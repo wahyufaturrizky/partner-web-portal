@@ -1,0 +1,49 @@
+.container > .container-navbar {
+	display: flex;
+	justify-content: space-between;
+	background-color: #ffffff;
+	padding: 1rem 1.25rem;
+	border-radius: 1rem;
+}
+
+.container .container-menu {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.container-card {
+	background-color: #ffffff;
+	padding: 1rem;
+	border-radius: 1rem;
+}
+
+.button-copy,
+.button-view {
+	font-size: 1rem;
+	color: #eb008b;
+	background-color: #ffffff;
+	border: 0.125rem solid #eb008b;
+	border-radius: 6rem;
+	cursor: pointer;
+}
+
+.row {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+}
+
+.row p {
+	font-family: "Nunito Sans", sans-serif;
+	font-size: 1rem;
+	line-height: 24px;
+}
+
+.button-copy {
+	padding: 0.813rem 1.5rem;
+}
+
+.button-view {
+	padding: 0.2rem 1rem;
+}
