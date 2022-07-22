@@ -3,7 +3,10 @@ import ICUser from "./user-list.svg";
 import ICMenu from "./Ic_menu.svg";
 import ICCalendar from "./calendar.svg";
 import ICFinance from "./finance-group-logo.svg";
-import ICExclamation from './exclamation.svg'
+import ICExclamation from "./exclamation.svg";
+import ICDownload from "./ic-download.svg";
+import ICUpload from "./ic-upload.svg";
+import ICSync from "./ic-sync.svg";
 
 export {
   ICField,
@@ -11,5 +14,8 @@ export {
   ICMenu,
   ICCalendar,
   ICFinance,
-  ICExclamation
-}
+  ICExclamation,
+  ICDownload,
+  ICUpload,
+  ICSync,
+};
