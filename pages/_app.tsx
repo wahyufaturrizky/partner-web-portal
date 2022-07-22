@@ -1,20 +1,23 @@
 import { NextComponentType } from "next";
 import { AppContext, AppInitialProps, AppProps } from "next/app";
-import DashboardLayout from "../components/DashboardLayout";
-import "pink-lava-ui/index.css";
-import "../styles/globals.css";
-import { AuthProvider } from "../context/AuthContext";
-import { QueryClient, QueryClientProvider } from "react-query";
-import { Hydrate } from "react-query/hydration";
-import { QueryCache } from "react-query";
 import toast, { Toaster, resolveValue } from "react-hot-toast";
+import { Hydrate } from "react-query/hydration";
 import { Spin } from "pink-lava-ui";
 import styled from "styled-components";
-import Exclamation from "../assets/exclamation.svg";
+import { QueryCache } from "react-query";
+import { QueryClient, QueryClientProvider } from "react-query";
+
+import { AuthProvider } from "../context/AuthContext";
+import DashboardLayout from "../layouts/Layout";
+import { ICExclamation } from "../assets";
+
+import "pink-lava-ui/index.css";
+import "../styles/globals.css";
+
 
 const queryCache = new QueryCache({
 	onError: (error) => {
-		//toast.error('Something went wrong');
+		toast.error('Something went wrong');
 	},
 });
 export const queryClient = new QueryClient({
@@ -50,7 +53,7 @@ const App: NextComponentType<AppContext, AppInitialProps, AppProps> = ({
 						<Toaster position="top-right" reverseOrder={false}>
 							{(t) => (
 								<CustomToaster style={{ opacity: t.visible ? 1 : 1 }}>
-									<Exclamation />
+									<ICExclamation />
 									{resolveValue(t.message, t)}
 								</CustomToaster>
 							)}
