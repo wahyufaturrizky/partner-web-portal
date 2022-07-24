@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import OtpInput from "react-otp-input";
 import styled from "styled-components";
 import * as yup from "yup";
-import { ReactComponent as EyeCrossed } from "../assets/eye-crossed.svg";
+import { ICEyeCrossed } from "../assets";
 import {
 	useSendOtpPhoneSmsOrWaOrEmail,
 	useSignIn,
@@ -205,7 +205,7 @@ const Login: any = () => {
 		<Container>
 			<div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
 				<div>
-					<Image src="/logo-nabati.svg" alt="logo-nabati" width={268} height={76} />
+					<Image src="/icons/logo-nabati.svg" alt="logo-nabati" width={268} height={76} />
 					<Spacer size={12} />
 					<Text fluid textAlign="center" color="white" variant="headingLarge">
 						Nabati Group Portal
@@ -213,9 +213,9 @@ const Login: any = () => {
 					<Spacer size={24} />
 				</div>
 				<Card>
-					<ImageBackgroundUp src="/pattern.png" />
+					<ImageBackgroundUp src="/images/pattern.png" />
 
-					<ImageBackgroundDown src="/pattern.png" />
+					<ImageBackgroundDown src="/images/pattern.png" />
 					<Col>
 						<Col alignItems="center">
 							<Text variant="headingLarge">
@@ -268,7 +268,7 @@ const Login: any = () => {
 									label="Confirm Password"
 									type="password"
 									placeholder={"Re-type your password"}
-									icon={<EyeCrossed />}
+									icon={<ICEyeCrossed />}
 									test-id="confirmNewPassword"
 								/>
 
@@ -417,7 +417,7 @@ const Login: any = () => {
 									label="Password"
 									type="password"
 									placeholder={"Type your password"}
-									icon={<EyeCrossed />}
+									icon={<ICEyeCrossed />}
 									test-id="password"
 								/>
 
@@ -459,7 +459,7 @@ const Login: any = () => {
 			</div>
 
 			<div>
-				<img src="/powered-edot.png" alt="logo-nabati" />
+				<img src="images/powered-edot.png" alt="logo-nabati" />
 				<Spacer size={12} />
 				<Text fluid textAlign="center" color="white" variant="footer">
 					edot.co.id &bull; Support &bull; Term & Privacy
