@@ -1,10 +1,13 @@
 import React, { useState } from "react";
-import { Header, Row, Col, Spacer, Steps, Button } from "pink-lava-ui";
+import { Header, Row, Col, Spacer, Steps, Button, Text } from "pink-lava-ui";
 import LogoSvg from "../../assets/icons/logo.svg";
 import BusinessType from "../../component/Register/BusinessType";
 import CreateAccount from "../../component/Register/CreateAccount";
 import CreateSubdomain from "../../component/Register/CreateSubdomain";
 import Finished from "../../component/Register/Finished";
+import { useForm, FormProvider } from "react-hook-form";
+import { ArrowLeftOutlined } from "@ant-design/icons";
+import styled from "styled-components";
 
 const renderContent = (step: any) => {
   switch (step) {
@@ -31,10 +34,12 @@ const Register = () => {
     { status: "wait", title: "Finished" },
   ]);
 
-  console.log(stepList);
+  const methods = useForm();
+  const { handleSubmit, trigger } = methods;
+  const onSubmit = (data: any) => console.log(data);
 
   return (
-    <div style={{ height: "100vh" }}>
+    <div style={{ height: "100vh", position: "relative" }}>
       <Header
         mode="horizontal"
         withMenu={false}
@@ -51,38 +56,23 @@ const Register = () => {
 
       <Spacer size={30} />
 
-      <Col alignItems={"center"}>
-        <div style={{ width: "70%" }}>
-          <Steps size="small" current={currentStep} stepList={stepList} />
-        </div>
-        <Spacer size={30} />
-        <div style={{ width: "50%", height: "60vh" }}>
-          {renderContent(stepList[currentStep].title)}
-        </div>
-
-        <Spacer size={20} />
-
-        {currentStep === 3 ? (
-          <div style={{ width: "25%" }}>
-            <Button variant="primary" size={"big"} full onClick={() => {}}>
-              Register For Free
-            </Button>
+      <FormProvider {...methods}>
+        <Col alignItems={"center"}>
+          <div style={{ width: "70%" }}>
+            <Steps size="small" current={currentStep} stepList={stepList} />
           </div>
-        ) : (
-          <div style={{ width: "25%" }}>
-            <Button
-              variant="primary"
-              size={"big"}
-              full
+          <Spacer size={30} />
+          {currentStep > 0 && (
+            <BackButton
               onClick={() => {
                 setCurrentStep((prevStep) => {
-                  const incrementStep = prevStep + 1;
+                  const incrementStep = prevStep - 1;
                   const mappingStepList = stepList.map((el, index) => {
                     if (
                       el.title === stepList[prevStep].title ||
                       incrementStep + 1 === stepList.length
                     ) {
-                      return { ...el, status: "finish" };
+                      return { ...el, status: "wait" };
                     } else if (index === incrementStep) {
                       return { ...el, status: "process" };
                     } else {
@@ -90,19 +80,78 @@ const Register = () => {
                     }
                   });
                   setStepList(mappingStepList);
-
                   return incrementStep;
                 });
               }}
             >
-              Next
-            </Button>
+              <ArrowLeftOutlined />{" "}
+              <Text inline variant={"headingRegular"} color="black.darker">
+                Back
+              </Text>
+            </BackButton>
+          )}
+
+          <div style={{ width: "50%", height: "480px" }}>
+            {renderContent(stepList[currentStep].title)}
           </div>
-        )}
-      </Col>
+
+          <Spacer size={20} />
+
+          {currentStep === 3 ? (
+            <div style={{ width: "25%" }}>
+              <Button variant="primary" size={"big"} full onClick={handleSubmit(onSubmit)}>
+                Register For Free
+              </Button>
+            </div>
+          ) : (
+            <div style={{ width: "25%" }}>
+              <Button
+                variant="primary"
+                size={"big"}
+                full
+                onClick={async () => {
+                  const isValid = await trigger();
+                  if (!isValid) {
+                    const mappingStepList = stepList.map((el, index) => {
+                      return index === currentStep ? { ...el, status: "error" } : el;
+                    });
+                    setStepList(mappingStepList);
+                  } else {
+                    setCurrentStep((prevStep) => {
+                      const incrementStep = prevStep + 1;
+                      const mappingStepList = stepList.map((el, index) => {
+                        if (
+                          el.title === stepList[prevStep].title ||
+                          incrementStep + 1 === stepList.length
+                        ) {
+                          return { ...el, status: "finish" };
+                        } else if (index === incrementStep) {
+                          return { ...el, status: "process" };
+                        } else {
+                          return el;
+                        }
+                      });
+                      setStepList(mappingStepList);
+                      return incrementStep;
+                    });
+                  }
+                }}
+              >
+                Next
+              </Button>
+            </div>
+          )}
+        </Col>
+      </FormProvider>
     </div>
   );
 };
+
+const BackButton = styled.span`
+  position: absolute;
+  left: 20px;
+  cursor: pointer;
+`;
 
 export default Register;
 Register.getLayout = (page: any) => page;

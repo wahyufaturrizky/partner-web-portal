@@ -1,8 +1,12 @@
 import React from "react";
 import { Col, Spacer, Text, FormInput } from "pink-lava-ui";
 import { LoadingOutlined, CheckCircleFilled, ExclamationCircleFilled } from "@ant-design/icons";
+import { useFormContext, Controller } from "react-hook-form";
 
 const CreateSubdomain = () => {
+  const { control, getValues } = useFormContext();
+  const formValues = getValues();
+
   return (
     <Col alignItems={"Center"}>
       <Text variant={"h4"}>Create Subdomain</Text>
@@ -15,21 +19,34 @@ const CreateSubdomain = () => {
       </div>
       <Spacer size={10} />
 
-      <div style={{ width: "50%" }}>
+      <div style={{ width: "400px" }}>
         <Text variant="subtitle1">Subdomain</Text>
-        <FormInput
-          size="large"
-          placeholder="large size"
-          suffix={
+        <Controller
+          control={control}
+          rules={{ required: true }}
+          name="subdomain"
+          render={({ field: { onChange }, formState: { errors } }) => (
             <>
-              <span>.com</span>
-
-              <CheckCircleFilled style={{ color: "green" }} />
-
-              {/* <ExclamationCircleFilled style={{color:"red"}}/> */}
-              {/* <LoadingOutlined /> */}
+              <FormInput
+                size="large"
+                defaultValue={formValues?.subdomain}
+                status={errors?.subdomain?.type === "required" && "error"}
+                placeholder="large size"
+                suffix={
+                  <>
+                    <span>.com</span>
+                    <CheckCircleFilled style={{ color: "green" }} />
+                    {/* <ExclamationCircleFilled style={{color:"red"}}/> */}
+                    {/* <LoadingOutlined /> */}
+                  </>
+                }
+                onChange={(e: any) => {
+                  onChange(e.target.value);
+                }}
+              />
+              {errors?.subdomain?.type === "required" && <span>This field is required</span>}
             </>
-          }
+          )}
         />
       </div>
     </Col>
