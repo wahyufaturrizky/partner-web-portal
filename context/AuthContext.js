@@ -46,7 +46,7 @@ function AuthProvider({ children, protectedRoute }) {
     return (
       <AuthContext.Provider value={null}>
         <Head>
-          <title>Zeus</title>
+          <title>Hermes</title>
         </Head>
 
         {children}
