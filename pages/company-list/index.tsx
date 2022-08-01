@@ -1,32 +1,9 @@
 import React, { useState } from "react";
 import styled from "styled-components";
-import { Text, Button, Col, Row, Spacer, Search, Table, Pagination, Lozenge } from "pink-lava-ui";
+import { Text, Button, Col, Row, Spacer, Search, Table, Pagination, Switch } from "pink-lava-ui";
 import usePagination from "@lucasmogari/react-pagination";
 import { useRouter } from "next/router";
-
-const fakeData = [
-    {
-        id: 1,
-        name: 'Nabati Group',
-        type: 'Holding',
-        fields: 'FMCG',
-        status: true
-    },
-    {
-        id: 2,
-        name: 'PT. Kaldu Sari Nabati',
-        type: 'Company',
-        fields: 'FMCG-Manufacturing',
-        status: true
-    },
-    {
-        id: 3,
-        name: 'PT. Pinus Merah Abadi',
-        type: 'Company',
-        fields: 'Food & Beverages',
-        status: false
-    }
-]
+import { useCompanyList, useStatusCompany } from "../../hooks/company-list/useCompany";
 
 const CompanyList: any = () => {
   const router = useRouter();
@@ -39,8 +16,10 @@ const CompanyList: any = () => {
     totalItems: 100,
   });
 
-  const [isLoading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [search, setSearch] = useState("");
+  const [toggleSelectedId, setToggleSelectedId] = useState();
+  const [statusToggle, setStatusToggle] = useState(0);
 
   const columns = [
     {
@@ -67,21 +46,62 @@ const CompanyList: any = () => {
     },
   ];
 
+  const {
+    data: fields,
+    refetch: refetchFields,
+    isLoading: isLoadingData,
+  } = useCompanyList({
+    options: {
+      onSuccess: (data) => {
+        pagination.setTotalItems(data.totalRow);
+        setIsLoading(false);
+      },
+    },
+    query: {
+      search,
+      page: pagination.page,
+      limit: pagination.itemsPerPage,
+    },
+  });
+
+  const { mutate: updateStatusCompany, isLoading: isLoadingUpdateStatus } = useStatusCompany({
+    companyId: toggleSelectedId,
+    status: statusToggle,
+    options: {
+      onSuccess: (data) => {
+        if (data) {
+          // setIsLoading(false);
+          refetchFields();
+          alert("Menu updated successfully");
+        }
+      },
+      onSettled: (error) => {
+        // setIsLoading(false);
+        window.alert(error.data.message);
+      },
+    },
+  });
+
   const data = [];
-  fakeData?.map((field) => {
-    console.log(field)
+  fields?.rows?.map((field) => {
     data.push({
       key: field.id,
       name: field.name,
-      type: field.type,
-      fields: field.fields,
-      active: field.status ? 'active' : 'inactive',
+      type: field.companyType,
+      fields: field.industry,
+      // active: field.status ? 'active' : 'inactive',
+      active: (
+        <Switch
+          defaultChecked={field.isActive ? true : false}
+          onChange={() => handleChangeStatus(field.id, field.isActive)}
+        />
+      ),
       action: (
         <div style={{ display: "flex", justifyContent: "left" }}>
           <Button
             size="small"
             onClick={() => {
-              router.push(`/partner-config-role-list/${field.id}`);
+              router.push(`/company-list/${field.id}`);
             }}
             variant="tertiary"
           >
@@ -102,6 +122,13 @@ const CompanyList: any = () => {
   const rowSelection = {
     selectedRowKeys,
     onChange: onSelectChange,
+  };
+
+  const handleChangeStatus = async (id, status) => {
+    await setToggleSelectedId(id);
+    await setStatusToggle(status ? 0 : 1);
+    // setIsLoading(true)
+    updateStatusCompany(id, status);
   };
 
   return (
@@ -141,7 +168,10 @@ const CompanyList: any = () => {
         {!isLoading && (
           <Card style={{ padding: "16px 20px" }}>
             <Col gap="60px">
-              <Table columns={columns} data={paginateField} rowSelection={rowSelection} />
+              {!isLoadingData && (
+                <Table columns={columns} data={paginateField} rowSelection={rowSelection} />
+              )}
+
               <Pagination pagination={pagination} />
             </Col>
           </Card>
