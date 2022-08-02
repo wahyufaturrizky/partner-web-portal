@@ -1,32 +1,32 @@
-import React, { useState } from "react";
-import styled from "styled-components";
+import usePagination from "@lucasmogari/react-pagination";
 import {
-  Text,
   Button,
   Col,
-  Row,
-  Spacer,
-  Search,
-  Table,
-  Pagination,
-  Modal,
-  Input,
   DropdownMenu,
   FileUploadModal,
+  Input,
+  Modal,
+  Pagination,
+  Row,
+  Search,
+  Spacer,
+  Table,
+  Text,
 } from "pink-lava-ui";
-import usePagination from "@lucasmogari/react-pagination";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import styled from "styled-components";
+import { ICDownload, ICUpload } from "../../assets";
 import {
   useChannelsMDM,
   useCreateChannelMDM,
-  useUpdateChannelMDM,
   useDeleteChannelMDM,
+  useUpdateChannelMDM,
   useUploadFileChannelMDM,
 } from "../../hooks/mdm/channel/useChannelMDM";
+import { mdmDownloadService } from "../../lib/client";
 import useDebounce from "../../lib/useDebounce";
 import { queryClient } from "../_app";
-import { useForm } from "react-hook-form";
-import { mdmDownloadService } from "../../lib/client";
-import { ICDownload, ICSync, ICUpload } from "../../assets";
 
 const downloadFile = (params: any) =>
   mdmDownloadService("/sales-channel/download", { params }).then((res) => {
@@ -202,7 +202,7 @@ const ChannelMDM = () => {
 
   const onSubmitFile = (file: any) => {
     const formData = new FormData();
-    formData.append("upload_file", file);
+    formData.append("file", file);
     formData.append("company_id", "KSNI");
 
     uploadFileChannelMDM(formData);
@@ -287,15 +287,6 @@ const ChannelMDM = () => {
                     <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
                       <ICDownload />
                       <p style={{ margin: "0" }}>Download Data</p>
-                    </div>
-                  ),
-                },
-                {
-                  key: 4,
-                  value: (
-                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                      <ICSync />
-                      <p style={{ margin: "0" }}>Sync Data</p>
                     </div>
                   ),
                 },
@@ -435,7 +426,7 @@ const ChannelMDM = () => {
                   onClick={() => {
                     if (isShowDelete.type === "selection") {
                       deleteChannelMDM({
-                        company_id: modalChannelForm.data.companyId,
+                        company_id: "KSNI",
                         ids: selectedRowKeys,
                       });
                     } else {
