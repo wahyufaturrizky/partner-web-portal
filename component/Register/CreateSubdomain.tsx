@@ -4,7 +4,12 @@ import { LoadingOutlined, CheckCircleFilled, ExclamationCircleFilled } from "@an
 import { useFormContext, Controller } from "react-hook-form";
 
 const CreateSubdomain = () => {
-  const { control, getValues } = useFormContext();
+  const {
+    control,
+    getValues,
+    formState: { errors },
+    clearErrors,
+  } = useFormContext();
   const formValues = getValues();
 
   return (
@@ -23,31 +28,41 @@ const CreateSubdomain = () => {
         <Text variant="subtitle1">Subdomain</Text>
         <Controller
           control={control}
-          rules={{ required: true }}
+          rules={{ required: true, pattern: /^[a-zA-Z0-9]*$/ }}
           name="subdomain"
-          render={({ field: { onChange }, formState: { errors } }) => (
-            <>
-              <FormInput
-                size="large"
-                defaultValue={formValues?.subdomain}
-                status={errors?.subdomain?.type === "required" && "error"}
-                placeholder="large size"
-                suffix={
-                  <>
-                    <span>.com</span>
-                    <CheckCircleFilled style={{ color: "green" }} />
-                    {/* <ExclamationCircleFilled style={{color:"red"}}/> */}
-                    {/* <LoadingOutlined /> */}
-                  </>
+          render={({ field: { onChange } }) => (
+            <FormInput
+              size="large"
+              defaultValue={formValues?.subdomain}
+              status={errors?.subdomain?.type === "required" && "error"}
+              placeholder="large size"
+              suffix={
+                <>
+                  <span>.com</span>
+                  {!errors?.subdomain?.type && <CheckCircleFilled style={{ color: "green" }} />}
+                  {errors?.subdomain?.type && <ExclamationCircleFilled style={{ color: "red" }} />}
+                  {/* <LoadingOutlined /> */}
+                </>
+              }
+              onChange={(e: any) => {
+                if (errors?.subdomain) {
+                  clearErrors("subdomain");
                 }
-                onChange={(e: any) => {
-                  onChange(e.target.value);
-                }}
-              />
-              {errors?.subdomain?.type === "required" && <span>This field is required</span>}
-            </>
+                onChange(e.target.value);
+              }}
+            />
           )}
         />
+        {errors?.subdomain?.type === "required" && (
+          <Text variant="alert" color={"red.regular"}>
+            This field is required
+          </Text>
+        )}
+        {errors?.subdomain?.type === "pattern" && (
+          <Text variant="alert" color={"red.regular"}>
+            Subdomain must be in alphanumeric
+          </Text>
+        )}
       </div>
     </Col>
   );
