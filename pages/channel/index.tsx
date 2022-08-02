@@ -218,7 +218,7 @@ const ChannelMDM = () => {
         <Row justifyContent="space-between">
           <Search
             width="340px"
-            placeholder="Search Sales Channel ID,  Name, Company"
+            placeholder="Search Sales Channel ID"
             onChange={(e: any) => {
               setSearch(e.target.value);
             }}
