@@ -8,6 +8,7 @@ import Finished from "../../component/Register/Finished";
 import { useForm, FormProvider } from "react-hook-form";
 import { ArrowLeftOutlined } from "@ant-design/icons";
 import styled from "styled-components";
+import { useRouter } from "next/router";
 
 const renderContent = (step: any) => {
   switch (step) {
@@ -26,6 +27,7 @@ const renderContent = (step: any) => {
 };
 
 const Register = () => {
+  const router = useRouter();
   const [currentStep, setCurrentStep] = useState(0);
   const [stepList, setStepList] = useState([
     { status: "process", title: "Create Account" },
@@ -35,7 +37,7 @@ const Register = () => {
   ]);
 
   const methods = useForm();
-  const { handleSubmit, trigger } = methods;
+  const { handleSubmit, trigger, formState } = methods;
   const onSubmit = (data: any) => console.log(data);
 
   return (
@@ -90,12 +92,26 @@ const Register = () => {
               </Text>
             </BackButton>
           )}
-
-          <div style={{ width: "50%", height: "480px" }}>
+          <div style={{ width: "50%", height: "440px" }}>
             {renderContent(stepList[currentStep].title)}
           </div>
 
-          <Spacer size={20} />
+          {currentStep === 3 && (
+            <>
+              <span>
+                <Text variant="subtitle2" inline color="grey.regular">
+                  By Clicking "Register for free", I agree
+                </Text>{" "}
+                <div style={{ cursor: "pointer", display: "inline-block" }} onClick={() => {}}>
+                  <Text variant="subtitle2" inline color="pink.regular">
+                    Terms and conditions
+                  </Text>
+                </div>
+              </span>
+
+              <Spacer size={5} />
+            </>
+          )}
 
           {currentStep === 3 ? (
             <div style={{ width: "25%" }}>
@@ -141,6 +157,24 @@ const Register = () => {
               </Button>
             </div>
           )}
+
+          <Spacer size={10} />
+
+          <span>
+            <Text variant="subtitle2" inline color="black.regular">
+              Already have an account?
+            </Text>{" "}
+            <div
+              style={{ cursor: "pointer", display: "inline-block" }}
+              onClick={() => {
+                router.back();
+              }}
+            >
+              <Text variant="subtitle2" inline color="pink.regular">
+                Login
+              </Text>
+            </div>
+          </span>
         </Col>
       </FormProvider>
     </div>

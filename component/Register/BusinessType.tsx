@@ -3,7 +3,7 @@ import { Row, Col, Spacer, Text, FormInput, FormSelect } from "pink-lava-ui";
 import { useFormContext, Controller } from "react-hook-form";
 
 const BusinessType = () => {
-  const { control, getValues } = useFormContext();
+  const { control, getValues, clearErrors } = useFormContext();
   const formValues = getValues();
 
   return (
@@ -36,6 +36,9 @@ const BusinessType = () => {
                 status={errors?.company_name?.type === "required" && "error"}
                 placeholder="e.g PT. Kaldu Sari Nabati Indonesia"
                 onChange={(e: any) => {
+                  if (errors?.company_name) {
+                    clearErrors("company_name");
+                  }
                   onChange(e.target.value);
                 }}
               />

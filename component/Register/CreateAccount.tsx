@@ -3,9 +3,17 @@ import { Row, Col, Spacer, Text, FormInput, FormSelect } from "pink-lava-ui";
 import { useFormContext, Controller } from "react-hook-form";
 
 const CreateAccount = () => {
-  const { control, getValues } = useFormContext();
+  const {
+    control,
+    getValues,
+    watch,
+    formState: { errors },
+    clearErrors,
+  } = useFormContext();
 
   const formValues = getValues();
+
+  const passwordValue = watch("password");
 
   return (
     <form>
@@ -22,27 +30,36 @@ const CreateAccount = () => {
           <Text variant="subtitle1">{"Email"}</Text>
           <Controller
             control={control}
-            rules={{ required: true }}
+            rules={{ required: true, pattern: /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/ }}
             name="email"
-            render={({ field: { onChange }, formState: { errors } }) => (
-              <>
-                <FormInput
-                  size="large"
-                  defaultValue={formValues?.email}
-                  status={errors?.email?.type === "required" && "error"}
-                  placeholder="e.g Gwen.Stacy@email.com"
-                  onChange={(e: any) => {
-                    onChange(e.target.value);
-                  }}
-                />
-                {errors?.email?.type === "required" && (
-                  <Text variant="alert" color={"red.regular"}>
-                    This field is required
-                  </Text>
-                )}
-              </>
+            render={({ field: { onChange } }) => (
+              <FormInput
+                size="large"
+                defaultValue={formValues?.email}
+                status={
+                  (errors?.email?.type === "required" || errors?.email?.type === "pattern") &&
+                  "error"
+                }
+                placeholder="e.g Gwen.Stacy@email.com"
+                onChange={(e: any) => {
+                  if (errors?.email) {
+                    clearErrors("email");
+                  }
+                  onChange(e.target.value);
+                }}
+              />
             )}
           />
+          {errors?.email?.type === "required" && (
+            <Text variant="alert" color={"red.regular"}>
+              This field is required
+            </Text>
+          )}
+          {errors?.email?.type === "pattern" && (
+            <Text variant="alert" color={"red.regular"}>
+              Your email doesn't look right!
+            </Text>
+          )}
 
           <Spacer size={20} />
 
@@ -73,7 +90,7 @@ const CreateAccount = () => {
               control={control}
               name="phone_number"
               rules={{ required: true }}
-              render={({ field: { onChange }, formState: { errors } }) => (
+              render={({ field: { onChange } }) => (
                 <Col width={"100%"}>
                   <FormInput
                     size="large"
@@ -82,6 +99,9 @@ const CreateAccount = () => {
                     placeholder="e.g 8121236384"
                     status={errors?.phone_number?.type === "required" && "error"}
                     onChange={(e: any) => {
+                      if (errors?.phone_number) {
+                        clearErrors("phone_number");
+                      }
                       onChange(e.target.value);
                     }}
                   />
@@ -101,28 +121,31 @@ const CreateAccount = () => {
           <Controller
             control={control}
             name="password"
-            rules={{ required: true }}
-            render={({ field: { onChange }, formState: { errors } }) => (
-              <>
-                <FormInput
-                  type="password"
-                  size="large"
-                  placeholder="Type Password"
-                  defaultValue={formValues?.password}
-                  status={errors?.password?.type === "required" && "error"}
-                  style={{ borderRadius: "8px" }}
-                  onChange={(e: any) => {
-                    onChange(e.target.value);
-                  }}
-                />
-                {errors?.password?.type === "required" && (
-                  <Text variant="alert" color={"red.regular"}>
-                    This field is required
-                  </Text>
-                )}
-              </>
+            rules={{
+              required: true,
+            }}
+            render={({ field: { onChange } }) => (
+              <FormInput
+                type="password"
+                size="large"
+                placeholder="Type Password"
+                defaultValue={formValues?.password}
+                status={errors?.password?.type === "required" && "error"}
+                style={{ borderRadius: "8px" }}
+                onChange={(e: any) => {
+                  if (errors?.password) {
+                    clearErrors("password");
+                  }
+                  onChange(e.target.value);
+                }}
+              />
             )}
           />
+          {errors?.password?.type === "required" && (
+            <Text variant="alert" color={"red.regular"}>
+              This field is required
+            </Text>
+          )}
 
           <Spacer size={20} />
 
@@ -130,28 +153,42 @@ const CreateAccount = () => {
           <Controller
             control={control}
             name="confirm_password"
-            rules={{ required: true }}
-            render={({ field: { onChange }, formState: { errors } }) => (
-              <>
-                <FormInput
-                  type="password"
-                  size="large"
-                  status={errors?.confirm_password?.type === "required" && "error"}
-                  placeholder="Type Password"
-                  defaultValue={formValues?.confirm_password}
-                  style={{ borderRadius: "8px" }}
-                  onChange={(e: any) => {
-                    onChange(e.target.value);
-                  }}
-                />
-                {errors?.confirm_password?.type === "required" && (
-                  <Text variant="alert" color={"red.regular"}>
-                    This field is required
-                  </Text>
-                )}
-              </>
+            rules={{
+              required: true,
+              validate: { isSame: (value) => value === passwordValue },
+            }}
+            render={({ field: { onChange } }) => (
+              <FormInput
+                type="password"
+                size="large"
+                status={
+                  (errors?.confirm_password?.type === "required" ||
+                    errors?.confirm_password?.type === "isSame") &&
+                  "error"
+                }
+                placeholder="Type Password"
+                defaultValue={formValues?.confirm_password}
+                style={{ borderRadius: "8px" }}
+                onChange={(e: any) => {
+                  if (errors?.confirm_password) {
+                    clearErrors("confirm_password");
+                  }
+
+                  onChange(e.target.value);
+                }}
+              />
             )}
           />
+          {errors?.confirm_password?.type === "required" && (
+            <Text variant="alert" color={"red.regular"}>
+              This field is required
+            </Text>
+          )}
+          {errors?.confirm_password?.type === "isSame" && (
+            <Text variant="alert" color={"red.regular"}>
+              Your password is not match
+            </Text>
+          )}
         </div>
       </Col>
     </form>
