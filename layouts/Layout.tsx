@@ -61,25 +61,25 @@ const menuConfig = [
       },
     ],
   },
-  // {
-  //   key: "business-Process",
-  //   title: "Business Process",
-  //   icon: ICFinance,
-  //   children: [
-  //     {
-  //       key: "process",
-  //       title: "Process",
-  //       content: () => "Process",
-  //       onClick: () => Router.push("/business-process/process"),
-  //     },
-  //     {
-  //       key: "business-process",
-  //       title: "Business Process",
-  //       content: () => "Business Process",
-  //       onClick: () => Router.push("/business-process"),
-  //     },
-  //   ],
-  // },
+  {
+    key: "business-Process",
+    title: "Business Process",
+    icon: ICFinance,
+    children: [
+      {
+        key: "process",
+        title: "Process",
+        content: () => "Process",
+        onClick: () => Router.push("/business-process/process"),
+      },
+      {
+        key: "business-process",
+        title: "Business Process",
+        content: () => "Business Process",
+        onClick: () => Router.push("/business-process"),
+      },
+    ],
+  },
   {
     key: "menu-config",
     title: "Menu Config",
