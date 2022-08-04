@@ -3,7 +3,7 @@ import { Col, Spacer, Text, Row } from "pink-lava-ui";
 import { LoadingOutlined, CheckCircleFilled, ExclamationCircleFilled } from "@ant-design/icons";
 import styled from "styled-components";
 import { useFormContext } from "react-hook-form";
-import { RegisterFormContext } from "../../context/RegisterContext";
+import { RegisterFormContext } from "../../../context/RegisterContext";
 
 const Finished = () => {
   const { getValues } = useFormContext();

@@ -1,7 +1,7 @@
 import React, { useContext } from "react";
 import { Row, Col, Spacer, Text, FormInput, FormSelect } from "pink-lava-ui";
 import { useFormContext, Controller } from "react-hook-form";
-import { RegisterFormContext } from "../../context/RegisterContext";
+import { RegisterFormContext } from "../../../context/RegisterContext";
 
 const BusinessType = () => {
   const { control, getValues, clearErrors, setValue } = useFormContext();

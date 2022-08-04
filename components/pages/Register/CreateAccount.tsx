@@ -1,7 +1,7 @@
 import React from "react";
 import { Row, Col, Spacer, Text, FormInput, FormSelect } from "pink-lava-ui";
 import { useFormContext, Controller } from "react-hook-form";
-import { DIAL_CODES } from "../../utils/dial_code_constant";
+import { DIAL_CODES } from "../../../utils/dial_code_constant";
 
 const CreateAccount = () => {
   const {

@@ -1,7 +1,7 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import Image from "next/image";
 import { useRouter } from "next/router";
-import { Button, Col, Input, Modal, Row, Spacer, Text } from "pink-lava-ui";
+import { Button, Col, Input, Modal, Row, Spacer, Text, Dropdown } from "pink-lava-ui";
 import React, { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import OtpInput from "react-otp-input";
@@ -14,6 +14,16 @@ import {
   useUpdatePassword,
   useVerifyOTP,
 } from "../hooks/auth/useAuth";
+
+import ICFlagIndonesia from '../assets/icons/ic-flag-idn.svg'
+import ICFlagEnglish from '../assets/icons/ic-flag-us.svg'
+
+const flexStyles = { display: 'flex', alignItems: 'center', gap: '.5rem' }
+
+const languageOptions = [
+  {value: <div style={flexStyles}><ICFlagIndonesia /><p>Indonesia</p></div>, id: "id" },
+  {value: <div style={flexStyles}><ICFlagEnglish /><p>English</p></div>, id: "en" },
+]
 
 const schemaLogin = yup
   .object({
@@ -206,18 +216,26 @@ const Login: any = () => {
   return (
     <Container>
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+      <LanguageOption>
+        <Dropdown
+          width="174px"
+          label=""
+          defaultValue="id"
+          items={languageOptions}
+          placeholder="Indonesia"
+          rounded
+          noSearch
+        />
+      </LanguageOption>
         <div>
-          <Image src="/icons/logo-nabati.svg" alt="logo-nabati" width={268} height={76} />
+          <Image src="/images/edot-logo-blue.svg" alt="logo-nabati" width={200} height={100} />
           <Spacer size={12} />
           <Text fluid textAlign="center" color="white" variant="headingLarge">
-            Nabati Group Portal
+            Nabati Group
           </Text>
           <Spacer size={24} />
         </div>
         <Card>
-          <ImageBackgroundUp src="/images/pattern.png" />
-
-          <ImageBackgroundDown src="/images/pattern.png" />
           <Col>
             <Col alignItems="center">
               <Text variant="headingLarge">
@@ -234,7 +252,7 @@ const Login: any = () => {
               <Spacer axis="vertical" size={4} />
               <Text textAlign="center" variant="body2" color="grey.light">
                 {isFlowCreateNewPassword
-                  ? "Create easy to remember1 passwords and keep your passwords private."
+                  ? "Create easy to remember passwords and keep your passwords private."
                   : isShowOtpFlow
                   ? `OTP code has been sent via WhatsApp to ********${getValues(
                       "resetPassWithEmailAndPhone"
@@ -383,15 +401,10 @@ const Login: any = () => {
                   {isLoadingSendOtpPhoneSmsOrWaOrEmail ? "Loading..." : "Continue"}
                 </Button>
 
-                <Spacer size={12} />
-
-                <Row justifyContent="center">
-                  <Col>
-                    <div style={{ cursor: "pointer" }} onClick={() => setIsForgotPassword(false)}>
-                      <Text color="pink.regular">Back to Login Page</Text>
-                    </div>
-                  </Col>
-                </Row>
+                <Spacer size={200} />
+                <ButtonFlat onClick={() => setIsForgotPassword(false)}>
+                  Back to Login Page
+                </ButtonFlat>
               </>
             ) : (
               <>
@@ -428,7 +441,7 @@ const Login: any = () => {
                 <Row justifyContent="flex-end">
                   <Col>
                     <div style={{ cursor: "pointer" }} onClick={() => setIsForgotPassword(true)}>
-                      <Text color="blue.regular">Forgot Password?</Text>
+                      <Text color="pink.regular">Forgot Password?</Text>
                     </div>
                   </Col>
                 </Row>
@@ -458,7 +471,7 @@ const Login: any = () => {
                       router.push("/register");
                     }}
                   >
-                    <Text variant="subtitle2" inline color="blue.regular">
+                    <Text variant="subtitle2" inline color="pink.regular">
                       Create an account
                     </Text>
                   </div>
@@ -468,14 +481,12 @@ const Login: any = () => {
           </Col>
         </Card>
       </div>
-
-      <div>
-        <img src="images/powered-edot.png" alt="logo-nabati" />
-        <Spacer size={12} />
-        <Text fluid textAlign="center" color="white" variant="footer">
+      <ImageBackgroundDown src="/images/illustration-footer.svg" />
+      <Footer>
+        <p className="">
           edot.co.id &bull; Support &bull; Term & Privacy
-        </Text>
-      </div>
+        </p>
+      </Footer>
 
       {isShowModal && (
         <Modal
@@ -528,39 +539,62 @@ const Login: any = () => {
   );
 };
 
+
+
 const Card = styled.div`
   background: white;
-  box-shadow: 0px 4px 16px rgba(170, 170, 170, 0.15);
-  border-radius: 24px;
-  padding: 32px;
-  width: 473px;
-  min-height: 532px;
-  position: relative;
+  box-shadow: 0px 0.25rem 1rem rgba(170, 170, 170, 0.15);
+  border-radius: 1.5rem;
+  padding: 2rem;
+  width: 29.563rem;
+  min-height: 33.25rem;
 `;
 
 const Container = styled.div`
-  background: linear-gradient(180deg, #1dbac8 0%, #2bbecb 100%);
+  background:  linear-gradient(180deg, #FFFFFF 18.39%, #D5FAFD 150.89%);
   display: flex;
   justify-content: space-between;
   align-items: center;
   height: 100vh;
   flex-direction: column;
-  padding: 40px 0px 12px 0px;
-`;
-
-const ImageBackgroundUp = styled.img`
-  z-index: 100000;
-  position: absolute;
-  top: -36px;
-  left: -60px;
+  padding: 2.5rem 0px 0.75rem 0px;
+  position: relative;
 `;
 
 const ImageBackgroundDown = styled.img`
-  z-index: 100000;
+  z-index: 2;
   position: absolute;
-  bottom: -44px;
-  right: -60px;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  width: 100%;
+
 `;
+
+const ButtonFlat = styled.div`
+  color: #EB008B;
+  text-align: center;
+  cursor: pointer;
+  font-weight: 600;
+`
+
+const LanguageOption = styled.div`
+  top: 1rem;
+  right: 1rem;
+  position: absolute;
+`
+
+const Footer = styled.div`
+  font-family: 'Avenir Next', sans serif;
+  font-style: normal;
+  font-weight: 500;
+  color: white;
+  font-size: 0.625rem;
+  line-height: 0.875rem;
+  z-index: 3;
+  position: absolute;
+  bottom: 1rem;
+`
 
 export default Login;
 Login.getLayout = (page: any) => page;
