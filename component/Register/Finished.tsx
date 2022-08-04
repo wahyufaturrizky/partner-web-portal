@@ -1,11 +1,13 @@
-import React from "react";
-import { Col, Spacer, Text, Row, FormInput } from "pink-lava-ui";
+import React, { useContext } from "react";
+import { Col, Spacer, Text, Row } from "pink-lava-ui";
 import { LoadingOutlined, CheckCircleFilled, ExclamationCircleFilled } from "@ant-design/icons";
 import styled from "styled-components";
 import { useFormContext } from "react-hook-form";
+import { RegisterFormContext } from "../../context/RegisterContext";
 
 const Finished = () => {
   const { getValues } = useFormContext();
+  const { setCurrentStep, setStepList } = useContext(RegisterFormContext);
 
   const formValues = getValues();
 
@@ -43,6 +45,17 @@ const Finished = () => {
             clickable
             variant={"link"}
             style={{ lineHeight: "normal" }}
+            onClick={() => {
+              setCurrentStep((prevStep: any) => {
+                setStepList([
+                  { status: "process", title: "Create Account" },
+                  { status: "wait", title: "Bussines Type" },
+                  { status: "wait", title: "Create Subdomain" },
+                  { status: "wait", title: "Finished" },
+                ]);
+                return 0;
+              });
+            }}
           >
             Edit
           </Text>
@@ -76,6 +89,17 @@ const Finished = () => {
             clickable
             variant={"link"}
             style={{ lineHeight: "normal" }}
+            onClick={() => {
+              setCurrentStep((prevStep: any) => {
+                setStepList([
+                  { status: "finish", title: "Create Account" },
+                  { status: "process", title: "Bussines Type" },
+                  { status: "wait", title: "Create Subdomain" },
+                  { status: "wait", title: "Finished" },
+                ]);
+                return 1;
+              });
+            }}
           >
             Edit
           </Text>
@@ -96,6 +120,24 @@ const Finished = () => {
         <Text variant="subtitle2" style={{ color: "grey" }}>
           {formValues?.company_type}
         </Text>
+
+        {formValues?.company_type !== "holding" && (
+          <>
+            <Spacer size={10} />
+
+            <Text variant="subtitle1">Industry Fields</Text>
+            <Text variant="subtitle2" style={{ color: "grey" }}>
+              {formValues?.industry_fields}
+            </Text>
+
+            <Spacer size={10} />
+
+            <Text variant="subtitle1">Sector/Segment</Text>
+            <Text variant="subtitle2" style={{ color: "grey" }}>
+              {formValues?.sector}
+            </Text>
+          </>
+        )}
 
         <Spacer size={10} />
 
@@ -130,6 +172,17 @@ const Finished = () => {
             clickable
             variant={"link"}
             style={{ lineHeight: "normal" }}
+            onClick={() => {
+              setCurrentStep((prevStep: any) => {
+                setStepList([
+                  { status: "finish", title: "Create Account" },
+                  { status: "finish", title: "Bussines Type" },
+                  { status: "process", title: "Create Subdomain" },
+                  { status: "wait", title: "Finished" },
+                ]);
+                return 2;
+              });
+            }}
           >
             Edit
           </Text>

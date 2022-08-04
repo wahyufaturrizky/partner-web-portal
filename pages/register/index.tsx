@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, createContext } from "react";
 import { Header, Row, Col, Spacer, Steps, Button, Text } from "pink-lava-ui";
 import LogoSvg from "../../assets/icons/logo.svg";
 import BusinessType from "../../component/Register/BusinessType";
@@ -9,6 +9,7 @@ import { useForm, FormProvider } from "react-hook-form";
 import { ArrowLeftOutlined } from "@ant-design/icons";
 import styled from "styled-components";
 import { useRouter } from "next/router";
+import { RegisterFormContext } from "../../context/RegisterContext";
 
 const renderContent = (step: any) => {
   switch (step) {
@@ -35,9 +36,12 @@ const Register = () => {
     { status: "wait", title: "Create Subdomain" },
     { status: "wait", title: "Finished" },
   ]);
+  const [numberEmployees, setNumberEmployees] = useState("1-50");
+  const [industryField, setIndustryField] = useState("Agricultural");
+  const [companyType, setCompanyType] = useState("corporate");
 
   const methods = useForm();
-  const { handleSubmit, trigger, formState } = methods;
+  const { handleSubmit, trigger } = methods;
   const onSubmit = (data: any) => console.log(data);
 
   return (
@@ -58,125 +62,253 @@ const Register = () => {
 
       <Spacer size={30} />
 
-      <FormProvider {...methods}>
-        <Col alignItems={"center"}>
-          <div style={{ width: "70%" }}>
-            <Steps size="small" current={currentStep} stepList={stepList} />
-          </div>
-          <Spacer size={30} />
-          {currentStep > 0 && (
-            <BackButton
-              onClick={() => {
-                setCurrentStep((prevStep) => {
-                  const incrementStep = prevStep - 1;
-                  const mappingStepList = stepList.map((el, index) => {
-                    if (
-                      el.title === stepList[prevStep].title ||
-                      incrementStep + 1 === stepList.length
-                    ) {
-                      return { ...el, status: "wait" };
-                    } else if (index === incrementStep) {
-                      return { ...el, status: "process" };
-                    } else {
-                      return el;
-                    }
-                  });
-                  setStepList(mappingStepList);
-                  return incrementStep;
-                });
-              }}
-            >
-              <ArrowLeftOutlined />{" "}
-              <Text inline variant={"headingRegular"} color="black.darker">
-                Back
-              </Text>
-            </BackButton>
-          )}
-          <div style={{ width: "50%", height: "440px" }}>
-            {renderContent(stepList[currentStep].title)}
-          </div>
-
-          {currentStep === 3 && (
-            <>
-              <span>
-                <Text variant="subtitle2" inline color="grey.regular">
-                  By Clicking "Register for free", I agree
-                </Text>{" "}
-                <div style={{ cursor: "pointer", display: "inline-block" }} onClick={() => {}}>
-                  <Text variant="subtitle2" inline color="pink.regular">
-                    Terms and conditions
-                  </Text>
-                </div>
-              </span>
-
-              <Spacer size={5} />
-            </>
-          )}
-
-          {currentStep === 3 ? (
-            <div style={{ width: "25%" }}>
-              <Button variant="primary" size={"big"} full onClick={handleSubmit(onSubmit)}>
-                Register For Free
-              </Button>
-            </div>
-          ) : (
-            <div style={{ width: "25%" }}>
-              <Button
-                variant="primary"
-                size={"big"}
-                full
-                onClick={async () => {
+      <RegisterFormContext.Provider
+        value={{
+          stepList,
+          currentStep,
+          industryField,
+          companyType,
+          numberEmployees,
+          setCurrentStep,
+          setStepList,
+          setIndustryField,
+          setCompanyType,
+          setNumberEmployees,
+        }}
+      >
+        <FormProvider {...methods}>
+          <Col alignItems={"center"}>
+            <div style={{ width: "70%" }}>
+              <Steps
+                size="small"
+                current={currentStep}
+                stepList={stepList}
+                onChange={async (value: any) => {
                   const isValid = await trigger();
-                  if (!isValid) {
-                    const mappingStepList = stepList.map((el, index) => {
-                      return index === currentStep ? { ...el, status: "error" } : el;
-                    });
-                    setStepList(mappingStepList);
-                  } else {
-                    setCurrentStep((prevStep) => {
-                      const incrementStep = prevStep + 1;
-                      const mappingStepList = stepList.map((el, index) => {
-                        if (
-                          el.title === stepList[prevStep].title ||
-                          incrementStep + 1 === stepList.length
-                        ) {
-                          return { ...el, status: "finish" };
-                        } else if (index === incrementStep) {
-                          return { ...el, status: "process" };
-                        } else {
-                          return el;
-                        }
+
+                  switch (value) {
+                    case 0:
+                      setCurrentStep((prevStep: any) => {
+                        setStepList([
+                          { status: "process", title: "Create Account" },
+                          { status: "wait", title: "Bussines Type" },
+                          { status: "wait", title: "Create Subdomain" },
+                          { status: "wait", title: "Finished" },
+                        ]);
+                        return 0;
                       });
-                      setStepList(mappingStepList);
-                      return incrementStep;
-                    });
+                      break;
+                    case 1:
+                      if (currentStep - value === -1) {
+                        if (!isValid) {
+                          const mappingStepList = stepList.map((el, index) => {
+                            return index === currentStep ? { ...el, status: "error" } : el;
+                          });
+                          setStepList(mappingStepList);
+                        } else {
+                          setCurrentStep((prevStep: any) => {
+                            setStepList([
+                              { status: "finish", title: "Create Account" },
+                              { status: "process", title: "Bussines Type" },
+                              { status: "wait", title: "Create Subdomain" },
+                              { status: "wait", title: "Finished" },
+                            ]);
+                            return 1;
+                          });
+                        }
+                      } else if (currentStep > value) {
+                        setCurrentStep((prevStep: any) => {
+                          setStepList([
+                            { status: "finish", title: "Create Account" },
+                            { status: "process", title: "Bussines Type" },
+                            { status: "wait", title: "Create Subdomain" },
+                            { status: "wait", title: "Finished" },
+                          ]);
+                          return 1;
+                        });
+                      }
+                      break;
+                    case 2:
+                      if (currentStep - value === -1) {
+                        if (!isValid) {
+                          const mappingStepList = stepList.map((el, index) => {
+                            return index === currentStep ? { ...el, status: "error" } : el;
+                          });
+                          setStepList(mappingStepList);
+                        } else {
+                          setCurrentStep((prevStep: any) => {
+                            setStepList([
+                              { status: "finish", title: "Create Account" },
+                              { status: "finish", title: "Bussines Type" },
+                              { status: "process", title: "Create Subdomain" },
+                              { status: "wait", title: "Finished" },
+                            ]);
+                            return 2;
+                          });
+                        }
+                      } else if (currentStep > value) {
+                        setCurrentStep((prevStep: any) => {
+                          setStepList([
+                            { status: "finish", title: "Create Account" },
+                            { status: "finish", title: "Bussines Type" },
+                            { status: "process", title: "Create Subdomain" },
+                            { status: "wait", title: "Finished" },
+                          ]);
+                          return 2;
+                        });
+                      }
+                      break;
+                    case 3:
+                      if (currentStep - value === -1) {
+                        if (!isValid) {
+                          const mappingStepList = stepList.map((el, index) => {
+                            return index === currentStep ? { ...el, status: "error" } : el;
+                          });
+                          setStepList(mappingStepList);
+                        } else {
+                          setCurrentStep((prevStep: any) => {
+                            setStepList([
+                              { status: "finish", title: "Create Account" },
+                              { status: "finish", title: "Bussines Type" },
+                              { status: "finish", title: "Create Subdomain" },
+                              { status: "finish", title: "Finished" },
+                            ]);
+                            return 3;
+                          });
+                        }
+                      } else if (currentStep > value) {
+                        setCurrentStep((prevStep: any) => {
+                          setStepList([
+                            { status: "finish", title: "Create Account" },
+                            { status: "finish", title: "Bussines Type" },
+                            { status: "finish", title: "Create Subdomain" },
+                            { status: "finish", title: "Finished" },
+                          ]);
+                          return 3;
+                        });
+                      }
+                      break;
+                    default:
+                      break;
                   }
                 }}
+              />
+            </div>
+            <Spacer size={30} />
+            {currentStep > 0 && (
+              <BackButton
+                onClick={() => {
+                  setCurrentStep((prevStep) => {
+                    const incrementStep = prevStep - 1;
+                    const mappingStepList = stepList.map((el, index) => {
+                      if (
+                        el.title === stepList[prevStep].title ||
+                        incrementStep + 1 === stepList.length
+                      ) {
+                        return { ...el, status: "wait" };
+                      } else if (index === incrementStep) {
+                        return { ...el, status: "process" };
+                      } else {
+                        return el;
+                      }
+                    });
+                    setStepList(mappingStepList);
+                    return incrementStep;
+                  });
+                }}
               >
-                Next
-              </Button>
+                <ArrowLeftOutlined />{" "}
+                <Text inline variant={"headingRegular"} color="black.darker">
+                  Back
+                </Text>
+              </BackButton>
+            )}
+            <div style={{ width: "50%", height: "440px" }}>
+              {renderContent(stepList[currentStep].title)}
             </div>
-          )}
 
-          <Spacer size={10} />
+            {currentStep === 3 && (
+              <>
+                <span>
+                  <Text variant="subtitle2" inline color="grey.regular">
+                    By Clicking "Register for free", I agree
+                  </Text>{" "}
+                  <div style={{ cursor: "pointer", display: "inline-block" }} onClick={() => {}}>
+                    <Text variant="subtitle2" inline color="pink.regular">
+                      Terms and conditions
+                    </Text>
+                  </div>
+                </span>
 
-          <span>
-            <Text variant="subtitle2" inline color="black.regular">
-              Already have an account?
-            </Text>{" "}
-            <div
-              style={{ cursor: "pointer", display: "inline-block" }}
-              onClick={() => {
-                router.back();
-              }}
-            >
-              <Text variant="subtitle2" inline color="pink.regular">
-                Login
-              </Text>
-            </div>
-          </span>
-        </Col>
-      </FormProvider>
+                <Spacer size={5} />
+              </>
+            )}
+
+            {currentStep === 3 ? (
+              <div style={{ width: "25%" }}>
+                <Button variant="primary" size={"big"} full onClick={handleSubmit(onSubmit)}>
+                  Register For Free
+                </Button>
+              </div>
+            ) : (
+              <div style={{ width: "25%" }}>
+                <Button
+                  variant="primary"
+                  size={"big"}
+                  full
+                  onClick={async () => {
+                    const isValid = await trigger();
+                    if (!isValid) {
+                      const mappingStepList = stepList.map((el, index) => {
+                        return index === currentStep ? { ...el, status: "error" } : el;
+                      });
+                      setStepList(mappingStepList);
+                    } else {
+                      setCurrentStep((prevStep) => {
+                        const incrementStep = prevStep + 1;
+                        const mappingStepList = stepList.map((el, index) => {
+                          if (
+                            el.title === stepList[prevStep].title ||
+                            incrementStep + 1 === stepList.length
+                          ) {
+                            return { ...el, status: "finish" };
+                          } else if (index === incrementStep) {
+                            return { ...el, status: "process" };
+                          } else {
+                            return el;
+                          }
+                        });
+                        setStepList(mappingStepList);
+                        return incrementStep;
+                      });
+                    }
+                  }}
+                >
+                  Next
+                </Button>
+              </div>
+            )}
+
+            <Spacer size={10} />
+
+            <span>
+              <Text variant="subtitle2" inline color="black.regular">
+                Already have an account?
+              </Text>{" "}
+              <div
+                style={{ cursor: "pointer", display: "inline-block" }}
+                onClick={() => {
+                  router.back();
+                }}
+              >
+                <Text variant="subtitle2" inline color="pink.regular">
+                  Login
+                </Text>
+              </div>
+            </span>
+          </Col>
+        </FormProvider>
+      </RegisterFormContext.Provider>
     </div>
   );
 };

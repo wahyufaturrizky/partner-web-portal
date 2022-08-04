@@ -1,6 +1,7 @@
 import React from "react";
 import { Row, Col, Spacer, Text, FormInput, FormSelect } from "pink-lava-ui";
 import { useFormContext, Controller } from "react-hook-form";
+import { DIAL_CODES } from "../../utils/dial_code_constant";
 
 const CreateAccount = () => {
   const {
@@ -61,7 +62,7 @@ const CreateAccount = () => {
             </Text>
           )}
 
-          <Spacer size={20} />
+          <Spacer size={10} />
 
           <Text variant="subtitle1">Phone Number</Text>
           <Row noWrap gap={"8px"}>
@@ -73,11 +74,9 @@ const CreateAccount = () => {
                 <Col>
                   <FormSelect
                     size={"large"}
+                    dropdownMatchSelectWidth={false}
                     defaultValue={formValues?.phone_code ?? "+62"}
-                    items={[
-                      { value: "+62", label: "+62" },
-                      { value: "+65", label: "+65" },
-                    ]}
+                    items={DIAL_CODES}
                     onChange={(value: any) => {
                       onChange(value);
                     }}
@@ -115,7 +114,7 @@ const CreateAccount = () => {
             />
           </Row>
 
-          <Spacer size={20} />
+          <Spacer size={10} />
 
           <Text variant="subtitle1">{"Password"}</Text>
           <Controller
@@ -147,7 +146,7 @@ const CreateAccount = () => {
             </Text>
           )}
 
-          <Spacer size={20} />
+          <Spacer size={10} />
 
           <Text variant="subtitle1">{"Confirm Password"}</Text>
           <Controller

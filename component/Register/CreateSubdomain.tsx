@@ -35,7 +35,7 @@ const CreateSubdomain = () => {
               size="large"
               defaultValue={formValues?.subdomain}
               status={errors?.subdomain?.type === "required" && "error"}
-              placeholder="large size"
+              placeholder="e.g NabatiGroup"
               suffix={
                 <>
                   <span>.com</span>
