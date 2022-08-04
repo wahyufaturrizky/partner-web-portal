@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { Header, Row, Col, Spacer, Steps, Button, Text } from "pink-lava-ui";
 import LogoSvg from "../../assets/icons/logo.svg";
-import BusinessType from "../../component/Register/BusinessType";
-import CreateAccount from "../../component/Register/CreateAccount";
-import CreateSubdomain from "../../component/Register/CreateSubdomain";
-import Finished from "../../component/Register/Finished";
+import BusinessType from "../../components/pages/Register/BusinessType";
+import CreateAccount from "../../components/pages/Register/CreateAccount";
+import CreateSubdomain from "../../components/pages/Register/CreateSubdomain";
+import Finished from "../../components/pages/Register/Finished";
 import { useForm, FormProvider } from "react-hook-form";
 import { ArrowLeftOutlined } from "@ant-design/icons";
 import styled from "styled-components";

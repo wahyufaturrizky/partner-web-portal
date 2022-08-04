@@ -15,7 +15,7 @@ import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
 import { CSS } from "@dnd-kit/utilities";
 import { useSortable, SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import styled from "styled-components";
-import { STATUS_BUSINESS_PROCESS } from "../../utils/constant";
+import { STATUS_BUSINESS_PROCESS } from "../../../utils/constant";
 
 const DraggableTable = ({ processList, isLoading, onDrag, onEdit, onDelete }: any) => {
 	const [activeId, setActiveId] = useState(null);

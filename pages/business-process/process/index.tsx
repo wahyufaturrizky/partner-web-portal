@@ -3,7 +3,7 @@ import Router from "next/router";
 import { Button, Col, Dropdown, Pagination, Row, Search, Spacer, Table, Text } from "pink-lava-ui";
 import React, { useState } from "react";
 import styled from "styled-components";
-import { ModalDeleteConfirmation } from "../../../component/Modal/ModalConfirmationDelete";
+import { ModalDeleteConfirmation } from "../../../components/elements/Modal/ModalConfirmationDelete";
 import { useConfigs } from "../../../hooks/config/useConfig";
 import { useDeleteProcessList, useProcessLists } from "../../../hooks/business-process/useProcess";
 import { colors } from "../../../utils/color";
