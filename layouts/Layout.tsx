@@ -178,6 +178,25 @@ const menuMdm = [
       },
     ],
   },
+  {
+    key: "inventory",
+    title: "Inventory",
+    icon: ICField,
+    children: [
+      {
+        key: "product",
+        title: "Product",
+        children: [
+          {
+            key: "inventory-product-brand",
+            title: "Product Brand",
+            content: () => "Product Brand",
+            onClick: () => Router.push("/product-brand"),
+          },
+        ],
+      },
+    ],
+  },
 ];
 
 const itemsMenu = [
