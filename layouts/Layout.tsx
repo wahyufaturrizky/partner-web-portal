@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import Router from "next/router";
 import { Sidebar, Layout, Header } from "pink-lava-ui";
 
-import { ICField, ICUser, ICMenu, ICCalendar, ICFinance } from "../assets";
+import { ICField, ICUser, ICMenu, ICCalendar, ICFinance, ICInventory } from "../assets";
 
 const menuConfig = [
   { type: "title", title: "Overview" },
@@ -178,22 +178,17 @@ const menuMdm = [
       },
     ],
   },
+  { type: "title", title: "Inventory" },
   {
-    key: "inventory",
-    title: "Inventory",
-    icon: ICField,
+    key: "product",
+    title: "Product",
+    icon: ICInventory,
     children: [
       {
-        key: "product",
-        title: "Product",
-        children: [
-          {
-            key: "inventory-product-brand",
-            title: "Product Brand",
-            content: () => "Product Brand",
-            onClick: () => Router.push("/product-brand"),
-          },
-        ],
+        key: "product-brand",
+        title: "Product Brand",
+        content: () => "Product Brand",
+        onClick: () => Router.push("/product-brand"),
       },
     ],
   },

@@ -80,7 +80,9 @@ const ProductBrandMDM = () => {
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const debounceSearch = useDebounce(search, 1000);
 
-  const { register, handleSubmit, setValue } = useForm();
+  const { register, handleSubmit, setValue } = useForm({
+    defaultValues: { parent: "" },
+  });
 
   const {
     data: productBrandsMDMData,
@@ -99,7 +101,7 @@ const ProductBrandMDM = () => {
       select: (data: any) => {
         const mappedData = data?.rows?.map((element: any) => {
           return {
-            key: element.code,
+            key: element.id,
             id: element.id,
             productBrandCode: element.code,
             brand: element.brand,
@@ -211,7 +213,7 @@ const ProductBrandMDM = () => {
         createProductBrandMDM({ ...data, company: "KSNI" });
         break;
       case "edit":
-        updateProductBrandMDM(data);
+        updateProductBrandMDM({ ...data, company: "KSNI" });
         break;
       default:
         setModalProductBrandForm({ open: false, typeForm: "", data: {} });
@@ -354,13 +356,13 @@ const ProductBrandMDM = () => {
               }}
             >
               <Input
-                defaultValue={modalProductBrandForm.data?.name}
+                defaultValue={modalProductBrandForm.data?.brand}
                 width="100%"
                 label="Name"
                 height="48px"
                 required
                 placeholder={"e.g Brand 1"}
-                {...register("name", {
+                {...register("brand", {
                   shouldUnregister: true,
                 })}
               />
@@ -370,15 +372,17 @@ const ProductBrandMDM = () => {
               ) : (
                 <>
                   <Dropdown
-                    label=""
+                    label="Parent"
+                    isOptional
                     width="100%"
                     items={dataParentProductBrandMDM.map((data) => ({
-                      value: data.parent,
-                      id: data.parent,
+                      value: data.brand,
+                      id: data.code,
                     }))}
                     placeholder={"Select"}
-                    handleChange={(text) => setValue("brand", text)}
+                    handleChange={(text) => setValue("parent", text)}
                     noSearch
+                    defaultValue={modalProductBrandForm.data?.parent}
                   />
 
                   <Spacer size={14} />

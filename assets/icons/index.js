@@ -7,7 +7,8 @@ import ICExclamation from "./exclamation.svg";
 import ICDownload from "./ic-download.svg";
 import ICUpload from "./ic-upload.svg";
 import ICSync from "./ic-sync.svg";
-import ICEyeCrossed from './eye-crossed.svg'
+import ICEyeCrossed from "./eye-crossed.svg";
+import ICInventory from "./ic-inventory.svg";
 
 export {
   ICField,
@@ -19,5 +20,6 @@ export {
   ICDownload,
   ICUpload,
   ICSync,
-  ICEyeCrossed
+  ICEyeCrossed,
+  ICInventory,
 };
