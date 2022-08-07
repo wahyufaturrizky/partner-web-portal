@@ -55,73 +55,22 @@ const fakeMenuDesign = [
   },
 ];
 
-const CompanyTypeData = [
+const fakeCompanyType = [
   {
     id: 1,
-    value: "Holding",
+    value: "Agricultural",
   },
   {
     id: 2,
-    value: "Corporate",
-  },
-  {
-    id: 3,
-    value: "Company",
-  },
-];
-
-const IndustryData = [
-  {
-    id: 1,
-    value: "Agricultural & Allied Industries",
-  },
-  {
-    id: 2,
-    value: "Automobiles",
-  },
-  {
-    id: 3,
-    value: "Aviation",
-  },
-  {
-    id: 4,
-    value: "Banking & Insurance",
-  },
-  {
-    id: 5,
-    value: "Cement",
-  },
-  {
-    id: 6,
-    value: "Consumer Durables",
-  },
-  {
-    id: 7,
     value: "E-Commerce",
   },
   {
-    id: 8,
-    value: "Education & Training",
+    id: 3,
+    value: "FMCG ",
   },
-  {
-    id: 9,
-    value: "Engineering & Capital Goods",
-  },
-  {
-    id: 10,
-    value: "FMCG",
-  },
-  {
-    id: 11,
-    value: "Gems & Jewellery",
-  },
-  {
-    id: 12,
-    value: "Healthcare",
-  },
-]
+];
 
-const CorporateData = [
+const fakeCorporate = [
   {
     id: 1,
     value: "Domestic",
@@ -135,37 +84,6 @@ const CorporateData = [
     value: "Other",
   },
 ];
-
-const numberOfEmployeeData = [
-  {
-    id: 1,
-    value: '1-50'
-  },
-  {
-    id: 2,
-    value: '51-100'
-  },
-  {
-    id: 3,
-    value: '101-500'
-  },
-  {
-    id: 4,
-    value: '501-1000'
-  },
-  {
-    id: 5,
-    value: '1001-5000'
-  },
-  {
-    id: 6,
-    value: '5001-10000'
-  },
-  {
-    id: 7,
-    value: '10001++'
-  },
-]
 
 const fakeCurrency = [
   {
@@ -200,8 +118,8 @@ const fakeTimezone = [
 const schema = yup
   .object({
     name: yup.string().required("Full Name is Required"),
-    code: yup.string().required("Company code has been used, try another"),
-    email: yup.string().email("Email"),
+    code: yup.string().required("Code is Required"),
+    email: yup.string().email("Email is"),
     address: yup.string().required("Address is Required"),
   })
   .required();
@@ -210,7 +128,7 @@ const defaultValue = {
   activeStatus: "Y",
 };
 
-const CreateCompany: any = () => {
+const DetailCompany: any = () => {
   const router = useRouter();
 
   const pagination = usePagination({
@@ -253,7 +171,7 @@ const CreateCompany: any = () => {
       <Col>
         <Row gap="4px" alignItems="center">
           <ArrowLeft style={{ cursor: "pointer" }} onClick={() => Router.push("/company-list")} />
-          <Text variant={"h4"}>Add New Company</Text>
+          <Text variant={"h4"}>PT. Kaldu Sari Nabati Indonesia</Text>
         </Row>
         <Spacer size={12} />
         <Card padding="20px">
@@ -348,7 +266,7 @@ const CreateCompany: any = () => {
                   <Dropdown2
                     label="Industry"
                     width={"100%"}
-                    items={IndustryData}
+                    // items={accounts}
                     placeholder={"Select"}
                     // handleChange={(value) => setValue("accountGroupId", value)}
                     // onSearch={(search) => setSearchAccountGroup(search)}
@@ -363,7 +281,7 @@ const CreateCompany: any = () => {
                   <Dropdown2
                     label="Number of Employee"
                     width={"100%"}
-                    items={numberOfEmployeeData}
+                    // items={accounts}
                     placeholder={"Select"}
                     // handleChange={(value) => setValue("accountGroupId", value)}
                     // onSearch={(search) => setSearchAccountGroup(search)}
@@ -429,7 +347,7 @@ const CreateCompany: any = () => {
                   <Dropdown2
                     label="Company Type"
                     width={"100%"}
-                    items={CompanyTypeData}
+                    // items={accounts}
                     placeholder={"Select"}
                     // handleChange={(value) => setValue("accountGroupId", value)}
                     // onSearch={(search) => setSearchAccountGroup(search)}
@@ -442,7 +360,7 @@ const CreateCompany: any = () => {
                   <Dropdown2
                     label="Corporate"
                     width={"100%"}
-                    items={CorporateData}
+                    // items={accounts}
                     placeholder={"Select"}
                     // handleChange={(value) => setValue("accountGroupId", value)}
                     // onSearch={(search) => setSearchAccountGroup(search)}
@@ -557,4 +475,4 @@ const Card = styled.div`
   padding: ${(p) => (p.padding ? p.padding : "16px")};
 `;
 
-export default CreateCompany;
+export default DetailCompany;
