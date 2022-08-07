@@ -329,7 +329,7 @@ const JobPosition = () => {
           closable={false}
           visible={modalForm.open}
           onCancel={() => setModalForm({ open: false, data: {}, typeForm: "" })}
-          title={modalForm.typeForm === "create" ? "Create Job Position" : "Job Position"}
+          title={modalForm.typeForm === "create" ? "Create Job Position" : modalForm.data?.name}
           footer={null}
           content={
             <div

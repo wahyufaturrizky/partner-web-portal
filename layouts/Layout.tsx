@@ -203,6 +203,12 @@ const menuMdm = [
         content: () => "Job Level",
         onClick: () => Router.push("/job-level"),
       },
+      {
+        key: "department",
+        title: "Department",
+        content: () => "Department",
+        onClick: () => Router.push("/department"),
+      },
     ],
   },
   { type: "title", title: "Inventory" },
