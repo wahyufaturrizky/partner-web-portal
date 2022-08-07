@@ -148,10 +148,10 @@ const Login: any = () => {
     mutate,
     isLoading: isLoadingLogin,
   } = useSignIn({
-    onSuccess: (data) => {
+    onSuccess: (data: any) => {
       window.location.assign(window.location);
     },
-    onError: (error) => {
+    onError: (error: any) => {
       if (
         error.status === 400 &&
         error.data.status === "ERROR" &&
@@ -161,7 +161,7 @@ const Login: any = () => {
     },
   });
 
-  const onSubmit = async (data) => {
+  const onSubmit = async (data: any) => {
     if (isFlowCreateNewPassword) {
       createReqBodyUpdatePassword({
         otp: stateOtp,
@@ -176,7 +176,7 @@ const Login: any = () => {
         setIsResetWithPhone(true);
       }
     } else {
-      const payload = {
+      const payload: any = {
         password: data.password,
       };
       if (data.username.includes("@")) {
@@ -189,7 +189,7 @@ const Login: any = () => {
     }
   };
 
-  const handleChangeOtp = (otpValue) => {
+  const handleChangeOtp = (otpValue: any) => {
     setStateOtp(otpValue);
   };
 
@@ -364,13 +364,13 @@ const Login: any = () => {
                       style={{ cursor: "pointer" }}
                       onClick={() => setOtpFlow({ isShowOtpFlow: true, usingWaOrSms: "SMS" })}
                     >
-                      <Image src="/send-otp-sms.svg" alt="edot-logo" width={408} height={96} />
+                      <Image src="/icons/send-otp-sms.svg" alt="edot-logo" width={408} height={96} />
                     </div>
                     <div
                       style={{ cursor: "pointer" }}
                       onClick={() => setOtpFlow({ isShowOtpFlow: true, usingWaOrSms: "WA" })}
                     >
-                      <Image src="/send-otp-wa.svg" alt="edot-logo" width={408} height={96} />
+                      <Image src="/icons/send-otp-wa.svg" alt="edot-logo" width={408} height={96} />
                     </div>
                   </>
                 )}
