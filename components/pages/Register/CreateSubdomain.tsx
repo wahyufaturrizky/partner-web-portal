@@ -13,7 +13,7 @@ const CreateSubdomain = () => {
   const formValues = getValues();
 
   return (
-    <Col alignItems={"Center"}>
+    <Col alignItems={"center"}>
       <Text variant={"h4"}>Create Subdomain</Text>
       <div style={{ width: "60%" }}>
         <Text variant={"caption"} textAlign={"center"} color={"grey.light"}>
@@ -38,7 +38,7 @@ const CreateSubdomain = () => {
               placeholder="e.g NabatiGroup"
               suffix={
                 <>
-                  <span>.com</span>
+                  <span>.edot.id</span>
                   {!errors?.subdomain?.type && <CheckCircleFilled style={{ color: "green" }} />}
                   {errors?.subdomain?.type && <ExclamationCircleFilled style={{ color: "red" }} />}
                   {/* <LoadingOutlined /> */}

@@ -12,7 +12,7 @@ const BusinessType = () => {
     setIndustryField,
     companyType,
     setCompanyType,
-    numberEmployees,
+    numberEmployees,  
     setNumberEmployees,
   } = useContext(RegisterFormContext);
 
@@ -44,7 +44,7 @@ const BusinessType = () => {
                 size="large"
                 defaultValue={formValues?.company_name}
                 status={errors?.company_name?.type === "required" && "error"}
-                placeholder="e.g PT. Kaldu Sari Nabati Indonesia"
+                placeholder="e.g PT. Elektronik Distribusi Otomatisasi Terkemuka"
                 onChange={(e: any) => {
                   if (errors?.company_name) {
                     clearErrors("company_name");

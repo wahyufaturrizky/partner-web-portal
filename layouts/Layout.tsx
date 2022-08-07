@@ -198,6 +198,18 @@ const menuMdm = [
         content: () => "Product Brand",
         onClick: () => Router.push("/product-brand"),
       },
+      {
+        key: "uom-category",
+        title: "UoM Category",
+        content: () => "UoM Category",
+        onClick: () => Router.push("/unit-of-measure-category"),
+      },
+      {
+        key: "uom",
+        title: "Unit of Measure",
+        content: () => "Unit of Measure",
+        onClick: () => Router.push("/unit-of-measure"),
+      },
     ],
   },
 ];
