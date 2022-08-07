@@ -2,14 +2,14 @@ import React, { useState } from "react";
 import Router from "next/router";
 import { Sidebar, Layout, Header, MenuLogout } from "pink-lava-ui";
 
-
 import { ICField, ICUser, ICMenu, ICCalendar, ICFinance, ICInventory } from "../assets";
-import ICAccount from '../assets/icons/ic-avatar-default.svg'
-import ICAccountSetting from '../assets/icons/ic-setting.svg'
-import ICCompany from '../assets/icons/ic-company.svg'
-import ICChangeLanguage from '../assets/icons/ic-globe.svg'
-import ICLogout from '../assets/icons/ic-logout.svg'
-import ICArrowBottom from '../assets/icons/ic-arrow-bottom.svg'
+import ICAccount from "../assets/icons/ic-avatar-default.svg";
+import ICAccountSetting from "../assets/icons/ic-setting.svg";
+import ICCompany from "../assets/icons/ic-company.svg";
+import ICChangeLanguage from "../assets/icons/ic-globe.svg";
+import ICLogout from "../assets/icons/ic-logout.svg";
+import ICArrowBottom from "../assets/icons/ic-arrow-bottom.svg";
+import ICBadge from "../assets/icons/ic-badge.svg";
 import styled from "styled-components";
 
 const menuConfig = [
@@ -186,6 +186,19 @@ const menuMdm = [
       },
     ],
   },
+  {
+    key: "employee",
+    title: "Employee",
+    icon: ICBadge,
+    children: [
+      {
+        key: "job-position",
+        title: "Job Position",
+        content: () => "Job Position",
+        onClick: () => Router.push("/job-position"),
+      },
+    ],
+  },
   { type: "title", title: "Inventory" },
   {
     key: "product",
@@ -214,20 +227,16 @@ const menuMdm = [
   },
 ];
 
-const itemsMenu = [
-  {label: "Config"},
-  {label: "Master Data Management"},
-];
-
+const itemsMenu = [{ label: "Config" }, { label: "Master Data Management" }];
 
 const flexStyles = {
-  display: 'flex',
-  alignItems: 'center',
-  gap: '.5rem',
-  paddingBottom: '1rem',
-  fontSize: '14px',
-  cursor: 'pointer'
- }
+  display: "flex",
+  alignItems: "center",
+  gap: ".5rem",
+  paddingBottom: "1rem",
+  fontSize: "14px",
+  cursor: "pointer",
+};
 
 const AdminLayout = (props: any) => {
   const [current, setCurrent] = useState("0");
@@ -237,10 +246,9 @@ const AdminLayout = (props: any) => {
   };
 
   const handleLogout = (e: any) => {
-    localStorage.clear()
-    window.location.href = '/login'
-
-  }
+    localStorage.clear();
+    window.location.href = "/login";
+  };
 
   return (
     <Layout style={{ minHeight: "100vh" }}>
@@ -260,27 +268,39 @@ const AdminLayout = (props: any) => {
             menu={
               <WrapperMenuLogout>
                 <WrapeprProfile>
-              <ICAccount />
-                <div>
-                  <TextName>Admin</TextName>
-                  <TextRole>Super User</TextRole>
+                  <ICAccount />
+                  <div>
+                    <TextName>Admin</TextName>
+                    <TextRole>Super User</TextRole>
+                  </div>
+                </WrapeprProfile>
+                <div style={flexStyles}>
+                  <ICAccountSetting />
+                  <p>Account Settings</p>
                 </div>
-              </WrapeprProfile>
-              <div style={flexStyles}><ICAccountSetting /><p>Account Settings</p></div>
-              <div style={flexStyles}><ICCompany /><p>Company List</p></div>
-              <div style={flexStyles}><ICChangeLanguage /><p>Change Language</p></div>
-              <div style={flexStyles} onClick={handleLogout}><ICLogout /><p>Logout</p></div>
-            </WrapperMenuLogout>
-          }
-        >
-          <MenuDropdown>
-            <div style={{gap: '5px', display: 'flex', alignItems: 'center', fontSize: '14px'}}>
-              <ICAccount />
-              <p>Admin</p>
-            </div>
-            <ICArrowBottom />
-          </MenuDropdown>
-        </MenuLogout>
+                <div style={flexStyles}>
+                  <ICCompany />
+                  <p>Company List</p>
+                </div>
+                <div style={flexStyles}>
+                  <ICChangeLanguage />
+                  <p>Change Language</p>
+                </div>
+                <div style={flexStyles} onClick={handleLogout}>
+                  <ICLogout />
+                  <p>Logout</p>
+                </div>
+              </WrapperMenuLogout>
+            }
+          >
+            <MenuDropdown>
+              <div style={{ gap: "5px", display: "flex", alignItems: "center", fontSize: "14px" }}>
+                <ICAccount />
+                <p>Admin</p>
+              </div>
+              <ICArrowBottom />
+            </MenuDropdown>
+          </MenuLogout>
         </Header>
         <div style={{ padding: "20px" }}>{props}</div>
       </Layout>
@@ -288,28 +308,27 @@ const AdminLayout = (props: any) => {
   );
 };
 
-
 const WrapeprProfile = styled.div`
-display: flex;
-align-items: center;
-gap: .5rem;
-border-bottom: 1px solid #F4F4F4;
-padding-bottom: 1rem;
-margin-bottom: 1rem;
-cursor: pointer;
-`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-bottom: 1px solid #f4f4f4;
+  padding-bottom: 1rem;
+  margin-bottom: 1rem;
+  cursor: pointer;
+`;
 
 const WrapperMenuLogout = styled.div`
-width: 200px;
-height: 272px;
-background: #FFFFFF;
-box-shadow: 0px 4px 16px rgba(170, 170, 170, 0.15);
-border-radius: 16px;
-padding: 20px;
-`
+  width: 200px;
+  height: 272px;
+  background: #ffffff;
+  box-shadow: 0px 4px 16px rgba(170, 170, 170, 0.15);
+  border-radius: 16px;
+  padding: 20px;
+`;
 
 const MenuDropdown = styled.div`
-  border: 1.5px solid #AAAAAA;
+  border: 1.5px solid #aaaaaa;
   border-radius: 24px;
   width: 180px;
   height: 3rem;
@@ -317,14 +336,14 @@ const MenuDropdown = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-`
+`;
 
 const TextName = styled.p`
   margin: 0;
   fontSize: '16px',
   fontWeight: 600;
   color: #000000;
-`
+`;
 
 const TextRole = styled.p`
   font-style: normal;
@@ -333,6 +352,6 @@ const TextRole = styled.p`
   line-height: 24px;
   margin: 0;
   color: #666666;
-`
+`;
 
 export default AdminLayout;

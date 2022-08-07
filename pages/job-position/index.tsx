@@ -13,23 +13,27 @@ import {
   Input,
   DropdownMenu,
   FileUploadModal,
-  Lozenge,
 } from "pink-lava-ui";
 import usePagination from "@lucasmogari/react-pagination";
-import { useUOMList, useUploadFileUOM, useDeletUOM } from "../../hooks/mdm/unit-of-measure/useUOM";
+import {
+  useJobPositions,
+  useCreateJobPosition,
+  useUpdateJobPosition,
+  useUploadFileJobPosition,
+  useDeleteJobPosition,
+} from "../../hooks/mdm/job-position/useJobPositon";
 import useDebounce from "../../lib/useDebounce";
 import { queryClient } from "../_app";
 import { useForm } from "react-hook-form";
 import { ICDownload, ICUpload } from "../../assets/icons";
 import { mdmDownloadService } from "../../lib/client";
-import { useRouter } from "next/router";
 
 const downloadFile = (params: any) =>
-  mdmDownloadService("/uom/download", { params }).then((res) => {
+  mdmDownloadService("/job-position/download", { params }).then((res) => {
     let dataUrl = window.URL.createObjectURL(new Blob([res.data]));
     let tempLink = document.createElement("a");
     tempLink.href = dataUrl;
-    tempLink.setAttribute("download", `uom_${new Date().getTime()}.xlsx`);
+    tempLink.setAttribute("download", `job_position_${new Date().getTime()}.xlsx`);
     tempLink.click();
   });
 
@@ -38,19 +42,18 @@ const renderConfirmationText = (type: any, data: any) => {
     case "selection":
       return data.selectedRowKeys.length > 1
         ? `Are you sure to delete ${data.selectedRowKeys.length} items ?`
-        : `Are you sure to delete Uom Name ${
-            data?.uomData?.data.find((el: any) => el.key === data.selectedRowKeys[0])?.uomName
+        : `Are you sure to delete ${
+            data?.uomCategoryData?.data.find((el: any) => el.key === data.selectedRowKeys[0])?.name
           } ?`;
     case "detail":
-      return `Are you sure to delete Uom Name ${data.uomName} ?`;
+      return `Are you sure to delete ${data.name} ?`;
 
     default:
       break;
   }
 };
 
-const UOM = () => {
-  const router = useRouter();
+const JobPosition = () => {
   const pagination = usePagination({
     page: 1,
     itemsPerPage: 10,
@@ -74,10 +77,10 @@ const UOM = () => {
   const { register, handleSubmit } = useForm();
 
   const {
-    data: UOMData,
-    isLoading: isLoadingUOM,
-    isFetching: isFetchingUOM,
-  } = useUOMList({
+    data: jobPositionsData,
+    isLoading: isLoadingJobPositions,
+    isFetching: isFetchingJobPositions,
+  } = useJobPositions({
     query: {
       search: debounceSearch,
       page: pagination.page,
@@ -91,17 +94,15 @@ const UOM = () => {
       select: (data: any) => {
         const mappedData = data?.rows?.map((element: any) => {
           return {
-            key: element.uomId,
-            id: element.uomId,
-            uomName: element.name,
-            uomCategoryName: element.uomCategoryName,
-            status: element.activeStatus,
+            key: element.jobPositionId,
+            id: element.jobPositionId,
+            name: element.name,
             action: (
               <div style={{ display: "flex", justifyContent: "left" }}>
                 <Button
                   size="small"
                   onClick={() => {
-                    router.push(`/unit-of-measure/${element.uomId}`);
+                    setModalForm({ open: true, typeForm: "edit", data: element });
                   }}
                   variant="tertiary"
                 >
@@ -117,46 +118,61 @@ const UOM = () => {
     },
   });
 
-  const { mutate: deleteUom, isLoading: isLoadingDeleteUom } = useDeletUOM({
-    options: {
-      onSuccess: () => {
-        setShowDelete({ open: false, data: {}, type: "" });
-        setSelectedRowKeys([]);
-        queryClient.invalidateQueries(["uom-list"]);
+  const { mutate: createJobPosition, isLoading: isLoadingCreateJobPosition } = useCreateJobPosition(
+    {
+      options: {
+        onSuccess: () => {
+          setModalForm({ open: false, typeForm: "", data: {} });
+          queryClient.invalidateQueries(["job-positions"]);
+        },
       },
-    },
-  });
+    }
+  );
 
-  const { mutate: uploadFileUom, isLoading: isLoadingUploadFileUom } = useUploadFileUOM({
-    options: {
-      onSuccess: () => {
-        queryClient.invalidateQueries(["uom-list"]);
-        setShowUpload(false);
+  const { mutate: updateJobPosition, isLoading: isLoadingUpdateJobPosition } = useUpdateJobPosition(
+    {
+      id: modalForm?.data?.jobPositionId,
+      companyId: "KSNI",
+      options: {
+        onSuccess: () => {
+          setModalForm({ open: false, typeForm: "", data: {} });
+          queryClient.invalidateQueries(["job-positions"]);
+        },
       },
-    },
-  });
+    }
+  );
+
+  const { mutate: deleteJobPosition, isLoading: isLoadingDeleteJobPosition } = useDeleteJobPosition(
+    {
+      options: {
+        onSuccess: () => {
+          setShowDelete({ open: false, data: {}, type: "" });
+          setModalForm({ open: false, data: {}, typeForm: "" });
+          setSelectedRowKeys([]);
+          queryClient.invalidateQueries(["job-positions"]);
+        },
+      },
+    }
+  );
+
+  const { mutate: uploadFileJobPosition, isLoading: isLoadingUploadFileJobPosition } =
+    useUploadFileJobPosition({
+      options: {
+        onSuccess: () => {
+          queryClient.invalidateQueries(["job-positions"]);
+          setShowUpload(false);
+        },
+      },
+    });
 
   const columns = [
     {
-      title: "Uom ID",
+      title: "Job Position ID",
       dataIndex: "id",
     },
     {
-      title: "Uom Name",
-      dataIndex: "uomName",
-    },
-    {
-      title: "Uom Category",
-      dataIndex: "uomCategoryName",
-    },
-    {
-      title: "status",
-      dataIndex: "status",
-      render: (status: any) => (
-        <Lozenge variant={status === "ACTIVE" ? "green" : "black"}>
-          {status === "ACTIVE" ? "Active" : "Inactive"}
-        </Lozenge>
-      ),
+      title: "Job Position Name",
+      dataIndex: "name",
     },
     {
       title: "Action",
@@ -173,25 +189,43 @@ const UOM = () => {
     },
   };
 
+  const onSubmit = (data: any) => {
+    switch (modalForm.typeForm) {
+      case "create":
+        const formData = {
+          company_id: "KSNI",
+          ...data,
+        };
+        createJobPosition(formData);
+        break;
+      case "edit":
+        updateJobPosition(data);
+        break;
+      default:
+        setModalForm({ open: false, typeForm: "", data: {} });
+        break;
+    }
+  };
+
   const onSubmitFile = (file: any) => {
     const formData = new FormData();
     formData.append("company_id", "KSNI");
     formData.append("file", file);
 
-    uploadFileUom(formData);
+    uploadFileJobPosition(formData);
   };
 
   return (
     <>
       <Col>
-        <Text variant={"h4"}>Unit of Measure</Text>
+        <Text variant={"h4"}>Job Position</Text>
         <Spacer size={20} />
       </Col>
       <Card>
         <Row justifyContent="space-between">
           <Search
             width="340px"
-            placeholder="Search Uom ID, Name."
+            placeholder="Search Job Position ID, Name."
             onChange={(e: any) => {
               setSearch(e.target.value);
             }}
@@ -204,7 +238,7 @@ const UOM = () => {
                 setShowDelete({
                   open: true,
                   type: "selection",
-                  data: { uomData: UOMData, selectedRowKeys },
+                  data: { uomCategoryData: jobPositionsData, selectedRowKeys },
                 })
               }
               disabled={rowSelection.selectedRowKeys?.length === 0}
@@ -268,7 +302,7 @@ const UOM = () => {
             <Button
               size="big"
               variant="primary"
-              onClick={() => router.push("/unit-of-measure/create")}
+              onClick={() => setModalForm({ open: true, typeForm: "create", data: {} })}
             >
               Create
             </Button>
@@ -279,14 +313,83 @@ const UOM = () => {
       <Card style={{ padding: "16px 20px" }}>
         <Col gap={"60px"}>
           <Table
-            loading={isLoadingUOM || isFetchingUOM}
+            loading={isLoadingJobPositions || isFetchingJobPositions}
             columns={columns}
-            data={UOMData?.data}
+            data={jobPositionsData?.data}
             rowSelection={rowSelection}
           />
           <Pagination pagination={pagination} />
         </Col>
       </Card>
+
+      {modalForm.open && (
+        <Modal
+          width={"350px"}
+          centered
+          closable={false}
+          visible={modalForm.open}
+          onCancel={() => setModalForm({ open: false, data: {}, typeForm: "" })}
+          title={modalForm.typeForm === "create" ? "Create Job Position" : "Job Position"}
+          footer={null}
+          content={
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
+              }}
+            >
+              <Input
+                defaultValue={modalForm.data?.name}
+                width="100%"
+                label="Job Position"
+                height="48px"
+                placeholder={"e.g Staff"}
+                {...register("name", {
+                  shouldUnregister: true,
+                })}
+              />
+              <Spacer size={14} />
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  gap: "10px",
+                  marginBottom: "20px",
+                }}
+              >
+                {modalForm.typeForm === "create" ? (
+                  <Button
+                    size="big"
+                    variant={"tertiary"}
+                    key="submit"
+                    type="primary"
+                    onClick={() => setModalForm({ open: false, data: {}, typeForm: "" })}
+                  >
+                    Cancel
+                  </Button>
+                ) : (
+                  <Button
+                    size="big"
+                    variant={"tertiary"}
+                    key="submit"
+                    type="primary"
+                    onClick={() => {
+                      setShowDelete({ open: true, type: "detail", data: modalForm.data });
+                    }}
+                  >
+                    Delete
+                  </Button>
+                )}
+
+                <Button onClick={handleSubmit(onSubmit)} variant="primary" size="big">
+                  {isLoadingCreateJobPosition || isLoadingUpdateJobPosition ? "Loading..." : "Save"}
+                </Button>
+              </div>
+            </div>
+          }
+        />
+      )}
 
       {isShowDelete.open && (
         <Modal
@@ -329,13 +432,13 @@ const UOM = () => {
                   size="big"
                   onClick={() => {
                     if (isShowDelete.type === "selection") {
-                      deleteUom({ ids: selectedRowKeys, company_id: "KSNI" });
+                      deleteJobPosition({ ids: selectedRowKeys, company_id: "KSNI" });
                     } else {
-                      deleteUom({ ids: [modalForm.data.id], company_id: "KSNI" });
+                      deleteJobPosition({ ids: [modalForm.data.id], company_id: "KSNI" });
                     }
                   }}
                 >
-                  {isLoadingDeleteUom ? "loading..." : "Yes"}
+                  {isLoadingDeleteJobPosition ? "loading..." : "Yes"}
                 </Button>
               </div>
             </div>
@@ -360,4 +463,4 @@ const Card = styled.div`
   padding: 16px;
 `;
 
-export default UOM;
+export default JobPosition;

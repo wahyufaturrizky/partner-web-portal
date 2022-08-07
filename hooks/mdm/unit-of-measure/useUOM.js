@@ -1,5 +1,5 @@
 import { useQuery, useMutation } from "react-query";
-import { mdmService } from "../../lib/client";
+import { mdmService } from "../../../lib/client";
 
 const fetchUOM = async ({ query = {} }) => {
   return mdmService(`/uom`, {

@@ -14,10 +14,10 @@ import {
 import styled from "styled-components";
 import { Controller, useForm } from "react-hook-form";
 import { useRouter } from "next/router";
-import { useUOMDetail, useUpdateUOM, useDeletUOM } from "../../hooks/unit-of-measure/useUOM";
+import { useUOMDetail, useUpdateUOM, useDeletUOM } from "../../hooks/mdm/unit-of-measure/useUOM";
 import { queryClient } from "../_app";
 import useDebounce from "../../lib/useDebounce";
-import { useUOMCategoryInfiniteLists } from "../../hooks/unit-of-measure-category/useUOMCategory";
+import { useUOMCategoryInfiniteLists } from "../../hooks/mdm/unit-of-measure-category/useUOMCategory";
 import { ModalDeleteConfirmation } from "../../components/elements/Modal/ModalConfirmationDelete";
 import ArrowLeft from "../../assets/icons/arrow-left.svg";
 

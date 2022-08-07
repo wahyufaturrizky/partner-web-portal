@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useInfiniteQuery } from "react-query";
-import { mdmService } from "../../lib/client";
+import { mdmService } from "../../../lib/client";
 
 const fetchUOMCategories = async ({ query = {} }) => {
   return mdmService(`/uom-category`, {

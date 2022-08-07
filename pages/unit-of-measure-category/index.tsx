@@ -21,7 +21,7 @@ import {
   useUpdateUOMCategory,
   useUploadFileUOMCategory,
   useDeletUOMCategory,
-} from "../../hooks/unit-of-measure-category/useUOMCategory";
+} from "../../hooks/mdm/unit-of-measure-category/useUOMCategory";
 import useDebounce from "../../lib/useDebounce";
 import { queryClient } from "../_app";
 import { useForm } from "react-hook-form";
