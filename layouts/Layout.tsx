@@ -197,6 +197,12 @@ const menuMdm = [
         content: () => "Job Position",
         onClick: () => Router.push("/job-position"),
       },
+      {
+        key: "job-level",
+        title: "Job Level",
+        content: () => "Job Level",
+        onClick: () => Router.push("/job-level"),
+      },
     ],
   },
   { type: "title", title: "Inventory" },

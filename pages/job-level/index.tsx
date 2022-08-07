@@ -16,12 +16,12 @@ import {
 } from "pink-lava-ui";
 import usePagination from "@lucasmogari/react-pagination";
 import {
-  useJobPositions,
-  useCreateJobPosition,
-  useUpdateJobPosition,
-  useUploadFileJobPosition,
-  useDeleteJobPosition,
-} from "../../hooks/mdm/job-position/useJobPositon";
+  useJobLevels,
+  useCreateJobLevel,
+  useUpdateJobLevel,
+  useUploadFileJobLevel,
+  useDeleteJobLevel,
+} from "../../hooks/mdm/job-level/useJobLevel";
 import useDebounce from "../../lib/useDebounce";
 import { queryClient } from "../_app";
 import { useForm } from "react-hook-form";
@@ -29,11 +29,11 @@ import { ICDownload, ICUpload } from "../../assets/icons";
 import { mdmDownloadService } from "../../lib/client";
 
 const downloadFile = (params: any) =>
-  mdmDownloadService("/job-position/download", { params }).then((res) => {
+  mdmDownloadService("/job-level/download", { params }).then((res) => {
     let dataUrl = window.URL.createObjectURL(new Blob([res.data]));
     let tempLink = document.createElement("a");
     tempLink.href = dataUrl;
-    tempLink.setAttribute("download", `job_position_${new Date().getTime()}.xlsx`);
+    tempLink.setAttribute("download", `job_level_${new Date().getTime()}.xlsx`);
     tempLink.click();
   });
 
@@ -43,7 +43,7 @@ const renderConfirmationText = (type: any, data: any) => {
       return data.selectedRowKeys.length > 1
         ? `Are you sure to delete ${data.selectedRowKeys.length} items ?`
         : `Are you sure to delete ${
-            data?.jobPositionData?.data.find((el: any) => el.key === data.selectedRowKeys[0])?.name
+            data?.jobLevelData?.data.find((el: any) => el.key === data.selectedRowKeys[0])?.name
           } ?`;
     case "detail":
       return `Are you sure to delete ${data.name} ?`;
@@ -77,10 +77,10 @@ const JobPosition = () => {
   const { register, handleSubmit } = useForm();
 
   const {
-    data: jobPositionsData,
-    isLoading: isLoadingJobPositions,
-    isFetching: isFetchingJobPositions,
-  } = useJobPositions({
+    data: jobLevelsData,
+    isLoading: isLoadingJobLevels,
+    isFetching: isFetchingJobLevels,
+  } = useJobLevels({
     query: {
       search: debounceSearch,
       page: pagination.page,
@@ -94,8 +94,8 @@ const JobPosition = () => {
       select: (data: any) => {
         const mappedData = data?.rows?.map((element: any) => {
           return {
-            key: element.jobPositionId,
-            id: element.jobPositionId,
+            key: element.jobLevelId,
+            id: element.jobLevelId,
             name: element.name,
             action: (
               <div style={{ display: "flex", justifyContent: "left" }}>
@@ -118,48 +118,42 @@ const JobPosition = () => {
     },
   });
 
-  const { mutate: createJobPosition, isLoading: isLoadingCreateJobPosition } = useCreateJobPosition(
-    {
-      options: {
-        onSuccess: () => {
-          setModalForm({ open: false, typeForm: "", data: {} });
-          queryClient.invalidateQueries(["job-positions"]);
-        },
+  const { mutate: createJobLevel, isLoading: isLoadingCreateJobLevel } = useCreateJobLevel({
+    options: {
+      onSuccess: () => {
+        setModalForm({ open: false, typeForm: "", data: {} });
+        queryClient.invalidateQueries(["job-levels"]);
       },
-    }
-  );
+    },
+  });
 
-  const { mutate: updateJobPosition, isLoading: isLoadingUpdateJobPosition } = useUpdateJobPosition(
-    {
-      id: modalForm?.data?.jobPositionId,
-      companyId: "KSNI",
-      options: {
-        onSuccess: () => {
-          setModalForm({ open: false, typeForm: "", data: {} });
-          queryClient.invalidateQueries(["job-positions"]);
-        },
+  const { mutate: updateJobLevel, isLoading: isLoadingUpdateJobLevel } = useUpdateJobLevel({
+    id: modalForm?.data?.jobLevelId,
+    companyId: "KSNI",
+    options: {
+      onSuccess: () => {
+        setModalForm({ open: false, typeForm: "", data: {} });
+        queryClient.invalidateQueries(["job-levels"]);
       },
-    }
-  );
+    },
+  });
 
-  const { mutate: deleteJobPosition, isLoading: isLoadingDeleteJobPosition } = useDeleteJobPosition(
-    {
-      options: {
-        onSuccess: () => {
-          setShowDelete({ open: false, data: {}, type: "" });
-          setModalForm({ open: false, data: {}, typeForm: "" });
-          setSelectedRowKeys([]);
-          queryClient.invalidateQueries(["job-positions"]);
-        },
+  const { mutate: deleteJobLevel, isLoading: isLoadingDeleteJobLevel } = useDeleteJobLevel({
+    options: {
+      onSuccess: () => {
+        setShowDelete({ open: false, data: {}, type: "" });
+        setModalForm({ open: false, data: {}, typeForm: "" });
+        setSelectedRowKeys([]);
+        queryClient.invalidateQueries(["job-levels"]);
       },
-    }
-  );
+    },
+  });
 
-  const { mutate: uploadFileJobPosition, isLoading: isLoadingUploadFileJobPosition } =
-    useUploadFileJobPosition({
+  const { mutate: uploadFileJobLevel, isLoading: isLoadingUploadFileJobLevel } =
+    useUploadFileJobLevel({
       options: {
         onSuccess: () => {
-          queryClient.invalidateQueries(["job-positions"]);
+          queryClient.invalidateQueries(["job-levels"]);
           setShowUpload(false);
         },
       },
@@ -167,11 +161,11 @@ const JobPosition = () => {
 
   const columns = [
     {
-      title: "Job Position ID",
+      title: "Job Level ID",
       dataIndex: "id",
     },
     {
-      title: "Job Position Name",
+      title: "Job Level Name",
       dataIndex: "name",
     },
     {
@@ -196,10 +190,10 @@ const JobPosition = () => {
           company_id: "KSNI",
           ...data,
         };
-        createJobPosition(formData);
+        createJobLevel(formData);
         break;
       case "edit":
-        updateJobPosition(data);
+        updateJobLevel(data);
         break;
       default:
         setModalForm({ open: false, typeForm: "", data: {} });
@@ -212,20 +206,20 @@ const JobPosition = () => {
     formData.append("company_id", "KSNI");
     formData.append("file", file);
 
-    uploadFileJobPosition(formData);
+    uploadFileJobLevel(formData);
   };
 
   return (
     <>
       <Col>
-        <Text variant={"h4"}>Job Position</Text>
+        <Text variant={"h4"}>Job Level</Text>
         <Spacer size={20} />
       </Col>
       <Card>
         <Row justifyContent="space-between">
           <Search
             width="340px"
-            placeholder="Search Job Position ID, Name."
+            placeholder="Search Job Level ID, Name."
             onChange={(e: any) => {
               setSearch(e.target.value);
             }}
@@ -238,7 +232,7 @@ const JobPosition = () => {
                 setShowDelete({
                   open: true,
                   type: "selection",
-                  data: { jobPositionData: jobPositionsData, selectedRowKeys },
+                  data: { jobLevelData: jobLevelsData, selectedRowKeys },
                 })
               }
               disabled={rowSelection.selectedRowKeys?.length === 0}
@@ -313,9 +307,9 @@ const JobPosition = () => {
       <Card style={{ padding: "16px 20px" }}>
         <Col gap={"60px"}>
           <Table
-            loading={isLoadingJobPositions || isFetchingJobPositions}
+            loading={isLoadingJobLevels || isFetchingJobLevels}
             columns={columns}
-            data={jobPositionsData?.data}
+            data={jobLevelsData?.data}
             rowSelection={rowSelection}
           />
           <Pagination pagination={pagination} />
@@ -329,7 +323,7 @@ const JobPosition = () => {
           closable={false}
           visible={modalForm.open}
           onCancel={() => setModalForm({ open: false, data: {}, typeForm: "" })}
-          title={modalForm.typeForm === "create" ? "Create Job Position" : "Job Position"}
+          title={modalForm.typeForm === "create" ? "Create Job Level" : "Job Level"}
           footer={null}
           content={
             <div
@@ -342,9 +336,9 @@ const JobPosition = () => {
               <Input
                 defaultValue={modalForm.data?.name}
                 width="100%"
-                label="Job Position"
+                label="Job Level"
                 height="48px"
-                placeholder={"e.g Staff"}
+                placeholder={"e.g Manager"}
                 {...register("name", {
                   shouldUnregister: true,
                 })}
@@ -383,7 +377,7 @@ const JobPosition = () => {
                 )}
 
                 <Button onClick={handleSubmit(onSubmit)} variant="primary" size="big">
-                  {isLoadingCreateJobPosition || isLoadingUpdateJobPosition ? "Loading..." : "Save"}
+                  {isLoadingCreateJobLevel || isLoadingUpdateJobLevel ? "Loading..." : "Save"}
                 </Button>
               </div>
             </div>
@@ -432,16 +426,13 @@ const JobPosition = () => {
                   size="big"
                   onClick={() => {
                     if (isShowDelete.type === "selection") {
-                      deleteJobPosition({ ids: selectedRowKeys, company_id: "KSNI" });
+                      deleteJobLevel({ ids: selectedRowKeys, company_id: "KSNI" });
                     } else {
-                      deleteJobPosition({
-                        ids: [modalForm.data.jobPositionId],
-                        company_id: "KSNI",
-                      });
+                      deleteJobLevel({ ids: [modalForm.data.jobLevelId], company_id: "KSNI" });
                     }
                   }}
                 >
-                  {isLoadingDeleteJobPosition ? "loading..." : "Yes"}
+                  {isLoadingDeleteJobLevel ? "loading..." : "Yes"}
                 </Button>
               </div>
             </div>

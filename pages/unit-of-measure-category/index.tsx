@@ -433,7 +433,10 @@ const UOMCategory = () => {
                     if (isShowDelete.type === "selection") {
                       deleteUomCategory({ ids: selectedRowKeys, company_id: "KSNI" });
                     } else {
-                      deleteUomCategory({ ids: [modalForm.data.id], company_id: "KSNI" });
+                      deleteUomCategory({
+                        ids: [modalForm.data.uomCategoryId],
+                        company_id: "KSNI",
+                      });
                     }
                   }}
                 >
