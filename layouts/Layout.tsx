@@ -360,6 +360,7 @@ const WrapperMenuLogout = styled.div`
 
 const MenuDropdown = styled.div`
   border: 1.5px solid #aaaaaa;
+  margin-right: 1rem;
   border-radius: 24px;
   width: 180px;
   height: 3rem;
