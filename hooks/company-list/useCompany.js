@@ -1,9 +1,11 @@
 import { useQuery, useMutation } from "react-query";
 import { client } from "../../lib/client";
+import { mdmService } from "../../lib/client";
 
 const fetchCompanyList = async ({ query = {} }) => {
   return client(`/hermes/company`, {
     params: {
+      account_id: 0,
       search: "",
       limit: 10,
       page: 1,
@@ -87,9 +89,9 @@ const useNumberFormatLists = ({ query = {}, options } = {}) => {
 const fetchListCoa = async ({ query = {} }) => {
   return client(`/coa`, {
     params: {
-      search: "",
-      limit: 10,
-      page: 1,
+      // search: "",
+      // limit: 10,
+      // page: 1,
       sortBy: "id",
       sortOrder: "asc",
       ...query,
@@ -106,24 +108,23 @@ const useCoa = ({ query = {}, options } = {}) => {
 
 // List Currency
 
-const fetchCurrencyLists = async ({ query = {} }) => {
-  return client(`/currency`, {
-    params: {
-      //   search: "",
-      //   limit: 10,
-      //   page: 1,
-      sortBy: "id",
-      sortOrder: "DESC",
-      ...query,
-    },
-  }).then((data) => data);
+const fetchCurrenciesMDM = async ({ query = {} }) => {
+	return mdmService(`/currency`, {
+		params: {
+			// search: "",
+			// page: 1,
+			// limit: 10,
+			sortBy: "created_at",
+			sortOrder: "DESC",
+			...query,
+		},
+	}).then((data) => data);
 };
 
-const useCurrencyLists = ({ query = {}, options } = {}) => {
-  return useQuery(["currency", query], () => fetchCurrencyLists({ query }), {
-    keepPreviousData: true,
-    ...options,
-  });
+const useCurrenciesMDM = ({ query = {}, options }) => {
+	return useQuery(["currencies", query], () => fetchCurrenciesMDM({ query }), {
+		...options,
+	});
 };
 
 // List Menu Design
@@ -153,7 +154,7 @@ const useMenuDesignLists = ({ query = {}, options } = {}) => {
 const fetchCountries = async ({ query = {} }) => {
 	return mdmService(`/country`, {
 		params: {
-			// search: "",
+			search: "",
 			// limit: 10,
 			// page: 1,
 			sortBy: "id",
@@ -176,7 +177,7 @@ export {
   useDateFormatLists,
   useNumberFormatLists,
   useCoa,
-  useCurrencyLists,
+  useCurrenciesMDM,
   useMenuDesignLists,
   useCountries
 };

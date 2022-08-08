@@ -20,6 +20,13 @@ import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useForm } from "react-hook-form";
 import usePagination from "@lucasmogari/react-pagination";
+import {
+  useCoa,
+  useCurrenciesMDM,
+  useDateFormatLists,
+  useMenuDesignLists,
+  useNumberFormatLists,
+} from "../../hooks/company-list/useCompany";
 
 const fakeCountry = [
   {
@@ -119,7 +126,7 @@ const IndustryData = [
     id: 12,
     value: "Healthcare",
   },
-]
+];
 
 const CorporateData = [
   {
@@ -139,33 +146,33 @@ const CorporateData = [
 const numberOfEmployeeData = [
   {
     id: 1,
-    value: '1-50'
+    value: "1-50",
   },
   {
     id: 2,
-    value: '51-100'
+    value: "51-100",
   },
   {
     id: 3,
-    value: '101-500'
+    value: "101-500",
   },
   {
     id: 4,
-    value: '501-1000'
+    value: "501-1000",
   },
   {
     id: 5,
-    value: '1001-5000'
+    value: "1001-5000",
   },
   {
     id: 6,
-    value: '5001-10000'
+    value: "5001-10000",
   },
   {
     id: 7,
-    value: '10001++'
+    value: "10001++",
   },
-]
+];
 
 const fakeCurrency = [
   {
@@ -224,6 +231,11 @@ const CreateCompany: any = () => {
 
   const [permissionsIds, setPermissions] = useState();
   const [search, setSearch] = useState("");
+  const [dateFormatList, setDateFormatList] = useState([]);
+  const [numberFormatList, setNumberFormatList] = useState([]);
+  const [dataFormat, setDateFormat] = useState();
+  const [coaList, setCoaList] = useState([]);
+  const [currencyList, setCurrencyList] = useState([]);
 
   const {
     register,
@@ -239,6 +251,89 @@ const CreateCompany: any = () => {
     { id: "Y", value: '<div key="1" style="color:green;">Active</div>' },
     { id: "N", value: '<div key="2" style="color:red;">Non Active</div>' },
   ];
+
+  const { data: dateFormatData, isLoading: isLoadingDateFormatList } = useDateFormatLists({
+    options: {
+      onSuccess: (data) => {
+        let newDateFormatList: any = [];
+        data.rows.forEach((item) => {
+          const obj = {
+            id: item.id,
+            value: item.format,
+          };
+          newDateFormatList.push(obj);
+        });
+        setDateFormatList(newDateFormatList);
+      },
+    },
+  });
+
+  const { data: numberFormatData, isLoading: isLoadingNumberFormatList } = useNumberFormatLists({
+    options: {
+      onSuccess: (data) => {
+        let newNumberFormatList: any = [];
+        data.rows.forEach((item) => {
+          const obj = {
+            id: item.id,
+            value: item.format,
+          };
+          newNumberFormatList.push(obj);
+        });
+        setNumberFormatList(newNumberFormatList);
+      },
+    },
+  });
+
+  const { data: coaData, isLoading: isLoadingCoaList } = useCoa({
+    options: {
+      onSuccess: (data) => {
+        // console.log(data);
+        let newCoaList: any = [];
+        data.rows.forEach((item) => {
+          const obj = {
+            id: item.id,
+            value: item.name,
+          };
+          newCoaList.push(obj);
+        });
+        setCoaList(newCoaList);
+      },
+    },
+  });
+
+  const { data: menuDesignData, isLoading: isLoadingMenuDesign } = useMenuDesignLists({
+    options: {
+      onSuccess: (data) => {
+        console.log(data);
+        let newMenuDesignList: any = [];
+        // data.rows.forEach((item) => {
+        //   const obj = {
+        //     id: item.id,
+        //     value: item.format,
+        //   };
+        //   newCoaList.push(obj);
+        // });
+        // setCoaList(newCoaList);
+      },
+    },
+  });
+
+  const { data: currencyData, isLoading: isLoadingCurrencyList } = useCurrenciesMDM({
+    options: {
+      onSuccess: (data) => {
+        console.log(data);
+        let newCurrencyList: any = [];
+        data.rows.forEach((item) => {
+          const obj = {
+            id: item.id,
+            value: `${item.currency} - ${item.currencyName}`,
+          };
+          newCurrencyList.push(obj);
+        });
+        setCurrencyList(newCurrencyList);
+      },
+    },
+  });
 
   const onSubmit = (data) => {
     // const payload = {
@@ -345,7 +440,7 @@ const CreateCompany: any = () => {
                   />
                 </Col>
                 <Col width="50%">
-                  <Dropdown2
+                  <Dropdown
                     label="Industry"
                     width={"100%"}
                     items={IndustryData}
@@ -426,7 +521,7 @@ const CreateCompany: any = () => {
             <Accordion.Body>
               <Row width="100%" gap="20px" noWrap>
                 <Col width="50%">
-                  <Dropdown2
+                  <Dropdown
                     label="Company Type"
                     width={"100%"}
                     items={CompanyTypeData}
@@ -436,10 +531,11 @@ const CreateCompany: any = () => {
                     // required
                     // error={errors?.accountGroupId?.message}
                     // defaultValue={account?.accountGroup?.groupName}
+                    noSearch
                   />
                 </Col>
                 <Col width="50%">
-                  <Dropdown2
+                  <Dropdown
                     label="Corporate"
                     width={"100%"}
                     items={CorporateData}
@@ -449,62 +545,70 @@ const CreateCompany: any = () => {
                     // required
                     // error={errors?.accountGroupId?.message}
                     // defaultValue={account?.accountGroup?.groupName}
+                    noSearch
                   />
                 </Col>
               </Row>
               <Row width="100%" gap="20px" noWrap>
                 <Col width="50%">
-                  <Dropdown2
+                  <Dropdown
                     label="Currency"
                     width={"100%"}
-                    // items={accounts}
+                    items={currencyList}
                     placeholder={"Select"}
                     // handleChange={(value) => setValue("accountGroupId", value)}
-                    // onSearch={(search) => setSearchAccountGroup(search)}
+                    // onSearch={(search) => setSearchCurrency(search)}
                     // required
                     // error={errors?.accountGroupId?.message}
                     // defaultValue={account?.accountGroup?.groupName}
+                    isLoading={isLoadingCurrencyList}
+                    noSearch
                   />
                 </Col>
                 <Col width="50%">
                   <Dropdown2
                     label="CoA Template"
                     width={"100%"}
-                    // items={accounts}
+                    items={coaList}
                     placeholder={"Select"}
                     // handleChange={(value) => setValue("accountGroupId", value)}
                     // onSearch={(search) => setSearchAccountGroup(search)}
                     // required
                     // error={errors?.accountGroupId?.message}
                     // defaultValue={account?.accountGroup?.groupName}
+                    isLoading={isLoadingCoaList}
                   />
                 </Col>
               </Row>
               <Row width="100%" gap="20px" noWrap>
                 <Col width="50%">
-                  <Dropdown2
+                  <Dropdown
                     label="Format Date"
                     width={"100%"}
-                    // items={accounts}
+                    items={dateFormatList}
                     placeholder={"Select"}
-                    // handleChange={(value) => setValue("accountGroupId", value)}
+                    handleChange={(value) => setDateFormat(value)}
                     // onSearch={(search) => setSearchAccountGroup(search)}
                     // required
                     // error={errors?.accountGroupId?.message}
                     // defaultValue={account?.accountGroup?.groupName}
+                    isLoading={isLoadingDateFormatList}
+                    noSearch
                   />
                 </Col>
                 <Col width="50%">
-                  <Dropdown2
+                  <Dropdown
                     label="Number Format"
                     width={"100%"}
-                    // items={accounts}
+                    items={numberFormatList}
                     placeholder={"Select"}
                     // handleChange={(value) => setValue("accountGroupId", value)}
                     // onSearch={(search) => setSearchAccountGroup(search)}
                     // required
                     // error={errors?.accountGroupId?.message}
                     // defaultValue={account?.accountGroup?.groupName}
+                    isLoading={isLoadingNumberFormatList}
+                    noSearch
                   />
                 </Col>
               </Row>
