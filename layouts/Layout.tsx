@@ -209,6 +209,12 @@ const menuMdm = [
         content: () => "Department",
         onClick: () => Router.push("/department"),
       },
+      {
+        key: "training-type",
+        title: "Training Type",
+        content: () => "Training Type",
+        onClick: () => Router.push("/training-type"),
+      },
     ],
   },
   { type: "title", title: "Inventory" },
