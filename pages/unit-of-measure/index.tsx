@@ -10,7 +10,6 @@ import {
   Table,
   Pagination,
   Modal,
-  Input,
   DropdownMenu,
   FileUploadModal,
   Lozenge,

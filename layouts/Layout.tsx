@@ -243,6 +243,19 @@ const menuMdm = [
       },
     ],
   },
+  {
+    key: "customer",
+    title: "Customer",
+    icon: ICUser,
+    children: [
+      {
+        key: "customer-group",
+        title: "Customer Group",
+        content: () => "Customer Group",
+        onClick: () => Router.push("/customer-group"),
+      },
+    ],
+  },
 ];
 
 const itemsMenu = [{ label: "Config" }, { label: "Master Data Management" }];

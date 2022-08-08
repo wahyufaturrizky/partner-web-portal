@@ -23,20 +23,21 @@ import { mdmDownloadService } from "../../lib/client";
 import useDebounce from "../../lib/useDebounce";
 import { queryClient } from "../_app";
 import {
-  useCreateProductBrandMDM,
-  useDeleteProductBrandMDM,
-  useParentProductBrandMDM,
-  useProductBrandsMDM,
-  useUpdateProductBrandMDM,
-  useUploadFileProductBrandMDM,
-} from "../../hooks/mdm/product-brand/useProductBrandMDM";
+  useCreateCustomerGroupMDM,
+  useCustomerGroupsMDM,
+  useDeleteCustomerGroupMDM,
+  useParentCustomerGroupMDM,
+  useUpdateCustomerGroupMDM,
+  useUploadFileCustomerGroupMDM,
+} from "../../hooks/mdm/customer-group/useCustomerGroupMDM";
+import { useRouter } from "next/router";
 
 const downloadFile = (params: any) =>
-  mdmDownloadService("/product-brand/download", { params }).then((res) => {
+  mdmDownloadService("/customer-group/download", { params }).then((res) => {
     let dataUrl = window.URL.createObjectURL(new Blob([res.data]));
     let tempLink = document.createElement("a");
     tempLink.href = dataUrl;
-    tempLink.setAttribute("download", `product-brand_${new Date().getTime()}.xlsx`);
+    tempLink.setAttribute("download", `customer-group_${new Date().getTime()}.xlsx`);
     tempLink.click();
   });
 
@@ -45,21 +46,23 @@ const renderConfirmationText = (type: any, data: any) => {
     case "selection":
       return data.selectedRowKeys.length > 1
         ? `Are you sure to delete ${data.selectedRowKeys.length} items ?`
-        : `By deleting it will affect data that already uses product brand ${
-            data?.productBrandData?.data.find((el: any) => el.key === data.selectedRowKeys[0])?.name
+        : `By deleting it will affect data that already uses customer group ${
+            data?.customerGroupData?.data.find((el: any) => el.key === data.selectedRowKeys[0])
+              ?.name
           }-${
-            data?.productBrandData?.data.find((el: any) => el.key === data.selectedRowKeys[0])
-              ?.productBrandCode
+            data?.customerGroupData?.data.find((el: any) => el.key === data.selectedRowKeys[0])
+              ?.customerGroupCode
           }`;
     case "detail":
-      return `By deleting it will affect data that already uses product brand ${data.name}-${data.productBrandCode}`;
+      return `By deleting it will affect data that already uses customer group ${data.name}-${data.customerGroupCode}`;
 
     default:
       break;
   }
 };
 
-const ProductBrandMDM = () => {
+const CustomerGroupMDM = () => {
+  const router = useRouter();
   const pagination = usePagination({
     page: 1,
     itemsPerPage: 10,
@@ -72,7 +75,7 @@ const ProductBrandMDM = () => {
   const [search, setSearch] = useState("");
   const [isShowDelete, setShowDelete] = useState({ open: false, type: "selection", data: {} });
   const [isShowUpload, setShowUpload] = useState(false);
-  const [modalProductBrandForm, setModalProductBrandForm] = useState({
+  const [modalCustomerGroupForm, setModalCustomerGroupForm] = useState({
     open: false,
     data: {},
     typeForm: "create",
@@ -85,10 +88,10 @@ const ProductBrandMDM = () => {
   });
 
   const {
-    data: productBrandsMDMData,
-    isLoading: isLoadingProductBrandsMDM,
-    isFetching: isFetchingProductBrandsMDM,
-  } = useProductBrandsMDM({
+    data: customerGroupsMDMData,
+    isLoading: isLoadingCustomerGroupsMDM,
+    isFetching: isFetchingCustomerGroupsMDM,
+  } = useCustomerGroupsMDM({
     query: {
       search: debounceSearch,
       page: pagination.page,
@@ -103,17 +106,15 @@ const ProductBrandMDM = () => {
           return {
             key: element.id,
             id: element.id,
-            productBrandCode: element.code,
-            brand: element.brand,
+            customerGroupCode: element.code,
+            name: element.name,
             parent: element.parent,
             company: element.company,
             action: (
               <div style={{ display: "flex", justifyContent: "left" }}>
                 <Button
                   size="small"
-                  onClick={() => {
-                    setModalProductBrandForm({ open: true, typeForm: "edit", data: element });
-                  }}
+                  onClick={() => router.push(`/customer-group/${element.id}`)}
                   variant="tertiary"
                 >
                   View Detail
@@ -128,48 +129,48 @@ const ProductBrandMDM = () => {
     },
   });
 
-  const { mutate: createProductBrandMDM, isLoading: isLoadingCreateProductBrandMDM } =
-    useCreateProductBrandMDM({
+  const { mutate: createCustomerGroupMDM, isLoading: isLoadingCreateCustomerGroupMDM } =
+    useCreateCustomerGroupMDM({
       options: {
         onSuccess: () => {
-          setModalProductBrandForm({ open: false, typeForm: "", data: {} });
-          queryClient.invalidateQueries(["product-brand"]);
+          setModalCustomerGroupForm({ open: false, typeForm: "", data: {} });
+          queryClient.invalidateQueries(["customer-group"]);
         },
       },
     });
 
-  const { mutate: updateProductBrandMDM, isLoading: isLoadingUpdateProductBrandMDM } =
-    useUpdateProductBrandMDM({
-      id: modalProductBrandForm.data?.id,
+  const { mutate: updateCustomerGrouMDM, isLoading: isLoadingUpdateCustomerGroupMDM } =
+    useUpdateCustomerGroupMDM({
+      id: modalCustomerGroupForm.data?.id,
       options: {
         onSuccess: () => {
-          setModalProductBrandForm({ open: false, typeForm: "", data: {} });
-          queryClient.invalidateQueries(["product-brand"]);
+          setModalCustomerGroupForm({ open: false, typeForm: "", data: {} });
+          queryClient.invalidateQueries(["customer-group"]);
         },
       },
     });
 
-  const { data: dataParentProductBrandMDM, isLoading: isLoadingParentProductBrandMDM } =
-    useParentProductBrandMDM({
-      id: modalProductBrandForm.data?.id ?? 0,
+  const { data: dataParentCustomerGroupMDM, isLoading: isLoadingParentCustomerGroupMDM } =
+    useParentCustomerGroupMDM({
+      id: modalCustomerGroupForm.data?.id ?? 0,
     });
 
-  const { mutate: deleteProductBrandMDM, isLoading: isLoadingDeleteProductBrandMDM } =
-    useDeleteProductBrandMDM({
+  const { mutate: deleteCustomerGroupMDM, isLoading: isLoadingDeleteCustomerGroupMDM } =
+    useDeleteCustomerGroupMDM({
       options: {
         onSuccess: () => {
           setShowDelete({ open: false, data: {}, type: "" });
-          setModalProductBrandForm({ open: false, data: {}, typeForm: "" });
+          setModalCustomerGroupForm({ open: false, data: {}, typeForm: "" });
           setSelectedRowKeys([]);
-          queryClient.invalidateQueries(["product-brand"]);
+          queryClient.invalidateQueries(["customer-group"]);
         },
       },
     });
 
-  const { mutate: uploadFileProductBrandMDM } = useUploadFileProductBrandMDM({
+  const { mutate: uploadFileCustomerGroupMDM } = useUploadFileCustomerGroupMDM({
     options: {
       onSuccess: () => {
-        queryClient.invalidateQueries(["product-brand"]);
+        queryClient.invalidateQueries(["customer-group"]);
         setShowUpload(false);
       },
     },
@@ -177,12 +178,12 @@ const ProductBrandMDM = () => {
 
   const columns = [
     {
-      title: "Product Brand ID",
-      dataIndex: "productBrandCode",
+      title: "Customer Group ID",
+      dataIndex: "customerGroupCode",
     },
     {
-      title: "Product Brand Name",
-      dataIndex: "brand",
+      title: "Customer Group Name",
+      dataIndex: "name",
     },
     {
       title: "Parent",
@@ -208,15 +209,15 @@ const ProductBrandMDM = () => {
   };
 
   const onSubmit = (data: any) => {
-    switch (modalProductBrandForm.typeForm) {
+    switch (modalCustomerGroupForm.typeForm) {
       case "create":
-        createProductBrandMDM({ ...data, company: "KSNI" });
+        createCustomerGroupMDM({ ...data, company: "KSNI" });
         break;
       case "edit":
-        updateProductBrandMDM({ ...data, company: "KSNI" });
+        updateCustomerGrouMDM({ ...data, company: "KSNI" });
         break;
       default:
-        setModalProductBrandForm({ open: false, typeForm: "", data: {} });
+        setModalCustomerGroupForm({ open: false, typeForm: "", data: {} });
         break;
     }
   };
@@ -226,20 +227,20 @@ const ProductBrandMDM = () => {
     formData.append("file", file);
     formData.append("company", "KSNI");
 
-    uploadFileProductBrandMDM(formData);
+    uploadFileCustomerGroupMDM(formData);
   };
 
   return (
     <>
       <Col>
-        <Text variant={"h4"}>Product Brand</Text>
+        <Text variant={"h4"}>Customer Group</Text>
         <Spacer size={20} />
       </Col>
       <Card>
         <Row justifyContent="space-between">
           <Search
             width="340px"
-            placeholder="Search Product Brand ID, Name, c"
+            placeholder="Search Cosutomer Group ID, Name, Parent"
             onChange={(e: any) => {
               setSearch(e.target.value);
             }}
@@ -252,7 +253,7 @@ const ProductBrandMDM = () => {
                 setShowDelete({
                   open: true,
                   type: "selection",
-                  data: { productBrandData: productBrandsMDMData, selectedRowKeys },
+                  data: { customerGroupData: customerGroupsMDMData, selectedRowKeys },
                 })
               }
               disabled={rowSelection.selectedRowKeys?.length === 0}
@@ -316,7 +317,9 @@ const ProductBrandMDM = () => {
             <Button
               size="big"
               variant="primary"
-              onClick={() => setModalProductBrandForm({ open: true, typeForm: "create", data: {} })}
+              onClick={() =>
+                setModalCustomerGroupForm({ open: true, typeForm: "create", data: {} })
+              }
             >
               Create
             </Button>
@@ -327,25 +330,23 @@ const ProductBrandMDM = () => {
       <Card style={{ padding: "16px 20px" }}>
         <Col gap={"60px"}>
           <Table
-            loading={isLoadingProductBrandsMDM || isFetchingProductBrandsMDM}
+            loading={isLoadingCustomerGroupsMDM || isFetchingCustomerGroupsMDM}
             columns={columns.filter((filtering) => filtering.dataIndex !== "company")}
-            data={productBrandsMDMData?.data}
+            data={customerGroupsMDMData?.data}
             rowSelection={rowSelection}
           />
           <Pagination pagination={pagination} />
         </Col>
       </Card>
 
-      {modalProductBrandForm.open && (
+      {modalCustomerGroupForm.open && (
         <Modal
           width={"350px"}
           centered
           closable={false}
-          visible={modalProductBrandForm.open}
-          onCancel={() => setModalProductBrandForm({ open: false, data: {}, typeForm: "" })}
-          title={
-            modalProductBrandForm.typeForm === "create" ? "Create Product Brand" : "Product Brand"
-          }
+          visible={modalCustomerGroupForm.open}
+          onCancel={() => setModalCustomerGroupForm({ open: false, data: {}, typeForm: "" })}
+          title={"Customer Group"}
           footer={null}
           content={
             <div
@@ -356,18 +357,17 @@ const ProductBrandMDM = () => {
               }}
             >
               <Input
-                defaultValue={modalProductBrandForm.data?.brand}
                 width="100%"
-                label="Name"
+                label="Customer Group Name"
                 height="48px"
                 required
-                placeholder={"e.g Brand 1"}
-                {...register("brand", {
+                placeholder={"e.g RTL-Retail Large"}
+                {...register("name", {
                   shouldUnregister: true,
                 })}
               />
               <Spacer size={14} />
-              {isLoadingParentProductBrandMDM ? (
+              {isLoadingParentCustomerGroupMDM ? (
                 <Spin tip="Loading data..." />
               ) : (
                 <>
@@ -375,19 +375,31 @@ const ProductBrandMDM = () => {
                     label="Parent"
                     isOptional
                     width="100%"
-                    items={dataParentProductBrandMDM.map((data) => ({
-                      value: data.brand,
+                    items={dataParentCustomerGroupMDM.map((data) => ({
+                      value: data.name,
                       id: data.code,
                     }))}
                     placeholder={"Select"}
                     handleChange={(text) => setValue("parent", text)}
                     noSearch
-                    defaultValue={modalProductBrandForm.data?.parent}
                   />
 
                   <Spacer size={14} />
                 </>
               )}
+
+              <Input
+                width="100%"
+                label="External Code"
+                height="48px"
+                required
+                placeholder={"e.g 400000"}
+                {...register("external_code", {
+                  shouldUnregister: true,
+                })}
+              />
+
+              <Spacer size={14} />
 
               <div
                 style={{
@@ -397,38 +409,18 @@ const ProductBrandMDM = () => {
                   marginBottom: "20px",
                 }}
               >
-                {modalProductBrandForm.typeForm === "create" ? (
-                  <Button
-                    size="big"
-                    variant={"tertiary"}
-                    key="submit"
-                    type="primary"
-                    onClick={() =>
-                      setModalProductBrandForm({ open: false, data: {}, typeForm: "" })
-                    }
-                  >
-                    Cancel
-                  </Button>
-                ) : (
-                  <Button
-                    size="big"
-                    variant={"tertiary"}
-                    key="submit"
-                    type="primary"
-                    onClick={() => {
-                      setShowDelete({
-                        open: true,
-                        type: "detail",
-                        data: modalProductBrandForm.data,
-                      });
-                    }}
-                  >
-                    Delete
-                  </Button>
-                )}
+                <Button
+                  size="big"
+                  variant={"tertiary"}
+                  key="submit"
+                  type="primary"
+                  onClick={() => setModalCustomerGroupForm({ open: false, data: {}, typeForm: "" })}
+                >
+                  Cancel
+                </Button>
 
                 <Button onClick={handleSubmit(onSubmit)} variant="primary" size="big">
-                  {isLoadingCreateProductBrandMDM || isLoadingUpdateProductBrandMDM
+                  {isLoadingCreateCustomerGroupMDM || isLoadingUpdateCustomerGroupMDM
                     ? "Loading..."
                     : "Save"}
                 </Button>
@@ -479,17 +471,17 @@ const ProductBrandMDM = () => {
                   size="big"
                   onClick={() => {
                     if (isShowDelete.type === "selection") {
-                      deleteProductBrandMDM({
+                      deleteCustomerGroupMDM({
                         ids: selectedRowKeys,
                       });
                     } else {
-                      deleteProductBrandMDM({
-                        ids: [modalProductBrandForm.data.id],
+                      deleteCustomerGroupMDM({
+                        ids: [modalCustomerGroupForm.data.id],
                       });
                     }
                   }}
                 >
-                  {isLoadingDeleteProductBrandMDM ? "loading..." : "Yes"}
+                  {isLoadingDeleteCustomerGroupMDM ? "loading..." : "Yes"}
                 </Button>
               </div>
             </div>
@@ -514,4 +506,4 @@ const Card = styled.div`
   padding: 16px;
 `;
 
-export default ProductBrandMDM;
+export default CustomerGroupMDM;
