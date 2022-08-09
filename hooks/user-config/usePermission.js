@@ -1,50 +1,34 @@
 import { useQuery, useMutation } from "react-query";
 import { client } from "../../lib/client";
 
-const fetchPermissions = async ({ query = {} }) => {
-  return client(`/permission`, {
+const fetchPartnerConfigPermissionLists = async ({ query = {} }) => {
+  return client(`/partner-permission`, {
     params: {
       search: "",
       limit: 10,
       page: 1,
-      sortBy: "id",
-      sortOrder: "asc",
+      sortBy: "created_at",
+      sortOrder: "DESC",
       ...query,
     },
   }).then((data) => data);
 };
 
-const fetchApprovalPermissions = async ({ query = {} }) => {
-  return client(`/permission/approval`, {
-    params: {
-      search: "",
-      limit: 10,
-      page: 1,
-      sortBy: "id",
-      sortOrder: "asc",
-      ...query,
-    },
-  }).then((data) => data);
+const usePartnerConfigPermissionLists = ({ query = {}, options } = {}) => {
+  return useQuery(
+    ["partner-permission", query],
+    () => fetchPartnerConfigPermissionLists({ query }),
+    {
+      keepPreviousData: true,
+      ...options,
+    }
+  );
 };
 
-const usePermissions = ({ query = {}, options } = {}) => {
-  return useQuery(["permissions", query], () => fetchPermissions({ query }), {
-    keepPreviousData: true,
-    ...options,
-  });
-};
-
-const useApprovalPermissions = ({ query = {}, options } = {}) => {
-  return useQuery(["approval-permissions", query], () => fetchApprovalPermissions({ query }), {
-    keepPreviousData: true,
-    ...options,
-  });
-};
-
-function useCreatePermission({ options }) {
+function useCreatePartnerConfigPermissionList({ options }) {
   return useMutation(
     (updates) =>
-      client(`/permission`, {
+      client(`/partner-permission`, {
         method: "POST",
         data: updates,
       }),
@@ -54,33 +38,24 @@ function useCreatePermission({ options }) {
   );
 }
 
-function useFilterListPermissions({ options }) {
-  return useMutation(
-    (dataFilter) =>
-      client(`/permission/filter`, {
-        method: "POST",
-        data: dataFilter,
-      }),
+const fetchPartnerConfigPermissionList = async ({ partner_config_menu_list_id }) => {
+  return client(`/partner-permission/${partner_config_menu_list_id}`).then((data) => data);
+};
+
+const usePartnerConfigPermissionList = ({ partner_config_menu_list_id, options }) => {
+  return useQuery(
+    ["partner-permission", partner_config_menu_list_id],
+    () => fetchPartnerConfigPermissionList({ partner_config_menu_list_id }),
     {
       ...options,
     }
   );
-}
-
-const fetchPermission = async ({ permission_id }) => {
-  return client(`/permission/${permission_id}`).then((data) => data);
 };
 
-const usePermission = ({ permission_id, options = {} }) => {
-  return useQuery(["permission", permission_id], () => fetchPermission({ permission_id }), {
-    ...options,
-  });
-};
-
-function useUpdatePermission({ permission_id, options }) {
+function useUpdatePartnerConfigPermissionList({ partnerConfigPermissionListId, options }) {
   return useMutation(
     (updates) =>
-      client(`/permission/${permission_id}`, {
+      client(`/partner-permission/${partnerConfigPermissionListId}`, {
         method: "PUT",
         data: updates,
       }),
@@ -90,23 +65,10 @@ function useUpdatePermission({ permission_id, options }) {
   );
 }
 
-function useApprovePermission({ options }) {
-  return useMutation(
-    (updates) =>
-      client(`/permission/approval`, {
-        method: "PUT",
-        data: updates,
-      }),
-    {
-      ...options,
-    }
-  );
-}
-
-const useDeletePermission = ({ options }) => {
+const useDeletePartnerConfigPermissionList = ({ options }) => {
   return useMutation(
     (ids) =>
-      client(`/permission`, {
+      client("/partner-permission", {
         method: "DELETE",
         data: ids,
       }),
@@ -116,31 +78,10 @@ const useDeletePermission = ({ options }) => {
   );
 };
 
-const fetchPermissionMenu = async ({ query = {} }) => {
-  return client(`/permission/menu`, {
-    params: {
-      search: "",
-      all: 1,
-      ...query,
-    },
-  }).then((data) => data);
-};
-
-const useMenuPermissionLists = ({ query = {}, options } = {}) => {
-  return useQuery(["menu", query], () => fetchPermissionMenu({ query }), {
-    keepPreviousData: true,
-    ...options,
-  });
-};
-
 export {
-  useApprovalPermissions,
-  usePermissions,
-  usePermission,
-  useCreatePermission,
-  useUpdatePermission,
-  useDeletePermission,
-  useMenuPermissionLists,
-  useFilterListPermissions,
-  useApprovePermission,
+  usePartnerConfigPermissionLists,
+  usePartnerConfigPermissionList,
+  useCreatePartnerConfigPermissionList,
+  useUpdatePartnerConfigPermissionList,
+  useDeletePartnerConfigPermissionList,
 };

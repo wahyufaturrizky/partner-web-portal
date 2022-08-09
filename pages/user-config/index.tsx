@@ -146,7 +146,7 @@ const UserConfigUser: any = () => {
 							<Button
 								size="big"
 								variant={"primary"}
-								onClick={() => router.push("/user/create")}
+								onClick={() => router.push("/user-config/create")}
 							>
 								Create
 							</Button>
