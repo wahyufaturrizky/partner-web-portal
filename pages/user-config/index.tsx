@@ -11,8 +11,11 @@ import {
   Search,
   Table,
   Pagination,
+	DropdownMenu,
   Lozenge } from "pink-lava-ui";
 
+	import DownloadSvg from "../../assets/icons/ic-download.svg";
+	import UploadSvg from "../../assets/icons/ic-upload.svg";
 import { ModalDeleteConfirmation } from "../../components/elements/Modal/ModalConfirmationDelete";
 import { useUsers, useDeleteUser } from "../../hooks/user-config/useUser";
 import { STATUS_APPROVAL_VARIANT, STATUS_APPROVAL_TEXT } from "../../utils/constant";
@@ -61,19 +64,12 @@ const UserConfigUser: any = () => {
 
 	const columns = [
 		{
+			title: "Employee ID",
+			dataIndex: "employee_id",
+		},
+		{
 			title: "Name",
 			dataIndex: "name",
-			width: "16%",
-		},
-		{
-			title: "Email",
-			dataIndex: "email",
-			width: "16%",
-		},
-		{
-			title: "Role",
-			dataIndex: "role",
-			width: "16%",
 		},
 		{
 			title: "Status",
@@ -81,12 +77,11 @@ const UserConfigUser: any = () => {
 			render: (text: any) => (
 				<Lozenge variant={STATUS_APPROVAL_VARIANT[text]}>{STATUS_APPROVAL_TEXT[text]}</Lozenge>
 			),
-			width: "16%",
 		},
 		{
 			title: "Action",
 			dataIndex: "action",
-			width: "16%",
+			width: "20%",
 		},
 	];
 
@@ -101,7 +96,7 @@ const UserConfigUser: any = () => {
 			action: (
 				<Button
 					size="small"
-					onClick={() => router.push(`/user/${user.id}`)}
+					onClick={() => router.push(`/user-config/${user.id}`)}
 					variant="tertiary"
 				>
 					View Detail
@@ -143,6 +138,32 @@ const UserConfigUser: any = () => {
 							>
 								Delete
 							</Button>
+							<DropdownMenu
+								title="More"
+								buttonVariant="secondary"
+								buttonSize="big"
+								textVariant="button"
+								textColor="pink.regular"
+								menuList={[
+								{
+									key: 1,
+									value: (
+										<div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+											<DownloadSvg />
+											<p style={{ margin: "0" }}>Download Template</p>
+										</div>
+									),
+								},
+								{
+									key: 2,
+									value: (
+										<div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+											<UploadSvg />
+											<p style={{ margin: "0" }}>Upload Template</p>
+										</div>
+									),
+								}]}
+							/>
 							<Button
 								size="big"
 								variant={"primary"}

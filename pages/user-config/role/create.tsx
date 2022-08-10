@@ -1,4 +1,10 @@
+import * as yup from "yup";
 import React, { useState } from "react";
+import usePagination from "@lucasmogari/react-pagination";
+import { yupResolver } from "@hookform/resolvers/yup";
+import Router, { useRouter } from "next/router";
+import { useForm } from "react-hook-form";
+import styled from "styled-components";
 import {
 	Text,
 	Col,
@@ -14,18 +20,10 @@ import {
 	Pagination,
 	AccordionCheckbox,
 } from "pink-lava-ui";
-import styled from "styled-components";
+
 import { ModalDeleteConfirmation } from "../../../components/elements/Modal/ModalConfirmationDelete";
-import Router, { useRouter } from "next/router";
 import ArrowLeft from "../../../assets/icons/arrow-left.svg";
-import {
-	useDeletePermission,
-	useMenuPermissionLists,
-} from "../../../hooks/user-config/usePermission";
-import * as yup from "yup";
-import { yupResolver } from "@hookform/resolvers/yup";
-import { useForm } from "react-hook-form";
-import usePagination from "@lucasmogari/react-pagination";
+import {useDeletePermission, useMenuPermissionLists} from "../../../hooks/permission/usePermission";
 import { useCreatePermission } from "../../../hooks/user-config/useRole";
 
 const schema = yup
@@ -208,7 +206,7 @@ const CreateRole: any = () => {
 		<>
 			<Col>
 				<Row gap="4px" alignItems="center">
-					<ArrowLeft style={{ cursor: "pointer" }} onClick={() => Router.push("/role")} />
+					<ArrowLeft style={{ cursor: "pointer" }} onClick={() => Router.push("/user-config/role")} />
 					<Text variant={"h4"}>Create Role</Text>
 				</Row>
 				<Spacer size={12} />

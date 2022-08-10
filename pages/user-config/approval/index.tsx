@@ -127,14 +127,9 @@ const UserConfigApproval: any = () => {
 								colorIcon={colors.grey.regular}
 								onChange={(e: any) => setSearch(e.target.value)}
 							/>
-							<Spacer size={16} />
-							<Text variant="subtitle1" color="black.dark">
-								Process
-							</Text>
 							<Spacer size={8} />
 							<Dropdown
 								width="200px"
-								label=""
 								allowClear
 								onClear={handleClearDropdownApproval}
 								loading={isLoadingieldsProcessLists}
@@ -142,7 +137,7 @@ const UserConfigApproval: any = () => {
 									dataFieldsProcessLists &&
 									dataFieldsProcessLists?.rows.map((data: any) => ({ id: data.id, value: data.name }))
 								}
-								placeholder={"Select"}
+								placeholder="Process"
 								handleChange={handleChangeDropdown}
 								noSearch
 								rounded
