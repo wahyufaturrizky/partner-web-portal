@@ -10,6 +10,7 @@ import ICChangeLanguage from "../assets/icons/ic-globe.svg";
 import ICLogout from "../assets/icons/ic-logout.svg";
 import ICArrowBottom from "../assets/icons/ic-arrow-bottom.svg";
 import ICBadge from "../assets/icons/ic-badge.svg";
+import ICSalesman from "../assets/icons/ic-salesman.svg";
 import styled from "styled-components";
 
 const menuConfig = [
@@ -240,6 +241,19 @@ const menuMdm = [
         title: "Unit of Measure",
         content: () => "Unit of Measure",
         onClick: () => Router.push("/unit-of-measure"),
+      },
+    ],
+  },
+  {
+    key: "salesman",
+    title: "Salesman",
+    icon: ICSalesman,
+    children: [
+      {
+        key: "salesman-group",
+        title: "Salesman Group",
+        content: () => "Salesman Group",
+        onClick: () => Router.push("/salesman-group"),
       },
     ],
   },
