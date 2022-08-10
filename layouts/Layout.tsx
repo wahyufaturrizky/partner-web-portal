@@ -257,6 +257,19 @@ const menuMdm = [
       },
     ],
   },
+  {
+    key: "customer",
+    title: "Customer",
+    icon: ICUser,
+    children: [
+      {
+        key: "customer-group",
+        title: "Customer Group",
+        content: () => "Customer Group",
+        onClick: () => Router.push("/customer-group"),
+      },
+    ],
+  },
 ];
 
 const itemsMenu = [{ label: "Config" }, { label: "Master Data Management" }];
@@ -361,6 +374,7 @@ const WrapperMenuLogout = styled.div`
 
 const MenuDropdown = styled.div`
   border: 1.5px solid #aaaaaa;
+  margin-right: 1rem;
   border-radius: 24px;
   width: 180px;
   height: 3rem;

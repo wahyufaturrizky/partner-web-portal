@@ -116,7 +116,7 @@ const Login: any = () => {
   const { mutate: createReqBodyUpdatePassword, isLoading: isLoadingUpdatePassword } =
     useUpdatePassword({
       options: {
-        onSuccess: (data) => {
+        onSuccess: () => {
           setStateModal({
             isShowModal: true,
             titleModal: "Success",
@@ -542,12 +542,13 @@ const Login: any = () => {
 
 
 const Card = styled.div`
-  background: white;
+  background: #fff;
   box-shadow: 0px 0.25rem 1rem rgba(170, 170, 170, 0.15);
   border-radius: 1.5rem;
   padding: 2rem;
   width: 29.563rem;
   min-height: 33.25rem;
+  z-index: 9999;
 `;
 
 const Container = styled.div`

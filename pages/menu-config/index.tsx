@@ -88,7 +88,7 @@ const MenuConfigList: any = () => {
 					size="small"
 					onClick={() =>
 						Router.push({
-							pathname: "/menu-list/detail",
+							pathname: "/menu-config/detail",
 							query: field,
 						})
 					}
@@ -117,15 +117,9 @@ const MenuConfigList: any = () => {
 	};
 
 	const listTab = [
-		{
-			title: "All",
-		},
-		{
-			title: "Menu",
-		},
-		{
-			title: "Process",
-		},
+		{title: "All"},
+		{title: "Menu"},
+		{title: "Process"},
 	];
 
 	return (
@@ -154,7 +148,7 @@ const MenuConfigList: any = () => {
 							<Button
 								size="big"
 								variant={"primary"}
-								onClick={() => Router.push("/menu-list/create")}
+								onClick={() => Router.push("/menu-config/create")}
 							>
 								Create
 							</Button>
