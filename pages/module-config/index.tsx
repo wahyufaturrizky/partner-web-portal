@@ -27,9 +27,8 @@ const ModuleConfig: any = () => {
 		isLoading: isLoadingConfigs,
 	} = useConfigs({
 		options: {
-			onSuccess: (data) => {
-				pagination.setTotalItems(data.totalRow);
-			},
+			onSuccess: (data: any) =>
+				pagination.setTotalItems(data.totalRow),
 		},
 		query: {
 			search,
@@ -73,7 +72,7 @@ const ModuleConfig: any = () => {
 		},
 	];
 
-	const data = [];
+	const data: any = [];
 	configs?.rows?.map((config: any) => {
 		data.push({
 			key: config.id,
@@ -87,7 +86,7 @@ const ModuleConfig: any = () => {
 		});
 	});
 
-	const paginateField = data;
+	const paginateField: any = data;
 	const [selectedRowKeys, setSelectedRowKeys] = useState([]);
 
 	const onSelectChange = (selectedRowKeys: any) => {
@@ -115,20 +114,15 @@ const ModuleConfig: any = () => {
 							<Search
 								width="380px"
 								placeholder="Search Module Name, Parent"
-								onChange={(e) => setSearch(e.target.value)}
+								onChange={(e: any) => setSearch(e.target.value)}
 							/>
-							<Spacer size={16} />
-							<Text variant="subtitle1" color="black.dark">
-								Parent
-							</Text>
 							<Spacer size={8} />
 							<Dropdown
 								width="200px"
-								label=""
-								defaultValue={"All"}
+								defaultValue="All"
 								items={parents}
-								placeholder={"Select"}
-								handleChange={(value) => setParent(value)}
+								placeholder="Parent"
+								handleChange={(value: any) => setParent(value)}
 								noSearch
 								rounded
 							/>
@@ -166,7 +160,8 @@ const ModuleConfig: any = () => {
 				<ModalDeleteConfirmation
 					totalSelected={selectedRowKeys?.length}
 					itemTitle={
-						paginateField?.find((config) => config.key === selectedRowKeys[0])?.module_name
+						paginateField?.find((config: any) =>
+						 config?.key === selectedRowKeys[0])?.module_name
 					}
 					visible={modalDelete.open}
 					onCancel={() => setModalDelete({ open: false })}

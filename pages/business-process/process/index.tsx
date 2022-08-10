@@ -64,7 +64,7 @@ const ProcessList: any = () => {
 
 	const columns = [
 		{
-			title: "Name",
+			title: "Process Name",
 			dataIndex: "field_name",
 			width: "43%",
 		},

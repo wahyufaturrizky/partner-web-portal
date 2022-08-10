@@ -178,21 +178,6 @@ const CreateUserConfig: any = () => {
 	);
 };
 
-const Span = styled.div`
-	font-size: 14px;
-	line-height: 18px;
-	font-weight: normal;
-	color: #ffe12e;
-`;
-
-const Record = styled.div`
-	height: 54px;
-	padding: 0px 20px;
-	display: flex;
-	align-items: center;
-	border-top: ${(p) => (p.borderTop ? "0.5px solid #AAAAAA" : "none")};
-`;
-
 const Card = styled.div`
 	background: #ffffff;
 	border-radius: 16px;

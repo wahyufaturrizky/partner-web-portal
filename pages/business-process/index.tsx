@@ -3,6 +3,7 @@ import styled from "styled-components";
 import { Text, Button, Col, Row, Spacer, Search, Table, Pagination, Lozenge } from "pink-lava-ui";
 import { useRouter } from "next/router";
 import usePagination from "@lucasmogari/react-pagination";
+
 import { ModalDeleteConfirmation } from "../../components/elements/Modal/ModalConfirmationDelete";
 import { useBusinessProcesses, useDeleteBusinessProcess } from "../../hooks/business-process/useBusinessProcess";
 import { STATUS_BUSINESS_PROCESS } from "../../utils/constant";
@@ -84,6 +85,7 @@ const BusinessProcess = () => {
 		{
 			title: "Status",
 			dataIndex: "status",
+			width: "30%",
 			render: (status: any) => (
 				<Lozenge variant={STATUS_BUSINESS_PROCESS[status].COLOR}>
 					{STATUS_BUSINESS_PROCESS[status].TEXT}
@@ -93,7 +95,6 @@ const BusinessProcess = () => {
 		{
 			title: "Action",
 			dataIndex: "action",
-			width: "15%",
 			align: "left",
 		},
 	];

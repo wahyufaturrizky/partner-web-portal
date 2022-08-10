@@ -57,8 +57,8 @@ const UserConfigRole: any = () => {
 			width: "43%",
 		},
 		{
-			title: "Status",
-			dataIndex: "approval_status",
+			title: "Company",
+			dataIndex: "company",
 			render: (text: any) => (
 				<Lozenge variant={STATUS_APPROVAL_VARIANT[text]}>{STATUS_APPROVAL_TEXT[text]}</Lozenge>
 			),
@@ -83,7 +83,7 @@ const UserConfigRole: any = () => {
 					<Button
 						size="small"
 						onClick={() => {
-							router.push(`/role/${field.id}`);
+							router.push(`/user-config/role/${field.id}`);
 						}}
 						variant="tertiary"
 					>
