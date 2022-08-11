@@ -1,10 +1,10 @@
 import usePagination from "@lucasmogari/react-pagination";
+import { useRouter } from "next/router";
 import {
   Button,
   Col,
   DropdownMenu,
   FileUploadModal,
-  Input,
   Modal,
   Pagination,
   Row,
@@ -18,22 +18,20 @@ import { useForm } from "react-hook-form";
 import styled from "styled-components";
 import { ICDownload, ICUpload } from "../../assets";
 import {
-  useChannelsMDM,
-  useCreateChannelMDM,
-  useDeleteChannelMDM,
-  useUpdateChannelMDM,
-  useUploadFileChannelMDM,
-} from "../../hooks/mdm/channel/useChannelMDM";
+  useDeletePurchaseOrganizationMDM,
+  usePurchaseOrganizationsMDM,
+  useUploadFilePurchaseOrganizationMDM,
+} from "../../hooks/mdm/purchase-organization/usePurchaseOrganizationMDM";
 import { mdmDownloadService } from "../../lib/client";
 import useDebounce from "../../lib/useDebounce";
 import { queryClient } from "../_app";
 
 const downloadFile = (params: any) =>
-  mdmDownloadService("/sales-channel/download", { params }).then((res) => {
+  mdmDownloadService("/purchase-organization/download", { params }).then((res) => {
     let dataUrl = window.URL.createObjectURL(new Blob([res.data]));
     let tempLink = document.createElement("a");
     tempLink.href = dataUrl;
-    tempLink.setAttribute("download", `sales-channel_${new Date().getTime()}.xlsx`);
+    tempLink.setAttribute("download", `purchase-organization_${new Date().getTime()}.xlsx`);
     tempLink.click();
   });
 
@@ -42,14 +40,11 @@ const renderConfirmationText = (type: any, data: any) => {
     case "selection":
       return data.selectedRowKeys.length > 1
         ? `Are you sure to delete ${data.selectedRowKeys.length} items ?`
-        : `By deleting it will affect data that already uses Channel ${
+        : `By deleting it will affect data that already uses purchase organization ${
             data?.channelData?.data.find((el: any) => el.key === data.selectedRowKeys[0])?.name
-          }-${
-            data?.channelData?.data.find((el: any) => el.key === data.selectedRowKeys[0])
-              ?.salesChannelId
-          }`;
+          }-${data?.channelData?.data.find((el: any) => el.key === data.selectedRowKeys[0])?.id}`;
     case "detail":
-      return `By deleting it will affect data that already uses Channel ${data.name}-${data.salesChannelId}`;
+      return `By deleting it will affect data that already uses purchase organization ${data.name}-${data.id}`;
 
     default:
       break;
@@ -57,6 +52,7 @@ const renderConfirmationText = (type: any, data: any) => {
 };
 
 const ChannelMDM = () => {
+  const router = useRouter();
   const pagination = usePagination({
     page: 1,
     itemsPerPage: 10,
@@ -80,10 +76,10 @@ const ChannelMDM = () => {
   const { register, handleSubmit } = useForm();
 
   const {
-    data: channelsMDMData,
-    isLoading: isLoadingChannelsMDM,
-    isFetching: isFetchingChannelsMDM,
-  } = useChannelsMDM({
+    data: dataPurchaseOrganizations,
+    isLoading: isLoadingPurchaseOrganizations,
+    isFetching: isFetchingPurchaseOrganizations,
+  } = usePurchaseOrganizationsMDM({
     query: {
       search: debounceSearch,
       page: pagination.page,
@@ -96,18 +92,16 @@ const ChannelMDM = () => {
       select: (data: any) => {
         const mappedData = data?.rows?.map((element: any) => {
           return {
-            key: element.salesChannelId,
-            id: element.salesChannelId,
-            salesChannelId: element.salesChannelId,
-            companyId: element.companyId,
+            key: element.id,
+            id: element.id,
+            code: element.code,
             name: element.name,
+            parent: element.parent,
             action: (
               <div style={{ display: "flex", justifyContent: "left" }}>
                 <Button
                   size="small"
-                  onClick={() => {
-                    setModalChannelForm({ open: true, typeForm: "edit", data: element });
-                  }}
+                  onClick={() => router.push(`purchase-organization/${element.id}`)}
                   variant="tertiary"
                 >
                   View Detail
@@ -122,50 +116,31 @@ const ChannelMDM = () => {
     },
   });
 
-  const { mutate: createChannelMDM, isLoading: isLoadingcreateChannelMDM } = useCreateChannelMDM({
-    options: {
-      onSuccess: () => {
-        setModalChannelForm({ open: false, typeForm: "", data: {} });
-        queryClient.invalidateQueries(["sales-channel"]);
-      },
-    },
-  });
-
-  const { mutate: updateChannelMDM, isLoading: isLoadingupdateChannelMDM } = useUpdateChannelMDM({
-    id: `${modalChannelForm?.data?.companyId}/${modalChannelForm?.data?.salesChannelId}`,
-    options: {
-      onSuccess: () => {
-        setModalChannelForm({ open: false, typeForm: "", data: {} });
-        queryClient.invalidateQueries(["sales-channel"]);
-      },
-    },
-  });
-
-  const { mutate: deleteChannelMDM, isLoading: isLoadingdeleteChannelMDM } = useDeleteChannelMDM({
-    options: {
-      onSuccess: () => {
-        setShowDelete({ open: false, data: {}, type: "" });
-        setModalChannelForm({ open: false, data: {}, typeForm: "" });
-        setSelectedRowKeys([]);
-        queryClient.invalidateQueries(["sales-channel"]);
-      },
-    },
-  });
-
-  const { mutate: uploadFileChannelMDM, isLoading: isLoadinguploadFileChannelMDM } =
-    useUploadFileChannelMDM({
+  const { mutate: deletePurchaseOrganization, isLoading: isLoadingDeletePurchaseOrganization } =
+    useDeletePurchaseOrganizationMDM({
       options: {
         onSuccess: () => {
-          queryClient.invalidateQueries(["sales-channel"]);
-          setShowUpload(false);
+          setShowDelete({ open: false, data: {}, type: "" });
+          setModalChannelForm({ open: false, data: {}, typeForm: "" });
+          setSelectedRowKeys([]);
+          queryClient.invalidateQueries(["purchase-organization"]);
         },
       },
     });
 
+  const { mutate: uploadFilePurchaseOrganization } = useUploadFilePurchaseOrganizationMDM({
+    options: {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["purchase-organization"]);
+        setShowUpload(false);
+      },
+    },
+  });
+
   const columns = [
     {
       title: "Purchase Org ID",
-      dataIndex: "salesChannelId",
+      dataIndex: "code",
     },
     {
       title: "Purchase Org Name",
@@ -190,26 +165,11 @@ const ChannelMDM = () => {
     },
   };
 
-  const onSubmit = (data: any) => {
-    switch (modalChannelForm.typeForm) {
-      case "create":
-        createChannelMDM({ ...data, company_id: "KSNI" });
-        break;
-      case "edit":
-        updateChannelMDM(data);
-        break;
-      default:
-        setModalChannelForm({ open: false, typeForm: "", data: {} });
-        break;
-    }
-  };
-
   const onSubmitFile = (file: any) => {
     const formData = new FormData();
-    formData.append("file", file);
-    formData.append("company_id", "KSNI");
+    formData.append("upload_file", file);
 
-    uploadFileChannelMDM(formData);
+    uploadFilePurchaseOrganization(formData);
   };
 
   return (
@@ -235,7 +195,7 @@ const ChannelMDM = () => {
                 setShowDelete({
                   open: true,
                   type: "selection",
-                  data: { channelData: channelsMDMData, selectedRowKeys },
+                  data: { channelData: dataPurchaseOrganizations, selectedRowKeys },
                 })
               }
               disabled={rowSelection.selectedRowKeys?.length === 0}
@@ -299,7 +259,7 @@ const ChannelMDM = () => {
             <Button
               size="big"
               variant="primary"
-              onClick={() => setModalChannelForm({ open: true, typeForm: "create", data: {} })}
+              onClick={() => router.push("purchase-organization/create")}
             >
               Create
             </Button>
@@ -310,83 +270,14 @@ const ChannelMDM = () => {
       <Card style={{ padding: "16px 20px" }}>
         <Col gap={"60px"}>
           <Table
-            loading={isLoadingChannelsMDM || isFetchingChannelsMDM}
+            loading={isLoadingPurchaseOrganizations || isFetchingPurchaseOrganizations}
             columns={columns}
-            data={channelsMDMData?.data}
+            data={dataPurchaseOrganizations?.data}
             rowSelection={rowSelection}
           />
           <Pagination pagination={pagination} />
         </Col>
       </Card>
-
-      {modalChannelForm.open && (
-        <Modal
-          width={"350px"}
-          centered
-          closable={false}
-          visible={modalChannelForm.open}
-          onCancel={() => setModalChannelForm({ open: false, data: {}, typeForm: "" })}
-          title={modalChannelForm.typeForm === "create" ? "Create Channel" : "Channel"}
-          footer={null}
-          content={
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "center",
-              }}
-            >
-              <Input
-                defaultValue={modalChannelForm.data?.name}
-                width="100%"
-                label="Sales Channel Name"
-                height="48px"
-                placeholder={"e.g Modern Trade"}
-                {...register("name", {
-                  shouldUnregister: true,
-                })}
-              />
-              <Spacer size={14} />
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "center",
-                  gap: "10px",
-                  marginBottom: "20px",
-                }}
-              >
-                {modalChannelForm.typeForm === "create" ? (
-                  <Button
-                    size="big"
-                    variant={"tertiary"}
-                    key="submit"
-                    type="primary"
-                    onClick={() => setModalChannelForm({ open: false, data: {}, typeForm: "" })}
-                  >
-                    Cancel
-                  </Button>
-                ) : (
-                  <Button
-                    size="big"
-                    variant={"tertiary"}
-                    key="submit"
-                    type="primary"
-                    onClick={() => {
-                      setShowDelete({ open: true, type: "detail", data: modalChannelForm.data });
-                    }}
-                  >
-                    Delete
-                  </Button>
-                )}
-
-                <Button onClick={handleSubmit(onSubmit)} variant="primary" size="big">
-                  {isLoadingcreateChannelMDM || isLoadingupdateChannelMDM ? "Loading..." : "Save"}
-                </Button>
-              </div>
-            </div>
-          }
-        />
-      )}
 
       {isShowDelete.open && (
         <Modal
@@ -429,19 +320,17 @@ const ChannelMDM = () => {
                   size="big"
                   onClick={() => {
                     if (isShowDelete.type === "selection") {
-                      deleteChannelMDM({
-                        company_id: "KSNI",
+                      deletePurchaseOrganization({
                         ids: selectedRowKeys,
                       });
                     } else {
-                      deleteChannelMDM({
-                        company_id: modalChannelForm.data.companyId,
-                        ids: [modalChannelForm.data.salesChannelId],
+                      deletePurchaseOrganization({
+                        ids: [modalChannelForm.data.id],
                       });
                     }
                   }}
                 >
-                  {isLoadingdeleteChannelMDM ? "loading..." : "Yes"}
+                  {isLoadingDeletePurchaseOrganization ? "loading..." : "Yes"}
                 </Button>
               </div>
             </div>

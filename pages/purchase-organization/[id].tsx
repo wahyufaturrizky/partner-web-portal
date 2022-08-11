@@ -4,6 +4,7 @@ import {
   Accordion,
   Button,
   Col,
+  Dropdown,
   DropdownMenuOptionCustome,
   DropdownMenuOptionGroup,
   Input,
@@ -12,34 +13,42 @@ import {
   Row,
   Search,
   Spacer,
+  Spin,
   Table,
   Text,
-  Dropdown,
-  Spin,
 } from "pink-lava-ui";
 import { useEffect, useState } from "react";
 import styled from "styled-components";
+import ArrowLeft from "../../assets/icons/arrow-left.svg";
+import { ModalDeleteConfirmation } from "../../components/elements/Modal/ModalConfirmationDelete";
 import { ModalRegisterField } from "../../components/elements/Modal/ModalRegisterField";
 import { useCreateField, useFields } from "../../hooks/field/useField";
 import {
-  useCreatePurchaseOrganizationMDM,
+  useDeletePurchaseOrganizationMDM,
   useParentPurchaseOrganizationMDM,
+  usePurchaseOrganizationMDM,
+  useUpdatePurchaseOrganizationMDM,
 } from "../../hooks/mdm/purchase-organization/usePurchaseOrganizationMDM";
 import { useFilterListPermissions } from "../../hooks/permission/usePermission";
 import { usePartnerConfigPermissionLists } from "../../hooks/user-config/usePermission";
 
-const CreateMenuList: any = () => {
-  const [isLoading, setLoading] = useState(true);
+const DetailMenuList: any = () => {
+  const [isLoading, setIsLoading] = useState(true);
   const [searchAllowedField, setSearchAllowedField] = useState("");
   const [searchTableField, setSearchTableField] = useState("");
   const [searchTablePermission, setSearchTablePermission] = useState("");
-  const [parent, setParent] = useState("");
+  const [ishowForDropDown, setIshowForDropDown] = useState<boolean>(false);
+  const [modalDelete, setModalDelete] = useState({ open: false });
   const [dataAllowedField, setDataAllowedField] = useState([]);
+  const [parent, setParent] = useState("");
+  const [selectedRowTableField, setSelectedRowTableField] = useState([]);
   const [dataAssociatedPermissionsField, setDataAssociatedPermissionsField] = useState([]);
+  const [selectedRowTablePermission, setSelectedRowTablePermission] = useState([]);
   const [modalCreate, setModalCreate] = useState({ open: false });
   const [stateFieldInput, setStateFieldInput] = useState({
     name: "",
   });
+  const { name } = stateFieldInput;
   const [stateModal, setStateModal] = useState({
     isShowModal: false,
     titleModal: "",
@@ -49,10 +58,10 @@ const CreateMenuList: any = () => {
   const { isShowModal, titleModal, dataModal, widthModal } = stateModal;
   const [selectedAllowedFieldRowKeys, setSelectedAllowedFieldRowKeys] = useState([]);
   const [dataTableAssociatePermission, setDataTableAssociatePermission] = useState([]);
+  const [isZeus, setIsZeus] = useState(false);
+  const [isHermes, setIsHermes] = useState(false);
   const [selectedRowKeysTablePermission, setSelectedRowKeysTablePermission] = useState([]);
-  const [selectedRowTablePermission, setSelectedRowTablePermission] = useState([]);
   const [selectedRowKeysTableField, setSelectedRowKeysTableField] = useState([]);
-  const [selectedRowTableField, setSelectedRowTableField] = useState([]);
   const [selectedFilter, setSelectedFilter] = useState([]);
   const paginationTableField = usePagination({
     page: 1,
@@ -79,29 +88,85 @@ const CreateMenuList: any = () => {
     totalItems: 100,
   });
 
-  const { data: fieldsTablePermission } = usePartnerConfigPermissionLists({
+  const { isLoading: isLoadingPurchaseOrganization } = usePurchaseOrganizationMDM({
     options: {
       onSuccess: (data) => {
-        paginationTablePermission.setTotalItems(data.totalRow);
-        setLoading(false);
+        // let tempDataAllowedField = [];
+        // let tempDataAssociatePermission = [];
+
+        // data.field.map((data) => {
+        //   tempDataAllowedField.push({
+        //     allowed_field: data.name,
+        //     allowed_field_id: data.id,
+        //     key: data.id,
+        //   });
+        // });
+
+        // data.modules.map((data) => {
+        //   tempDataAssociatePermission.push({
+        //     field_name: data.name,
+        //     key: data.id,
+        //   });
+        // });
+
+        // if (data.menu.processName) {
+        //   setIsMenuProcess(true);
+        // }
+
+        // setIsZeus(data.menu.isZeus === "Y" ? true : false);
+        // setIsHermes(data.menu.isHermes === "Y" ? true : false);
+        console.log(data);
+
+        setParent(data.parent);
+
+        setStateFieldInput({
+          ...stateFieldInput,
+          name: data.name,
+        });
+
+        // setDataAllowedField(tempDataAllowedField);
+
+        // onSelectChangeTablePermission(tempDataAssociatePermission.map((data) => data.key));
+
+        // onSelectChangeTableField(tempDataAllowedField.map((data) => data.key));
+
+        // setDataAssociatedPermissionsField(tempDataAssociatePermission);
+
+        if (name) {
+          setIsLoading(false);
+        }
       },
     },
-    query: {
-      search: searchTablePermission,
-      page: paginationTablePermission.page,
-      limit: paginationTablePermission.itemsPerPage,
-    },
+    id: Router.query.id,
   });
 
-  const { mutate: reqBodyFilterListPermission, data: fieldsTablePermissionFilter } =
-    useFilterListPermissions({
+  const { data: fieldsTablePermission, isLoading: isLoadingPermissions } =
+    usePartnerConfigPermissionLists({
       options: {
         onSuccess: (data) => {
           paginationTablePermission.setTotalItems(data.totalRow);
-          setLoading(false);
+          setIsLoading(false);
         },
       },
+      query: {
+        search: searchTablePermission,
+        page: paginationTablePermission.page,
+        limit: paginationTablePermission.itemsPerPage,
+      },
     });
+
+  const {
+    mutate: reqBodyFilterListPermission,
+    data: fieldsTablePermissionFilter,
+    isLoading: isLoadingFilterListPermissions,
+  } = useFilterListPermissions({
+    options: {
+      onSuccess: (data) => {
+        paginationTablePermission.setTotalItems(data.totalRow);
+        setIsLoading(false);
+      },
+    },
+  });
 
   useEffect(() => {
     if (fieldsTablePermissionFilter && selectedFilter.length > 0) {
@@ -109,7 +174,7 @@ const CreateMenuList: any = () => {
     } else if (fieldsTablePermission) {
       setDataTableAssociatePermission(fieldsTablePermission);
     }
-  }, [fieldsTablePermissionFilter, fieldsTablePermission, selectedFilter.length]);
+  }, [fieldsTablePermissionFilter, fieldsTablePermission]);
 
   const columnsTablePermission = [
     {
@@ -120,7 +185,6 @@ const CreateMenuList: any = () => {
 
   const dataTablePermission = [];
   const datFieldPermission = [];
-
   dataTableAssociatePermission?.rows?.map((field) => {
     dataTablePermission.push({
       key: field.id,
@@ -132,11 +196,19 @@ const CreateMenuList: any = () => {
     });
   });
 
+  useEffect(() => {
+    if (dataTablePermission.length > 0 && datFieldPermission.length > 0) {
+      setIsLoading(false);
+    } else {
+      setIsLoading(true);
+    }
+  }, [dataTablePermission, datFieldPermission]);
+
   const paginateFieldTablePermission = dataTablePermission;
 
   const onSelectChangeTablePermission = (selectedRowKeys, selectedRows) => {
-    setSelectedRowKeysTablePermission(selectedRowKeys);
     setSelectedRowTablePermission(selectedRows);
+    setSelectedRowKeysTablePermission(selectedRowKeys);
   };
 
   const rowSelectionTablePermission = {
@@ -219,7 +291,7 @@ const CreateMenuList: any = () => {
     options: {
       onSuccess: (data) => {
         paginationTableField.setTotalItems(data.totalRow);
-        setLoading(false);
+        setIsLoading(false);
       },
     },
     query: {
@@ -259,11 +331,6 @@ const CreateMenuList: any = () => {
       },
     },
   });
-
-  const { data: dataParentPurchaseOrganization, isLoading: isLoadingParentPurchaseOrganization } =
-    useParentPurchaseOrganizationMDM({
-      id: 0 + "/KSNI",
-    });
 
   const handleSelectedField = () => {
     if (titleModal === "Product Category") {
@@ -315,8 +382,6 @@ const CreateMenuList: any = () => {
     tempDataAllowedField = dataAllowedField?.filter(
       (field) => !rowSelectionAllowedField.selectedRowKeys.includes(field.key)
     );
-
-    onSelectChangeTableField(tempDataAllowedField.map((data) => data.key));
     setDataAllowedField(tempDataAllowedField);
   };
 
@@ -324,22 +389,27 @@ const CreateMenuList: any = () => {
     setSelectedFilter(selectedFilter);
   };
 
-  const { mutate: createPurchaseOrganization, isLoading: isLoadingurchaseOrganization } =
-    useCreatePurchaseOrganizationMDM({
+  const { mutate: updatePurchaseOrganization, isLoading: isLoadingUpdatePurchaseOrganization } =
+    useUpdatePurchaseOrganizationMDM({
       options: {
         onSuccess: (data) => {
           if (data) {
-            setLoading(false);
-            window.alert("Menu created successfully");
+            setIsLoading(false);
+            window.alert("Purchase organization updated successfully");
             Router.back();
           }
         },
+        onSettled: (data, error) => {
+          setIsLoading(false);
+          window.alert(error.data.message);
+        },
       },
+      id: Router.query.id,
     });
 
   useEffect(() => {
     if (isShowModal && titleModal === "Product Category") {
-      setLoading(true);
+      setIsLoading(true);
       const tempCheck = selectedFilter.find((finding) => finding);
       reqBodyFilterListPermission({
         ids: rowSelectionTablePermission.selectedRowKeys,
@@ -351,8 +421,8 @@ const CreateMenuList: any = () => {
     }
   }, [selectedFilter, isShowModal]);
 
-  const handleCreateMenuList = () => {
-    setLoading(true);
+  const handleUpdateMenuList = () => {
+    setIsLoading(true);
     const isEmptyField = Object.keys(stateFieldInput).find(
       (thereIsEmptyField) =>
         thereIsEmptyField !== "process_name" &&
@@ -363,28 +433,36 @@ const CreateMenuList: any = () => {
     const data = {
       company: "KSNI",
       name: stateFieldInput?.name,
-      parent: parent,
+      parent: dataParentPurchaseOrganization.find((finding) => finding.name === parent).code,
       product_categories: "",
       // process_name: stateFieldInput?.process_name,
-      // isZeus: isZeus ? "Y" : "N",
-      // isHermes: isHermes ? "Y" : "N",
       // field: dataAllowedField.map((data) => data.key),
+      // is_config: isZeus ? "Y" : "N",
+      // is_partner: isHermes ? "Y" : "N",
       // permission: dataAssociatedPermissionsField.map((data) => data.key),
     };
-
-    createPurchaseOrganization(data);
+    updatePurchaseOrganization(data);
 
     // if (!isEmptyField) {
-
     //   if (dataAllowedField.length !== 0 && dataAssociatedPermissionsField.length !== 0) {
+
     //   } else {
-    //     window.alert("data allowed and data associate permission can't be empty");
+    //     window.alert("data allowed and data associate permission can't br empty");
     //   }
     // } else {
-    //   setLoading(false);
+    //   setIsLoading(false);
     //   window.alert(`field ${isEmptyField} must be fill!`);
     // }
   };
+
+  const { mutate: deleteFields } = useDeletePurchaseOrganizationMDM({
+    options: {
+      onSuccess: () => {
+        setModalDelete({ open: false });
+        Router.back();
+      },
+    },
+  });
 
   const handleChangeInputAssociatePermission = (key) => {
     const tempDataAssociatedPermissionsField = [];
@@ -405,22 +483,49 @@ const CreateMenuList: any = () => {
     });
   };
 
+  useEffect(() => {
+    if (
+      !isLoading &&
+      !isLoadingPermissions &&
+      !isLoadingPurchaseOrganization &&
+      !isLoadingFilterListPermissions
+    ) {
+      setTimeout(() => setIshowForDropDown(true), 3000);
+    }
+  }, [
+    isLoading,
+    isLoadingPermissions,
+    isLoadingPurchaseOrganization,
+    isLoadingFilterListPermissions,
+  ]);
+
+  const { data: dataParentPurchaseOrganization, isLoading: isLoadingParentPurchaseOrganization } =
+    useParentPurchaseOrganizationMDM({
+      id: Router.query.id + "/KSNI",
+    });
+
   return (
     <>
       <Col>
         <Row gap="4px">
-          <Text variant={"h4"}>Create Purchase Organization</Text>
+          <ArrowLeft style={{ cursor: "pointer" }} onClick={() => Router.back()} />
+          <Text variant={"h4"}>{stateFieldInput?.name}</Text>
         </Row>
+
         <Spacer size={12} />
         <Card padding="20px">
           <Row justifyContent="flex-end" alignItems="center" nowrap>
             <Row>
               <Row gap="16px">
-                <Button size="big" variant={"tertiary"} onClick={() => Router.back()}>
-                  Cancel
+                <Button
+                  size="big"
+                  variant={"tertiary"}
+                  onClick={() => setModalDelete({ open: true })}
+                >
+                  Delete
                 </Button>
-                <Button size="big" variant={"primary"} onClick={handleCreateMenuList}>
-                  {isLoading ? "loading..." : "Save"}
+                <Button size="big" variant={"primary"} onClick={handleUpdateMenuList}>
+                  {isLoadingUpdatePurchaseOrganization ? "loading..." : "Save"}
                 </Button>
               </Row>
             </Row>
@@ -431,25 +536,27 @@ const CreateMenuList: any = () => {
 
         <Accordion>
           <Accordion.Item key={1}>
-            <Accordion.Header variant="blue">Purchase Organization</Accordion.Header>
+            <Accordion.Header variant="blue">General</Accordion.Header>
             <Accordion.Body>
               <Row width="100%" gap="20px" noWrap>
                 <Input
                   id="name"
                   width="100%"
-                  label="Purchase Group Name"
+                  label="Name"
+                  value={name}
                   height="48px"
-                  placeholder={"e.g Packaging Material"}
+                  placeholder={"e.g Shipment and Delivery"}
                   onChange={handleChangeInput}
                 />
 
-                {isLoadingParentPurchaseOrganization ? (
+                {isLoadingParentPurchaseOrganization || isLoadingPurchaseOrganization ? (
                   <Spin tip="Loading data..." />
                 ) : (
                   <>
                     <Dropdown
                       label="Parent"
                       isOptional
+                      defaultValue={parent}
                       width="100%"
                       items={dataParentPurchaseOrganization.map((data) => ({
                         value: data.name,
@@ -465,24 +572,29 @@ const CreateMenuList: any = () => {
                 )}
               </Row>
 
-              <DropdownMenuOptionCustome
-                handleOpenTotalBadge={() =>
-                  setStateModal({
-                    ...stateModal,
-                    isShowModal: true,
-                    titleModal: "Product Category",
-                    widthModal: 1000,
-                  })
-                }
-                isAllowClear
-                handleChangeValue={handleChangeInputAssociatePermission}
-                valueSelectedItems={
-                  dataAssociatedPermissionsField &&
-                  dataAssociatedPermissionsField?.map((data) => data.key)
-                }
-                label="Product Category"
-                listItems={datFieldPermission}
-              />
+              {!isLoadingPurchaseOrganization && !isLoadingFilterListPermissions ? (
+                <DropdownMenuOptionCustome
+                  loading={isLoading}
+                  handleOpenTotalBadge={() =>
+                    setStateModal({
+                      ...stateModal,
+                      isShowModal: true,
+                      titleModal: "Product Category",
+                      widthModal: 1000,
+                    })
+                  }
+                  isAllowClear
+                  valueSelectedItems={
+                    dataAssociatedPermissionsField &&
+                    dataAssociatedPermissionsField?.map((data) => data.key)
+                  }
+                  handleChangeValue={handleChangeInputAssociatePermission}
+                  label="Product Category"
+                  listItems={datFieldPermission}
+                />
+              ) : (
+                <Spin tip="loading data..." />
+              )}
 
               <div
                 style={{ cursor: "pointer" }}
@@ -541,7 +653,6 @@ const CreateMenuList: any = () => {
               </Row>
               <Spacer size={10} />
               <Table
-                loading={isLoading}
                 columns={columns}
                 data={dataAllowedField}
                 rowSelection={rowSelectionAllowedField}
@@ -586,7 +697,7 @@ const CreateMenuList: any = () => {
                 width="380px"
                 placeholder={
                   titleModal === "Product Category"
-                    ? "Search Product Category Name"
+                    ? "Search Permission Name"
                     : "Search Field ID, Name, Key"
                 }
                 onChange={(e) =>
@@ -649,6 +760,15 @@ const CreateMenuList: any = () => {
           onOk={(data) => createField(data)}
         />
       )}
+
+      {modalDelete.open && (
+        <ModalDeleteConfirmation
+          itemTitle={Router.query.name}
+          visible={modalDelete.open}
+          onCancel={() => setModalDelete({ open: false })}
+          onOk={() => deleteFields({ id: [Number(Router.query.id)] })}
+        />
+      )}
     </>
   );
 };
@@ -674,4 +794,4 @@ const Card = styled.div`
   padding: ${(p) => (p.padding ? p.padding : "16px")};
 `;
 
-export default CreateMenuList;
+export default DetailMenuList;
