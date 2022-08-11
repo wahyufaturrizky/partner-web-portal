@@ -72,7 +72,7 @@ const CustomerGroupDetail = () => {
     isLoading: isLoadingParentCustomerGroupMDM,
     isFetching: isFetchingParentCustomerGroupMDM,
   } = useParentCustomerGroupMDM({
-    id: Number(id),
+    id: Number(id) + "/KSNI",
     options: {
       onSuccess: (data: any) => {},
     },

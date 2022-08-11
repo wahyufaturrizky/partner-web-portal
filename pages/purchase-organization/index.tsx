@@ -12,31 +12,28 @@ import {
   Spacer,
   Table,
   Text,
-  Dropdown,
-  Spin,
 } from "pink-lava-ui";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import styled from "styled-components";
 import { ICDownload, ICUpload } from "../../assets";
+import {
+  useChannelsMDM,
+  useCreateChannelMDM,
+  useDeleteChannelMDM,
+  useUpdateChannelMDM,
+  useUploadFileChannelMDM,
+} from "../../hooks/mdm/channel/useChannelMDM";
 import { mdmDownloadService } from "../../lib/client";
 import useDebounce from "../../lib/useDebounce";
 import { queryClient } from "../_app";
-import {
-  useCreateProductBrandMDM,
-  useDeleteProductBrandMDM,
-  useParentProductBrandMDM,
-  useProductBrandsMDM,
-  useUpdateProductBrandMDM,
-  useUploadFileProductBrandMDM,
-} from "../../hooks/mdm/product-brand/useProductBrandMDM";
 
 const downloadFile = (params: any) =>
-  mdmDownloadService("/product-brand/download", { params }).then((res) => {
+  mdmDownloadService("/sales-channel/download", { params }).then((res) => {
     let dataUrl = window.URL.createObjectURL(new Blob([res.data]));
     let tempLink = document.createElement("a");
     tempLink.href = dataUrl;
-    tempLink.setAttribute("download", `product-brand_${new Date().getTime()}.xlsx`);
+    tempLink.setAttribute("download", `sales-channel_${new Date().getTime()}.xlsx`);
     tempLink.click();
   });
 
@@ -45,21 +42,21 @@ const renderConfirmationText = (type: any, data: any) => {
     case "selection":
       return data.selectedRowKeys.length > 1
         ? `Are you sure to delete ${data.selectedRowKeys.length} items ?`
-        : `By deleting it will affect data that already uses product brand ${
-            data?.productBrandData?.data.find((el: any) => el.key === data.selectedRowKeys[0])?.name
+        : `By deleting it will affect data that already uses Channel ${
+            data?.channelData?.data.find((el: any) => el.key === data.selectedRowKeys[0])?.name
           }-${
-            data?.productBrandData?.data.find((el: any) => el.key === data.selectedRowKeys[0])
-              ?.productBrandCode
+            data?.channelData?.data.find((el: any) => el.key === data.selectedRowKeys[0])
+              ?.salesChannelId
           }`;
     case "detail":
-      return `By deleting it will affect data that already uses product brand ${data.name}-${data.productBrandCode}`;
+      return `By deleting it will affect data that already uses Channel ${data.name}-${data.salesChannelId}`;
 
     default:
       break;
   }
 };
 
-const ProductBrandMDM = () => {
+const ChannelMDM = () => {
   const pagination = usePagination({
     page: 1,
     itemsPerPage: 10,
@@ -72,7 +69,7 @@ const ProductBrandMDM = () => {
   const [search, setSearch] = useState("");
   const [isShowDelete, setShowDelete] = useState({ open: false, type: "selection", data: {} });
   const [isShowUpload, setShowUpload] = useState(false);
-  const [modalProductBrandForm, setModalProductBrandForm] = useState({
+  const [modalChannelForm, setModalChannelForm] = useState({
     open: false,
     data: {},
     typeForm: "create",
@@ -80,15 +77,13 @@ const ProductBrandMDM = () => {
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const debounceSearch = useDebounce(search, 1000);
 
-  const { register, handleSubmit, setValue } = useForm({
-    defaultValues: { parent: "" },
-  });
+  const { register, handleSubmit } = useForm();
 
   const {
-    data: productBrandsMDMData,
-    isLoading: isLoadingProductBrandsMDM,
-    isFetching: isFetchingProductBrandsMDM,
-  } = useProductBrandsMDM({
+    data: channelsMDMData,
+    isLoading: isLoadingChannelsMDM,
+    isFetching: isFetchingChannelsMDM,
+  } = useChannelsMDM({
     query: {
       search: debounceSearch,
       page: pagination.page,
@@ -101,18 +96,17 @@ const ProductBrandMDM = () => {
       select: (data: any) => {
         const mappedData = data?.rows?.map((element: any) => {
           return {
-            key: element.id,
-            id: element.id,
-            productBrandCode: element.code,
-            brand: element.brand,
-            parent: element.parent,
-            company: element.company,
+            key: element.salesChannelId,
+            id: element.salesChannelId,
+            salesChannelId: element.salesChannelId,
+            companyId: element.companyId,
+            name: element.name,
             action: (
               <div style={{ display: "flex", justifyContent: "left" }}>
                 <Button
                   size="small"
                   onClick={() => {
-                    setModalProductBrandForm({ open: true, typeForm: "edit", data: element });
+                    setModalChannelForm({ open: true, typeForm: "edit", data: element });
                   }}
                   variant="tertiary"
                 >
@@ -128,69 +122,58 @@ const ProductBrandMDM = () => {
     },
   });
 
-  const { mutate: createProductBrandMDM, isLoading: isLoadingCreateProductBrandMDM } =
-    useCreateProductBrandMDM({
-      options: {
-        onSuccess: () => {
-          setModalProductBrandForm({ open: false, typeForm: "", data: {} });
-          queryClient.invalidateQueries(["product-brand"]);
-        },
-      },
-    });
-
-  const { mutate: updateProductBrandMDM, isLoading: isLoadingUpdateProductBrandMDM } =
-    useUpdateProductBrandMDM({
-      id: modalProductBrandForm.data?.id,
-      options: {
-        onSuccess: () => {
-          setModalProductBrandForm({ open: false, typeForm: "", data: {} });
-          queryClient.invalidateQueries(["product-brand"]);
-        },
-      },
-    });
-
-  const { data: dataParentProductBrandMDM, isLoading: isLoadingParentProductBrandMDM } =
-    useParentProductBrandMDM({
-      id: modalProductBrandForm.data?.id ?? 0 + "/KSNI",
-    });
-
-  const { mutate: deleteProductBrandMDM, isLoading: isLoadingDeleteProductBrandMDM } =
-    useDeleteProductBrandMDM({
-      options: {
-        onSuccess: () => {
-          setShowDelete({ open: false, data: {}, type: "" });
-          setModalProductBrandForm({ open: false, data: {}, typeForm: "" });
-          setSelectedRowKeys([]);
-          queryClient.invalidateQueries(["product-brand"]);
-        },
-      },
-    });
-
-  const { mutate: uploadFileProductBrandMDM } = useUploadFileProductBrandMDM({
+  const { mutate: createChannelMDM, isLoading: isLoadingcreateChannelMDM } = useCreateChannelMDM({
     options: {
       onSuccess: () => {
-        queryClient.invalidateQueries(["product-brand"]);
-        setShowUpload(false);
+        setModalChannelForm({ open: false, typeForm: "", data: {} });
+        queryClient.invalidateQueries(["sales-channel"]);
       },
     },
   });
 
+  const { mutate: updateChannelMDM, isLoading: isLoadingupdateChannelMDM } = useUpdateChannelMDM({
+    id: `${modalChannelForm?.data?.companyId}/${modalChannelForm?.data?.salesChannelId}`,
+    options: {
+      onSuccess: () => {
+        setModalChannelForm({ open: false, typeForm: "", data: {} });
+        queryClient.invalidateQueries(["sales-channel"]);
+      },
+    },
+  });
+
+  const { mutate: deleteChannelMDM, isLoading: isLoadingdeleteChannelMDM } = useDeleteChannelMDM({
+    options: {
+      onSuccess: () => {
+        setShowDelete({ open: false, data: {}, type: "" });
+        setModalChannelForm({ open: false, data: {}, typeForm: "" });
+        setSelectedRowKeys([]);
+        queryClient.invalidateQueries(["sales-channel"]);
+      },
+    },
+  });
+
+  const { mutate: uploadFileChannelMDM, isLoading: isLoadinguploadFileChannelMDM } =
+    useUploadFileChannelMDM({
+      options: {
+        onSuccess: () => {
+          queryClient.invalidateQueries(["sales-channel"]);
+          setShowUpload(false);
+        },
+      },
+    });
+
   const columns = [
     {
-      title: "Product Brand ID",
-      dataIndex: "productBrandCode",
+      title: "Purchase Org ID",
+      dataIndex: "salesChannelId",
     },
     {
-      title: "Product Brand Name",
-      dataIndex: "brand",
+      title: "Purchase Org Name",
+      dataIndex: "name",
     },
     {
       title: "Parent",
       dataIndex: "parent",
-    },
-    {
-      title: "Company",
-      dataIndex: "company",
     },
     {
       title: "Action",
@@ -208,37 +191,38 @@ const ProductBrandMDM = () => {
   };
 
   const onSubmit = (data: any) => {
-    switch (modalProductBrandForm.typeForm) {
+    switch (modalChannelForm.typeForm) {
       case "create":
-        createProductBrandMDM({ ...data, company: "KSNI" });
+        createChannelMDM({ ...data, company_id: "KSNI" });
         break;
       case "edit":
-        updateProductBrandMDM({ ...data, company: "KSNI" });
+        updateChannelMDM(data);
         break;
       default:
-        setModalProductBrandForm({ open: false, typeForm: "", data: {} });
+        setModalChannelForm({ open: false, typeForm: "", data: {} });
         break;
     }
   };
 
   const onSubmitFile = (file: any) => {
     const formData = new FormData();
-    formData.append("upload_file", file);
+    formData.append("file", file);
+    formData.append("company_id", "KSNI");
 
-    uploadFileProductBrandMDM(formData);
+    uploadFileChannelMDM(formData);
   };
 
   return (
     <>
       <Col>
-        <Text variant={"h4"}>Product Brand</Text>
+        <Text variant={"h4"}>Purchase Organization</Text>
         <Spacer size={20} />
       </Col>
       <Card>
         <Row justifyContent="space-between">
           <Search
             width="340px"
-            placeholder="Search Product Brand ID, Name, c"
+            placeholder="Search Purchase Org ID,  Name, Parent"
             onChange={(e: any) => {
               setSearch(e.target.value);
             }}
@@ -251,7 +235,7 @@ const ProductBrandMDM = () => {
                 setShowDelete({
                   open: true,
                   type: "selection",
-                  data: { productBrandData: productBrandsMDMData, selectedRowKeys },
+                  data: { channelData: channelsMDMData, selectedRowKeys },
                 })
               }
               disabled={rowSelection.selectedRowKeys?.length === 0}
@@ -268,13 +252,13 @@ const ProductBrandMDM = () => {
               onClick={(e: any) => {
                 switch (parseInt(e.key)) {
                   case 1:
-                    downloadFile({ with_data: "N", company: "KSNI" });
+                    downloadFile({ with_data: "N", company_id: "KSNI" });
                     break;
                   case 2:
                     setShowUpload(true);
                     break;
                   case 3:
-                    downloadFile({ with_data: "Y", company: "KSNI" });
+                    downloadFile({ with_data: "Y", company_id: "KSNI" });
                     break;
                   case 4:
                     break;
@@ -315,7 +299,7 @@ const ProductBrandMDM = () => {
             <Button
               size="big"
               variant="primary"
-              onClick={() => setModalProductBrandForm({ open: true, typeForm: "create", data: {} })}
+              onClick={() => setModalChannelForm({ open: true, typeForm: "create", data: {} })}
             >
               Create
             </Button>
@@ -326,25 +310,23 @@ const ProductBrandMDM = () => {
       <Card style={{ padding: "16px 20px" }}>
         <Col gap={"60px"}>
           <Table
-            loading={isLoadingProductBrandsMDM || isFetchingProductBrandsMDM}
-            columns={columns.filter((filtering) => filtering.dataIndex !== "company")}
-            data={productBrandsMDMData?.data}
+            loading={isLoadingChannelsMDM || isFetchingChannelsMDM}
+            columns={columns}
+            data={channelsMDMData?.data}
             rowSelection={rowSelection}
           />
           <Pagination pagination={pagination} />
         </Col>
       </Card>
 
-      {modalProductBrandForm.open && (
+      {modalChannelForm.open && (
         <Modal
           width={"350px"}
           centered
           closable={false}
-          visible={modalProductBrandForm.open}
-          onCancel={() => setModalProductBrandForm({ open: false, data: {}, typeForm: "" })}
-          title={
-            modalProductBrandForm.typeForm === "create" ? "Create Product Brand" : "Product Brand"
-          }
+          visible={modalChannelForm.open}
+          onCancel={() => setModalChannelForm({ open: false, data: {}, typeForm: "" })}
+          title={modalChannelForm.typeForm === "create" ? "Create Channel" : "Channel"}
           footer={null}
           content={
             <div
@@ -355,39 +337,16 @@ const ProductBrandMDM = () => {
               }}
             >
               <Input
-                defaultValue={modalProductBrandForm.data?.brand}
+                defaultValue={modalChannelForm.data?.name}
                 width="100%"
-                label="Name"
+                label="Sales Channel Name"
                 height="48px"
-                required
-                placeholder={"e.g Brand 1"}
-                {...register("brand", {
+                placeholder={"e.g Modern Trade"}
+                {...register("name", {
                   shouldUnregister: true,
                 })}
               />
               <Spacer size={14} />
-              {isLoadingParentProductBrandMDM ? (
-                <Spin tip="Loading data..." />
-              ) : (
-                <>
-                  <Dropdown
-                    label="Parent"
-                    isOptional
-                    width="100%"
-                    items={dataParentProductBrandMDM.map((data) => ({
-                      value: data.brand,
-                      id: data.code,
-                    }))}
-                    placeholder={"Select"}
-                    handleChange={(text) => setValue("parent", text)}
-                    noSearch
-                    defaultValue={modalProductBrandForm.data?.parent}
-                  />
-
-                  <Spacer size={14} />
-                </>
-              )}
-
               <div
                 style={{
                   display: "flex",
@@ -396,15 +355,13 @@ const ProductBrandMDM = () => {
                   marginBottom: "20px",
                 }}
               >
-                {modalProductBrandForm.typeForm === "create" ? (
+                {modalChannelForm.typeForm === "create" ? (
                   <Button
                     size="big"
                     variant={"tertiary"}
                     key="submit"
                     type="primary"
-                    onClick={() =>
-                      setModalProductBrandForm({ open: false, data: {}, typeForm: "" })
-                    }
+                    onClick={() => setModalChannelForm({ open: false, data: {}, typeForm: "" })}
                   >
                     Cancel
                   </Button>
@@ -415,11 +372,7 @@ const ProductBrandMDM = () => {
                     key="submit"
                     type="primary"
                     onClick={() => {
-                      setShowDelete({
-                        open: true,
-                        type: "detail",
-                        data: modalProductBrandForm.data,
-                      });
+                      setShowDelete({ open: true, type: "detail", data: modalChannelForm.data });
                     }}
                   >
                     Delete
@@ -427,9 +380,7 @@ const ProductBrandMDM = () => {
                 )}
 
                 <Button onClick={handleSubmit(onSubmit)} variant="primary" size="big">
-                  {isLoadingCreateProductBrandMDM || isLoadingUpdateProductBrandMDM
-                    ? "Loading..."
-                    : "Save"}
+                  {isLoadingcreateChannelMDM || isLoadingupdateChannelMDM ? "Loading..." : "Save"}
                 </Button>
               </div>
             </div>
@@ -478,17 +429,19 @@ const ProductBrandMDM = () => {
                   size="big"
                   onClick={() => {
                     if (isShowDelete.type === "selection") {
-                      deleteProductBrandMDM({
+                      deleteChannelMDM({
+                        company_id: "KSNI",
                         ids: selectedRowKeys,
                       });
                     } else {
-                      deleteProductBrandMDM({
-                        ids: [modalProductBrandForm.data.id],
+                      deleteChannelMDM({
+                        company_id: modalChannelForm.data.companyId,
+                        ids: [modalChannelForm.data.salesChannelId],
                       });
                     }
                   }}
                 >
-                  {isLoadingDeleteProductBrandMDM ? "loading..." : "Yes"}
+                  {isLoadingdeleteChannelMDM ? "loading..." : "Yes"}
                 </Button>
               </div>
             </div>
@@ -513,4 +466,4 @@ const Card = styled.div`
   padding: 16px;
 `;
 
-export default ProductBrandMDM;
+export default ChannelMDM;
