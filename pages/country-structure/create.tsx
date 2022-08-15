@@ -1,9 +1,6 @@
 import React, { useState } from "react";
 import _ from "lodash";
-import { saveAs } from "file-saver";
-import styled from "styled-components";
 import { useRouter } from "next/router";
-import * as ExcelJS from "exceljs/dist/exceljs.min.js";
 import {
 	Text,
 	Col,
@@ -20,10 +17,15 @@ import {
 
 import { ModalDeleteConfirmation } from "../../components/elements/Modal/ModalConfirmationDelete";
 import { ModalManageData } from "../../components/elements/Modal/ModalManageData";
-import { useCurrenciesMDM } from "../../hooks/mdm/currency/useCurrencyMDM";
-import { useMdmCreateCountry } from "../../hooks/mdm/country/useCountries";
+import { useCurrenciesMDM } from "../../hooks/mdm/country-structure/useCurrencyMDM";
 
-async function downloadStructure(countryStructure: { name: any; }[]) {
+import * as ExcelJS from "exceljs/dist/exceljs.min.js";
+import { saveAs } from "file-saver";
+
+import styled from "styled-components";
+import { useCreateCountries } from "../../hooks/mdm/country-structure/useCountries";
+
+async function downloadStructure(countryStructure: any) {
 	const wb = new ExcelJS.Workbook();
 	const ws = wb.addWorksheet("country_structure");
 	ws.columns = [
@@ -82,7 +84,7 @@ async function downloadStructure(countryStructure: { name: any; }[]) {
 	saveAs(new Blob([buf]), "country_structure.xlsx");
 }
 
-function stringifyNumber(n: number) {
+function stringifyNumber(n: any) {
 	const special = [
 		"First",
 		"Second",
@@ -98,25 +100,25 @@ function stringifyNumber(n: number) {
 	return special[n];
 }
 
-const CountryStructureDefault = () => {
+const CreateCountries = () => {
 	const router = useRouter();
-	const [errors, setErrors] = useState({});
-	const [countryStructure, setCountryStructure] = useState([]);
-	const [modalDelete, setModalDelete] = useState({ open: false });
+	const [errors, setErrors] = useState<any>({});
+	const [countryStructure, setCountryStructure] = useState<any>([]);
+	const [modalDelete, setModalDelete] = useState<any>({ open: false });
 	const [searchCurrency, setSearchCurrency] = useState("");
 	const [countryBasic, setCountryBasic] = useState({
 		name: "",
 		currencyId: "",
 	});
-	const [allStructure, setAllStructure] = useState([]);
+	const [allStructure, setAllStructure] = useState<any>([]);
 
-	const [showUploadStructure, setShowUploadStructure] = useState();
-	const [showManageData, setShowManageData] = useState({
+	const [showUploadStructure, setShowUploadStructure] = useState<any>(false);
+	const [showManageData, setShowManageData] = useState<any>({
 		visible: false,
 		index: null,
 	});
 
-	const onUploadStructure = (data: ({ [s: string]: unknown; } | ArrayLike<unknown>)[]) => {
+	const onUploadStructure = (data: any) => {
 		const datas: any = Object.values(data[1]).map((data, index) => ({
 			name: data,
 			level: index + 1,
@@ -125,17 +127,18 @@ const CountryStructureDefault = () => {
 		setCountryStructure(datas);
 	};
 
-	const { mutate: createCountry } = useMdmCreateCountry({
+	const { mutate: createCountry } = useCreateCountries({
 		options: {
 			onSuccess: () => {
-				router.push("/country");
+				alert('country success created')
+				router.push("/country-structure");
 			},
 		},
 	});
 
-	const validateRequired = (data: { structure?: any; name: any; currencyId: any; }) => {
+	const validateRequired = (data: any) => {
 		const newErrors: any = _.cloneDeep(errors);
-		let isError: boolean = false;
+		let isError = false;
 
 		if (!data.name) {
 			newErrors["name"] = "Country Name is required";
@@ -155,14 +158,14 @@ const CountryStructureDefault = () => {
 	const onSubmit = () => {
 		let newAllStructure: any = _.clone(allStructure);
 		if (newAllStructure.length > 0) {
-			const allStructureZero =
+			const allStructureZero: any =
 				allStructure?.[0]?.map((data: any) => ({
 					...data,
 					parent: 0,
 				})) || [];
 			newAllStructure[0] = allStructureZero;
 		}
-		const newStructure: any = countryStructure.map((country: any, index) => {
+		const newStructure = countryStructure.map((country: any, index: any) => {
 			return {
 				...country,
 				data: newAllStructure[index],
@@ -179,15 +182,15 @@ const CountryStructureDefault = () => {
 	};
 
 	const onDeleteStructure = () => {
-		const newCountryStructure = countryStructure.slice(0, modalDelete?.index);
-		const newAllStructure = allStructure.slice(0, modalDelete?.index);
+		const newCountryStructure: any = countryStructure.slice(0, modalDelete?.index);
+		const newAllStructure: any = allStructure.slice(0, modalDelete?.index);
 		setCountryStructure(newCountryStructure);
 		setAllStructure(newAllStructure);
 		setModalDelete({ open: false });
 	};
 
 	const addStructure = () => {
-		let newStructure: any = countryStructure.slice();
+		let newStructure = countryStructure.slice();
 		newStructure.push({
 			level: countryStructure.length + 1,
 			connectPostalCode: "N",
@@ -196,35 +199,36 @@ const CountryStructureDefault = () => {
 		setCountryStructure(newStructure);
 	};
 
-	const onChangeStructureName = (e: { target: { value: any; }; }, index: number) => {
+	const onChangeStructureName = (e: any, index: any) => {
 		let newStructure = _.cloneDeep(countryStructure);
 		newStructure[index].name = e.target.value;
 		setCountryStructure(newStructure);
 	};
 
-	const onChangeStructurePostalCode = (index: number) => {
-		let newStructure: any = _.cloneDeep(countryStructure);
+	const onChangeStructurePostalCode = (index: any) => {
+		let newStructure = _.cloneDeep(countryStructure);
 		newStructure[index].connectPostalCode = newStructure[index].connectPostalCode === "Y" ? "N" : "Y";
 		setCountryStructure(newStructure);
 	};
 
-	const { data: currencies, isLoading: isLoadingCurrencies } = useCurrenciesMDM({
+	const { data: currencies, isLoading: isLoadingCurrencies }: any = useCurrenciesMDM({
 		query: {
 			limit: 10000,
 			search: searchCurrency,
 		},
+		options: {}
 	});
-	const currencyList = currencies?.rows?.map((currency: { id: any; currencyName: any; }) => ({
+	const currencyList = currencies?.rows?.map((currency: any) => ({
 		id: currency.id,
 		value: currency.currencyName,
 	}));
 
-	const recursivelyDeleteStructure = (structure: any[], allStructure: any[], deletedIds: any[], level: number) => {
-		const parentDeletedIds: any[] = [];
+	const recursivelyDeleteStructure = (structure: any, allStructure: any, deletedIds: any, level: any) => {
+		const parentDeletedIds: any = [];
 		deletedIds.forEach((id: any) => {
-			const findParentId =  structure.find((structure: { parent: any; }) => structure.parent === id);
+			const findParentId =  structure.find((structure: any) => structure.parent === id);
 			parentDeletedIds.push(findParentId.id);
-			allStructure[level] = structure.filter((structure: { parent: any; }) => structure.parent !== id)
+			allStructure[level] = structure.filter((structure: any) => structure.parent !== id)
 		})
 
 		if(allStructure[level+1]){
@@ -232,7 +236,7 @@ const CountryStructureDefault = () => {
 		}
 	}
 
-	const onAddToStructure = (tempAllStructure: any[], level: number) => {
+	const onAddToStructure = (tempAllStructure: any, level: any) => {
 		if(!tempAllStructure) {
 			setShowManageData({ visible: false });
 			return;
@@ -241,18 +245,18 @@ const CountryStructureDefault = () => {
 		let newStructure: any = _.cloneDeep(allStructure);
 		// recursively delete
 		if(newStructure[level] && !_.isEqual(newStructure[level-1], tempAllStructure)){
-			const deletedIds: any[] = [];
-			const tempAllStructureIds = tempAllStructure.map((temp: { id: any; }) => temp.id);
-			newStructure[level-1].forEach((structure: { id: any; }) => {
+			const deletedIds: any = [];
+			const tempAllStructureIds: any = tempAllStructure.map((temp: any) => temp?.id);
+			newStructure[level-1].forEach((structure: any) => {
 				if(!tempAllStructureIds.includes(structure.id)){
 					deletedIds.push(structure.id)
 				}
 			})
-			const parentDeletedIds: any[] = [];
+			const parentDeletedIds: any = [];
 			deletedIds.forEach((id: any) => {
-				const findParentId =  newStructure[level].find((structure: { parent: any; }) => structure.parent === id);
+				const findParentId =  newStructure[level].find((structure: any) => structure.parent === id);
 				parentDeletedIds.push(findParentId.id);
-				newStructure[level] = newStructure[level].filter((structure: { parent: any; }) => structure.parent !== id)
+				newStructure[level] = newStructure[level].filter((structure: any) => structure.parent !== id)
 			})
 			
 			if(newStructure[level+1]){
@@ -264,7 +268,7 @@ const CountryStructureDefault = () => {
 		setShowManageData({ visible: false });
 	};
 
-	const onFocusRemoveValidation = (e: { target: any; }) => {
+	const onFocusRemoveValidation = (e: any) => {
 		const newErrors: any = _.cloneDeep(errors);
 		delete newErrors[e.target.name];
 		setErrors(newErrors);
@@ -284,15 +288,13 @@ const CountryStructureDefault = () => {
 					<Spacer size={12} />
 					<Card>
 						<Row justifyContent="flex-end" alignItems="center" nowrap>
-							<Row>
-								<Row gap="16px">
-									<Button size="big" variant={"tertiary"} onClick={() => router.push("/country")}>
-										Cancel
-									</Button>
-									<Button size="big" variant={"primary"} onClick={onSubmit}>
-										Save
-									</Button>
-								</Row>
+							<Row gap="10px">
+								<Button size="big" variant={"tertiary"} onClick={() => router.push("/country")}>
+									Cancel
+								</Button>
+								<Button size="big" variant={"primary"} onClick={onSubmit}>
+									Save
+								</Button>
 							</Row>
 						</Row>
 					</Card>
@@ -311,8 +313,8 @@ const CountryStructureDefault = () => {
 										height="48px"
 										placeholder={"e.g Indonesia"}
 										value={countryBasic.name}
-										onChange={(e: { target: { value: any; }; }) => setCountryBasic({ ...countryBasic, name: e.target.value })}
-										error={errors.name}
+										onChange={(e: any) => setCountryBasic({ ...countryBasic, name: e.target.value })}
+										error={errors?.name}
 										required
 										onFocus={() =>
 											onFocusRemoveValidation({
@@ -327,7 +329,7 @@ const CountryStructureDefault = () => {
 										width={"100%"}
 										items={currencyList}
 										placeholder={"Select"}
-										onSearch={(search: React.SetStateAction<string>) => setSearchCurrency(search)}
+										onSearch={(search: any) => setSearchCurrency(search)}
 										handleChange={(value: any) => {
 											onFocusRemoveValidation({
 												target: {
@@ -336,7 +338,7 @@ const CountryStructureDefault = () => {
 											});
 											setCountryBasic({ ...countryBasic, currencyId: value });
 										}}
-										error={errors?.currency}
+										error={errors.currency}
 										required
 									/>
 								</Row>
@@ -506,7 +508,7 @@ const DownloadUploadContainer = styled.div`
 const Card = styled.div`
 	background: #ffffff;
 	border-radius: 16px;
-	padding: ${(p) => (p.padding ? p.padding : "16px")};
+	padding: 16px;
 `;
 
-export default CountryStructureDefault;
+export default CreateCountries;

@@ -17,7 +17,8 @@ import styled from "styled-components";
 import usePagination from "@lucasmogari/react-pagination";
 import UploadFile from "../../../assets/icons/upload-file.svg";
 import DownloadFile from "../../../assets/icons/download-file.svg";
-import { useMdmCountryStructure } from "../../../hooks/mdm/country-structure/useCountry";
+import { useFetchCountriesStructure } from "../../../hooks/mdm/country-structure/useCountries";
+
 import axios from "axios";
 
 let token: any;
@@ -69,8 +70,8 @@ export const ModalManageDataEdit = ({
 	countryStructure,
 	updateAllStructure
 }: any) => {
-	const [name, setName] = useState();
-	const [parent, setParent] = useState(null);
+	const [name, setName] = useState("");
+	const [parent, setParent] = useState<any>({});
 	const [tempAllStructure, setTempAllStructure] = useState([]);
 	const [searchTable, setSearchTable] = useState("");
 	const [parentDatasStructure, setParentDatasStructure] = useState([]);
@@ -91,7 +92,7 @@ export const ModalManageDataEdit = ({
 		totalItems: 100,
 	});
 
-	let currentTempStructure = tempAllStructure;
+	let currentTempStructure: any = tempAllStructure;
 	if(!structure.id){
 		const addNewAllStructure = updateAllStructure.addNew[level-1]
 		const deletedNewAllStructure = updateAllStructure.delete[level-1]
@@ -100,17 +101,17 @@ export const ModalManageDataEdit = ({
 		}
 		
 		if(deletedNewAllStructure){
-			currentTempStructure = currentTempStructure.filter(data => !deletedNewAllStructure.includes(data.id))
+			currentTempStructure = currentTempStructure.filter((data: any) => !deletedNewAllStructure.includes(data.id))
 		}
 	}
 
-	useMdmCountryStructure({
+	useFetchCountriesStructure({
 		structure_id: structure.id,
 		options: {
-			onSuccess: (data) => {
-				const addNewAllStructure = updateAllStructure.addNew[level-1]
-				const deletedNewAllStructure = updateAllStructure.delete[level-1]
-				let tempAllStructureClone = _.clone(tempAllStructure);
+			onSuccess: (data: any) => {
+				const addNewAllStructure: any = updateAllStructure.addNew[level-1]
+				const deletedNewAllStructure: any = updateAllStructure.delete[level-1]
+				let tempAllStructureClone: any = _.clone(tempAllStructure);
 				if(addNewAllStructure){
 					tempAllStructureClone = [...addNewAllStructure, ...data.rows];
 				} else {
@@ -140,10 +141,10 @@ export const ModalManageDataEdit = ({
 		},
 	});
 
-	useMdmCountryStructure({
+	useFetchCountriesStructure({
 		structure_id: countryStructure?.[level - 2]?.id,
 		options: {
-			onSuccess: (data) => {
+			onSuccess: (data: any) => {
 				const addParentAllStructure = updateAllStructure.addNew[level-2]
 				let tempParent = data.rows
 				if(addParentAllStructure){
@@ -152,12 +153,12 @@ export const ModalManageDataEdit = ({
 
 				const deleteParentAllStructure = updateAllStructure.delete[level-2]
 				if(deleteParentAllStructure){
-					tempParent = tempParent.filter(parent => !deleteParentAllStructure.includes(parent.id));
+					tempParent = tempParent.filter((parent: any) => !deleteParentAllStructure.includes(parent.id));
 			   } 
 
 			   setAllParentData(tempParent)
 				setParentDatasStructure(
-					tempParent.map((data) => ({
+					tempParent.map((data: any) => ({
 						id: data.id,
 						value: data.name,
 						data: data
@@ -227,7 +228,7 @@ export const ModalManageDataEdit = ({
 		}));
 
 	let dataTable: any = [];
-	currentTempStructure?.forEach((data) => {
+	currentTempStructure?.forEach((data: any) => {
 		dataTable.push({
 			key: data.id,
 			1: data.name,
@@ -256,19 +257,19 @@ export const ModalManageDataEdit = ({
 	});
 
 	if(searchTable){
-		dataTable = dataTable.filter(data => data[1].toLowerCase().includes(searchTable.toLowerCase()))
+		dataTable = dataTable.filter((data: any) => data[1].toLowerCase().includes(searchTable.toLowerCase()))
 	}
 
 	let parentData = parentDatasStructure;
 	if(!countryStructure?.[level - 2]?.id && level > 1){
-		parentData= updateAllStructure.addNew[level-1].map((data) => ({
+		parentData= updateAllStructure.addNew[level-1].map((data: any) => ({
 			id: data.id,
 			value: data.name,
 			data: data?.data
 		}))
 	}
 	if(searchCurrency){
-		parentData = parentData.filter(data => data.value.toLowerCase().includes(searchCurrency.toLowerCase()))
+		parentData = parentData.filter((data: any) => data.value.toLowerCase().includes(searchCurrency.toLowerCase()))
 	}
 
 	const onSelectChange = (selectedRowKeys: any) => {
@@ -280,13 +281,13 @@ export const ModalManageDataEdit = ({
 	};
 
 	const deleteDataInStructure = (deleteId: any) => {
-		const newAllStructure = _.cloneDeep(currentTempStructure);
-		newAllStructure = newAllStructure.filter((data) => !selectedRowKeys.includes(data.id));
+		let newAllStructure: any = _.cloneDeep(currentTempStructure);
+		newAllStructure = newAllStructure.filter((data: any) => !selectedRowKeys.includes(data.id));
 		setTempAllStructure(newAllStructure);
 
 		let updateStructureClone = _.cloneDeep(updateStructure);
 		const isNaNRow = selectedRowKeys.filter(row=> isNaN(row));
-		updateStructureClone.addNew = updateStructureClone.addNew.filter(data => !isNaNRow.includes(data.id))
+		updateStructureClone.addNew = updateStructureClone.addNew.filter((data: any)=> !isNaNRow.includes(data.id))
 		updateStructureClone.delete.push(...selectedRowKeys.filter(row => !isNaN(row)))
 		setUpdateStructure(updateStructureClone)
 	};
@@ -294,9 +295,9 @@ export const ModalManageDataEdit = ({
 	const [showUploadTemplate, setShowUploadTemplate] = useState(false);
 
 	const onUploadStructure = (data: any) => {
-		const newData = [];
+		const newData: any = [];
 		if (level > 1) {
-			data.forEach((data) => {
+			data.forEach((data: any) => {
 				let newEntries = Object.entries(data);
 				const currentLevel = newEntries[level];
 				const currentData = currentLevel[1];
@@ -309,8 +310,8 @@ export const ModalManageDataEdit = ({
 					currentParentId = currentParentIds[1];
 				}
 
-				const newSingleData = {
-					id: self.crypto.randomUUID(),
+				const newSingleData: any = {
+					id: self?.crypto?.randomUUID(),
 					name: currentData,
 					parent: {
 						id: currentParentId,
@@ -322,13 +323,13 @@ export const ModalManageDataEdit = ({
 				newData.push(newSingleData);
 			});
 		} else {
-			data.forEach((data) => {
+			data.forEach((data: any) => {
 				let newEntries = Object.entries(data);
 				const currentLevel = newEntries[level - 1];
 				const currentData = currentLevel[1];
 
 				const newSingleData = {
-					id: self.crypto.randomUUID(),
+					id: self?.crypto?.randomUUID(),
 					name: currentData,
 					parent: null,
 					isNewParent: false,
@@ -338,18 +339,18 @@ export const ModalManageDataEdit = ({
 			});
 		}
 
-		const tempAddClone = _.cloneDeep(tempAdd);
+		const tempAddClone: any = _.cloneDeep(tempAdd);
 		tempAddClone.push(newData);
 		setTempAdd(tempAddClone)
 
-		const newAllStructure = _.cloneDeep(currentTempStructure);
+		let newAllStructure: any = _.cloneDeep(currentTempStructure);
 		newAllStructure = newData;
 		setTempAllStructure(newAllStructure);
 		setName("");
 		setParent(null);
 
 		let updateStructureClone = _.cloneDeep(updateStructure);
-		updateStructureClone.delete.push(...tempAllStructure.map(data => data.id))
+		updateStructureClone.delete.push(...tempAllStructure.map((data: any) => data.id))
 		updateStructureClone.addNew = newData
 		setUpdateStructure(updateStructureClone)
 	};
@@ -427,7 +428,7 @@ export const ModalManageDataEdit = ({
 							label={`${stringifyNumber(structure.level - 1)} Level Name`}
 							height="48px"
 							placeholder={`e.g ${structure.name} Name`}
-							onChange={(e) => setName(e.target.value)}
+							onChange={(e: any) => setName(e.target.value)}
 							value={name}
 							//onChange={(e) => onChangeStructure(e, index)}
 						/>
@@ -438,8 +439,8 @@ export const ModalManageDataEdit = ({
 								key={dataTable.length}
 								items={parentData}
 								placeholder={"Select"}
-								onSearch={(search) => setSearchCurrency(search)}
-								handleChange={(value) => setParent({id: value })}
+								onSearch={(search: any) => setSearchCurrency(search)}
+								handleChange={(value: any) => setParent({ id: value })}
 							/>
 						)}
 						<Button disabled={!name} variant="primary" size="big" onClick={() => onAddStructure()}>
@@ -456,7 +457,7 @@ export const ModalManageDataEdit = ({
 					<Row width="100%" noWrap alignItems="center" gap="16px">
 						<Search
 							placeholder={`Search ${structure.name} Name`}
-							onChange={(e) => setSearchTable(e.target.value)}
+							onChange={(e: any) => setSearchTable(e.target.value)}
 						/>
 						<ActionButton lists={lists} />
 						<Button

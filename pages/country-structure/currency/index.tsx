@@ -22,7 +22,7 @@ import {
 	useCreateCurrencyMDM,
 	useUpdateCurrencyMDM,
 	useUploadFileCurrencyMDM,
-} from "../../../hooks/mdm/currency/useCurrencyMDM";
+} from "../../../hooks/mdm/country-structure/useCurrencyMDM";
 import { queryClient } from "../../_app";
 import useDebounce from "../../../lib/useDebounce";
 import { mdmDownloadService } from "../../../lib/client";

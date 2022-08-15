@@ -16,9 +16,15 @@ import {
 	FileUploadModal,
 } from "pink-lava-ui";
 
+import {useDataCountries, useDeleteDataCountries, useUploadFileCountries} from '../../hooks/mdm/country-structure/useCountries'
 import DownloadSvg from "../../assets/icons/ic-download.svg";
 import UploadSvg from "../../assets/icons/ic-upload.svg";
 import SyncSvg from "../../assets/icons/ic-sync.svg";
+
+import styled from "styled-components";
+import { mdmDownloadService } from "../../lib/client";
+
+const dropdownStyles = {cursor: "pointer", display: "flex", alignItems: "center", gap: 5}
 
 const ListTemplateMenu = () => {
 	const router = useRouter();
@@ -36,25 +42,24 @@ const ListTemplateMenu = () => {
 	});
 	const [search, setSearch] = useState<string>("");
 	const [selectedItem, setSelectedItem] = useState([]);
-	const [isShowUpload, setShowUpload] = useState(false);
 
 
 	// event function
 	const columns = [
 		{
 			title: "Country ID",
-			dataIndex: "currencyId",
-			key: "currencyId",
+			dataIndex: "countryID",
+			key: "countryID",
 		},
 		{
 			title: "Country Name",
-			dataIndex: "name",
-			key: "name",
+			dataIndex: "countryName",
+			key: "countryName",
 		},
 		{
 			title: "Action",
-			render: ({ id }: { id: string }) => (
-				<Button size="small" onClick={() => router.push(`/country-structure/${id}`)} variant="tertiary">
+			render: ({ countryID }: { countryID: string }) => (
+				<Button size="small" onClick={() => router.push(`/country-structure/${countryID}`)} variant="tertiary">
 					View Detail
 				</Button>
 			),
@@ -63,16 +68,71 @@ const ListTemplateMenu = () => {
 
 	const rowSelection = {
 		selectedItem,
-		onChange: (selectedKey: any) => setSelectedItem(selectedKey),
+		onChange: (countryID: any) => setSelectedItem(countryID)
 	};
+	
+	const { data: fetchDataCountries, refetch: refetchDataCountries, isLoading } = useDataCountries({
+		options: {
+			onSuccess: (data: any) => {
+				pagination.setTotalItems(data.totalRow);
+			}
+		},
+		query: {
+			search
+		}
+	})
 
+	const data: any = [];
+	fetchDataCountries?.rows?.map((country: any, index: any) => {
+		data.push({
+			key: country?.id,
+			countryID: country?.id,
+			countryName: country?.name
+		});
+	});
+
+	const { mutate: deleteDataCountries }:any = useDeleteDataCountries({
+		options: {
+			onSuccess: () => {
+				refetchDataCountries()
+				setSelectedItem([])
+				setVisible({ delete: false, upload: false })
+			}
+		}
+	})
+
+	const handleDownloadFile = (params: any) => {
+		mdmDownloadService("/country/template/generate", { params }).then(res => {
+			let dataUrl = window.URL.createObjectURL(new Blob([res?.data]));
+			let tempLink = document.createElement("a");
+			tempLink.href = dataUrl;
+			tempLink.setAttribute("download", `country_${new Date().getTime()}.xlsx`);
+			tempLink.click();
+		})
+	}
+
+	const { mutate: uploadFileCountries } = useUploadFileCountries({
+		options: {
+			onSuccess: () => {
+				refetchDataCountries()
+				setVisible({ delete: false, upload: false })
+			}
+		}
+	})
+
+	const submitUploadFile = (file: any) => {
+		const formData: any = new FormData()
+		formData.append('upload_file', file)
+		
+		uploadFileCountries(formData)
+	}
 
 	return (
 		<>
 			<Col>
 				<Text variant={"h4"}>Country</Text>
 				<Spacer size={20} />
-				<div>
+				<Card>
 					<Row justifyContent="space-between">
 						<Search
 							width="380px"
@@ -101,7 +161,7 @@ const ListTemplateMenu = () => {
 								{
 									key: 1,
 									value: (
-										<div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+										<div onClick={() => handleDownloadFile({ with_data: "Y" })} style={dropdownStyles}>
 											<DownloadSvg />
 											<p style={{ margin: "0" }}>Download Template</p>
 										</div>
@@ -110,7 +170,7 @@ const ListTemplateMenu = () => {
 								{
 									key: 2,
 									value: (
-										<div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+										<div onClick={() => setVisible({ delete: false, upload: true })} style={dropdownStyles}>
 											<UploadSvg />
 											<p style={{ margin: "0" }}>Upload Template</p>
 										</div>
@@ -119,7 +179,7 @@ const ListTemplateMenu = () => {
 								{
 									key: 3,
 									value: (
-										<div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+										<div onClick={() => handleDownloadFile({ with_data: "N" })} style={dropdownStyles}>
 											<DownloadSvg />
 											<p style={{ margin: "0" }}>Download Data</p>
 										</div>
@@ -128,7 +188,7 @@ const ListTemplateMenu = () => {
 								{
 									key: 4,
 									value: (
-										<div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+										<div onClick={() => {}} style={dropdownStyles}>
 											<SyncSvg />
 											<p style={{ margin: "0" }}>Sync Data</p>
 										</div>
@@ -141,36 +201,40 @@ const ListTemplateMenu = () => {
 							</Button>
 						</Row>
 					</Row>
-				</div>
+				</Card>
 				<Spacer size={10} />
-				<div>
-					<Col gap="60px">
-						<Table
-							loading={false}
-							rowSelection={rowSelection}
-							columns={columns}
-							data={[]}
-						/>
-						<Pagination pagination={pagination} />
-					</Col>
-				</div>
+				<Card>
+					<Table
+						loading={isLoading}
+						rowSelection={rowSelection}
+						columns={columns}
+						data={data || []}
+					/>
+					<Pagination pagination={pagination} />
+				</Card>
 			</Col>
 
 			<FileUploadModal
-				visible={isShowUpload}
-				setVisible={setShowUpload}
-				onSubmit={() => {}}
+				visible={visible.upload}
+				setVisible={() => setVisible({ upload: false, delete: false })}
+				onSubmit={submitUploadFile}
 			/>
 
 			<ModalDeleteConfirmation
 				totalSelected={0}
 				itemTitle={`ID ${selectedItem}`}
 				visible={visible.delete}
-				onOk={() => {}}
+				onOk={() => deleteDataCountries({ ids: selectedItem })}
 				onCancel={() => setVisible({ delete: false, upload: false })}
 			/>
 		</>
 	);
 };
+
+const Card = styled.div`
+	background: white;
+	padding: 16px;
+	border-radius: 16px;
+`
 
 export default ListTemplateMenu;

@@ -1,9 +1,9 @@
 import { useQuery, useMutation } from "react-query";
-import { mdmClient } from "../../../lib/client";
+import { mdmService } from "../../../lib/client";
 
 // Get All
 const fetchPostalCodes = async ({ query = {} }) => {
-  return mdmClient(`/postal-code`, {
+  return mdmService(`/postal-code`, {
     params: {
       search: "",
       limit: 10,
@@ -37,7 +37,7 @@ const usePostalCode = () => {
 function useCreatePostalCode({ options }) {
   return useMutation(
     (updates) =>
-      mdmClient(`/postal-code`, {
+      mdmService(`/postal-code`, {
         method: "POST",
         data: updates,
       }),
@@ -51,7 +51,7 @@ function useCreatePostalCode({ options }) {
 function useUpdatePostalCode({ postalCode_id, options }) {
   return useMutation(
     (updates) =>
-      mdmClient(`/postal-code/${postalCode_id}`, {
+      mdmService(`/postal-code/${postalCode_id}`, {
         method: "PUT",
         data: updates,
       }),
@@ -65,7 +65,7 @@ function useUpdatePostalCode({ postalCode_id, options }) {
 const useDeletePostalCode = ({ options }) => {
   return useMutation(
     (ids) =>
-      mdmClient(`/postal-code`, {
+      mdmService(`/postal-code`, {
         method: "DELETE",
         data: ids,
       }),
@@ -77,7 +77,7 @@ const useDeletePostalCode = ({ options }) => {
 
 // Find All Countries
 const fetchCountries = async ({ query = {} }) => {
-  return mdmClient(`/country`, {
+  return mdmService(`/country`, {
     params: {
       ...query,
     },
@@ -92,7 +92,7 @@ const useCountries = ({ query = {}, options } = {}) => {
 };
 
 const fetchCountryStructures = async ({ country }) => {
-  return mdmClient(`/postal-code/country/structures/${country}`).then((data) => data);
+  return mdmService(`/postal-code/country/structures/${country}`).then((data) => data);
 };
 
 const useCountryStructures = ({ country, options }) => {

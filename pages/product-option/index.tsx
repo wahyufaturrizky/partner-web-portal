@@ -116,7 +116,7 @@ const ProductOption = () => {
     },
   });
 
-  const { mutate: deleteProductOption, isLoading: isLoadingDeleteProductOption } =
+  const { mutate: deleteProductOption, isLoading: isLoadingDeleteProductOption }: any =
     useDeleteProductOptionMDM({
       options: {
         onSuccess: () => {
@@ -165,7 +165,7 @@ const ProductOption = () => {
   };
 
   const onSubmitFile = (file: any) => {
-    const formData = new FormData();
+    const formData: any = new FormData();
     formData.append("company_id", "KSNI");
     formData.append("file", file);
 
