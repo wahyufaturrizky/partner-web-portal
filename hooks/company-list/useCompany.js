@@ -2,6 +2,8 @@ import { useQuery, useMutation } from "react-query";
 import { client } from "../../lib/client";
 import { mdmService } from "../../lib/client";
 
+// Start Company
+
 const fetchCompanyList = async ({ query = {} }) => {
   return client(`/hermes/company`, {
     params: {
@@ -23,8 +25,17 @@ const useCompanyList = ({ query = {}, options } = {}) => {
   });
 };
 
+const fetchCompany = async ({ id }) => {
+  return client(`/hermes/company/${id}`).then((data) => data);
+};
+
+const useCompany = ({ id, options }) => {
+  return useQuery(["company", id], () => fetchCompany({ id }), {
+    ...options,
+  });
+};
+
 function useStatusCompany({ companyId, status, options }) {
-  console.log(companyId, "Company ID");
   return useMutation(
     (payload) =>
       client(`/hermes/company/${companyId}/${status}`, {
@@ -39,6 +50,47 @@ function useStatusCompany({ companyId, status, options }) {
     }
   );
 }
+
+function useCreateCompany({ options }) {
+	return useMutation(
+		(updates) =>
+			client(`/hermes/company`, {
+				method: "POST",
+				data: updates,
+			}),
+		{
+			...options,
+		}
+	);
+}
+
+function useUpdateCompany({ companyId, options }) {
+	return useMutation(
+		(updates) =>
+			client(`/hermes/company/${companyId}`, {
+				method: "PUT",
+				data: updates,
+			}),
+		{
+			...options,
+		}
+	);
+}
+
+const useDeleteCompany = ({ options }) => {
+	return useMutation(
+		(ids) =>
+			client(`/hermes/company`, {
+				method: "DELETE",
+				data: ids,
+			}),
+		{
+			...options,
+		}
+	);
+};
+
+// End Company
 
 // list Date Format
 
@@ -89,7 +141,7 @@ const useNumberFormatLists = ({ query = {}, options } = {}) => {
 const fetchListCoa = async ({ query = {} }) => {
   return client(`/coa`, {
     params: {
-      // search: "",
+      search: "",
       // limit: 10,
       // page: 1,
       sortBy: "id",
@@ -111,7 +163,7 @@ const useCoa = ({ query = {}, options } = {}) => {
 const fetchCurrenciesMDM = async ({ query = {} }) => {
 	return mdmService(`/currency`, {
 		params: {
-			// search: "",
+			search: "",
 			// page: 1,
 			// limit: 10,
 			sortBy: "created_at",
@@ -173,7 +225,11 @@ const useCountries = ({ query = {}, options } = {}) => {
 
 export {
   useCompanyList,
+  useCompany,
   useStatusCompany,
+  useCreateCompany,
+  useUpdateCompany,
+  useDeleteCompany,
   useDateFormatLists,
   useNumberFormatLists,
   useCoa,

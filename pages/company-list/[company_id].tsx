@@ -5,13 +5,13 @@ import {
   Row,
   Spacer,
   Dropdown,
-  Table,
   Button,
   Accordion,
   Input,
   TextArea,
   Dropdown2,
   Switch,
+  Spin,
 } from "pink-lava-ui";
 import styled from "styled-components";
 import Router, { useRouter } from "next/router";
@@ -20,116 +20,348 @@ import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useForm } from "react-hook-form";
 import usePagination from "@lucasmogari/react-pagination";
+import {
+  useCoa,
+  useCompany,
+  useCountries,
+  useCreateCompany,
+  useCurrenciesMDM,
+  useDateFormatLists,
+  useMenuDesignLists,
+  useNumberFormatLists,
+} from "../../hooks/company-list/useCompany";
+import { useTimezone } from "../../hooks/timezone/useTimezone";
 
-const fakeCountry = [
+const CompanyTypeDataFake = [
   {
-    id: 1,
-    value: "Indonesia",
+    id: "Holding",
+    value: "Holding",
   },
   {
-    id: 2,
-    value: "Malaysia",
+    id: "Corporate",
+    value: "Corporate",
   },
   {
-    id: 3,
-    value: "Vietnam",
-  },
-  {
-    id: 4,
-    value: "Brunei",
+    id: "Company",
+    value: "Company",
   },
 ];
 
-const fakeMenuDesign = [
+const IndustryDataFake = [
   {
-    id: 1,
-    value: "FMCG Manufacture",
+    id: "Agricultural & Allied Industries",
+    value: "Agricultural & Allied Industries",
+    data: [
+      {
+        id: "Agricultural products",
+        value: "Agricultural products",
+      },
+      {
+        id: "Forestry & logging",
+        value: "Forestry & logging",
+      },
+      {
+        id: "Fishery",
+        value: "Fishery",
+      },
+    ],
   },
   {
-    id: 2,
-    value: "FMCG Distribution",
+    id: "Automobiles",
+    value: "Automobiles",
+    data: [
+      {
+        id: "Commercial vehicles",
+        value: "Commercial vehicles",
+      },
+      {
+        id: "Passenger cars",
+        value: "Passenger cars",
+      },
+      {
+        id: "Three & two-wheelers",
+        value: "Three & two-wheelers",
+      },
+    ],
   },
   {
-    id: 3,
-    value: "FMCG Marketing",
+    id: "Aviation",
+    value: "Aviation",
+    data: [
+      {
+        id: "Civil aviation",
+        value: "Civil aviation",
+      },
+      {
+        id: "Military aviation",
+        value: "Military aviation",
+      },
+    ],
   },
-];
-
-const fakeCompanyType = [
   {
-    id: 1,
-    value: "Agricultural",
+    id: "Banking & Insurance",
+    value: "Banking & Insurance",
+    data: [
+      {
+        id: "Public Banking",
+        value: "Public Banking",
+      },
+      {
+        id: "Private banking",
+        value: "Private banking",
+      },
+      {
+        id: "International banking",
+        value: "International banking",
+      },
+      {
+        id: "Life insurance",
+        value: "Life insurance",
+      },
+      {
+        id: "General insurance",
+        value: "General insurance",
+      },
+    ],
   },
   {
-    id: 2,
+    id: "Cement",
+    value: "Cement",
+    data: [
+      {
+        id: "Cement production",
+        value: "Cement production",
+      },
+      {
+        id: "Cement transportation",
+        value: "Cement transportation",
+      },
+    ],
+  },
+  {
+    id: "Consumer Durables",
+    value: "Consumer Durables",
+    data: [
+      {
+        id: "Consumer electronics (brown goods)",
+        value: "Consumer electronics (brown goods)",
+      },
+      {
+        id: "Consumer appliances (white goods)",
+        value: "Consumer appliances (white goods)",
+      },
+    ],
+  },
+  {
+    id: "E-Commerce",
     value: "E-Commerce",
+    data: [
+      {
+        id: "E-procurement",
+        value: "E-procurement",
+      },
+      {
+        id: "E-marketing",
+        value: "E-marketing",
+      },
+      {
+        id: "E-payment",
+        value: "E-payment",
+      },
+    ],
   },
   {
-    id: 3,
-    value: "FMCG ",
+    id: "Education & Training",
+    value: "Education & Training",
+    data: [
+      {
+        id: "Education",
+        value: "Education",
+      },
+      {
+        id: "Training",
+        value: "Training",
+      },
+    ],
+  },
+  {
+    id: "Engineering & Capital Goods",
+    value: "Engineering & Capital Goods",
+    data: [
+      {
+        id: "Transport equipment",
+        value: "Transport equipment",
+      },
+      {
+        id: "Capital goods",
+        value: "Capital goods",
+      },
+      {
+        id: "other machinery/equipment and light engineering products such as castings, forgings and fasteners",
+        value:
+          "other machinery/equipment and light engineering products such as castings, forgings and fasteners",
+      },
+    ],
+  },
+  {
+    id: "FMCG",
+    value: "FMCG",
+    data: [
+      {
+        id: "Packaged foods",
+        value: "Packaged foods",
+      },
+      {
+        id: "Beverages",
+        value: "Beverages",
+      },
+      {
+        id: "Toiletries",
+        value: "Toiletries",
+      },
+      {
+        id: "Over-the-counter drugs",
+        value: "Over-the-counter drugs",
+      },
+      {
+        id: "Other consumables",
+        value: "Other consumables",
+      },
+    ],
+  },
+  {
+    id: "Gems & Jewellery",
+    value: "Gems & Jewellery",
+    data: [
+      {
+        id: "Gems",
+        value: "Gems",
+      },
+      {
+        id: "Jewelry",
+        value: "Jewelry",
+      },
+    ],
+  },
+  {
+    id: "Healthcare",
+    value: "Healthcare",
+    data: [
+      {
+        id: "Hospitals",
+        value: "Hospitals",
+      },
+      {
+        id: "Medical devices",
+        value: "Medical devices",
+      },
+      {
+        id: "Clinical trials",
+        value: "Clinical trials",
+      },
+      {
+        id: "Outsourcing",
+        value: "Outsourcing",
+      },
+      {
+        id: "Telemedicine",
+        value: "Telemedicine",
+      },
+      {
+        id: "Medical tourism",
+        value: "Medical tourism",
+      },
+      {
+        id: "Health insurance and Medical equipment",
+        value: "Health insurance and Medical equipment",
+      },
+    ],
   },
 ];
 
-const fakeCorporate = [
+const CorporateDataFake = [
   {
-    id: 1,
+    id: "Domestic",
     value: "Domestic",
   },
   {
-    id: 2,
+    id: "International",
     value: "International",
   },
   {
-    id: 3,
+    id: "Other",
     value: "Other",
   },
 ];
 
-const fakeCurrency = [
+const NumberOfEmployeeDataFake = [
   {
-    id: 1,
-    value: "IDR - Indonesia Rupiah",
+    id: "1-50",
+    value: "1-50",
   },
   {
-    id: 2,
-    value: "USD - United States Dollar",
+    id: "51-100",
+    value: "51-100",
   },
   {
-    id: 3,
-    value: "SGD - Singapore Dollar",
-  },
-];
-
-const fakeTimezone = [
-  {
-    id: 1,
-    value: "(UTC +07:00) Bangkok, Hanoi, Jakarta",
+    id: "101-500",
+    value: "101-500",
   },
   {
-    id: 2,
-    value: "(UTC +08:00) Beijing, Chongqing, Hongkong",
+    id: "501-1000",
+    value: "501-1000",
   },
   {
-    id: 3,
-    value: "(UTC +08:00) Kuala Lumpure, Singapore",
+    id: "1001-5000",
+    value: "1001-5000",
+  },
+  {
+    id: "5001-10000",
+    value: "5001-10000",
+  },
+  {
+    id: "10001++",
+    value: "10001++",
   },
 ];
 
 const schema = yup
   .object({
-    name: yup.string().required("Full Name is Required"),
-    code: yup.string().required("Code is Required"),
-    email: yup.string().email("Email is"),
-    address: yup.string().required("Address is Required"),
+    name: yup.string().required("Name is Required"),
+    code: yup.string().required("Company code is Required"),
+    email: yup.string().email("Email not validated").required("Email is Required"),
+    address: yup.string(),
+    taxId: yup.string(),
+    country: yup.string().required("Country is Required"),
+    industry: yup.string().required("Industry is Required"),
+    numberOfEmployee: yup.string(),
+    sector: yup.string().required("Sector is Required"),
+    menuDesign: yup.string(),
+    companyType: yup.string().required("Company Type is Required"),
+    corporate: yup.string(),
+    currency: yup.string().required("Currency is Required"),
+    coaTemplate: yup.string().required("CoA Template is Required"),
+    formatDate: yup.string().required("Format Date is Required"),
+    numberFormat: yup.string().required("Number Format is Required"),
+    timezone: yup.string(),
+    isPkp: yup.boolean(),
+    advancePricing: yup.boolean(),
+    pricingStructure: yup.boolean(),
+    usingApproval: yup.boolean(),
   })
   .required();
 
 const defaultValue = {
   activeStatus: "Y",
+  isPkp: false,
+  advancePricing: false,
+  pricingStructure: false,
+  usingApproval: false,
 };
 
 const DetailCompany: any = () => {
   const router = useRouter();
+  const { company_id } = router.query;
 
   const pagination = usePagination({
     page: 1,
@@ -140,8 +372,20 @@ const DetailCompany: any = () => {
     totalItems: 100,
   });
 
-  const [permissionsIds, setPermissions] = useState();
-  const [search, setSearch] = useState("");
+  const [searchCoa, setSearchCoa] = useState("");
+
+  const [searchCurrency, setSearchCurrency] = useState("");
+
+  const [searchMenuDesign, setSearchMenuDesign] = useState("");
+
+  const [searchTimezone, setSearchTimezone] = useState();
+
+  const [searchCountry, setSearchCountry] = useState();
+
+  const [industryList, setIndustryList] = useState(IndustryDataFake);
+  const [sectorList, setSectorList] = useState([]);
+
+  const [address, setAddress] = useState("");
 
   const {
     register,
@@ -158,12 +402,125 @@ const DetailCompany: any = () => {
     { id: "N", value: '<div key="2" style="color:red;">Non Active</div>' },
   ];
 
+  const {
+    data: companyData,
+    isLoading: isLoadingCompanyData,
+    isFetching: isFetchingCompanyData,
+  } = useCompany({
+    id: company_id,
+    options: {
+      onSuccess: (data: any) => {
+        console.log(data, "Detail Data");
+      },
+    },
+  });
+
+  const { data: dateFormatData, isLoading: isLoadingDateFormatList } = useDateFormatLists({
+    options: {
+      onSuccess: (data) => {},
+    },
+  });
+
+  const { data: numberFormatData, isLoading: isLoadingNumberFormatList } = useNumberFormatLists({
+    options: {
+      onSuccess: (data) => {},
+    },
+  });
+
+  const { data: coaData, isLoading: isLoadingCoaList } = useCoa({
+    options: {
+      onSuccess: (data) => {},
+    },
+    query: {
+      search: searchCoa,
+    },
+  });
+
+  const { data: menuDesignData, isLoading: isLoadingMenuDesignList } = useMenuDesignLists({
+    options: {
+      onSuccess: (data) => {},
+    },
+    query: {
+      search: searchMenuDesign,
+    },
+  });
+
+  const { data: currencyData, isLoading: isLoadingCurrencyList } = useCurrenciesMDM({
+    options: {
+      onSuccess: (data) => {},
+    },
+    query: {
+      search: searchCurrency,
+    },
+  });
+
+  const { data: countryData, isLoading: isLoadingCountryList } = useCountries({
+    options: {
+      onSuccess: (data) => {},
+    },
+    query: {
+      search: searchCountry,
+    },
+  });
+
+  const { data: timezoneData, isLoading: isLoadingTimezoneList } = useTimezone({
+    options: {
+      onSuccess: (data) => {},
+    },
+    query: {
+      search: searchTimezone,
+    },
+  });
+
+  const handleSearchIndustry = (value) => {
+    const newIndustry = IndustryDataFake.filter((tz) => tz.value.includes(value));
+    setIndustryList(newIndustry);
+  };
+
+  const handleSelectIndustry = (value) => {
+    setValue("industry", value);
+    const filterIndustry = industryList.filter((tz) => tz.value.includes(value));
+    setSectorList(filterIndustry[0].data);
+  };
+
+  const { mutate: createCompany } = useCreateCompany({
+    options: {
+      onSuccess: (data) => {
+        console.log(data);
+        // router.push("/company-list");
+      },
+    },
+  });
+
   const onSubmit = (data) => {
-    // const payload = {
-    // 	...data,
-    // 	permissions: permissionsIds,
-    // };
-    // createRole(payload);
+    const payload = {
+      account_id: "0",
+      name: data.name,
+      code: data.code,
+      email: data.email,
+      address: address,
+      country: data.country || "",
+      industry: data.industry,
+      employees: data.numberOfEmployee,
+      sector: data.sector,
+      menu_design: data.menuDesign || "",
+      tax_id: data.taxId,
+      pkp: data.isPkp,
+      logo: "",
+      company_type: data.companyType,
+      corporate: data.corporate,
+      currency: data.currency,
+      coa: data.coaTemplate,
+      format_date: data.formatDate,
+      format_number: data.numberFormat,
+      timezone: data.timezone || "",
+      advance_pricing: data.advancePricing,
+      pricing_structure: data.pricingStructure,
+      use_approval: data.usingApproval,
+      status: data.activeStatus,
+    };
+    // console.log(payload)
+    createCompany(payload);
   };
 
   return (
@@ -171,21 +528,23 @@ const DetailCompany: any = () => {
       <Col>
         <Row gap="4px" alignItems="center">
           <ArrowLeft style={{ cursor: "pointer" }} onClick={() => Router.push("/company-list")} />
-          <Text variant={"h4"}>PT. Kaldu Sari Nabati Indonesia</Text>
+          <Text variant={"h4"}>Add New Company</Text>
         </Row>
         <Spacer size={12} />
         <Card padding="20px">
           <Row justifyContent="space-between" alignItems="center" nowrap>
-            <Dropdown
-              label=""
-              isHtml
-              width={"185px"}
-              items={activeStatus}
-              placeholder={"Status"}
-              handleChange={(text) => setValue("activeStatus", text)}
-              noSearch
-              defaultValue="Y"
-            />
+            {!isLoadingCompanyData && !isFetchingCompanyData && (
+              <Dropdown
+                label=""
+                isHtml
+                width={"185px"}
+                items={activeStatus}
+                placeholder={"Status"}
+                handleChange={(text) => setValue("activeStatus", text)}
+                noSearch
+                defaultValue={companyData.isActive ? "Y" : "N"}
+              />
+            )}
             <Row>
               <Row gap="16px">
                 <Button
@@ -203,266 +562,344 @@ const DetailCompany: any = () => {
           </Row>
         </Card>
 
-        {/* <Spacer size={20} />
-        <Alert><Text variant="subtitle2" color="white">“General” Associated Menu must be filled.</Text></Alert> */}
         <Spacer size={20} />
-
-        <Accordion>
-          <Accordion.Item key={1}>
-            <Accordion.Header variant="blue">Company Profile</Accordion.Header>
-            <Accordion.Body>
-              <Row width="100%" gap="20px" noWrap>
-                <Input
-                  width="100%"
-                  label="Name"
-                  height="48px"
-                  placeholder={"e.g PT. Kaldu Sari Nabati Indonesia"}
-                  {...register("name", { required: true })}
-                />
-                <Input
-                  width="100%"
-                  label="Company Code"
-                  height="48px"
-                  placeholder={"e.g KSNI"}
-                  {...register("code", { required: true })}
-                />
-              </Row>
-              <Row width="100%" gap="20px" noWrap>
-                <Col width="50%">
+        {!isLoadingCompanyData && !isFetchingCompanyData && (
+          <Accordion>
+            <Accordion.Item key={1}>
+              <Accordion.Header variant="blue">Company Profile</Accordion.Header>
+              <Accordion.Body>
+                <Row width="100%" gap="20px" noWrap>
                   <Input
                     width="100%"
-                    label="Email"
+                    label="Name"
                     height="48px"
-                    placeholder={"e.g karina@nabatisnack.co.id"}
-                    {...register("email", { required: true })}
+                    placeholder={"e.g PT. Kaldu Sari Nabati Indonesia"}
+                    error={errors?.name?.message}
+                    {...register("name", { required: true })}
+                    defaultValue={companyData.name}
                   />
-                </Col>
-                <Col width="50%">
-                  <TextArea
-                    //   value={desc}
-                    //   onChange={(e) => setDesc(e.target.value)}
-                    width="100%"
-                    rows={1}
-                    label={<Text placeholder="e.g JL. Soekarno Hatta">Address</Text>}
-                    {...register("address", { required: true })}
-                  />
-                </Col>
-              </Row>
-              <Row width="100%" gap="20px" noWrap>
-                <Col width="50%">
-                  <Dropdown2
-                    label="Country"
-                    width={"100%"}
-                    // items={accounts}
-                    placeholder={"Select"}
-                    // handleChange={(value) => setValue("accountGroupId", value)}
-                    // onSearch={(search) => setSearchAccountGroup(search)}
-                    // required
-                    // error={errors?.accountGroupId?.message}
-                    // defaultValue={account?.accountGroup?.groupName}
-                  />
-                </Col>
-                <Col width="50%">
-                  <Dropdown2
-                    label="Industry"
-                    width={"100%"}
-                    // items={accounts}
-                    placeholder={"Select"}
-                    // handleChange={(value) => setValue("accountGroupId", value)}
-                    // onSearch={(search) => setSearchAccountGroup(search)}
-                    // required
-                    // error={errors?.accountGroupId?.message}
-                    // defaultValue={account?.accountGroup?.groupName}
-                  />
-                </Col>
-              </Row>
-              <Row width="100%" gap="20px" noWrap>
-                <Col width="50%">
-                  <Dropdown2
-                    label="Number of Employee"
-                    width={"100%"}
-                    // items={accounts}
-                    placeholder={"Select"}
-                    // handleChange={(value) => setValue("accountGroupId", value)}
-                    // onSearch={(search) => setSearchAccountGroup(search)}
-                    // required
-                    // error={errors?.accountGroupId?.message}
-                    // defaultValue={account?.accountGroup?.groupName}
-                  />
-                </Col>
-                <Col width="50%">
-                  <Dropdown2
-                    label="Sector"
-                    width={"100%"}
-                    // items={accounts}
-                    placeholder={"Select"}
-                    // handleChange={(value) => setValue("accountGroupId", value)}
-                    // onSearch={(search) => setSearchAccountGroup(search)}
-                    // required
-                    // error={errors?.accountGroupId?.message}
-                    // defaultValue={account?.accountGroup?.groupName}
-                  />
-                </Col>
-              </Row>
-              <Row width="100%" gap="20px" noWrap>
-                <Col width="50%">
-                  <Dropdown2
-                    label="Menu Design"
-                    width={"100%"}
-                    // items={accounts}
-                    placeholder={"Select"}
-                    // handleChange={(value) => setValue("accountGroupId", value)}
-                    // onSearch={(search) => setSearchAccountGroup(search)}
-                    // required
-                    // error={errors?.accountGroupId?.message}
-                    // defaultValue={account?.accountGroup?.groupName}
-                  />
-                </Col>
-                <Col width="50%">
                   <Input
                     width="100%"
-                    label="Tax ID (optional)"
+                    label="Company Code"
                     height="48px"
-                    placeholder={"e.g 10"}
-                    {...register("email", { required: true })}
+                    placeholder={"e.g KSNI"}
+                    error={errors?.code?.message}
+                    {...register("code", { required: true })}
+                    defaultValue={companyData.code}
                   />
-                  <Row>
-                    <Text variant="body1">PKP ? </Text>
-                    <Switch />
-                  </Row>
-                </Col>
-              </Row>
-            </Accordion.Body>
-          </Accordion.Item>
-        </Accordion>
-
+                </Row>
+                <Row width="100%" gap="20px" noWrap>
+                  <Col width="50%">
+                    <Input
+                      width="100%"
+                      label="Email"
+                      height="48px"
+                      placeholder={"e.g karina@nabatisnack.co.id"}
+                      error={errors?.email?.message}
+                      {...register("email", { required: true })}
+                      defaultValue={companyData.email}
+                    />
+                  </Col>
+                  <Col width="50%">
+                    <TextArea
+                      width="100%"
+                      rows={1}
+                      label={<Text placeholder="e.g JL. Soekarno Hatta">Address</Text>}
+                      {...register("address")}
+                      onChange={(e) => setAddress(e.target.value)}
+                      defaultValue={companyData.address}
+                    />
+                  </Col>
+                </Row>
+                <Row width="100%" gap="20px" noWrap>
+                  <Col width="50%">
+                    {isLoadingCountryList ? (
+                      <Spin tip="Loading data..." />
+                    ) : (
+                      <Dropdown2
+                        label="Country"
+                        width={"100%"}
+                        items={countryData.rows.map((data) => ({
+                          id: data.name,
+                          value: data.name,
+                        }))}
+                        placeholder={"Select"}
+                        handleChange={(value) => setValue("country", value)}
+                        onSearch={(search) => setSearchCountry(search)}
+                        required
+                        error={errors?.country?.message}
+                        {...register("country")}
+                        defaultValue={companyData.country}
+                      />
+                    )}
+                  </Col>
+                  <Col width="50%">
+                    <Dropdown
+                      label="Industry"
+                      width={"100%"}
+                      items={industryList}
+                      placeholder={"Select"}
+                      handleChange={(value: any) => handleSelectIndustry(value)}
+                      onSearch={(search) => handleSearchIndustry(search)}
+                      required
+                      error={errors?.industry?.message}
+                      {...register("industry", { required: true })}
+                      defaultValue={companyData.industry}
+                    />
+                  </Col>
+                </Row>
+                <Row width="100%" gap="20px" noWrap>
+                  <Col width="50%">
+                    <Dropdown
+                      label="Number of Employee"
+                      width={"100%"}
+                      items={NumberOfEmployeeDataFake}
+                      placeholder={"Select"}
+                      handleChange={(value: any) => setValue("numberOfEmployee", value)}
+                      {...register("numberOfEmployee")}
+                      noSearch
+                      defaultValue={companyData.employees}
+                    />
+                  </Col>
+                  <Col width="50%">
+                    <Dropdown
+                      label="Sector"
+                      width={"100%"}
+                      items={sectorList}
+                      placeholder={"Select"}
+                      handleChange={(value) => setValue("sector", value)}
+                      required
+                      noSearch
+                      error={errors?.sector?.message}
+                      {...register("sector", { required: true })}
+                      defaultValue={companyData.sector}
+                    />
+                  </Col>
+                </Row>
+                <Row width="100%" gap="20px" noWrap>
+                  <Col width="50%">
+                    {isLoadingMenuDesignList ? (
+                      <Spin tip="Loading data..." />
+                    ) : (
+                      <Dropdown2
+                        label="Menu Design"
+                        width={"100%"}
+                        items={menuDesignData.rows.map((data) => ({
+                          id: data.format,
+                          value: data.id,
+                        }))}
+                        placeholder={"Select"}
+                        handleChange={(value) => setValue("menuDesign", value)}
+                        onSearch={(search) => setSearchMenuDesign(search)}
+                        required
+                        error={errors?.menuDesign?.message}
+                        {...register("menuDesign", { required: true })}
+                        defaultValue={companyData.menuDesign}
+                      />
+                    )}
+                  </Col>
+                  <Col width="50%">
+                    <Input
+                      width="100%"
+                      label="Tax ID (optional)"
+                      height="48px"
+                      placeholder={"e.g 10"}
+                      {...register("taxId")}
+                      defaultValue={companyData.taxId}
+                    />
+                    <Row>
+                      <Text variant="body1">PKP ? </Text>
+                      <Switch
+                        defaultChecked={companyData.pkp}
+                        checked={companyData.pkp}
+                        onChange={(value) => setValue("isPkp", value)}
+                      />
+                    </Row>
+                  </Col>
+                </Row>
+              </Accordion.Body>
+            </Accordion.Item>
+          </Accordion>
+        )}
         <Spacer size={20} />
+        {!isLoadingCompanyData && !isFetchingCompanyData && (
+          <Accordion>
+            <Accordion.Item key={1}>
+              <Accordion.Header variant="blue">General Setup</Accordion.Header>
+              <Accordion.Body>
+                <Row width="100%" gap="20px" noWrap>
+                  <Col width="50%">
+                    <Dropdown
+                      label="Company Type"
+                      width={"100%"}
+                      items={CompanyTypeDataFake}
+                      placeholder={"Select"}
+                      handleChange={(value) => setValue("companyType", value)}
+                      required
+                      noSearch
+                      error={errors?.companyType?.message}
+                      {...register("companyType", { required: true })}
+                      defaultValue={companyData.company_type}
+                    />
+                  </Col>
+                  <Col width="50%">
+                    <Dropdown
+                      label="Corporate"
+                      width={"100%"}
+                      items={CorporateDataFake}
+                      placeholder={"Select"}
+                      handleChange={(value) => setValue("corporate", value)}
+                      {...register("corporate")}
+                      noSearch
+                      defaultValue={companyData.corporate}
+                    />
+                  </Col>
+                </Row>
+                <Row width="100%" gap="20px" noWrap>
+                  <Col width="50%">
+                    {isLoadingCurrencyList ? (
+                      <Spin tip="Loading data..." />
+                    ) : (
+                      <Dropdown2
+                        label="Currency"
+                        width={"100%"}
+                        items={currencyData.rows.map((data) => ({
+                          value: `${data.currency} - ${data.currencyName}`,
+                          id: `${data.currency} - ${data.currencyName}`,
+                        }))}
+                        placeholder={"Select"}
+                        handleChange={(value) => setValue("currency", value)}
+                        onSearch={(search) => setSearchCurrency(search)}
+                        required
+                        error={errors?.currency?.message}
+                        {...register("currency", { required: true })}
+                        defaultValue={companyData.currency}
+                      />
+                    )}
+                  </Col>
+                  <Col width="50%">
+                    {isLoadingCoaList ? (
+                      <Spin tip="Loading data..." />
+                    ) : (
+                      <Dropdown2
+                        label="CoA Template"
+                        width={"100%"}
+                        items={coaData.rows.map((data) => ({
+                          value: data.name,
+                          id: data.name,
+                        }))}
+                        placeholder={"Select"}
+                        handleChange={(value) => setValue("coaTemplate", value)}
+                        onSearch={(search) => setSearchCoa(search)}
+                        required
+                        error={errors?.coaTemplate?.message}
+                        {...register("coaTemplate", { required: true })}
+                        defaultValue={companyData.coa}
+                      />
+                    )}
+                  </Col>
+                </Row>
+                <Row width="100%" gap="20px" noWrap>
+                  <Col width="50%">
+                    {isLoadingDateFormatList ? (
+                      <Spin tip="Loading data..." />
+                    ) : (
+                      <Dropdown
+                        label="Format Date"
+                        width={"100%"}
+                        items={dateFormatData.rows.map((data) => ({
+                          value: data.format,
+                          id: data.format,
+                        }))}
+                        placeholder={"Select"}
+                        handleChange={(value) => setValue("formatDate", value)}
+                        required
+                        error={errors?.formatDate?.message}
+                        {...register("formatDate", { required: true })}
+                        noSearch
+                        defaultValue={companyData.format_date}
+                      />
+                    )}
+                  </Col>
+                  <Col width="50%">
+                    {isLoadingNumberFormatList ? (
+                      <Spin tip="Loading data..." />
+                    ) : (
+                      <Dropdown
+                        label="Number Format"
+                        width={"100%"}
+                        items={numberFormatData.rows.map((data) => ({
+                          value: data.format,
+                          id: data.format,
+                        }))}
+                        placeholder={"Select"}
+                        handleChange={(value) => setValue("numberFormat", value)}
+                        required
+                        error={errors?.numberFormat?.message}
+                        {...register("numberFormat", { required: true })}
+                        noSearch
+                        defaultValue={companyData.format_number}
+                      />
+                    )}
+                  </Col>
+                </Row>
+                <Row width="100%" gap="20px" noWrap>
+                  <Col width="50%">
+                    {isLoadingTimezoneList ? (
+                      <Spin tip="Loading data..." />
+                    ) : (
+                      <Dropdown2
+                        label="Timezone"
+                        width={"100%"}
+                        items={timezoneData.rows.map((data) => ({
+                          value: `${data.utc} - ${data.name}`,
+                          id: `${data.utc} - ${data.name}`,
+                        }))}
+                        placeholder={"Select"}
+                        handleChange={(value) => setValue("timezone", value)}
+                        onSearch={(search) => setSearchTimezone(search)}
+                        required
+                        error={errors?.timezone?.message}
+                        {...register("timezone", { required: true })}
+                        defaultValue={companyData.timezone}
+                      />
+                    )}
+                  </Col>
 
-        <Accordion>
-          <Accordion.Item key={1}>
-            <Accordion.Header variant="blue">General Setup</Accordion.Header>
-            <Accordion.Body>
-              <Row width="100%" gap="20px" noWrap>
-                <Col width="50%">
-                  <Dropdown2
-                    label="Company Type"
-                    width={"100%"}
-                    // items={accounts}
-                    placeholder={"Select"}
-                    // handleChange={(value) => setValue("accountGroupId", value)}
-                    // onSearch={(search) => setSearchAccountGroup(search)}
-                    // required
-                    // error={errors?.accountGroupId?.message}
-                    // defaultValue={account?.accountGroup?.groupName}
-                  />
-                </Col>
-                <Col width="50%">
-                  <Dropdown2
-                    label="Corporate"
-                    width={"100%"}
-                    // items={accounts}
-                    placeholder={"Select"}
-                    // handleChange={(value) => setValue("accountGroupId", value)}
-                    // onSearch={(search) => setSearchAccountGroup(search)}
-                    // required
-                    // error={errors?.accountGroupId?.message}
-                    // defaultValue={account?.accountGroup?.groupName}
-                  />
-                </Col>
-              </Row>
-              <Row width="100%" gap="20px" noWrap>
-                <Col width="50%">
-                  <Dropdown2
-                    label="Currency"
-                    width={"100%"}
-                    // items={accounts}
-                    placeholder={"Select"}
-                    // handleChange={(value) => setValue("accountGroupId", value)}
-                    // onSearch={(search) => setSearchAccountGroup(search)}
-                    // required
-                    // error={errors?.accountGroupId?.message}
-                    // defaultValue={account?.accountGroup?.groupName}
-                  />
-                </Col>
-                <Col width="50%">
-                  <Dropdown2
-                    label="CoA Template"
-                    width={"100%"}
-                    // items={accounts}
-                    placeholder={"Select"}
-                    // handleChange={(value) => setValue("accountGroupId", value)}
-                    // onSearch={(search) => setSearchAccountGroup(search)}
-                    // required
-                    // error={errors?.accountGroupId?.message}
-                    // defaultValue={account?.accountGroup?.groupName}
-                  />
-                </Col>
-              </Row>
-              <Row width="100%" gap="20px" noWrap>
-                <Col width="50%">
-                  <Dropdown2
-                    label="Format Date"
-                    width={"100%"}
-                    // items={accounts}
-                    placeholder={"Select"}
-                    // handleChange={(value) => setValue("accountGroupId", value)}
-                    // onSearch={(search) => setSearchAccountGroup(search)}
-                    // required
-                    // error={errors?.accountGroupId?.message}
-                    // defaultValue={account?.accountGroup?.groupName}
-                  />
-                </Col>
-                <Col width="50%">
-                  <Dropdown2
-                    label="Number Format"
-                    width={"100%"}
-                    // items={accounts}
-                    placeholder={"Select"}
-                    // handleChange={(value) => setValue("accountGroupId", value)}
-                    // onSearch={(search) => setSearchAccountGroup(search)}
-                    // required
-                    // error={errors?.accountGroupId?.message}
-                    // defaultValue={account?.accountGroup?.groupName}
-                  />
-                </Col>
-              </Row>
-              <Row width="100%" gap="20px" noWrap>
-                <Col width="50%">
-                  <Dropdown2
-                    label="Timezone"
-                    width={"100%"}
-                    // items={accounts}
-                    placeholder={"Select"}
-                    // handleChange={(value) => setValue("accountGroupId", value)}
-                    // onSearch={(search) => setSearchAccountGroup(search)}
-                    // required
-                    // error={errors?.accountGroupId?.message}
-                    // defaultValue={account?.accountGroup?.groupName}
-                  />
-                </Col>
-
-                <Col width="50%">
-                  <Spacer size={20} />
-                  <Row width="100%" gap="20px" noWrap>
-                    <Text variant="body1">Company Use Advance Pricing</Text>
-                    <Switch />
-                  </Row>
-                  <Spacer size={20} />
-                  <Row width="100%" gap="20px" noWrap>
-                    <Text variant="body1">Company Use Advance Costing</Text>
-                    <Switch />
-                  </Row>
-                  <Spacer size={20} />
-                  <Row width="100%" gap="20px" noWrap>
-                    <Text variant="body1">Using Approval</Text>
-                    <Switch />
-                  </Row>
-                </Col>
-              </Row>
-            </Accordion.Body>
-          </Accordion.Item>
-        </Accordion>
-
+                  <Col width="50%">
+                    <Spacer size={20} />
+                    <Row width="100%" gap="20px" noWrap>
+                      <Text variant="body1">Company Use Advance Pricing</Text>
+                      <Switch
+                        defaultChecked={companyData.advancePricing}
+                        checked={companyData.advancePricing}
+                        onChange={(value) => setValue("advancePricing", value)}
+                      />
+                    </Row>
+                    <Spacer size={20} />
+                    <Row width="100%" gap="20px" noWrap>
+                      <Text variant="body1">Company Use Pricing Structure</Text>
+                      <Switch
+                        defaultChecked={!companyData.pricingStructure}
+                        checked={companyData.pricingStructure}
+                        onChange={(value) => setValue("pricingStructure", value)}
+                      />
+                    </Row>
+                    <Spacer size={20} />
+                    <Row width="100%" gap="20px" noWrap>
+                      <Text variant="body1">Using Approval</Text>
+                      <Switch
+                        defaultChecked={companyData.useApproval}
+                        checked={companyData.useApproval}
+                        onChange={(value) => setValue("usingApproval", value)}
+                      />
+                    </Row>
+                  </Col>
+                </Row>
+              </Accordion.Body>
+            </Accordion.Item>
+          </Accordion>
+        )}
         <Spacer size={20} />
       </Col>
     </>
