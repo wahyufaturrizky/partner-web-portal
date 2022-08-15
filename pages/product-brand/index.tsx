@@ -32,7 +32,7 @@ import {
 } from "../../hooks/mdm/product-brand/useProductBrandMDM";
 
 const downloadFile = (params: any) =>
-  mdmDownloadService("/product-brand/download", { params }).then((res) => {
+  mdmDownloadService("product-brand/template/download", { params }).then((res) => {
     let dataUrl = window.URL.createObjectURL(new Blob([res.data]));
     let tempLink = document.createElement("a");
     tempLink.href = dataUrl;
@@ -195,8 +195,7 @@ const ProductBrandMDM = () => {
     {
       title: "Action",
       dataIndex: "action",
-      width: "15%",
-      align: "left",
+      width: 160,
     },
   ];
 
@@ -268,13 +267,13 @@ const ProductBrandMDM = () => {
               onClick={(e: any) => {
                 switch (parseInt(e.key)) {
                   case 1:
-                    downloadFile({ with_data: "N", company: "KSNI" });
+                    downloadFile({ with_data: "N", company_id: "KSNI" });
                     break;
                   case 2:
                     setShowUpload(true);
                     break;
                   case 3:
-                    downloadFile({ with_data: "Y", company: "KSNI" });
+                    downloadFile({ with_data: "Y", company_id: "KSNI" });
                     break;
                   case 4:
                     break;
@@ -337,9 +336,8 @@ const ProductBrandMDM = () => {
 
       {modalProductBrandForm.open && (
         <Modal
-          width={"350px"}
           centered
-          closable={false}
+          closable={true}
           visible={modalProductBrandForm.open}
           onCancel={() => setModalProductBrandForm({ open: false, data: {}, typeForm: "" })}
           title={
