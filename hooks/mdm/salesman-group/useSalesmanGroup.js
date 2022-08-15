@@ -20,12 +20,22 @@ const useSalesmanGroups = ({ query = {}, options }) => {
   });
 };
 
-const fetchSalesmanGroup = async ({ id, companyId }) => {
-  return mdmService(`/salesman-group/${companyId}/${id}`).then((data) => data);
+const fetchSalesmanGroup = async ({ id }) => {
+  return mdmService(`/salesman-group/${id}`).then((data) => data);
 };
 
-const useSalesmanGroup = ({ id, companyId, options }) => {
-  return useQuery(["salesman-group", id], () => fetchSalesmanGroup({ id, companyId }), {
+const useSalesmanGroup = ({ id, options }) => {
+  return useQuery(["salesman-group"], () => fetchSalesmanGroup({ id }), {
+    ...options,
+  });
+};
+
+const fetchSalesmanGroupParent = async ({ id, companyId }) => {
+  return mdmService(`/salesman-group/parent/${id}/${companyId}`).then((data) => data);
+};
+
+const useSalesmanGroupParent = ({ dataId: { id, companyId }, options }) => {
+  return useQuery(["salesman-group-parent"], () => fetchSalesmanGroupParent({ id, companyId }), {
     ...options,
   });
 };
@@ -43,10 +53,10 @@ function useCreateSalesmanGroup({ options }) {
   );
 }
 
-function useUpdateSalesmanGroup({ id, companyId, options }) {
+function useUpdateSalesmanGroup({ id, options }) {
   return useMutation(
     (data) =>
-      mdmService(`/salesman-group/${companyId}/${id}`, {
+      mdmService(`/salesman-group/${id}`, {
         method: "PUT",
         data,
       }),
@@ -85,6 +95,7 @@ const useUploadFileSalesmanGroup = ({ options }) => {
 export {
   useSalesmanGroups,
   useSalesmanGroup,
+  useSalesmanGroupParent,
   useCreateSalesmanGroup,
   useUpdateSalesmanGroup,
   useDeleteSalesmanGroup,
