@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import {
   Text,
@@ -14,14 +14,17 @@ import {
   DropdownMenu,
   FileUploadModal,
   FormSelect,
+  Spin,
 } from "pink-lava-ui";
 import usePagination from "@lucasmogari/react-pagination";
 import {
   useSalesmanGroups,
+  useSalesmanGroup,
   useCreateSalesmanGroup,
   useUpdateSalesmanGroup,
   useUploadFileSalesmanGroup,
   useDeleteSalesmanGroup,
+  useSalesmanGroupParent,
 } from "../../hooks/mdm/salesman-group/useSalesmanGroup";
 import useDebounce from "../../lib/useDebounce";
 import { queryClient } from "../_app";
@@ -30,7 +33,7 @@ import { ICDownload, ICUpload } from "../../assets/icons";
 import { mdmDownloadService } from "../../lib/client";
 
 const downloadFile = (params: any) =>
-  mdmDownloadService("/salesman-group/download", { params }).then((res) => {
+  mdmDownloadService("/salesman-group/template/download", { params }).then((res) => {
     let dataUrl = window.URL.createObjectURL(new Blob([res.data]));
     let tempLink = document.createElement("a");
     tempLink.href = dataUrl;
@@ -44,7 +47,7 @@ const renderConfirmationText = (type: any, data: any) => {
       return data.selectedRowKeys.length > 1
         ? `Are you sure to delete ${data.selectedRowKeys.length} items ?`
         : `Are you sure to delete ${
-            data?.salesmanGroupData?.data.find((el: any) => el.key === data.selectedRowKeys[0])
+            data?.salesmanGroupDatas?.data.find((el: any) => el.key === data.selectedRowKeys[0])
               ?.name
           } ?`;
     case "detail":
@@ -75,38 +78,106 @@ const SalesmanGroup = () => {
   });
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const debounceSearch = useDebounce(search, 1000);
+  const [salesmanGroupId, setSalesmanGroupId] = useState(0);
+  const [salesmanGroupParentId, setSalesmanGroupParentId] = useState(0);
+  const [salesmanGroupFormData, setSalesmanGroupFormData] = useState({});
 
   const { register, handleSubmit, control } = useForm();
 
   const {
-    data: salesmanGroupsData,
+    data: salesmanGroupParentData,
+    isLoading: isLoadingSalesmanGroupParent,
+    isFetching: isFetchingSalesmanGroupParent,
+    refetch: refetchSalesmanGroupParent,
+  } = useSalesmanGroupParent({
+    dataId: {
+      id: salesmanGroupParentId,
+      companyId: "KSNI",
+    },
+    options: {
+      enabled: false,
+      onSuccess: (data: any) => {},
+      select: (data: any) => {
+        const mappedData = data?.map((element: any) => {
+          return {
+            value: element.code,
+            label: element.brand,
+          };
+        });
+
+        return mappedData;
+      },
+    },
+  });
+
+  const {
+    data: salesmanGroupData,
     isLoading: isLoadingSalesmanGroup,
     isFetching: isFetchingSalesmanGroup,
+    refetch: refetchSalesmanGroup,
+  } = useSalesmanGroup({
+    id: salesmanGroupId,
+    options: {
+      enabled: false,
+      onSuccess: (data: any) => {
+        setSalesmanGroupFormData(data);
+      },
+      select: (data: any) => {
+        const mappedData = {
+          key: data.id,
+          id: data.code,
+          name: data.brand,
+          parent: data.parent,
+          parentId: data?.parentRecord?.code,
+          externalCode: data.externalCode,
+        };
+
+        return mappedData;
+      },
+    },
+  });
+
+  useEffect(() => {
+    if (salesmanGroupId !== 0) {
+      console.log("kepanggil");
+      refetchSalesmanGroup();
+    }
+  }, [salesmanGroupId]);
+
+  useEffect(() => {
+    refetchSalesmanGroupParent();
+  }, [salesmanGroupParentId]);
+
+  const {
+    data: salesmanGroupsData,
+    isLoading: isLoadingSalesmanGroups,
+    isFetching: isFetchingSalesmanGroups,
   } = useSalesmanGroups({
     query: {
       search: debounceSearch,
       page: pagination.page,
       limit: pagination.itemsPerPage,
-      company_id: "KSNI",
+      company: "KSNI",
     },
     options: {
       onSuccess: (data: any) => {
         pagination.setTotalItems(data.totalRow);
       },
-      initialData: () => [],
       select: (data: any) => {
         const mappedData = data?.rows?.map((element: any) => {
           return {
-            key: element.salesmanGroupId,
-            id: element.salesmanGroupId,
-            name: element.name,
-            parent: element.name,
+            key: element.id,
+            id: element.code,
+            name: element.brand,
+            parent: element.parent,
             action: (
               <div style={{ display: "flex", justifyContent: "left" }}>
                 <Button
                   size="small"
                   onClick={() => {
                     setModalForm({ open: true, typeForm: "edit", data: element });
+                    setSalesmanGroupId(element.id);
+                    setSalesmanGroupParentId(element.id);
                   }}
                   variant="tertiary"
                 >
@@ -134,8 +205,7 @@ const SalesmanGroup = () => {
 
   const { mutate: updateSalemanGroup, isLoading: isLoadingUpdateSalesmanGroup } =
     useUpdateSalesmanGroup({
-      id: modalForm?.data?.salesmanGroupId,
-      companyId: "KSNI",
+      id: modalForm?.data?.id,
       options: {
         onSuccess: () => {
           setModalForm({ open: false, typeForm: "", data: {} });
@@ -195,16 +265,17 @@ const SalesmanGroup = () => {
   };
 
   const onSubmit = (data: any) => {
+    const formData = {
+      company: "KSNI",
+      parent: data.parent ?? "",
+      ...data,
+    };
     switch (modalForm.typeForm) {
       case "create":
-        const formData = {
-          company_id: "KSNI",
-          ...data,
-        };
         createSalesmanGroup(formData);
         break;
       case "edit":
-        updateSalemanGroup(data);
+        updateSalemanGroup(formData);
         break;
       default:
         setModalForm({ open: false, typeForm: "", data: {} });
@@ -214,8 +285,7 @@ const SalesmanGroup = () => {
 
   const onSubmitFile = (file: any) => {
     const formData = new FormData();
-    formData.append("company_id", "KSNI");
-    formData.append("file", file);
+    formData.append("upload_file", file);
 
     uploadFileSalesmanGroup(formData);
   };
@@ -243,7 +313,7 @@ const SalesmanGroup = () => {
                 setShowDelete({
                   open: true,
                   type: "selection",
-                  data: { salesmanGroupData: salesmanGroupsData, selectedRowKeys },
+                  data: { salesmanGroupDatas: salesmanGroupsData, selectedRowKeys },
                 })
               }
               disabled={rowSelection.selectedRowKeys?.length === 0}
@@ -307,7 +377,10 @@ const SalesmanGroup = () => {
             <Button
               size="big"
               variant="primary"
-              onClick={() => setModalForm({ open: true, typeForm: "create", data: {} })}
+              onClick={() => {
+                setSalesmanGroupParentId(0);
+                setModalForm({ open: true, typeForm: "create", data: {} });
+              }}
             >
               Create
             </Button>
@@ -318,7 +391,7 @@ const SalesmanGroup = () => {
       <Card style={{ padding: "16px 20px" }}>
         <Col gap={"60px"}>
           <Table
-            loading={isLoadingSalesmanGroup || isFetchingSalesmanGroup}
+            loading={isLoadingSalesmanGroups || isFetchingSalesmanGroups}
             columns={columns}
             data={salesmanGroupsData?.data}
             rowSelection={rowSelection}
@@ -333,107 +406,133 @@ const SalesmanGroup = () => {
           centered
           closable={false}
           visible={modalForm.open}
-          onCancel={() => setModalForm({ open: false, data: {}, typeForm: "" })}
-          title={modalForm.typeForm === "create" ? "Create Salesman Group" : modalForm.data?.name}
+          onCancel={() => {
+            setModalForm({ open: false, data: {}, typeForm: "" });
+            setSalesmanGroupFormData({});
+          }}
+          title={
+            modalForm.typeForm === "create"
+              ? "Create Salesman Group"
+              : !isLoadingSalesmanGroup || !isFetchingSalesmanGroup
+              ? salesmanGroupFormData?.name
+              : ""
+          }
           footer={null}
           content={
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "center",
-              }}
-            >
-              <Input
-                defaultValue={modalForm.data?.name}
-                width="100%"
-                label="Salesman Group Name"
-                height="40px"
-                placeholder={"e.g Motoris"}
-                {...register("name", {
-                  shouldUnregister: true,
-                })}
-              />
-
-              <Spacer size={10} />
-
-              <Controller
-                control={control}
-                name="parent"
-                defaultValue={modalForm.data?.parent}
-                render={({ field: { onChange } }) => (
-                  <>
-                    <Label>Parent</Label>
-                    <Spacer size={3} />
-                    <FormSelect
-                      defaultValue={modalForm.data?.parent}
-                      style={{ width: "100%" }}
-                      size={"large"}
-                      placeholder={"Select"}
-                      borderColor={"#AAAAAA"}
-                      arrowColor={"#000"}
-                      withSearch={[].length !== 0}
-                      isLoading={false}
-                      isLoadingMore={false}
-                      fetchMore={() => {
-                        if (false) {
-                          // fetchNextPage();
-                        }
-                      }}
-                      // items={
-                      //   isFetchingUomCategory && !isFetchingMoreUomCategory ? [] : listUomCategory
-                      // }
-                      items={[]}
-                      onChange={(value: any) => {
-                        onChange(value);
-                      }}
-                      onSearch={(value: any) => {
-                        setSearch(value);
-                      }}
-                    />
-                  </>
-                )}
-              />
-
-              <Spacer size={15} />
-
-              <Input
-                defaultValue={modalForm.data?.externalCode}
-                width="100%"
-                label="External Code"
-                height="40px"
-                placeholder={""}
-                {...register("external_code", {
-                  shouldUnregister: true,
-                })}
-              />
-
-              <Spacer size={14} />
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "center",
-                  gap: "10px",
-                  marginBottom: "20px",
-                }}
-              >
-                <Button
-                  size="big"
-                  variant={"tertiary"}
-                  key="submit"
-                  type="primary"
-                  onClick={() => setModalForm({ open: false, data: {}, typeForm: "" })}
+            <>
+              {isLoadingSalesmanGroup || isFetchingSalesmanGroup ? (
+                <Center>
+                  <Spin tip="Loading Data" />
+                </Center>
+              ) : (
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "center",
+                  }}
                 >
-                  Cancel
-                </Button>
+                  <Input
+                    defaultValue={salesmanGroupFormData?.name ?? ""}
+                    width="100%"
+                    label="Salesman Group Name"
+                    height="40px"
+                    placeholder={"e.g Motoris"}
+                    {...register("brand", {
+                      shouldUnregister: true,
+                    })}
+                  />
 
-                <Button onClick={handleSubmit(onSubmit)} variant="primary" size="big">
-                  {isLoadingCreateSalesmanGroup || isLoadingUpdateSalesmanGroup
-                    ? "Loading..."
-                    : "Save"}
-                </Button>
-              </div>
-            </div>
+                  <Spacer size={10} />
+
+                  <Controller
+                    control={control}
+                    name="parent"
+                    defaultValue={salesmanGroupFormData?.parentId ?? ""}
+                    shouldUnregister={true}
+                    render={({ field: { onChange } }) => (
+                      <>
+                        <span>
+                          <Label style={{ display: "inline" }}>Parent</Label>{" "}
+                          <span>{"(Optional)"}</span>
+                        </span>
+
+                        <Spacer size={3} />
+                        <FormSelect
+                          defaultValue={salesmanGroupFormData?.parent ?? ""}
+                          style={{ width: "100%" }}
+                          size={"large"}
+                          placeholder={"Select"}
+                          borderColor={"#AAAAAA"}
+                          arrowColor={"#000"}
+                          withSearch={salesmanGroupParentData?.length !== 0}
+                          isLoading={isLoadingSalesmanGroupParent || isFetchingSalesmanGroupParent}
+                          isLoadingMore={false}
+                          fetchMore={() => {
+                            if (false) {
+                              // fetchNextPage();
+                            }
+                          }}
+                          items={
+                            isLoadingSalesmanGroupParent || isFetchingSalesmanGroupParent
+                              ? []
+                              : salesmanGroupParentData
+                          }
+                          onChange={(value: any) => {
+                            onChange(value);
+                          }}
+                          onSearch={(value: any) => {
+                            setSearch(value);
+                          }}
+                        />
+                      </>
+                    )}
+                  />
+
+                  <Spacer size={15} />
+
+                  <Input
+                    defaultValue={salesmanGroupFormData?.externalCode ?? ""}
+                    width="100%"
+                    label="External Code"
+                    height="40px"
+                    placeholder={""}
+                    {...register("external_code", {
+                      shouldUnregister: true,
+                    })}
+                  />
+
+                  <Spacer size={14} />
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "center",
+                      gap: "10px",
+                      marginBottom: "20px",
+                    }}
+                  >
+                    <Button
+                      size="big"
+                      variant={"tertiary"}
+                      key="submit"
+                      type="primary"
+                      onClick={() => {
+                        setModalForm({ open: false, data: {}, typeForm: "" });
+                        setSalesmanGroupFormData({});
+                      }}
+                    >
+                      Cancel
+                    </Button>
+
+                    <Button onClick={handleSubmit(onSubmit)} variant="primary" size="big">
+                      {isLoadingCreateSalesmanGroup || isLoadingUpdateSalesmanGroup
+                        ? "Loading..."
+                        : "Save"}
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </>
           }
         />
       )}
@@ -478,14 +577,7 @@ const SalesmanGroup = () => {
                   variant="primary"
                   size="big"
                   onClick={() => {
-                    if (isShowDelete.type === "selection") {
-                      deleteSalesmanGroup({ ids: selectedRowKeys, company_id: "KSNI" });
-                    } else {
-                      deleteSalesmanGroup({
-                        ids: [modalForm.data.trainingTypeId],
-                        company_id: "KSNI",
-                      });
-                    }
+                    deleteSalesmanGroup({ ids: selectedRowKeys, company_id: "KSNI" });
                   }}
                 >
                   {isLoadingDeleteSalesmanGroup ? "loading..." : "Yes"}
@@ -518,6 +610,12 @@ const Label = styled.div`
   font-size: 16px;
   line-height: 24px;
   color: #000000;
+`;
+
+const Center = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
 `;
 
 export default SalesmanGroup;
