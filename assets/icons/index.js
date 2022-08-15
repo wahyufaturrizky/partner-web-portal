@@ -9,6 +9,10 @@ import ICUpload from "./ic-upload.svg";
 import ICSync from "./ic-sync.svg";
 import ICEyeCrossed from "./eye-crossed.svg";
 import ICInventory from "./ic-inventory.svg";
+import ICPurchasOrg from "./ic-purchase-org.svg";
+import ICPlus from "./ic-plus.svg";
+import ICEdit from "./ic-edit.svg";
+import ICDelete from "./ic-delete.svg";
 
 export {
   ICField,
@@ -22,4 +26,8 @@ export {
   ICSync,
   ICEyeCrossed,
   ICInventory,
+  ICPurchasOrg,
+  ICPlus,
+  ICEdit,
+  ICDelete,
 };

@@ -2,7 +2,15 @@ import React, { useState } from "react";
 import Router from "next/router";
 import { Sidebar, Layout, Header, MenuLogout } from "pink-lava-ui";
 
-import { ICField, ICUser, ICMenu, ICCalendar, ICFinance, ICInventory } from "../assets";
+import {
+  ICField,
+  ICUser,
+  ICMenu,
+  ICCalendar,
+  ICFinance,
+  ICInventory,
+  ICPurchasOrg,
+} from "../assets";
 import ICAccount from "../assets/icons/ic-avatar-default.svg";
 import ICAccountSetting from "../assets/icons/ic-setting.svg";
 import ICCompany from "../assets/icons/ic-company.svg";
@@ -175,6 +183,31 @@ const menuMdm = [
   { type: "divider" },
   { type: "title", title: "Configuration" },
   {
+    key: "country",
+    title: "Country Structure",
+    icon: ICBadge,
+    children: [
+      {
+        key: "country",
+        title: "Country",
+        content: () => "Country",
+        onClick: () => Router.push("/country-structure"),
+      },
+      {
+        key: "zip-postal",
+        title: "Zip/Postal Code",
+        content: () => "Zip/Postal Code",
+        onClick: () => Router.push("/country-structure/postal-code"),
+      },
+      {
+        key: "currency",
+        title: "Currency",
+        content: () => "Currency",
+        onClick: () => Router.push("/country-structure/currency"),
+      },
+    ],
+  },
+  {
     key: "general",
     title: "General",
     icon: ICField,
@@ -184,6 +217,12 @@ const menuMdm = [
         title: "Channel",
         content: () => "Channel",
         onClick: () => Router.push("/channel"),
+      },
+      {
+        key: "sales-organization",
+        title: "Sales Organization",
+        content: () => "Sales Organization",
+        onClick: () => Router.push("/sales-organization"),
       },
     ],
   },
@@ -224,6 +263,12 @@ const menuMdm = [
     title: "Product",
     icon: ICInventory,
     children: [
+      {
+        key: "product-option",
+        title: "Product Option",
+        content: () => "Product Option",
+        onClick: () => Router.push("/product-option"),
+      },
       {
         key: "product-brand",
         title: "Product Brand",
@@ -269,6 +314,13 @@ const menuMdm = [
         onClick: () => Router.push("/customer-group"),
       },
     ],
+  },
+  {
+    key: "purchase-organization",
+    title: "Purchase Organization",
+    icon: ICPurchasOrg,
+    content: () => "Purchase Organization",
+    onClick: () => Router.push("/purchase-organization"),
   },
 ];
 
