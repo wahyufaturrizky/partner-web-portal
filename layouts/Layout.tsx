@@ -183,6 +183,31 @@ const menuMdm = [
   { type: "divider" },
   { type: "title", title: "Configuration" },
   {
+    key: "country",
+    title: "Country Structure",
+    icon: ICBadge,
+    children: [
+      {
+        key: "country",
+        title: "Country",
+        content: () => "Country",
+        onClick: () => Router.push("/country-structure"),
+      },
+      {
+        key: "zip-postal",
+        title: "Zip/Postal Code",
+        content: () => "Zip/Postal Code",
+        onClick: () => Router.push("/country-structure/postal-code"),
+      },
+      {
+        key: "currency",
+        title: "Currency",
+        content: () => "Currency",
+        onClick: () => Router.push("/country-structure/currency"),
+      },
+    ],
+  },
+  {
     key: "general",
     title: "General",
     icon: ICField,

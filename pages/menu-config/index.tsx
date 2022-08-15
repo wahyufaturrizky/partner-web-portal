@@ -49,7 +49,7 @@ const MenuConfigList: any = () => {
 				  },
 	});
 
-	const { mutate: deleteFields } = useDeleteMenuList({
+	const { mutate: deleteFields }: any = useDeleteMenuList({
 		options: {
 			onSuccess: () => {
 				refetchFields();
