@@ -20,7 +20,7 @@ import DownloadFile from "../../../assets/icons/download-file.svg";
 import { useCreateSalesOrganizationHirarcy, useSalesOrganizationHirarcy } from "../../../hooks/sales-organization/useSalesOrganization";
 import axios from "axios";
 
-const COMPANY_CODE = 'KL';
+const COMPANY_CODE = 'KSNI';
 
 let token;
 let apiURL = process.env.NEXT_PUBLIC_API_BASE3;
