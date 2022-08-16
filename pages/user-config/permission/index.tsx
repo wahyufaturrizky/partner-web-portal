@@ -129,15 +129,6 @@ const UserConfigPermission: any = () => {
 	const paginateField: any = data;
 	const [selectedRowKeys, setSelectedRowKeys] = useState([]);
 
-	const onSelectChange = (selectedRowKeys: any) => {
-		setSelectedRowKeys(selectedRowKeys);
-	};
-
-	const rowSelection = {
-		selectedRowKeys,
-		onChange: onSelectChange,
-	};
-
 	const handleChangeDropdownMenu = (value: any) => {
 		setDataListDropdownMenu(value);
 	};
@@ -229,22 +220,11 @@ const UserConfigPermission: any = () => {
 							loading={isLoadingFields}
 							columns={columns}
 							data={paginateField}
-							rowSelection={rowSelection}
 						/>
 						<Pagination pagination={pagination} />
 					</Col>
 				</Card>
 			</Col>
-
-			{modalDelete.open && (
-				<ModalDeleteConfirmation
-					totalSelected={selectedRowKeys?.length}
-					itemTitle={paginateField?.find((config: any) => config.key === selectedRowKeys[0])?.field_name}
-					visible={modalDelete.open}
-					onCancel={() => setModalDelete({ open: false })}
-					onOk={() => deletePermissions({ id: selectedRowKeys })}
-				/>
-			)}
 		</>
 	);
 };
