@@ -75,7 +75,7 @@ const CreateConfig = () => {
 		country_id,
 		options: {
 			onSuccess: () => {
-				router.push("/country");
+				router.push("/country-structure");
 			},
 		},
 	});
@@ -562,7 +562,7 @@ const DownloadUploadContainer = styled.div`
 const Card = styled.div`
 	background: #ffffff;
 	border-radius: 16px;
-	padding: "16px"
+	padding: 16px;
 `;
 
 export default CreateConfig;

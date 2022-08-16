@@ -74,10 +74,12 @@ const ListTemplateMenu = () => {
 	const { data: fetchDataCountries, refetch: refetchDataCountries, isLoading } = useDataCountries({
 		options: {
 			onSuccess: (data: any) => {
-				pagination.setTotalItems(data.totalRow);
+				pagination.setTotalItems(data?.totalRow);
 			}
 		},
 		query: {
+			limit: pagination?.itemsPerPage,
+			page: pagination?.page,
 			search
 		}
 	})

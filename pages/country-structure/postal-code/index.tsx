@@ -24,7 +24,6 @@ const CountryPostalCode = () => {
 	});
 	const [modalDelete, setModalDelete] = useState({ open: false });
 	const [search, setSearch] = useState("");
-	const [isLoading, setLoading] = useState(true);
 	const [selectedRowKeys, setSelectedRowKeys] = useState([]);
 	const [modalCreate, setModalCreate] = useState({ open: false });
 	const [modalDetail, setModalDetail] = useState({ open: false, dataDetail: null });
@@ -49,12 +48,12 @@ const CountryPostalCode = () => {
 
 	const {
 		data: fields,
-		isLoading: isLoadingFields,
+		isLoading,
 		refetch: refetchPostalCode,
 	} = usePostalCodes({
 		options: {
 			onSuccess: (data: any) => {
-				pagination.setTotalItems(data.totalRow);
+				pagination.setTotalItems(data?.totalRow);
 			},
 		},
 		query: {
@@ -121,7 +120,6 @@ const CountryPostalCode = () => {
 							/>
 							<Dropdown
 								width="200px"
-								label=""
 								allowClear
 								items={[
 									{ id: 1, value: "Indonesia" },
@@ -198,10 +196,10 @@ const CountryPostalCode = () => {
 				<Card>
 					<Col gap="60px">
 						<Table
-							loading={false}
+							loading={isLoading}
 							rowSelection={rowSelection}
 							columns={columns}
-							data={[] ?? []}
+							data={data || []}
 						/>
 						<Pagination pagination={pagination} />
 					</Col>

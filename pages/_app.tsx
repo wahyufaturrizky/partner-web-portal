@@ -13,11 +13,7 @@ import { ICExclamation } from "../assets";
 import "pink-lava-ui/index.css";
 import "../styles/globals.css";
 
-const queryCache = new QueryCache({
-  onError: (error) => {
-    toast.error("Something went wrong");
-  },
-});
+const queryCache = new QueryCache({});
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
