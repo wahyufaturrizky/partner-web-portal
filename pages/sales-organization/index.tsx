@@ -7,7 +7,7 @@ import {
 import styled from "styled-components";
 import { ModalDeleteConfirmation } from "../../components/elements/Modal/ModalConfirmationDelete";
 import _ from "lodash";
-import { useSalesOrganization, useUpdateSalesOrganization } from "../../hooks/sales-organization/useSalesOrganization";
+import { useSalesOrganization, useUpdateSalesOrganization, useCreateSalesOrganizationHirarcy } from "../../hooks/sales-organization/useSalesOrganization";
 import { ModalManageDataEdit } from "../../components/elements/Modal/ModalManageDataSalesOrganization";
 import axios from "axios";
 
@@ -29,6 +29,7 @@ const CreateConfig = () => {
 		visible: false,
 		index: null,
 	});
+    const [isNew, setIsNew] = useState(true);
 
 	const onUploadStructure = (data: ({ [s: string]: unknown; } | ArrayLike<unknown>)[]) => {
 		let idCountryStructure = countryStructure[0];
@@ -101,6 +102,7 @@ const CreateConfig = () => {
         company_code: COMPANY_CODE,
 		options: {
 			onSuccess: (data: any) => {
+                setIsNew(false);
 				setCountryStructure(
 					data.salesOrganizationStructures.map((data: any, index: string) => ({
 						name: data.name,
@@ -109,13 +111,20 @@ const CreateConfig = () => {
 						companyInternalStructure: data.companyInternalStructure
 					}))
 				);
-
 			},
-		},
+		}
 	});
 
     const { mutate: updateSalesOrganization } = useUpdateSalesOrganization({
         company_code: COMPANY_CODE,
+		options: {
+			onSuccess: () => {
+				refetchSalesOrganization()
+			},
+		}
+	});
+
+    const { mutate: createSalesOrganization } = useCreateSalesOrganizationHirarcy({
 		options: {
 			onSuccess: () => {
 				refetchSalesOrganization()
@@ -190,15 +199,25 @@ const CreateConfig = () => {
 	};
 
     const onSubmit = () => {
-        const payload = {
-            add: countryStructure.filter(data => data.actionType === "NEW").map(({actionType, level, ...rest}) => ({
-                ...rest
-            })),
-            update: countryStructure.filter(data => data.actionType === "UPDATE").map(({actionType, level, ...rest}) => ({
-                ...rest
-            }))
+        let payload = {}
+        if(isNew){
+            payload = {
+                company_code: COMPANY_CODE,
+                data: countryStructure.filter(data => data.actionType === "NEW").map(({actionType, ...rest}) => ({
+                    ...rest
+                }))
+            }
+        } else {
+            payload = {
+                add: countryStructure.filter(data => data.actionType === "NEW").map(({actionType, level, ...rest}) => ({
+                    ...rest
+                })),
+                update: countryStructure.filter(data => data.actionType === "UPDATE").map(({actionType, level, ...rest}) => ({
+                    ...rest
+                }))
+            }
         }
-	    updateSalesOrganization(payload)
+	    isNew ? createSalesOrganization(payload) : updateSalesOrganization(payload);
         setIsEditMode(false)
 	};
 

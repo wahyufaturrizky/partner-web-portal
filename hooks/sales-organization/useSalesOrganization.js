@@ -16,6 +16,9 @@ const fetchSalesOrganization = async ({ company_code }) => {
 const useSalesOrganization = ({  options, company_code } = {}) => {
 	return useQuery(["sales-organization", company_code], () => fetchSalesOrganization({ company_code }), {
 		keepPreviousData: true,
+		refetchOnWindowFocus: false,
+		refetchOnMount: true,
+		retry: false,
 		...options,
 	});
 };
