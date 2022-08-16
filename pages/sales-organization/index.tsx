@@ -7,7 +7,7 @@ import {
 import styled from "styled-components";
 import { ModalDeleteConfirmation } from "../../components/elements/Modal/ModalConfirmationDelete";
 import _ from "lodash";
-import { useSalesOrganization, useUpdateSalesOrganization, useCreateSalesOrganizationHirarcy } from "../../hooks/sales-organization/useSalesOrganization";
+import { useSalesOrganization, useUpdateSalesOrganization, useCreateSalesOrganization } from "../../hooks/sales-organization/useSalesOrganization";
 import { ModalManageDataEdit } from "../../components/elements/Modal/ModalManageDataSalesOrganization";
 import axios from "axios";
 
@@ -45,7 +45,7 @@ const CreateConfig = () => {
 
         updateSalesOrganization(payload)
 
-		const datas = Object.values(data[0]).map((data, index) => ({
+		const datas = Object.values(data[0]).filter(data => !!data).map((data, index) => ({
 			name: data,
 			level: index + 1,
 			companyInternalStructure: false,
@@ -124,7 +124,7 @@ const CreateConfig = () => {
 		}
 	});
 
-    const { mutate: createSalesOrganization } = useCreateSalesOrganizationHirarcy({
+    const { mutate: createSalesOrganization } = useCreateSalesOrganization({
 		options: {
 			onSuccess: () => {
 				refetchSalesOrganization()
@@ -209,7 +209,7 @@ const CreateConfig = () => {
             }
         } else {
             payload = {
-                add: countryStructure.filter(data => data.actionType === "NEW").map(({actionType, level, ...rest}) => ({
+                add: countryStructure.filter(data => data.actionType === "NEW").map(({actionType, ...rest}) => ({
                     ...rest
                 })),
                 update: countryStructure.filter(data => data.actionType === "UPDATE").map(({actionType, level, ...rest}) => ({
@@ -218,7 +218,6 @@ const CreateConfig = () => {
             }
         }
 	    isNew ? createSalesOrganization(payload) : updateSalesOrganization(payload);
-        setIsEditMode(false)
 	};
 
     const isDisabled = !isEditMode;
@@ -253,7 +252,12 @@ const CreateConfig = () => {
 					<Row gap="4px" alignItems="center" justifyContent="space-between">
 						<Text variant={"h4"}>Sales Organization</Text>
                         <Button size="big" variant={"primary"} onClick={() => {
-                            isEditMode ? onSubmit() : setIsEditMode(true)
+                            if(isEditMode){
+                                onSubmit();
+                                setIsEditMode(false);
+                             } else {
+                                setIsEditMode(true)
+                             }
                         }}>
 							{isEditMode ? 'Save' : 'Edit'}
 						</Button>
@@ -325,6 +329,7 @@ const CreateConfig = () => {
                                             variant="primary"
                                             size="big"
                                             onClick={() => {
+                                                onSubmit();
                                                 setShowManageData({ visible: true, index })
                                             }}
                                             disabled={isDisabled}
@@ -363,11 +368,11 @@ const CreateConfig = () => {
 					itemTitle={modalDelete.structure.name}
 				/>
 			)}
-			<FileUploaderExcel
+			{showUploadStructure && <FileUploaderExcel
 				setVisible={setShowUploadStructure}
 				visible={showUploadStructure}
 				onSubmit={onUploadStructure}
-			/>
+			/>}
 
             {showManageData.visible && (
 				<ModalManageDataEdit
@@ -377,6 +382,7 @@ const CreateConfig = () => {
                     parentId={countryStructure?.[showManageData.index-1]?.id ?? null}
 					onSubmit={() => {
                         onSubmit();
+                        setIsEditMode(false)
                         setShowManageData({ visible: false });
                     }}
                     countryStructure={countryStructure}

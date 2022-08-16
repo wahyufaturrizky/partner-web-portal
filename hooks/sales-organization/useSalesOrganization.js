@@ -34,6 +34,17 @@ const useUpdateSalesOrganization = ({ company_code, options }) => {
 	);
 };
 
+const useCreateSalesOrganization = ({ options }) => {
+	return useMutation(
+		(data) =>
+			mdmService(`/sales-org`, {
+				method: "POST",
+				data,
+			}),
+		{ ...options }
+	);
+};
+
 const useCreateSalesOrganizationHirarcy = ({ options }) => {
 	return useMutation(
 		(data) =>
@@ -75,4 +86,4 @@ const useSalesOrganizationHirarcy = ({  options, structure_id } = {}) => {
 	});
 };
 
-export { useCreateSalesOrganizationHirarcy, useSalesOrganizationHirarcy, useSalesOrganization, useUpdateSalesOrganization, useGenerateTemplate };
+export { useCreateSalesOrganizationHirarcy, useCreateSalesOrganization, useSalesOrganizationHirarcy, useSalesOrganization, useUpdateSalesOrganization, useGenerateTemplate };

@@ -100,7 +100,7 @@ export const ModalManageDataEdit = ({
 	})
 	const [searchTable, setSearchTable] = useState("");
 	const [parentDatasStructure, setParentDatasStructure] = useState([]);
-	const [allParentData, setAllParentData] = useState();
+	const [allParentData, setAllParentData] = useState([]);
 	const [searchCurrency, setSearchCurrency] = useState("");
 
 	const pagination = usePagination({
@@ -114,9 +114,7 @@ export const ModalManageDataEdit = ({
 
 	const { mutate: updateSalesOrganizationHirarcy } = useCreateSalesOrganizationHirarcy({
 	options: {
-		onSuccess: () => {
-			refetchSalesOrganization()
-		},
+		onSuccess: () => {},
 	},
 });
 
@@ -168,7 +166,12 @@ export const ModalManageDataEdit = ({
 	};
 
 	const onAddStructure = () => {
-		const parentData = allParentData.find(data => data?.id === parent?.id);
+		let parentData = allParentData.find(data => data?.id === parent?.id);
+		if(!parentData){
+			parentData = {
+				hirarcies: []
+			}
+		}
 		const newData = {
 			id: self.crypto.randomUUID(),
 			name: name,
@@ -272,13 +275,11 @@ export const ModalManageDataEdit = ({
 		} else {
 			data.forEach((data) => {
 				let newEntries = Object.entries(data);
-				const currentLevel = newEntries[level - 1];
-				const currentData = currentLevel[1];
+				const currentData = newEntries[1][1];
 
 				const newSingleData = {
 					id: self.crypto.randomUUID(),
 					name: currentData,
-					parent: null,
 					hirarcies: [
 						{ name: currentData },
 					],
