@@ -402,9 +402,8 @@ const SalesmanGroup = () => {
 
       {modalForm.open && (
         <Modal
-          width={"350px"}
+          width={"440px"}
           centered
-          closable={false}
           visible={modalForm.open}
           onCancel={() => {
             setModalForm({ open: false, data: {}, typeForm: "" });
@@ -414,7 +413,7 @@ const SalesmanGroup = () => {
             modalForm.typeForm === "create"
               ? "Create Salesman Group"
               : !isLoadingSalesmanGroup || !isFetchingSalesmanGroup
-              ? salesmanGroupFormData?.name
+              ? "Salesman Group"
               : ""
           }
           footer={null}
@@ -430,6 +429,7 @@ const SalesmanGroup = () => {
                     display: "flex",
                     flexDirection: "column",
                     justifyContent: "center",
+                    marginTop: "12px",
                   }}
                 >
                   <Input
@@ -502,7 +502,8 @@ const SalesmanGroup = () => {
                     })}
                   />
 
-                  <Spacer size={14} />
+                  <Spacer size={30} />
+
                   <div
                     style={{
                       display: "flex",
@@ -516,6 +517,7 @@ const SalesmanGroup = () => {
                       variant={"tertiary"}
                       key="submit"
                       type="primary"
+                      full
                       onClick={() => {
                         setModalForm({ open: false, data: {}, typeForm: "" });
                         setSalesmanGroupFormData({});
@@ -524,7 +526,7 @@ const SalesmanGroup = () => {
                       Cancel
                     </Button>
 
-                    <Button onClick={handleSubmit(onSubmit)} variant="primary" size="big">
+                    <Button full onClick={handleSubmit(onSubmit)} variant="primary" size="big">
                       {isLoadingCreateSalesmanGroup || isLoadingUpdateSalesmanGroup
                         ? "Loading..."
                         : "Save"}

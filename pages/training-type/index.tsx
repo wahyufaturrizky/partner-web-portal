@@ -321,9 +321,8 @@ const TrainingType = () => {
 
       {modalForm.open && (
         <Modal
-          width={"350px"}
+          width={"420px"}
           centered
-          closable={false}
           visible={modalForm.open}
           onCancel={() => setModalForm({ open: false, data: {}, typeForm: "" })}
           title={modalForm.typeForm === "create" ? "Create Training Type" : modalForm.data?.name}
@@ -334,6 +333,7 @@ const TrainingType = () => {
                 display: "flex",
                 flexDirection: "column",
                 justifyContent: "center",
+                marginTop: "12px",
               }}
             >
               <Input
@@ -346,7 +346,7 @@ const TrainingType = () => {
                   shouldUnregister: true,
                 })}
               />
-              <Spacer size={14} />
+              <Spacer size={30} />
               <div
                 style={{
                   display: "flex",
@@ -357,6 +357,7 @@ const TrainingType = () => {
               >
                 {modalForm.typeForm === "create" ? (
                   <Button
+                    full
                     size="big"
                     variant={"tertiary"}
                     key="submit"
@@ -367,6 +368,7 @@ const TrainingType = () => {
                   </Button>
                 ) : (
                   <Button
+                    full
                     size="big"
                     variant={"tertiary"}
                     key="submit"
@@ -379,7 +381,7 @@ const TrainingType = () => {
                   </Button>
                 )}
 
-                <Button onClick={handleSubmit(onSubmit)} variant="primary" size="big">
+                <Button full onClick={handleSubmit(onSubmit)} variant="primary" size="big">
                   {isLoadingCreateTrainingType || isLoadingUpdateTrainingType
                     ? "Loading..."
                     : "Save"}
@@ -392,7 +394,6 @@ const TrainingType = () => {
 
       {isShowDelete.open && (
         <Modal
-          closable={false}
           centered
           visible={isShowDelete.open}
           onCancel={() => setShowDelete({ open: false, type: "", data: {} })}

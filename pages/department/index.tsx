@@ -318,9 +318,8 @@ const JobPosition = () => {
 
       {modalForm.open && (
         <Modal
-          width={"350px"}
+          width={"420px"}
           centered
-          closable={false}
           visible={modalForm.open}
           onCancel={() => setModalForm({ open: false, data: {}, typeForm: "" })}
           title={modalForm.typeForm === "create" ? "Create Department" : modalForm?.data?.name}
@@ -331,6 +330,7 @@ const JobPosition = () => {
                 display: "flex",
                 flexDirection: "column",
                 justifyContent: "center",
+                marginTop: "12px",
               }}
             >
               <Input
@@ -343,7 +343,7 @@ const JobPosition = () => {
                   shouldUnregister: true,
                 })}
               />
-              <Spacer size={14} />
+              <Spacer size={30} />
               <div
                 style={{
                   display: "flex",
@@ -354,6 +354,7 @@ const JobPosition = () => {
               >
                 {modalForm.typeForm === "create" ? (
                   <Button
+                    full
                     size="big"
                     variant={"tertiary"}
                     key="submit"
@@ -364,6 +365,7 @@ const JobPosition = () => {
                   </Button>
                 ) : (
                   <Button
+                    full
                     size="big"
                     variant={"tertiary"}
                     key="submit"
@@ -376,7 +378,7 @@ const JobPosition = () => {
                   </Button>
                 )}
 
-                <Button onClick={handleSubmit(onSubmit)} variant="primary" size="big">
+                <Button full onClick={handleSubmit(onSubmit)} variant="primary" size="big">
                   {isLoadingCreateDepartment || isLoadingUpdateDepartment ? "Loading..." : "Save"}
                 </Button>
               </div>

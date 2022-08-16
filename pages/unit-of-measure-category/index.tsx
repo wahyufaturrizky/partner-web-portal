@@ -323,9 +323,8 @@ const UOMCategory = () => {
 
       {modalForm.open && (
         <Modal
-          width={"350px"}
+          width={"420px"}
           centered
-          closable={false}
           visible={modalForm.open}
           onCancel={() => setModalForm({ open: false, data: {}, typeForm: "" })}
           title={modalForm.typeForm === "create" ? "Create Uom Category" : "UoM Category"}
@@ -336,6 +335,7 @@ const UOMCategory = () => {
                 display: "flex",
                 flexDirection: "column",
                 justifyContent: "center",
+                marginTop: "12px",
               }}
             >
               <Input
@@ -348,7 +348,7 @@ const UOMCategory = () => {
                   shouldUnregister: true,
                 })}
               />
-              <Spacer size={14} />
+              <Spacer size={30} />
               <div
                 style={{
                   display: "flex",
@@ -363,6 +363,7 @@ const UOMCategory = () => {
                     variant={"tertiary"}
                     key="submit"
                     type="primary"
+                    full
                     onClick={() => setModalForm({ open: false, data: {}, typeForm: "" })}
                   >
                     Cancel
@@ -373,6 +374,7 @@ const UOMCategory = () => {
                     variant={"tertiary"}
                     key="submit"
                     type="primary"
+                    full
                     onClick={() => {
                       setShowDelete({ open: true, type: "detail", data: modalForm.data });
                     }}
@@ -381,7 +383,7 @@ const UOMCategory = () => {
                   </Button>
                 )}
 
-                <Button onClick={handleSubmit(onSubmit)} variant="primary" size="big">
+                <Button full onClick={handleSubmit(onSubmit)} variant="primary" size="big">
                   {isLoadingCreateUomCategory || isLoadingUpdateUomCategory ? "Loading..." : "Save"}
                 </Button>
               </div>
