@@ -28,6 +28,7 @@ import {
   useDateFormatLists,
   useMenuDesignLists,
   useNumberFormatLists,
+  useTimezones,
 } from "../../hooks/company-list/useCompany";
 import { useTimezone } from "../../hooks/timezone/useTimezone";
 
@@ -448,7 +449,7 @@ const CreateCompany: any = () => {
     },
   });
 
-  const { data: timezoneData, isLoading: isLoadingTimezoneList } = useTimezone({
+  const { data: timezoneData, isLoading: isLoadingTimezoneList } = useTimezones({
     options: {
       onSuccess: (data) => {},
     },
@@ -472,7 +473,8 @@ const CreateCompany: any = () => {
     options: {
       onSuccess: (data) => {
         console.log(data);
-        // router.push("/company-list");
+        alert("Create Success!");
+        router.push("/company-list");
       },
     },
   });
@@ -660,8 +662,8 @@ const CreateCompany: any = () => {
                       label="Menu Design"
                       width={"100%"}
                       items={menuDesignData.rows.map((data) => ({
-                        id: data.format,
-                        value: data.id,
+                        id: data.id,
+                        value: data.name,
                       }))}
                       placeholder={"Select"}
                       handleChange={(value) => setValue("menuDesign", value)}
@@ -815,8 +817,8 @@ const CreateCompany: any = () => {
                       label="Timezone"
                       width={"100%"}
                       items={timezoneData.rows.map((data) => ({
-                        value: `${data.utc} - ${data.name}`,
-                        id: `${data.utc} - ${data.name}`,
+                        value: `${data.utc} ${data.name}`,
+                        id: `${data.utc} ${data.name}`,
                       }))}
                       placeholder={"Select"}
                       handleChange={(value) => setValue("timezone", value)}

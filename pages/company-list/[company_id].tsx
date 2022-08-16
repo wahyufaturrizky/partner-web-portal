@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Text,
   Col,
@@ -18,7 +18,7 @@ import Router, { useRouter } from "next/router";
 import ArrowLeft from "../../assets/icons/arrow-left.svg";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import usePagination from "@lucasmogari/react-pagination";
 import {
   useCoa,
@@ -29,6 +29,8 @@ import {
   useDateFormatLists,
   useMenuDesignLists,
   useNumberFormatLists,
+  useTimezones,
+  useUpdateCompany,
 } from "../../hooks/company-list/useCompany";
 import { useTimezone } from "../../hooks/timezone/useTimezone";
 
@@ -351,13 +353,14 @@ const schema = yup
   })
   .required();
 
-const defaultValue = {
-  activeStatus: "Y",
-  isPkp: false,
-  advancePricing: false,
-  pricingStructure: false,
-  usingApproval: false,
-};
+// const defaultValue = {
+//   activeStatus: "Y",
+//   isPkp: false,
+//   advancePricing: false,
+//   pricingStructure: false,
+//   usingApproval: false,
+//   country: ''
+// };
 
 const DetailCompany: any = () => {
   const router = useRouter();
@@ -391,10 +394,11 @@ const DetailCompany: any = () => {
     register,
     handleSubmit,
     setValue,
+    control,
     formState: { errors },
   } = useForm({
     resolver: yupResolver(schema),
-    defaultValues: defaultValue,
+    // defaultValues: defaultValue,
   });
 
   const activeStatus = [
@@ -411,6 +415,17 @@ const DetailCompany: any = () => {
     options: {
       onSuccess: (data: any) => {
         console.log(data, "Detail Data");
+        setAddress(data.address);
+      },
+    },
+  });
+
+  const { mutate: updateCompany, isLoading: isLoadingUpdateCompany } = useUpdateCompany({
+    id: company_id,
+    options: {
+      onSuccess: () => {
+        alert("Update Success!");
+        router.push("/company-list");
       },
     },
   });
@@ -463,7 +478,7 @@ const DetailCompany: any = () => {
     },
   });
 
-  const { data: timezoneData, isLoading: isLoadingTimezoneList } = useTimezone({
+  const { data: timezoneData, isLoading: isLoadingTimezoneList } = useTimezones({
     options: {
       onSuccess: (data) => {},
     },
@@ -483,15 +498,6 @@ const DetailCompany: any = () => {
     setSectorList(filterIndustry[0].data);
   };
 
-  const { mutate: createCompany } = useCreateCompany({
-    options: {
-      onSuccess: (data) => {
-        console.log(data);
-        // router.push("/company-list");
-      },
-    },
-  });
-
   const onSubmit = (data) => {
     const payload = {
       account_id: "0",
@@ -499,11 +505,11 @@ const DetailCompany: any = () => {
       code: data.code,
       email: data.email,
       address: address,
-      country: data.country || "",
+      country: data.country,
       industry: data.industry,
       employees: data.numberOfEmployee,
       sector: data.sector,
-      menu_design: data.menuDesign || "",
+      menu_design: data.menuDesign,
       tax_id: data.taxId,
       pkp: data.isPkp,
       logo: "",
@@ -513,14 +519,14 @@ const DetailCompany: any = () => {
       coa: data.coaTemplate,
       format_date: data.formatDate,
       format_number: data.numberFormat,
-      timezone: data.timezone || "",
+      timezone: data.timezone,
       advance_pricing: data.advancePricing,
       pricing_structure: data.pricingStructure,
       use_approval: data.usingApproval,
       status: data.activeStatus,
     };
-    // console.log(payload)
-    createCompany(payload);
+    console.log(payload);
+    updateCompany(payload);
   };
 
   return (
@@ -534,15 +540,24 @@ const DetailCompany: any = () => {
         <Card padding="20px">
           <Row justifyContent="space-between" alignItems="center" nowrap>
             {!isLoadingCompanyData && !isFetchingCompanyData && (
-              <Dropdown
-                label=""
-                isHtml
-                width={"185px"}
-                items={activeStatus}
-                placeholder={"Status"}
-                handleChange={(text) => setValue("activeStatus", text)}
-                noSearch
-                defaultValue={companyData.isActive ? "Y" : "N"}
+              <Controller
+                control={control}
+                name="activeStatus"
+                defaultValue={companyData.country}
+                render={({ field: { onChange } }) => (
+                  <Dropdown
+                    label=""
+                    isHtml
+                    width={"185px"}
+                    items={activeStatus}
+                    placeholder={"Status"}
+                    handleChange={(value: any) => {
+                      onChange(value);
+                    }}
+                    noSearch
+                    defaultValue={companyData.isActive ? "Y" : "N"}
+                  />
+                )}
               />
             )}
             <Row>
@@ -616,63 +631,99 @@ const DetailCompany: any = () => {
                     {isLoadingCountryList ? (
                       <Spin tip="Loading data..." />
                     ) : (
-                      <Dropdown2
-                        label="Country"
-                        width={"100%"}
-                        items={countryData.rows.map((data) => ({
-                          id: data.name,
-                          value: data.name,
-                        }))}
-                        placeholder={"Select"}
-                        handleChange={(value) => setValue("country", value)}
-                        onSearch={(search) => setSearchCountry(search)}
-                        required
-                        error={errors?.country?.message}
-                        {...register("country")}
+                      <Controller
+                        control={control}
+                        name="country"
                         defaultValue={companyData.country}
+                        render={({ field: { onChange } }) => (
+                          <Dropdown2
+                            label="Country"
+                            width={"100%"}
+                            items={countryData.rows.map((data) => ({
+                              id: data.id, // id
+                              value: data.name, // id
+                            }))}
+                            placeholder={"Select"}
+                            handleChange={(value: any) => {
+                              onChange(value);
+                            }}
+                            // handleChange={(value) => setValue("country", value)}
+                            onSearch={(search) => setSearchCountry(search)}
+                            required
+                            error={errors?.country?.message}
+                            defaultValue={companyData.country}
+                          />
+                        )}
                       />
                     )}
                   </Col>
                   <Col width="50%">
-                    <Dropdown
-                      label="Industry"
-                      width={"100%"}
-                      items={industryList}
-                      placeholder={"Select"}
-                      handleChange={(value: any) => handleSelectIndustry(value)}
-                      onSearch={(search) => handleSearchIndustry(search)}
-                      required
-                      error={errors?.industry?.message}
-                      {...register("industry", { required: true })}
+                    <Controller
+                      control={control}
+                      name="industry"
                       defaultValue={companyData.industry}
+                      render={({ field: { onChange } }) => (
+                        <Dropdown
+                          label="Industry"
+                          width={"100%"}
+                          items={industryList}
+                          placeholder={"Select"}
+                          handleChange={(value: any) => {
+                            onChange(value);
+                          }}
+                          onSearch={(search) => handleSearchIndustry(search)}
+                          required
+                          error={errors?.industry?.message}
+                          {...register("industry", { required: true })}
+                          defaultValue={companyData.industry}
+                        />
+                      )}
                     />
                   </Col>
                 </Row>
                 <Row width="100%" gap="20px" noWrap>
                   <Col width="50%">
-                    <Dropdown
-                      label="Number of Employee"
-                      width={"100%"}
-                      items={NumberOfEmployeeDataFake}
-                      placeholder={"Select"}
-                      handleChange={(value: any) => setValue("numberOfEmployee", value)}
-                      {...register("numberOfEmployee")}
-                      noSearch
+                    <Controller
+                      control={control}
+                      name="numberOfEmployee"
                       defaultValue={companyData.employees}
+                      render={({ field: { onChange } }) => (
+                        <Dropdown
+                          label="Number of Employee"
+                          width={"100%"}
+                          items={NumberOfEmployeeDataFake}
+                          placeholder={"Select"}
+                          handleChange={(value: any) => {
+                            onChange(value);
+                          }}
+                          {...register("numberOfEmployee")}
+                          noSearch
+                          defaultValue={companyData.employees}
+                        />
+                      )}
                     />
                   </Col>
                   <Col width="50%">
-                    <Dropdown
-                      label="Sector"
-                      width={"100%"}
-                      items={sectorList}
-                      placeholder={"Select"}
-                      handleChange={(value) => setValue("sector", value)}
-                      required
-                      noSearch
-                      error={errors?.sector?.message}
-                      {...register("sector", { required: true })}
+                    <Controller
+                      control={control}
+                      name="sector"
                       defaultValue={companyData.sector}
+                      render={({ field: { onChange } }) => (
+                        <Dropdown
+                          label="Sector"
+                          width={"100%"}
+                          items={sectorList}
+                          placeholder={"Select"}
+                          handleChange={(value: any) => {
+                            onChange(value);
+                          }}
+                          required
+                          noSearch
+                          error={errors?.sector?.message}
+                          {...register("sector", { required: true })}
+                          defaultValue={companyData.sector}
+                        />
+                      )}
                     />
                   </Col>
                 </Row>
@@ -681,20 +732,29 @@ const DetailCompany: any = () => {
                     {isLoadingMenuDesignList ? (
                       <Spin tip="Loading data..." />
                     ) : (
-                      <Dropdown2
-                        label="Menu Design"
-                        width={"100%"}
-                        items={menuDesignData.rows.map((data) => ({
-                          id: data.format,
-                          value: data.id,
-                        }))}
-                        placeholder={"Select"}
-                        handleChange={(value) => setValue("menuDesign", value)}
-                        onSearch={(search) => setSearchMenuDesign(search)}
-                        required
-                        error={errors?.menuDesign?.message}
-                        {...register("menuDesign", { required: true })}
+                      <Controller
+                        control={control}
+                        name="menuDesign"
                         defaultValue={companyData.menuDesign}
+                        render={({ field: { onChange } }) => (
+                          <Dropdown2
+                            label="Menu Design"
+                            width={"100%"}
+                            items={menuDesignData.rows.map((data) => ({
+                              id: data.id,
+                              value: data.name,
+                            }))}
+                            placeholder={"Select"}
+                            handleChange={(value: any) => {
+                              onChange(value);
+                            }}
+                            onSearch={(search) => setSearchMenuDesign(search)}
+                            required
+                            error={errors?.menuDesign?.message}
+                            {...register("menuDesign", { required: true })}
+                            defaultValue={companyData.menuDesign}
+                          />
+                        )}
                       />
                     )}
                   </Col>
@@ -709,10 +769,19 @@ const DetailCompany: any = () => {
                     />
                     <Row>
                       <Text variant="body1">PKP ? </Text>
-                      <Switch
-                        defaultChecked={companyData.pkp}
-                        checked={companyData.pkp}
-                        onChange={(value) => setValue("isPkp", value)}
+                      <Controller
+                        control={control}
+                        name="isPkp"
+                        defaultValue={companyData.useApproval}
+                        render={({ field: { onChange } }) => (
+                          <Switch
+                            defaultChecked={companyData.pkp}
+                            checked={companyData.pkp}
+                            handleChange={(value: any) => {
+                              onChange(value);
+                            }}
+                          />
+                        )}
                       />
                     </Row>
                   </Col>
@@ -729,29 +798,47 @@ const DetailCompany: any = () => {
               <Accordion.Body>
                 <Row width="100%" gap="20px" noWrap>
                   <Col width="50%">
-                    <Dropdown
-                      label="Company Type"
-                      width={"100%"}
-                      items={CompanyTypeDataFake}
-                      placeholder={"Select"}
-                      handleChange={(value) => setValue("companyType", value)}
-                      required
-                      noSearch
-                      error={errors?.companyType?.message}
-                      {...register("companyType", { required: true })}
-                      defaultValue={companyData.company_type}
+                    <Controller
+                      control={control}
+                      name="companyType"
+                      defaultValue={companyData.companyType}
+                      render={({ field: { onChange } }) => (
+                        <Dropdown
+                          label="Company Type"
+                          width={"100%"}
+                          items={CompanyTypeDataFake}
+                          placeholder={"Select"}
+                          handleChange={(value: any) => {
+                            onChange(value);
+                          }}
+                          required
+                          noSearch
+                          error={errors?.companyType?.message}
+                          {...register("companyType", { required: true })}
+                          defaultValue={companyData.companyType}
+                        />
+                      )}
                     />
                   </Col>
                   <Col width="50%">
-                    <Dropdown
-                      label="Corporate"
-                      width={"100%"}
-                      items={CorporateDataFake}
-                      placeholder={"Select"}
-                      handleChange={(value) => setValue("corporate", value)}
-                      {...register("corporate")}
-                      noSearch
+                    <Controller
+                      control={control}
+                      name="corporate"
                       defaultValue={companyData.corporate}
+                      render={({ field: { onChange } }) => (
+                        <Dropdown
+                          label="Corporate"
+                          width={"100%"}
+                          items={CorporateDataFake}
+                          placeholder={"Select"}
+                          handleChange={(value: any) => {
+                            onChange(value);
+                          }}
+                          {...register("corporate")}
+                          noSearch
+                          defaultValue={companyData.corporate}
+                        />
+                      )}
                     />
                   </Col>
                 </Row>
@@ -760,20 +847,29 @@ const DetailCompany: any = () => {
                     {isLoadingCurrencyList ? (
                       <Spin tip="Loading data..." />
                     ) : (
-                      <Dropdown2
-                        label="Currency"
-                        width={"100%"}
-                        items={currencyData.rows.map((data) => ({
-                          value: `${data.currency} - ${data.currencyName}`,
-                          id: `${data.currency} - ${data.currencyName}`,
-                        }))}
-                        placeholder={"Select"}
-                        handleChange={(value) => setValue("currency", value)}
-                        onSearch={(search) => setSearchCurrency(search)}
-                        required
-                        error={errors?.currency?.message}
-                        {...register("currency", { required: true })}
+                      <Controller
+                        control={control}
+                        name="currency"
                         defaultValue={companyData.currency}
+                        render={({ field: { onChange } }) => (
+                          <Dropdown2
+                            label="Currency"
+                            width={"100%"}
+                            items={currencyData.rows.map((data) => ({
+                              value: `${data.currency} - ${data.currencyName}`,
+                              id: `${data.currency} - ${data.currencyName}`,
+                            }))}
+                            placeholder={"Select"}
+                            handleChange={(value: any) => {
+                              onChange(value);
+                            }}
+                            onSearch={(search) => setSearchCurrency(search)}
+                            required
+                            error={errors?.currency?.message}
+                            {...register("currency", { required: true })}
+                            defaultValue={companyData.currency}
+                          />
+                        )}
                       />
                     )}
                   </Col>
@@ -781,20 +877,29 @@ const DetailCompany: any = () => {
                     {isLoadingCoaList ? (
                       <Spin tip="Loading data..." />
                     ) : (
-                      <Dropdown2
-                        label="CoA Template"
-                        width={"100%"}
-                        items={coaData.rows.map((data) => ({
-                          value: data.name,
-                          id: data.name,
-                        }))}
-                        placeholder={"Select"}
-                        handleChange={(value) => setValue("coaTemplate", value)}
-                        onSearch={(search) => setSearchCoa(search)}
-                        required
-                        error={errors?.coaTemplate?.message}
-                        {...register("coaTemplate", { required: true })}
+                      <Controller
+                        control={control}
+                        name="coaTemplate"
                         defaultValue={companyData.coa}
+                        render={({ field: { onChange } }) => (
+                          <Dropdown2
+                            label="CoA Template"
+                            width={"100%"}
+                            items={coaData.rows.map((data) => ({
+                              id: data.name,
+                              value: data.name,
+                            }))}
+                            placeholder={"Select"}
+                            handleChange={(value: any) => {
+                              onChange(value);
+                            }}
+                            onSearch={(search) => setSearchCoa(search)}
+                            required
+                            error={errors?.coaTemplate?.message}
+                            {...register("coaTemplate", { required: true })}
+                            defaultValue={companyData.coa}
+                          />
+                        )}
                       />
                     )}
                   </Col>
@@ -804,20 +909,29 @@ const DetailCompany: any = () => {
                     {isLoadingDateFormatList ? (
                       <Spin tip="Loading data..." />
                     ) : (
-                      <Dropdown
-                        label="Format Date"
-                        width={"100%"}
-                        items={dateFormatData.rows.map((data) => ({
-                          value: data.format,
-                          id: data.format,
-                        }))}
-                        placeholder={"Select"}
-                        handleChange={(value) => setValue("formatDate", value)}
-                        required
-                        error={errors?.formatDate?.message}
-                        {...register("formatDate", { required: true })}
-                        noSearch
-                        defaultValue={companyData.format_date}
+                      <Controller
+                        control={control}
+                        name="formatDate"
+                        defaultValue={companyData.formatDate}
+                        render={({ field: { onChange } }) => (
+                          <Dropdown
+                            label="Format Date"
+                            width={"100%"}
+                            items={dateFormatData.rows.map((data) => ({
+                              value: data.format,
+                              id: data.format,
+                            }))}
+                            placeholder={"Select"}
+                            handleChange={(value: any) => {
+                              onChange(value);
+                            }}
+                            required
+                            error={errors?.formatDate?.message}
+                            {...register("formatDate", { required: true })}
+                            noSearch
+                            defaultValue={companyData.formatDate}
+                          />
+                        )}
                       />
                     )}
                   </Col>
@@ -825,20 +939,29 @@ const DetailCompany: any = () => {
                     {isLoadingNumberFormatList ? (
                       <Spin tip="Loading data..." />
                     ) : (
-                      <Dropdown
-                        label="Number Format"
-                        width={"100%"}
-                        items={numberFormatData.rows.map((data) => ({
-                          value: data.format,
-                          id: data.format,
-                        }))}
-                        placeholder={"Select"}
-                        handleChange={(value) => setValue("numberFormat", value)}
-                        required
-                        error={errors?.numberFormat?.message}
-                        {...register("numberFormat", { required: true })}
-                        noSearch
-                        defaultValue={companyData.format_number}
+                      <Controller
+                        control={control}
+                        name="numberFormat"
+                        defaultValue={companyData.formatNumber}
+                        render={({ field: { onChange } }) => (
+                          <Dropdown
+                            label="Number Format"
+                            width={"100%"}
+                            items={numberFormatData.rows.map((data) => ({
+                              value: data.format,
+                              id: data.format,
+                            }))}
+                            placeholder={"Select"}
+                            handleChange={(value: any) => {
+                              onChange(value);
+                            }}
+                            required
+                            error={errors?.numberFormat?.message}
+                            {...register("numberFormat", { required: true })}
+                            noSearch
+                            defaultValue={companyData.formatNumber}
+                          />
+                        )}
                       />
                     )}
                   </Col>
@@ -848,20 +971,29 @@ const DetailCompany: any = () => {
                     {isLoadingTimezoneList ? (
                       <Spin tip="Loading data..." />
                     ) : (
-                      <Dropdown2
-                        label="Timezone"
-                        width={"100%"}
-                        items={timezoneData.rows.map((data) => ({
-                          value: `${data.utc} - ${data.name}`,
-                          id: `${data.utc} - ${data.name}`,
-                        }))}
-                        placeholder={"Select"}
-                        handleChange={(value) => setValue("timezone", value)}
-                        onSearch={(search) => setSearchTimezone(search)}
-                        required
-                        error={errors?.timezone?.message}
-                        {...register("timezone", { required: true })}
+                      <Controller
+                        control={control}
+                        name="timezone"
                         defaultValue={companyData.timezone}
+                        render={({ field: { onChange } }) => (
+                          <Dropdown2
+                            label="Timezone"
+                            width={"100%"}
+                            items={timezoneData.rows.map((data) => ({
+                              value: `${data.utc} ${data.name}`,
+                              id: `${data.utc} ${data.name}`,
+                            }))}
+                            placeholder={"Select"}
+                            handleChange={(value: any) => {
+                              onChange(value);
+                            }}
+                            onSearch={(search) => setSearchTimezone(search)}
+                            required
+                            error={errors?.timezone?.message}
+                            {...register("timezone", { required: true })}
+                            defaultValue={companyData.timezone}
+                          />
+                        )}
                       />
                     )}
                   </Col>
@@ -870,28 +1002,56 @@ const DetailCompany: any = () => {
                     <Spacer size={20} />
                     <Row width="100%" gap="20px" noWrap>
                       <Text variant="body1">Company Use Advance Pricing</Text>
-                      <Switch
-                        defaultChecked={companyData.advancePricing}
-                        checked={companyData.advancePricing}
-                        onChange={(value) => setValue("advancePricing", value)}
+                      <Controller
+                        control={control}
+                        name="advancePricing"
+                        defaultValue={companyData.advancePricing}
+                        render={({ field: { onChange } }) => (
+                          <Switch
+                            defaultChecked={companyData.advancePricing}
+                            checked={companyData.advancePricing}
+                            // onChange={(value) => setValue("advancePricing", value)}
+                            handleChange={(value: any) => {
+                              onChange(value);
+                            }}
+                          />
+                        )}
                       />
                     </Row>
                     <Spacer size={20} />
                     <Row width="100%" gap="20px" noWrap>
                       <Text variant="body1">Company Use Pricing Structure</Text>
-                      <Switch
-                        defaultChecked={!companyData.pricingStructure}
-                        checked={companyData.pricingStructure}
-                        onChange={(value) => setValue("pricingStructure", value)}
+                      <Controller
+                        control={control}
+                        name="pricingStructure"
+                        defaultValue={companyData.pricingStructure}
+                        render={({ field: { onChange } }) => (
+                          <Switch
+                            defaultChecked={!companyData.pricingStructure}
+                            checked={companyData.pricingStructure}
+                            handleChange={(value: any) => {
+                              onChange(value);
+                            }}
+                          />
+                        )}
                       />
                     </Row>
                     <Spacer size={20} />
                     <Row width="100%" gap="20px" noWrap>
                       <Text variant="body1">Using Approval</Text>
-                      <Switch
-                        defaultChecked={companyData.useApproval}
-                        checked={companyData.useApproval}
-                        onChange={(value) => setValue("usingApproval", value)}
+                      <Controller
+                        control={control}
+                        name="usingApproval"
+                        defaultValue={companyData.useApproval}
+                        render={({ field: { onChange } }) => (
+                          <Switch
+                            defaultChecked={companyData.useApproval}
+                            checked={companyData.useApproval}
+                            handleChange={(value: any) => {
+                              onChange(value);
+                            }}
+                          />
+                        )}
                       />
                     </Row>
                   </Col>

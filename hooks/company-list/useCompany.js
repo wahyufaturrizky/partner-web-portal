@@ -1,5 +1,5 @@
 import { useQuery, useMutation } from "react-query";
-import { client } from "../../lib/client";
+import { client, client3 } from "../../lib/client";
 import { mdmService } from "../../lib/client";
 
 // Start Company
@@ -64,10 +64,10 @@ function useCreateCompany({ options }) {
 	);
 }
 
-function useUpdateCompany({ companyId, options }) {
+function useUpdateCompany({ id, options }) {
 	return useMutation(
 		(updates) =>
-			client(`/hermes/company/${companyId}`, {
+			client(`/hermes/company/${id}`, {
 				method: "PUT",
 				data: updates,
 			}),
@@ -223,6 +223,26 @@ const useCountries = ({ query = {}, options } = {}) => {
 	});
 };
 
+const fetchTimezone = async ({ query = {} }) => {
+	return client3(`/master/timezone`, {
+		params: {
+			search: "",
+			limit: 10000,
+			page: 1,
+			sortBy: "id",
+			sortOrder: "asc",
+			...query,
+		},
+	}).then((data) => data);
+};
+
+const useTimezones = ({ query = {}, options } = {}) => {
+	return useQuery(["timezone", query], () => fetchTimezone({ query }), {
+		keepPreviousData: true,
+		...options,
+	});
+};
+
 export {
   useCompanyList,
   useCompany,
@@ -235,5 +255,6 @@ export {
   useCoa,
   useCurrenciesMDM,
   useMenuDesignLists,
-  useCountries
+  useCountries,
+  useTimezones
 };
