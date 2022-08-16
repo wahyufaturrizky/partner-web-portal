@@ -114,6 +114,8 @@ const DetailMenuList: any = () => {
 					});
 				});
 
+				console.log('============', data)
+
 				if (data.menu.processName) {
 					setIsMenuProcess(true);
 				}
@@ -156,7 +158,7 @@ const DetailMenuList: any = () => {
 		isLoading: isLoadingPermissions,
 	} = usePermissions({
 		options: {
-			onSuccess: (data) => {
+			onSuccess: (data: any) => {
 				paginationTablePermission.setTotalItems(data.totalRow);
 				setIsLoading(false);
 			},
@@ -174,7 +176,7 @@ const DetailMenuList: any = () => {
 		isLoading: isLoadingFilterListPermissions,
 	} = useFilterListPermissions({
 		options: {
-			onSuccess: (data) => {
+			onSuccess: (data: any) => {
 				paginationTablePermission.setTotalItems(data.totalRow);
 				setIsLoading(false);
 			},
@@ -196,9 +198,9 @@ const DetailMenuList: any = () => {
 		},
 	];
 
-	const dataTablePermission = [];
-	const datFieldPermission = [];
-	dataTableAssociatePermission?.rows?.map((field) => {
+	const dataTablePermission: any = [];
+	const datFieldPermission: any = [];
+	dataTableAssociatePermission?.rows?.map((field: any) => {
 		dataTablePermission.push({
 			key: field.id,
 			field_name: field.name,
@@ -219,7 +221,7 @@ const DetailMenuList: any = () => {
 
 	const paginateFieldTablePermission = dataTablePermission;
 
-	const onSelectChangeTablePermission = (selectedRowKeys, selectedRows) => {
+	const onSelectChangeTablePermission = (selectedRowKeys: any, selectedRows: any) => {
 		setSelectedRowTablePermission(selectedRows);
 		setSelectedRowKeysTablePermission(selectedRowKeys);
 	};
@@ -344,8 +346,8 @@ const DetailMenuList: any = () => {
 		},
 	});
 
-	const dataTableField = [];
-	tableFieldData?.rows?.map((field) => {
+	const dataTableField: any = [];
+	tableFieldData?.rows?.map((field: any) => {
 		dataTableField.push({
 			key: field.id,
 			field_id: field.id,
@@ -356,7 +358,7 @@ const DetailMenuList: any = () => {
 
 	const paginateTableField = dataTableField;
 
-	const onSelectChangeTableField = (value, rowSelected) => {
+	const onSelectChangeTableField = (value: any, rowSelected: any) => {
 		setSelectedRowKeysTableField(value);
 		setSelectedRowTableField(rowSelected);
 	};
@@ -377,8 +379,8 @@ const DetailMenuList: any = () => {
 
 	const handleSelectedField = () => {
 		if (titleModal === "Associated Permissions") {
-			const tempDataAssociatedPermissionsField = [];
-			dataTablePermission?.map((field) => {
+			const tempDataAssociatedPermissionsField: any = [];
+			dataTablePermission?.map((field: any) => {
 				if (rowSelectionTablePermission.selectedRowKeys.includes(field.key)) {
 					tempDataAssociatedPermissionsField.push({
 						key: field.key,
@@ -393,8 +395,8 @@ const DetailMenuList: any = () => {
 				}
 			});
 		} else {
-			const tempDataAllowedField = [];
-			dataTableField?.map((field) => {
+			const tempDataAllowedField: any = [];
+			dataTableField?.map((field: any) => {
 				if (rowSelectionTableField.selectedRowKeys.includes(field.key)) {
 					tempDataAllowedField.push({
 						key: field.key,
@@ -562,12 +564,14 @@ const DetailMenuList: any = () => {
 		}
 	};
 
+	console.log('isMenuProcess', isMenuProcess)
+
 	return (
 		<>
 			<Col>
 				<Row alignItems="center" gap="4px">
 					<div onClick={() => Router.back()} style={{ cursor: "pointer" }}>
-						<Image src="/arrow-left.svg" alt="arrow-left" width={32} height={32} />
+						<Image src="/icons/arrow-left.svg" alt="arrow-left" width={32} height={32} />
 					</div>
 					<Text variant={"h4"}>{Router.query.name}</Text>
 				</Row>

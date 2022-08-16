@@ -160,13 +160,23 @@ const UserConfigPermission: any = () => {
 				<Text variant={"h4"}>Partner Config Permission List</Text>
 				<Spacer size={20} />
 					<HeaderFilter>
+					<Row alignItems="center">
 						<Search
+							width="380px"
 							placeholder="Search Permission Name"
-							onChange={(e) => setSearch(e.target.value)}
+							onChange={(e: any) => setSearch(e.target.value)}
 						/>
 
+						<Spacer size={8} />
+						<Text variant="subtitle1" color="black.dark">
+							Menu
+						</Text>
+
+						<Spacer size={8} />
+
 						<Dropdown
-							width="100%"
+							width="130px"
+							label=""
 							allowClear
 							onClear={handleClearDropdownMenu}
 							loading={isLoadingMenuList}
@@ -174,21 +184,43 @@ const UserConfigPermission: any = () => {
 								fieldsMenuList &&
 								fieldsMenuList?.rows.map((data: any) => ({ id: data.id, value: data.name }))
 							}
-							placeholder="Menu"
+							placeholder={"Select"}
 							handleChange={handleChangeDropdownMenu}
 							noSearch
 							rounded
 						/>
+
+						<Spacer size={8} />
+						<Text variant="subtitle1" color="black.dark">
+							Is system config
+						</Text>
+
+						<Spacer size={8} />
+
 						<Dropdown
-							width="100%"
+							width="130px"
+							label=""
 							allowClear
 							onClear={handleClearDropdownIsSystemConfig}
-							handleChange={handleChangeDropdownIsSystemConfig}
 							items={valueIsSystemConfig}
-							placeholder="Is System Config"
+							placeholder={"Select"}
+							handleChange={handleChangeDropdownIsSystemConfig}
 							noSearch
 							rounded
 						/>
+					</Row>
+
+					<Row gap="16px">
+						<Button
+							size="big"
+							variant={"primary"}
+							onClick={() => {
+								router.push("/user-config/permission/create");
+							}}
+						>
+							Create
+						</Button>
+					</Row>
 					</HeaderFilter>
 				<Spacer size={10} />
 				<Card style={{ padding: "16px 20px" }}>

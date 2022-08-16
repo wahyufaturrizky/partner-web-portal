@@ -7,7 +7,7 @@ const fetchDataCountries = async ({ query = {}}) => {
             limit: 10,
             page: 1,
             sortBy: "id",
-            sortOrder: "asc",
+            sortOrder: "DESC",
             ...query
         }
     }).then(data => data)
@@ -28,7 +28,7 @@ const fetchDetailCountry = async ({ country_id }) => {
     return mdmService(`/country/${country_id}`).then(data => data)
 }
 
-const fetchCountryStructure = ({ structure_id, query }) => {
+const fetchCountryStructure = async ({ structure_id, query }) => {
    return mdmService(`/country/structure/${structure_id}`, {
 		params: {
 			search: "",
@@ -57,8 +57,8 @@ const useFetchDetailCountry = ({ country_id, options }) => {
 const useUpdateCountry = ({ country_id, options }) => {
     return useMutation(
         payload =>
-            mdmService(`/country/${country_id}`, {
-                method: 'POST',
+            mdmService(`country/${country_id}`, {
+                method: 'PUT',
                 data: payload
             }),
             { ...options }

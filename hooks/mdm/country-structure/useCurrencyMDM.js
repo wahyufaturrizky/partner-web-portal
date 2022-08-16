@@ -6,8 +6,8 @@ const fetchCurrenciesMDM = async ({ query = {} }) => {
     params: {
       search: "",
       page: 1,
-      limit: 10,
-      sortBy: "created_at",
+      limit: 10000,
+      sortBy: "id",
       sortOrder: "DESC",
       ...query,
     },
@@ -15,7 +15,8 @@ const fetchCurrenciesMDM = async ({ query = {} }) => {
 };
 
 const useCurrenciesMDM = ({ query = {}, options }) => {
-  return useQuery(["currencies", query], () => fetchCurrenciesMDM({ query }), {
+  return useQuery(["currencies-mdm", query], () => fetchCurrenciesMDM({ query }), {
+    keepPreviousData: true,
     ...options,
   });
 };
