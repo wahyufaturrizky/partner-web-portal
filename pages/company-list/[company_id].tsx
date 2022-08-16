@@ -11,6 +11,7 @@ import {
   TextArea,
   Dropdown2,
   Switch,
+	FileUploaderAllFiles,
   Spin,
 } from "pink-lava-ui";
 import styled from "styled-components";
@@ -390,6 +391,8 @@ const DetailCompany: any = () => {
 
   const [address, setAddress] = useState("");
 
+  const [foto, setFoto] = useState()
+
   const {
     register,
     handleSubmit,
@@ -512,7 +515,7 @@ const DetailCompany: any = () => {
       menu_design: data.menuDesign,
       tax_id: data.taxId,
       pkp: data.isPkp,
-      logo: "",
+      logo: '',
       company_type: data.companyType,
       corporate: data.corporate,
       currency: data.currency,
@@ -525,7 +528,7 @@ const DetailCompany: any = () => {
       use_approval: data.usingApproval,
       status: data.activeStatus,
     };
-    console.log(payload);
+    // console.log(payload);
     updateCompany(payload);
   };
 
@@ -757,6 +760,13 @@ const DetailCompany: any = () => {
                         )}
                       />
                     )}
+                    <FileUploaderAllFiles
+                      label="Company Logo"
+                      onSubmit={(file) => setFoto(file)}
+                      defaultFile={"/default-file.svg"}
+										  withCrop={true}
+                      removeable
+                    />
                   </Col>
                   <Col width="50%">
                     <Input
