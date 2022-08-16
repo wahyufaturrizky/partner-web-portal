@@ -72,7 +72,7 @@ const CompanyList: any = () => {
         if (data) {
           // setIsLoading(false);
           refetchFields();
-          alert("Menu updated successfully");
+          alert("Updated successfully");
         }
       },
       onSettled: (error) => {
