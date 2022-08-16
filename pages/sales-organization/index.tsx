@@ -9,8 +9,16 @@ import { ModalDeleteConfirmation } from "../../components/elements/Modal/ModalCo
 import _ from "lodash";
 import { useSalesOrganization, useUpdateSalesOrganization } from "../../hooks/sales-organization/useSalesOrganization";
 import { ModalManageDataEdit } from "../../components/elements/Modal/ModalManageDataSalesOrganization";
+import axios from "axios";
 
 const COMPANY_CODE = 'KL';
+
+let token;
+let apiURL = process.env.NEXT_PUBLIC_API_BASE3;
+
+if (typeof window !== "undefined") {
+	token = localStorage.getItem("token");
+}
 
 const CreateConfig = () => {
 	const [countryStructure, setCountryStructure] = useState([]);
@@ -183,10 +191,10 @@ const CreateConfig = () => {
 
     const onSubmit = () => {
         const payload = {
-            add: countryStructure.filter(data => data.actionType === "NEW").map(({actionType, ...rest}) => ({
+            add: countryStructure.filter(data => data.actionType === "NEW").map(({actionType, level, ...rest}) => ({
                 ...rest
             })),
-            update: countryStructure.filter(data => data.actionType === "UPDATE").map(({actionType, ...rest}) => ({
+            update: countryStructure.filter(data => data.actionType === "UPDATE").map(({actionType, level, ...rest}) => ({
                 ...rest
             }))
         }
@@ -195,6 +203,25 @@ const CreateConfig = () => {
 	};
 
     const isDisabled = !isEditMode;
+
+    const donwloadStructure = async(value) => {
+		return await axios
+		.get(apiURL + `/sales-org/structure/${COMPANY_CODE}`, {
+			responseType: 'blob',
+			headers: {
+				Authorization: "Bearer " + token,
+				"Content-Type": "application/json",
+			},
+		})
+		.then((response) => {
+			var data = new Blob([response?.data], { type: 'application / vnd. MS Excel'});
+			var csvURL = window.URL.createObjectURL(data);
+			var tempLink = document.createElement('a');
+			tempLink.href = csvURL;
+			tempLink.setAttribute('download', `sales_organization_structure_template.xlsx`);
+			tempLink.click();
+		});
+	}
 
 	return (
 		<>
@@ -224,13 +251,8 @@ const CreateConfig = () => {
                                     Use this template to add structure level
                                 </Text>
                                 <Spacer size={10} />
-                                <Button variant="tertiary" size="big" disabled={isDisabled}>
-                                    <Link
-                                        href="https://mdm-portal.nabatisnack.co.id:3001/public/template/Template-Country-Structure.xlsx"
-                                        target="_blank"
-                                    >
-                                        Download Template
-                                    </Link>
+                                <Button variant="tertiary" size="big" disabled={isDisabled} onClick={donwloadStructure}>
+                                    Download Template
                                 </Button>
                             </DownloadUploadContainer>
 
