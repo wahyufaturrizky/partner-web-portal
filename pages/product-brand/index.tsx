@@ -32,7 +32,7 @@ import {
 } from "../../hooks/mdm/product-brand/useProductBrandMDM";
 
 const downloadFile = (params: any) =>
-  mdmDownloadService("product-brand/template/download", { params }).then((res) => {
+  mdmDownloadService("/product-brand/template/download", { params }).then((res) => {
     let dataUrl = window.URL.createObjectURL(new Blob([res.data]));
     let tempLink = document.createElement("a");
     tempLink.href = dataUrl;
@@ -151,7 +151,7 @@ const ProductBrandMDM = () => {
 
   const { data: dataParentProductBrandMDM, isLoading: isLoadingParentProductBrandMDM } =
     useParentProductBrandMDM({
-      id: modalProductBrandForm.data?.id ?? 0 + "/KSNI",
+      id: (modalProductBrandForm.data?.id ?? 0) + "/KSNI",
     });
 
   const { mutate: deleteProductBrandMDM, isLoading: isLoadingDeleteProductBrandMDM } =
