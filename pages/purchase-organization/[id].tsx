@@ -115,7 +115,6 @@ const DetailMenuList: any = () => {
 
         // setIsZeus(data.menu.isZeus === "Y" ? true : false);
         // setIsHermes(data.menu.isHermes === "Y" ? true : false);
-        console.log(data);
 
         setParent(data.parent);
 
@@ -433,7 +432,7 @@ const DetailMenuList: any = () => {
     const data = {
       company: "KSNI",
       name: stateFieldInput?.name,
-      parent: dataParentPurchaseOrganization.find((finding) => finding.name === parent).code,
+      parent: parent,
       product_categories: "",
       // process_name: stateFieldInput?.process_name,
       // field: dataAllowedField.map((data) => data.key),
