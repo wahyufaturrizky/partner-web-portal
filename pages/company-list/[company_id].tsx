@@ -11,7 +11,7 @@ import {
   TextArea,
   Dropdown2,
   Switch,
-	FileUploaderAllFiles,
+  FileUploaderAllFiles,
   Spin,
 } from "pink-lava-ui";
 import styled from "styled-components";
@@ -32,6 +32,7 @@ import {
   useNumberFormatLists,
   useTimezones,
   useUpdateCompany,
+  useUploadLogoCompany,
 } from "../../hooks/company-list/useCompany";
 import { useTimezone } from "../../hooks/timezone/useTimezone";
 
@@ -391,7 +392,7 @@ const DetailCompany: any = () => {
 
   const [address, setAddress] = useState("");
 
-  const [foto, setFoto] = useState()
+  const [foto, setFoto] = useState("");
 
   const {
     register,
@@ -417,8 +418,8 @@ const DetailCompany: any = () => {
     id: company_id,
     options: {
       onSuccess: (data: any) => {
-        console.log(data, "Detail Data");
         setAddress(data.address);
+        setFoto(data.logo)
       },
     },
   });
@@ -501,6 +502,22 @@ const DetailCompany: any = () => {
     setSectorList(filterIndustry[0].data);
   };
 
+  const { mutate: uploadLogo, isLoading: isLoadingUploadLogo } =
+    useUploadLogoCompany({
+      options: {
+        onSuccess: (data) => {
+          setFoto(data)
+          alert('Upload Success')
+        },
+      },
+    });
+
+  const handleUploadLogo = (file:any) => {
+    const formData = new FormData();
+    formData.append("upload_file", file);
+    uploadLogo(formData);
+  };
+
   const onSubmit = (data) => {
     const payload = {
       account_id: "0",
@@ -515,7 +532,7 @@ const DetailCompany: any = () => {
       menu_design: data.menuDesign,
       tax_id: data.taxId,
       pkp: data.isPkp,
-      logo: '',
+      logo: foto,
       company_type: data.companyType,
       corporate: data.corporate,
       currency: data.currency,
@@ -528,7 +545,7 @@ const DetailCompany: any = () => {
       use_approval: data.usingApproval,
       status: data.activeStatus,
     };
-    // console.log(payload);
+
     updateCompany(payload);
   };
 
@@ -762,9 +779,10 @@ const DetailCompany: any = () => {
                     )}
                     <FileUploaderAllFiles
                       label="Company Logo"
-                      onSubmit={(file) => setFoto(file)}
-                      defaultFile={"/default-file.svg"}
-										  withCrop={true}
+                      // onSubmit={(file) => setFoto(file)}
+                      onSubmit={(file) => handleUploadLogo(file)}
+                      defaultFile={foto}
+                      withCrop={true}
                       removeable
                     />
                   </Col>

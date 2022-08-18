@@ -77,6 +77,19 @@ function useUpdateCompany({ id, options }) {
 	);
 }
 
+const useUploadLogoCompany = ({ options }) => {
+  return useMutation(
+    (data) =>
+      client(`/hermes/company/upload`, {
+        method: "POST",
+        data,
+      }),
+    {
+      ...options,
+    }
+  );
+};
+
 const useDeleteCompany = ({ options }) => {
 	return useMutation(
 		(ids) =>
@@ -250,6 +263,7 @@ export {
   useCreateCompany,
   useUpdateCompany,
   useDeleteCompany,
+  useUploadLogoCompany,
   useDateFormatLists,
   useNumberFormatLists,
   useCoa,

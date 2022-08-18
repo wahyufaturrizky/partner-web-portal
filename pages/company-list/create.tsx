@@ -11,7 +11,7 @@ import {
   TextArea,
   Dropdown2,
   Switch,
-	FileUploaderAllFiles,
+  FileUploaderAllFiles,
   Spin,
 } from "pink-lava-ui";
 import styled from "styled-components";
@@ -30,6 +30,7 @@ import {
   useMenuDesignLists,
   useNumberFormatLists,
   useTimezones,
+  useUploadLogoCompany,
 } from "../../hooks/company-list/useCompany";
 import { useTimezone } from "../../hooks/timezone/useTimezone";
 
@@ -387,7 +388,7 @@ const CreateCompany: any = () => {
 
   const [address, setAddress] = useState("");
 
-  const [foto, setFoto] = useState()
+  const [foto, setFoto] = useState("");
 
   const {
     register,
@@ -475,12 +476,27 @@ const CreateCompany: any = () => {
   const { mutate: createCompany } = useCreateCompany({
     options: {
       onSuccess: (data) => {
-        console.log(data);
         alert("Create Success!");
         router.push("/company-list");
       },
     },
   });
+
+  const { mutate: uploadLogo, isLoading: isLoadingUploadLogo } =
+    useUploadLogoCompany({
+      options: {
+        onSuccess: (data) => {
+          setFoto(data)
+          alert('Upload Success')
+        },
+      },
+    });
+
+  const handleUploadLogo = (file:any) => {
+    const formData = new FormData();
+    formData.append("upload_file", file);
+    uploadLogo(formData);
+  };
 
   const onSubmit = (data) => {
     const payload = {
@@ -496,7 +512,7 @@ const CreateCompany: any = () => {
       menu_design: data.menuDesign || "",
       tax_id: data.taxId,
       pkp: data.isPkp,
-      logo: '',
+      logo: foto,
       company_type: data.companyType,
       corporate: data.corporate,
       currency: data.currency,
@@ -509,7 +525,7 @@ const CreateCompany: any = () => {
       use_approval: data.usingApproval,
       status: data.activeStatus,
     };
-    // console.log(payload)
+
     createCompany(payload);
   };
 
@@ -677,12 +693,13 @@ const CreateCompany: any = () => {
                     />
                   )}
                   <FileUploaderAllFiles
-                      label="Company Logo"
-                      onSubmit={(file) => setFoto(file)}
-                      defaultFile={"/default-file.svg"}
-										  withCrop={true}
-                      removeable
-                    />
+                    label="Company Logo"
+                    // onSubmit={(file) => setFoto(file)}
+                    onSubmit={(file) => handleUploadLogo(file)}
+                    defaultFile={"/default-file.svg"}
+                    withCrop={true}
+                    removeable
+                  />
                 </Col>
                 <Col width="50%">
                   <Input
