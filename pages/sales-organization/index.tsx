@@ -48,7 +48,6 @@ const CreateConfig = () => {
 		const datas = Object.values(data[0]).filter(data => !!data).map((data, index) => ({
 			name: data,
 			level: index + 1,
-			companyInternalStructure: false,
             actionType: 'NEW'
 		}));
 
@@ -107,8 +106,7 @@ const CreateConfig = () => {
 					data.salesOrganizationStructures.map((data: any, index: string) => ({
 						name: data.name,
 						level: index + 1,
-						id: data.id,
-						companyInternalStructure: data.companyInternalStructure
+						id: data.id
 					}))
 				);
 			},
@@ -131,35 +129,6 @@ const CreateConfig = () => {
 			},
 		},
 	});
-
-    const onChangeInternalStructure = (index, isNew) => {
-        if (isNew) {
-            onChangeNewStructureInternalStructure(index)
-        } else {
-            onChangeOldStructureInternalStructure(index)
-        }
-    }
-
-    const onChangeNewStructureInternalStructure = (index) => {
-        let newStructure = _.cloneDeep(countryStructure);
-        let currentCompanyInternalStructure = newStructure[index].companyInternalStructure;
-        newStructure[index].companyInternalStructure = !currentCompanyInternalStructure;
-  
-		setCountryStructure(newStructure);
-    }
-
-    const onChangeOldStructureInternalStructure = (index) => {
-        let currentStructure = { ...countryStructure[index] };
-        let currentCompanyInternalStructure = currentStructure.companyInternalStructure;
-        currentStructure.companyInternalStructure = !currentCompanyInternalStructure;
-        delete currentStructure.level;
-        
-        const payload = {
-            add: [],
-            update: [currentStructure]
-        }
-        updateSalesOrganization(payload)
-	};
 
     const onDeleteStructure = () => {
         if(modalDelete.structure.id){
@@ -191,7 +160,6 @@ const CreateConfig = () => {
 		let newStructure = countryStructure.slice();
 		newStructure.push({
 			level: countryStructure.length + 1,
-			companyInternalStructure: false,
 			name: "",
             actionType: "NEW"
 		});
@@ -337,15 +305,6 @@ const CreateConfig = () => {
                                             Manage Data
                                         </Button>
                                     </Row>
-                                </Row>
-                                <Spacer size={8} />
-                                <Row gap="15px" alignItems="center">
-                                    <Text variant="body2">Company Internal Structure</Text>
-                                    <Switch
-                                        disabled={isDisabled}
-                                        checked={structure.companyInternalStructure}
-                                        onChange={() => onChangeInternalStructure(index, structure.actionType === "NEW")}
-                                    />
                                 </Row>
                                 <Spacer size={20} />
                                 <Divider />

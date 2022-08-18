@@ -138,11 +138,17 @@ export const ModalManageDataEdit = ({
 			onSuccess: (data) => {
 			  setAllParentData(data ?? [])
 				setParentDatasStructure(
-					data.map((data) => ({
-						id: data.id,
-						value: data.name,
-						data: data
-					}))
+					data.map((data) => { 
+						let previousParentName = data?.hirarcies?.[1]?.name;
+						let currentParentName = data?.name;
+						let parentValue = previousParentName ? `${previousParentName} - ${currentParentName}` : currentParentName;
+						return {
+							id: data.id,
+							value: parentValue,
+							data: data
+						};
+					}
+					)
 				);
 			},
 			enabled: !!parentId,
