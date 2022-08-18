@@ -545,7 +545,7 @@ const DetailCompany: any = () => {
       use_approval: data.usingApproval,
       status: data.activeStatus,
     };
-    // console.log(payload);
+
     updateCompany(payload);
   };
 

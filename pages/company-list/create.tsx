@@ -525,7 +525,7 @@ const CreateCompany: any = () => {
       use_approval: data.usingApproval,
       status: data.activeStatus,
     };
-    // console.log(payload)
+
     createCompany(payload);
   };
 
