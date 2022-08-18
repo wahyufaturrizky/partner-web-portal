@@ -103,7 +103,7 @@ const FinanceConfigCoATemplateCreate: any = () => {
 	const { mutate: createCoa } = useCreateCoa({
 		options: {
 			onSuccess: () => {
-				router.push("/coa-template");
+				router.push("/finance-config/coa-template");
 			},
 		},
 	});
