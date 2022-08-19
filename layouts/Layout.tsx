@@ -232,6 +232,18 @@ const menuMdm = [
     icon: ICBadge,
     children: [
       {
+        key: "employee-list",
+        title: "Employee List",
+        content: () => "Employee List",
+        onClick: () => Router.push("/employee-list"),
+      },
+      {
+        key: "job-position",
+        title: "Job Position",
+        content: () => "Job Position",
+        onClick: () => Router.push("/job-position"),
+      },
+      {
         key: "job-position",
         title: "Job Position",
         content: () => "Job Position",
