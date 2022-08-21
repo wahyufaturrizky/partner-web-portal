@@ -1,39 +1,53 @@
-import React, { useState } from "react";
+import { useRouter } from "next/router";
 import {
-  Text,
+  Accordion,
+  Button,
   Col,
+  Dropdown,
+  FormSelect,
+  Input,
   Row,
   Spacer,
-  Dropdown,
-  Button,
-  Accordion,
-  Input,
-  FormSelect,
+  Text,
+  DatePickerInput,
 } from "pink-lava-ui";
-import styled from "styled-components";
+import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { useRouter } from "next/router";
-import { useCreateUOM } from "../../hooks/mdm/unit-of-measure/useUOM";
-import { queryClient } from "../_app";
+import styled from "styled-components";
+import { useDepartmentInfiniteLists } from "../../hooks/mdm/department/useDepartment";
+import { useCreateEmployeeListMDM } from "../../hooks/mdm/employee-list/useEmployeeListMDM";
+import { useJobLevelInfiniteLists } from "../../hooks/mdm/job-level/useJobLevel";
+import { useJobPositionInfiniteLists } from "../../hooks/mdm/job-position/useJobPositon";
 import useDebounce from "../../lib/useDebounce";
-import { useUOMCategoryInfiniteLists } from "../../hooks/mdm/unit-of-measure-category/useUOMCategory";
+import { queryClient } from "../_app";
+import { colors } from "../../utils/color";
+import { useLanguages } from "../../hooks/languages/useLanguages";
 
-const UOMCreate = () => {
+const EmployeeListCreate = () => {
   const router = useRouter();
 
-  const [listUomCategory, setListUomCategory] = useState<any[]>([]);
-  const [totalRows, setTotalRows] = useState(0);
-  const [search, setSearch] = useState("");
-  const debounceFetch = useDebounce(search, 1000);
+  const [departmentList, setListDepartmentList] = useState<any[]>([]);
+  const [totalRowsDepartmentList, setTotalRowsDepartmentList] = useState(0);
+  const [searchDepartment, setSearchDepartment] = useState("");
 
-  const { register, control, handleSubmit } = useForm();
+  const [jobPositionList, setJobPositionList] = useState<any[]>([]);
+  const [totalRowsJobPositionList, setTotalRowsJobPositionList] = useState(0);
+  const [searchJobPosition, setSearchJobPosition] = useState("");
+
+  const [jobLevelList, setJobLevelList] = useState<any[]>([]);
+  const [totalRowsJobLevelList, setTotalRowsJobLevelList] = useState(0);
+  const [searchJobLevel, setSearchJobLevel] = useState("");
+
+  const debounceFetch = useDebounce(searchDepartment || searchJobPosition || searchJobLevel, 1000);
+
+  const { register, control, handleSubmit } = useForm({ shouldUseNativeValidation: true });
 
   const {
-    isFetching: isFetchingUomCategory,
-    isFetchingNextPage: isFetchingMoreUomCategory,
-    hasNextPage,
-    fetchNextPage,
-  } = useUOMCategoryInfiniteLists({
+    isFetching: isFetchingDepartment,
+    isFetchingNextPage: isFetchingMoreDepartment,
+    hasNextPage: hasNextPageDepartment,
+    fetchNextPage: fetchNextPageDepartment,
+  } = useDepartmentInfiniteLists({
     query: {
       search: debounceFetch,
       company_id: "KSNI",
@@ -41,20 +55,20 @@ const UOMCreate = () => {
     },
     options: {
       onSuccess: (data: any) => {
-        setTotalRows(data.pages[0].totalRow);
+        setTotalRowsDepartmentList(data.pages[0].totalRow);
         const mappedData = data?.pages?.map((group: any) => {
           return group.rows?.map((element: any) => {
             return {
-              value: element.uomCategoryId,
+              value: element.departmentId,
               label: element.name,
             };
           });
         });
         const flattenArray = [].concat(...mappedData);
-        setListUomCategory(flattenArray);
+        setListDepartmentList(flattenArray);
       },
       getNextPageParam: (_lastPage: any, pages: any) => {
-        if (listUomCategory.length < totalRows) {
+        if (departmentList.length < totalRowsDepartmentList) {
           return pages.length + 1;
         } else {
           return undefined;
@@ -63,27 +77,104 @@ const UOMCreate = () => {
     },
   });
 
-  const { mutate: createUom, isLoading: isLoadingCreateUom } = useCreateUOM({
+  const {
+    isFetching: isFetchingJobPosition,
+    isFetchingNextPage: isFetchingMoreJobPosition,
+    hasNextPage: hasNextPageJobPosition,
+    fetchNextPage: fetchNextPageJobPosition,
+  } = useJobPositionInfiniteLists({
+    query: {
+      search: debounceFetch,
+      company_id: "KSNI",
+      limit: 10,
+    },
     options: {
-      onSuccess: () => {
-        router.back();
-        queryClient.invalidateQueries(["uom-list"]);
+      onSuccess: (data: any) => {
+        setTotalRowsJobPositionList(data.pages[0].totalRow);
+        const mappedData = data?.pages?.map((group: any) => {
+          return group.rows?.map((element: any) => {
+            return {
+              value: element.jobPositionId,
+              label: element.name,
+            };
+          });
+        });
+        const flattenArray = [].concat(...mappedData);
+        setJobPositionList(flattenArray);
+      },
+      getNextPageParam: (_lastPage: any, pages: any) => {
+        if (jobPositionList.length < totalRowsJobPositionList) {
+          return pages.length + 1;
+        } else {
+          return undefined;
+        }
       },
     },
   });
+
+  const {
+    isFetching: isFetchingJobLevel,
+    isFetchingNextPage: isFetchingMoreJobLevel,
+    hasNextPage: hasNextPageJobLevel,
+    fetchNextPage: fetchNextPageJobLevel,
+  } = useJobLevelInfiniteLists({
+    query: {
+      search: debounceFetch,
+      company_id: "KSNI",
+      limit: 10,
+    },
+    options: {
+      onSuccess: (data: any) => {
+        setTotalRowsJobLevelList(data.pages[0].totalRow);
+        const mappedData = data?.pages?.map((group: any) => {
+          return group.rows?.map((element: any) => {
+            return {
+              value: element.jobLevelId,
+              label: element.name,
+            };
+          });
+        });
+        const flattenArray = [].concat(...mappedData);
+        setJobLevelList(flattenArray);
+      },
+      getNextPageParam: (_lastPage: any, pages: any) => {
+        if (jobLevelList.length < totalRowsJobLevelList) {
+          return pages.length + 1;
+        } else {
+          return undefined;
+        }
+      },
+    },
+  });
+
+  const { mutate: createEmployeeList, isLoading: isLoadingCreateEmployeeList } =
+    useCreateEmployeeListMDM({
+      options: {
+        onSuccess: () => {
+          router.back();
+          queryClient.invalidateQueries(["employee-list"]);
+        },
+      },
+    });
 
   const onSubmit = (data: any) => {
     const formData = {
       company_id: "KSNI",
       ...data,
     };
-    createUom(formData);
+    console.log("@formData", formData);
+
+    createEmployeeList(formData);
   };
+
+  const { data: languageData } = useLanguages();
+
+  const language = languageData?.rows?.map((row) => ({ id: row.id, value: row.name })) ?? [];
 
   return (
     <Col>
       <Row gap="4px">
-        <Text variant={"h4"}>Create Unit of Measure</Text>
+        <Text variant={"h4"}>Create Employee</Text>
       </Row>
 
       <Spacer size={20} />
@@ -92,18 +183,15 @@ const UOMCreate = () => {
         <Row justifyContent="space-between" alignItems="center" nowrap>
           <Controller
             control={control}
-            name="active_status"
-            defaultValue={"ACTIVE"}
+            name="employee_type"
+            defaultValue={"FULLTIME"}
             render={({ field: { onChange } }) => (
               <Dropdown
                 label=""
                 width="185px"
                 noSearch
-                items={[
-                  { id: "ACTIVE", value: "Active" },
-                  { id: "INACTIVE", value: "Inactive" },
-                ]}
-                defaultValue="ACTIVE"
+                items={[{ id: "FULLTIME", value: "Fulltime" }]}
+                defaultValue="FULLTIME"
                 handleChange={(value: any) => {
                   onChange(value);
                 }}
@@ -116,7 +204,7 @@ const UOMCreate = () => {
               Cancel
             </Button>
             <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
-              {isLoadingCreateUom ? "Loading..." : "Save"}
+              {isLoadingCreateEmployeeList ? "Loading..." : "Save"}
             </Button>
           </Row>
         </Row>
@@ -131,11 +219,13 @@ const UOMCreate = () => {
             <Row width="100%" noWrap>
               <Col width={"100%"}>
                 <Input
+                  type="number"
                   width="100%"
-                  label="Uom Name"
-                  height="40px"
-                  placeholder={"e.g gram"}
-                  {...register("name")}
+                  label="NIK"
+                  height="48px"
+                  required
+                  placeholder={"e.g 123456789"}
+                  {...register("nik", { required: "Please enter NIK." })}
                 />
               </Col>
               <Spacer size={10} />
@@ -143,57 +233,262 @@ const UOMCreate = () => {
               <Col width="100%">
                 <Controller
                   control={control}
-                  name="uom_category_id"
+                  name="department"
                   render={({ field: { onChange } }) => (
                     <>
-                      <Label>UoM Category</Label>
+                      <Label>Department</Label>
                       <Spacer size={3} />
                       <FormSelect
                         style={{ width: "100%" }}
                         size={"large"}
-                        placeholder={"select uom category"}
+                        placeholder={"Select"}
                         borderColor={"#AAAAAA"}
                         arrowColor={"#000"}
                         withSearch
-                        isLoading={isFetchingUomCategory}
-                        isLoadingMore={isFetchingMoreUomCategory}
+                        isLoading={isFetchingDepartment}
+                        isLoadingMore={isFetchingMoreDepartment}
                         fetchMore={() => {
-                          if (hasNextPage) {
-                            fetchNextPage();
+                          if (hasNextPageDepartment) {
+                            fetchNextPageDepartment();
                           }
                         }}
                         items={
-                          isFetchingUomCategory && !isFetchingMoreUomCategory ? [] : listUomCategory
+                          isFetchingDepartment && !isFetchingMoreDepartment ? [] : departmentList
                         }
                         onChange={(value: any) => {
                           onChange(value);
                         }}
                         onSearch={(value: any) => {
-                          setSearch(value);
+                          setSearchDepartment(value);
                         }}
                       />
                     </>
                   )}
                 />
+              </Col>
+            </Row>
 
-                <Text
-                  onClick={() => window.open(`/unit-of-measure/create`, "_blank")}
-                  clickable
-                  variant="headingSmall"
-                  color="pink.regular"
-                >
-                  Go to UoM Category &gt;
-                </Text>
+            <Row width="100%" noWrap>
+              <Col width="100%">
+                <Controller
+                  control={control}
+                  name="job_position"
+                  render={({ field: { onChange } }) => (
+                    <>
+                      <Label>Job Position</Label>
+                      <Spacer size={3} />
+                      <FormSelect
+                        style={{ width: "100%" }}
+                        size={"large"}
+                        placeholder={"Select"}
+                        borderColor={"#AAAAAA"}
+                        arrowColor={"#000"}
+                        withSearch
+                        isLoading={isFetchingJobPosition}
+                        isLoadingMore={isFetchingMoreJobPosition}
+                        fetchMore={() => {
+                          if (hasNextPageJobPosition) {
+                            fetchNextPageJobPosition();
+                          }
+                        }}
+                        items={
+                          isFetchingJobPosition && !isFetchingMoreJobPosition ? [] : jobPositionList
+                        }
+                        onChange={(value: any) => {
+                          onChange(value);
+                        }}
+                        onSearch={(value: any) => {
+                          setSearchJobPosition(value);
+                        }}
+                      />
+                    </>
+                  )}
+                />
+              </Col>
+              <Spacer size={10} />
+
+              <Col width="100%">
+                <Controller
+                  control={control}
+                  name="job_level"
+                  render={({ field: { onChange } }) => (
+                    <>
+                      <Label>Job Level</Label>
+                      <Spacer size={3} />
+                      <FormSelect
+                        style={{ width: "100%" }}
+                        size={"large"}
+                        placeholder={"Select"}
+                        borderColor={"#AAAAAA"}
+                        arrowColor={"#000"}
+                        withSearch
+                        isLoading={isFetchingJobLevel}
+                        isLoadingMore={isFetchingMoreJobLevel}
+                        fetchMore={() => {
+                          if (hasNextPageJobLevel) {
+                            fetchNextPageJobLevel();
+                          }
+                        }}
+                        items={isFetchingJobLevel && !isFetchingMoreJobLevel ? [] : jobLevelList}
+                        onChange={(value: any) => {
+                          onChange(value);
+                        }}
+                        onSearch={(value: any) => {
+                          setSearchJobLevel(value);
+                        }}
+                      />
+                    </>
+                  )}
+                />
+              </Col>
+            </Row>
+
+            <Row width="100%" noWrap>
+              <Col width="100%">
+                <Controller
+                  control={control}
+                  name="report_to"
+                  render={({ field: { onChange } }) => (
+                    <>
+                      <Label>Report to</Label>
+                      <Spacer size={3} />
+                      <FormSelect
+                        style={{ width: "100%" }}
+                        size={"large"}
+                        placeholder={"Select"}
+                        borderColor={"#AAAAAA"}
+                        arrowColor={"#000"}
+                        withSearch
+                        isLoading={isFetchingJobPosition}
+                        isLoadingMore={isFetchingMoreJobPosition}
+                        fetchMore={() => {
+                          if (hasNextPageJobPosition) {
+                            fetchNextPageJobPosition();
+                          }
+                        }}
+                        items={
+                          isFetchingJobPosition && !isFetchingMoreJobPosition ? [] : jobPositionList
+                        }
+                        onChange={(value: any) => {
+                          onChange(value);
+                        }}
+                        onSearch={(value: any) => {
+                          setSearchJobPosition(value);
+                        }}
+                      />
+                    </>
+                  )}
+                />
+              </Col>
+              <Spacer size={10} />
+
+              <Col width="100%">
+                <Controller
+                  control={control}
+                  name="branch"
+                  render={({ field: { onChange } }) => (
+                    <>
+                      <Label>
+                        Branch <span style={{ color: colors.red.regular }}>*</span>
+                      </Label>
+                      <Spacer size={3} />
+                      <FormSelect
+                        style={{ width: "100%" }}
+                        size={"large"}
+                        placeholder={"Select"}
+                        borderColor={"#AAAAAA"}
+                        arrowColor={"#000"}
+                        withSearch
+                        isLoading={isFetchingJobLevel}
+                        isLoadingMore={isFetchingMoreJobLevel}
+                        fetchMore={() => {
+                          if (hasNextPageJobLevel) {
+                            fetchNextPageJobLevel();
+                          }
+                        }}
+                        items={isFetchingJobLevel && !isFetchingMoreJobLevel ? [] : jobLevelList}
+                        onChange={(value: any) => {
+                          onChange(value);
+                        }}
+                        onSearch={(value: any) => {
+                          setSearchJobLevel(value);
+                        }}
+                      />
+                    </>
+                  )}
+                />
+              </Col>
+            </Row>
+
+            <Row width="100%" noWrap>
+              <Col width="100%">
+                <Controller
+                  control={control}
+                  name="join_date"
+                  render={({ field: { onChange } }) => (
+                    <DatePickerInput
+                      fullWidth
+                      onChange={(date: any, dateString: any) => onChange(dateString)}
+                      label="Join Date"
+                    />
+                  )}
+                />
+              </Col>
+              <Spacer size={10} />
+
+              <Col width="100%">
+                <Controller
+                  control={control}
+                  name="resign_date"
+                  render={({ field: { onChange } }) => (
+                    <DatePickerInput
+                      fullWidth
+                      onChange={(date: any, dateString: any) => onChange(dateString)}
+                      label="Join Date"
+                    />
+                  )}
+                />
+              </Col>
+            </Row>
+
+            <Row width="100%" noWrap>
+              <Col width="100%">
+                <Controller
+                  control={control}
+                  name="preferred_language"
+                  render={({ field: { onChange } }) => (
+                    <Dropdown
+                      label="Language"
+                      items={language}
+                      width={"100%"}
+                      placeholder={"Select"}
+                      handleChange={onChange}
+                      noSearch
+                    />
+                  )}
+                />
+              </Col>
+              <Spacer size={10} />
+
+              <Col width="100%">
+                <Input
+                  width="100%"
+                  type="number"
+                  label="Tax Number"
+                  height="48px"
+                  placeholder={"e.g 123456789 "}
+                  {...register("external_code")}
+                />
               </Col>
             </Row>
 
             <Row width="50%" noWrap>
               <Input
                 width="100%"
-                label="Uom Format"
-                height="40px"
-                placeholder={"e.g gr"}
-                {...register("format")}
+                label="External Code"
+                height="48px"
+                placeholder={"e.g ABC12345"}
+                {...register("external_code")}
               />
             </Row>
           </Accordion.Body>
@@ -222,4 +517,4 @@ const Label = styled.div`
   color: #000000;
 `;
 
-export default UOMCreate;
+export default EmployeeListCreate;

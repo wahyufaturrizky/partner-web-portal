@@ -2,7 +2,7 @@ import { useQuery, useMutation } from "react-query";
 import { mdmService } from "../../../lib/client";
 
 const fetchPurchaseOrganizationsMDM = async ({ query = {} }) => {
-  return mdmService(`purchase-organization`, {
+  return mdmService(`/purchase-organization`, {
     params: {
       search: "",
       page: 1,
@@ -26,7 +26,7 @@ const usePurchaseOrganizationsMDM = ({ query = {}, options }) => {
 };
 
 const fetchPurchaseOrganizationMDM = async ({ id }) => {
-  return mdmService(`purchase-organization/${id}`).then((data) => data);
+  return mdmService(`/purchase-organization/${id}`).then((data) => data);
 };
 
 const usePurchaseOrganizationMDM = ({ id, options }) => {
@@ -36,7 +36,7 @@ const usePurchaseOrganizationMDM = ({ id, options }) => {
 };
 
 const fetchParentPurchaseOrganizationMDM = async ({ id }) => {
-  return mdmService(`purchase-organization/parent/${id}`).then((data) => data);
+  return mdmService(`/purchase-organization/parent/${id}`).then((data) => data);
 };
 
 const useParentPurchaseOrganizationMDM = ({ id, options }) => {
@@ -48,7 +48,7 @@ const useParentPurchaseOrganizationMDM = ({ id, options }) => {
 function useCreatePurchaseOrganizationMDM({ options }) {
   return useMutation(
     (data) =>
-      mdmService(`purchase-organization`, {
+      mdmService(`/purchase-organization`, {
         method: "POST",
         data,
       }),
@@ -61,7 +61,7 @@ function useCreatePurchaseOrganizationMDM({ options }) {
 function useUpdatePurchaseOrganizationMDM({ id, options }) {
   return useMutation(
     (data) =>
-      mdmService(`purchase-organization/${id}`, {
+      mdmService(`/purchase-organization/${id}`, {
         method: "PUT",
         data,
       }),
@@ -74,7 +74,7 @@ function useUpdatePurchaseOrganizationMDM({ id, options }) {
 const useDeletePurchaseOrganizationMDM = ({ options }) => {
   return useMutation(
     (ids) =>
-      mdmService(`purchase-organization`, {
+      mdmService(`/purchase-organization`, {
         method: "DELETE",
         data: ids,
       }),
@@ -87,7 +87,7 @@ const useDeletePurchaseOrganizationMDM = ({ options }) => {
 const useUploadFilePurchaseOrganizationMDM = ({ options }) => {
   return useMutation(
     (data) =>
-      mdmService(`purchase-organization/upload`, {
+      mdmService(`/purchase-organization/upload`, {
         method: "POST",
         data,
       }),

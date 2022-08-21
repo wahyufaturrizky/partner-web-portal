@@ -267,7 +267,7 @@ const EmployeeList = () => {
             <Button
               size="big"
               variant="primary"
-              onClick={() => router.push("/unit-of-measure/create")}
+              onClick={() => router.push("/employee-list/create")}
             >
               Create
             </Button>
