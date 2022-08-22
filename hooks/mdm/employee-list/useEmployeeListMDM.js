@@ -42,6 +42,27 @@ const useEmployeeInfiniteLists = ({ query = {}, options }) => {
   });
 };
 
+const fetchInfiniteeBranchLists = async ({ pageParam = 1, queryKey }) => {
+  const searchQuery = queryKey[1].search;
+  return mdmService(`/branch-list`, {
+    params: {
+      search: searchQuery,
+      limit: 10,
+      page: pageParam,
+      sortBy: "created_at",
+      sortOrder: "DESC",
+      ...queryKey[1],
+    },
+  }).then((data) => data);
+};
+
+const useBranchInfiniteLists = ({ query = {}, options }) => {
+  return useInfiniteQuery(["branch-list/infinite", query], fetchInfiniteeBranchLists, {
+    keepPreviousData: true,
+    ...options,
+  });
+};
+
 const fetchEmployeeListMDM = async ({ id }) => {
   return mdmService(`/employee-list/${id}`).then((data) => data);
 };
@@ -112,4 +133,5 @@ export {
   useDeleteEmployeeListMDM,
   useUploadFileEmployeeListMDM,
   useEmployeeInfiniteLists,
+  useBranchInfiniteLists,
 };
