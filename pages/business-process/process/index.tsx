@@ -91,7 +91,7 @@ const ProcessList: any = () => {
 					size="small"
 					onClick={() =>
 						Router.push({
-							pathname: "/process/detail",
+							pathname: "/business-process/process/detail",
 							query: field,
 						})
 					}

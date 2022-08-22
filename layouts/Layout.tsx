@@ -303,24 +303,31 @@ const menuMdm = [
     ],
   },
   {
-    key: "customer",
-    title: "Customer",
-    icon: ICUser,
-    children: [
-      {
-        key: "customer-group",
-        title: "Customer Group",
-        content: () => "Customer Group",
-        onClick: () => Router.push("/customer-group"),
-      },
-    ],
-  },
-  {
     key: "purchase-organization",
     title: "Purchase Organization",
     icon: ICPurchasOrg,
     content: () => "Purchase Organization",
     onClick: () => Router.push("/purchase-organization"),
+  },
+  { type: "title", title: "Sales" },
+  {
+    key: "customer",
+    title: "Customer",
+    icon: ICUser,
+    children: [
+      {
+        key: "customers",
+        title: "Customers",
+        content: () => "Customers",
+        onClick: () => Router.push("/customers"),
+      },
+      {
+        key: "customer-group",
+        title: "Customer Group",
+        content: () => "Customer Group",
+        onClick: () => Router.push("/customers/group"),
+      },
+    ],
   },
 ];
 
