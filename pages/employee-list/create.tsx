@@ -15,7 +15,10 @@ import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import styled from "styled-components";
 import { useDepartmentInfiniteLists } from "../../hooks/mdm/department/useDepartment";
-import { useCreateEmployeeListMDM } from "../../hooks/mdm/employee-list/useEmployeeListMDM";
+import {
+  useCreateEmployeeListMDM,
+  useEmployeeInfiniteLists,
+} from "../../hooks/mdm/employee-list/useEmployeeListMDM";
 import { useJobLevelInfiniteLists } from "../../hooks/mdm/job-level/useJobLevel";
 import { useJobPositionInfiniteLists } from "../../hooks/mdm/job-position/useJobPositon";
 import useDebounce from "../../lib/useDebounce";
@@ -38,7 +41,14 @@ const EmployeeListCreate = () => {
   const [totalRowsJobLevelList, setTotalRowsJobLevelList] = useState(0);
   const [searchJobLevel, setSearchJobLevel] = useState("");
 
-  const debounceFetch = useDebounce(searchDepartment || searchJobPosition || searchJobLevel, 1000);
+  const [employeeList, setEmployeeList] = useState<any[]>([]);
+  const [totalRowsEmployeeList, setTotalRowsEmployeeList] = useState(0);
+  const [searchEmployee, setSearchEmployee] = useState("");
+
+  const debounceFetch = useDebounce(
+    searchDepartment || searchJobPosition || searchJobLevel || searchEmployee,
+    1000
+  );
 
   const { register, control, handleSubmit } = useForm({ shouldUseNativeValidation: true });
 
@@ -104,6 +114,41 @@ const EmployeeListCreate = () => {
       },
       getNextPageParam: (_lastPage: any, pages: any) => {
         if (jobPositionList.length < totalRowsJobPositionList) {
+          return pages.length + 1;
+        } else {
+          return undefined;
+        }
+      },
+    },
+  });
+
+  const {
+    isFetching: isFetchingEmployee,
+    isFetchingNextPage: isFetchingMoreEmployee,
+    hasNextPage: hasNextPageEmployee,
+    fetchNextPage: fetchNextPageEmployee,
+  } = useEmployeeInfiniteLists({
+    query: {
+      search: debounceFetch,
+      company_id: "KSNI",
+      limit: 10,
+    },
+    options: {
+      onSuccess: (data: any) => {
+        setTotalRowsEmployeeList(data.pages[0].totalRow);
+        const mappedData = data?.pages?.map((group: any) => {
+          return group.rows?.map((element: any) => {
+            return {
+              value: element.employeeId,
+              label: element.name,
+            };
+          });
+        });
+        const flattenArray = [].concat(...mappedData);
+        setEmployeeList(flattenArray);
+      },
+      getNextPageParam: (_lastPage: any, pages: any) => {
+        if (employeeList.length < totalRowsEmployeeList) {
           return pages.length + 1;
         } else {
           return undefined;
@@ -359,21 +404,19 @@ const EmployeeListCreate = () => {
                         borderColor={"#AAAAAA"}
                         arrowColor={"#000"}
                         withSearch
-                        isLoading={isFetchingJobPosition}
-                        isLoadingMore={isFetchingMoreJobPosition}
+                        isLoading={isFetchingEmployee}
+                        isLoadingMore={isFetchingMoreEmployee}
                         fetchMore={() => {
-                          if (hasNextPageJobPosition) {
-                            fetchNextPageJobPosition();
+                          if (hasNextPageEmployee) {
+                            fetchNextPageEmployee();
                           }
                         }}
-                        items={
-                          isFetchingJobPosition && !isFetchingMoreJobPosition ? [] : jobPositionList
-                        }
+                        items={isFetchingEmployee && !isFetchingMoreEmployee ? [] : employeeList}
                         onChange={(value: any) => {
                           onChange(value);
                         }}
                         onSearch={(value: any) => {
-                          setSearchJobPosition(value);
+                          setSearchEmployee(value);
                         }}
                       />
                     </>

@@ -1,4 +1,4 @@
-import { useQuery, useMutation } from "react-query";
+import { useQuery, useMutation, useInfiniteQuery } from "react-query";
 import { mdmService } from "../../../lib/client";
 
 const fetchEmployeeListsMDM = async ({ query = {} }) => {
@@ -17,6 +17,27 @@ const fetchEmployeeListsMDM = async ({ query = {} }) => {
 
 const useEmployeeListsMDM = ({ query = {}, options }) => {
   return useQuery(["employee-list", query], () => fetchEmployeeListsMDM({ query }), {
+    ...options,
+  });
+};
+
+const fetchInfiniteeEmployeeLists = async ({ pageParam = 1, queryKey }) => {
+  const searchQuery = queryKey[1].search;
+  return mdmService(`/employee-list`, {
+    params: {
+      search: searchQuery,
+      limit: 10,
+      page: pageParam,
+      sortBy: "created_at",
+      sortOrder: "DESC",
+      ...queryKey[1],
+    },
+  }).then((data) => data);
+};
+
+const useEmployeeInfiniteLists = ({ query = {}, options }) => {
+  return useInfiniteQuery(["employee-list/infinite", query], fetchInfiniteeEmployeeLists, {
+    keepPreviousData: true,
     ...options,
   });
 };
@@ -90,4 +111,5 @@ export {
   useUpdateEmployeeListMDM,
   useDeleteEmployeeListMDM,
   useUploadFileEmployeeListMDM,
+  useEmployeeInfiniteLists,
 };
