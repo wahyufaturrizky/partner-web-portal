@@ -8,29 +8,72 @@ import {
   Dropdown,
   Checkbox,
   Text,
-  TextArea
+  TextArea,
+  FileUploaderAllFiles
 } from "pink-lava-ui";
 import styled from 'styled-components'
+import { Controller, useForm, Control } from 'react-hook-form'
 
 import IconAdd from '../../../../assets/icons/ICAdd'
-import PicturePlaceholder from '../../../../assets/icons/ic-picture-dummy.svg'
 
-import styles from './styles.module.css'
+type FormValues = {
+  store_picture: string;
+};
+
+interface PropsFormContact {
+  isPrimary: boolean;
+  label: number;
+  onChangeChecked: () => void;
+  control: Control<FormValues>
+}
 
 export default function Addresses() {
   const [isPrimary, setIsPrimary] = useState(false)
+  const { control } = useForm<FormValues>({ shouldUseNativeValidation: true });
+  const [addContact, setAddContact] = useState([0])
 
   return (
     <div>
-      <Button size="big" variant={"primary"} onClick={() => { }}>
+      <Button
+        size="big"
+        variant="primary"
+        onClick={() => setAddContact([...addContact, addContact[0] + 1])}>
         <IconAdd /> Add More Address
       </Button>
       <Spacer size={20} />
+      {
+        addContact.map((item, index) =>
+          <>
+            <FormContact
+              label={index + 1}
+              key={item}
+              isPrimary={isPrimary}
+              control={control}
+              onChangeChecked={() => setIsPrimary(!isPrimary)}
+            />
+            <Spacer size={30} />
+            {addContact.length > 1 && <hr />}
+            <Spacer size={30} />
+          </>
+        )
+      }
+    </div>
+  )
+}
+
+const FormContact = ({
+  label,
+  isPrimary,
+  onChangeChecked,
+  control
+}: PropsFormContact) => {
+  return (
+    <>
       <ElementFlex>
-        <LabelChekbox>Address 1</LabelChekbox>
+        <LabelChekbox>Address {label}</LabelChekbox>
         <Row alignItems="center">
-          <Checkbox checked={isPrimary} onChange={() => setIsPrimary(!isPrimary)} />
-          <div style={{ cursor: "pointer" }} onClick={() => {}}>
+          <Checkbox checked={isPrimary} onChange={onChangeChecked} />
+          <div style={{ cursor: "pointer" }} onClick={() => { }}>
             <Text>Primary</Text>
           </div>
         </Row>
@@ -53,7 +96,7 @@ export default function Addresses() {
             width="100%"
           />
           <Spacer size={30} />
-          <UploadImage />
+          <UploadImage control={control} />
         </Col>
         <Col width="48%">
           <TextArea
@@ -62,7 +105,7 @@ export default function Addresses() {
             height="10px"
             placeholder="e.g Front Groceries No. 5"
             label={<Label>Street</Label>}
-            onChange={() => {}}
+            onChange={() => { }}
             defaultValue={['']}
           />
           <Spacer size={10} />
@@ -80,36 +123,33 @@ export default function Addresses() {
           />
         </Col>
       </Row>
-    </div>
+    </>
   )
 }
 
-const UploadImage = () => {
+const UploadImage = ({ control }: { control: Control<FormValues> }) => {
   return (
-    <div>
-      <Label>Store Photo</Label>
-      <CardUploader>
-        <div className={styles['image-uploader']}>
-          <PicturePlaceholder />
-        </div>
-        <Spacer size={10} />
-        <div className={styles['description-uploader']}>
-          <p className={styles['rules-dimension']}>Dimension Minimum Size 300 x 300</p>
-          <p className={styles['rules-size']}>File Size Max. 1MB</p>
-          <Spacer size={5} />
-          <Button type="primary" size="small">
-            Upload
-          </Button>
-        </div>
-      </CardUploader>
-    </div>
+    <Controller
+      control={control}
+      rules={{ required: true }}
+      name="store_picture"
+      render={({ field: { onChange } }) => (
+        <FileUploaderAllFiles
+          label="Company Logo"
+          onSubmit={(file: any) => onChange(file)}
+          defaultFile="/placeholder-employee-photo.svg"
+          withCrop
+          sizeImagePhoto="125px"
+          removeable
+          textPhoto={[
+            "Dimension Minimum Size 300 x 300",
+            "File Size Max. 1MB",
+          ]}
+        />
+      )}
+    ></Controller>
   )
 }
-
-const CardUploader = styled.div`
-  display: flex;
-  align-items: top;
-`
 
 const LabelChekbox = styled.p`
   margin: 0;
