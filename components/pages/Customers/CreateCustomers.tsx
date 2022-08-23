@@ -2,26 +2,18 @@ import React, { useState } from 'react'
 import {
   Button,
   Col,
-  DropdownMenu,
-  FileUploadModal,
   Input,
-  Modal,
-  Pagination,
   Row,
-  Search,
   Tabs,
   Spacer,
-  Table,
   Text,
   Dropdown,
+  FileUploaderAllFiles,
   Accordion,
-  Spin,
 } from "pink-lava-ui";
 import { useRouter } from 'next/router';
+import { Controller, useForm, Control } from 'react-hook-form'
 import styled from 'styled-components'
-
-import PicturePlaceholder from '../../../assets/icons/ic-picture-dummy.svg'
-import styles from './fragments/styles.module.css'
 
 import {
   Sales,
@@ -31,9 +23,22 @@ import {
   Purchasing
 } from './fragments'
 
+
+type FormValues = {
+  profile_picture: string;
+};
+
 export default function CreateCustomers() {
   const router = useRouter();
   const [tabAktived, setTabAktived] = useState('Contact')
+
+
+  const {
+    register,
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm <FormValues>({ shouldUseNativeValidation: true });
 
   const listTabItems = [
     { title: "Contact" },
@@ -60,10 +65,12 @@ export default function CreateCustomers() {
     }
   }
 
+  const onSubmit = (data: any) => {};
+
   return (
     <div>
       <Col>
-        <Text variant={"h4"}>Customer Group</Text>
+        <Text variant={"h4"}>Create Customer</Text>
         <Spacer size={20} />
       </Col>
       <Card>
@@ -81,10 +88,16 @@ export default function CreateCustomers() {
           />
 
           <Row gap="16px">
-            <Button size="big" variant={"tertiary"} onClick={() => router.back()}>
+            <Button
+              size="big"
+              variant="tertiary"
+              onClick={() => router.back()}>
               Cancel
             </Button>
-            <Button size="big" variant={"primary"} onClick={() => { }}>
+            <Button
+              size="big"
+              variant="primary"
+              onClick={handleSubmit(onSubmit)}>
               Save
             </Button>
           </Row>
@@ -127,7 +140,9 @@ export default function CreateCustomers() {
                     placeholder={"e.g gram"}
                   />
                   <Spacer size={10} />
-                  <UploadImage />
+                  <UploadImage
+                    control={control}
+                  />
                 </Col>
                 <Col width="50%">
                   <Input
@@ -181,7 +196,9 @@ export default function CreateCustomers() {
                 listTabPane={listTabItems}
                 onChange={(e: any) => setTabAktived(e)}
               />
+              <Spacer size={20} />
               {switchTabItem()}
+              <Spacer size={100} />
             </Accordion.Body>
           </Accordion.Item>
         </Accordion>
@@ -191,25 +208,44 @@ export default function CreateCustomers() {
 }
 
 
-const UploadImage = () => {
+const UploadImage = ({ control }: { control: Control<FormValues> }) => {
   return (
-    <div>
-      <Label>Company Logo</Label>
-      <CardUploader>
-        <div className={styles['image-uploader']}>
-          <PicturePlaceholder />
-        </div>
-        <Spacer size={10} />
-        <div className={styles['description-uploader']}>
-          <p className={styles['rules-dimension']}>Dimension Minimum 72 x 72, Optimal size 300 x 300</p>
-          <p className={styles['rules-size']}>File Size Max. 1MB</p>
-          <Spacer size={5} />
-          <Button type="primary" size="small">
-            Upload
-          </Button>
-        </div>
-      </CardUploader>
-    </div>
+    //  <div>
+    //   <Label>Company Logo</Label>
+    //   <CardUploader>
+    //     <div className={styles['image-uploader']}>
+    //       <PicturePlaceholder />
+    //     </div>
+    //     <Spacer size={10} />
+    //     <div className={styles['description-uploader']}>
+    //       <p className={styles['rules-dimension']}>Dimension Minimum 72 x 72, Optimal size 300 x 300</p>
+    //       <p className={styles['rules-size']}>File Size Max. 1MB</p>
+    //       <Spacer size={5} />
+    //       <Button type="primary" size="small">
+    //         Upload
+    //       </Button>
+    //     </div>
+    //   </CardUploader>
+    // </div>
+    <Controller
+      control={control}
+      rules={{ required: true }}
+      name="profile_picture"
+      render={({ field: { onChange } }) => (
+        <FileUploaderAllFiles
+          label="Company Logo"
+          onSubmit={(file: any) => onChange(file)}
+          defaultFile="/icons/placeholder-employee-photo.svg"
+          withCrop
+          sizeImagePhoto="125px"
+          removeable
+          textPhoto={[
+            "Dimension Minimum 72 x 72, Optimal size 300 x 300",
+            "File Size Max. 1MB",
+          ]}
+        />
+      )}
+    ></Controller>
   )
 }
 
