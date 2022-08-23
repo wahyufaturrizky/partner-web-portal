@@ -172,65 +172,107 @@ const DetailSequenceNumber: any = () => {
 
                 <Spacer size={12} />
 
-                <Row justifyContent={"flex"}>
-                  <Input
-                    width="50%"
-                    label="Prefix"
-                    height="48px"
-                    placeholder={"e.g"}
-                    disabled={isEdit ? false : true}
-                    // {...register("name", { required: true })}
-                  />
+                <Row>
+                  <Row width="100%" alignItems="center">
+                    <Col width="15%">
+                      <Text variant="headingSmall">Prefix</Text>
+                    </Col>
+                    <Col width="85%">
+                      <Input
+                        width="100%"
+                        label=""
+                        height="48px"
+                        placeholder={"e.g"}
+                        disabled={isEdit ? false : true}
+                        // {...register("name", { required: true })}
+                      />
+                    </Col>
+                  </Row>
                 </Row>
                 <Row>
-                  <Input
-                    width="100%"
-                    label="Suffix"
-                    height="48px"
-                    placeholder={"e.g"}
-                    disabled={isEdit ? false : true}
-                    // {...register("name", { required: true })}
-                  />
+                  <Row width="100%" alignItems="center">
+                    <Col width="15%">
+                      <Text variant="headingSmall">Suffix</Text>
+                    </Col>
+                    <Col width="85%">
+                      <Input
+                        width="100%"
+                        label=""
+                        height="48px"
+                        placeholder={"e.g"}
+                        disabled={isEdit ? false : true}
+                        // {...register("name", { required: true })}
+                      />
+                    </Col>
+                  </Row>
                 </Row>
                 <Row>
-                  <Input
-                    width="100%"
-                    label="Digit Size"
-                    height="48px"
-                    placeholder={"e.g"}
-                    disabled={isEdit ? false : true}
-                    // {...register("name", { required: true })}
-                  />
+                  <Row width="100%" alignItems="center">
+                    <Col width="15%">
+                      <Text variant="headingSmall">Digit Size</Text>
+                    </Col>
+                    <Col width="85%">
+                      <Input
+                        width="100%"
+                        label=""
+                        height="48px"
+                        placeholder={"e.g"}
+                        disabled={isEdit ? false : true}
+                        // {...register("name", { required: true })}
+                      />
+                    </Col>
+                  </Row>
                 </Row>
                 <Row>
-                  <Input
-                    width="100%"
-                    label="Separator"
-                    height="48px"
-                    placeholder={"e.g"}
-                    disabled={isEdit ? false : true}
-                    // {...register("name", { required: true })}
-                  />
+                  <Row width="100%" alignItems="center">
+                    <Col width="15%">
+                      <Text variant="headingSmall">Separator</Text>
+                    </Col>
+                    <Col width="85%">
+                      <Input
+                        width="100%"
+                        label=""
+                        height="48px"
+                        placeholder={"e.g"}
+                        disabled={isEdit ? false : true}
+                        // {...register("name", { required: true })}
+                      />
+                    </Col>
+                  </Row>
                 </Row>
                 <Row>
-                  <Input
-                    width="100%"
-                    label="Start Number"
-                    height="48px"
-                    placeholder={"e.g"}
-                    disabled={isEdit ? false : true}
-                    // {...register("name", { required: true })}
-                  />
+                  <Row width='100%' alignItems='center'>
+                    <Col width='15%'>
+                      <Text variant="headingSmall">Start Number</Text>
+                    </Col>
+                    <Col width='85%'>
+                      <Input
+                        width="100%"
+                        label=""
+                        height="48px"
+                        placeholder={"e.g"}
+                        disabled={isEdit ? false : true}
+                        // {...register("name", { required: true })}
+                      />
+                    </Col>
+                  </Row>
                 </Row>
                 <Row>
-                  <Input
-                    width="100%"
-                    label="Next Number"
-                    height="48px"
-                    placeholder={"e.g"}
-                    disabled={isEdit ? false : true}
-                    // {...register("name", { required: true })}
-                  />
+                  <Row width='100%' alignItems='center'>
+                    <Col width='15%'>
+                      <Text variant="headingSmall">Next Number</Text>
+                    </Col>
+                    <Col width='85%'>
+                      <Input
+                        width="100%"
+                        label=""
+                        height="48px"
+                        placeholder={"e.g"}
+                        disabled={isEdit ? false : true}
+                        // {...register("name", { required: true })}
+                      />
+                    </Col>
+                  </Row>
                 </Row>
               </Col>
             </Row>
