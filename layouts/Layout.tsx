@@ -232,6 +232,18 @@ const menuMdm = [
     icon: ICBadge,
     children: [
       {
+        key: "employee-list",
+        title: "Employee List",
+        content: () => "Employee List",
+        onClick: () => Router.push("/employee-list"),
+      },
+      {
+        key: "job-position",
+        title: "Job Position",
+        content: () => "Job Position",
+        onClick: () => Router.push("/job-position"),
+      },
+      {
         key: "job-position",
         title: "Job Position",
         content: () => "Job Position",
@@ -399,7 +411,7 @@ const AdminLayout = (props: any) => {
           >
             <MenuDropdown>
               <div style={{ gap: "5px", display: "flex", alignItems: "center", fontSize: "14px" }}>
-                <ICAccount />
+                <ICAccount size={64} />
                 <p>Admin</p>
               </div>
               <ICArrowBottom />

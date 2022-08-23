@@ -40,8 +40,8 @@ const CreatePartnerConfigPermissionList: any = () => {
         window.alert("Permission partner success created!");
         Router.back();
       },
-      onError: (error) => {
-        window.alert(error.errors.map((data) => `${data.label} ${data.message}`));
+      onError: (error: any) => {
+        window.alert(error.errors.map((data: any) => `${data.label} ${data.message}`));
       },
     },
   });
@@ -52,8 +52,8 @@ const CreatePartnerConfigPermissionList: any = () => {
       refetchOnWindowFocus: "always",
     },
   });
-  const menus = menuLists?.rows?.map((menu) => ({ id: menu.id, value: menu.name }));
-  const onSubmit = (data) => mutatePartnerConfigPermissionList(data);
+  const menus = menuLists?.rows?.map((menu: any) => ({ id: menu.id, value: menu.name }));
+  const onSubmit = (data: any) => mutatePartnerConfigPermissionList(data);
 
   const activeStatus = [
     { id: "Y", value: '<div key="1" style="color:green;">Active</div>' },
@@ -93,7 +93,7 @@ const CreatePartnerConfigPermissionList: any = () => {
               width={"185px"}
               items={activeStatus}
               placeholder={"Status"}
-              handleChange={(text) => setValue("activeStatus", text)}
+              handleChange={(text: any) => setValue("activeStatus", text)}
               noSearch
               defaultValue="Y"
             />

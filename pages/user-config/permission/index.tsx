@@ -15,7 +15,6 @@ import {
 	Dropdown,
 } from "pink-lava-ui";
 
-import { ModalDeleteConfirmation } from "../../../components/elements/Modal/ModalConfirmationDelete";
 import { useMenuLists } from "../../../hooks/menu-config/useMenuConfig";
 import { usePartnerConfigPermissionLists, useDeletePartnerConfigPermissionList} from "../../../hooks/user-config/usePermission";
 
@@ -73,16 +72,6 @@ const UserConfigPermission: any = () => {
 		},
 	});
 
-	const { mutate: deletePermissions } = useDeletePartnerConfigPermissionList({
-		options: {
-			onSuccess: () => {
-				refetchFields();
-				setModalDelete({ open: false });
-				setSelectedRowKeys([]);
-			},
-		},
-	});
-
 	const columns = [
 		{
 			title: "Permission Name",
@@ -116,7 +105,7 @@ const UserConfigPermission: any = () => {
 				<Button
 					size="small"
 					onClick={() => {
-						router.push(`/partner-config-permission-list/${field.id}`);
+						router.push(`/user-config/permission//${field.id}`);
 					}}
 					variant="tertiary"
 				>
