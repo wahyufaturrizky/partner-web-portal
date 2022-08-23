@@ -1,39 +1,29 @@
 import React, { useState } from "react";
-import Router, { useRouter } from "next/router";
-import usePagination from "@lucasmogari/react-pagination";
-import { yupResolver } from "@hookform/resolvers/yup";
-import { useForm } from "react-hook-form";
-import * as yup from "yup";
-import styled from "styled-components";
 import {
   Text,
   Col,
   Row,
   Spacer,
   Dropdown,
-  Table,
-  Alert,
   Button,
   Accordion,
-  Spin,
   Input,
-  Modal,
-  Search,
-  Pagination,
-  AccordionCheckbox,
+  TextArea,
+  Dropdown2,
+  Switch,
+  Spin,
   Checkbox,
 } from "pink-lava-ui";
-
+import styled from "styled-components";
+import Router, { useRouter } from "next/router";
 import ArrowLeft from "../../../assets/icons/arrow-left.svg";
-import AddSequenceNumber from "../../../components/pages/SequenceNumber/AddSequenceNumber";
+import * as yup from "yup";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { useForm } from "react-hook-form";
+import usePagination from "@lucasmogari/react-pagination";
 
-const CreateSequenceNumber: any = () => {
+const AddSequenceNumber: any = () => {
   const router = useRouter();
-  const { sequence_id } = router.query;
-
-  const [search, setSearch] = useState("");
-  const [isEdit, setIsEdit] = useState(false);
-  const [isAdd, setIsAdd] = useState(true);
 
   const pagination = usePagination({
     page: 1,
@@ -43,45 +33,97 @@ const CreateSequenceNumber: any = () => {
     arrows: true,
     totalItems: 100,
   });
-  console.log(isAdd);
+
   return (
     <>
       <Col>
-        <Row gap="16px" justifyContent="flex" alignItems="center">
-          <ArrowLeft style={{ cursor: "pointer" }} onClick={() => Router.back()} />
-          <Text variant={"h4"}>{"PMA Bandung Selatan"}</Text>
+        <Row gap="4px" alignItems="center">
+          <ArrowLeft style={{ cursor: "pointer" }} onClick={() => Router.push("/company-list")} />
+          <Text variant={"h4"}>Add Sequence</Text>
         </Row>
         <Spacer size={12} />
-        <Card>
-          <Row width="100%" noWrap>
-            <Col width="25%" style={{ padding: "12px", borderRight: "3px solid #f0f2f5" }}>
-              <Row>
-                <Search placeholder="Search" onChange={(e: any) => setSearch(e.target.value)} />
-              </Row>
-              <Spacer size={20} />
-              <Row>
-                <Text
-                  clickable
-                  variant={"label"}
-                  color={"red.regular"}
-                  onClick={() => setIsAdd(!isAdd)}
+        <Card padding="20px">
+          <Row justifyContent="flex-end" alignItems="center" nowrap>
+            <Row>
+              <Row gap="16px">
+                <Button
+                  size="big"
+                  variant={"tertiary"}
+                  onClick={() => Router.push("/company-list")}
                 >
-                  + Add Sequence
-                </Text>
+                  Cancel
+                </Button>
+                <Button size="big" variant={"primary"}>
+                  Save
+                </Button>
               </Row>
-            </Col>
-            <Col width="75%" style={{ padding: "12px" }}>
-              <Row justifyContent={"flex-end"}>
-                {!isEdit ? (
-                  <Button size="big" variant={"primary"} onClick={() => setIsEdit(!isEdit)}>
-                    Edit
-                  </Button>
-                ) : (
-                  <Button size="big" variant={"primary"} onClick={() => setIsEdit(!isEdit)}>
-                    Save
-                  </Button>
-                )}
+            </Row>
+          </Row>
+        </Card>
+
+        <Spacer size={20} />
+
+        <Accordion>
+          <Accordion.Item key={1}>
+            <Accordion.Header variant="blue">General</Accordion.Header>
+            <Accordion.Body>
+              <Row width="100%" justifyContent="space-between">
+                <Col width="50%">
+                  <Input
+                    label="Sequence Name"
+                    height="48px"
+                    placeholder={"e.g"}
+                    // {...register("name", { required: true })}
+                    required
+                  />
+                </Col>
+                <Col width="48%">
+                  <Dropdown
+                    width="100%"
+                    label="Process"
+                    items={[]}
+                    placeholder={"Select"}
+                    // handleChange={(value) => setValue("numberFormat", value)}
+                    required
+                    // error={errors?.numberFormat?.message}
+                    // {...register("numberFormat", { required: true })}
+                    noSearch
+                  />
+                </Col>
               </Row>
+              <Row width="100%" justifyContent="space-between">
+                <Col width="50%">
+                  <Input
+                    label="Company"
+                    height="48px"
+                    placeholder={"e.g"}
+                    disabled={true}
+                    // {...register("name", { required: true })}
+                  />
+                </Col>
+                <Col width="48%">
+                  <Dropdown
+                    width="100%"
+                    label="Branch"
+                    items={[]}
+                    placeholder={"Select"}
+                    // handleChange={(value) => setValue("numberFormat", value)}
+                    // error={errors?.numberFormat?.message}
+                    // {...register("numberFormat", { required: true })}
+                    noSearch
+                  />
+                </Col>
+              </Row>
+            </Accordion.Body>
+          </Accordion.Item>
+        </Accordion>
+
+        <Spacer size={20} />
+
+        <Accordion>
+          <Accordion.Item key={1}>
+            <Accordion.Header variant="blue">Number Allocation</Accordion.Header>
+            <Accordion.Body>
               <Spacer size={12} />
               <Row>
                 <Input
@@ -106,7 +148,6 @@ const CreateSequenceNumber: any = () => {
                     <Row>
                       <Checkbox
                         checked={false}
-                        disabled={isEdit ? false : true}
                         //   onChange={(value: boolean) => {
                         //     onChange(value);
                         //     setIsCompany(value);
@@ -120,7 +161,6 @@ const CreateSequenceNumber: any = () => {
                     <Row>
                       <Checkbox
                         checked={false}
-                        disabled={isEdit ? false : true}
                         //   onChange={(value: boolean) => {
                         //     onChange(value);
                         //     setIsBranch(value);
@@ -143,7 +183,6 @@ const CreateSequenceNumber: any = () => {
                     <Row>
                       <Checkbox
                         checked={false}
-                        disabled={isEdit ? false : true}
                         //   onChange={(value: boolean) => {
                         //     onChange(value);
                         //     setIsCompany(value);
@@ -157,7 +196,6 @@ const CreateSequenceNumber: any = () => {
                     <Row>
                       <Checkbox
                         checked={false}
-                        disabled={isEdit ? false : true}
                         //   onChange={(value: boolean) => {
                         //     onChange(value);
                         //     setIsBranch(value);
@@ -184,7 +222,6 @@ const CreateSequenceNumber: any = () => {
                       label=""
                       height="48px"
                       placeholder={"e.g"}
-                      disabled={isEdit ? false : true}
                       // {...register("name", { required: true })}
                     />
                   </Col>
@@ -201,7 +238,6 @@ const CreateSequenceNumber: any = () => {
                       label=""
                       height="48px"
                       placeholder={"e.g"}
-                      disabled={isEdit ? false : true}
                       // {...register("name", { required: true })}
                     />
                   </Col>
@@ -218,7 +254,6 @@ const CreateSequenceNumber: any = () => {
                       label=""
                       height="48px"
                       placeholder={"e.g"}
-                      disabled={isEdit ? false : true}
                       // {...register("name", { required: true })}
                     />
                   </Col>
@@ -235,7 +270,6 @@ const CreateSequenceNumber: any = () => {
                       label=""
                       height="48px"
                       placeholder={"e.g"}
-                      disabled={isEdit ? false : true}
                       // {...register("name", { required: true })}
                     />
                   </Col>
@@ -252,7 +286,6 @@ const CreateSequenceNumber: any = () => {
                       label=""
                       height="48px"
                       placeholder={"e.g"}
-                      disabled={isEdit ? false : true}
                       // {...register("name", { required: true })}
                     />
                   </Col>
@@ -269,31 +302,25 @@ const CreateSequenceNumber: any = () => {
                       label=""
                       height="48px"
                       placeholder={"e.g"}
-                      disabled={isEdit ? false : true}
                       // {...register("name", { required: true })}
                     />
                   </Col>
                 </Row>
               </Row>
-            </Col>
-          </Row>
-        </Card>
-      </Col>
+            </Accordion.Body>
+          </Accordion.Item>
+        </Accordion>
 
-      <AddSequenceNumber isActiceAdd={{ isAdd, setIsAdd }} />
+        <Spacer size={20} />
+      </Col>
     </>
   );
 };
 
-const Center = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-`;
-
 const Card = styled.div`
   background: #ffffff;
   border-radius: 16px;
+  padding: ${(p) => (p.padding ? p.padding : "16px")};
 `;
 
 const Label = styled.div`
@@ -303,4 +330,4 @@ const Label = styled.div`
   color: #000000;
 `;
 
-export default CreateSequenceNumber;
+export default AddSequenceNumber;

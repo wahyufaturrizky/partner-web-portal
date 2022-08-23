@@ -51,7 +51,7 @@ const DetailSequenceNumber: any = () => {
 			) : ( */}
       <>
         <Col>
-          <Row gap="16px" justifyContent="flex">
+          <Row gap="16px" justifyContent="flex" alignItems="center">
             <ArrowLeft style={{ cursor: "pointer" }} onClick={() => Router.back()} />
             <Text variant={"h4"}>{"PMA Bandung Selatan"}</Text>
           </Row>
