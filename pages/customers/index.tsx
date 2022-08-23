@@ -1,23 +1,15 @@
-import usePagination from "@lucasmogari/react-pagination";
 import { useRouter } from "next/router";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
 import styled from "styled-components";
 import {
   Button,
   Col,
   DropdownMenu,
-  FileUploadModal,
-  Input,
-  Modal,
   Pagination,
   Row,
   Search,
   Spacer,
   Table,
   Text,
-  Dropdown,
-  Spin,
 } from "pink-lava-ui";
 import { ICDownload, ICUpload } from "../../assets";
 
@@ -119,7 +111,7 @@ export default function Customer() {
           </Row>
         </Row>
       </Card>
-
+      <Spacer size={20} />
       <Card style={{ padding: "16px 20px" }}>
         <Col gap={"60px"}>
           <Table

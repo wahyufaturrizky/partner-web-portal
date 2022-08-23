@@ -1,24 +1,12 @@
-import React, { useState } from 'react'
-import {
-  Button,
-  Col,
-  DropdownMenu,
-  FileUploadModal,
-  Input,
-  Modal,
-  Pagination,
-  Row,
-  Search,
-  Tabs,
-  Spacer,
-  Table,
-  Text,
-  Dropdown,
-  Accordion,
-  Spin,
-} from "pink-lava-ui";
+import React from 'react'
+import { Col, Row, Search, Spacer } from "pink-lava-ui";
 import styled from 'styled-components'
-import { useRouter } from 'next/router';
+
+import IconAdd from '../../../../.../../assets/icons/ic-add-rounded.svg'
+import IconAvatar from '../../../../.../../assets/icons/ic-avatar-xs.svg'
+import IconEdit from '../../../../.../../assets/icons/ic-more.svg'
+
+import styles from './styles.module.css'
 
 export default function Contact() {
   return (
@@ -28,27 +16,69 @@ export default function Contact() {
         placeholder="search contact name, role, email"
         onChange={() => { }}
       />
-      <Row style={{marginTop: '1rem'}}>
-        <Col md="8">
-          <CardBoxAdd>
-            Add New Contact
-          </CardBoxAdd>
+      <Spacer size={20} />
+      <Row gap="12px" width="100%">
+        <Col width="32%">
+          <CardAddContact onClick={() => { }} />
         </Col>
-        <Col md="8">
-          <CardBoxAdd>
-            Add New Contact
-          </CardBoxAdd>
-        </Col>
-        <Col md="8">
-          <CardBoxAdd>
-            Add New Contact
-          </CardBoxAdd>
-        </Col>
+        {
+          [1, 2].map((index) => (
+            <Col key={index} width="32%">
+              <CardContact />
+            </Col>
+          ))
+        }
       </Row>
     </div>
   )
 }
 
+const CardContact = () => {
+  return (
+    <CardUser>
+      <div className={styles['card-contact-user']}>
+        <FlexElement>
+          <IconAvatar />
+          <Spacer size={10} />
+          <div className={styles['detail-contact']}>
+            <p className={styles['title']}>Tri Tipang</p>
+            <p className={styles['status']}>COO</p>
+            <p className={styles['email']}>duolipa@indomarco.com</p>
+          </div>
+        </FlexElement>
+        <IconEdit />
+      </div>
+    </CardUser>
+  )
+}
+
+export const CardAddContact = ({ onClick }: any) => {
+  return (
+    <Card onClick={onClick}>
+      <IconAdd /> Add New contact
+    </Card>
+  )
+}
+
+const FlexElement = styled.div`
+  display: flex;
+  align-items: center;
+`
+
+const CardUser = styled.div`
+  border: 1px solid #DDDDDD;
+  border-radius: 16px;
+`
+
+const Card = styled.div`
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid #DDDDDD;
+  border-radius: 16px;
+  padding: 37px 92px;
+`
 
 const CardBoxAdd = styled.div`
   display: flex;

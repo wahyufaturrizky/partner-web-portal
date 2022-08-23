@@ -411,7 +411,7 @@ const AdminLayout = (props: any) => {
           >
             <MenuDropdown>
               <div style={{ gap: "5px", display: "flex", alignItems: "center", fontSize: "14px" }}>
-                <ICAccount />
+                <ICAccount size={64} />
                 <p>Admin</p>
               </div>
               <ICArrowBottom />
