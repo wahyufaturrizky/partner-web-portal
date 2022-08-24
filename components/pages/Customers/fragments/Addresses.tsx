@@ -6,53 +6,115 @@ import {
   Row,
   Spacer,
   Dropdown,
-  Checkbox,
+  Lozenge,
   Text,
   TextArea,
   FileUploaderAllFiles
 } from "pink-lava-ui";
 import styled from 'styled-components'
-import { Controller, useForm, Control } from 'react-hook-form'
 
+import { ICCheckPrimary } from "../../../../assets";
 import IconAdd from '../../../../assets/icons/ICAdd'
 
-type FormValues = {
-  store_picture: string;
-};
+import {
+  Controller,
+  useForm,
+  Control,
+  useFieldArray
+} from 'react-hook-form'
 
-interface PropsFormContact {
-  isPrimary: boolean;
-  label: number;
-  onChangeChecked: () => void;
-  control: Control<FormValues>
+interface FormContacts {
+  detailInformation: {
+    addresess: {
+      is_primary_address: boolean;
+      address_type: string;
+      street: string;
+      country: string;
+      province: string;
+      city: string;
+      district: string;
+      zone: string;
+      postal_code: string;
+      longitude: string;
+      store_picture: string
+      latitude: string;
+      key: number;
+    }[];
+  };
 }
 
 export default function Addresses() {
-  const [isPrimary, setIsPrimary] = useState(false)
-  const { control } = useForm<FormValues>({ shouldUseNativeValidation: true });
-  const [addContact, setAddContact] = useState([0])
+
+  const addressBodyField = {
+    is_primary_address: false,
+    address_type: "",
+    street: "",
+    country: "",
+    province: "",
+    city: "",
+    district: "",
+    zone: "",
+    postal_code: "",
+    longitude: "",
+    latitude: "",
+    key: 0,
+  };
+
+  const { 
+    register,
+    control,
+    handleSubmit,
+    formState: { errors },
+    getValues,
+   } = useForm({
+    shouldUseNativeValidation: true,
+     defaultValues: {
+       detailInformation: {
+         addresess: [addressBodyField],
+       },
+     }
+  });
+
+
+  const {
+    fields: fieldsAddresess,
+    append: appendAddresess,
+    replace: replaceAddresess,
+    remove: removeAddresess,
+  } = useFieldArray({
+    control,
+    name: "detailInformation.addresess",
+  });
+
+  const propsFieldForm = {
+    getValues: getValues,
+    control: control,
+    fieldsAddresess: fieldsAddresess,
+    replaceAddresess: replaceAddresess,
+    removeAddresess: removeAddresess,
+  }
 
   return (
     <div>
       <Button
         size="big"
         variant="primary"
-        onClick={() => setAddContact([...addContact, addContact[0] + 1])}>
+        onClick={() =>
+          appendAddresess({
+            ...addressBodyField,
+            key: fieldsAddresess.length
+          })}>
         <IconAdd /> Add More Address
       </Button>
       <Spacer size={20} />
       {
-        addContact.map((item, index) =>
+        fieldsAddresess.map((_, index) =>
           <>
             <FormContact
-              label={index + 1}
-              key={item}
-              isPrimary={isPrimary}
-              control={control}
-              onChangeChecked={() => setIsPrimary(!isPrimary)}
+              key={index}
+              index={index}
+              {...propsFieldForm}
             />
-            <Spacer size={30} />
-            {addContact.length > 1 && <hr />}
             <Spacer size={30} />
           </>
         )
@@ -62,22 +124,66 @@ export default function Addresses() {
 }
 
 const FormContact = ({
-  label,
-  isPrimary,
-  onChangeChecked,
-  control
-}: PropsFormContact) => {
+  control,
+  index,
+  getValues,
+  fieldsAddresess,
+  replaceAddresess,
+  removeAddresess
+}: any) => {
   return (
     <>
-      <ElementFlex>
-        <LabelChekbox>Address {label}</LabelChekbox>
-        <Row alignItems="center">
-          <Checkbox checked={isPrimary} onChange={onChangeChecked} />
-          <div style={{ cursor: "pointer" }} onClick={() => { }}>
-            <Text>Primary</Text>
-          </div>
-        </Row>
-      </ElementFlex>
+      <Controller
+        control={control}
+        name={`detailInformation.addresess.${index}.is_primary_address`}
+        render={({ field: { } }) => (
+          <>
+            <Text color={"blue.dark"} variant={"headingMedium"}>
+              {getValues(`detailInformation.addresess.${index}.is_primary_address`)
+                ? "Home"
+                : "New Address"}
+            </Text>
+            <Row gap="12px" alignItems="center">
+              {getValues(
+                `detailInformation.addresess.${index}.is_primary_address`
+              ) ? (
+                <Lozenge variant="blue">
+                  <Row alignItems="center">
+                    <ICCheckPrimary />
+                    Primary
+                  </Row>
+                </Lozenge>
+              ) : (
+                <Text
+                  clickable
+                  color="pink.regular"
+                  onClick={() => {
+                    let tempEdit = fieldsAddresess.map((mapDataItem: any) => {
+                      if (mapDataItem.key === index) {
+                        mapDataItem.is_primary_address = true;
+
+                        return { ...mapDataItem };
+                      } else {
+                        mapDataItem.is_primary_address = false;
+                        return { ...mapDataItem };
+                      }
+                    });
+                    replaceAddresess(tempEdit);
+                  }}
+                >
+                  Set as Primary
+                </Text>
+              )}
+              |
+              <div style={{ cursor: "pointer" }}>
+                <Text color="pink.regular" onClick={() => removeAddresess(index)}>
+                  Delete
+                </Text>
+              </div>
+            </Row>
+          </>
+        )}
+      />
       <Spacer size={30} />
       <Row gap="20px" width="100%">
         <Col width="48%">
@@ -96,17 +202,14 @@ const FormContact = ({
             width="100%"
           />
           <Spacer size={30} />
-          <UploadImage control={control} />
+          <UploadImage control={control} index={index} />
         </Col>
         <Col width="48%">
           <TextArea
             width="100%"
-            rows={1}
-            height="10px"
+            height="48px"
             placeholder="e.g Front Groceries No. 5"
-            label={<Label>Street</Label>}
-            onChange={() => { }}
-            defaultValue={['']}
+            label="Street"
           />
           <Spacer size={10} />
           <Dropdown label="Province" width="100%" />
@@ -127,12 +230,12 @@ const FormContact = ({
   )
 }
 
-const UploadImage = ({ control }: { control: Control<FormValues> }) => {
+const UploadImage = ({ control, index }: { index: number, control: Control<FormContacts> }) => {
   return (
     <Controller
       control={control}
       rules={{ required: true }}
-      name="store_picture"
+      name={`detailInformation.addresess.${index}.is_primary_address`}
       render={({ field: { onChange } }) => (
         <FileUploaderAllFiles
           label="Company Logo"
@@ -159,8 +262,19 @@ const LabelChekbox = styled.p`
   color: #1E858E;
 `
 
+const DescriptionPrimary = styled.p`
+  color: #1E858E;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 75px;
+  height: 24px;
+  background: #D5FAFD;
+`
+
 const ElementFlex = styled.div`
   display: flex;
+  color: #EB008B;
   align-items: center;
   gap: 5px;
 `
