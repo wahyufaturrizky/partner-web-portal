@@ -10,7 +10,7 @@ import {
 import { arrayMove } from "@dnd-kit/sortable";
 import { queryClient } from "../_app";
 import ModalAddTerm from "../../components/elements/Modal/ModalAddTerm";
-import DraggableTable from "../../components/elements/Draggable/TermOfPayment/DraggableTable";
+import DraggableTable from "../../components/pages/TermOfPayment/DraggableTable";
 import { ExclamationCircleOutlined } from "@ant-design/icons";
 
 const TermOfPaymentCreate = () => {

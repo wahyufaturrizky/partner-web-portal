@@ -15,7 +15,7 @@ const fetchMenuLists = async ({ query = {} }) => {
 };
 
 const useMenuLists = ({ query = {}, options } = {}) => {
-  return useQuery(["menu", query], () => fetchMenuLists({ query }), {
+  return useQuery(["menu-list", query], () => fetchMenuLists({ query }), {
     keepPreviousData: true,
     ...options,
   });

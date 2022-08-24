@@ -19,8 +19,8 @@ import ModalAddBusinessProcess from "../../components/elements/Modal/ModalAddBus
 import ModalEditProcess from "../../components/elements/Modal/ModalEditProcess";
 import { useProcessInfiniteLists } from "../../hooks/business-process/useProcess";
 import { useCreateBusinessProcess } from "../../hooks/business-process/useBusinessProcess";
-import DraggableTable from "../../components/elements/Draggable/BusinessProcess/DraggableTable";
-import DraggableGrids from "../../components/elements/Draggable/BusinessProcess/DraggableGrid";
+import DraggableTable from "../../components/pages/BusinessProcess/DraggableGrid";
+import DraggableGrids from "../../components/pages/BusinessProcess/DraggableGrid";
 
 import styled from "styled-components";
 
@@ -275,8 +275,16 @@ const CreateBusinessProcess = () => {
                       const filterProcessList = processList.filter(
                         (process) => process.id !== data.id
                       );
+
+                      const mappedProcessList = filterProcessList.map((el, index) => {
+                        return {
+                          ...el,
+                          index,
+                        };
+                      });
+
                       const filterDropdownValue = value.filter((value) => value.value !== data.id);
-                      setProcessList(filterProcessList);
+                      setProcessList(mappedProcessList);
                       setValue(filterDropdownValue);
                     }}
                   />

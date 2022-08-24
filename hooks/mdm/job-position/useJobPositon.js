@@ -1,4 +1,4 @@
-import { useQuery, useMutation } from "react-query";
+import { useQuery, useMutation, useInfiniteQuery } from "react-query";
 import { mdmService } from "../../../lib/client";
 
 const fetchJobPositions = async ({ query = {} }) => {
@@ -16,6 +16,27 @@ const fetchJobPositions = async ({ query = {} }) => {
 
 const useJobPositions = ({ query = {}, options }) => {
   return useQuery(["job-positions", query], () => fetchJobPositions({ query }), {
+    ...options,
+  });
+};
+
+const fetchInfiniteeJobPositions = async ({ pageParam = 1, queryKey }) => {
+  const searchQuery = queryKey[1].search;
+  return mdmService(`/job-position`, {
+    params: {
+      search: searchQuery,
+      limit: 10,
+      page: pageParam,
+      sortBy: "created_at",
+      sortOrder: "DESC",
+      ...queryKey[1],
+    },
+  }).then((data) => data);
+};
+
+const useJobPositionInfiniteLists = ({ query = {}, options }) => {
+  return useInfiniteQuery(["job-position/infinite", query], fetchInfiniteeJobPositions, {
+    keepPreviousData: true,
     ...options,
   });
 };
@@ -89,4 +110,5 @@ export {
   useUpdateJobPosition,
   useDeleteJobPosition,
   useUploadFileJobPosition,
+  useJobPositionInfiniteLists,
 };

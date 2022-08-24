@@ -3,13 +3,13 @@ import Router from "next/router";
 import { Accordion, Button, Col, Dropdown, Input, Row, Spacer, Spin, Text } from "pink-lava-ui";
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import { ModalDeleteConfirmation } from "../../components/modals/ModalDeleteConfirmation";
-import { useConfigs } from "../../hooks/config/useConfig";
+import { ModalDeleteConfirmation } from "../../../components/elements/Modal/ModalConfirmationDelete";
+import { useConfigs } from "../../../hooks/config/useConfig"
 import {
 	useDeleteProcessList,
 	useProcessList,
 	useUpdateProcessList,
-} from "../../hooks/process/useProcess";
+} from "../../../hooks/business-process/useProcess";
 
 const DetailProcessList: any = () => {
 	const [isLoading, setIsLoading] = useState(false);
@@ -110,7 +110,7 @@ const DetailProcessList: any = () => {
 			<Col>
 				<Row alignItems="center" gap="4px">
 					<div onClick={() => Router.back()} style={{ cursor: "pointer" }}>
-						<Image src="/arrow-left.svg" alt="arrow-left" width={32} height={32} />
+						<Image src="/icons/arrow-left.svg" alt="arrow-left" width={32} height={32} />
 					</div>
 					<Text variant={"h4"}>{Router.query.name || "Unknown"}</Text>
 				</Row>

@@ -11,28 +11,28 @@ import {
   Input,
   EmptyState,
 } from "pink-lava-ui";
+import { useForm, Controller } from "react-hook-form";
+import { arrayMove } from "@dnd-kit/sortable";
 import styled from "styled-components";
 import { useRouter } from "next/router";
-import ArrowLeft from "../../assets/arrow-left.svg";
 import {
   useBusinessProcess,
   useUpdateBusinessProcess,
   useDeleteBusinessProcess,
 } from "../../hooks/business-process/useBusinessProcess";
-import { ModalDeleteConfirmation } from "../../components/elements/Modal/ModalConfirmationDelete";
 import { queryClient } from "../_app";
+import ArrowLeft from "../../assets/icons/arrow-left.svg";
+import { ModalDeleteConfirmation } from "../../components/elements/Modal/ModalConfirmationDelete";
 import { useProcessInfiniteLists } from "../../hooks/business-process/useProcess";
 import useDebounce from "../../lib/useDebounce";
-import { useForm, Controller } from "react-hook-form";
 import ModalAddBusinessProcess from "../../components/elements/Modal/ModalAddBusinessProcess";
 import ModalEditProcess from "../../components/elements/Modal/ModalEditProcess";
-import { arrayMove } from "@dnd-kit/sortable";
-import DraggableTable from "../../components/elements/Draggable/BusinessProcess/DraggableTable";
-import DraggableGrids from "../../components/elements/Draggable/BusinessProcess/DraggableGrid";
+import DraggableTable from "../../components/pages/BusinessProcess/DraggableTable";
+import DraggableGrids from "../../components/pages/BusinessProcess/DraggableGrid";
 
 const BussinessProcessDetail = () => {
   const router = useRouter();
-  const { bp_id } = router.query;
+  const { bussiness_process_id: bp_id } = router.query;
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showAddProcessModal, setShowAddProcessModal] = useState(false);
@@ -393,8 +393,16 @@ const BussinessProcessDetail = () => {
                       const filterProcessList = processList.filter(
                         (process) => process.id !== data.id
                       );
+
+                      const mappedProcessList = filterProcessList.map((el, index) => {
+                        return {
+                          ...el,
+                          index,
+                        };
+                      });
+
                       const filterDropdownValue = value.filter((value) => value.value !== data.id);
-                      setProcessList(filterProcessList);
+                      setProcessList(mappedProcessList);
                       setValue(filterDropdownValue);
                     }}
                   />
@@ -402,7 +410,7 @@ const BussinessProcessDetail = () => {
               ) : (
                 <>
                   <EmptyState
-                    image={"/empty-state.svg"}
+                    image={"/icons/empty-state.svg"}
                     title={"No Data Company List"}
                     description={"Press Add Process First"}
                     height={325}

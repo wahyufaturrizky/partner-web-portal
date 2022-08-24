@@ -32,7 +32,7 @@ const useProductBrandMDM = ({ id, options }) => {
 };
 
 const fetchParentProductBrandMDM = async ({ id }) => {
-  return mdmService(`product-brand/parent/${id}`).then((data) => data);
+  return mdmService(`/product-brand/parent/${id}`).then((data) => data);
 };
 
 const useParentProductBrandMDM = ({ id, options }) => {

@@ -19,7 +19,7 @@ import styled from "styled-components";
 import usePagination from "@lucasmogari/react-pagination";
 
 
-import { ModalCopyCoA } from "../../../components/elements/Modal/ModalCopyCoa";
+import {ModalCopyCoA} from "../../../components/elements/Modal/ModalCopyCoA";
 import { useCreateCoa, useDetailCoa, useFilterAccountCoa } from "../../../hooks/finance-config/useCoaTemplate";
 import VectorPeople from "../../../assets/icons/vector-people.svg";
 import PlusAdd from "../../../assets/icons/plus-add.svg";
@@ -103,7 +103,7 @@ const FinanceConfigCoATemplateCreate: any = () => {
 	const { mutate: createCoa } = useCreateCoa({
 		options: {
 			onSuccess: () => {
-				router.push("/coa-template");
+				router.push("/finance-config/coa-template");
 			},
 		},
 	});

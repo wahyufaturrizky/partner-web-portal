@@ -19,7 +19,6 @@ import {
 import React, { useState } from "react";
 import styled from "styled-components";
 
-import { useConfigs } from "../../../hooks/config/useConfig";
 import {
 	useCreateMenuDesignList,
 	useCreateModuleMenuDesignList,
@@ -27,6 +26,7 @@ import {
 	useMenuDesignList,
 	useUpdateMenuDesignList,
 } from "../../../hooks/menu-config/useMenuDesign";
+import { useConfigs } from "../../../hooks/config/useConfig";
 import { useMenuLists } from "../../../hooks/menu-config/useMenuConfig";
 
 const x = 3;
@@ -117,8 +117,6 @@ const CreateMenuDesignList: any = () => {
 
 	const onDragEnter = (info: any) => {
 		console.log(info);
-    // expandedKeys 需要受控时设置
-		// setExpandedKeys(info.expandedKeys)
 	};
 
 	const onDrop = (info: any) => {
@@ -183,7 +181,7 @@ const CreateMenuDesignList: any = () => {
 		setGData(data);
 	};
 
-	const handleChangeInput = (e) => {
+	const handleChangeInput = (e: any) => {
 		setStateFieldInput({
 			...stateFieldInput,
 			[e.target.id]: e.target.value,
@@ -221,6 +219,7 @@ const CreateMenuDesignList: any = () => {
 				}
 			},
 			onError: (error: any) => {
+				alert('ini adalah errorsss')
 				setIsLoading(false);
 				if (error?.message) {
 					window.alert(error?.message);
@@ -469,9 +468,8 @@ const CreateMenuDesignList: any = () => {
 	const { data: dataMenuLists, isLoading: isLoadingMenuLists } = useMenuLists({
 		options: {
 			onSuccess: (data: any) => {
-				paginationMenuLists.setTotalItems(data.totalRow);
-			},
-			refetchOnWindowFocus: "always",
+				paginationMenuLists.setTotalItems(data.totalRow)
+			}
 		},
 		query: {
 			search: searchMenuLists,
@@ -481,7 +479,7 @@ const CreateMenuDesignList: any = () => {
 	});
 
 	const dataTableMenuLists: any = [];
-	dataMenuLists?.rows?.map((field) => {
+	dataMenuLists?.rows?.map((field: any) => {
 		dataTableMenuLists.push({
 			key: field.id,
 			field_id: field.id,
@@ -515,7 +513,7 @@ const CreateMenuDesignList: any = () => {
 		);
 	};
 
-	const onSelectTree = (selectedKeys, info) => {
+	const onSelectTree = (selectedKeys: any, info: any) => {
 		setStateModuleId(selectedKeys[0]);
 		setStateModal({
 			...stateModal,
@@ -639,7 +637,7 @@ const CreateMenuDesignList: any = () => {
 																	switcherIcon={<DownOutlined />}
 																	checkable
 																	treeData={subfilterByIdParentAndGroup.childrenMainMenu.map(
-																		(subChildrenMainMenu) => ({
+																		(subChildrenMainMenu: any) => ({
 																			key: subChildrenMainMenu.id,
 																			title: (
 																				<span>
@@ -648,7 +646,7 @@ const CreateMenuDesignList: any = () => {
 																				</span>
 																			),
 																			children: subChildrenMainMenu.menuDesignToMenus.map(
-																				(subMenuDesignToMenus) => ({
+																				(subMenuDesignToMenus: any) => ({
 																					key: subMenuDesignToMenus.id,
 																					title: subMenuDesignToMenus.menu.name,
 																					icon: (
@@ -732,7 +730,7 @@ const CreateMenuDesignList: any = () => {
 							<Search
 								width="380px"
 								placeholder={`Search ${titleModal === "Add Module" ? "Module" : "Menu"} Name`}
-								onChange={(e) =>
+								onChange={(e: any) =>
 									titleModal === "Add Module"
 										? setSearchModuleConfig(e.target.value)
 										: setSearchMenuLists(e.target.value)

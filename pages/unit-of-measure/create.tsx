@@ -88,7 +88,7 @@ const UOMCreate = () => {
 
       <Spacer size={20} />
 
-      <Card padding="20px">
+      <Card>
         <Row justifyContent="space-between" alignItems="center" nowrap>
           <Controller
             control={control}

@@ -1,4 +1,4 @@
-import { useQuery, useMutation } from "react-query";
+import { useQuery, useMutation, useInfiniteQuery } from "react-query";
 import { mdmService } from "../../../lib/client";
 
 const fetchJobLevels = async ({ query = {} }) => {
@@ -16,6 +16,27 @@ const fetchJobLevels = async ({ query = {} }) => {
 
 const useJobLevels = ({ query = {}, options }) => {
   return useQuery(["job-levels", query], () => fetchJobLevels({ query }), {
+    ...options,
+  });
+};
+
+const fetchInfiniteeJobLevels = async ({ pageParam = 1, queryKey }) => {
+  const searchQuery = queryKey[1].search;
+  return mdmService(`/job-level`, {
+    params: {
+      search: searchQuery,
+      limit: 10,
+      page: pageParam,
+      sortBy: "created_at",
+      sortOrder: "DESC",
+      ...queryKey[1],
+    },
+  }).then((data) => data);
+};
+
+const useJobLevelInfiniteLists = ({ query = {}, options }) => {
+  return useInfiniteQuery(["job-level/infinite", query], fetchInfiniteeJobLevels, {
+    keepPreviousData: true,
     ...options,
   });
 };
@@ -89,4 +110,5 @@ export {
   useUpdateJobLevel,
   useDeleteJobLevel,
   useUploadFileJobLevel,
+  useJobLevelInfiniteLists,
 };
