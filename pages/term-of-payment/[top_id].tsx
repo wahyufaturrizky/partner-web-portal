@@ -7,9 +7,12 @@ import {
   useTermOfPayment,
   useUpdateTermOfPayment,
   useTopForm,
+  useDeleteTermOfPayment,
 } from "../../hooks/mdm/term-of-payment/useTermOfPayment";
 import { arrayMove } from "@dnd-kit/sortable";
 import { queryClient } from "../_app";
+import ArrowLeft from "../../assets/icons/arrow-left.svg";
+import { ModalDeleteConfirmation } from "../../components/elements/Modal/ModalConfirmationDelete";
 import ModalAddTerm from "../../components/elements/Modal/ModalAddTerm";
 import DraggableTable from "../../components/pages/TermOfPayment/DraggableTable";
 import { ExclamationCircleOutlined } from "@ant-design/icons";
@@ -20,6 +23,7 @@ const TermOfPaymentEdit = () => {
 
   const [showTermForm, setShowTermForm] = useState({ type: "", open: false, data: {} });
   const [showDisableTerm, setShowDisableTerm] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [termList, setTermList] = useState<any[]>([]);
   const [removeList, setRemoveList] = useState<any[]>([]);
 
@@ -36,6 +40,16 @@ const TermOfPaymentEdit = () => {
         },
       },
     });
+
+  const { mutate: deleteBusinessProcess, isLoading: isLoadingDeleteBP } = useDeleteTermOfPayment({
+    options: {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["top-list"]);
+        setShowDeleteModal(false);
+        router.back();
+      },
+    },
+  });
 
   const {
     data: termOfPaymentData,
@@ -176,7 +190,8 @@ const TermOfPaymentEdit = () => {
     <>
       <Col>
         <Row gap="4px">
-          <Text variant={"h4"}>Create Term of Payment</Text>
+          <ArrowLeft style={{ cursor: "pointer" }} onClick={() => router.back()} />
+          <Text variant={"h4"}>Term of Payment</Text>
         </Row>
 
         <Spacer size={20} />
@@ -184,8 +199,8 @@ const TermOfPaymentEdit = () => {
         <Card padding="20px">
           <Row justifyContent="flex-end" alignItems="center" nowrap>
             <Row gap="16px">
-              <Button size="big" variant={"tertiary"} onClick={() => router.back()}>
-                Cancel
+              <Button size="big" variant={"tertiary"} onClick={() => setShowDeleteModal(true)}>
+                Delete
               </Button>
               <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
                 {isLoadingUpdateTermOfPayment ? "Loading..." : "Save"}
@@ -309,6 +324,17 @@ const TermOfPaymentEdit = () => {
               </Col>
             </>
           }
+        />
+      )}
+
+      {showDeleteModal && (
+        <ModalDeleteConfirmation
+          totalSelected={1}
+          itemTitle={termOfPaymentData.name}
+          visible={showDeleteModal}
+          isLoading={isLoadingDeleteBP}
+          onCancel={() => setShowDeleteModal(false)}
+          onOk={() => deleteBusinessProcess({ ids: [top_id], company_id: "KSNI" })}
         />
       )}
     </>
