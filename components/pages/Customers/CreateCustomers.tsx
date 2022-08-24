@@ -2,26 +2,18 @@ import React, { useState } from 'react'
 import {
   Button,
   Col,
-  DropdownMenu,
-  FileUploadModal,
   Input,
-  Modal,
-  Pagination,
   Row,
-  Search,
   Tabs,
   Spacer,
-  Table,
   Text,
   Dropdown,
+  FileUploaderAllFiles,
   Accordion,
-  Spin,
+  Radio
 } from "pink-lava-ui";
+import { Controller, useForm, Control } from 'react-hook-form'
 import { useRouter } from 'next/router';
-import styled from 'styled-components'
-
-import PicturePlaceholder from '../../../assets/icons/ic-picture-dummy.svg'
-import styles from './fragments/styles.module.css'
 
 import {
   Sales,
@@ -30,10 +22,25 @@ import {
   Invoicing,
   Purchasing
 } from './fragments'
+import styled from 'styled-components'
+
+type FormValues = {
+  profile_picture: string;
+};
 
 export default function CreateCustomers() {
   const router = useRouter();
   const [tabAktived, setTabAktived] = useState('Contact')
+  const [formType, setFormType] = useState('Company')
+  const isCompany = formType === 'Company'
+
+
+  const {
+    register,
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm <FormValues>({ shouldUseNativeValidation: true });
 
   const listTabItems = [
     { title: "Contact" },
@@ -43,9 +50,9 @@ export default function CreateCustomers() {
     { title: "Invoicing" },
   ];
 
-  const switchTabItem = () => {
+  const switchTabItem = (type: string) => {
     switch (tabAktived) {
-      case 'Contact':
+      case type === 'Company' && 'Contact':
         return <Contact />
       case 'Addresses':
         return <Addresses />
@@ -56,35 +63,61 @@ export default function CreateCustomers() {
       case 'Invoicing':
         return <Invoicing />
       default:
-        return <Contact />
+        return null
     }
   }
 
+  const status = [
+    { id: "ACTIVE", value: "Active" },
+    { id: "INACTIVE", value: "Inactive" },
+  ]
+
+  const _formType = ['Company', 'Individu']
+
+  const onSubmit = (data: any) => {};
+
   return (
     <div>
-      <Col>
-        <Text variant={"h4"}>Customer Group</Text>
-        <Spacer size={20} />
-      </Col>
+      <FlexElement>
+        <Label>Create Customer</Label>
+          {
+            _formType.map((item) => (
+              <FlexElement key={item}>
+                <Radio
+                  value={item}
+                  defaultValue="Company"
+                  checked={item === formType}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                    setFormType(e.target.value)
+                    item === 'Individu' && setTabAktived('Addresses')
+                  }}
+                /> {item}
+                <Spacer size={20} />
+              </FlexElement>
+            ))
+          }
+      </FlexElement>
+      <Spacer size={20} />
       <Card>
         <Row justifyContent="space-between" alignItems="center" nowrap>
           <Dropdown
-            label=""
             width="185px"
             noSearch
-            items={[
-              { id: "ACTIVE", value: "Active" },
-              { id: "INACTIVE", value: "Inactive" },
-            ]}
+            items={status}
             defaultValue="ACTIVE"
             handleChange={() => { }}
           />
-
           <Row gap="16px">
-            <Button size="big" variant={"tertiary"} onClick={() => router.back()}>
+            <Button
+              size="big"
+              variant="tertiary"
+              onClick={() => router.back()}>
               Cancel
             </Button>
-            <Button size="big" variant={"primary"} onClick={() => { }}>
+            <Button
+              size="big"
+              variant="primary"
+              onClick={handleSubmit(onSubmit)}>
               Save
             </Button>
           </Row>
@@ -127,7 +160,10 @@ export default function CreateCustomers() {
                     placeholder={"e.g gram"}
                   />
                   <Spacer size={10} />
-                  <UploadImage />
+                  {
+                    isCompany && <UploadImage control={control} />
+                  }
+                  
                 </Col>
                 <Col width="50%">
                   <Input
@@ -178,10 +214,12 @@ export default function CreateCustomers() {
             <Accordion.Body>
               <Tabs
                 defaultActiveKey={tabAktived}
-                listTabPane={listTabItems}
+                listTabPane={isCompany ? listTabItems : listTabItems.slice(1, listTabItems.length)}
                 onChange={(e: any) => setTabAktived(e)}
               />
-              {switchTabItem()}
+              <Spacer size={20} />
+              {switchTabItem(formType)}
+              <Spacer size={100} />
             </Accordion.Body>
           </Accordion.Item>
         </Accordion>
@@ -190,40 +228,36 @@ export default function CreateCustomers() {
   )
 }
 
-
-const UploadImage = () => {
+const UploadImage = ({ control }: { control: Control<FormValues> }) => {
   return (
-    <div>
-      <Label>Company Logo</Label>
-      <CardUploader>
-        <div className={styles['image-uploader']}>
-          <PicturePlaceholder />
-        </div>
-        <Spacer size={10} />
-        <div className={styles['description-uploader']}>
-          <p className={styles['rules-dimension']}>Dimension Minimum 72 x 72, Optimal size 300 x 300</p>
-          <p className={styles['rules-size']}>File Size Max. 1MB</p>
-          <Spacer size={5} />
-          <Button type="primary" size="small">
-            Upload
-          </Button>
-        </div>
-      </CardUploader>
-    </div>
+    <Controller
+      control={control}
+      rules={{ required: true }}
+      name="profile_picture"
+      render={({ field: { onChange } }) => (
+        <FileUploaderAllFiles
+          label="Company Logo"
+          onSubmit={(file: any) => onChange(file)}
+          defaultFile="/placeholder-employee-photo.svg"
+          withCrop
+          sizeImagePhoto="125px"
+          removeable
+          textPhoto={[
+            "Dimension Minimum 72 x 72, Optimal size 300 x 300",
+            "File Size Max. 1MB",
+          ]}
+        />
+      )}
+    ></Controller>
   )
 }
 
-
-const CardUploader = styled.div`
-  display: flex;
-  align-items: top;
-`
-
 const Label = styled.p`
-  font-weight: bold;
+  font-size: 30px;
+  font-weight: 600;
   line-height: 14px;
-  font-size: 16px;
-  margin: 0 0 10px 0;
+  margin: 0;
+  margin-right: 1rem;
 `
 
 const Card = styled.div`
@@ -231,3 +265,8 @@ const Card = styled.div`
   border-radius: 16px;
   padding: 16px;
 `;
+
+const FlexElement = styled.div`
+  display: flex;
+  align-items: center;
+`

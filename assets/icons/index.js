@@ -13,6 +13,9 @@ import ICPurchasOrg from "./ic-purchase-org.svg";
 import ICPlus from "./ic-plus.svg";
 import ICEdit from "./ic-edit.svg";
 import ICDelete from "./ic-delete.svg";
+import ICPlusWhite from "./ic-plus-white.svg";
+import ICCheckPrimary from "./check-as-primary.svg";
+import ICView from "./ic-view.svg";
 
 export {
   ICField,
@@ -30,4 +33,7 @@ export {
   ICPlus,
   ICEdit,
   ICDelete,
+  ICPlusWhite,
+  ICCheckPrimary,
+  ICView,
 };

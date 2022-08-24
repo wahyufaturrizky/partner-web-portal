@@ -1,7 +1,8 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Col, Row, Search, Spacer } from "pink-lava-ui";
 import styled from 'styled-components'
 
+import ModalAddNewContact from '../../../elements/Modal/ModalAddNewContact';
 import IconAdd from '../../../../.../../assets/icons/ic-add-rounded.svg'
 import IconAvatar from '../../../../.../../assets/icons/ic-avatar-xs.svg'
 import IconEdit from '../../../../.../../assets/icons/ic-more.svg'
@@ -9,6 +10,8 @@ import IconEdit from '../../../../.../../assets/icons/ic-more.svg'
 import styles from './styles.module.css'
 
 export default function Contact() {
+  const [visible, setVisible] = useState(false)
+
   return (
     <div>
       <Search
@@ -19,7 +22,7 @@ export default function Contact() {
       <Spacer size={20} />
       <Row gap="12px" width="100%">
         <Col width="32%">
-          <CardAddContact onClick={() => { }} />
+          <CardAddContact onClick={() => setVisible(!visible)} />
         </Col>
         {
           [1, 2].map((index) => (
@@ -29,6 +32,12 @@ export default function Contact() {
           ))
         }
       </Row>
+
+      <ModalAddNewContact
+        visible={visible}
+        onSubmit={() => setVisible(!visible)}
+        onCancel={() => setVisible(!visible)}
+      />
     </div>
   )
 }

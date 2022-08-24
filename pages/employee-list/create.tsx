@@ -3,20 +3,31 @@ import {
   Accordion,
   Button,
   Col,
+  DatePickerInput,
   Dropdown,
+  FileUploaderAllFiles,
   FormSelect,
   Input,
+  Lozenge,
+  Modal,
   Row,
   Spacer,
-  Text,
-  DatePickerInput,
-  FileUploaderAllFiles,
+  Table,
   Tabs,
+  Text,
   TextArea,
 } from "pink-lava-ui";
 import { useState } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useFieldArray, useForm } from "react-hook-form";
 import styled from "styled-components";
+import { ICCheckPrimary, ICDelete, ICEdit, ICPlusWhite, ICView } from "../../assets";
+import { useCityInfiniteLists } from "../../hooks/city/useCity";
+import { useLanguages } from "../../hooks/languages/useLanguages";
+import {
+  useCountryInfiniteLists,
+  useDistrictInfiniteLists,
+  useProvinceInfiniteLists,
+} from "../../hooks/mdm/country-structure/useCountries";
 import { useDepartmentInfiniteLists } from "../../hooks/mdm/department/useDepartment";
 import {
   useBranchInfiniteLists,
@@ -25,16 +36,10 @@ import {
 } from "../../hooks/mdm/employee-list/useEmployeeListMDM";
 import { useJobLevelInfiniteLists } from "../../hooks/mdm/job-level/useJobLevel";
 import { useJobPositionInfiniteLists } from "../../hooks/mdm/job-position/useJobPositon";
-import { useCityInfiniteLists } from "../../hooks/city/useCity";
 import useDebounce from "../../lib/useDebounce";
-import { queryClient } from "../_app";
 import { colors } from "../../utils/color";
-import { useLanguages } from "../../hooks/languages/useLanguages";
-import {
-  useCountryInfiniteLists,
-  useDistrictInfiniteLists,
-  useProvinceInfiniteLists,
-} from "../../hooks/mdm/country-structure/useCountries";
+import { queryClient } from "../_app";
+import moment from "moment";
 
 const EmployeeListCreate = () => {
   const router = useRouter();
@@ -75,6 +80,12 @@ const EmployeeListCreate = () => {
   const [totalRowsDistrictList, setTotalRowsDistrictList] = useState(0);
   const [searchDistrict, setSearchDistrict] = useState("");
 
+  const [modalChannelForm, setModalChannelForm] = useState({
+    open: false,
+    data: {},
+    typeForm: "create",
+  });
+
   const [defaultActiveKey, setDefaultActiveKey] = useState("Personal");
 
   const debounceFetch = useDebounce(
@@ -90,12 +101,108 @@ const EmployeeListCreate = () => {
     1000
   );
 
+  const addressBodyField = {
+    is_primary_address: false,
+    address_type: "",
+    street: "",
+    country: "",
+    province: "",
+    city: "",
+    district: "",
+    zone: "",
+    postal_code: "",
+    longitude: "",
+    latitude: "",
+    key: 0,
+  };
+
   const {
     register,
     control,
     handleSubmit,
     formState: { errors },
-  } = useForm({ shouldUseNativeValidation: true });
+    getValues,
+  } = useForm({
+    shouldUseNativeValidation: true,
+    defaultValues: {
+      employee_type: "",
+      employee_photo: "",
+      title: "",
+      name: "",
+      nik: "",
+      department: "",
+      job_position: "",
+      job_level: "",
+      report_to: "",
+      branch: "",
+      join_date: "",
+      resign_date: "",
+      preferred_language: "",
+      external_code: "",
+      detailInformation: {
+        personal: {
+          placeof_birth: "",
+          date_of_birth: "",
+          nationality: "",
+          marital_status: "",
+          blood_type: "",
+          religion: "",
+          medical_number_insurance: "",
+          personal_email: "",
+          phone_number: "",
+          mobile_number: "",
+          visa_number: "",
+          visa_expired_date: "",
+        },
+        addresess: [addressBodyField],
+        bankAccount: [],
+        education: [],
+        family: [],
+        training: [],
+        certification: [],
+      },
+    },
+  });
+
+  const {
+    register: registerBankAccount,
+    handleSubmit: handleSubmitBankAccount,
+    formState: { errors: errorsBankAccount },
+  } = useForm({
+    shouldUseNativeValidation: true,
+  });
+
+  const {
+    register: registerEducation,
+    handleSubmit: handleSubmitEducation,
+    control: controlEducation,
+  } = useForm({
+    shouldUseNativeValidation: true,
+  });
+
+  const {
+    register: registerFamily,
+    handleSubmit: handleSubmitFamily,
+    control: controlFamily,
+  } = useForm({
+    shouldUseNativeValidation: true,
+  });
+
+  const {
+    register: registerTraining,
+    handleSubmit: handleSubmitTraining,
+    control: controlTraining,
+  } = useForm({
+    shouldUseNativeValidation: true,
+  });
+
+  const {
+    register: registerCertification,
+    handleSubmit: handleSubmitCertification,
+    control: controlCertification,
+  } = useForm({
+    shouldUseNativeValidation: true,
+  });
 
   const {
     isFetching: isFetchingDepartment,
@@ -423,7 +530,6 @@ const EmployeeListCreate = () => {
       company_id: "KSNI",
       ...data,
     };
-    console.log("@formData", formData);
 
     createEmployeeList(formData);
   };
@@ -444,6 +550,558 @@ const EmployeeListCreate = () => {
   const handleChangeTabs = (e: any) => {
     setDefaultActiveKey(e);
   };
+
+  const {
+    fields: fieldsAddresess,
+    append: appendAddresess,
+    replace: replaceAddresess,
+    remove: removeAddresess,
+  } = useFieldArray({
+    control,
+    name: "detailInformation.addresess",
+  });
+
+  const {
+    fields: fieldsBankAccount,
+    append: appendBankAccount,
+    remove: removeBankAccount,
+    replace: replaceBankAccount,
+  } = useFieldArray({
+    control,
+    name: "detailInformation.bankAccount",
+  });
+
+  const {
+    fields: fieldsEducation,
+    append: appendEducation,
+    remove: removeEducation,
+    replace: replaceEducation,
+  } = useFieldArray({
+    control,
+    name: "detailInformation.education",
+  });
+
+  const {
+    fields: fieldsFamily,
+    append: appendFamily,
+    remove: removeFamily,
+    replace: replaceFamily,
+  } = useFieldArray({
+    control,
+    name: "detailInformation.family",
+  });
+
+  const {
+    fields: fieldsTraining,
+    append: appendTraining,
+    remove: removeTraining,
+    replace: replaceTraining,
+  } = useFieldArray({
+    control,
+    name: "detailInformation.training",
+  });
+
+  const {
+    fields: fieldsCertification,
+    append: appendCertification,
+    remove: removeCertification,
+    replace: replaceCertification,
+  } = useFieldArray({
+    control,
+    name: "detailInformation.certification",
+  });
+
+  const handleAddItemBankAccount = (data: any) => {
+    if (modalChannelForm.typeForm === "Edit Bank Account") {
+      let tempEdit = fieldsBankAccount.map((mapDataItem) => {
+        if (mapDataItem.id === modalChannelForm.data.id) {
+          mapDataItem.bankName = data.bankName;
+          mapDataItem.accountNumber = data.accountNumber;
+          mapDataItem.accountName = data.accountName;
+
+          return { ...mapDataItem };
+        } else {
+          return mapDataItem;
+        }
+      });
+
+      replaceBankAccount(tempEdit);
+    } else {
+      console.log("asdasdasd", data);
+      appendBankAccount({
+        ...data,
+        key: fieldsBankAccount.length,
+        id: new Date().valueOf(),
+        primary: false,
+      });
+    }
+
+    setModalChannelForm({ open: false, data: {}, typeForm: "" });
+  };
+
+  const handleAddItemEducation = (data: any) => {
+    if (modalChannelForm.typeForm === "Edit Education") {
+      let tempEdit = fieldsEducation.map((mapDataItem) => {
+        if (mapDataItem.id === modalChannelForm.data.id) {
+          mapDataItem.schoolName = data.schoolName;
+          mapDataItem.degree = data.degree;
+          mapDataItem.fieldOfStudy = data.fieldOfStudy;
+          mapDataItem.startYear = data.startYear;
+          mapDataItem.endYear = data.endYear;
+          mapDataItem.gpa = data.gpa;
+
+          return { ...mapDataItem };
+        } else {
+          return mapDataItem;
+        }
+      });
+
+      replaceEducation(tempEdit);
+    } else {
+      appendEducation({
+        ...data,
+        key: fieldsEducation.length,
+        id: new Date().valueOf(),
+      });
+    }
+
+    setModalChannelForm({ open: false, data: {}, typeForm: "" });
+  };
+
+  const handleAddItemFamily = (data: any) => {
+    if (modalChannelForm.typeForm === "Edit Family") {
+      let tempEdit = fieldsFamily.map((mapDataItem) => {
+        if (mapDataItem.id === modalChannelForm.data.id) {
+          mapDataItem.familyRelation = data.familyRelation;
+          mapDataItem.name = data.name;
+          mapDataItem.gender = data.gender;
+          mapDataItem.birthOfDate = data.birthOfDate;
+          mapDataItem.mobile = data.mobile;
+
+          return { ...mapDataItem };
+        } else {
+          return mapDataItem;
+        }
+      });
+
+      replaceFamily(tempEdit);
+    } else {
+      appendFamily({
+        ...data,
+        key: fieldsEducation.length,
+        id: new Date().valueOf(),
+      });
+    }
+
+    setModalChannelForm({ open: false, data: {}, typeForm: "" });
+  };
+
+  const handleAddItemTraining = (data: any) => {
+    if (modalChannelForm.typeForm === "Edit Training") {
+      let tempEdit = fieldsTraining.map((mapDataItem) => {
+        if (mapDataItem.id === modalChannelForm.data.id) {
+          mapDataItem.trainingType = data.trainingType;
+          mapDataItem.trainingName = data.trainingName;
+          mapDataItem.trainingStatus = data.trainingStatus;
+          mapDataItem.startDate = data.startDate;
+          mapDataItem.endDate = data.endDate;
+
+          return { ...mapDataItem };
+        } else {
+          return mapDataItem;
+        }
+      });
+
+      replaceTraining(tempEdit);
+    } else {
+      appendTraining({
+        ...data,
+        key: fieldsEducation.length,
+        id: new Date().valueOf(),
+      });
+    }
+
+    setModalChannelForm({ open: false, data: {}, typeForm: "" });
+  };
+
+  const handleAddItemCertification = (data: any) => {
+    if (modalChannelForm.typeForm === "Edit Certification") {
+      let tempEdit = fieldsCertification.map((mapDataItem) => {
+        if (mapDataItem.id === modalChannelForm.data.id) {
+          mapDataItem.certificationName = data.certificationName;
+          mapDataItem.institution = data.institution;
+          mapDataItem.certificationNumber = data.certificationNumber;
+          mapDataItem.certificationDate = data.certificationDate;
+
+          return { ...mapDataItem };
+        } else {
+          return mapDataItem;
+        }
+      });
+
+      replaceCertification(tempEdit);
+    } else {
+      appendCertification({
+        ...data,
+        key: fieldsEducation.length,
+        id: new Date().valueOf(),
+      });
+    }
+
+    setModalChannelForm({ open: false, data: {}, typeForm: "" });
+  };
+
+  const columnsEducation = [
+    {
+      title: "key",
+      dataIndex: "key",
+    },
+    {
+      title: "id",
+      dataIndex: "id",
+    },
+    {
+      title: "Action",
+      dataIndex: "action",
+      width: "15%",
+      align: "left",
+      render: (_: any, record: any) => {
+        return (
+          <Row gap="16px" alignItems="center" nowrap>
+            <Col>
+              <ICEdit
+                onClick={() =>
+                  setModalChannelForm({
+                    open: true,
+                    typeForm: "Edit Education",
+                    data: record,
+                  })
+                }
+              />
+            </Col>
+            <Col>
+              <ICDelete onClick={() => removeEducation(record.key)} />
+            </Col>
+          </Row>
+        );
+      },
+    },
+    {
+      title: "School Name",
+      dataIndex: "schoolName",
+    },
+    {
+      title: "Degree",
+      dataIndex: "degree",
+    },
+    {
+      title: "Field of Study",
+      dataIndex: "fieldOfStudy",
+    },
+    {
+      title: "Start Year",
+      dataIndex: "startYear",
+    },
+    {
+      title: "End Year",
+      dataIndex: "endYear",
+    },
+    {
+      title: "GPA",
+      dataIndex: "gpa",
+    },
+  ];
+
+  const columnsFamily = [
+    {
+      title: "key",
+      dataIndex: "key",
+    },
+    {
+      title: "id",
+      dataIndex: "id",
+    },
+    {
+      title: "Action",
+      dataIndex: "action",
+      width: "15%",
+      align: "left",
+      render: (_: any, record: any) => {
+        return (
+          <Row gap="16px" alignItems="center" nowrap>
+            <Col>
+              <ICEdit
+                onClick={() =>
+                  setModalChannelForm({
+                    open: true,
+                    typeForm: "Edit Family",
+                    data: record,
+                  })
+                }
+              />
+            </Col>
+            <Col>
+              <ICDelete onClick={() => removeFamily(record.key)} />
+            </Col>
+          </Row>
+        );
+      },
+    },
+    {
+      title: "Family Relation",
+      dataIndex: "familyRelation",
+    },
+    {
+      title: "Name",
+      dataIndex: "name",
+    },
+    {
+      title: "Gender",
+      dataIndex: "gender",
+    },
+    {
+      title: "Birth of Date",
+      dataIndex: "birthOfDate",
+    },
+    {
+      title: "Mobile",
+      dataIndex: "mobile",
+    },
+  ];
+
+  const columnsTraining = [
+    {
+      title: "key",
+      dataIndex: "key",
+    },
+    {
+      title: "id",
+      dataIndex: "id",
+    },
+    {
+      title: "Action",
+      dataIndex: "action",
+      width: "15%",
+      align: "left",
+      render: (_: any, record: any) => {
+        return (
+          <Row gap="16px" alignItems="center" nowrap>
+            <Col>
+              <ICView
+                onClick={() =>
+                  setModalChannelForm({
+                    open: true,
+                    typeForm: "View Training",
+                    data: record,
+                  })
+                }
+              />
+            </Col>
+            <Col>
+              <ICEdit
+                onClick={() =>
+                  setModalChannelForm({
+                    open: true,
+                    typeForm: "Edit Training",
+                    data: record,
+                  })
+                }
+              />
+            </Col>
+            <Col>
+              <ICDelete onClick={() => removeTraining(record.key)} />
+            </Col>
+          </Row>
+        );
+      },
+    },
+    {
+      title: "Training Type",
+      dataIndex: "trainingType",
+    },
+    {
+      title: "Training Name",
+      dataIndex: "trainingName",
+    },
+    {
+      title: "Training Status",
+      dataIndex: "trainingStatus",
+    },
+    {
+      title: "Description",
+      dataIndex: "description",
+    },
+    {
+      title: "Start Date",
+      dataIndex: "startDate",
+    },
+    {
+      title: "End Date",
+      dataIndex: "endDate",
+    },
+    {
+      title: "Image Cert Training",
+      dataIndex: "imageCertTraining",
+    },
+  ];
+
+  const columnsCertification = [
+    {
+      title: "key",
+      dataIndex: "key",
+    },
+    {
+      title: "id",
+      dataIndex: "id",
+    },
+    {
+      title: "Action",
+      dataIndex: "action",
+      width: "15%",
+      align: "left",
+      render: (_: any, record: any) => {
+        return (
+          <Row gap="16px" alignItems="center" nowrap>
+            <Col>
+              <ICView
+                onClick={() =>
+                  setModalChannelForm({
+                    open: true,
+                    typeForm: "View Certification",
+                    data: record,
+                  })
+                }
+              />
+            </Col>
+            <Col>
+              <ICEdit
+                onClick={() =>
+                  setModalChannelForm({
+                    open: true,
+                    typeForm: "Edit Certification",
+                    data: record,
+                  })
+                }
+              />
+            </Col>
+            <Col>
+              <ICDelete onClick={() => removeCertification(record.key)} />
+            </Col>
+          </Row>
+        );
+      },
+    },
+    {
+      title: "Certification Name",
+      dataIndex: "certificationName",
+    },
+    {
+      title: "Institution",
+      dataIndex: "institution",
+    },
+    {
+      title: "Certification Number",
+      dataIndex: "certificationNumber",
+    },
+    {
+      title: "Certification  Date",
+      dataIndex: "certificationDate",
+    },
+    {
+      title: "imageCertCertification",
+      dataIndex: "imageCertCertification",
+    },
+  ];
+
+  const columnsBankAccount = [
+    {
+      title: "key",
+      dataIndex: "key",
+    },
+    {
+      title: "id",
+      dataIndex: "id",
+    },
+    {
+      title: "Action",
+      dataIndex: "action",
+      width: "15%",
+      align: "left",
+      render: (_: any, record: any) => {
+        return (
+          <Row gap="16px" alignItems="center" nowrap>
+            <Col>
+              <ICEdit
+                onClick={() =>
+                  setModalChannelForm({
+                    open: true,
+                    typeForm: "Edit Bank Account",
+                    data: record,
+                  })
+                }
+              />
+            </Col>
+            <Col>
+              <ICDelete onClick={() => removeBankAccount(record.key)} />
+            </Col>
+          </Row>
+        );
+      },
+    },
+    {
+      title: "Bank Name",
+      dataIndex: "bankName",
+    },
+    {
+      title: "Account Number",
+      dataIndex: "accountNumber",
+    },
+    {
+      title: "Account Name",
+      dataIndex: "accountName",
+    },
+    {
+      title: "Primary",
+      dataIndex: "primary",
+      render: (_: any, record: any) => {
+        return (
+          <Row gap="16px" alignItems="center" nowrap>
+            <Col>
+              {record.primary ? (
+                <Lozenge variant="blue">
+                  <Row alignItems="center">
+                    <ICCheckPrimary />
+                    Primary
+                  </Row>
+                </Lozenge>
+              ) : (
+                <Text
+                  clickable
+                  color="pink.regular"
+                  onClick={() => {
+                    let tempEdit = fieldsBankAccount.map((mapDataItem) => {
+                      if (mapDataItem.id === record.id) {
+                        mapDataItem.primary = true;
+
+                        return { ...mapDataItem };
+                      } else {
+                        mapDataItem.primary = false;
+                        return { ...mapDataItem };
+                      }
+                    });
+
+                    replaceBankAccount(tempEdit);
+                  }}
+                >
+                  Set as Primary
+                </Text>
+              )}
+            </Col>
+          </Row>
+        );
+      },
+    },
+  ];
 
   return (
     <Col>
@@ -510,7 +1168,7 @@ const EmployeeListCreate = () => {
                       ]}
                     />
                   )}
-                ></Controller>
+                />
               </Col>
             </Row>
 
@@ -872,7 +1530,7 @@ const EmployeeListCreate = () => {
                   <Col width={"100%"}>
                     <Controller
                       control={control}
-                      name="placeof_birth"
+                      name="detailInformation.personal.placeof_birth"
                       render={({ field: { onChange } }) => (
                         <>
                           <Label>Place of Birth</Label>
@@ -909,7 +1567,7 @@ const EmployeeListCreate = () => {
                   <Col width="100%">
                     <Controller
                       control={control}
-                      name="date_of_birth"
+                      name="detailInformation.personal.date_of_birth"
                       render={({ field: { onChange } }) => (
                         <DatePickerInput
                           fullWidth
@@ -925,7 +1583,7 @@ const EmployeeListCreate = () => {
                   <Col width={"100%"}>
                     <Controller
                       control={control}
-                      name="nationality"
+                      name="detailInformation.personal.nationality"
                       render={({ field: { onChange } }) => (
                         <>
                           <Label>Nationality</Label>
@@ -962,7 +1620,7 @@ const EmployeeListCreate = () => {
                   <Col width="100%">
                     <Controller
                       control={control}
-                      name="marital_status"
+                      name="detailInformation.personal.marital_status"
                       render={({ field: { onChange } }) => (
                         <>
                           <Label>Marital Status</Label>
@@ -989,7 +1647,7 @@ const EmployeeListCreate = () => {
                   <Col width={"100%"}>
                     <Controller
                       control={control}
-                      name="blood_type"
+                      name="detailInformation.personal.blood_type"
                       render={({ field: { onChange } }) => (
                         <>
                           <Label>Blood Type</Label>
@@ -1015,7 +1673,7 @@ const EmployeeListCreate = () => {
                   <Col width="100%">
                     <Controller
                       control={control}
-                      name="religion"
+                      name="detailInformation.personal.religion"
                       render={({ field: { onChange } }) => (
                         <>
                           <Label>Religion</Label>
@@ -1049,7 +1707,7 @@ const EmployeeListCreate = () => {
                       label="Medical Number (Insurance)"
                       height="48px"
                       placeholder={"e.g 123456789"}
-                      {...register("medical_number_insurance")}
+                      {...register("detailInformation.personal.medical_number_insurance")}
                     />
                   </Col>
                   <Spacer size={10} />
@@ -1060,9 +1718,9 @@ const EmployeeListCreate = () => {
                       width="100%"
                       label="Personal Email"
                       height="48px"
-                      error={errors.personal_email?.message}
+                      error={errors.detailInformation?.personal?.personal_email?.message}
                       placeholder={"e.g you@email.com"}
-                      {...register("personal_email", {
+                      {...register("detailInformation.personal.personal_email", {
                         pattern: {
                           value: /\S+@\S+\.\S+/,
                           message: "Entered value does not match email format",
@@ -1080,7 +1738,7 @@ const EmployeeListCreate = () => {
                       label="Phone Number"
                       height="48px"
                       placeholder={"e.g 022 709999"}
-                      {...register("phone_number")}
+                      {...register("detailInformation.personal.phone_number")}
                     />
                   </Col>
                   <Spacer size={10} />
@@ -1092,9 +1750,11 @@ const EmployeeListCreate = () => {
                       label="Mobile Number"
                       height="48px"
                       required
-                      error={errors.mobile_number?.message}
+                      error={errors.detailInformation?.personal?.mobile_number?.message}
                       placeholder={"e.g you@email.com"}
-                      {...register("mobile_number", { required: "Please enter mobile number." })}
+                      {...register("detailInformation.personal.mobile_number", {
+                        required: "Please enter mobile number.",
+                      })}
                     />
                   </Col>
                 </Row>
@@ -1107,7 +1767,7 @@ const EmployeeListCreate = () => {
                       label="Visa Number"
                       height="48px"
                       placeholder={"e.g 123456789"}
-                      {...register("visa_number")}
+                      {...register("detailInformation.personal.visa_number")}
                     />
                   </Col>
                   <Spacer size={10} />
@@ -1115,7 +1775,7 @@ const EmployeeListCreate = () => {
                   <Col width="100%">
                     <Controller
                       control={control}
-                      name="visa_expired_date"
+                      name="detailInformation.personal.visa_expired_date"
                       render={({ field: { onChange } }) => (
                         <DatePickerInput
                           fullWidth
@@ -1129,320 +1789,1007 @@ const EmployeeListCreate = () => {
               </>
             ) : defaultActiveKey === "Addresess" ? (
               <>
-                <Row width="100%" noWrap>
-                  <Col width={"100%"}>
-                    <Controller
-                      control={control}
-                      name="address_type"
-                      render={({ field: { onChange } }) => (
-                        <>
-                          <Label>Address Type</Label>
-                          <Spacer size={3} />
-                          <Dropdown
-                            noSearch
+                <Button
+                  size="big"
+                  onClick={() =>
+                    appendAddresess({ ...addressBodyField, key: fieldsAddresess.length })
+                  }
+                >
+                  <ICPlusWhite /> Add More Address
+                </Button>
+
+                {fieldsAddresess.map((item, index) => {
+                  return (
+                    <div key={index}>
+                      <Spacer size={20} />
+
+                      <Controller
+                        control={control}
+                        name={`detailInformation.addresess.${index}.is_primary_address`}
+                        render={({ field: {} }) => (
+                          <>
+                            <Text color={"blue.dark"} variant={"headingMedium"}>
+                              {getValues(`detailInformation.addresess.${index}.is_primary_address`)
+                                ? "Home"
+                                : "New Address"}
+                            </Text>
+                            <Row gap="12px" alignItems="center">
+                              {getValues(
+                                `detailInformation.addresess.${index}.is_primary_address`
+                              ) ? (
+                                <Lozenge variant="blue">
+                                  <Row alignItems="center">
+                                    <ICCheckPrimary />
+                                    Primary
+                                  </Row>
+                                </Lozenge>
+                              ) : (
+                                <Text
+                                  clickable
+                                  color="pink.regular"
+                                  onClick={() => {
+                                    let tempEdit = fieldsAddresess.map((mapDataItem) => {
+                                      if (mapDataItem.key === index) {
+                                        mapDataItem.is_primary_address = true;
+
+                                        return { ...mapDataItem };
+                                      } else {
+                                        mapDataItem.is_primary_address = false;
+                                        return { ...mapDataItem };
+                                      }
+                                    });
+
+                                    replaceAddresess(tempEdit);
+                                  }}
+                                >
+                                  Set as Primary
+                                </Text>
+                              )}
+                              |
+                              <div style={{ cursor: "pointer" }}>
+                                <Text color="pink.regular" onClick={() => removeAddresess(index)}>
+                                  Delete
+                                </Text>
+                              </div>
+                            </Row>
+                          </>
+                        )}
+                      />
+
+                      <Spacer size={20} />
+
+                      <Row width="100%" noWrap>
+                        <Col width={"100%"}>
+                          <Controller
+                            control={control}
+                            name={`detailInformation.addresess.${index}.address_type`}
+                            render={({ field: { onChange } }) => (
+                              <>
+                                <Label>Address Type</Label>
+                                <Spacer size={3} />
+                                <Dropdown
+                                  noSearch
+                                  width="100%"
+                                  items={[
+                                    { id: "home", value: "Home" },
+                                    { id: "office", value: "Office" },
+                                    { id: "apartment", value: "Apartment" },
+                                  ]}
+                                  handleChange={(value: any) => {
+                                    onChange(value);
+                                  }}
+                                />
+                              </>
+                            )}
+                          />
+                        </Col>
+                        <Spacer size={10} />
+
+                        <Col width="100%">
+                          <TextArea
                             width="100%"
-                            items={[
-                              { id: "home", value: "Home" },
-                              { id: "office", value: "Office" },
-                              { id: "apartment", value: "Apartment" },
-                            ]}
-                            handleChange={(value: any) => {
-                              onChange(value);
-                            }}
-                          />
-                        </>
-                      )}
-                    />
-                  </Col>
-                  <Spacer size={10} />
-
-                  <Col width="100%">
-                    <TextArea
-                      width="100%"
-                      rows={2}
-                      required
-                      error={errors.street?.message}
-                      placeholder="e.g Front Groceries No. 5"
-                      label="Street"
-                      {...register("street", { required: "Please enter street." })}
-                    />
-                  </Col>
-                </Row>
-
-                <Row width="100%" noWrap>
-                  <Col width={"100%"}>
-                    <Controller
-                      control={control}
-                      name="country"
-                      render={({ field: { onChange } }) => (
-                        <>
-                          <Label>Country</Label>
-                          <Spacer size={3} />
-                          <FormSelect
-                            height="48px"
-                            style={{ width: "100%" }}
-                            size={"large"}
-                            placeholder={"Select"}
-                            borderColor={"#AAAAAA"}
-                            arrowColor={"#000"}
-                            withSearch
-                            isLoading={isFetchingCountry}
-                            isLoadingMore={isFetchingMoreCountry}
-                            fetchMore={() => {
-                              if (hasNextPageCountry) {
-                                fetchNextPageCountry();
-                              }
-                            }}
-                            items={isFetchingCountry && !isFetchingMoreCountry ? [] : countryList}
-                            onChange={(value: any) => {
-                              onChange(value);
-                            }}
-                            onSearch={(value: any) => {
-                              setSearchCountry(value);
-                            }}
-                          />
-                        </>
-                      )}
-                    />
-                  </Col>
-                  <Spacer size={10} />
-
-                  <Col width="100%">
-                    <Controller
-                      control={control}
-                      name="province"
-                      render={({ field: { onChange } }) => (
-                        <>
-                          <Label>Province</Label>
-                          <Spacer size={3} />
-                          <FormSelect
-                            height="48px"
-                            style={{ width: "100%" }}
-                            size={"large"}
-                            placeholder={"Select"}
-                            borderColor={"#AAAAAA"}
-                            arrowColor={"#000"}
-                            withSearch
-                            isLoading={isFetchingProvince}
-                            isLoadingMore={isFetchingMoreProvince}
-                            fetchMore={() => {
-                              if (hasNextPageProvince) {
-                                fetchNextPageProvince();
-                              }
-                            }}
-                            items={
-                              isFetchingProvince && !isFetchingMoreProvince ? [] : provinceList
+                            rows={2}
+                            required
+                            error={
+                              errors?.["detailInformation"]?.["addresess"]?.[index]?.["street"]?.[
+                                "message"
+                              ]
                             }
-                            onChange={(value: any) => {
-                              onChange(value);
-                            }}
-                            onSearch={(value: any) => {
-                              setSearchProvince(value);
-                            }}
+                            placeholder="e.g Front Groceries No. 5"
+                            label="Street"
+                            {...register(`detailInformation.addresess.${index}.street`, {
+                              required: "Please enter street.",
+                            })}
                           />
-                        </>
-                      )}
-                    />
-                  </Col>
-                </Row>
+                        </Col>
+                      </Row>
 
-                <Row width="100%" noWrap>
-                  <Col width={"100%"}>
-                    <Controller
-                      control={control}
-                      name="city"
-                      render={({ field: { onChange } }) => (
-                        <>
-                          <Label>City</Label>
-                          <Spacer size={3} />
-                          <FormSelect
-                            height="48px"
-                            style={{ width: "100%" }}
-                            size={"large"}
-                            placeholder={"Select"}
-                            borderColor={"#AAAAAA"}
-                            arrowColor={"#000"}
-                            withSearch
-                            isLoading={isFetchingCity}
-                            isLoadingMore={isFetchingMoreCity}
-                            fetchMore={() => {
-                              if (hasNextPageCity) {
-                                fetchNextPageCity();
-                              }
-                            }}
-                            items={isFetchingCity && !isFetchingMoreCity ? [] : cityList}
-                            onChange={(value: any) => {
-                              onChange(value);
-                            }}
-                            onSearch={(value: any) => {
-                              setSearchCity(value);
-                            }}
+                      <Row width="100%" noWrap>
+                        <Col width={"100%"}>
+                          <Controller
+                            control={control}
+                            name={`detailInformation.addresess.${index}.country`}
+                            render={({ field: { onChange } }) => (
+                              <>
+                                <Label>Country</Label>
+                                <Spacer size={3} />
+                                <FormSelect
+                                  height="48px"
+                                  style={{ width: "100%" }}
+                                  size={"large"}
+                                  placeholder={"Select"}
+                                  borderColor={"#AAAAAA"}
+                                  arrowColor={"#000"}
+                                  withSearch
+                                  isLoading={isFetchingCountry}
+                                  isLoadingMore={isFetchingMoreCountry}
+                                  fetchMore={() => {
+                                    if (hasNextPageCountry) {
+                                      fetchNextPageCountry();
+                                    }
+                                  }}
+                                  items={
+                                    isFetchingCountry && !isFetchingMoreCountry ? [] : countryList
+                                  }
+                                  onChange={(value: any) => {
+                                    onChange(value);
+                                  }}
+                                  onSearch={(value: any) => {
+                                    setSearchCountry(value);
+                                  }}
+                                />
+                              </>
+                            )}
                           />
-                        </>
-                      )}
-                    />
-                  </Col>
-                  <Spacer size={10} />
+                        </Col>
+                        <Spacer size={10} />
 
-                  <Col width="100%">
-                    <Controller
-                      control={control}
-                      name="district"
-                      render={({ field: { onChange } }) => (
-                        <>
-                          <Label>District</Label>
-                          <Spacer size={3} />
-                          <FormSelect
-                            height="48px"
-                            style={{ width: "100%" }}
-                            size={"large"}
-                            placeholder={"Select"}
-                            borderColor={"#AAAAAA"}
-                            arrowColor={"#000"}
-                            withSearch
-                            isLoading={isFetchingDistrict}
-                            isLoadingMore={isFetchingMoreDistrict}
-                            fetchMore={() => {
-                              if (hasNextPageDistrict) {
-                                fetchNextPageDistrict();
-                              }
-                            }}
-                            items={
-                              isFetchingDistrict && !isFetchingMoreDistrict ? [] : districtList
-                            }
-                            onChange={(value: any) => {
-                              onChange(value);
-                            }}
-                            onSearch={(value: any) => {
-                              setSearchDistrict(value);
-                            }}
+                        <Col width="100%">
+                          <Controller
+                            control={control}
+                            name={`detailInformation.addresess.${index}.province`}
+                            render={({ field: { onChange } }) => (
+                              <>
+                                <Label>Province</Label>
+                                <Spacer size={3} />
+                                <FormSelect
+                                  height="48px"
+                                  style={{ width: "100%" }}
+                                  size={"large"}
+                                  placeholder={"Select"}
+                                  borderColor={"#AAAAAA"}
+                                  arrowColor={"#000"}
+                                  withSearch
+                                  isLoading={isFetchingProvince}
+                                  isLoadingMore={isFetchingMoreProvince}
+                                  fetchMore={() => {
+                                    if (hasNextPageProvince) {
+                                      fetchNextPageProvince();
+                                    }
+                                  }}
+                                  items={
+                                    isFetchingProvince && !isFetchingMoreProvince
+                                      ? []
+                                      : provinceList
+                                  }
+                                  onChange={(value: any) => {
+                                    onChange(value);
+                                  }}
+                                  onSearch={(value: any) => {
+                                    setSearchProvince(value);
+                                  }}
+                                />
+                              </>
+                            )}
                           />
-                        </>
-                      )}
-                    />
-                  </Col>
-                </Row>
+                        </Col>
+                      </Row>
 
-                <Row width="100%" noWrap>
-                  <Col width={"100%"}>
-                    <Controller
-                      control={control}
-                      name="zone"
-                      render={({ field: { onChange } }) => (
-                        <>
-                          <Label>Zone</Label>
-                          <Spacer size={3} />
-                          <Dropdown
-                            noSearch
+                      <Row width="100%" noWrap>
+                        <Col width={"100%"}>
+                          <Controller
+                            control={control}
+                            name={`detailInformation.addresess.${index}.city`}
+                            render={({ field: { onChange } }) => (
+                              <>
+                                <Label>City</Label>
+                                <Spacer size={3} />
+                                <FormSelect
+                                  height="48px"
+                                  style={{ width: "100%" }}
+                                  size={"large"}
+                                  placeholder={"Select"}
+                                  borderColor={"#AAAAAA"}
+                                  arrowColor={"#000"}
+                                  withSearch
+                                  isLoading={isFetchingCity}
+                                  isLoadingMore={isFetchingMoreCity}
+                                  fetchMore={() => {
+                                    if (hasNextPageCity) {
+                                      fetchNextPageCity();
+                                    }
+                                  }}
+                                  items={isFetchingCity && !isFetchingMoreCity ? [] : cityList}
+                                  onChange={(value: any) => {
+                                    onChange(value);
+                                  }}
+                                  onSearch={(value: any) => {
+                                    setSearchCity(value);
+                                  }}
+                                />
+                              </>
+                            )}
+                          />
+                        </Col>
+                        <Spacer size={10} />
+
+                        <Col width="100%">
+                          <Controller
+                            control={control}
+                            name={`detailInformation.addresess.${index}.district`}
+                            render={({ field: { onChange } }) => (
+                              <>
+                                <Label>District</Label>
+                                <Spacer size={3} />
+                                <FormSelect
+                                  height="48px"
+                                  style={{ width: "100%" }}
+                                  size={"large"}
+                                  placeholder={"Select"}
+                                  borderColor={"#AAAAAA"}
+                                  arrowColor={"#000"}
+                                  withSearch
+                                  isLoading={isFetchingDistrict}
+                                  isLoadingMore={isFetchingMoreDistrict}
+                                  fetchMore={() => {
+                                    if (hasNextPageDistrict) {
+                                      fetchNextPageDistrict();
+                                    }
+                                  }}
+                                  items={
+                                    isFetchingDistrict && !isFetchingMoreDistrict
+                                      ? []
+                                      : districtList
+                                  }
+                                  onChange={(value: any) => {
+                                    onChange(value);
+                                  }}
+                                  onSearch={(value: any) => {
+                                    setSearchDistrict(value);
+                                  }}
+                                />
+                              </>
+                            )}
+                          />
+                        </Col>
+                      </Row>
+
+                      <Row width="100%" noWrap>
+                        <Col width={"100%"}>
+                          <Controller
+                            control={control}
+                            name={`detailInformation.addresess.${index}.zone`}
+                            render={({ field: { onChange } }) => (
+                              <>
+                                <Label>Zone</Label>
+                                <Spacer size={3} />
+                                <Dropdown
+                                  noSearch
+                                  width="100%"
+                                  items={[{ id: "Andir", value: "Andir" }]}
+                                  handleChange={(value: any) => {
+                                    onChange(value);
+                                  }}
+                                />
+                              </>
+                            )}
+                          />
+                        </Col>
+                        <Spacer size={10} />
+
+                        <Col width="100%">
+                          <Input
+                            type="number"
                             width="100%"
-                            items={[{ id: "Andir", value: "Andir" }]}
-                            handleChange={(value: any) => {
-                              onChange(value);
-                            }}
+                            error={
+                              errors?.["detailInformation"]?.["addresess"]?.[index]?.[
+                                "postal_code"
+                              ]?.["message"]
+                            }
+                            placeholder="e.g 40123"
+                            label="Postal Code"
+                            {...register(`detailInformation.addresess.${index}.postal_code`)}
                           />
-                        </>
-                      )}
-                    />
-                  </Col>
-                  <Spacer size={10} />
+                        </Col>
+                      </Row>
 
-                  <Col width="100%">
-                    <Input
-                      type="number"
-                      width="100%"
-                      error={errors.postal_code?.message}
-                      placeholder="e.g 40123"
-                      label="Postal Code"
-                      {...register("postal_code")}
-                    />
-                  </Col>
-                </Row>
+                      <Row width="100%" noWrap>
+                        <Col width={"100%"}>
+                          <Input
+                            type="number"
+                            width="100%"
+                            error={
+                              errors?.["detailInformation"]?.["addresess"]?.[index]?.[
+                                "longitude"
+                              ]?.["message"]
+                            }
+                            placeholder="e.g -6.909829165558788, 107.57502431159176"
+                            label="Longitude"
+                            {...register(`detailInformation.addresess.${index}.longitude`)}
+                          />
+                        </Col>
+                        <Spacer size={10} />
 
-                <Row width="100%" noWrap>
-                  <Col width={"100%"}>
-                    <Input
-                      type="number"
-                      width="100%"
-                      error={errors.longitude?.message}
-                      placeholder="e.g -6.909829165558788, 107.57502431159176"
-                      label="Longitude"
-                      {...register("longitude")}
-                    />
-                  </Col>
-                  <Spacer size={10} />
+                        <Col width="100%">
+                          <Input
+                            type="number"
+                            width="100%"
+                            error={
+                              errors?.["detailInformation"]?.["addresess"]?.[index]?.["latitude"]?.[
+                                "message"
+                              ]
+                            }
+                            placeholder="e.g -6.909829165558788, 107.57502431159176"
+                            label="Latitude"
+                            {...register(`detailInformation.addresess.${index}.latitude`)}
+                          />
+                        </Col>
+                      </Row>
+                    </div>
+                  );
+                })}
+              </>
+            ) : defaultActiveKey === "Bank Account" ? (
+              <>
+                <Button
+                  size="big"
+                  onClick={() =>
+                    setModalChannelForm({ open: true, typeForm: "Add Bank Account", data: {} })
+                  }
+                >
+                  <ICPlusWhite />
+                  Add Bank Account
+                </Button>
 
-                  <Col width="100%">
-                    <Input
-                      type="number"
-                      width="100%"
-                      error={errors.latitude?.message}
-                      placeholder="e.g 40123"
-                      label="Latitude"
-                      {...register("latitude")}
-                    />
-                  </Col>
-                </Row>
+                <Spacer size={20} />
+
+                <Table
+                  columns={columnsBankAccount.filter(
+                    (filtering) => filtering.dataIndex !== "id" && filtering.dataIndex !== "key"
+                  )}
+                  data={fieldsBankAccount}
+                />
+              </>
+            ) : defaultActiveKey === "Education" ? (
+              <>
+                <Button
+                  size="big"
+                  onClick={() =>
+                    setModalChannelForm({ open: true, typeForm: "Add Education", data: {} })
+                  }
+                >
+                  <ICPlusWhite />
+                  Add Education
+                </Button>
+
+                <Spacer size={20} />
+
+                <Table
+                  columns={columnsEducation.filter(
+                    (filtering) => filtering.dataIndex !== "id" && filtering.dataIndex !== "key"
+                  )}
+                  data={fieldsEducation}
+                />
+              </>
+            ) : defaultActiveKey === "Family" ? (
+              <>
+                <Button
+                  size="big"
+                  onClick={() =>
+                    setModalChannelForm({ open: true, typeForm: "Add Family", data: {} })
+                  }
+                >
+                  <ICPlusWhite />
+                  Add Family
+                </Button>
+
+                <Spacer size={20} />
+
+                <Table
+                  columns={columnsFamily.filter(
+                    (filtering) => filtering.dataIndex !== "id" && filtering.dataIndex !== "key"
+                  )}
+                  data={fieldsFamily}
+                />
               </>
             ) : (
               <>
-                <Row width="100%" noWrap>
-                  <Col width={"100%"}>
-                    <Input
-                      type="number"
-                      width="100%"
-                      label="NIK"
-                      height="48px"
-                      required
-                      placeholder={"e.g 123456789"}
-                      {...register("nik", { required: "Please enter NIK." })}
-                    />
-                  </Col>
-                  <Spacer size={10} />
+                <Button
+                  size="big"
+                  onClick={() =>
+                    setModalChannelForm({ open: true, typeForm: "Add Training", data: {} })
+                  }
+                >
+                  <ICPlusWhite />
+                  Add Training
+                </Button>
 
-                  <Col width="100%">
-                    <Controller
-                      control={control}
-                      name="department"
-                      render={({ field: { onChange } }) => (
-                        <>
-                          <Label>Department</Label>
-                          <Spacer size={3} />
-                          <FormSelect
-                            style={{ width: "100%" }}
-                            size={"large"}
-                            placeholder={"Select"}
-                            borderColor={"#AAAAAA"}
-                            arrowColor={"#000"}
-                            withSearch
-                            isLoading={isFetchingDepartment}
-                            isLoadingMore={isFetchingMoreDepartment}
-                            fetchMore={() => {
-                              if (hasNextPageDepartment) {
-                                fetchNextPageDepartment();
-                              }
-                            }}
-                            items={
-                              isFetchingDepartment && !isFetchingMoreDepartment
-                                ? []
-                                : departmentList
-                            }
-                            onChange={(value: any) => {
-                              onChange(value);
-                            }}
-                            onSearch={(value: any) => {
-                              setSearchDepartment(value);
-                            }}
-                          />
-                        </>
-                      )}
-                    />
-                  </Col>
-                </Row>
+                <Spacer size={20} />
+
+                <Table
+                  columns={columnsTraining.filter(
+                    (filtering) =>
+                      filtering.dataIndex !== "id" &&
+                      filtering.dataIndex !== "key" &&
+                      filtering.dataIndex !== "imageCertTraining"
+                  )}
+                  data={fieldsTraining}
+                />
+
+                <Spacer size={20} />
+
+                <Button
+                  size="big"
+                  onClick={() =>
+                    setModalChannelForm({ open: true, typeForm: "Add Certification", data: {} })
+                  }
+                >
+                  <ICPlusWhite />
+                  Add Certification
+                </Button>
+
+                <Spacer size={20} />
+
+                <Table
+                  columns={columnsCertification.filter(
+                    (filtering) =>
+                      filtering.dataIndex !== "id" &&
+                      filtering.dataIndex !== "key" &&
+                      filtering.dataIndex !== "imageCertCertification"
+                  )}
+                  data={fieldsCertification}
+                />
               </>
             )}
           </Accordion.Body>
         </Accordion.Item>
       </Accordion>
+
+      {modalChannelForm.open && (
+        <Modal
+          centered
+          closable={true}
+          visible={modalChannelForm.open}
+          onCancel={() => setModalChannelForm({ open: false, data: {}, typeForm: "" })}
+          title={modalChannelForm.typeForm}
+          footer={null}
+          content={
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
+              }}
+            >
+              <Spacer size={20} />
+
+              {modalChannelForm.typeForm === "Add Bank Account" ||
+              modalChannelForm.typeForm === "Edit Bank Account" ? (
+                <>
+                  <Input
+                    defaultValue={modalChannelForm.data?.bankName}
+                    width="100%"
+                    label="Bank Name"
+                    height="48px"
+                    required
+                    error={errorsBankAccount.bankName?.message}
+                    placeholder={"e.g BCA"}
+                    {...registerBankAccount("bankName", {
+                      shouldUnregister: true,
+                      required: "Please enter bank name.",
+                    })}
+                  />
+
+                  <Spacer size={20} />
+
+                  <Input
+                    defaultValue={modalChannelForm.data?.accountNumber}
+                    type="number"
+                    width="100%"
+                    label="Account Number"
+                    height="48px"
+                    required
+                    error={errorsBankAccount.accountNumber?.message}
+                    placeholder={"e.g 123456789"}
+                    {...registerBankAccount("accountNumber", {
+                      shouldUnregister: true,
+                      required: "Please enter account number.",
+                    })}
+                  />
+                  <Spacer size={20} />
+
+                  <Input
+                    defaultValue={modalChannelForm.data?.accountName}
+                    width="100%"
+                    label="Account Name"
+                    height="48px"
+                    required
+                    error={errorsBankAccount.accountName?.message}
+                    placeholder={"e.g Jane Doe"}
+                    {...registerBankAccount("accountName", {
+                      shouldUnregister: true,
+                      required: "Please enter account name.",
+                    })}
+                  />
+                </>
+              ) : modalChannelForm.typeForm === "Add Education" ||
+                modalChannelForm.typeForm === "Edit Education" ? (
+                <>
+                  <Input
+                    defaultValue={modalChannelForm.data?.schoolName}
+                    width="100%"
+                    label="School Name"
+                    height="48px"
+                    placeholder={"e.g Lala University"}
+                    {...registerEducation("schoolName")}
+                  />
+
+                  <Spacer size={20} />
+
+                  <Controller
+                    control={controlEducation}
+                    name="degree"
+                    render={({ field: { onChange } }) => (
+                      <>
+                        <Label>Degree</Label>
+                        <Spacer size={3} />
+                        <Dropdown
+                          defaultValue={modalChannelForm.data?.degree}
+                          noSearch
+                          defaul
+                          width="100%"
+                          items={[{ id: "S1", value: "S1" }]}
+                          handleChange={(value: any) => {
+                            onChange(value);
+                          }}
+                        />
+                      </>
+                    )}
+                  />
+
+                  <Spacer size={20} />
+
+                  <Input
+                    defaultValue={modalChannelForm.data?.fieldOfStudy}
+                    width="100%"
+                    label="Field of Study"
+                    height="48px"
+                    placeholder={"e.g Business"}
+                    {...registerEducation("fieldOfStudy")}
+                  />
+
+                  <Spacer size={20} />
+
+                  <Controller
+                    control={controlEducation}
+                    name="startYear"
+                    render={({ field: { onChange } }) => (
+                      <DatePickerInput
+                        fullWidth
+                        defaultValue={moment(
+                          modalChannelForm.data?.startYear || new Date(),
+                          "YYYY-MM-DD"
+                        )}
+                        picker="year"
+                        onChange={(date: any, dateString: any) => onChange(dateString)}
+                        label="Start Year"
+                      />
+                    )}
+                  />
+
+                  <Spacer size={20} />
+
+                  <Controller
+                    control={controlEducation}
+                    name="endYear"
+                    render={({ field: { onChange } }) => (
+                      <DatePickerInput
+                        fullWidth
+                        defaultValue={moment(
+                          modalChannelForm.data?.endYear || new Date(),
+                          "YYYY-MM-DD"
+                        )}
+                        picker="year"
+                        onChange={(date: any, dateString: any) => onChange(dateString)}
+                        label="End Year"
+                      />
+                    )}
+                  />
+
+                  <Spacer size={20} />
+
+                  <Input
+                    defaultValue={modalChannelForm.data?.gpa}
+                    width="100%"
+                    label="GPA"
+                    type="number"
+                    height="48px"
+                    placeholder={"e.g 4.0"}
+                    {...registerEducation("gpa")}
+                  />
+                </>
+              ) : modalChannelForm.typeForm === "Add Family" ||
+                modalChannelForm.typeForm === "Edit Family" ? (
+                <>
+                  <Controller
+                    control={controlFamily}
+                    name="familyRelation"
+                    render={({ field: { onChange } }) => (
+                      <>
+                        <Label>Family Relation</Label>
+                        <Spacer size={3} />
+                        <Dropdown
+                          defaultValue={modalChannelForm.data?.familyRelation}
+                          noSearch
+                          defaul
+                          width="100%"
+                          items={[{ id: "Husband", value: "Husband" }]}
+                          handleChange={(value: any) => {
+                            onChange(value);
+                          }}
+                        />
+                      </>
+                    )}
+                  />
+
+                  <Spacer size={20} />
+
+                  <Input
+                    defaultValue={modalChannelForm.data?.name}
+                    width="100%"
+                    label="Name"
+                    height="48px"
+                    placeholder={"e.g Jane Doe"}
+                    {...registerFamily("name")}
+                  />
+
+                  <Spacer size={20} />
+
+                  <Controller
+                    control={controlFamily}
+                    name="gender"
+                    render={({ field: { onChange } }) => (
+                      <>
+                        <Label>Gender</Label>
+                        <Spacer size={3} />
+                        <Dropdown
+                          defaultValue={modalChannelForm.data?.gender}
+                          noSearch
+                          defaul
+                          width="100%"
+                          items={[
+                            { id: "Male", value: "Male" },
+                            { id: "Female", value: "Female" },
+                          ]}
+                          handleChange={(value: any) => {
+                            onChange(value);
+                          }}
+                        />
+                      </>
+                    )}
+                  />
+
+                  <Spacer size={20} />
+
+                  <Controller
+                    control={controlFamily}
+                    name="birthOfDate"
+                    render={({ field: { onChange } }) => (
+                      <DatePickerInput
+                        fullWidth
+                        defaultValue={moment(
+                          modalChannelForm.data?.birthOfDate || new Date(),
+                          "YYYY-DD-MM"
+                        )}
+                        onChange={(date: any, dateString: any) => onChange(dateString)}
+                        label="Birth of Date"
+                      />
+                    )}
+                  />
+
+                  <Spacer size={20} />
+
+                  <Input
+                    defaultValue={modalChannelForm.data?.gpa}
+                    width="100%"
+                    label="Mobile"
+                    type="number"
+                    height="48px"
+                    placeholder={"e.g 08123456789"}
+                    {...registerFamily("mobile")}
+                  />
+                </>
+              ) : modalChannelForm.typeForm === "Add Training" ||
+                modalChannelForm.typeForm === "Edit Training" ? (
+                <>
+                  <Input
+                    defaultValue={modalChannelForm.data?.trainingName}
+                    width="100%"
+                    label="Training Name"
+                    height="48px"
+                    placeholder={"e.g Training Business"}
+                    {...registerTraining("trainingName")}
+                  />
+
+                  <Spacer size={20} />
+
+                  <Controller
+                    control={controlTraining}
+                    name="trainingType"
+                    render={({ field: { onChange } }) => (
+                      <>
+                        <Label>Training Type</Label>
+                        <Spacer size={3} />
+                        <Dropdown
+                          defaultValue={modalChannelForm.data?.trainingType}
+                          noSearch
+                          defaul
+                          width="100%"
+                          items={[{ id: "lorem", value: "lorem" }]}
+                          handleChange={(value: any) => {
+                            onChange(value);
+                          }}
+                        />
+                      </>
+                    )}
+                  />
+
+                  <Spacer size={20} />
+
+                  <Controller
+                    control={controlTraining}
+                    name="trainingStatus"
+                    render={({ field: { onChange } }) => (
+                      <>
+                        <Label>Training Status</Label>
+                        <Spacer size={3} />
+                        <Dropdown
+                          defaultValue={modalChannelForm.data?.trainingStatus}
+                          noSearch
+                          defaul
+                          width="100%"
+                          items={[{ id: "lorem", value: "lorem" }]}
+                          handleChange={(value: any) => {
+                            onChange(value);
+                          }}
+                        />
+                      </>
+                    )}
+                  />
+
+                  <Spacer size={20} />
+
+                  <Controller
+                    control={controlTraining}
+                    name="startDate"
+                    render={({ field: { onChange } }) => (
+                      <DatePickerInput
+                        fullWidth
+                        defaultValue={moment(
+                          modalChannelForm.data?.startDate || new Date(),
+                          "YYYY-DD-MM"
+                        )}
+                        onChange={(date: any, dateString: any) => onChange(dateString)}
+                        label="Start Date"
+                      />
+                    )}
+                  />
+
+                  <Spacer size={20} />
+
+                  <Controller
+                    control={controlTraining}
+                    name="endDate"
+                    render={({ field: { onChange } }) => (
+                      <DatePickerInput
+                        fullWidth
+                        defaultValue={moment(
+                          modalChannelForm.data?.endDate || new Date(),
+                          "YYYY-DD-MM"
+                        )}
+                        onChange={(date: any, dateString: any) => onChange(dateString)}
+                        label="End Date"
+                      />
+                    )}
+                  />
+
+                  <Spacer size={20} />
+
+                  <TextArea
+                    width="100%"
+                    rows={2}
+                    required
+                    placeholder="e.g Training very helpfull"
+                    label="Description"
+                    {...registerTraining("description")}
+                  />
+
+                  <Spacer size={20} />
+
+                  <Controller
+                    control={controlTraining}
+                    name="imageCertTraining"
+                    render={({ field: { onChange } }) => (
+                      <FileUploaderAllFiles
+                        label="Cert. Training Photo"
+                        onSubmit={(file: any) => onChange(file)}
+                        defaultFile={"/placeholder-employee-photo.svg"}
+                        withCrop
+                        sizeImagePhoto="125px"
+                        removeable
+                        textPhoto={[
+                          "Upload Training Certification",
+                          "(Max. 5MB, Format .jpeg, .pdf)",
+                        ]}
+                      />
+                    )}
+                  />
+                </>
+              ) : modalChannelForm.typeForm === "View Training" ? (
+                <>
+                  <Spacer size={20} />
+                  View Training
+                  <Spacer size={20} />
+                </>
+              ) : modalChannelForm.typeForm === "View Certification" ? (
+                <>
+                  <Spacer size={20} />
+                  View Certification
+                  <Spacer size={20} />
+                </>
+              ) : (
+                <>
+                  <Input
+                    defaultValue={modalChannelForm.data?.certificationName}
+                    width="100%"
+                    label="Certification Name"
+                    height="48px"
+                    placeholder={"e.g Business Cetification"}
+                    {...registerCertification("certificationName")}
+                  />
+
+                  <Spacer size={20} />
+
+                  <Input
+                    defaultValue={modalChannelForm.data?.institution}
+                    width="100%"
+                    label="Institution"
+                    height="48px"
+                    placeholder={"e.g Business Center"}
+                    {...registerCertification("institution")}
+                  />
+
+                  <Spacer size={20} />
+
+                  <Input
+                    defaultValue={modalChannelForm.data?.certificationNumber}
+                    width="100%"
+                    label="Certification Number"
+                    height="48px"
+                    placeholder={"e.g Business Center"}
+                    {...registerCertification("certificationNumber")}
+                  />
+
+                  <Spacer size={20} />
+
+                  <Controller
+                    control={controlCertification}
+                    name="certificationDate"
+                    render={({ field: { onChange } }) => (
+                      <DatePickerInput
+                        fullWidth
+                        defaultValue={moment(
+                          modalChannelForm.data?.certificationDate || new Date(),
+                          "YYYY-DD-MM"
+                        )}
+                        onChange={(date: any, dateString: any) => onChange(dateString)}
+                        label="Certification Date"
+                      />
+                    )}
+                  />
+
+                  <Spacer size={20} />
+
+                  <Controller
+                    control={controlCertification}
+                    name="imageCertCertification"
+                    render={({ field: { onChange } }) => (
+                      <FileUploaderAllFiles
+                        label="Certification Photo"
+                        onSubmit={(file: any) => onChange(file)}
+                        defaultFile={"/placeholder-employee-photo.svg"}
+                        withCrop
+                        sizeImagePhoto="125px"
+                        removeable
+                        textPhoto={[
+                          "Upload Certification Certification",
+                          "(Max. 5MB, Format .jpeg, .pdf)",
+                        ]}
+                      />
+                    )}
+                  />
+                </>
+              )}
+
+              <Spacer size={20} />
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  gap: "10px",
+                  marginBottom: "20px",
+                }}
+              >
+                <Button
+                  size="big"
+                  variant={"tertiary"}
+                  key="submit"
+                  type="primary"
+                  onClick={() => setModalChannelForm({ open: false, data: {}, typeForm: "" })}
+                >
+                  Cancel
+                </Button>
+
+                {modalChannelForm.typeForm === "Add Bank Account" ||
+                modalChannelForm.typeForm === "Edit Bank Account" ? (
+                  <Button
+                    onClick={handleSubmitBankAccount(handleAddItemBankAccount)}
+                    variant="primary"
+                    size="big"
+                  >
+                    Save
+                  </Button>
+                ) : modalChannelForm.typeForm === "Add Bank Education" ||
+                  modalChannelForm.typeForm === "Edit Bank Education" ? (
+                  <Button
+                    onClick={handleSubmitEducation(handleAddItemEducation)}
+                    variant="primary"
+                    size="big"
+                  >
+                    Save
+                  </Button>
+                ) : modalChannelForm.typeForm === "Add Family" ||
+                  modalChannelForm.typeForm === "Edit Family" ? (
+                  <Button
+                    onClick={handleSubmitFamily(handleAddItemFamily)}
+                    variant="primary"
+                    size="big"
+                  >
+                    Save
+                  </Button>
+                ) : modalChannelForm.typeForm === "Add Training" ||
+                  modalChannelForm.typeForm === "Edit Training" ? (
+                  <Button
+                    onClick={handleSubmitTraining(handleAddItemTraining)}
+                    variant="primary"
+                    size="big"
+                  >
+                    Save
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={handleSubmitCertification(handleAddItemCertification)}
+                    variant="primary"
+                    size="big"
+                  >
+                    Save
+                  </Button>
+                )}
+              </div>
+            </div>
+          }
+        />
+      )}
     </Col>
   );
 };
