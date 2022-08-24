@@ -232,6 +232,18 @@ const menuMdm = [
     icon: ICBadge,
     children: [
       {
+        key: "employee-list",
+        title: "Employee List",
+        content: () => "Employee List",
+        onClick: () => Router.push("/employee-list"),
+      },
+      {
+        key: "job-position",
+        title: "Job Position",
+        content: () => "Job Position",
+        onClick: () => Router.push("/job-position"),
+      },
+      {
         key: "job-position",
         title: "Job Position",
         content: () => "Job Position",
@@ -303,24 +315,31 @@ const menuMdm = [
     ],
   },
   {
-    key: "customer",
-    title: "Customer",
-    icon: ICUser,
-    children: [
-      {
-        key: "customer-group",
-        title: "Customer Group",
-        content: () => "Customer Group",
-        onClick: () => Router.push("/customer-group"),
-      },
-    ],
-  },
-  {
     key: "purchase-organization",
     title: "Purchase Organization",
     icon: ICPurchasOrg,
     content: () => "Purchase Organization",
     onClick: () => Router.push("/purchase-organization"),
+  },
+  { type: "title", title: "Sales" },
+  {
+    key: "customer",
+    title: "Customer",
+    icon: ICUser,
+    children: [
+      {
+        key: "customers",
+        title: "Customers",
+        content: () => "Customers",
+        onClick: () => Router.push("/customers"),
+      },
+      {
+        key: "customer-group",
+        title: "Customer Group",
+        content: () => "Customer Group",
+        onClick: () => Router.push("/customers/group"),
+      },
+    ],
   },
 ];
 
@@ -392,7 +411,7 @@ const AdminLayout = (props: any) => {
           >
             <MenuDropdown>
               <div style={{ gap: "5px", display: "flex", alignItems: "center", fontSize: "14px" }}>
-                <ICAccount />
+                <ICAccount size={64} />
                 <p>Admin</p>
               </div>
               <ICArrowBottom />

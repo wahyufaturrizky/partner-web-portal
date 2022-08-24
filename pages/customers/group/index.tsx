@@ -1,4 +1,8 @@
 import usePagination from "@lucasmogari/react-pagination";
+import { useRouter } from "next/router";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import styled from "styled-components";
 import {
   Button,
   Col,
@@ -15,13 +19,10 @@ import {
   Dropdown,
   Spin,
 } from "pink-lava-ui";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import styled from "styled-components";
-import { ICDownload, ICUpload } from "../../assets";
-import { mdmDownloadService } from "../../lib/client";
-import useDebounce from "../../lib/useDebounce";
-import { queryClient } from "../_app";
+import { queryClient } from "../../_app";
+import { ICDownload, ICUpload } from "../../../assets";
+import { mdmDownloadService } from "../../../lib/client";
+import useDebounce from "../../../lib/useDebounce";
 import {
   useCreateCustomerGroupMDM,
   useCustomerGroupsMDM,
@@ -29,8 +30,7 @@ import {
   useParentCustomerGroupMDM,
   useUpdateCustomerGroupMDM,
   useUploadFileCustomerGroupMDM,
-} from "../../hooks/mdm/customer-group/useCustomerGroupMDM";
-import { useRouter } from "next/router";
+} from "../../../hooks/mdm/customer-group/useCustomerGroupMDM";
 
 const downloadFile = (params: any) =>
   mdmDownloadService("/customer-group/download", { params }).then((res) => {
@@ -46,13 +46,11 @@ const renderConfirmationText = (type: any, data: any) => {
     case "selection":
       return data.selectedRowKeys.length > 1
         ? `Are you sure to delete ${data.selectedRowKeys.length} items ?`
-        : `By deleting it will affect data that already uses customer group ${
-            data?.customerGroupData?.data.find((el: any) => el.key === data.selectedRowKeys[0])
-              ?.name
-          }-${
-            data?.customerGroupData?.data.find((el: any) => el.key === data.selectedRowKeys[0])
-              ?.customerGroupCode
-          }`;
+        : `By deleting it will affect data that already uses customer group ${data?.customerGroupData?.data.find((el: any) => el.key === data.selectedRowKeys[0])
+          ?.name
+        }-${data?.customerGroupData?.data.find((el: any) => el.key === data.selectedRowKeys[0])
+          ?.customerGroupCode
+        }`;
     case "detail":
       return `By deleting it will affect data that already uses customer group ${data.name}-${data.customerGroupCode}`;
 
@@ -114,7 +112,7 @@ const CustomerGroupMDM = () => {
               <div style={{ display: "flex", justifyContent: "left" }}>
                 <Button
                   size="small"
-                  onClick={() => router.push(`/customer-group/${element.id}`)}
+                  onClick={() => router.push(`/customers/group/${element.id}`)}
                   variant="tertiary"
                 >
                   View Detail
@@ -151,9 +149,7 @@ const CustomerGroupMDM = () => {
     });
 
   const { data: dataParentCustomerGroupMDM, isLoading: isLoadingParentCustomerGroupMDM } =
-    useParentCustomerGroupMDM({
-      id: modalCustomerGroupForm.data?.id ?? 0 + "/KSNI",
-    });
+    useParentCustomerGroupMDM({id: modalCustomerGroupForm.data?.id ?? 0 + "/KSNI"});
 
   const { mutate: deleteCustomerGroupMDM, isLoading: isLoadingDeleteCustomerGroupMDM } =
     useDeleteCustomerGroupMDM({

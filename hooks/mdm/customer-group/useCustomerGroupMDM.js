@@ -2,7 +2,7 @@ import { useQuery, useMutation } from "react-query";
 import { mdmService } from "../../../lib/client";
 
 const fetchCustomerGroupsMDM = async ({ query = {} }) => {
-  return mdmService(`customer-group`, {
+  return mdmService(`/customer-group`, {
     params: {
       search: "",
       page: 1,
@@ -22,7 +22,7 @@ const useCustomerGroupsMDM = ({ query = {}, options }) => {
 };
 
 const fetchCustomerGroupMDM = async ({ id }) => {
-  return mdmService(`customer-group/${id}`).then((data) => data);
+  return mdmService(`/customer-group/${id}`).then((data) => data);
 };
 
 const useCustomerGroupMDM = ({ id, options }) => {
@@ -32,7 +32,7 @@ const useCustomerGroupMDM = ({ id, options }) => {
 };
 
 const fetchParentCustomerGroupMDM = async ({ id }) => {
-  return mdmService(`customer-group/parent/${id}`).then((data) => data);
+  return mdmService(`/customer-group/parent/${id}`).then((data) => data);
 };
 
 const useParentCustomerGroupMDM = ({ id, options }) => {
@@ -44,7 +44,7 @@ const useParentCustomerGroupMDM = ({ id, options }) => {
 function useCreateCustomerGroupMDM({ options }) {
   return useMutation(
     (data) =>
-      mdmService(`customer-group`, {
+      mdmService(`/customer-group`, {
         method: "POST",
         data,
       }),
@@ -57,7 +57,7 @@ function useCreateCustomerGroupMDM({ options }) {
 function useUpdateCustomerGroupMDM({ id, options }) {
   return useMutation(
     (data) =>
-      mdmService(`customer-group/${id}`, {
+      mdmService(`/customer-group/${id}`, {
         method: "PUT",
         data,
       }),
@@ -70,7 +70,7 @@ function useUpdateCustomerGroupMDM({ id, options }) {
 const useDeleteCustomerGroupMDM = ({ options }) => {
   return useMutation(
     (ids) =>
-      mdmService(`customer-group`, {
+      mdmService(`/customer-group`, {
         method: "DELETE",
         data: ids,
       }),
@@ -83,7 +83,7 @@ const useDeleteCustomerGroupMDM = ({ options }) => {
 const useUploadFileCustomerGroupMDM = ({ options }) => {
   return useMutation(
     (data) =>
-      mdmService(`customer-group/upload`, {
+      mdmService(`/customer-group/upload`, {
         method: "POST",
         data,
       }),

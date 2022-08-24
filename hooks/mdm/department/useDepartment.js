@@ -1,4 +1,4 @@
-import { useQuery, useMutation } from "react-query";
+import { useQuery, useMutation, useInfiniteQuery } from "react-query";
 import { mdmService } from "../../../lib/client";
 
 const fetchDepartments = async ({ query = {} }) => {
@@ -16,6 +16,27 @@ const fetchDepartments = async ({ query = {} }) => {
 
 const useDepartments = ({ query = {}, options }) => {
   return useQuery(["departments", query], () => fetchDepartments({ query }), {
+    ...options,
+  });
+};
+
+const fetchInfiniteeDepartmentLists = async ({ pageParam = 1, queryKey }) => {
+  const searchQuery = queryKey[1].search;
+  return mdmService(`/department`, {
+    params: {
+      search: searchQuery,
+      limit: 10,
+      page: pageParam,
+      sortBy: "created_at",
+      sortOrder: "DESC",
+      ...queryKey[1],
+    },
+  }).then((data) => data);
+};
+
+const useDepartmentInfiniteLists = ({ query = {}, options }) => {
+  return useInfiniteQuery(["department/infinite", query], fetchInfiniteeDepartmentLists, {
+    keepPreviousData: true,
     ...options,
   });
 };
@@ -89,4 +110,5 @@ export {
   useCreateDepartment,
   useDeleteDepartment,
   useUploadFileDepartment,
+  useDepartmentInfiniteLists,
 };

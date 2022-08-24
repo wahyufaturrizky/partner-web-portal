@@ -30,7 +30,6 @@ import { usePartnerConfigPermissionLists } from "../../hooks/user-config/usePerm
 
 const CreateMenuList: any = () => {
   const [isLoading, setLoading] = useState(true);
-  const [searchAllowedField, setSearchAllowedField] = useState("");
   const [searchTableField, setSearchTableField] = useState("");
   const [searchTablePermission, setSearchTablePermission] = useState("");
   const [parent, setParent] = useState("");
@@ -46,8 +45,7 @@ const CreateMenuList: any = () => {
     dataModal: null,
     widthModal: null,
   });
-  const { isShowModal, titleModal, dataModal, widthModal } = stateModal;
-  const [selectedAllowedFieldRowKeys, setSelectedAllowedFieldRowKeys] = useState([]);
+  const { isShowModal, titleModal, widthModal } = stateModal;
   const [dataTableAssociatePermission, setDataTableAssociatePermission] = useState([]);
   const [selectedRowKeysTablePermission, setSelectedRowKeysTablePermission] = useState([]);
   const [selectedRowTablePermission, setSelectedRowTablePermission] = useState([]);
@@ -55,14 +53,6 @@ const CreateMenuList: any = () => {
   const [selectedRowTableField, setSelectedRowTableField] = useState([]);
   const [selectedFilter, setSelectedFilter] = useState([]);
   const paginationTableField = usePagination({
-    page: 1,
-    itemsPerPage: 10,
-    maxPageItems: Infinity,
-    numbers: true,
-    arrows: true,
-    totalItems: 100,
-  });
-  const paginationAllowedField = usePagination({
     page: 1,
     itemsPerPage: 10,
     maxPageItems: Infinity,
@@ -188,22 +178,6 @@ const CreateMenuList: any = () => {
     });
   };
 
-  const columns = [
-    {
-      title: "Allowed Field",
-      dataIndex: "allowed_field",
-    },
-  ];
-
-  const onSelectChangeAllowedField = (selectedAllowedFieldRowKeys) => {
-    setSelectedAllowedFieldRowKeys(selectedAllowedFieldRowKeys);
-  };
-
-  const rowSelectionAllowedField = {
-    selectedRowKeys: selectedAllowedFieldRowKeys,
-    onChange: onSelectChangeAllowedField,
-  };
-
   const columnsTableField = [
     {
       title: "Field Name",
@@ -307,17 +281,6 @@ const CreateMenuList: any = () => {
         }
       });
     }
-  };
-
-  const handleRemoveAllowedField = () => {
-    let tempDataAllowedField = [];
-
-    tempDataAllowedField = dataAllowedField?.filter(
-      (field) => !rowSelectionAllowedField.selectedRowKeys.includes(field.key)
-    );
-
-    onSelectChangeTableField(tempDataAllowedField.map((data) => data.key));
-    setDataAllowedField(tempDataAllowedField);
   };
 
   const handleChangeFilterValue = (selectedFilter) => {
@@ -499,53 +462,6 @@ const CreateMenuList: any = () => {
                   Advance View
                 </Text>
               </div>
-            </Accordion.Body>
-          </Accordion.Item>
-        </Accordion>
-
-        <Spacer size={20} />
-
-        <Accordion>
-          <Accordion.Item key={1}>
-            <Accordion.Header variant="blue">
-              <Row gap="8px" alignItems="baseline">
-                Allowed Field
-              </Row>
-            </Accordion.Header>
-            <Accordion.Body>
-              <Row justifyContent="space-between">
-                <Search
-                  width="380px"
-                  placeholder="Search Menu Name"
-                  onChange={(e) => setSearchAllowedField(e.target.value)}
-                />
-                <Row gap="16px">
-                  <Button size="big" variant={"tertiary"} onClick={handleRemoveAllowedField}>
-                    Remove
-                  </Button>
-                  <Button
-                    size="big"
-                    variant={"primary"}
-                    onClick={() =>
-                      setStateModal({
-                        ...stateModal,
-                        isShowModal: true,
-                        titleModal: "Add Field",
-                        widthModal: 1000,
-                      })
-                    }
-                  >
-                    Add Field
-                  </Button>
-                </Row>
-              </Row>
-              <Spacer size={10} />
-              <Table
-                loading={isLoading}
-                columns={columns}
-                data={dataAllowedField}
-                rowSelection={rowSelectionAllowedField}
-              />
             </Accordion.Body>
           </Accordion.Item>
         </Accordion>

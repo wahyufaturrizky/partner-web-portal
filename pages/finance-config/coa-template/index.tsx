@@ -79,7 +79,7 @@ const FinanceConfigCoATemplate: any = () => {
 					<Button
 						size="small"
 						onClick={() => {
-							router.push(`/coa-template/${field.id}`);
+							router.push(`/finance-config/coa-template/${field.id}`);
 						}}
 						variant="tertiary"
 					>

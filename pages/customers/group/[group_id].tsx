@@ -14,19 +14,19 @@ import {
 import styled from "styled-components";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/router";
-import { queryClient } from "../_app";
-import { ModalDeleteConfirmation } from "../../components/elements/Modal/ModalConfirmationDelete";
-import ArrowLeft from "../../assets/icons/arrow-left.svg";
+import { queryClient } from "../../_app";
+import { ModalDeleteConfirmation } from "../../../components/elements/Modal/ModalConfirmationDelete";
+import ArrowLeft from "../../../assets/icons/arrow-left.svg";
 import {
   useCustomerGroupMDM,
   useDeleteCustomerGroupMDM,
   useParentCustomerGroupMDM,
   useUpdateCustomerGroupMDM,
-} from "../../hooks/mdm/customer-group/useCustomerGroupMDM";
+} from "../../../hooks/mdm/customer-group/useCustomerGroupMDM";
 
 const CustomerGroupDetail = () => {
   const router = useRouter();
-  const { id } = router.query;
+  const { group_id: id } = router.query;
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
@@ -41,7 +41,7 @@ const CustomerGroupDetail = () => {
   } = useCustomerGroupMDM({
     id: id,
     options: {
-      onSuccess: (data: any) => {},
+      onSuccess: (data: any) => { },
     },
   });
 
@@ -74,7 +74,7 @@ const CustomerGroupDetail = () => {
   } = useParentCustomerGroupMDM({
     id: Number(id) + "/KSNI",
     options: {
-      onSuccess: (data: any) => {},
+      onSuccess: (data: any) => { },
     },
   });
 
@@ -113,7 +113,7 @@ const CustomerGroupDetail = () => {
       customer: "PT. Indomarco Jaya",
       action: (
         <div style={{ display: "flex", justifyContent: "left" }}>
-          <Button size="small" onClick={() => {}} variant="tertiary">
+          <Button size="small" onClick={() => { }} variant="tertiary">
             View Detail
           </Button>
         </div>
@@ -125,7 +125,7 @@ const CustomerGroupDetail = () => {
       customer: "PT. Alfamart ",
       action: (
         <div style={{ display: "flex", justifyContent: "left" }}>
-          <Button size="small" onClick={() => {}} variant="tertiary">
+          <Button size="small" onClick={() => { }} variant="tertiary">
             View Detail
           </Button>
         </div>

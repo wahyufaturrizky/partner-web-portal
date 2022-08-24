@@ -51,12 +51,27 @@ const MenuConfigDesign: any = () => {
 
 	const columns = [
 		{
-			title: "Name",
+			title: "Menu Design Name",
 			dataIndex: "field_name",
+			width: "80%"
 		},
 		{
 			title: "Action",
 			dataIndex: "action",
+			render: (items: any) => (
+				<Button
+						size="small"
+						onClick={() =>
+							Router.push({
+								pathname: "/menu-design/detail",
+								query: items,
+							})
+						}
+						variant="tertiary"
+					>
+						View Detail
+					</Button>
+			)
 		},
 	];
 
@@ -65,21 +80,7 @@ const MenuConfigDesign: any = () => {
 		data.push({
 			key: field.id,
 			field_name: field.name,
-			field_module: field?.module?.name,
-			action: (
-				<Button
-					size="small"
-					onClick={() =>
-						Router.push({
-							pathname: "/menu-design/detail",
-							query: field,
-						})
-					}
-					variant="tertiary"
-				>
-					View Detail
-				</Button>
-			),
+			field_module: field?.module?.name
 		});
 	});
 
