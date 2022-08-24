@@ -6,6 +6,7 @@ import {
   DatePickerInput,
   Dropdown,
   FileUploaderAllFiles,
+  FileUploaderAllFilesDragger,
   FormSelect,
   Input,
   Lozenge,
@@ -40,6 +41,8 @@ import useDebounce from "../../lib/useDebounce";
 import { colors } from "../../utils/color";
 import { queryClient } from "../_app";
 import moment from "moment";
+import { usePostalCodeInfiniteLists } from "../../hooks/mdm/postal-code/usePostalCode";
+import { useTrainingTypeInfiniteLists } from "../../hooks/mdm/training-type/useTrainingType";
 
 const EmployeeListCreate = () => {
   const router = useRouter();
@@ -80,6 +83,14 @@ const EmployeeListCreate = () => {
   const [totalRowsDistrictList, setTotalRowsDistrictList] = useState(0);
   const [searchDistrict, setSearchDistrict] = useState("");
 
+  const [postalCodeList, setPostalCodeList] = useState<any[]>([]);
+  const [totalRowsPostalCodeList, setTotalRowsPostalCodeList] = useState(0);
+  const [searchPostalCode, setSearchPostalCode] = useState("");
+
+  const [trainingTypeList, setTrainingTypeList] = useState<any[]>([]);
+  const [totalRowsTrainingTypeList, setTotalRowsTrainingTypeList] = useState(0);
+  const [searchTrainingType, setSearchTrainingType] = useState("");
+
   const [modalChannelForm, setModalChannelForm] = useState({
     open: false,
     data: {},
@@ -97,6 +108,8 @@ const EmployeeListCreate = () => {
       searchCity ||
       searchProvince ||
       searchDistrict ||
+      searchPostalCode ||
+      searchTrainingType ||
       searchCountry,
     1000
   );
@@ -138,6 +151,7 @@ const EmployeeListCreate = () => {
       join_date: "",
       resign_date: "",
       preferred_language: "",
+      taxNumber: "",
       external_code: "",
       detailInformation: {
         personal: {
@@ -184,6 +198,7 @@ const EmployeeListCreate = () => {
     register: registerFamily,
     handleSubmit: handleSubmitFamily,
     control: controlFamily,
+    formState: { errors: errorsFamily },
   } = useForm({
     shouldUseNativeValidation: true,
   });
@@ -192,6 +207,7 @@ const EmployeeListCreate = () => {
     register: registerTraining,
     handleSubmit: handleSubmitTraining,
     control: controlTraining,
+    formState: { errors: errorTraining },
   } = useForm({
     shouldUseNativeValidation: true,
   });
@@ -200,6 +216,7 @@ const EmployeeListCreate = () => {
     register: registerCertification,
     handleSubmit: handleSubmitCertification,
     control: controlCertification,
+    formState: { errors: errorsCertification },
   } = useForm({
     shouldUseNativeValidation: true,
   });
@@ -308,6 +325,40 @@ const EmployeeListCreate = () => {
   });
 
   const {
+    isFetching: isFetchingPostalCode,
+    isFetchingNextPage: isFetchingMorePostalCode,
+    hasNextPage: hasNextPagePostalCode,
+    fetchNextPage: fetchNextPagePostalCode,
+  } = usePostalCodeInfiniteLists({
+    query: {
+      search: debounceFetch,
+      limit: 10,
+    },
+    options: {
+      onSuccess: (data: any) => {
+        setTotalRowsPostalCodeList(data.pages[0].totalRow);
+        const mappedData = data?.pages?.map((group: any) => {
+          return group.rows?.map((element: any) => {
+            return {
+              value: element.codeText,
+              label: element.codeText,
+            };
+          });
+        });
+        const flattenArray = [].concat(...mappedData);
+        setPostalCodeList(flattenArray);
+      },
+      getNextPageParam: (_lastPage: any, pages: any) => {
+        if (postalCodeList.length < totalRowsPostalCodeList) {
+          return pages.length + 1;
+        } else {
+          return undefined;
+        }
+      },
+    },
+  });
+
+  const {
     isFetching: isFetchingCountry,
     isFetchingNextPage: isFetchingMoreCountry,
     hasNextPage: hasNextPageCountry,
@@ -367,6 +418,40 @@ const EmployeeListCreate = () => {
       },
       getNextPageParam: (_lastPage: any, pages: any) => {
         if (provinceList.length < totalRowsProvinceList) {
+          return pages.length + 1;
+        } else {
+          return undefined;
+        }
+      },
+    },
+  });
+
+  const {
+    isFetching: isFetchingTrainingType,
+    isFetchingNextPage: isFetchingMoreTrainingType,
+    hasNextPage: hasNextPageTrainingType,
+    fetchNextPage: fetchNextPageTrainingType,
+  } = useTrainingTypeInfiniteLists({
+    query: {
+      search: debounceFetch,
+      limit: 10,
+    },
+    options: {
+      onSuccess: (data: any) => {
+        setTotalRowsTrainingTypeList(data.pages[0].totalRow);
+        const mappedData = data?.pages?.map((group: any) => {
+          return group.rows?.map((element: any) => {
+            return {
+              value: element.trainingTypeId,
+              label: element.name,
+            };
+          });
+        });
+        const flattenArray = [].concat(...mappedData);
+        setTrainingTypeList(flattenArray);
+      },
+      getNextPageParam: (_lastPage: any, pages: any) => {
+        if (trainingTypeList.length < totalRowsTrainingTypeList) {
           return pages.length + 1;
         } else {
           return undefined;
@@ -627,7 +712,6 @@ const EmployeeListCreate = () => {
 
       replaceBankAccount(tempEdit);
     } else {
-      console.log("asdasdasd", data);
       appendBankAccount({
         ...data,
         key: fieldsBankAccount.length,
@@ -697,6 +781,7 @@ const EmployeeListCreate = () => {
   };
 
   const handleAddItemTraining = (data: any) => {
+    console.log("@data", data);
     if (modalChannelForm.typeForm === "Edit Training") {
       let tempEdit = fieldsTraining.map((mapDataItem) => {
         if (mapDataItem.id === modalChannelForm.data.id) {
@@ -705,6 +790,8 @@ const EmployeeListCreate = () => {
           mapDataItem.trainingStatus = data.trainingStatus;
           mapDataItem.startDate = data.startDate;
           mapDataItem.endDate = data.endDate;
+          mapDataItem.descriptionTraining = data.descriptionTraining;
+          mapDataItem.imageCertTraining = data.imageCertTraining;
 
           return { ...mapDataItem };
         } else {
@@ -732,6 +819,7 @@ const EmployeeListCreate = () => {
           mapDataItem.institution = data.institution;
           mapDataItem.certificationNumber = data.certificationNumber;
           mapDataItem.certificationDate = data.certificationDate;
+          mapDataItem.imageCertCertification = data.imageCertCertification;
 
           return { ...mapDataItem };
         } else {
@@ -929,7 +1017,7 @@ const EmployeeListCreate = () => {
     },
     {
       title: "Description",
-      dataIndex: "description",
+      dataIndex: "descriptionTraining",
     },
     {
       title: "Start Date",
@@ -1116,14 +1204,19 @@ const EmployeeListCreate = () => {
           <Controller
             control={control}
             name="employee_type"
-            defaultValue={"FULLTIME"}
             render={({ field: { onChange } }) => (
               <Dropdown
                 label=""
                 width="185px"
                 noSearch
-                items={[{ id: "FULLTIME", value: "Fulltime" }]}
-                defaultValue="FULLTIME"
+                items={[
+                  { id: "Fulltime", value: "Fulltime" },
+                  { id: "Contract", value: "Contract" },
+                  { id: "Freelance", value: "Freelance" },
+                  { id: "Outsource", value: "Outsource" },
+                  { id: "Part Time", value: "Part Time" },
+                  { id: "Intern", value: "Intern" },
+                ]}
                 handleChange={(value: any) => {
                   onChange(value);
                 }}
@@ -1218,7 +1311,13 @@ const EmployeeListCreate = () => {
                   error={errors.name?.message}
                   required
                   placeholder={"e.g 123456789"}
-                  {...register("name", { required: "Please enter Name." })}
+                  {...register("name", {
+                    required: "Please enter Name.",
+                    maxLength: {
+                      value: 100,
+                      message: "Max length exceeded",
+                    },
+                  })}
                 />
               </Col>
             </Row>
@@ -1229,10 +1328,17 @@ const EmployeeListCreate = () => {
                   type="number"
                   width="100%"
                   label="NIK"
+                  error={errors.nik?.message}
                   height="48px"
                   required
                   placeholder={"e.g 123456789"}
-                  {...register("nik", { required: "Please enter NIK." })}
+                  {...register("nik", {
+                    required: "Please enter NIK.",
+                    maxLength: {
+                      value: 16,
+                      message: "Max length exceeded",
+                    },
+                  })}
                 />
               </Col>
               <Spacer size={10} />
@@ -1493,8 +1599,14 @@ const EmployeeListCreate = () => {
                   type="number"
                   label="Tax Number"
                   height="48px"
+                  error={errors.taxNumber?.message}
                   placeholder={"e.g 123456789 "}
-                  {...register("external_code")}
+                  {...register("taxNumber", {
+                    maxLength: {
+                      value: 16,
+                      message: "Max length exceeded",
+                    },
+                  })}
                 />
               </Col>
             </Row>
@@ -1504,8 +1616,14 @@ const EmployeeListCreate = () => {
                 width="100%"
                 label="External Code"
                 height="48px"
+                error={errors.external_code?.message}
                 placeholder={"e.g ABC12345"}
-                {...register("external_code")}
+                {...register("external_code", {
+                  maxLength: {
+                    value: 100,
+                    message: "Max length exceeded",
+                  },
+                })}
               />
             </Row>
           </Accordion.Body>
@@ -1658,6 +1776,7 @@ const EmployeeListCreate = () => {
                             items={[
                               { id: "A", value: "A" },
                               { id: "B", value: "B" },
+                              { id: "AB", value: "AB" },
                               { id: "O", value: "O" },
                             ]}
                             handleChange={(value: any) => {
@@ -1682,12 +1801,13 @@ const EmployeeListCreate = () => {
                             noSearch
                             width="100%"
                             items={[
-                              { id: "islam", value: "Islam" },
-                              { id: "kristen", value: "Kristen" },
-                              { id: "katolik", value: "Katolik" },
-                              { id: "budha", value: "Budha" },
-                              { id: "hindu", value: "Hindu" },
-                              { id: "other", value: "Other" },
+                              { id: "Moslem", value: "Moslem" },
+                              { id: "Cristian", value: "Cristian" },
+                              { id: "Catholic", value: "Catholic" },
+                              { id: "Budhist", value: "Budhist" },
+                              { id: "Hindu", value: "Hindu" },
+                              { id: "Konghucu", value: "Konghucu" },
+                              { id: "Other", value: "Other" },
                             ]}
                             handleChange={(value: any) => {
                               onChange(value);
@@ -1704,10 +1824,16 @@ const EmployeeListCreate = () => {
                     <Input
                       type="number"
                       width="100%"
+                      error={errors.detailInformation?.personal?.medical_number_insurance?.message}
                       label="Medical Number (Insurance)"
                       height="48px"
                       placeholder={"e.g 123456789"}
-                      {...register("detailInformation.personal.medical_number_insurance")}
+                      {...register("detailInformation.personal.medical_number_insurance", {
+                        maxLength: {
+                          value: 50,
+                          message: "Max length exceeded",
+                        },
+                      })}
                     />
                   </Col>
                   <Spacer size={10} />
@@ -1725,6 +1851,10 @@ const EmployeeListCreate = () => {
                           value: /\S+@\S+\.\S+/,
                           message: "Entered value does not match email format",
                         },
+                        maxLength: {
+                          value: 200,
+                          message: "Max length exceeded",
+                        },
                       })}
                     />
                   </Col>
@@ -1735,10 +1865,16 @@ const EmployeeListCreate = () => {
                     <Input
                       type="number"
                       width="100%"
+                      error={errors.detailInformation?.personal?.phone_number?.message}
                       label="Phone Number"
                       height="48px"
                       placeholder={"e.g 022 709999"}
-                      {...register("detailInformation.personal.phone_number")}
+                      {...register("detailInformation.personal.phone_number", {
+                        maxLength: {
+                          value: 15,
+                          message: "Max length exceeded",
+                        },
+                      })}
                     />
                   </Col>
                   <Spacer size={10} />
@@ -1754,6 +1890,10 @@ const EmployeeListCreate = () => {
                       placeholder={"e.g you@email.com"}
                       {...register("detailInformation.personal.mobile_number", {
                         required: "Please enter mobile number.",
+                        maxLength: {
+                          value: 15,
+                          message: "Max length exceeded",
+                        },
                       })}
                     />
                   </Col>
@@ -1764,10 +1904,16 @@ const EmployeeListCreate = () => {
                     <Input
                       type="number"
                       width="100%"
+                      error={errors.detailInformation?.personal?.visa_number?.message}
                       label="Visa Number"
                       height="48px"
                       placeholder={"e.g 123456789"}
-                      {...register("detailInformation.personal.visa_number")}
+                      {...register("detailInformation.personal.visa_number", {
+                        maxLength: {
+                          value: 30,
+                          message: "Max length exceeded",
+                        },
+                      })}
                     />
                   </Col>
                   <Spacer size={10} />
@@ -1874,6 +2020,7 @@ const EmployeeListCreate = () => {
                                     { id: "home", value: "Home" },
                                     { id: "office", value: "Office" },
                                     { id: "apartment", value: "Apartment" },
+                                    { id: "School", value: "School" },
                                   ]}
                                   handleChange={(value: any) => {
                                     onChange(value);
@@ -1886,20 +2033,34 @@ const EmployeeListCreate = () => {
                         <Spacer size={10} />
 
                         <Col width="100%">
-                          <TextArea
-                            width="100%"
-                            rows={2}
-                            required
-                            error={
-                              errors?.["detailInformation"]?.["addresess"]?.[index]?.["street"]?.[
-                                "message"
-                              ]
-                            }
-                            placeholder="e.g Front Groceries No. 5"
-                            label="Street"
-                            {...register(`detailInformation.addresess.${index}.street`, {
-                              required: "Please enter street.",
-                            })}
+                          <Controller
+                            control={control}
+                            rules={{
+                              maxLength: {
+                                value: 225,
+                                message: "Max length exceeded",
+                              },
+                              required: {
+                                value: true,
+                                message: "Please enter account street.",
+                              },
+                            }}
+                            name={`detailInformation.addresess.${index}.street`}
+                            render={({ field: { onChange } }) => (
+                              <TextArea
+                                width="100%"
+                                rows={2}
+                                onChange={onChange}
+                                required
+                                error={
+                                  errors?.["detailInformation"]?.["addresess"]?.[index]?.[
+                                    "street"
+                                  ]?.["message"]
+                                }
+                                placeholder="e.g Front Groceries No. 5"
+                                label="Street"
+                              />
+                            )}
                           />
                         </Col>
                       </Row>
@@ -2088,17 +2249,42 @@ const EmployeeListCreate = () => {
                         <Spacer size={10} />
 
                         <Col width="100%">
-                          <Input
-                            type="number"
-                            width="100%"
-                            error={
-                              errors?.["detailInformation"]?.["addresess"]?.[index]?.[
-                                "postal_code"
-                              ]?.["message"]
-                            }
-                            placeholder="e.g 40123"
-                            label="Postal Code"
-                            {...register(`detailInformation.addresess.${index}.postal_code`)}
+                          <Controller
+                            control={control}
+                            name={`detailInformation.addresess.${index}.postal_code`}
+                            render={({ field: { onChange } }) => (
+                              <>
+                                <Label>Postal Code</Label>
+                                <Spacer size={3} />
+                                <FormSelect
+                                  height="48px"
+                                  style={{ width: "100%" }}
+                                  size={"large"}
+                                  placeholder={"Select"}
+                                  borderColor={"#AAAAAA"}
+                                  arrowColor={"#000"}
+                                  withSearch
+                                  isLoading={isFetchingPostalCode}
+                                  isLoadingMore={isFetchingMorePostalCode}
+                                  fetchMore={() => {
+                                    if (hasNextPagePostalCode) {
+                                      fetchNextPagePostalCode();
+                                    }
+                                  }}
+                                  items={
+                                    isFetchingPostalCode && !isFetchingMorePostalCode
+                                      ? []
+                                      : postalCodeList
+                                  }
+                                  onChange={(value: any) => {
+                                    onChange(value);
+                                  }}
+                                  onSearch={(value: any) => {
+                                    setSearchPostalCode(value);
+                                  }}
+                                />
+                              </>
+                            )}
                           />
                         </Col>
                       </Row>
@@ -2115,7 +2301,12 @@ const EmployeeListCreate = () => {
                             }
                             placeholder="e.g -6.909829165558788, 107.57502431159176"
                             label="Longitude"
-                            {...register(`detailInformation.addresess.${index}.longitude`)}
+                            {...register(`detailInformation.addresess.${index}.longitude`, {
+                              maxLength: {
+                                value: 225,
+                                message: "Max length exceeded",
+                              },
+                            })}
                           />
                         </Col>
                         <Spacer size={10} />
@@ -2131,7 +2322,12 @@ const EmployeeListCreate = () => {
                             }
                             placeholder="e.g -6.909829165558788, 107.57502431159176"
                             label="Latitude"
-                            {...register(`detailInformation.addresess.${index}.latitude`)}
+                            {...register(`detailInformation.addresess.${index}.latitude`, {
+                              maxLength: {
+                                value: 225,
+                                message: "Max length exceeded",
+                              },
+                            })}
                           />
                         </Col>
                       </Row>
@@ -2287,6 +2483,10 @@ const EmployeeListCreate = () => {
                     {...registerBankAccount("bankName", {
                       shouldUnregister: true,
                       required: "Please enter bank name.",
+                      maxLength: {
+                        value: 100,
+                        message: "Max length exceeded",
+                      },
                     })}
                   />
 
@@ -2304,6 +2504,10 @@ const EmployeeListCreate = () => {
                     {...registerBankAccount("accountNumber", {
                       shouldUnregister: true,
                       required: "Please enter account number.",
+                      maxLength: {
+                        value: 20,
+                        message: "Max length exceeded",
+                      },
                     })}
                   />
                   <Spacer size={20} />
@@ -2319,6 +2523,10 @@ const EmployeeListCreate = () => {
                     {...registerBankAccount("accountName", {
                       shouldUnregister: true,
                       required: "Please enter account name.",
+                      maxLength: {
+                        value: 100,
+                        message: "Max length exceeded",
+                      },
                     })}
                   />
                 </>
@@ -2331,7 +2539,13 @@ const EmployeeListCreate = () => {
                     label="School Name"
                     height="48px"
                     placeholder={"e.g Lala University"}
-                    {...registerEducation("schoolName")}
+                    {...registerEducation("schoolName", {
+                      shouldUnregister: true,
+                      maxLength: {
+                        value: 100,
+                        message: "Max length exceeded",
+                      },
+                    })}
                   />
 
                   <Spacer size={20} />
@@ -2348,7 +2562,19 @@ const EmployeeListCreate = () => {
                           noSearch
                           defaul
                           width="100%"
-                          items={[{ id: "S1", value: "S1" }]}
+                          items={[
+                            { id: "Master Degree", value: "Master Degree" },
+                            { id: "Magister Degree", value: "Magister Degree" },
+                            { id: "Magister Degree", value: "Magister Degree" },
+                            { id: "Doctor", value: "Doctor" },
+                            { id: "Bachelor Degree", value: "Bachelor Degree" },
+                            { id: "Associate", value: "Associate" },
+                            { id: "Diploma 4", value: "Diploma 4" },
+                            { id: "Diploma 3", value: "Diploma 3" },
+                            { id: "Diploma 2", value: "Diploma 2" },
+                            { id: "Diploma 1", value: "Diploma 1" },
+                            { id: "Senior High School", value: "Senior High School" },
+                          ]}
                           handleChange={(value: any) => {
                             onChange(value);
                           }}
@@ -2365,7 +2591,13 @@ const EmployeeListCreate = () => {
                     label="Field of Study"
                     height="48px"
                     placeholder={"e.g Business"}
-                    {...registerEducation("fieldOfStudy")}
+                    {...registerEducation("fieldOfStudy", {
+                      shouldUnregister: true,
+                      maxLength: {
+                        value: 150,
+                        message: "Max length exceeded",
+                      },
+                    })}
                   />
 
                   <Spacer size={20} />
@@ -2376,10 +2608,11 @@ const EmployeeListCreate = () => {
                     render={({ field: { onChange } }) => (
                       <DatePickerInput
                         fullWidth
-                        defaultValue={moment(
-                          modalChannelForm.data?.startYear || new Date(),
-                          "YYYY-MM-DD"
-                        )}
+                        defaultValue={
+                          modalChannelForm.data?.startYear
+                            ? moment(modalChannelForm.data?.startYear, "YYYY-MM-DD")
+                            : ""
+                        }
                         picker="year"
                         onChange={(date: any, dateString: any) => onChange(dateString)}
                         label="Start Year"
@@ -2395,10 +2628,11 @@ const EmployeeListCreate = () => {
                     render={({ field: { onChange } }) => (
                       <DatePickerInput
                         fullWidth
-                        defaultValue={moment(
-                          modalChannelForm.data?.endYear || new Date(),
-                          "YYYY-MM-DD"
-                        )}
+                        defaultValue={
+                          modalChannelForm.data?.endYear
+                            ? moment(modalChannelForm.data?.endYear, "YYYY-MM-DD")
+                            : ""
+                        }
                         picker="year"
                         onChange={(date: any, dateString: any) => onChange(dateString)}
                         label="End Year"
@@ -2415,7 +2649,13 @@ const EmployeeListCreate = () => {
                     type="number"
                     height="48px"
                     placeholder={"e.g 4.0"}
-                    {...registerEducation("gpa")}
+                    {...registerEducation("gpa", {
+                      shouldUnregister: true,
+                      maxLength: {
+                        value: 5,
+                        message: "Max length exceeded",
+                      },
+                    })}
                   />
                 </>
               ) : modalChannelForm.typeForm === "Add Family" ||
@@ -2433,7 +2673,13 @@ const EmployeeListCreate = () => {
                           noSearch
                           defaul
                           width="100%"
-                          items={[{ id: "Husband", value: "Husband" }]}
+                          items={[
+                            { id: "Husband", value: "Husband" },
+                            { id: "Father", value: "Father" },
+                            { id: "Mother", value: "Mother" },
+                            { id: "Wife", value: "Wife" },
+                            { id: "Child", value: "Child" },
+                          ]}
                           handleChange={(value: any) => {
                             onChange(value);
                           }}
@@ -2449,8 +2695,14 @@ const EmployeeListCreate = () => {
                     width="100%"
                     label="Name"
                     height="48px"
+                    error={errorsFamily.name?.message}
                     placeholder={"e.g Jane Doe"}
-                    {...registerFamily("name")}
+                    {...registerFamily("name", {
+                      maxLength: {
+                        value: 100,
+                        message: "Max length exceeded",
+                      },
+                    })}
                   />
 
                   <Spacer size={20} />
@@ -2487,10 +2739,11 @@ const EmployeeListCreate = () => {
                     render={({ field: { onChange } }) => (
                       <DatePickerInput
                         fullWidth
-                        defaultValue={moment(
-                          modalChannelForm.data?.birthOfDate || new Date(),
-                          "YYYY-DD-MM"
-                        )}
+                        defaultValue={
+                          modalChannelForm.data?.birthOfDate
+                            ? moment(modalChannelForm.data?.birthOfDate, "YYYY-DD-MM")
+                            : ""
+                        }
                         onChange={(date: any, dateString: any) => onChange(dateString)}
                         label="Birth of Date"
                       />
@@ -2500,13 +2753,19 @@ const EmployeeListCreate = () => {
                   <Spacer size={20} />
 
                   <Input
-                    defaultValue={modalChannelForm.data?.gpa}
+                    defaultValue={modalChannelForm.data?.mobile}
                     width="100%"
                     label="Mobile"
+                    error={errorsFamily.mobile?.message}
                     type="number"
                     height="48px"
                     placeholder={"e.g 08123456789"}
-                    {...registerFamily("mobile")}
+                    {...registerFamily("mobile", {
+                      maxLength: {
+                        value: 15,
+                        message: "Max length exceeded",
+                      },
+                    })}
                   />
                 </>
               ) : modalChannelForm.typeForm === "Add Training" ||
@@ -2514,11 +2773,18 @@ const EmployeeListCreate = () => {
                 <>
                   <Input
                     defaultValue={modalChannelForm.data?.trainingName}
+                    error={errorTraining.trainingName?.message}
                     width="100%"
                     label="Training Name"
                     height="48px"
                     placeholder={"e.g Training Business"}
-                    {...registerTraining("trainingName")}
+                    {...registerTraining("trainingName", {
+                      maxLength: {
+                        value: 100,
+                        message: "Max length exceeded",
+                      },
+                      shouldUnregister: true,
+                    })}
                   />
 
                   <Spacer size={20} />
@@ -2526,18 +2792,36 @@ const EmployeeListCreate = () => {
                   <Controller
                     control={controlTraining}
                     name="trainingType"
-                    render={({ field: { onChange } }) => (
+                    render={({ field: { onChange }, fieldState: { error } }) => (
                       <>
                         <Label>Training Type</Label>
                         <Spacer size={3} />
-                        <Dropdown
-                          defaultValue={modalChannelForm.data?.trainingType}
-                          noSearch
-                          defaul
-                          width="100%"
-                          items={[{ id: "lorem", value: "lorem" }]}
-                          handleChange={(value: any) => {
+                        <FormSelect
+                          error={error?.message}
+                          height="48px"
+                          style={{ width: "100%" }}
+                          size={"large"}
+                          placeholder={"Select"}
+                          borderColor={error?.message ? "#ED1C24" : "#AAAAAA"}
+                          arrowColor={"#000"}
+                          withSearch
+                          isLoading={isFetchingTrainingType}
+                          isLoadingMore={isFetchingMoreTrainingType}
+                          fetchMore={() => {
+                            if (hasNextPageTrainingType) {
+                              fetchNextPageTrainingType();
+                            }
+                          }}
+                          items={
+                            isFetchingTrainingType && !isFetchingMoreTrainingType
+                              ? []
+                              : trainingTypeList
+                          }
+                          onChange={(value: any) => {
                             onChange(value);
+                          }}
+                          onSearch={(value: any) => {
+                            setSearchTrainingType(value);
                           }}
                         />
                       </>
@@ -2558,7 +2842,11 @@ const EmployeeListCreate = () => {
                           noSearch
                           defaul
                           width="100%"
-                          items={[{ id: "lorem", value: "lorem" }]}
+                          items={[
+                            { id: "Completed", value: "Completed" },
+                            { id: "In Progress", value: "In Progress" },
+                            { id: "Plan", value: "Plan" },
+                          ]}
                           handleChange={(value: any) => {
                             onChange(value);
                           }}
@@ -2575,10 +2863,11 @@ const EmployeeListCreate = () => {
                     render={({ field: { onChange } }) => (
                       <DatePickerInput
                         fullWidth
-                        defaultValue={moment(
-                          modalChannelForm.data?.startDate || new Date(),
-                          "YYYY-DD-MM"
-                        )}
+                        defaultValue={
+                          modalChannelForm.data?.startDate
+                            ? moment(modalChannelForm.data?.startDate, "YYYY-DD-MM")
+                            : ""
+                        }
                         onChange={(date: any, dateString: any) => onChange(dateString)}
                         label="Start Date"
                       />
@@ -2593,10 +2882,11 @@ const EmployeeListCreate = () => {
                     render={({ field: { onChange } }) => (
                       <DatePickerInput
                         fullWidth
-                        defaultValue={moment(
-                          modalChannelForm.data?.endDate || new Date(),
-                          "YYYY-DD-MM"
-                        )}
+                        defaultValue={
+                          modalChannelForm.data?.endDate
+                            ? moment(modalChannelForm.data?.endDate, "YYYY-DD-MM")
+                            : ""
+                        }
                         onChange={(date: any, dateString: any) => onChange(dateString)}
                         label="End Date"
                       />
@@ -2605,32 +2895,54 @@ const EmployeeListCreate = () => {
 
                   <Spacer size={20} />
 
-                  <TextArea
-                    width="100%"
-                    rows={2}
-                    required
-                    placeholder="e.g Training very helpfull"
-                    label="Description"
-                    {...registerTraining("description")}
+                  <Controller
+                    control={controlTraining}
+                    rules={{
+                      maxLength: {
+                        value: 225,
+                        message: "Max length exceeded",
+                      },
+                    }}
+                    name="descriptionTraining"
+                    render={({ field: { onChange } }) => (
+                      <TextArea
+                        width="100%"
+                        rows={2}
+                        onChange={onChange}
+                        defaultValue={modalChannelForm.data?.descriptionTraining}
+                        error={errorTraining.descriptionTraining?.message}
+                        placeholder="e.g Training very helpfull"
+                        label="Description"
+                      />
+                    )}
                   />
 
                   <Spacer size={20} />
+
+                  <Text variant="headingRegular">
+                    Upload Certification <Text variant="body1">(Max. 5MB, Format .jpeg, .pdf)</Text>
+                  </Text>
+
+                  <Spacer size={16} />
 
                   <Controller
                     control={controlTraining}
                     name="imageCertTraining"
                     render={({ field: { onChange } }) => (
-                      <FileUploaderAllFiles
-                        label="Cert. Training Photo"
+                      <FileUploaderAllFilesDragger
                         onSubmit={(file: any) => onChange(file)}
-                        defaultFile={"/placeholder-employee-photo.svg"}
+                        defaultFileList={
+                          modalChannelForm.data?.imageCertTraining
+                            ? [modalChannelForm.data?.imageCertTraining]
+                            : []
+                        }
+                        defaultFile={
+                          modalChannelForm.data?.imageCertTraining
+                            ? URL.createObjectURL(modalChannelForm.data?.imageCertTraining)
+                            : "/placeholder-employee-photo.svg"
+                        }
                         withCrop
-                        sizeImagePhoto="125px"
                         removeable
-                        textPhoto={[
-                          "Upload Training Certification",
-                          "(Max. 5MB, Format .jpeg, .pdf)",
-                        ]}
                       />
                     )}
                   />
@@ -2652,21 +2964,33 @@ const EmployeeListCreate = () => {
                   <Input
                     defaultValue={modalChannelForm.data?.certificationName}
                     width="100%"
+                    error={errorsCertification.certificationName?.message}
                     label="Certification Name"
                     height="48px"
                     placeholder={"e.g Business Cetification"}
-                    {...registerCertification("certificationName")}
+                    {...registerCertification("certificationName", {
+                      maxLength: {
+                        value: 50,
+                        message: "Max length exceeded",
+                      },
+                    })}
                   />
 
                   <Spacer size={20} />
 
                   <Input
                     defaultValue={modalChannelForm.data?.institution}
+                    error={errorsCertification.institution?.message}
                     width="100%"
                     label="Institution"
                     height="48px"
                     placeholder={"e.g Business Center"}
-                    {...registerCertification("institution")}
+                    {...registerCertification("institution", {
+                      maxLength: {
+                        value: 50,
+                        message: "Max length exceeded",
+                      },
+                    })}
                   />
 
                   <Spacer size={20} />
@@ -2688,10 +3012,11 @@ const EmployeeListCreate = () => {
                     render={({ field: { onChange } }) => (
                       <DatePickerInput
                         fullWidth
-                        defaultValue={moment(
-                          modalChannelForm.data?.certificationDate || new Date(),
-                          "YYYY-DD-MM"
-                        )}
+                        defaultValue={
+                          modalChannelForm.data?.certificationDate
+                            ? moment(modalChannelForm.data?.certificationDate, "YYYY-DD-MM")
+                            : ""
+                        }
                         onChange={(date: any, dateString: any) => onChange(dateString)}
                         label="Certification Date"
                       />
@@ -2700,21 +3025,30 @@ const EmployeeListCreate = () => {
 
                   <Spacer size={20} />
 
+                  <Text variant="headingRegular">
+                    Upload Certification <Text variant="body1">(Max. 5MB, Format .jpeg, .pdf)</Text>
+                  </Text>
+
+                  <Spacer size={16} />
+
                   <Controller
                     control={controlCertification}
                     name="imageCertCertification"
                     render={({ field: { onChange } }) => (
-                      <FileUploaderAllFiles
-                        label="Certification Photo"
+                      <FileUploaderAllFilesDragger
                         onSubmit={(file: any) => onChange(file)}
-                        defaultFile={"/placeholder-employee-photo.svg"}
+                        defaultFileList={
+                          modalChannelForm.data?.imageCertCertification
+                            ? [modalChannelForm.data?.imageCertCertification]
+                            : []
+                        }
+                        defaultFile={
+                          modalChannelForm.data?.imageCertCertification
+                            ? URL.createObjectURL(modalChannelForm.data?.imageCertCertification)
+                            : "/placeholder-employee-photo.svg"
+                        }
                         withCrop
-                        sizeImagePhoto="125px"
                         removeable
-                        textPhoto={[
-                          "Upload Certification Certification",
-                          "(Max. 5MB, Format .jpeg, .pdf)",
-                        ]}
                       />
                     )}
                   />
@@ -2749,8 +3083,8 @@ const EmployeeListCreate = () => {
                   >
                     Save
                   </Button>
-                ) : modalChannelForm.typeForm === "Add Bank Education" ||
-                  modalChannelForm.typeForm === "Edit Bank Education" ? (
+                ) : modalChannelForm.typeForm === "Add Education" ||
+                  modalChannelForm.typeForm === "Edit Education" ? (
                   <Button
                     onClick={handleSubmitEducation(handleAddItemEducation)}
                     variant="primary"
