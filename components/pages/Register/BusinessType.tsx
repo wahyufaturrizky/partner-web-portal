@@ -12,7 +12,7 @@ const BusinessType = () => {
     setIndustryField,
     companyType,
     setCompanyType,
-    numberEmployees,  
+    numberEmployees,
     setNumberEmployees,
   } = useContext(RegisterFormContext);
 

@@ -19,6 +19,7 @@ import ICLogout from "../assets/icons/ic-logout.svg";
 import ICArrowBottom from "../assets/icons/ic-arrow-bottom.svg";
 import ICBadge from "../assets/icons/ic-badge.svg";
 import ICSalesman from "../assets/icons/ic-salesman.svg";
+import ICDocument from "../assets/icons/ic-document.svg";
 import styled from "styled-components";
 
 const menuConfig = [
@@ -171,7 +172,7 @@ const menuConfig = [
 ];
 
 const menuMdm = [
-  { type: "title", title: "Overview" },
+  { type: "title", title: "OVERVIEW" },
   {
     key: "dashboard",
     type: "menu",
@@ -181,95 +182,7 @@ const menuMdm = [
     onClick: () => Router.push("/dashboard"),
   },
   { type: "divider" },
-  { type: "title", title: "Configuration" },
-  {
-    key: "country",
-    title: "Country Structure",
-    icon: ICBadge,
-    children: [
-      {
-        key: "country",
-        title: "Country",
-        content: () => "Country",
-        onClick: () => Router.push("/country-structure"),
-      },
-      {
-        key: "zip-postal",
-        title: "Zip/Postal Code",
-        content: () => "Zip/Postal Code",
-        onClick: () => Router.push("/country-structure/postal-code"),
-      },
-      {
-        key: "currency",
-        title: "Currency",
-        content: () => "Currency",
-        onClick: () => Router.push("/country-structure/currency"),
-      },
-    ],
-  },
-  {
-    key: "general",
-    title: "General",
-    icon: ICField,
-    children: [
-      {
-        key: "general-channel",
-        title: "Channel",
-        content: () => "Channel",
-        onClick: () => Router.push("/channel"),
-      },
-      {
-        key: "sales-organization",
-        title: "Sales Organization",
-        content: () => "Sales Organization",
-        onClick: () => Router.push("/sales-organization"),
-      },
-    ],
-  },
-  {
-    key: "employee",
-    title: "Employee",
-    icon: ICBadge,
-    children: [
-      {
-        key: "employee-list",
-        title: "Employee List",
-        content: () => "Employee List",
-        onClick: () => Router.push("/employee-list"),
-      },
-      {
-        key: "job-position",
-        title: "Job Position",
-        content: () => "Job Position",
-        onClick: () => Router.push("/job-position"),
-      },
-      {
-        key: "job-position",
-        title: "Job Position",
-        content: () => "Job Position",
-        onClick: () => Router.push("/job-position"),
-      },
-      {
-        key: "job-level",
-        title: "Job Level",
-        content: () => "Job Level",
-        onClick: () => Router.push("/job-level"),
-      },
-      {
-        key: "department",
-        title: "Department",
-        content: () => "Department",
-        onClick: () => Router.push("/department"),
-      },
-      {
-        key: "training-type",
-        title: "Training Type",
-        content: () => "Training Type",
-        onClick: () => Router.push("/training-type"),
-      },
-    ],
-  },
-  { type: "title", title: "Inventory" },
+  { type: "title", title: "INVENTORY" },
   {
     key: "product",
     title: "Product",
@@ -301,27 +214,8 @@ const menuMdm = [
       },
     ],
   },
-  {
-    key: "salesman",
-    title: "Salesman",
-    icon: ICSalesman,
-    children: [
-      {
-        key: "salesman-group",
-        title: "Salesman Group",
-        content: () => "Salesman Group",
-        onClick: () => Router.push("/salesman-group"),
-      },
-    ],
-  },
-  {
-    key: "purchase-organization",
-    title: "Purchase Organization",
-    icon: ICPurchasOrg,
-    content: () => "Purchase Organization",
-    onClick: () => Router.push("/purchase-organization"),
-  },
-  { type: "title", title: "Sales" },
+  { type: "divider" },
+  { type: "title", title: "SALES" },
   {
     key: "customer",
     title: "Customer",
@@ -338,6 +232,120 @@ const menuMdm = [
         title: "Customer Group",
         content: () => "Customer Group",
         onClick: () => Router.push("/customers/group"),
+      },
+    ],
+  },
+  {
+    key: "salesman",
+    title: "Salesman",
+    icon: ICSalesman,
+    children: [
+      {
+        key: "salesman-group",
+        title: "Salesman Group",
+        content: () => "Salesman Group",
+        onClick: () => Router.push("/salesman-group"),
+      },
+    ],
+  },
+  { type: "divider" },
+  { type: "title", title: "FINANCE" },
+  {
+    key: "term-of-payment",
+    title: "Term Of Payment",
+    content: () => "Term Of Payment",
+    icon: ICDocument,
+    onClick: () => Router.push("/term-of-payment"),
+  },
+  { type: "divider" },
+  { type: "title", title: "HUMAN CAPITAL" },
+  {
+    key: "employee",
+    title: "Employee",
+    icon: ICBadge,
+    children: [
+      {
+        key: "employee-list",
+        title: "Employee List",
+        content: () => "Employee List",
+        onClick: () => Router.push("/employee-list"),
+      },
+      {
+        key: "job-position",
+        title: "Job Position",
+        content: () => "Job Position",
+        onClick: () => Router.push("/job-position"),
+      },
+      {
+        key: "job-level",
+        title: "Job Level",
+        content: () => "Job Level",
+        onClick: () => Router.push("/job-level"),
+      },
+      {
+        key: "department",
+        title: "Department",
+        content: () => "Department",
+        onClick: () => Router.push("/department"),
+      },
+      {
+        key: "training-type",
+        title: "Training Type",
+        content: () => "Training Type",
+        onClick: () => Router.push("/training-type"),
+      },
+    ],
+  },
+  { type: "divider" },
+  { type: "title", title: "GENERAL" },
+  {
+    key: "country",
+    title: "Country Structure",
+    icon: ICBadge,
+    children: [
+      {
+        key: "country",
+        title: "Country",
+        content: () => "Country",
+        onClick: () => Router.push("/country-structure"),
+      },
+      {
+        key: "zip-postal",
+        title: "Zip/Postal Code",
+        content: () => "Zip/Postal Code",
+        onClick: () => Router.push("/country-structure/postal-code"),
+      },
+      {
+        key: "currency",
+        title: "Currency",
+        content: () => "Currency",
+        onClick: () => Router.push("/country-structure/currency"),
+      },
+    ],
+  },
+  {
+    key: "company structure",
+    title: "Company Structure",
+    icon: ICField,
+    children: [
+      {
+        key: "general-channel",
+        title: "Channel",
+        content: () => "Channel",
+        onClick: () => Router.push("/channel"),
+      },
+      {
+        key: "sales-organization",
+        title: "Sales Organization",
+        content: () => "Sales Organization",
+        onClick: () => Router.push("/sales-organization"),
+      },
+      {
+        key: "purchase-organization",
+        title: "Purchase Organization",
+        icon: ICPurchasOrg,
+        content: () => "Purchase Organization",
+        onClick: () => Router.push("/purchase-organization"),
       },
     ],
   },

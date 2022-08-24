@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from "react";
-import { Row, Spacer, Table, Lozenge } from "pink-lava-ui";
+import { Row, Spacer, Table } from "pink-lava-ui";
 import { DeleteOutlined, DragOutlined, EditOutlined } from "@ant-design/icons";
 import {
   closestCenter,
@@ -15,9 +15,40 @@ import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
 import { CSS } from "@dnd-kit/utilities";
 import { useSortable, SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import styled from "styled-components";
-import { STATUS_BUSINESS_PROCESS } from "../../../utils/constant";
 
-const DraggableTable = ({ processList, isLoading, onDrag, onEdit, onDelete }: any) => {
+const getTypeName = (type: any) => {
+  switch (type) {
+    case 1:
+      return "Balance";
+    case 2:
+      return "Percent";
+    case 3:
+      return "Fix Amount";
+
+    default:
+      return "";
+  }
+};
+
+const getOptionName = (type: any) => {
+  switch (type) {
+    case 1:
+      return "Days after the end of the invoice month";
+    case 2:
+      return "Days after invoice date";
+    case 3:
+      return "of the following week";
+    case 4:
+      return "of the following month";
+    case 5:
+      return "of the day";
+
+    default:
+      return "";
+  }
+};
+
+const DraggableTable = ({ termList, isLoading, onDrag, onEdit, onDelete }: any) => {
   const [activeId, setActiveId] = useState(null);
 
   const sensors = useSensors(
@@ -47,10 +78,10 @@ const DraggableTable = ({ processList, isLoading, onDrag, onEdit, onDelete }: an
     if (!activeId) {
       return null;
     }
-    const row = processList.find((item) => item.key === activeId);
+    const row = termList.find((item: any) => item.key === activeId);
 
     return row;
-  }, [activeId, processList]);
+  }, [activeId, termList]);
 
   const columns = [
     {
@@ -59,22 +90,26 @@ const DraggableTable = ({ processList, isLoading, onDrag, onEdit, onDelete }: an
       width: "150px",
     },
     {
-      title: "Sequence",
+      title: "Stage",
       dataIndex: "index",
     },
     {
-      title: "Process",
-      dataIndex: "name",
+      title: "Payment Type",
+      dataIndex: "type",
     },
     {
-      title: "Mandatory",
-      dataIndex: "is_mandatory",
+      title: "Value",
+      dataIndex: "value",
       width: "15%",
       align: "left",
     },
     {
-      title: "Status",
-      dataIndex: "status",
+      title: "Due",
+      dataIndex: "optionValue",
+    },
+    {
+      title: "Options",
+      dataIndex: "option",
     },
   ];
 
@@ -89,7 +124,7 @@ const DraggableTable = ({ processList, isLoading, onDrag, onEdit, onDelete }: an
     >
       <Table
         columns={columns}
-        data={processList}
+        data={termList}
         loading={isLoading}
         components={{
           body: {
@@ -109,7 +144,7 @@ const DraggableTable = ({ processList, isLoading, onDrag, onEdit, onDelete }: an
     </DndContext>
   );
 
-  function DraggableWrapper(props) {
+  function DraggableWrapper(props: any) {
     const { children, ...restProps } = props;
 
     return children[1] instanceof Array ? (
@@ -129,7 +164,7 @@ const DraggableTable = ({ processList, isLoading, onDrag, onEdit, onDelete }: an
     );
   }
 
-  function DraggableRow(props) {
+  function DraggableRow(props: any) {
     const { attributes, listeners, setNodeRef, isDragging, transform, transition } = useSortable({
       id: props.data.key,
     });
@@ -143,7 +178,7 @@ const DraggableTable = ({ processList, isLoading, onDrag, onEdit, onDelete }: an
     return (
       <tr ref={setNodeRef} style={style} {...attributes} {...restProps}>
         {isDragging ? (
-          <DraggingRow colSpan={5}>&nbsp;</DraggingRow>
+          <DraggingRow colSpan={6}>&nbsp;</DraggingRow>
         ) : (
           <>
             <td {...restProps}>
@@ -190,13 +225,10 @@ const DraggableTable = ({ processList, isLoading, onDrag, onEdit, onDelete }: an
               </div>
             </td>
             <td>{props.data.index + 1}</td>
-            <td>{props.data.name}</td>
-            <td>{props.data.is_mandatory}</td>
-            <td>
-              <Lozenge variant={STATUS_BUSINESS_PROCESS[props.data.status]?.COLOR}>
-                {STATUS_BUSINESS_PROCESS[props.data.status]?.TEXT}
-              </Lozenge>
-            </td>
+            <td>{getTypeName(props.data.type)}</td>
+            <td>{props.data.value}</td>
+            <td>{props.data.optionValue}</td>
+            <td>{getOptionName(props.data.option)}</td>
           </>
         )}
       </tr>
@@ -244,13 +276,10 @@ const StaticTableRow = ({ row }) => {
         </Row>
       </StyledStaticData>
       <StyledStaticData style={{ padding: "16px" }}>{row.index + 1}</StyledStaticData>
-      <StyledStaticData style={{ padding: "16px" }}>{row.name}</StyledStaticData>
-      <StyledStaticData style={{ padding: "16px" }}>{row.is_mandatory}</StyledStaticData>
-      <StyledStaticData style={{ padding: "16px" }}>
-        <Lozenge variant={STATUS_BUSINESS_PROCESS[row.status]?.COLOR}>
-          {STATUS_BUSINESS_PROCESS[row.status]?.TEXT}
-        </Lozenge>
-      </StyledStaticData>
+      <StyledStaticData style={{ padding: "16px" }}>{getTypeName(row.type)}</StyledStaticData>
+      <StyledStaticData style={{ padding: "16px" }}>{row.value}</StyledStaticData>
+      <StyledStaticData style={{ padding: "16px" }}>{row.optionValue}</StyledStaticData>
+      <StyledStaticData style={{ padding: "16px" }}>{getOptionName(row.option)}</StyledStaticData>
     </StyledStaticTableRow>
   );
 };
