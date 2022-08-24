@@ -172,7 +172,7 @@ const menuConfig = [
 ];
 
 const menuMdm = [
-  { type: "title", title: "Overview" },
+  { type: "title", title: "OVERVIEW" },
   {
     key: "dashboard",
     type: "menu",
@@ -182,7 +182,122 @@ const menuMdm = [
     onClick: () => Router.push("/dashboard"),
   },
   { type: "divider" },
-  { type: "title", title: "General" },
+  { type: "title", title: "INVENTORY" },
+  {
+    key: "product",
+    title: "Product",
+    icon: ICInventory,
+    children: [
+      {
+        key: "product-option",
+        title: "Product Option",
+        content: () => "Product Option",
+        onClick: () => Router.push("/product-option"),
+      },
+      {
+        key: "product-brand",
+        title: "Product Brand",
+        content: () => "Product Brand",
+        onClick: () => Router.push("/product-brand"),
+      },
+      {
+        key: "uom-category",
+        title: "UoM Category",
+        content: () => "UoM Category",
+        onClick: () => Router.push("/unit-of-measure-category"),
+      },
+      {
+        key: "uom",
+        title: "Unit of Measure",
+        content: () => "Unit of Measure",
+        onClick: () => Router.push("/unit-of-measure"),
+      },
+    ],
+  },
+  { type: "divider" },
+  { type: "title", title: "SALES" },
+  {
+    key: "customer",
+    title: "Customer",
+    icon: ICUser,
+    children: [
+      {
+        key: "customers",
+        title: "Customers",
+        content: () => "Customers",
+        onClick: () => Router.push("/customers"),
+      },
+      {
+        key: "customer-group",
+        title: "Customer Group",
+        content: () => "Customer Group",
+        onClick: () => Router.push("/customers/group"),
+      },
+    ],
+  },
+  {
+    key: "salesman",
+    title: "Salesman",
+    icon: ICSalesman,
+    children: [
+      {
+        key: "salesman-group",
+        title: "Salesman Group",
+        content: () => "Salesman Group",
+        onClick: () => Router.push("/salesman-group"),
+      },
+    ],
+  },
+  { type: "divider" },
+  { type: "title", title: "FINANCE" },
+  {
+    key: "term-of-payment",
+    title: "Term Of Payment",
+    content: () => "Term Of Payment",
+    icon: ICDocument,
+    onClick: () => Router.push("/term-of-payment"),
+  },
+  { type: "divider" },
+  { type: "title", title: "HUMAN CAPITAL" },
+  {
+    key: "employee",
+    title: "Employee",
+    icon: ICBadge,
+    children: [
+      {
+        key: "employee-list",
+        title: "Employee List",
+        content: () => "Employee List",
+        onClick: () => Router.push("/employee-list"),
+      },
+      {
+        key: "job-position",
+        title: "Job Position",
+        content: () => "Job Position",
+        onClick: () => Router.push("/job-position"),
+      },
+      {
+        key: "job-level",
+        title: "Job Level",
+        content: () => "Job Level",
+        onClick: () => Router.push("/job-level"),
+      },
+      {
+        key: "department",
+        title: "Department",
+        content: () => "Department",
+        onClick: () => Router.push("/department"),
+      },
+      {
+        key: "training-type",
+        title: "Training Type",
+        content: () => "Training Type",
+        onClick: () => Router.push("/training-type"),
+      },
+    ],
+  },
+  { type: "divider" },
+  { type: "title", title: "GENERAL" },
   {
     key: "country",
     title: "Country Structure",
@@ -233,127 +348,6 @@ const menuMdm = [
         onClick: () => Router.push("/purchase-organization"),
       },
     ],
-  },
-  {
-    key: "employee",
-    title: "Employee",
-    icon: ICBadge,
-    children: [
-      {
-        key: "employee-list",
-        title: "Employee List",
-        content: () => "Employee List",
-        onClick: () => Router.push("/employee-list"),
-      },
-      {
-        key: "job-position",
-        title: "Job Position",
-        content: () => "Job Position",
-        onClick: () => Router.push("/job-position"),
-      },
-      {
-        key: "job-level",
-        title: "Job Level",
-        content: () => "Job Level",
-        onClick: () => Router.push("/job-level"),
-      },
-      {
-        key: "department",
-        title: "Department",
-        content: () => "Department",
-        onClick: () => Router.push("/department"),
-      },
-      {
-        key: "training-type",
-        title: "Training Type",
-        content: () => "Training Type",
-        onClick: () => Router.push("/training-type"),
-      },
-    ],
-  },
-  { type: "divider" },
-  { type: "title", title: "Inventory" },
-  {
-    key: "product",
-    title: "Product",
-    icon: ICInventory,
-    children: [
-      {
-        key: "product-option",
-        title: "Product Option",
-        content: () => "Product Option",
-        onClick: () => Router.push("/product-option"),
-      },
-      {
-        key: "product-brand",
-        title: "Product Brand",
-        content: () => "Product Brand",
-        onClick: () => Router.push("/product-brand"),
-      },
-      {
-        key: "uom-category",
-        title: "UoM Category",
-        content: () => "UoM Category",
-        onClick: () => Router.push("/unit-of-measure-category"),
-      },
-      {
-        key: "uom",
-        title: "Unit of Measure",
-        content: () => "Unit of Measure",
-        onClick: () => Router.push("/unit-of-measure"),
-      },
-    ],
-  },
-  { type: "divider" },
-  { type: "title", title: "Sales" },
-  {
-    key: "salesman",
-    title: "Salesman",
-    icon: ICSalesman,
-    children: [
-      {
-        key: "salesman-group",
-        title: "Salesman Group",
-        content: () => "Salesman Group",
-        onClick: () => Router.push("/salesman-group"),
-      },
-    ],
-  },
-  {
-    key: "purchase-organization",
-    title: "Purchase Organization",
-    icon: ICPurchasOrg,
-    content: () => "Purchase Organization",
-    onClick: () => Router.push("/purchase-organization"),
-  },
-  { type: "title", title: "Sales" },
-  {
-    key: "customer",
-    title: "Customer",
-    icon: ICUser,
-    children: [
-      {
-        key: "customers",
-        title: "Customers",
-        content: () => "Customers",
-        onClick: () => Router.push("/customers"),
-      },
-      {
-        key: "customer-group",
-        title: "Customer Group",
-        content: () => "Customer Group",
-        onClick: () => Router.push("/customers/group"),
-      },
-    ],
-  },
-  { type: "divider" },
-  { type: "title", title: "Finance" },
-  {
-    key: "term-of-payment",
-    title: "Term Of Payment",
-    content: () => "Term Of Payment",
-    icon: ICDocument,
-    onClick: () => Router.push("/term-of-payment"),
   },
 ];
 
