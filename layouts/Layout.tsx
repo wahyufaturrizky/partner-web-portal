@@ -19,6 +19,7 @@ import ICLogout from "../assets/icons/ic-logout.svg";
 import ICArrowBottom from "../assets/icons/ic-arrow-bottom.svg";
 import ICBadge from "../assets/icons/ic-badge.svg";
 import ICSalesman from "../assets/icons/ic-salesman.svg";
+import ICDocument from "../assets/icons/ic-document.svg";
 import styled from "styled-components";
 
 const menuConfig = [
@@ -181,7 +182,7 @@ const menuMdm = [
     onClick: () => Router.push("/dashboard"),
   },
   { type: "divider" },
-  { type: "title", title: "Configuration" },
+  { type: "title", title: "General" },
   {
     key: "country",
     title: "Country Structure",
@@ -208,8 +209,8 @@ const menuMdm = [
     ],
   },
   {
-    key: "general",
-    title: "General",
+    key: "company structure",
+    title: "Company Structure",
     icon: ICField,
     children: [
       {
@@ -223,6 +224,13 @@ const menuMdm = [
         title: "Sales Organization",
         content: () => "Sales Organization",
         onClick: () => Router.push("/sales-organization"),
+      },
+      {
+        key: "purchase-organization",
+        title: "Purchase Organization",
+        icon: ICPurchasOrg,
+        content: () => "Purchase Organization",
+        onClick: () => Router.push("/purchase-organization"),
       },
     ],
   },
@@ -257,6 +265,7 @@ const menuMdm = [
       },
     ],
   },
+  { type: "divider" },
   { type: "title", title: "Inventory" },
   {
     key: "product",
@@ -289,6 +298,8 @@ const menuMdm = [
       },
     ],
   },
+  { type: "divider" },
+  { type: "title", title: "Sales" },
   {
     key: "salesman",
     title: "Salesman",
@@ -315,12 +326,14 @@ const menuMdm = [
       },
     ],
   },
+  { type: "divider" },
+  { type: "title", title: "Finance" },
   {
-    key: "purchase-organization",
-    title: "Purchase Organization",
-    icon: ICPurchasOrg,
-    content: () => "Purchase Organization",
-    onClick: () => Router.push("/purchase-organization"),
+    key: "term-of-payment",
+    title: "Term Of Payment",
+    content: () => "Term Of Payment",
+    icon: ICDocument,
+    onClick: () => Router.push("/term-of-payment"),
   },
 ];
 

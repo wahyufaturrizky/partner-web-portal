@@ -92,16 +92,17 @@ const CreateAccount = () => {
               render={({ field: { onChange } }) => (
                 <Col width={"100%"}>
                   <FormInput
+                    style={{ width: "100%" }}
                     size="large"
                     type="number"
                     defaultValue={formValues?.phone_number}
                     placeholder="e.g 8121236384"
                     status={errors?.phone_number?.type === "required" && "error"}
-                    onChange={(e: any) => {
+                    onChange={(value: any) => {
                       if (errors?.phone_number) {
                         clearErrors("phone_number");
                       }
-                      onChange(e.target.value);
+                      onChange(value);
                     }}
                   />
                   {errors?.phone_number?.type === "required" && (

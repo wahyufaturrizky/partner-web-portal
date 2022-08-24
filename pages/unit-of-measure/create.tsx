@@ -209,12 +209,6 @@ const Card = styled.div`
   padding: ${(p: any) => (p.padding ? p.padding : "16px")};
 `;
 
-const Center = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-`;
-
 const Label = styled.div`
   font-weight: bold;
   font-size: 16px;
