@@ -15,7 +15,6 @@ import { useForm, Controller } from "react-hook-form";
 import { arrayMove } from "@dnd-kit/sortable";
 import styled from "styled-components";
 import { useRouter } from "next/router";
-
 import {
   useBusinessProcess,
   useUpdateBusinessProcess,
@@ -24,11 +23,11 @@ import {
 import { queryClient } from "../_app";
 import ArrowLeft from "../../assets/icons/arrow-left.svg";
 import { ModalDeleteConfirmation } from "../../components/elements/Modal/ModalConfirmationDelete";
-import { useProcessInfiniteLists } from "../../hooks/business-process/useProcess"
+import { useProcessInfiniteLists } from "../../hooks/business-process/useProcess";
 import useDebounce from "../../lib/useDebounce";
 import ModalAddBusinessProcess from "../../components/elements/Modal/ModalAddBusinessProcess";
 import ModalEditProcess from "../../components/elements/Modal/ModalEditProcess";
-import DraggableTable from "../../components/pages/BusinessProcess/DraggableGrid";
+import DraggableTable from "../../components/pages/BusinessProcess/DraggableTable";
 import DraggableGrids from "../../components/pages/BusinessProcess/DraggableGrid";
 
 const BussinessProcessDetail = () => {
@@ -394,8 +393,16 @@ const BussinessProcessDetail = () => {
                       const filterProcessList = processList.filter(
                         (process) => process.id !== data.id
                       );
+
+                      const mappedProcessList = filterProcessList.map((el, index) => {
+                        return {
+                          ...el,
+                          index,
+                        };
+                      });
+
                       const filterDropdownValue = value.filter((value) => value.value !== data.id);
-                      setProcessList(filterProcessList);
+                      setProcessList(mappedProcessList);
                       setValue(filterDropdownValue);
                     }}
                   />
@@ -489,29 +496,29 @@ const BussinessProcessDetail = () => {
 };
 
 const VisualizationContainer = styled.div`
-	background: #ffffff;
-	border-radius: 16px;
-	box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
-	padding: 16px;
-	cursor: pointer;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
+  padding: 16px;
+  cursor: pointer;
 `;
 
 const Card = styled.div`
-	background: #ffffff;
-	border-radius: 16px;
-	padding: ${(p) => (p.padding ? p.padding : "16px")};
+  background: #ffffff;
+  border-radius: 16px;
+  padding: ${(p) => (p.padding ? p.padding : "16px")};
 `;
 
 const Center = styled.div`
-	display: flex;
-	justify-content: center;
-	align-items: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 `;
 
 const Separator = styled.div`
-	display: block;
-	height: 0;
-	border-bottom: 1px dashed #aaaaaa;
+  display: block;
+  height: 0;
+  border-bottom: 1px dashed #aaaaaa;
 `;
 
 export default BussinessProcessDetail;
