@@ -2957,46 +2957,6 @@ const EmployeeListCreate = () => {
                 <>
                   <Spacer size={20} />
 
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "flex-end",
-                      gap: "10px",
-                      marginBottom: "20px",
-                    }}
-                  >
-                    <Button
-                      size="big"
-                      variant={"tertiary"}
-                      key="submit"
-                      type="primary"
-                      onClick={() => {
-                        let tempEdit = fieldsTraining.map((mapDataItem) => {
-                          if (mapDataItem.id === modalChannelForm.data.id) {
-                            mapDataItem.imageCertTraining = "";
-
-                            return { ...mapDataItem };
-                          } else {
-                            return mapDataItem;
-                          }
-                        });
-
-                        replaceTraining(tempEdit);
-
-                        setModalChannelForm({ open: false, data: {}, typeForm: "" });
-                      }}
-                    >
-                      Delete
-                    </Button>
-
-                    <Button
-                      onClick={handleSubmitBankAccount(handleAddItemBankAccount)}
-                      variant="primary"
-                      size="big"
-                    >
-                      Edit
-                    </Button>
-                  </div>
                   <Image
                     src={
                       modalChannelForm.data?.imageCertTraining
@@ -3020,46 +2980,6 @@ const EmployeeListCreate = () => {
                 <>
                   <Spacer size={20} />
 
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "flex-end",
-                      gap: "10px",
-                      marginBottom: "20px",
-                    }}
-                  >
-                    <Button
-                      size="big"
-                      variant={"tertiary"}
-                      key="submit"
-                      type="primary"
-                      onClick={() => {
-                        let tempEdit = fieldsCertification.map((mapDataItem) => {
-                          if (mapDataItem.id === modalChannelForm.data.id) {
-                            mapDataItem.imageCertCertification = "";
-
-                            return { ...mapDataItem };
-                          } else {
-                            return mapDataItem;
-                          }
-                        });
-
-                        replaceCertification(tempEdit);
-
-                        setModalChannelForm({ open: false, data: {}, typeForm: "" });
-                      }}
-                    >
-                      Delete
-                    </Button>
-
-                    <Button
-                      onClick={handleSubmitBankAccount(handleAddItemBankAccount)}
-                      variant="primary"
-                      size="big"
-                    >
-                      Edit
-                    </Button>
-                  </div>
                   <Image
                     src={
                       modalChannelForm.data?.imageCertTraining
@@ -3256,12 +3176,6 @@ const Card = styled.div`
   background: #ffffff;
   border-radius: 16px;
   padding: ${(p: any) => (p.padding ? p.padding : "16px")};
-`;
-
-const Center = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
 `;
 
 const Label = styled.div`
