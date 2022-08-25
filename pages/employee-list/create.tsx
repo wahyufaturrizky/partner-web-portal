@@ -43,6 +43,7 @@ import { queryClient } from "../_app";
 import moment from "moment";
 import { usePostalCodeInfiniteLists } from "../../hooks/mdm/postal-code/usePostalCode";
 import { useTrainingTypeInfiniteLists } from "../../hooks/mdm/training-type/useTrainingType";
+import Image from "next/image";
 
 const EmployeeListCreate = () => {
   const router = useRouter();
@@ -781,7 +782,6 @@ const EmployeeListCreate = () => {
   };
 
   const handleAddItemTraining = (data: any) => {
-    console.log("@data", data);
     if (modalChannelForm.typeForm === "Edit Training") {
       let tempEdit = fieldsTraining.map((mapDataItem) => {
         if (mapDataItem.id === modalChannelForm.data.id) {
@@ -2454,6 +2454,12 @@ const EmployeeListCreate = () => {
       {modalChannelForm.open && (
         <Modal
           centered
+          width={
+            modalChannelForm.typeForm === "View Training" ||
+            modalChannelForm.typeForm === "View Certification"
+              ? "80%"
+              : undefined
+          }
           closable={true}
           visible={modalChannelForm.open}
           onCancel={() => setModalChannelForm({ open: false, data: {}, typeForm: "" })}
@@ -2950,13 +2956,127 @@ const EmployeeListCreate = () => {
               ) : modalChannelForm.typeForm === "View Training" ? (
                 <>
                   <Spacer size={20} />
-                  View Training
+
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "flex-end",
+                      gap: "10px",
+                      marginBottom: "20px",
+                    }}
+                  >
+                    <Button
+                      size="big"
+                      variant={"tertiary"}
+                      key="submit"
+                      type="primary"
+                      onClick={() => {
+                        let tempEdit = fieldsTraining.map((mapDataItem) => {
+                          if (mapDataItem.id === modalChannelForm.data.id) {
+                            mapDataItem.imageCertTraining = "";
+
+                            return { ...mapDataItem };
+                          } else {
+                            return mapDataItem;
+                          }
+                        });
+
+                        replaceTraining(tempEdit);
+
+                        setModalChannelForm({ open: false, data: {}, typeForm: "" });
+                      }}
+                    >
+                      Delete
+                    </Button>
+
+                    <Button
+                      onClick={handleSubmitBankAccount(handleAddItemBankAccount)}
+                      variant="primary"
+                      size="big"
+                    >
+                      Edit
+                    </Button>
+                  </div>
+                  <Image
+                    src={
+                      modalChannelForm.data?.imageCertTraining
+                        ? URL.createObjectURL(modalChannelForm.data?.imageCertTraining)
+                        : "/sample-cert.svg"
+                    }
+                    layout="responsive"
+                    width={100}
+                    height={100}
+                    placeholder="blur"
+                    blurDataURL={
+                      modalChannelForm.data?.imageCertTraining
+                        ? URL.createObjectURL(modalChannelForm.data?.imageCertTraining)
+                        : "/placeholder-employee-photo.svg"
+                    }
+                    alt="iew-training"
+                  />
                   <Spacer size={20} />
                 </>
               ) : modalChannelForm.typeForm === "View Certification" ? (
                 <>
                   <Spacer size={20} />
-                  View Certification
+
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "flex-end",
+                      gap: "10px",
+                      marginBottom: "20px",
+                    }}
+                  >
+                    <Button
+                      size="big"
+                      variant={"tertiary"}
+                      key="submit"
+                      type="primary"
+                      onClick={() => {
+                        let tempEdit = fieldsCertification.map((mapDataItem) => {
+                          if (mapDataItem.id === modalChannelForm.data.id) {
+                            mapDataItem.imageCertCertification = "";
+
+                            return { ...mapDataItem };
+                          } else {
+                            return mapDataItem;
+                          }
+                        });
+
+                        replaceCertification(tempEdit);
+
+                        setModalChannelForm({ open: false, data: {}, typeForm: "" });
+                      }}
+                    >
+                      Delete
+                    </Button>
+
+                    <Button
+                      onClick={handleSubmitBankAccount(handleAddItemBankAccount)}
+                      variant="primary"
+                      size="big"
+                    >
+                      Edit
+                    </Button>
+                  </div>
+                  <Image
+                    src={
+                      modalChannelForm.data?.imageCertTraining
+                        ? URL.createObjectURL(modalChannelForm.data?.imageCertTraining)
+                        : "/sample-cert.svg"
+                    }
+                    layout="responsive"
+                    width={100}
+                    height={100}
+                    placeholder="blur"
+                    blurDataURL={
+                      modalChannelForm.data?.imageCertTraining
+                        ? URL.createObjectURL(modalChannelForm.data?.imageCertTraining)
+                        : "/placeholder-employee-photo.svg"
+                    }
+                    alt="iew-training"
+                  />
                   <Spacer size={20} />
                 </>
               ) : (
@@ -3064,15 +3184,18 @@ const EmployeeListCreate = () => {
                   marginBottom: "20px",
                 }}
               >
-                <Button
-                  size="big"
-                  variant={"tertiary"}
-                  key="submit"
-                  type="primary"
-                  onClick={() => setModalChannelForm({ open: false, data: {}, typeForm: "" })}
-                >
-                  Cancel
-                </Button>
+                {modalChannelForm.typeForm === "View Certification" ||
+                  (modalChannelForm.typeForm === "View Training" ? null : (
+                    <Button
+                      size="big"
+                      variant={"tertiary"}
+                      key="submit"
+                      type="primary"
+                      onClick={() => setModalChannelForm({ open: false, data: {}, typeForm: "" })}
+                    >
+                      Cancel
+                    </Button>
+                  ))}
 
                 {modalChannelForm.typeForm === "Add Bank Account" ||
                 modalChannelForm.typeForm === "Edit Bank Account" ? (
@@ -3110,7 +3233,8 @@ const EmployeeListCreate = () => {
                   >
                     Save
                   </Button>
-                ) : (
+                ) : modalChannelForm.typeForm === "Add Certification" ||
+                  modalChannelForm.typeForm === "Edit Certification" ? (
                   <Button
                     onClick={handleSubmitCertification(handleAddItemCertification)}
                     variant="primary"
@@ -3118,7 +3242,7 @@ const EmployeeListCreate = () => {
                   >
                     Save
                   </Button>
-                )}
+                ) : null}
               </div>
             </div>
           }
