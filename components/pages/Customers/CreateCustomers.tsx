@@ -6,7 +6,6 @@ import {
   Row,
   Tabs,
   Spacer,
-  Text,
   Dropdown,
   FileUploaderAllFiles,
   Accordion,
@@ -34,9 +33,7 @@ export default function CreateCustomers() {
   const [formType, setFormType] = useState('Company')
   const isCompany = formType === 'Company'
 
-
   const {
-    register,
     control,
     handleSubmit,
     formState: { errors },
