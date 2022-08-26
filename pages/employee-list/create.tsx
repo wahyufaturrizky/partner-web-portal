@@ -1893,7 +1893,7 @@ const EmployeeListCreate = () => {
                     <Input
                       type="number"
                       width="100%"
-                      error={errors.detailInformation?.personal?.insurance?.message}
+                      error={errors.personal?.insurance?.message}
                       label="Medical Number (Insurance)"
                       height="48px"
                       placeholder={"e.g 123456789"}
@@ -1913,7 +1913,7 @@ const EmployeeListCreate = () => {
                       width="100%"
                       label="Personal Email"
                       height="48px"
-                      error={errors.detailInformation?.personal?.email?.message}
+                      error={errors.personal?.email?.message}
                       placeholder={"e.g you@email.com"}
                       {...register("personal.email", {
                         pattern: {
@@ -1934,7 +1934,7 @@ const EmployeeListCreate = () => {
                     <Input
                       type="number"
                       width="100%"
-                      error={errors.detailInformation?.personal?.phone?.message}
+                      error={errors.personal?.phone?.message}
                       label="Phone Number"
                       height="48px"
                       placeholder={"e.g 022 709999"}
@@ -1955,7 +1955,7 @@ const EmployeeListCreate = () => {
                       label="Mobile Number"
                       height="48px"
                       required
-                      error={errors.detailInformation?.personal?.mobile?.message}
+                      error={errors.personal?.mobile?.message}
                       placeholder={"e.g you@email.com"}
                       {...register("personal.mobile", {
                         required: "Please enter mobile number.",
@@ -1973,7 +1973,7 @@ const EmployeeListCreate = () => {
                     <Input
                       type="number"
                       width="100%"
-                      error={errors.detailInformation?.personal?.visa?.message}
+                      error={errors.personal?.visa?.message}
                       label="Visa Number"
                       height="48px"
                       placeholder={"e.g 123456789"}
@@ -2117,11 +2117,7 @@ const EmployeeListCreate = () => {
                                 rows={2}
                                 onChange={onChange}
                                 required
-                                error={
-                                  errors?.["detailInformation"]?.["address"]?.[index]?.["street"]?.[
-                                    "message"
-                                  ]
-                                }
+                                error={errors?.["address"]?.[index]?.["street"]?.["message"]}
                                 placeholder="e.g Front Groceries No. 5"
                                 label="Street"
                               />
@@ -2359,13 +2355,9 @@ const EmployeeListCreate = () => {
                           <Input
                             type="number"
                             width="100%"
-                            error={
-                              errors?.["detailInformation"]?.["address"]?.[index]?.["lon"]?.[
-                                "message"
-                              ]
-                            }
+                            error={errors?.["address"]?.[index]?.["lon"]?.["message"]}
                             placeholder="e.g -6.909829165558788, 107.57502431159176"
-                            label="lon"
+                            label="Longitude"
                             {...register(`address.${index}.lon`, {
                               maxLength: {
                                 value: 225,
@@ -2380,13 +2372,9 @@ const EmployeeListCreate = () => {
                           <Input
                             type="number"
                             width="100%"
-                            error={
-                              errors?.["detailInformation"]?.["address"]?.[index]?.["lat"]?.[
-                                "message"
-                              ]
-                            }
+                            error={errors?.["address"]?.[index]?.["lat"]?.["message"]}
                             placeholder="e.g -6.909829165558788, 107.57502431159176"
-                            label="lat"
+                            label="Latitude"
                             {...register(`address.${index}.lat`, {
                               maxLength: {
                                 value: 225,
