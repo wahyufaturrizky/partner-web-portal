@@ -323,6 +323,7 @@ const EmployeeListCreate = () => {
           return undefined;
         }
       },
+      enabled: false,
     },
   });
 
@@ -425,6 +426,7 @@ const EmployeeListCreate = () => {
           return undefined;
         }
       },
+      enabled: false,
     },
   });
 
@@ -494,6 +496,7 @@ const EmployeeListCreate = () => {
           return undefined;
         }
       },
+      enabled: false,
     },
   });
 
@@ -613,14 +616,6 @@ const EmployeeListCreate = () => {
     });
 
   const onSubmit = (data: any) => {
-    console.log("@data", data);
-    data.address.map((dataAddress: any) => {
-      if (dataAddress.hasOwnProperty("id") || dataAddress.hasOwnProperty("key")) {
-        delete dataAddress.id;
-        delete dataAddress.key;
-      }
-    });
-
     data.bank.map((dataBank: any) => {
       if (dataBank.hasOwnProperty("id") || dataBank.hasOwnProperty("key")) {
         delete dataBank.id;
@@ -653,6 +648,24 @@ const EmployeeListCreate = () => {
       if (dataFamily.hasOwnProperty("id") || dataFamily.hasOwnProperty("key")) {
         delete dataFamily.id;
         delete dataFamily.key;
+      }
+    });
+
+    data.address.map((dataAddress: any) => {
+      if (
+        dataAddress.hasOwnProperty("province") ||
+        dataAddress.hasOwnProperty("city") ||
+        dataAddress.hasOwnProperty("district") ||
+        dataAddress.hasOwnProperty("zone") ||
+        dataAddress.hasOwnProperty("id") ||
+        dataAddress.hasOwnProperty("key")
+      ) {
+        delete dataAddress.id;
+        delete dataAddress.key;
+        delete dataAddress.province;
+        delete dataAddress.city;
+        delete dataAddress.district;
+        delete dataAddress.zone;
       }
     });
 
@@ -1246,12 +1259,21 @@ const EmployeeListCreate = () => {
       <Card padding="20px">
         <Row justifyContent="space-between" alignItems="center" nowrap>
           <Row alignItems="center" gap="16px">
-            <Text color="grey.regular">Employee Type</Text>
+            <Text color="grey.regular">
+              Employee Type <span style={{ color: colors.red.regular }}>*</span>
+            </Text>
             <Controller
               control={control}
               name="type"
-              render={({ field: { onChange } }) => (
+              rules={{
+                required: {
+                  value: true,
+                  message: "Please enter type employee.",
+                },
+              }}
+              render={({ field: { onChange }, fieldState: { error } }) => (
                 <Dropdown
+                  error={error?.message}
                   label=""
                   width="185px"
                   noSearch
@@ -1356,7 +1378,7 @@ const EmployeeListCreate = () => {
                   height="48px"
                   error={errors.name?.message}
                   required
-                  placeholder={"e.g 123456789"}
+                  placeholder={"e.g Jane Doe"}
                   {...register("name", {
                     required: "Please enter Name.",
                     maxLength: {
@@ -1577,8 +1599,8 @@ const EmployeeListCreate = () => {
                         }}
                         items={
                           isFetchingBranch && !isFetchingMoreBranch
-                            ? [{ id: "test branch", value: "test branch" }]
-                            : branchList
+                            ? []
+                            : [{ id: "test branch", value: "test branch" }]
                         }
                         onChange={(value: any) => {
                           onChange(value);
@@ -1617,7 +1639,7 @@ const EmployeeListCreate = () => {
                     <DatePickerInput
                       fullWidth
                       onChange={(date: any, dateString: any) => onChange(dateString)}
-                      label="Join Date"
+                      label="Resign Date"
                     />
                   )}
                 />
@@ -2073,12 +2095,21 @@ const EmployeeListCreate = () => {
                         <Col width={"100%"}>
                           <Controller
                             control={control}
+                            rules={{
+                              required: {
+                                value: true,
+                                message: "Please enter address type.",
+                              },
+                            }}
                             name={`address.${index}.type`}
-                            render={({ field: { onChange } }) => (
+                            render={({ field: { onChange }, fieldState: { error } }) => (
                               <>
-                                <Label>Address Type</Label>
+                                <Label>
+                                  Address Type <span style={{ color: colors.red.regular }}>*</span>
+                                </Label>
                                 <Spacer size={3} />
                                 <Dropdown
+                                  error={error?.message}
                                   noSearch
                                   width="100%"
                                   items={[
