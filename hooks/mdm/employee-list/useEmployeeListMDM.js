@@ -62,12 +62,43 @@ const useBranchInfiniteLists = ({ query = {}, options }) => {
   });
 };
 
+const fetchInfiniteeReportToLists = async ({ pageParam = 1, queryKey }) => {
+  const searchQuery = queryKey[1].search;
+  return mdmService(`/employee/reportto`, {
+    params: {
+      search: searchQuery,
+      limit: 10,
+      page: pageParam,
+      sortBy: "created_at",
+      sortOrder: "DESC",
+      ...queryKey[1],
+    },
+  }).then((data) => data);
+};
+
+const useReportToInfiniteLists = ({ query = {}, options }) => {
+  return useInfiniteQuery(["reportto-list/infinite", query], fetchInfiniteeReportToLists, {
+    keepPreviousData: true,
+    ...options,
+  });
+};
+
 const fetchEmployeeListMDM = async ({ id }) => {
   return mdmService(`/employee/${id}`).then((data) => data);
 };
 
 const useEmployeeListMDM = ({ id, options }) => {
   return useQuery(["employee", id], () => fetchEmployeeListMDM({ id }), {
+    ...options,
+  });
+};
+
+const fetchCountryStructureListMDM = async ({ id }) => {
+  return mdmService(`/employee/country/structures/${id}`).then((data) => data);
+};
+
+const useCountryStructureListMDM = ({ id, options }) => {
+  return useQuery(["employee/country/structures", id], () => fetchCountryStructureListMDM({ id }), {
     ...options,
   });
 };
@@ -124,6 +155,19 @@ const useUploadFileEmployeeListMDM = ({ options }) => {
   );
 };
 
+const useUploadFilePhotoEmployeeMDM = ({ options }) => {
+  return useMutation(
+    (data) =>
+      mdmService(`/employee/file/upload`, {
+        method: "POST",
+        data,
+      }),
+    {
+      ...options,
+    }
+  );
+};
+
 export {
   useEmployeeListsMDM,
   useEmployeeListMDM,
@@ -133,4 +177,7 @@ export {
   useUploadFileEmployeeListMDM,
   useEmployeeInfiniteLists,
   useBranchInfiniteLists,
+  useUploadFilePhotoEmployeeMDM,
+  useReportToInfiniteLists,
+  useCountryStructureListMDM,
 };

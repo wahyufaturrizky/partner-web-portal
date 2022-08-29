@@ -5,7 +5,6 @@ import {
   Col,
   DropdownMenu,
   FileUploadModal,
-  Lozenge,
   Modal,
   Pagination,
   Row,
@@ -15,7 +14,6 @@ import {
   Text,
 } from "pink-lava-ui";
 import { useState } from "react";
-import { useForm } from "react-hook-form";
 import styled from "styled-components";
 import { ICDownload, ICUpload } from "../../assets/icons";
 import {
@@ -130,16 +128,14 @@ const EmployeeList = () => {
       },
     });
 
-  const { mutate: uploadFileUom, isLoading: isLoadingUploadFileUom } = useUploadFileEmployeeListMDM(
-    {
-      options: {
-        onSuccess: () => {
-          queryClient.invalidateQueries(["employee-list"]);
-          setShowUpload(false);
-        },
+  const { mutate: uploadFileEmployee } = useUploadFileEmployeeListMDM({
+    options: {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["employee-list"]);
+        setShowUpload(false);
       },
-    }
-  );
+    },
+  });
 
   const columns = [
     {
@@ -177,7 +173,7 @@ const EmployeeList = () => {
     formData.append("company", "KSNI");
     formData.append("file", file);
 
-    uploadFileUom(formData);
+    uploadFileEmployee(formData);
   };
 
   return (
@@ -328,9 +324,9 @@ const EmployeeList = () => {
                   size="big"
                   onClick={() => {
                     if (isShowDelete.type === "selection") {
-                      deleteEmployeeList({ ids: selectedRowKeys, company: "KSNI" });
+                      deleteEmployeeList({ ids: selectedRowKeys });
                     } else {
-                      deleteEmployeeList({ ids: [modalForm.data.id], company: "KSNI" });
+                      deleteEmployeeList({ ids: [modalForm.data.id] });
                     }
                   }}
                 >
