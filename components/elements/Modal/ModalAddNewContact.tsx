@@ -12,7 +12,7 @@ interface PropsContactModal {
   visible: true | false
   onCancel: () => void
   onSubmit: () => VoidFunction
-  register: any
+  registerContact: any
   setValueContact: any
   contact: {
     name: { message: string }
@@ -28,7 +28,7 @@ export default function ModalAddNewContact({
   visible,
   onCancel,
   onSubmit,
-  register,
+  registerContact,
   contact,
   setValueContact
 }: PropsContactModal) {
@@ -66,7 +66,7 @@ export default function ModalAddNewContact({
         <div key={1}>
           <Dropdown
             label="Title"
-            width={"100%"}
+            width="100%"
             noSearch
             required
             handleChange={(value: string) => {
@@ -81,7 +81,7 @@ export default function ModalAddNewContact({
             label="Full Name" 
             required
             error={contact?.name?.message}
-            {...register('contact.name', {
+            {...registerContact('contact.name', {
               required: 'full name must be filled'
             })}
           />
@@ -92,7 +92,7 @@ export default function ModalAddNewContact({
             label="Job Position"
             required
             error={contact?.job_position?.message}
-            {...register('contact.job_position', {
+            {...registerContact('contact.job_position', {
               required: 'job_position must be filled'
             })}
           />
@@ -103,7 +103,7 @@ export default function ModalAddNewContact({
             label="Mobile"
             required
             error={contact?.mobile?.message}
-            {...register('contact.mobile', {
+            {...registerContact('contact.mobile', {
               required: 'mobile must be filled'
             })}
           />
@@ -114,7 +114,7 @@ export default function ModalAddNewContact({
             label="Email"
             required
             error={contact?.email?.message}
-            {...register('contact.email', {
+            {...registerContact('contact.email', {
               required: 'email must be filled'
             })}
           />
@@ -125,7 +125,7 @@ export default function ModalAddNewContact({
             label="NIK (optional)"
             required
             error={contact?.nik?.message}
-            {...register('contact.nik', {
+            {...registerContact('contact.nik', {
               required: 'nik must be filled'
             })}
           />

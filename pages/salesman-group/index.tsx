@@ -139,7 +139,6 @@ const SalesmanGroup = () => {
 
   useEffect(() => {
     if (salesmanGroupId !== 0) {
-      console.log("kepanggil");
       refetchSalesmanGroup();
     }
   }, [salesmanGroupId]);
