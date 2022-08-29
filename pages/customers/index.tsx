@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useRouter } from "next/router";
 import styled from "styled-components";
 import {
@@ -11,23 +12,35 @@ import {
   Table,
   Text,
 } from "pink-lava-ui";
+import usePagination from "@lucasmogari/react-pagination";
+import { useListCustomers } from '../../hooks/mdm/customers/useCustomersMDM'
 import { ICDownload, ICUpload } from "../../assets";
 
 export default function Customer() {
+  const pagination = usePagination({
+    page: 1,
+    itemsPerPage: 10,
+    maxPageItems: Infinity,
+    numbers: true,
+    arrows: true,
+    totalItems: 100,
+  });
   const router = useRouter()
+  const [search, setSearch] = useState("");
+  const [itemsSelected, setItemsSelected] = useState([]);
 
   const columns = [
     {
       title: "Customer ID",
-      dataIndex: "customer_code",
+      dataIndex: "id",
     },
     {
       title: "Customer Name",
-      dataIndex: "customer_name",
+      dataIndex: "name",
     },
     {
       title: "Customer Group",
-      dataIndex: "customer_group",
+      dataIndex: "group",
     },
     {
       title: "Salesman",
@@ -35,11 +48,66 @@ export default function Customer() {
     },
     {
       title: "Action",
-      dataIndex: "action",
+      dataIndex: "id",
       width: "15%",
       align: "left",
+      render: (id: any) => (
+        <div style={{ display: "flex", justifyContent: "left" }}>
+          <Button
+            size="small"
+            onClick={() => router.push(`/customers/${id}`)}
+            variant="tertiary"
+          >
+            View Detail
+          </Button>
+        </div>
+      )
     },
   ];
+
+  const { data: listCustomers, isLoading } = useListCustomers({
+    options: {},
+    query: {
+      search
+    },
+  });
+
+  const actDrowpdown = [
+    {
+      key: 1,
+      value: (
+        <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+          <ICDownload />
+          <p style={{ margin: "0" }}>Download Template</p>
+        </div>
+      ),
+    },
+    {
+      key: 2,
+      value: (
+        <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+          <ICUpload />
+          <p style={{ margin: "0" }}>Upload Template</p>
+        </div>
+      ),
+    },
+    {
+      key: 3,
+      value: (
+        <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+          <ICDownload />
+          <p style={{ margin: "0" }}>Download Data</p>
+        </div>
+      ),
+    },
+  ]
+
+  const rowSelection = {
+    itemsSelected,
+    onChange: (selected: any) => {
+      setItemsSelected(selected);
+    },
+  }
 
   return (
     <div>
@@ -52,7 +120,7 @@ export default function Customer() {
           <Search
             width="340px"
             placeholder="Search Customer, Salesman, etc"
-            onChange={() => {}}
+            onChange={({ target }: any) => setSearch(target.value)}
           />
           <Row gap="16px">
             <Button
@@ -71,35 +139,7 @@ export default function Customer() {
               textColor={"pink.regular"}
               iconStyle={{ fontSize: "12px" }}
               onClick={() => {}}
-              menuList={[
-                {
-                  key: 1,
-                  value: (
-                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                      <ICDownload />
-                      <p style={{ margin: "0" }}>Download Template</p>
-                    </div>
-                  ),
-                },
-                {
-                  key: 2,
-                  value: (
-                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                      <ICUpload />
-                      <p style={{ margin: "0" }}>Upload Template</p>
-                    </div>
-                  ),
-                },
-                {
-                  key: 3,
-                  value: (
-                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                      <ICDownload />
-                      <p style={{ margin: "0" }}>Download Data</p>
-                    </div>
-                  ),
-                },
-              ]}
+              menuList={actDrowpdown}
             />
             <Button
               size="big"
@@ -115,12 +155,12 @@ export default function Customer() {
       <Card style={{ padding: "16px 20px" }}>
         <Col gap={"60px"}>
           <Table
-            loading={false}
+            loading={isLoading}
             columns={columns}
-            data={[]}
-            rowSelection={() => {}}
+            data={listCustomers?.rows || []}
+            rowSelection={rowSelection}
           />
-          <Pagination pagination={[]} />
+          <Pagination pagination={pagination} />
         </Col>
       </Card>
     </div>

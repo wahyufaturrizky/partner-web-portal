@@ -1,4 +1,4 @@
-import { useQuery, useMutation } from "react-query";
+import { useQuery, useMutation, useInfiniteQuery } from "react-query";
 import { mdmService } from "../../../lib/client";
 
 // Get All
@@ -22,6 +22,27 @@ const usePostalCodes = ({ query = {}, options } = {}) => {
   });
 };
 // End of Get All
+
+const fetchInfiniteePostalCodeLists = async ({ pageParam = 1, queryKey }) => {
+  const searchQuery = queryKey[1].search;
+  return mdmService(`/postal-code`, {
+    params: {
+      search: searchQuery,
+      limit: 10,
+      page: pageParam,
+      sortBy: "id",
+      sortOrder: "ASC",
+      ...queryKey[1],
+    },
+  }).then((data) => data);
+};
+
+const usePostalCodeInfiniteLists = ({ query = {}, options }) => {
+  return useInfiniteQuery(["postal-code/infinite", query], fetchInfiniteePostalCodeLists, {
+    keepPreviousData: true,
+    ...options,
+  });
+};
 
 // Get One
 const fetchPostalCode = async ({ postalCode_id }) => {
@@ -109,4 +130,5 @@ export {
   useDeletePostalCode,
   useCountries,
   useCountryStructures,
+  usePostalCodeInfiniteLists,
 };

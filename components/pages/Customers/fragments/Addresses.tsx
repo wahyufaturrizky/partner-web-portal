@@ -1,4 +1,5 @@
-import React, { useState } from 'react'
+import React from 'react'
+import { Controller } from 'react-hook-form'
 import {
   Button,
   Col,
@@ -6,55 +7,63 @@ import {
   Row,
   Spacer,
   Dropdown,
-  Checkbox,
+  Lozenge,
   Text,
-  TextArea,
   FileUploaderAllFiles
 } from "pink-lava-ui";
-import styled from 'styled-components'
-import { Controller, useForm, Control } from 'react-hook-form'
 
+import { ICCheckPrimary } from "../../../../assets";
 import IconAdd from '../../../../assets/icons/ICAdd'
 
-type FormValues = {
-  store_picture: string;
-};
+export default function Addresses(props: any) {
+  const {
+    getValues,
+    fieldsAddress,
+    appendAddress,
+    replaceAddress,
+    removeAddress,
+    control,
+    register,
+    address,
+    addressBodyField,
+  } = props
 
-interface PropsFormContact {
-  isPrimary: boolean;
-  label: number;
-  onChangeChecked: () => void;
-  control: Control<FormValues>
-}
+  const propsFieldForm = {
+    getValues,
+    control,
+    fieldsAddress,
+    replaceAddress,
+    removeAddress,
+    register,
+    address
+  }
 
-export default function Addresses() {
-  const [isPrimary, setIsPrimary] = useState(false)
-  const { control } = useForm<FormValues>({ shouldUseNativeValidation: true });
-  const [addContact, setAddContact] = useState([0])
+  const handleAddMoreAddresss = () => {
+    appendAddress({
+      ...addressBodyField,
+      key: fieldsAddress?.length
+    })
+  }
 
   return (
     <div>
       <Button
         size="big"
         variant="primary"
-        onClick={() => setAddContact([...addContact, addContact[0] + 1])}>
-        <IconAdd /> Add More Address
+        onClick={handleAddMoreAddresss}
+      >
+        <IconAdd />
+        Add More Address
       </Button>
       <Spacer size={20} />
       {
-        addContact.map((item, index) =>
-          <>
-            <FormContact
-              label={index + 1}
-              key={item}
-              isPrimary={isPrimary}
-              control={control}
-              onChangeChecked={() => setIsPrimary(!isPrimary)}
-            />
-            <Spacer size={30} />
-            {addContact.length > 1 && <hr />}
-            <Spacer size={30} />
-          </>
+        fieldsAddress.map((field: any, index: number | string) =>
+        <>
+          <FormContact key={index} index={index} {...propsFieldForm} />
+          <Spacer size={30} />
+          <hr />
+          <Spacer size={30} />
+        </>
         )
       }
     </div>
@@ -62,64 +71,185 @@ export default function Addresses() {
 }
 
 const FormContact = ({
-  label,
-  isPrimary,
-  onChangeChecked,
-  control
-}: PropsFormContact) => {
+  control,
+  index,
+  getValues,
+  fieldsAddress,
+  replaceAddress,
+  removeAddress,
+  register,
+}: any) => {
+
+  const setAsPrimary = () => {
+    let editAsPrimary = fieldsAddress?.map((items: any) => {
+      if (items?.key === index) {
+        items.primary = true;
+        return { ...items };
+      } else {
+        items.primary = false;
+        return { ...items };
+      }
+    });
+    replaceAddress(editAsPrimary);
+  }
+
+  const propsButtonSetPrimary = {
+    getValues,
+    index,
+    removeAddress,
+    fieldsAddress,
+    setAsPrimary: () => setAsPrimary()
+  }
+
+  const listFakeCountres = [
+    { id: 'indonesia', value: 'Indonesia' },
+    { id: 'japan', value: 'Japan' },
+    { id: 'malaysia', value: 'Malaysia' },
+    { id: 'singepore', value: 'Singepore' },
+  ]
+
   return (
     <>
-      <ElementFlex>
-        <LabelChekbox>Address {label}</LabelChekbox>
-        <Row alignItems="center">
-          <Checkbox checked={isPrimary} onChange={onChangeChecked} />
-          <div style={{ cursor: "pointer" }} onClick={() => { }}>
-            <Text>Primary</Text>
-          </div>
-        </Row>
-      </ElementFlex>
+      <Controller
+        control={control}
+        name={`address.${index}.primary`}
+        render={() => <ButtonSetFormsPrimary {...propsButtonSetPrimary} />}
+      />
       <Spacer size={30} />
       <Row gap="20px" width="100%">
         <Col width="48%">
-          <Dropdown label="Address Type" width="100%" />
+          <Controller
+            control={control}
+            name={`address.${index}.address_type`}
+            render={({ field: { onChange } }) => (
+              <Dropdown
+                label="Address Type"
+                width="100%"
+                noSearch
+                items={listFakeCountres}
+                handleChange={(value: string) => onChange(value)}
+              />
+            )}
+          />
+
           <Spacer size={10} />
-          <Dropdown label="Country" width="100%" />
+          <Controller
+            control={control}
+            name={`address.${index}.country`}
+            render={({ field: { onChange } }) => (
+              <Dropdown
+                label="Country"
+                width="100%"
+                noSearch
+                items={listFakeCountres}
+                handleChange={(value: string) => onChange(value)}
+              />
+            )} />
           <Spacer size={10} />
-          <Dropdown label="City" width="100%" />
+          <Controller
+            control={control}
+            name={`address.${index}.city`}
+            render={({ field: { onChange } }) => (
+              <Dropdown
+                label="City"
+                width="100%"
+                noSearch
+                items={listFakeCountres}
+                handleChange={(value: string) => onChange(value)}
+              />
+            )} />
           <Spacer size={10} />
-          <Dropdown label="Zone" width="100%" />
+          <Controller
+            control={control}
+            name={`address.${index}.zone`}
+            render={({ field: { onChange } }) => (
+              <Dropdown
+                label="Zone"
+                width="100%"
+                noSearch
+                items={listFakeCountres}
+                handleChange={(value: string) => onChange(value)}
+              />
+            )} />
           <Spacer size={10} />
           <Input
             height="48px"
             placeholder="e.g 1421.31231.1231"
             label="Longitude"
             width="100%"
+            noSearch
+            required
+            {...register(`address.${index}.longtitude`, {
+              required: 'longtitude must be filled'
+            })}
           />
           <Spacer size={30} />
-          <UploadImage control={control} />
+          <UploadImage control={control} index={index} />
         </Col>
         <Col width="48%">
-          <TextArea
+          <Input
             width="100%"
-            rows={1}
-            height="10px"
+            height="48px"
             placeholder="e.g Front Groceries No. 5"
-            label={<Label>Street</Label>}
-            onChange={() => { }}
-            defaultValue={['']}
+            label="Street"
+            required
+            {...register(`address.${index}.street`, {
+              required: 'street must be filled'
+            })}
           />
           <Spacer size={10} />
-          <Dropdown label="Province" width="100%" />
+          <Controller
+            control={control}
+            name={`address.${index}.province`}
+            render={({ field: { onChange } }) => (
+              <Dropdown
+                label="Province"
+                width="100%"
+                noSearch
+                items={listFakeCountres}
+                handleChange={(value: string) => onChange(value)}
+              />
+            )} />
           <Spacer size={10} />
-          <Dropdown label="District" width="100%" />
+          <Controller
+            rules={{ required: "District type should be filled" }}
+            control={control}
+            name={`address.${index}.district`}
+            render={({ field: { onChange } }) => (
+              <Dropdown
+                label="District"
+                width="100%"
+                noSearch
+                items={listFakeCountres}
+                handleChange={(value: string) => onChange(value)}
+              />
+            )} />
           <Spacer size={10} />
-          <Dropdown label="Postal Code" width="100%" />
+          <Controller
+            rules={{ required: {
+              value: true,
+              message: "Please enter postal code.",
+            }}}
+            control={control}
+            name={`address.${index}.postal_code`}
+            render={({ field: { onChange } }) => (
+              <Dropdown
+                label="Postal Code"
+                width="100%"
+                noSearch
+                items={listFakeCountres}
+                handleChange={(value: string) => onChange(value)}
+              />
+            )} />
           <Spacer size={10} />
           <Input
             height="48px"
             placeholder="e.g 1421.31231.1231"
             label="Latitude"
             width="100%"
+            {...register(`address.${index}.latitude`, {
+              required: 'latitude must be filled'
+            })}
           />
         </Col>
       </Row>
@@ -127,12 +257,59 @@ const FormContact = ({
   )
 }
 
-const UploadImage = ({ control }: { control: Control<FormValues> }) => {
+const ButtonSetFormsPrimary = ({
+  getValues,
+  index,
+  setAsPrimary,
+  removeAddress,
+  fieldsAddress,
+}: any) => {
+  const isDeleteAktifed: boolean = fieldsAddress?.length > 1
+  return (
+    <>
+      <Text color="blue.dark" variant="headingMedium">
+        {getValues(`address.${index}.primary`)
+          ? "Home"
+          : "New Address"}
+      </Text>
+      <Row gap="12px" alignItems="center">
+        {getValues(`address.${index}.primary`)
+          ? <Lozenge variant="blue">
+            <Row alignItems="center">
+              <ICCheckPrimary />
+              Primary
+            </Row>
+          </Lozenge>
+          : <Text
+            clickable
+            color="pink.regular"
+            onClick={setAsPrimary}>
+            Set as Primary
+          </Text>
+        }
+        {
+          isDeleteAktifed && (
+            <> |
+              <div style={{ cursor: "pointer" }}>
+                <Text color="pink.regular" onClick={() => removeAddress(index)}>
+                  Delete
+                </Text>
+              </div>
+            </>
+          )
+        }
+      </Row>
+    </>
+  )
+}
+
+const UploadImage = ({ control, index }:
+  { index: number, control: any }) => {
   return (
     <Controller
       control={control}
       rules={{ required: true }}
-      name="store_picture"
+      name={`address.${index}.logo_store`}
       render={({ field: { onChange } }) => (
         <FileUploaderAllFiles
           label="Company Logo"
@@ -151,23 +328,4 @@ const UploadImage = ({ control }: { control: Control<FormValues> }) => {
   )
 }
 
-const LabelChekbox = styled.p`
-  margin: 0;
-  font-weight: 600;
-  font-size: 20px;
-  line-height: 27px;
-  color: #1E858E;
-`
 
-const ElementFlex = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 5px;
-`
-
-const Label = styled.p`
-  font-weight: bold;
-  line-height: 14px;
-  font-size: 16px;
-  margin: 0 0 10px 0;
-`
