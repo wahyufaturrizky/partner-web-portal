@@ -1,4 +1,4 @@
-import { useQuery } from 'react-query'
+import { useMutation, useQuery } from 'react-query'
 import { mdmService } from "../../../lib/client";
 
 const fetchListCustomers = async ({ query = {} }) => {
@@ -20,4 +20,16 @@ const useListCustomers = ({ options, query = {} }) => {
   });
 }
 
-export { useListCustomers }
+const useCreateCustomers = ({ options }) => {
+  return useMutation(
+    (data) => {
+      return mdmService('/customer', {
+        method: 'POST',
+        data
+      }),
+        { ...options }
+    }
+  )
+}
+
+export { useListCustomers, useCreateCustomers }

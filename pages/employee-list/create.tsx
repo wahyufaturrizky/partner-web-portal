@@ -200,7 +200,7 @@ const EmployeeListCreate = () => {
     register: registerFamily,
     handleSubmit: handleSubmitFamily,
     control: controlFamily,
-    formState: { errors: errorsFamily },
+    formState: { errors: errorsFamily }
   } = useForm({
     shouldUseNativeValidation: true,
   });
@@ -616,6 +616,13 @@ const EmployeeListCreate = () => {
     });
 
   const onSubmit = (data: any) => {
+    data.address.map((dataAddress: any) => {
+      if (dataAddress.hasOwnProperty("id") || dataAddress.hasOwnProperty("key")) {
+        delete dataAddress.id;
+        delete dataAddress.key;
+      }
+    });
+
     data.bank.map((dataBank: any) => {
       if (dataBank.hasOwnProperty("id") || dataBank.hasOwnProperty("key")) {
         delete dataBank.id;
