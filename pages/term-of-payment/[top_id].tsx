@@ -27,7 +27,7 @@ const TermOfPaymentEdit = () => {
   const [termList, setTermList] = useState<any[]>([]);
   const [removeList, setRemoveList] = useState<any[]>([]);
 
-  const { register, control, handleSubmit } = useForm();
+  const { register, handleSubmit } = useForm();
 
   const { mutate: updateTermOfPayment, isLoading: isLoadingUpdateTermOfPayment } =
     useUpdateTermOfPayment({

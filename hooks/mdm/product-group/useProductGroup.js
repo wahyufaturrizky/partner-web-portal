@@ -30,10 +30,10 @@ const useProductGroup = ({ id, companyId, options }) => {
   });
 };
 
-function useFilterProductGroup({ options }) {
+function useFilterProductGroup({ pagingationParam: { page = 1, limit = 10 }, options }) {
   return useMutation(
     (data) =>
-      mdmService(`/product-group/filter-product`, {
+      mdmService(`/product-group/filter-product?page=${page}&limit=${limit}`, {
         method: "POST",
         data,
       }),
