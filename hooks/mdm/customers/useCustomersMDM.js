@@ -32,4 +32,14 @@ const useCreateCustomers = ({ options }) => {
   )
 }
 
-export { useListCustomers, useCreateCustomers }
+const useDeleteCustomers = ({ options }) => {
+  return useMutation((ids) =>
+    mdmService('/customer', {
+      method: 'DELETE',
+      data: ids
+    }),
+    { ...options }
+  )
+}
+
+export { useListCustomers, useCreateCustomers, useDeleteCustomers }

@@ -13,8 +13,9 @@ import {
   Text,
 } from "pink-lava-ui";
 import usePagination from "@lucasmogari/react-pagination";
-import { useListCustomers } from '../../hooks/mdm/customers/useCustomersMDM'
+import { useListCustomers, useDeleteCustomers } from '../../hooks/mdm/customers/useCustomersMDM'
 import { ICDownload, ICUpload } from "../../assets";
+import { ModalDeleteConfirmation } from '../../components/elements/Modal/ModalConfirmationDelete'
 
 export default function Customer() {
   const pagination = usePagination({
@@ -28,6 +29,7 @@ export default function Customer() {
   const router = useRouter()
   const [search, setSearch] = useState("");
   const [itemsSelected, setItemsSelected] = useState([]);
+  const [visible, setVisible] = useState(false)
 
   const columns = [
     {
@@ -65,12 +67,40 @@ export default function Customer() {
     },
   ];
 
-  const { data: listCustomers, isLoading } = useListCustomers({
-    options: {},
+  const { data: listCustomers, isLoading, refetch } = useListCustomers({
+    options: {
+      onSuccess: (items: any) => {
+        pagination.setTotalItems(items?.totalRow);
+      },
+      select: ({ rows, totalRow }: any) => {
+        const data =  rows?.map((items: any) => {
+          return {
+            key: items?.id,
+            id: items?.id,
+            name: items?.name,
+            group: items?.group,
+            salesman: items?.salesman
+          }
+        }) 
+        return { data, totalRow }
+      }
+    },
     query: {
-      search
+      search,
+      page: pagination.page,
+      limit: pagination.itemsPerPage,
     },
   });
+
+  const { mutate: deleteCustomer, isLoading: loadingDelete }: any = useDeleteCustomers({
+    options: {
+      onSuccess: () => {
+        refetch()
+        setItemsSelected([])
+        setVisible(false)
+      }
+    }
+  })
 
   const actDrowpdown = [
     {
@@ -105,7 +135,7 @@ export default function Customer() {
   const rowSelection = {
     itemsSelected,
     onChange: (selected: any) => {
-      setItemsSelected(selected);
+      setItemsSelected(selected)
     },
   }
 
@@ -126,8 +156,8 @@ export default function Customer() {
             <Button
               size="big"
               variant={"tertiary"}
-              onClick={() => {}}
-              disabled={false}
+              onClick={() => setVisible(true)}
+              disabled={itemsSelected?.length < 1}
             >
               Delete
             </Button>
@@ -157,12 +187,21 @@ export default function Customer() {
           <Table
             loading={isLoading}
             columns={columns}
-            data={listCustomers?.rows || []}
+            data={listCustomers?.data || []}
             rowSelection={rowSelection}
           />
           <Pagination pagination={pagination} />
         </Col>
       </Card>
+
+      <ModalDeleteConfirmation
+        totalSelected={itemsSelected.length}
+        visible={visible}
+        itemTitle={listCustomers?.data?.find((item: any) => item.key === itemsSelected[0])?.name}
+        isLoading={loadingDelete}
+        onCancel={() => setVisible(false)}
+        onOk={() => deleteCustomer({ delete: itemsSelected })}
+      />
     </div>
   )
 }
