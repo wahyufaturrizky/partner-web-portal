@@ -30,7 +30,7 @@ import {
   useParentCustomerGroupMDM,
   useUpdateCustomerGroupMDM,
   useUploadFileCustomerGroupMDM,
-} from "../../../hooks/mdm/customer-group/useCustomerGroupMDM";
+} from "../../../hooks/mdm/customers/useCustomersGroupMDM";
 
 const downloadFile = (params: any) =>
   mdmDownloadService("/customer-group/download", { params }).then((res) => {

@@ -22,7 +22,7 @@ import {
   useDeleteCustomerGroupMDM,
   useParentCustomerGroupMDM,
   useUpdateCustomerGroupMDM,
-} from "../../../hooks/mdm/customer-group/useCustomerGroupMDM";
+} from "../../../hooks/mdm/customers/useCustomersGroupMDM";
 
 const CustomerGroupDetail = () => {
   const router = useRouter();

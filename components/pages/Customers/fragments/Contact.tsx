@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React from 'react'
 import { Col, Row, Search, Spacer } from "pink-lava-ui";
 import styled from 'styled-components'
 
@@ -7,10 +7,17 @@ import IconAdd from '../../../../.../../assets/icons/ic-add-rounded.svg'
 import IconAvatar from '../../../../.../../assets/icons/ic-avatar-xs.svg'
 import IconEdit from '../../../../.../../assets/icons/ic-more.svg'
 
-import styles from './styles.module.css'
+import styles from '../styles.module.css'
 
-export default function Contact() {
-  const [visible, setVisible] = useState(false)
+export default function Contact(props: any) {
+  const {
+      onCreate,
+      setVisible,
+      visible,
+      register,
+      contact,
+      setValueContact
+    } = props 
 
   return (
     <div>
@@ -22,7 +29,7 @@ export default function Contact() {
       <Spacer size={20} />
       <Row gap="12px" width="100%">
         <Col width="32%">
-          <CardAddContact onClick={() => setVisible(!visible)} />
+          <CardAddContact onClick={setVisible} />
         </Col>
         {
           [1, 2].map((index) => (
@@ -34,9 +41,12 @@ export default function Contact() {
       </Row>
 
       <ModalAddNewContact
+        setValueContact={setValueContact}
+        contact={contact}
         visible={visible}
-        onSubmit={() => setVisible(!visible)}
-        onCancel={() => setVisible(!visible)}
+        onSubmit={onCreate}
+        onCancel={setVisible}
+        register={register}
       />
     </div>
   )

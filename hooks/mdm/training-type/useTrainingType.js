@@ -1,4 +1,4 @@
-import { useQuery, useMutation } from "react-query";
+import { useQuery, useMutation, useInfiniteQuery } from "react-query";
 import { mdmService } from "../../../lib/client";
 
 const fetchTrainingTypes = async ({ query = {} }) => {
@@ -16,6 +16,28 @@ const fetchTrainingTypes = async ({ query = {} }) => {
 
 const useTrainingTypes = ({ query = {}, options }) => {
   return useQuery(["training-types", query], () => fetchTrainingTypes({ query }), {
+    ...options,
+  });
+};
+
+const fetchInfiniteeTrainingTypeLists = async ({ pageParam = 1, queryKey }) => {
+  const searchQuery = queryKey[1].search;
+  return mdmService(`/training-type`, {
+    params: {
+      search: searchQuery,
+      limit: 10,
+      page: pageParam,
+      sortBy: "created_at",
+      sortOrder: "DESC",
+      company_id: "KSNI",
+      ...queryKey[1],
+    },
+  }).then((data) => data);
+};
+
+const useTrainingTypeInfiniteLists = ({ query = {}, options }) => {
+  return useInfiniteQuery(["training-type/infinite", query], fetchInfiniteeTrainingTypeLists, {
+    keepPreviousData: true,
     ...options,
   });
 };
@@ -89,4 +111,5 @@ export {
   useUpdateTrainingType,
   useDeleteTrainingType,
   useUploadFileTrainingType,
+  useTrainingTypeInfiniteLists,
 };

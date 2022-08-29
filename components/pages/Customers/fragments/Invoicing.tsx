@@ -1,22 +1,51 @@
-import React, { useState } from 'react'
+import React from 'react'
 import styled from 'styled-components'
-import { Table, Button, Input, Spacer, Dropdown, Row, Col, TextArea } from 'pink-lava-ui'
+import {
+  Table,
+  Button,
+  Input,
+  Spacer,
+  Dropdown,
+  Dropdown2,
+  Row,
+  Col,
+} from 'pink-lava-ui'
+import { ICDelete, ICEdit } from "../../../../assets";
 
 import ModalAddBankAccount from '../../../elements/Modal/ModalAddBankAccount'
 import IconAdd from '../../../../assets/icons/ICAdd'
 
-export default function Invoicing() {
-  const [visible, setVisible] = useState(false)
+export default function Invoicing(props: any) {
+  const {
+    setValueInvoicing,
+    register,
+    visible,
+    setVisible,
+    onHandleEdit,
+    handleSubmitBankAccount,
+    registerBankAccount,
+    errorsBankAccount,
+    handleAddItemBankAccount,
+    fieldsBankAccount,
+    removeBankAccount,
+  } = props
+
   const columns = [
+    { title: "", dataIndex: "key" },
+    { title: "", dataIndex: "id" },
     {
       title: "",
       dataIndex: "action",
       width: "15%",
-      render: () => (
-        <div>
-          <Button>+</Button>
-          <Button>-</Button>
-        </div>
+      render: (_: any, record: any) => (
+        <Row gap="16px" alignItems="center" nowrap>
+          <Col>
+            <ICEdit onClick={() => onHandleEdit(record)}/>
+          </Col>
+          <Col>
+            <ICDelete onClick={() => removeBankAccount(record.key)} />
+          </Col>
+        </Row>
       )
     },
     {
@@ -33,19 +62,26 @@ export default function Invoicing() {
     },
   ];
 
+  const listFakeIncomeAccount = [
+    { value: 'RP. 2.000.000 - Payment', id: 'payment' },
+    { value: 'RP. 5.000.000 - Income', id: 'income' },
+    { value: 'RP. 10.000.000 - Bonus', id: 'bonus' },
+  ]
+
   return (
     <div>
       <Label>Account Receivable</Label>
       <Spacer size={20} />
       <Row gap="16px" width="100%">
         <Col width="48%">
-          <Dropdown
-            label="Term of Payment"
+          <Input
+            label="Credit Limit"
             width="100%"
-            actionLabel="Add New Term of Payment"
-            isShowActionLabel
-            handleClickActionLabel={() => { }}
-            noSearch
+            height="50px"
+            required
+            {...register('invoicing.credit_limit', {
+              required: 'credit limit must be filled'
+            })}
           />
           <Spacer size={10} />
           <Input
@@ -53,6 +89,7 @@ export default function Invoicing() {
             width="100%"
             height="50px"
             disabled
+            {...register('invoicing.credit_used')}
           />
         </Col>
         <Col width="48%">
@@ -61,15 +98,19 @@ export default function Invoicing() {
             width="100%"
             height="50px"
             disabled
+            errors={errorsBankAccount}
+            {...register('invoicing.credit_balance')}
           />
           <Spacer size={10} />
-          <Dropdown
+          <Dropdown2
             label="Income Account"
             width="100%"
             actionLabel="Add New Income Account"
             isShowActionLabel
+            items={listFakeIncomeAccount}
             handleClickActionLabel={() => { }}
-            noSearch
+            handleChange={(value: string) =>
+              setValueInvoicing("invoicing.income_account", value)}
           />
         </Col>
       </Row>
@@ -86,7 +127,9 @@ export default function Invoicing() {
             actionLabel="Add New Expense Account"
             isShowActionLabel
             handleClickActionLabel={() => { }}
-            noSearch
+            items={listFakeIncomeAccount}
+            handleChange={(value: string) =>
+              setValueInvoicing("invoicing.expense_account", value)}
           />
         </Col>
       </Row>
@@ -95,15 +138,20 @@ export default function Invoicing() {
 
       <Label>Bank Account</Label>
       <Spacer size={20} />
-      <Button size="big" variant={"primary"} onClick={() => setVisible(!visible)}>
+      <Button
+        size="big"
+        variant={"primary"}
+        onClick={() => setVisible(!visible)}
+      >
         <IconAdd /> Add Bank Account
       </Button>
       <Spacer size={20} />
-      <Table columns={columns} width="100%" />
-      <ModalAddBankAccount 
-        visible={visible}
-        onSubmit={() => setVisible(!visible)} 
-        onCancel={() => setVisible(!visible)}
+      <Table
+        columns={columns.filter(
+          (filtering) => filtering?.dataIndex !== "id" && filtering?.dataIndex !== "key"
+        )}
+        data={fieldsBankAccount}
+        width="100%"
       />
 
       <Spacer size={30} />
@@ -117,26 +165,31 @@ export default function Invoicing() {
             width="100%"
             height="48px"
             placeholder="e.g Tax Items"
+            {...register('invoicing.tax_name')}
           />
           <Spacer size={20} />
         </Col>
         <Row gap="16px" width="100%">
           <Col width="48%">
-            <Dropdown
+            <Dropdown2
               label="Tax City"
               width="100%"
               actionLabel="Add New Tax City"
               isShowActionLabel
+              items={listFakeIncomeAccount}
               handleClickActionLabel={() => { }}
-              noSearch
+              handleChange={(value: any) => {
+                setValueInvoicing('invoicing.tax_city', value)
+              }}
             />
           </Col>
           <Col width="48%">
-            <TextArea
-              label="Tax Name"
+            <Input
+              label="Tax Address"
               width="100%"
               placeholder="e.g Jalan Soekarano Hatta No.1"
               height="48px"
+              {...register('invoicing.tax_address')}
             />
           </Col>
         </Row>
@@ -145,6 +198,7 @@ export default function Invoicing() {
       <Spacer size={30} />
 
       <Label>Currency</Label>
+      <Spacer size={10} />
       <Row gap="16px" width="100%">
         <Col width="48%">
           <Dropdown
@@ -152,11 +206,24 @@ export default function Invoicing() {
             width="100%"
             actionLabel="Add New Currency Code"
             isShowActionLabel
+            items={listFakeIncomeAccount}
             handleClickActionLabel={() => { }}
-            noSearch
+            handleChange={(value: any) => {
+              setValueInvoicing('invoicing.currency', value)
+            }}
           />
         </Col>
       </Row>
+
+      {/* modal create list-bank */}
+      <ModalAddBankAccount
+        errorsBankAccount={errorsBankAccount}
+        handleAddItemBankAccount={handleAddItemBankAccount}
+        handleSubmitBankAccount={handleSubmitBankAccount}
+        registerBankAccount={registerBankAccount}
+        visible={visible}
+        onCancel={() => setVisible(!visible)}
+      />
     </div>
   )
 }

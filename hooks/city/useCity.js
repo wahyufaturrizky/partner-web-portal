@@ -23,13 +23,13 @@ const useCities = ({ query = {}, options } = {}) => {
 
 const fetchInfiniteeCityLists = async ({ pageParam = 1, queryKey }) => {
   const searchQuery = queryKey[1].search;
-  return mdmService(`/master/city`, {
+  return client(`/master/city`, {
     params: {
       search: searchQuery,
       limit: 10,
       page: pageParam,
       sortBy: "id",
-      sortOrder: "DESC",
+      sortOrder: "ASC",
       ...queryKey[1],
     },
   }).then((data) => data);
