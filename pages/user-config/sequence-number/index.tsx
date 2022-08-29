@@ -3,28 +3,13 @@ import Router, { useRouter } from "next/router";
 import { Button, Col, Dropdown, Pagination, Row, Search, Spacer, Table, Text } from "pink-lava-ui";
 import React, { useState } from "react";
 import styled from "styled-components";
-
-const expData = [
-  {
-    id: 1,
-    name: "PT. Pinus Merah Abadi",
-    branch: "PMA Bandung Selatan",
-  },
-  {
-    id: 2,
-    name: "PT. Pinus Merah Abadi",
-    branch: "PMA Bandung Timur",
-  },
-  {
-    id: 3,
-    name: "PT. Pinus Merah Abadi",
-    branch: "PMA Bandung Barat",
-  },
-];
+import { useCompanyList } from "../../../hooks/company-list/useCompany";
+import { useAllSequenceNumber } from "../../../hooks/sequence-number/useSequenceNumber";
 
 const SequenceNumber = () => {
   const router = useRouter();
 
+  const [search, setSearch] = useState("");
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
 
   const pagination = usePagination({
@@ -52,28 +37,68 @@ const SequenceNumber = () => {
     },
   ];
 
-  const data: any = [];
-  expData?.map((field: any) => {
-    data.push({
-      key: field.id,
-      company: field.name,
-      branchName: field.branch,
-      action: (
-        <div>
-          <Button
-            size="small"
-            onClick={() => {
-              router.push(`/user-config/sequence-number/${field.id}`);
-            }}
-            variant="tertiary"
-          >
-            View Detail
-          </Button>
-        </div>
-      ),
-    });
+  const {
+    data: fields,
+    refetch: refetchFields,
+    isLoading: isLoadingData,
+  } = useAllSequenceNumber({
+    options: {
+      onSuccess: (data) => {
+        pagination.setTotalItems(data.totalRow);
+        // setIsLoading(false);
+        console.log(data, "data response");
+      },
+    },
+    query: {
+      search,
+      page: pagination.page,
+      limit: pagination.itemsPerPage,
+    },
   });
-	
+
+  const {
+    data: fieldsCompany,
+    refetch: refetchFieldsCompany,
+    isLoading: isLoadingDataCompany,
+  } = useCompanyList({
+    options: {
+      onSuccess: (data) => {
+        pagination.setTotalItems(data.totalRow);
+        // setIsLoading(false);
+        console.log(data, "COMPANUES");
+      },
+    },
+  });
+
+  const handleCompanyId = (companyId) => {
+    const company = fieldsCompany.rows.find((item) => item.id == companyId);
+    if (company) return company.name;
+  };
+
+  const data: any = [];
+  !isLoadingDataCompany &&
+    !isLoadingData &&
+    fields.rows?.map((field: any) => {
+      data.push({
+        key: field.id,
+        company: handleCompanyId(field.companyId),
+        branchName: field.branch,
+        action: (
+          <div>
+            <Button
+              size="small"
+              onClick={() => {
+                router.push(`/user-config/sequence-number/${field.id}`);
+              }}
+              variant="tertiary"
+            >
+              View Detail
+            </Button>
+          </div>
+        ),
+      });
+    });
+
   const paginateField = data;
 
   const rowSelection = {
@@ -90,7 +115,11 @@ const SequenceNumber = () => {
       <Card>
         <Row justifyContent="space-between">
           <Row alignItems="center">
-            <Search width="380px" placeholder="Search Branch Name" onChange={(e: any) => {}} />
+            <Search
+              width="380px"
+              placeholder="Search Branch Name"
+              onChange={(e) => setSearch(e.target.value)}
+            />
           </Row>
           <Button
             size="big"
@@ -105,7 +134,7 @@ const SequenceNumber = () => {
       <Card style={{ padding: "16px 20px" }}>
         <Col gap="60px">
           <Table columns={columns} data={paginateField} rowSelection={rowSelection} />
-          <Pagination pagination={[]} />
+          <Pagination pagination={pagination} />
         </Col>
       </Card>
     </Col>
