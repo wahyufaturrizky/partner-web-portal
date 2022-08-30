@@ -14,14 +14,7 @@ interface PropsContactModal {
   onSubmit: () => VoidFunction
   registerContact: any
   setValueContact: any
-  contact: {
-    name: { message: string }
-    role: { message: string }
-    email: { message: string }
-    mobile: { message: string }
-    nik: { message: string }
-    job_position: { message: string }
-  }
+  contact: any
 }
 
 export default function ModalAddNewContact({
@@ -70,7 +63,7 @@ export default function ModalAddNewContact({
             noSearch
             required
             handleChange={(value: string) => {
-              setValueContact('contact.role', value)
+              setValueContact('contact.tittle', value)
             }}
             items={listFakeTitle}
           />
@@ -92,8 +85,8 @@ export default function ModalAddNewContact({
             label="Job Position"
             required
             error={contact?.job_position?.message}
-            {...registerContact('contact.job_position', {
-              required: 'job_position must be filled'
+            {...registerContact('contact.role', {
+              required: 'job position must be filled'
             })}
           />
           <Spacer size={10} />
@@ -102,6 +95,7 @@ export default function ModalAddNewContact({
             placeholder="e.g 08123456789"
             label="Mobile"
             required
+            type="number"
             error={contact?.mobile?.message}
             {...registerContact('contact.mobile', {
               required: 'mobile must be filled'
@@ -113,6 +107,7 @@ export default function ModalAddNewContact({
             placeholder="e.g lala.lulu@kasni.co.id"
             label="Email"
             required
+            type="email"
             error={contact?.email?.message}
             {...registerContact('contact.email', {
               required: 'email must be filled'
@@ -124,6 +119,7 @@ export default function ModalAddNewContact({
             placeholder="e.g 123456789"
             label="NIK (optional)"
             required
+            type="number"
             error={contact?.nik?.message}
             {...registerContact('contact.nik', {
               required: 'nik must be filled'

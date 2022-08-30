@@ -278,10 +278,6 @@ const ProductGroupCreate = () => {
   }, [isLoadingProductGroup, isFetchingProductGroup, isFetchingProductBrand]);
 
   useEffect(() => {
-    // console.log("triggered", pagination);
-  }, [pagination.fromItem, pagination.itemsPerPage]);
-
-  useEffect(() => {
     if (initialRender.current) {
       initialRender.current = false;
       return;

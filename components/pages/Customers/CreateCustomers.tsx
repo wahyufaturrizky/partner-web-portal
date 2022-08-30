@@ -25,13 +25,20 @@ import {
   Purchasing,
   UploadImage
 } from './fragments'
-import { useCreateCustomers } from '../../../hooks/mdm/customers/useCustomersMDM';
+import { useCreateCustomers, useUploadLogo } from '../../../hooks/mdm/customers/useCustomersMDM';
 
+const listFakeItems = [
+  { id: 1, value: 'Indonesia' },
+  { id: 2, value: 'Japan' },
+  { id: 3, value: 'Malaysia' },
+  { id: 4, value: 'Singepore' },
+]
 
-export default function CreateCustomers({ isUpdate }: any) {
+export default function CreateCustomers({ isUpdate, detailCustomer }: any) {
   const router = useRouter();
   const [tabAktived, setTabAktived] = useState<string>('Contact')
   const [formType, setFormType] = useState<string>('Company')
+  const [imageLogo, setImageLogo] = useState<string>('')
   const [isPKP, setIsPKP] = useState<boolean>(false)
   const [visible, setVisible] = useState<{
     contact: boolean,
@@ -69,7 +76,7 @@ export default function CreateCustomers({ isUpdate }: any) {
   ]
 
   const addressBodyField = {
-    primary: false,
+    is_primary: false,
     address_type: "",
     street: "",
     country: "",
@@ -108,19 +115,38 @@ export default function CreateCustomers({ isUpdate }: any) {
       company_code:'',
       bank: [],
       contact: [],
+      sales: {
+        branch: 0,
+        salesman: 0,
+        term_payment: "",
+        sales_order_blocking: false,
+        billing_blocking: false,
+        delivery_order_blocking: false
+      },
+      purchasing: {
+        term_of_payment: "enum"
+      },
+      invoicing: {
+        credit_limit: 0,
+        expense_account: "",
+        credit_balance: 0,
+        tax_name: "",
+        credit_used: 0,
+        income_account: "",
+        tax_city: "",
+        tax_address: "",
+        currency: ""
+      },
       address: [addressBodyField],
     }
   });
 
-  //use-forms PURCHASING
-  const {
-    setValue: setValuePurchasing,
-    getValues: getValuesPurchasing
-  } = useForm({
+  //use-forms PURCHASINGS
+  const { setValue: setValuePurchasing } = useForm({
     shouldUseNativeValidation: true,
   });
 
-  //use-forms BANK
+  //use-forms BANKS
   const {
     register: registerBankAccount,
     handleSubmit: handleSubmitBankAccount,
@@ -133,7 +159,7 @@ export default function CreateCustomers({ isUpdate }: any) {
   const {
     setValue: setValueInvoicing,
     register: registerInvoicing,
-    getValues: getValuesInvoicing,
+    getValues: getValueInvoicing
   } = useForm({
     shouldUseNativeValidation: true,
     defaultValues: {
@@ -159,6 +185,9 @@ export default function CreateCustomers({ isUpdate }: any) {
     shouldUseNativeValidation: true,
     defaultValues: {
       sales: {
+        branch: 0,
+        salesman: 0,
+        term_payment: "",
         billing_blocking: false,
         delivery_order_blocking: false,
         sales_order_blocking: false
@@ -188,45 +217,95 @@ export default function CreateCustomers({ isUpdate }: any) {
     name: "address",
   });
 
-  // useFieldArray BANK
+  // useFieldArray BANKS
   const {
     fields: fieldsBankAccount,
     append: appendBankAccount,
     remove: removeBankAccount,
     replace: replaceBankAccount,
-  } = useFieldArray({
+  } = useFieldArray<any>({
     control,
     name: "bank"
   });
 
-  // useFieldArray CONTACT
+  // useFieldArray CONTACTS
   const {
     fields: fieldsContact,
     append: appendContact,
     remove: removeContact,
     replace: replaceContact,
-  } = useFieldArray({
+  } = useFieldArray<any>({
     control,
     name: "contact"
   });
 
+  // functional react-query
   const { mutate: createCustomer } = useCreateCustomers({
     options: {
       onSuccess: () => alert('create success!')
     }
   })
+
+  const { mutate: uploadCustomer } = useUploadLogo({
+    options: {
+      onSuccess: ({ imageUrl }: { imageUrl: string }) => {
+        setImageLogo(imageUrl)
+      }
+    }
+  })
   
   // action function
   const onSubmit = (data: any) => {
-    const { invoicing } = getValuesInvoicing()
-    const { purchasing } = getValuesPurchasing()
     const { sales } = getValuesSales()
-
-    const result = { ...data, ...invoicing, purchasing, sales }
+    const { invoicing } = getValueInvoicing()
+    const result: any = { 
+      customer: {
+        active_status: 'ACTIVE',
+        name: data?.name,
+        is_company: isCompany,
+        phone: data?.phone,
+        tax_number: data?.tax_number,
+        mobile: data?.mobile,
+        ppkp: isPKP,
+        website: data?.website,
+        email: data?.email,
+        language: data?.language,
+        customer_group: data?.customer_group,
+        external_code: data?.external_code,
+        company_logo: imageLogo
+      },
+      sales: sales,
+      address: data?.address?.map((item: any) =>  {
+        return {
+          is_primary: item?.is_primary,
+          address_type: item?.address_type,
+          street: item?.street,
+          country: 1,
+          postal_code: item?.postal_code,
+          longtitude: item?.longtitude,
+          latitude: item?.latitude,
+          lvl_1: item?.province,
+          lvl_2: item?.city,
+          lvl_3: item?.zone,
+          lvl_4: item?.district,
+        }
+      }),
+      purchasing: data?.purchasing,
+      invoicing,
+      bank: data?.bank?.map((item: any) => {
+        return {
+          bank_name: item?.bank_name,
+          account_number: item?.account_number,
+          account_name: item?.account_name
+        }
+      }),
+      contact: data?.contact?.map((item: any) => item?.contact)
+    }
+    createCustomer(result)
   };
 
   const onHandleCreateContact = (data: any) => {
-    appendContact({ ...data, key: fieldsContact.length })
+    appendContact({ ...data  })
     setVisible({ ...visible, contact: false })
   }
 
@@ -251,6 +330,13 @@ export default function CreateCustomers({ isUpdate }: any) {
     }
   }
 
+  const handleUploadCustomer = async (files: any) => {
+    const formData: any = new FormData()
+    await formData.append('image', files)
+
+    return uploadCustomer(formData)
+  }
+
   const propsContacts = {
     setValueContact: setValueContact,
     controlContact,
@@ -267,6 +353,7 @@ export default function CreateCustomers({ isUpdate }: any) {
     register,
     fieldsAddress,
     appendAddress,
+    listFakeItems,
     replaceAddress,
     removeAddress,
     addressBodyField,
@@ -285,8 +372,8 @@ export default function CreateCustomers({ isUpdate }: any) {
     },
     handleAddItemBankAccount,
     visible: visible.bank,
-    setVisible: () => setVisible({ ...visible, bank: !visible.bank }),
     errorsBankAccount, 
+    setVisible: () => setVisible({ ...visible, bank: !visible.bank }),
     handleSubmitBankAccount, 
     registerBankAccount, 
     fieldsBankAccount, 
@@ -294,7 +381,6 @@ export default function CreateCustomers({ isUpdate }: any) {
     removeBankAccount, 
     replaceBankAccount, 
   }
-
 
   const switchTabItem = () => {
     switch (tabAktived) {
@@ -312,6 +398,9 @@ export default function CreateCustomers({ isUpdate }: any) {
         return null
     }
   }
+
+
+  // if status update
 
   return (
     <div>
@@ -390,6 +479,7 @@ export default function CreateCustomers({ isUpdate }: any) {
                     height="50px"
                     placeholder="e.g 123456789"
                     required
+                    type="number"
                     error={errors?.tax_number?.message}
                     {...register('tax_number', {
                       required: 'tax number must be filled'
@@ -425,9 +515,9 @@ export default function CreateCustomers({ isUpdate }: any) {
                     width="100%"
                     isShowActionLabel
                     items={[
-                      { id: 'indonesia', value: 'Indonesia' },
-                      { id: 'malaysia', value: 'Malaysia' },
-                      { id: 'Thailand', value: 'Thailand' },
+                      { id: 1, value: 'Indonesia' },
+                      { id: 2, value: 'Malaysia' },
+                      { id: 3, value: 'Thailand' },
                     ]}
                     handleClickActionLabel={() => { }}
                     handleChange={(value: any) => {
@@ -436,7 +526,7 @@ export default function CreateCustomers({ isUpdate }: any) {
                   />
                   <Spacer size={10} />
                   {
-                    isCompany && <UploadImage control={control} />
+                    isCompany && <UploadImage handleUpload={handleUploadCustomer} control={control} />
                   }
                 </Col>
                 <Col width="50%">
@@ -482,9 +572,9 @@ export default function CreateCustomers({ isUpdate }: any) {
                     width="100%" 
                     isShowActionLabel
                     items={[
-                      { id: 'indonesia', value: 'Indonesia' },
-                      { id: 'malaysia', value: 'Malaysia' },
-                      { id: 'Thailand', value: 'Thailand' },
+                      { id: 1, value: 'Indonesia' },
+                      { id: 2, value: 'Malaysia' },
+                      { id: 3, value: 'Thailand' },
                     ]}
                     handleClickActionLabel={() => { }}
                     handleChange={(value: any) => {

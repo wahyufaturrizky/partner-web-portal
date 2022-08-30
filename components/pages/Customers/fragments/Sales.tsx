@@ -5,7 +5,8 @@ import {
   Dropdown2,
   Spacer,
   Checkbox,
-  Text
+  Text,
+  Dropdown
 } from 'pink-lava-ui'
 import styled from 'styled-components'
 
@@ -16,6 +17,7 @@ export default function Sales(props: any) {
     invoice: false,
     delivery: false,
   })
+
   const listSalesItems = [
     { id: 'sales', label: 'Sales Order Blocking', value: 'sales_order_blocking' },
     { id: 'invoice', label: 'Invoice/Billing Blocking', value: 'billing_blocking' },
@@ -23,10 +25,23 @@ export default function Sales(props: any) {
   ]
 
   const listFakeBranch = [
-    { value: 'items-1', id: 'items-1' },
-    { value: 'items-2', id: 'items-2' },
-    { value: 'items-3', id: 'items-3' },
-    { value: 'items-4', id: 'items-4' },
+    { value: 'example-branch-1', id: 1 },
+    { value: 'example-branch-2', id: 2 },
+    { value: 'example-branch-3', id: 3 },
+    { value: 'example-branch-4', id: 4 },
+  ]
+
+
+  const listFakeTermpayment = [
+    { value: '7 days of payment', id: '7d' },
+    { value: '15 days of payment', id: '15d' },
+    { value: '30 days of payment', id: '30d' },
+  ]
+
+  const listFakeSalesman = [
+    { value: 'Billa yuvila', id: 1 },
+    { value: 'Gween sticky', id: 2 },
+    { value: 'Lecredec', id: 3 },
   ]
 
   return (
@@ -47,28 +62,27 @@ export default function Sales(props: any) {
             required
           />
         <Spacer size={20} />
-        <Dropdown2
+        <Dropdown
           label="Term of Payment" 
           width="100%"
           actionLabel="Add New Term of Payment"
           isShowActionLabel
-          items={listFakeBranch}
-          handleClickActionLabel={() => { }}
+          noSearch
+          items={listFakeTermpayment}
+          handleClickActionLabel={() => window.open('/term-of-payment/create')}
           handleChange={(value: string) => setValueSales("sales.term_payment", value)}
-          onSearch={(search: string) => {}}
           required
         />
         </Col>
         <Col width="48%">
-          <Dropdown2
+          <Dropdown
             actionLabel="Add New Salesman"
             label="Salesman"
             width="100%"
             isShowActionLabel
-            items={listFakeBranch}
-            handleClickActionLabel={() => { }}
+            items={listFakeSalesman}
+            handleClickActionLabel={() => window.open('/salesman/create')}
             handleChange={(value: string) => setValueSales("sales.salesman", value)}
-            onSearch={(search: string) => { }}
             required
           />
         </Col>

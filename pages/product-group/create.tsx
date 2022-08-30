@@ -188,12 +188,9 @@ const ProductGroupCreate = () => {
       company_id: "KSNI",
       ...data,
     };
-    console.log(formData);
-    // createProductGroup(formData);
   };
 
   useEffect(() => {
-    // console.log("triggered", pagination);
   }, [pagination.fromItem, pagination.itemsPerPage]);
 
   useEffect(() => {
@@ -220,7 +217,6 @@ const ProductGroupCreate = () => {
     filterProduct(requestBody);
   }, [debounceMin, debounceMax]);
 
-  console.log(itemsWatch);
 
   return (
     <>

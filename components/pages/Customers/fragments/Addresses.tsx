@@ -24,7 +24,6 @@ export default function Addresses(props: any) {
     removeAddress,
     control,
     register,
-    address,
     addressBodyField,
   } = props
 
@@ -35,7 +34,6 @@ export default function Addresses(props: any) {
     replaceAddress,
     removeAddress,
     register,
-    address
   }
 
   const handleAddMoreAddresss = () => {
@@ -58,12 +56,12 @@ export default function Addresses(props: any) {
       <Spacer size={20} />
       {
         fieldsAddress.map((field: any, index: number | string) =>
-        <>
-          <FormContact key={index} index={index} {...propsFieldForm} />
+        <div key={index}>
+          <FormContact index={index} {...propsFieldForm} />
           <Spacer size={30} />
           <hr />
           <Spacer size={30} />
-        </>
+        </div>
         )
       }
     </div>
@@ -83,10 +81,10 @@ const FormContact = ({
   const setAsPrimary = () => {
     let editAsPrimary = fieldsAddress?.map((items: any) => {
       if (items?.key === index) {
-        items.primary = true;
+        items.is_primary = true;
         return { ...items };
       } else {
-        items.primary = false;
+        items.is_primary = false;
         return { ...items };
       }
     });
@@ -100,19 +98,42 @@ const FormContact = ({
     fieldsAddress,
     setAsPrimary: () => setAsPrimary()
   }
-
+  
   const listFakeCountres = [
-    { id: 'indonesia', value: 'Indonesia' },
-    { id: 'japan', value: 'Japan' },
-    { id: 'malaysia', value: 'Malaysia' },
-    { id: 'singepore', value: 'Singepore' },
+    { id: 1, value: 'Indonesia' },
+    { id: 2, value: 'Japan' },
+    { id: 3, value: 'Malaysia' },
+    { id: 4, value: 'Singepore' },
   ]
+
+
+  const listFakePostalCode = [
+    { id: 'POSTAL-1', value: 'Example - postal code - 1' },
+    { id: 'POSTAL-2', value: 'Example - postal code - 2' },
+    { id: 'POSTAL-3', value: 'Example - postal code - 3' },
+    { id: 'POSTAL-4', value: 'Example - postal code - 4' },
+  ]
+
+  const listFakeProvince = [
+    { id: 1, value: 'Lampung' },
+    { id: 2, value: 'Jawa Barat' },
+    { id: 3, value: 'Jawa Tengah' },
+    { id: 4, value: 'DKI Timur' },
+  ]
+
+  const listFakeAddressType = [
+    { id: 'TYPE-1', value: 'Type 1' },
+    { id: 'TYPE-2', value: 'Type 3' },
+    { id: 'TYPE-3', value: 'Type 3' },
+    { id: 'TYPE-4', value: 'Type 4' },
+  ]
+
 
   return (
     <>
       <Controller
         control={control}
-        name={`address.${index}.primary`}
+        name={`address.${index}.is_primary`}
         render={() => <ButtonSetFormsPrimary {...propsButtonSetPrimary} />}
       />
       <Spacer size={30} />
@@ -121,12 +142,14 @@ const FormContact = ({
           <Controller
             control={control}
             name={`address.${index}.address_type`}
-            render={({ field: { onChange } }) => (
+            rules={{ required: "Please enter address type." }}
+            render={({ field: { onChange }, fieldState: { error } }) => (
               <Dropdown
                 label="Address Type"
                 width="100%"
                 noSearch
-                items={listFakeCountres}
+                error={error?.message}
+                items={listFakeAddressType}
                 handleChange={(value: string) => onChange(value)}
               />
             )}
@@ -136,11 +159,13 @@ const FormContact = ({
           <Controller
             control={control}
             name={`address.${index}.country`}
-            render={({ field: { onChange } }) => (
+            rules={{ required: "Please enter country." }}
+            render={({ field: { onChange }, fieldState: { error } }) => (
               <Dropdown
                 label="Country"
                 width="100%"
                 noSearch
+                error={error?.message}
                 items={listFakeCountres}
                 handleChange={(value: string) => onChange(value)}
               />
@@ -149,11 +174,13 @@ const FormContact = ({
           <Controller
             control={control}
             name={`address.${index}.city`}
-            render={({ field: { onChange } }) => (
+            rules={{ required: "Please enter city." }}
+            render={({ field: { onChange }, fieldState: { error } }) => (
               <Dropdown
                 label="City"
                 width="100%"
                 noSearch
+                error={error?.message}
                 items={listFakeCountres}
                 handleChange={(value: string) => onChange(value)}
               />
@@ -162,11 +189,13 @@ const FormContact = ({
           <Controller
             control={control}
             name={`address.${index}.zone`}
-            render={({ field: { onChange } }) => (
+            rules={{ required: "Please enter zone." }}
+            render={({ field: { onChange }, fieldState: { error } }) => (
               <Dropdown
                 label="Zone"
                 width="100%"
                 noSearch
+                error={error?.message}
                 items={listFakeCountres}
                 handleChange={(value: string) => onChange(value)}
               />
@@ -201,43 +230,44 @@ const FormContact = ({
           <Controller
             control={control}
             name={`address.${index}.province`}
-            render={({ field: { onChange } }) => (
+            rules={{ required: "Please enter province." }}
+            render={({ field: { onChange }, fieldState: { error } }) => (
               <Dropdown
                 label="Province"
                 width="100%"
                 noSearch
-                items={listFakeCountres}
+                error={error?.message}
+                items={listFakeProvince}
                 handleChange={(value: string) => onChange(value)}
               />
             )} />
           <Spacer size={10} />
           <Controller
-            rules={{ required: "District type should be filled" }}
+            rules={{ required: "Please enter district" }}
             control={control}
             name={`address.${index}.district`}
-            render={({ field: { onChange } }) => (
+            render={({ field: { onChange }, fieldState: { error } }) => (
               <Dropdown
                 label="District"
                 width="100%"
                 noSearch
+                error={error?.message}
                 items={listFakeCountres}
                 handleChange={(value: string) => onChange(value)}
               />
             )} />
           <Spacer size={10} />
           <Controller
-            rules={{ required: {
-              value: true,
-              message: "Please enter postal code.",
-            }}}
+            rules={{ required: "Please enter postal code." }}
             control={control}
             name={`address.${index}.postal_code`}
-            render={({ field: { onChange } }) => (
+            render={({ field: { onChange }, fieldState: { error } }) => (
               <Dropdown
                 label="Postal Code"
                 width="100%"
                 noSearch
-                items={listFakeCountres}
+                items={listFakePostalCode}
+                error={error?.message}
                 handleChange={(value: string) => onChange(value)}
               />
             )} />
@@ -268,12 +298,12 @@ const ButtonSetFormsPrimary = ({
   return (
     <>
       <Text color="blue.dark" variant="headingMedium">
-        {getValues(`address.${index}.primary`)
+        {getValues(`address.${index}.is_primary`)
           ? "Home"
           : "New Address"}
       </Text>
       <Row gap="12px" alignItems="center">
-        {getValues(`address.${index}.primary`)
+        {getValues(`address.${index}.is_primary`)
           ? <Lozenge variant="blue">
             <Row alignItems="center">
               <ICCheckPrimary />
@@ -308,11 +338,10 @@ const UploadImage = ({ control, index }:
   return (
     <Controller
       control={control}
-      rules={{ required: true }}
       name={`address.${index}.logo_store`}
       render={({ field: { onChange } }) => (
         <FileUploaderAllFiles
-          label="Company Logo"
+          label="Store photo"
           onSubmit={(file: any) => onChange(file)}
           defaultFile="/placeholder-employee-photo.svg"
           withCrop
