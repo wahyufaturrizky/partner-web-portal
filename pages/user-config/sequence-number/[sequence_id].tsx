@@ -25,6 +25,7 @@ import {
 } from "pink-lava-ui";
 
 import ArrowLeft from "../../../assets/icons/arrow-left.svg";
+import AddSequenceNumber from "../../../components/pages/SequenceNumber/AddSequenceNumber";
 
 const DetailSequenceNumber: any = () => {
   const router = useRouter();
@@ -32,6 +33,7 @@ const DetailSequenceNumber: any = () => {
 
   const [search, setSearch] = useState("");
   const [isEdit, setIsEdit] = useState(false);
+  const [isAdd, setIsAdd] = useState(true);
 
   const pagination = usePagination({
     page: 1,
@@ -44,12 +46,7 @@ const DetailSequenceNumber: any = () => {
 
   return (
     <>
-      {/* {isLoading ? (
-				<Center>
-					<Spin tip="Loading data..." />
-				</Center>
-			) : ( */}
-      <>
+      {isAdd ? (
         <Col>
           <Row gap="16px" justifyContent="flex" alignItems="center">
             <ArrowLeft style={{ cursor: "pointer" }} onClick={() => Router.back()} />
@@ -64,7 +61,12 @@ const DetailSequenceNumber: any = () => {
                 </Row>
                 <Spacer size={20} />
                 <Row>
-                  <Text clickable variant={"label"} color={"red.regular"}>
+                  <Text
+                    clickable
+                    variant={"label"}
+                    color={"red.regular"}
+                    onClick={() => setIsAdd(!isAdd)}
+                  >
                     + Add Sequence
                   </Text>
                 </Row>
@@ -241,11 +243,11 @@ const DetailSequenceNumber: any = () => {
                   </Row>
                 </Row>
                 <Row>
-                  <Row width='100%' alignItems='center'>
-                    <Col width='15%'>
+                  <Row width="100%" alignItems="center">
+                    <Col width="15%">
                       <Text variant="headingSmall">Start Number</Text>
                     </Col>
-                    <Col width='85%'>
+                    <Col width="85%">
                       <Input
                         width="100%"
                         label=""
@@ -258,11 +260,11 @@ const DetailSequenceNumber: any = () => {
                   </Row>
                 </Row>
                 <Row>
-                  <Row width='100%' alignItems='center'>
-                    <Col width='15%'>
+                  <Row width="100%" alignItems="center">
+                    <Col width="15%">
                       <Text variant="headingSmall">Next Number</Text>
                     </Col>
-                    <Col width='85%'>
+                    <Col width="85%">
                       <Input
                         width="100%"
                         label=""
@@ -278,10 +280,9 @@ const DetailSequenceNumber: any = () => {
             </Row>
           </Card>
         </Col>
-      </>
-      {/* )} */}
-
-      {/* <AddSequenceNumber/> */}
+      ) : (
+        <AddSequenceNumber onBack={() => setIsAdd(!isAdd)} />
+      )}
     </>
   );
 };

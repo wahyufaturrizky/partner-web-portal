@@ -22,7 +22,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { useForm } from "react-hook-form";
 import usePagination from "@lucasmogari/react-pagination";
 
-const AddSequenceNumber: any = () => {
+const AddSequenceNumber: any = ({onBack}) => {
   const router = useRouter();
 
   const pagination = usePagination({
@@ -38,7 +38,7 @@ const AddSequenceNumber: any = () => {
     <>
       <Col>
         <Row gap="4px" alignItems="center">
-          <ArrowLeft style={{ cursor: "pointer" }} onClick={() => Router.push("/company-list")} />
+          <ArrowLeft style={{ cursor: "pointer" }} onClick={onBack} />
           <Text variant={"h4"}>Add Sequence</Text>
         </Row>
         <Spacer size={12} />
