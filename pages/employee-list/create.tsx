@@ -1251,6 +1251,7 @@ const EmployeeListCreate = () => {
       },
     },
   ];
+  console.log("xcvxvxcv", errors);
 
   return (
     <Col>
@@ -1491,18 +1492,10 @@ const EmployeeListCreate = () => {
 
                 <Controller
                   control={control}
-                  rules={{
-                    required: {
-                      value: true,
-                      message: "Please enter is salesman.",
-                    },
-                  }}
                   name="is_salesman"
                   render={({ field: { onChange, value } }) => (
                     <Row alignItems="center" gap="12px">
-                      <Label>
-                        Is Salesman <span style={{ color: colors.red.regular }}>*</span>
-                      </Label>
+                      <Text>Is Salesman</Text>
                       <Switch defaultChecked={value} checked={value} onChange={onChange} />
                     </Row>
                   )}

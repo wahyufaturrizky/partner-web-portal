@@ -121,6 +121,13 @@ const EmployeeDetail = () => {
     1000
   );
 
+  const { data: dataEmployee, isLoading: isLoadingEmployee } = useEmployeeListMDM({
+    options: {
+      onSuccess: () => {},
+    },
+    id: idEmployee,
+  });
+
   const addressBodyField = {
     primary: false,
     type: "",
@@ -137,13 +144,6 @@ const EmployeeDetail = () => {
     key: 0,
   };
 
-  const { data: dataEmployee, isLoading: isLoadingEmployee } = useEmployeeListMDM({
-    options: {
-      onSuccess: () => {},
-    },
-    id: idEmployee,
-  });
-
   const {
     register,
     control,
@@ -153,7 +153,43 @@ const EmployeeDetail = () => {
     setValue,
   } = useForm({
     shouldUseNativeValidation: true,
-    defaultValues: dataEmployee,
+    defaultValues: {
+      type: dataEmployee?.type,
+      photo: dataEmployee?.photo,
+      title: dataEmployee?.title,
+      name: dataEmployee?.name,
+      nik: dataEmployee?.nik,
+      department: dataEmployee?.department,
+      job_position: dataEmployee?.jobPosition,
+      job_level: dataEmployee?.jobLevel,
+      is_salesman: dataEmployee?.isSalesman,
+      report_to: dataEmployee?.reportTo,
+      branch: dataEmployee?.branch,
+      date_join: dataEmployee?.dateJoin,
+      date_resign: dataEmployee?.dateResign,
+      languages: dataEmployee?.languages,
+      tax: dataEmployee?.tax,
+      external_code: dataEmployee?.externalCode,
+      personal: {
+        pob: dataEmployee?.pob,
+        dob: dataEmployee?.dob,
+        nationality: dataEmployee?.nationality,
+        martial: dataEmployee?.martial,
+        blood: dataEmployee?.blood,
+        religion: dataEmployee?.religion,
+        insurance: dataEmployee?.insurance,
+        email: dataEmployee?.email,
+        phone: dataEmployee?.phone,
+        mobile: dataEmployee?.mobile,
+        visa: dataEmployee?.visa,
+        visa_expire: dataEmployee?.visaExpire,
+      },
+      address: dataEmployee?.address,
+      bank: dataEmployee?.bank,
+      education: dataEmployee?.education,
+      family: dataEmployee?.family,
+      development: dataEmployee?.development,
+    },
   });
 
   const {
@@ -1257,6 +1293,7 @@ const EmployeeDetail = () => {
       </Row>
 
       <Spacer size={20} />
+      {console.log("sadasdasd", dataEmployee)}
 
       <Card padding="20px">
         <Row justifyContent="space-between" alignItems="center" nowrap>
@@ -1494,22 +1531,20 @@ const EmployeeDetail = () => {
                 />
 
                 <Spacer size={8} />
+                {console.log("cvbcbc", dataEmployee)}
 
                 <Controller
                   control={control}
+                  defaultValue={dataEmployee?.isSalesman}
                   name="is_salesman"
-                  rules={{
-                    required: {
-                      value: true,
-                      message: "Please enter is salesman.",
-                    },
-                  }}
                   render={({ field: { onChange, value } }) => (
                     <Row alignItems="center" gap="12px">
-                      <Label>
-                        Is Salesman <span style={{ color: colors.red.regular }}>*</span>
-                      </Label>
-                      <Switch defaultChecked={value} checked={value} onChange={onChange} />
+                      <Text>Is Salesman</Text>
+                      <Switch
+                        defaultChecked={value || dataEmployee?.isSalesman}
+                        checked={value || dataEmployee?.isSalesman}
+                        onChange={onChange}
+                      />
                     </Row>
                   )}
                 />
