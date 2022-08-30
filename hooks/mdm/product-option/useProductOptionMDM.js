@@ -1,4 +1,4 @@
-import { useQuery, useMutation } from "react-query";
+import { useQuery, useMutation, useInfiniteQuery } from "react-query";
 import { mdmService } from "../../../lib/client";
 
 const fetchProductOptionsMDM = async ({ query = {} }) => {
@@ -20,6 +20,28 @@ const useProductOptionsMDM = ({ query = {}, options }) => {
     ...options,
   });
 };
+
+const fetchInfiniteProductOptionsLists = async ({ pageParam = 1, queryKey }) => {
+  const searchQuery = queryKey[1].search;
+  return mdmService(`/product-option`, {
+    params: {
+      search: searchQuery,
+      limit: 10,
+      page: pageParam,
+      sortBy: "created_at",
+      sortOrder: "DESC",
+      ...queryKey[1],
+    },
+  }).then((data) => data);
+};
+
+const useProductOptionsInfiniteLists = ({ query = {}, options }) => {
+  return useInfiniteQuery(["product-options/infinite", query], fetchInfiniteProductOptionsLists, {
+    keepPreviousData: true,
+    ...options,
+  });
+};
+
 
 const fetchProductOptionMDM = async ({ id }) => {
   return mdmService(`/product-option/${id}`).then((data) => data);
@@ -125,6 +147,7 @@ const useUploadFileProductOptionMDM = ({ options }) => {
 export {
   useProductOptionsMDM,
   useProductOptionMDM,
+  useProductOptionsInfiniteLists,
   useCreateProductOptionMDM,
   useUpdateProductOptionMDM,
   useDeleteProductOptionMDM,

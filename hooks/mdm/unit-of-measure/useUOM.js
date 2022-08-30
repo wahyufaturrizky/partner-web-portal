@@ -1,4 +1,4 @@
-import { useQuery, useMutation } from "react-query";
+import { useQuery, useMutation, useInfiniteQuery } from "react-query";
 import { mdmService } from "../../../lib/client";
 
 const fetchUOM = async ({ query = {} }) => {
@@ -16,6 +16,27 @@ const fetchUOM = async ({ query = {} }) => {
 
 const useUOMList = ({ query = {}, options }) => {
   return useQuery(["uom-list", query], () => fetchUOM({ query }), {
+    ...options,
+  });
+};
+
+const fetchInfiniteUOMLists = async ({ pageParam = 1, queryKey }) => {
+  const searchQuery = queryKey[1].search;
+  return mdmService(`/uom`, {
+    params: {
+      search: searchQuery,
+      limit: 10,
+      page: pageParam,
+      sortBy: "created_at",
+      sortOrder: "DESC",
+      ...queryKey[1],
+    },
+  }).then((data) => data);
+};
+
+const useUOMInfiniteLists = ({ query = {}, options }) => {
+  return useInfiniteQuery(["uom/infinite", query], fetchInfiniteUOMLists, {
+    keepPreviousData: true,
     ...options,
   });
 };
@@ -82,4 +103,4 @@ const useUploadFileUOM = ({ options }) => {
   );
 };
 
-export { useUOMList, useUOMDetail, useCreateUOM, useUpdateUOM, useDeletUOM, useUploadFileUOM };
+export { useUOMList, useUOMInfiniteLists,  useUOMDetail, useCreateUOM, useUpdateUOM, useDeletUOM, useUploadFileUOM };
