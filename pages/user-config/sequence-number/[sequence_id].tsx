@@ -27,13 +27,13 @@ import {
 import ArrowLeft from "../../../assets/icons/arrow-left.svg";
 import AddSequenceNumber from "../../../components/pages/SequenceNumber/AddSequenceNumber";
 
-const CreateSequenceNumber: any = () => {
+const DetailSequenceNumber: any = () => {
   const router = useRouter();
   const { sequence_id } = router.query;
 
   const [search, setSearch] = useState("");
   const [isEdit, setIsEdit] = useState(false);
-  const [isAdd, setIsAdd] = useState(false);
+  const [isAdd, setIsAdd] = useState(true);
 
   const pagination = usePagination({
     page: 1,
@@ -43,7 +43,7 @@ const CreateSequenceNumber: any = () => {
     arrows: true,
     totalItems: 100,
   });
-  console.log(isAdd);
+
   return (
     <>
       {isAdd ? (
@@ -305,4 +305,4 @@ const Label = styled.div`
   color: #000000;
 `;
 
-export default CreateSequenceNumber;
+export default DetailSequenceNumber;
