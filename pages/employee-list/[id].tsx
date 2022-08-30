@@ -1497,10 +1497,18 @@ const EmployeeDetail = () => {
 
                 <Controller
                   control={control}
-                  name="job_position"
+                  name="is_salesman"
+                  rules={{
+                    required: {
+                      value: true,
+                      message: "Please enter is salesman.",
+                    },
+                  }}
                   render={({ field: { onChange, value } }) => (
                     <Row alignItems="center" gap="12px">
-                      <Text>Is Salesman</Text>
+                      <Label>
+                        Is Salesman <span style={{ color: colors.red.regular }}>*</span>
+                      </Label>
                       <Switch defaultChecked={value} checked={value} onChange={onChange} />
                     </Row>
                   )}
