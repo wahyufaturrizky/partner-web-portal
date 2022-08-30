@@ -17,7 +17,6 @@ import {
 } from "pink-lava-ui";
 import { Controller, useForm, Control, useFieldArray } from 'react-hook-form'
 import { useRouter } from 'next/router';
-import { DevTool } from "@hookform/devtools";
 import {
   Branch,
   Registration,
@@ -637,8 +636,6 @@ export default function CreateProduct() {
           </Accordion.Body>
         </Accordion.Item>
       </Accordion>
-
-      <DevTool control={control} />
       </>
     }
     </Col>
