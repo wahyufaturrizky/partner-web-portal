@@ -189,7 +189,7 @@ const TermOfPaymentEdit = () => {
   return (
     <>
       <Col>
-        <Row gap="4px">
+        <Row gap="4px" alignItems={"center"}>
           <ArrowLeft style={{ cursor: "pointer" }} onClick={() => router.back()} />
           <Text variant={"h4"}>Term of Payment</Text>
         </Row>

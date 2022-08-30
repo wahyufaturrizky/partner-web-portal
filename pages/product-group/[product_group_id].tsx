@@ -19,11 +19,14 @@ import {
   useUpdateProductGroup,
   useProductGroup,
   useFilterProductGroup,
+  useDeleteProductGroup,
 } from "../../hooks/mdm/product-group/useProductGroup";
 import { useProductBrandInfiniteLists } from "../../hooks/mdm/product-brand/useProductBrandMDM";
 import { queryClient } from "../_app";
 import usePagination from "@lucasmogari/react-pagination";
 import useDebounce from "../../lib/useDebounce";
+import ArrowLeft from "../../assets/icons/arrow-left.svg";
+import { ModalDeleteConfirmation } from "../../components/elements/Modal/ModalConfirmationDelete";
 
 const getFilterOption = (group: any) => {
   switch (group) {
@@ -56,6 +59,7 @@ const ProductGroupCreate = () => {
     totalItems: 0,
   });
 
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isSuccessGetAllData, setIsSuccessGetAllData] = useState(false);
   const [filteredProduct, setFilteredProduct] = useState([]);
   const [groupingOption, setGroupingOption] = useState([
@@ -140,6 +144,17 @@ const ProductGroupCreate = () => {
         onSuccess: () => {
           router.back();
           queryClient.invalidateQueries(["products-group"]);
+        },
+      },
+    });
+
+  const { mutate: deleteProductGroup, isLoading: isLoadingDeleteProductGroup } =
+    useDeleteProductGroup({
+      options: {
+        onSuccess: () => {
+          queryClient.invalidateQueries(["products-group"]);
+          setShowDeleteModal(false);
+          router.back();
         },
       },
     });
@@ -300,8 +315,9 @@ const ProductGroupCreate = () => {
   return (
     <>
       <Col>
-        <Row gap="4px">
-          <Text variant={"h4"}>Create Product Group</Text>
+        <Row gap="4px" alignItems={"center"}>
+          <ArrowLeft style={{ cursor: "pointer" }} onClick={() => router.back()} />
+          <Text variant={"h4"}>{productGroupData?.name}</Text>
         </Row>
 
         <Spacer size={20} />
@@ -309,8 +325,8 @@ const ProductGroupCreate = () => {
         <Card padding="20px">
           <Row justifyContent="flex-end" alignItems="center" nowrap>
             <Row gap="16px">
-              <Button size="big" variant={"tertiary"} onClick={() => router.back()}>
-                Cancel
+              <Button size="big" variant={"tertiary"} onClick={() => setShowDeleteModal(true)}>
+                Delete
               </Button>
               <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
                 {isLoadingUpdateProductGroup ? "Loading..." : "Save"}
@@ -710,6 +726,17 @@ const ProductGroupCreate = () => {
           </Accordion.Item>
         </Accordion>
       </Col>
+
+      {showDeleteModal && (
+        <ModalDeleteConfirmation
+          totalSelected={1}
+          itemTitle={productGroupData?.name}
+          visible={showDeleteModal}
+          isLoading={isLoadingDeleteProductGroup}
+          onCancel={() => setShowDeleteModal(false)}
+          onOk={() => deleteProductGroup({ ids: [product_group_id], company_id: "KSNI" })}
+        />
+      )}
     </>
   );
 };
