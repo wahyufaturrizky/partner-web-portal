@@ -1266,6 +1266,7 @@ const EmployeeDetail = () => {
             </Text>
             <Controller
               control={control}
+              defaultValue={dataEmployee?.type}
               name="type"
               rules={{
                 required: {
@@ -1338,6 +1339,7 @@ const EmployeeDetail = () => {
                 <Controller
                   control={control}
                   name="title"
+                  defaultValue={dataEmployee?.title}
                   rules={{
                     required: {
                       value: true,
@@ -1585,6 +1587,7 @@ const EmployeeDetail = () => {
 
               <Col width="100%">
                 <Controller
+                  defaultValue={dataEmployee?.branch}
                   rules={{
                     required: {
                       value: true,
@@ -2002,6 +2005,7 @@ const EmployeeDetail = () => {
                       label="Mobile Number"
                       height="48px"
                       required
+                      defaultValue={dataEmployee?.personal?.mobile}
                       error={errors.personal?.mobile?.message}
                       placeholder={"e.g you@email.com"}
                       {...register("personal.mobile", {
@@ -2120,6 +2124,7 @@ const EmployeeDetail = () => {
                         <Col width={"100%"}>
                           <Controller
                             control={control}
+                            defaultValue={dataEmployee?.address?.[index]?.type}
                             rules={{
                               required: {
                                 value: true,
@@ -2134,6 +2139,7 @@ const EmployeeDetail = () => {
                                 </Label>
                                 <Spacer size={3} />
                                 <Dropdown
+                                  defaultValue={dataEmployee?.address?.[index]?.type}
                                   error={error?.message}
                                   noSearch
                                   width="100%"
@@ -2156,6 +2162,7 @@ const EmployeeDetail = () => {
                         <Col width="100%">
                           <Controller
                             control={control}
+                            defaultValue={dataEmployee?.address?.[index]?.street}
                             rules={{
                               maxLength: {
                                 value: 225,
@@ -2171,6 +2178,7 @@ const EmployeeDetail = () => {
                               <TextArea
                                 width="100%"
                                 rows={2}
+                                defaultValue={dataEmployee?.address?.[index]?.street}
                                 onChange={onChange}
                                 required
                                 error={errors?.["address"]?.[index]?.["street"]?.["message"]}
