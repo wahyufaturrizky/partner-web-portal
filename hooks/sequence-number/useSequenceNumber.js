@@ -9,7 +9,7 @@ const fetchAllSequenceNumber = async ({ query = {} }) => {
       limit: 10,
       sortBy: "created_at",
       sortOrder: "DESC",
-    //   company_id: "KSNI",
+      company_id: 1,
       ...query,
     },
   }).then((data) => data);

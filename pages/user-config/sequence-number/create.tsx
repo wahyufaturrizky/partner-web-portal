@@ -33,7 +33,7 @@ const CreateSequenceNumber: any = () => {
 
   const [search, setSearch] = useState("");
   const [isEdit, setIsEdit] = useState(false);
-  const [isAdd, setIsAdd] = useState(true);
+  const [isAdd, setIsAdd] = useState(false);
 
   const pagination = usePagination({
     page: 1,
