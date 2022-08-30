@@ -46,7 +46,6 @@ const Register = () => {
   const { handleSubmit, trigger } = methods;
   const onSubmit = (data: any) => {
     setSuccessRegister(true);
-    console.log(data);
   };
   return (
     <div style={{ height: "100vh", position: "relative" }}>

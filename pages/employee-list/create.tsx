@@ -1,3 +1,5 @@
+import moment from "moment";
+import Image from "next/image";
 import { useRouter } from "next/router";
 import {
   Accordion,
@@ -13,6 +15,7 @@ import {
   Modal,
   Row,
   Spacer,
+  Switch,
   Table,
   Tabs,
   Text,
@@ -24,26 +27,23 @@ import styled from "styled-components";
 import { ICCheckPrimary, ICDelete, ICEdit, ICPlusWhite, ICView } from "../../assets";
 import { useCityInfiniteLists } from "../../hooks/city/useCity";
 import { useLanguages } from "../../hooks/languages/useLanguages";
-import {
-  useCountryInfiniteLists,
-  useDistrictInfiniteLists,
-  useProvinceInfiniteLists,
-} from "../../hooks/mdm/country-structure/useCountries";
+import { useCountryInfiniteLists } from "../../hooks/mdm/country-structure/useCountries";
 import { useDepartmentInfiniteLists } from "../../hooks/mdm/department/useDepartment";
 import {
   useBranchInfiniteLists,
+  useCountryStructureListMDM,
   useCreateEmployeeListMDM,
   useEmployeeInfiniteLists,
+  useReportToInfiniteLists,
+  useUploadFilePhotoEmployeeMDM,
 } from "../../hooks/mdm/employee-list/useEmployeeListMDM";
 import { useJobLevelInfiniteLists } from "../../hooks/mdm/job-level/useJobLevel";
 import { useJobPositionInfiniteLists } from "../../hooks/mdm/job-position/useJobPositon";
+import { usePostalCodeInfiniteLists } from "../../hooks/mdm/postal-code/usePostalCode";
+import { useTrainingTypeInfiniteLists } from "../../hooks/mdm/training-type/useTrainingType";
 import useDebounce from "../../lib/useDebounce";
 import { colors } from "../../utils/color";
 import { queryClient } from "../_app";
-import moment from "moment";
-import { usePostalCodeInfiniteLists } from "../../hooks/mdm/postal-code/usePostalCode";
-import { useTrainingTypeInfiniteLists } from "../../hooks/mdm/training-type/useTrainingType";
-import Image from "next/image";
 
 const EmployeeListCreate = () => {
   const router = useRouter();
@@ -76,14 +76,6 @@ const EmployeeListCreate = () => {
   const [totalRowsCountryList, setTotalRowsCountryList] = useState(0);
   const [searchCountry, setSearchCountry] = useState("");
 
-  const [provinceList, setProvinceList] = useState<any[]>([]);
-  const [totalRowsProvinceList, setTotalRowsProvinceList] = useState(0);
-  const [searchProvince, setSearchProvince] = useState("");
-
-  const [districtList, setDistrictList] = useState<any[]>([]);
-  const [totalRowsDistrictList, setTotalRowsDistrictList] = useState(0);
-  const [searchDistrict, setSearchDistrict] = useState("");
-
   const [postalCodeList, setPostalCodeList] = useState<any[]>([]);
   const [totalRowsPostalCodeList, setTotalRowsPostalCodeList] = useState(0);
   const [searchPostalCode, setSearchPostalCode] = useState("");
@@ -91,6 +83,14 @@ const EmployeeListCreate = () => {
   const [trainingTypeList, setTrainingTypeList] = useState<any[]>([]);
   const [totalRowsTrainingTypeList, setTotalRowsTrainingTypeList] = useState(0);
   const [searchTrainingType, setSearchTrainingType] = useState("");
+
+  const [reportToList, setReportToList] = useState<any[]>([]);
+  const [totalRowsReportToList, setTotalRowsReportToList] = useState(0);
+  const [searchReportTo, setSearchReportTo] = useState("");
+
+  const [typePhoto, setTypePhoto] = useState("");
+
+  const [countryId, setCountryId] = useState();
 
   const [modalChannelForm, setModalChannelForm] = useState({
     open: false,
@@ -103,12 +103,11 @@ const EmployeeListCreate = () => {
   const debounceFetch = useDebounce(
     searchDepartment ||
       searchJobPosition ||
+      searchReportTo ||
       searchJobLevel ||
       searchEmployee ||
       searchBranch ||
       searchCity ||
-      searchProvince ||
-      searchDistrict ||
       searchPostalCode ||
       searchTrainingType ||
       searchCountry,
@@ -137,6 +136,7 @@ const EmployeeListCreate = () => {
     handleSubmit,
     formState: { errors },
     getValues,
+    setValue,
   } = useForm({
     shouldUseNativeValidation: true,
     defaultValues: {
@@ -148,6 +148,7 @@ const EmployeeListCreate = () => {
       department: "",
       job_position: "",
       job_level: "",
+      is_salesman: false,
       report_to: "",
       branch: "",
       date_join: "",
@@ -200,7 +201,7 @@ const EmployeeListCreate = () => {
     register: registerFamily,
     handleSubmit: handleSubmitFamily,
     control: controlFamily,
-    formState: { errors: errorsFamily }
+    formState: { errors: errorsFamily },
   } = useForm({
     shouldUseNativeValidation: true,
   });
@@ -222,6 +223,28 @@ const EmployeeListCreate = () => {
   } = useForm({
     shouldUseNativeValidation: true,
   });
+
+  const { mutate: uploadFilePhoto, isLoading: isLoadingFilePhoto } = useUploadFilePhotoEmployeeMDM({
+    options: {
+      onSuccess: (data: any) => {
+        if (typePhoto === "photo") {
+          setValue("photo", data);
+        } else if (typePhoto === "certification") {
+          setValue("development.certification.attachments", data);
+        } else {
+          setValue("development.training.attachments", data);
+        }
+        alert("Upload Success");
+      },
+    },
+  });
+
+  const handleUploadPhotoFile = (file: any, type: string) => {
+    const formData = new FormData();
+    formData.append("upload_file", file);
+    setTypePhoto(type);
+    uploadFilePhoto(formData);
+  };
 
   const {
     isFetching: isFetchingDepartment,
@@ -255,6 +278,42 @@ const EmployeeListCreate = () => {
           return undefined;
         }
       },
+    },
+  });
+
+  const {
+    isFetching: isFetchingReportTo,
+    isFetchingNextPage: isFetchingMoreReportTo,
+    hasNextPage: hasNextPageReportTo,
+    fetchNextPage: fetchNextPageReportTo,
+  } = useReportToInfiniteLists({
+    query: {
+      search: debounceFetch,
+      company: "KSNI",
+      limit: 10,
+    },
+    options: {
+      onSuccess: (data: any) => {
+        setTotalRowsReportToList(data.pages[0].totalRow);
+        const mappedData = data?.pages?.map((group: any) => {
+          return group.rows?.map((element: any) => {
+            return {
+              value: element.ReportToId,
+              label: element.name,
+            };
+          });
+        });
+        const flattenArray = [].concat(...mappedData);
+        setReportToList(flattenArray);
+      },
+      getNextPageParam: (_lastPage: any, pages: any) => {
+        if (reportToList.length < totalRowsReportToList) {
+          return pages.length + 1;
+        } else {
+          return undefined;
+        }
+      },
+      enabled: false,
     },
   });
 
@@ -293,41 +352,6 @@ const EmployeeListCreate = () => {
   });
 
   const {
-    isFetching: isFetchingDistrict,
-    isFetchingNextPage: isFetchingMoreDistrict,
-    hasNextPage: hasNextPageDistrict,
-    fetchNextPage: fetchNextPageDistrict,
-  } = useDistrictInfiniteLists({
-    query: {
-      search: debounceFetch,
-      limit: 10,
-    },
-    options: {
-      onSuccess: (data: any) => {
-        setTotalRowsDistrictList(data.pages[0].totalRow);
-        const mappedData = data?.pages?.map((group: any) => {
-          return group.rows?.map((element: any) => {
-            return {
-              value: element.DistrictId,
-              label: element.name,
-            };
-          });
-        });
-        const flattenArray = [].concat(...mappedData);
-        setDistrictList(flattenArray);
-      },
-      getNextPageParam: (_lastPage: any, pages: any) => {
-        if (districtList.length < totalRowsDistrictList) {
-          return pages.length + 1;
-        } else {
-          return undefined;
-        }
-      },
-      enabled: false,
-    },
-  });
-
-  const {
     isFetching: isFetchingPostalCode,
     isFetchingNextPage: isFetchingMorePostalCode,
     hasNextPage: hasNextPagePostalCode,
@@ -344,7 +368,7 @@ const EmployeeListCreate = () => {
           return group.rows?.map((element: any) => {
             return {
               value: element.codeText,
-              label: element.codeText,
+              label: element.code,
             };
           });
         });
@@ -358,6 +382,24 @@ const EmployeeListCreate = () => {
           return undefined;
         }
       },
+    },
+  });
+
+  const {
+    fields: fieldsAddresess,
+    append: appendAddresess,
+    replace: replaceAddresess,
+    remove: removeAddresess,
+  } = useFieldArray({
+    control,
+    name: "address",
+  });
+
+  const { data: countryStructureListData } = useCountryStructureListMDM({
+    id: countryId,
+    options: {
+      onSuccess: (data: any) => {},
+      enabled: countryId || countryId !== undefined ? true : false,
     },
   });
 
@@ -377,7 +419,7 @@ const EmployeeListCreate = () => {
         const mappedData = data?.pages?.map((group: any) => {
           return group.rows?.map((element: any) => {
             return {
-              value: element.CountryId,
+              value: element.id,
               label: element.name,
             };
           });
@@ -392,41 +434,6 @@ const EmployeeListCreate = () => {
           return undefined;
         }
       },
-    },
-  });
-
-  const {
-    isFetching: isFetchingProvince,
-    isFetchingNextPage: isFetchingMoreProvince,
-    hasNextPage: hasNextPageProvince,
-    fetchNextPage: fetchNextPageProvince,
-  } = useProvinceInfiniteLists({
-    query: {
-      search: debounceFetch,
-      limit: 10,
-    },
-    options: {
-      onSuccess: (data: any) => {
-        setTotalRowsProvinceList(data.pages[0].totalRow);
-        const mappedData = data?.pages?.map((group: any) => {
-          return group.rows?.map((element: any) => {
-            return {
-              value: element.ProvinceId,
-              label: element.name,
-            };
-          });
-        });
-        const flattenArray = [].concat(...mappedData);
-        setProvinceList(flattenArray);
-      },
-      getNextPageParam: (_lastPage: any, pages: any) => {
-        if (provinceList.length < totalRowsProvinceList) {
-          return pages.length + 1;
-        } else {
-          return undefined;
-        }
-      },
-      enabled: false,
     },
   });
 
@@ -700,16 +707,6 @@ const EmployeeListCreate = () => {
   const handleChangeTabs = (e: any) => {
     setDefaultActiveKey(e);
   };
-
-  const {
-    fields: fieldsAddresess,
-    append: appendAddresess,
-    replace: replaceAddresess,
-    remove: removeAddresess,
-  } = useFieldArray({
-    control,
-    name: "address",
-  });
 
   const {
     fields: fieldsBankAccount,
@@ -1319,23 +1316,18 @@ const EmployeeListCreate = () => {
           <Accordion.Body>
             <Row width="100%" noWrap>
               <Col>
-                <Controller
-                  control={control}
-                  name="photo"
-                  render={({ field: { onChange } }) => (
-                    <FileUploaderAllFiles
-                      label="Employee Photo"
-                      onSubmit={(file: any) => onChange(file)}
-                      defaultFile={"/placeholder-employee-photo.svg"}
-                      withCrop
-                      sizeImagePhoto="125px"
-                      removeable
-                      textPhoto={[
-                        "This Photo will also be used for account profiles and employee identities.",
-                        "Photo size 500 x 500 recommended. Drag & Drop Photo or pressing “Upload”",
-                      ]}
-                    />
-                  )}
+                <FileUploaderAllFiles
+                  label="Employee Photo"
+                  onSubmit={(file: any) => handleUploadPhotoFile(file, "photo")}
+                  defaultFile={"/placeholder-employee-photo.svg"}
+                  withCrop
+                  disabled={isLoadingFilePhoto}
+                  sizeImagePhoto="125px"
+                  removeable
+                  textPhoto={[
+                    "This Photo will also be used for account profiles and employee identities.",
+                    "Photo size 500 x 500 recommended. Drag & Drop Photo or pressing “Upload”",
+                  ]}
                 />
               </Col>
             </Row>
@@ -1492,6 +1484,19 @@ const EmployeeListCreate = () => {
                         }}
                       />
                     </>
+                  )}
+                />
+
+                <Spacer size={8} />
+
+                <Controller
+                  control={control}
+                  name="job_position"
+                  render={({ field: { onChange, value } }) => (
+                    <Row alignItems="center" gap="12px">
+                      <Text>Is Salesman</Text>
+                      <Switch defaultChecked={value} checked={value} onChange={onChange} />
+                    </Row>
                   )}
                 />
               </Col>
@@ -2192,6 +2197,7 @@ const EmployeeListCreate = () => {
                                     isFetchingCountry && !isFetchingMoreCountry ? [] : countryList
                                   }
                                   onChange={(value: any) => {
+                                    setCountryId(value);
                                     onChange(value);
                                   }}
                                   onSearch={(value: any) => {
@@ -2209,37 +2215,14 @@ const EmployeeListCreate = () => {
                             control={control}
                             name={`address.${index}.province`}
                             render={({ field: { onChange } }) => (
-                              <>
-                                <Label>Province</Label>
-                                <Spacer size={3} />
-                                <FormSelect
-                                  height="48px"
-                                  style={{ width: "100%" }}
-                                  size={"large"}
-                                  placeholder={"Select"}
-                                  borderColor={"#AAAAAA"}
-                                  arrowColor={"#000"}
-                                  withSearch
-                                  isLoading={isFetchingProvince}
-                                  isLoadingMore={isFetchingMoreProvince}
-                                  fetchMore={() => {
-                                    if (hasNextPageProvince) {
-                                      fetchNextPageProvince();
-                                    }
-                                  }}
-                                  items={
-                                    isFetchingProvince && !isFetchingMoreProvince
-                                      ? []
-                                      : provinceList
-                                  }
-                                  onChange={(value: any) => {
-                                    onChange(value);
-                                  }}
-                                  onSearch={(value: any) => {
-                                    setSearchProvince(value);
-                                  }}
-                                />
-                              </>
+                              <Dropdown
+                                label="Province"
+                                width="100%"
+                                items={countryStructureListData?.structures?.[0]?.values.map(
+                                  (data) => ({ id: data.id, value: data.name })
+                                )}
+                                handleChange={onChange}
+                              />
                             )}
                           />
                         </Col>
@@ -2251,33 +2234,14 @@ const EmployeeListCreate = () => {
                             control={control}
                             name={`address.${index}.city`}
                             render={({ field: { onChange } }) => (
-                              <>
-                                <Label>City</Label>
-                                <Spacer size={3} />
-                                <FormSelect
-                                  height="48px"
-                                  style={{ width: "100%" }}
-                                  size={"large"}
-                                  placeholder={"Select"}
-                                  borderColor={"#AAAAAA"}
-                                  arrowColor={"#000"}
-                                  withSearch
-                                  isLoading={isFetchingCity}
-                                  isLoadingMore={isFetchingMoreCity}
-                                  fetchMore={() => {
-                                    if (hasNextPageCity) {
-                                      fetchNextPageCity();
-                                    }
-                                  }}
-                                  items={isFetchingCity && !isFetchingMoreCity ? [] : cityList}
-                                  onChange={(value: any) => {
-                                    onChange(value);
-                                  }}
-                                  onSearch={(value: any) => {
-                                    setSearchCity(value);
-                                  }}
-                                />
-                              </>
+                              <Dropdown
+                                label="City"
+                                width="100%"
+                                items={countryStructureListData?.structures?.[1]?.values.map(
+                                  (data) => ({ id: data.id, value: data.name })
+                                )}
+                                handleChange={onChange}
+                              />
                             )}
                           />
                         </Col>
@@ -2288,37 +2252,14 @@ const EmployeeListCreate = () => {
                             control={control}
                             name={`address.${index}.district`}
                             render={({ field: { onChange } }) => (
-                              <>
-                                <Label>District</Label>
-                                <Spacer size={3} />
-                                <FormSelect
-                                  height="48px"
-                                  style={{ width: "100%" }}
-                                  size={"large"}
-                                  placeholder={"Select"}
-                                  borderColor={"#AAAAAA"}
-                                  arrowColor={"#000"}
-                                  withSearch
-                                  isLoading={isFetchingDistrict}
-                                  isLoadingMore={isFetchingMoreDistrict}
-                                  fetchMore={() => {
-                                    if (hasNextPageDistrict) {
-                                      fetchNextPageDistrict();
-                                    }
-                                  }}
-                                  items={
-                                    isFetchingDistrict && !isFetchingMoreDistrict
-                                      ? []
-                                      : districtList
-                                  }
-                                  onChange={(value: any) => {
-                                    onChange(value);
-                                  }}
-                                  onSearch={(value: any) => {
-                                    setSearchDistrict(value);
-                                  }}
-                                />
-                              </>
+                              <Dropdown
+                                label="District"
+                                width="100%"
+                                items={countryStructureListData?.structures?.[2]?.values.map(
+                                  (data) => ({ id: data.id, value: data.name })
+                                )}
+                                handleChange={onChange}
+                              />
                             )}
                           />
                         </Col>
@@ -2330,18 +2271,14 @@ const EmployeeListCreate = () => {
                             control={control}
                             name={`address.${index}.zone`}
                             render={({ field: { onChange } }) => (
-                              <>
-                                <Label>Zone</Label>
-                                <Spacer size={3} />
-                                <Dropdown
-                                  noSearch
-                                  width="100%"
-                                  items={[{ id: "Andir", value: "Andir" }]}
-                                  handleChange={(value: any) => {
-                                    onChange(value);
-                                  }}
-                                />
-                              </>
+                              <Dropdown
+                                label="Zone"
+                                width="100%"
+                                items={countryStructureListData?.structures?.[3]?.values.map(
+                                  (data) => ({ id: data.id, value: data.name })
+                                )}
+                                handleChange={onChange}
+                              />
                             )}
                           />
                         </Col>
@@ -3022,26 +2959,18 @@ const EmployeeListCreate = () => {
 
                   <Spacer size={16} />
 
-                  <Controller
-                    control={controlTraining}
-                    name="attachments"
-                    render={({ field: { onChange } }) => (
-                      <FileUploaderAllFilesDragger
-                        onSubmit={(file: any) => onChange(file)}
-                        defaultFileList={
-                          modalChannelForm.data?.attachments
-                            ? [modalChannelForm.data?.attachments]
-                            : []
-                        }
-                        defaultFile={
-                          modalChannelForm.data?.attachments
-                            ? URL.createObjectURL(modalChannelForm.data?.attachments)
-                            : "/placeholder-employee-photo.svg"
-                        }
-                        withCrop
-                        removeable
-                      />
-                    )}
+                  <FileUploaderAllFilesDragger
+                    onSubmit={(file: any) => handleUploadPhotoFile(file, "training")}
+                    defaultFileList={
+                      modalChannelForm.data?.attachments ? [modalChannelForm.data?.attachments] : []
+                    }
+                    defaultFile={
+                      modalChannelForm.data?.attachments
+                        ? URL.createObjectURL(modalChannelForm.data?.attachments)
+                        : "/placeholder-employee-photo.svg"
+                    }
+                    withCrop
+                    removeable
                   />
                 </>
               ) : modalChannelForm.typeForm === "View Training" ? (
@@ -3162,26 +3091,18 @@ const EmployeeListCreate = () => {
 
                   <Spacer size={16} />
 
-                  <Controller
-                    control={controlCertification}
-                    name="attachments"
-                    render={({ field: { onChange } }) => (
-                      <FileUploaderAllFilesDragger
-                        onSubmit={(file: any) => onChange(file)}
-                        defaultFileList={
-                          modalChannelForm.data?.attachments
-                            ? [modalChannelForm.data?.attachments]
-                            : []
-                        }
-                        defaultFile={
-                          modalChannelForm.data?.attachments
-                            ? URL.createObjectURL(modalChannelForm.data?.attachments)
-                            : "/placeholder-employee-photo.svg"
-                        }
-                        withCrop
-                        removeable
-                      />
-                    )}
+                  <FileUploaderAllFilesDragger
+                    onSubmit={(file: any) => handleUploadPhotoFile(file, "certification")}
+                    defaultFileList={
+                      modalChannelForm.data?.attachments ? [modalChannelForm.data?.attachments] : []
+                    }
+                    defaultFile={
+                      modalChannelForm.data?.attachments
+                        ? URL.createObjectURL(modalChannelForm.data?.attachments)
+                        : "/placeholder-employee-photo.svg"
+                    }
+                    withCrop
+                    removeable
                   />
                 </>
               )}

@@ -14,9 +14,10 @@ export default function Contact(props: any) {
       onCreate,
       setVisible,
       visible,
-      register,
+      registerContact,
       contact,
-      setValueContact
+      setValueContact,
+      fieldsContact
     } = props 
 
   return (
@@ -32,9 +33,9 @@ export default function Contact(props: any) {
           <CardAddContact onClick={setVisible} />
         </Col>
         {
-          [1, 2].map((index) => (
+          fieldsContact.map((items: any, index: number) => (
             <Col key={index} width="32%">
-              <CardContact />
+              <CardContact key={index} {...items} />
             </Col>
           ))
         }
@@ -46,13 +47,13 @@ export default function Contact(props: any) {
         visible={visible}
         onSubmit={onCreate}
         onCancel={setVisible}
-        register={register}
+        registerContact={registerContact}
       />
     </div>
   )
 }
 
-const CardContact = () => {
+const CardContact = ({ contact  }: any) => {
   return (
     <CardUser>
       <div className={styles['card-contact-user']}>
@@ -60,9 +61,9 @@ const CardContact = () => {
           <IconAvatar />
           <Spacer size={10} />
           <div className={styles['detail-contact']}>
-            <p className={styles['title']}>Tri Tipang</p>
-            <p className={styles['status']}>COO</p>
-            <p className={styles['email']}>duolipa@indomarco.com</p>
+            <p className={styles['title']}>{contact?.name}</p>
+            <p className={styles['status']}>{contact?.role}</p>
+            <p className={styles['email']}>{contact?.email}</p>
           </div>
         </FlexElement>
         <IconEdit />

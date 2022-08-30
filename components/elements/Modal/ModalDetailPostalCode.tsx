@@ -84,8 +84,6 @@ export const ModalDetailPostalCode: any = ({
 			country: selectedCountry,
 			structures: selectedCountryStructures,
 		};
-		console.log(payload);
-
 		mutateUpdatePostalCode(payload);
 	};
 
