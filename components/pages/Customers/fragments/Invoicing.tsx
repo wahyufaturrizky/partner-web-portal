@@ -80,7 +80,7 @@ export default function Invoicing(props: any) {
             height="50px"
             required
             {...register('invoicing.credit_limit', {
-              required: 'credit limit must be filled'
+              // required: 'credit limit must be filled'
             })}
           />
           <Spacer size={10} />

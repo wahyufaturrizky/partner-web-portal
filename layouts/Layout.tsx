@@ -189,6 +189,12 @@ const menuMdm = [
     icon: ICInventory,
     children: [
       {
+        key: "product-lis",
+        title: "Product List",
+        content: () => "Product List",
+        onClick: () => Router.push("/product-list"),
+      },
+      {
         key: "product-option",
         title: "Product Option",
         content: () => "Product Option",

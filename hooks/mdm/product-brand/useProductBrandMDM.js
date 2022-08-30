@@ -21,6 +21,28 @@ const useProductBrandsMDM = ({ query = {}, options }) => {
   });
 };
 
+const fetchInfiniteProductBrandLists = async ({ pageParam = 1, queryKey }) => {
+  console.log("queryKey", queryKey)
+  const searchQuery = queryKey[1].search;
+  return mdmService(`/product-brand`, {
+    params: {
+      search: searchQuery,
+      limit: 10,
+      page: pageParam,
+      sortBy: "created_at",
+      sortOrder: "DESC",
+      ...queryKey[1]
+    },
+  }).then((data) => data);
+};
+
+const useProductBrandInfiniteLists = ({ query = {}, options }) => {
+  return useInfiniteQuery(["product-brand/infinite", query], fetchInfiniteProductBrandLists, {
+    keepPreviousData: true,
+    ...options,
+  });
+};
+
 const fetchProductBrandMDM = async ({ id }) => {
   return mdmService(`/product-brand/${id}`).then((data) => data);
 };
@@ -107,12 +129,6 @@ const fetchInfiniteProductBrand = async ({ pageParam = 1, queryKey }) => {
   }).then((data) => data);
 };
 
-const useProductBrandInfiniteLists = ({ query = {}, options }) => {
-  return useInfiniteQuery(["product-brand/infinite", query], fetchInfiniteProductBrand, {
-    keepPreviousData: true,
-    ...options,
-  });
-};
 
 export {
   useProductBrandsMDM,

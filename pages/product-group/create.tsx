@@ -193,7 +193,6 @@ const ProductGroupCreate = () => {
   };
 
   useEffect(() => {
-    // console.log("triggered", pagination);
   }, [pagination.fromItem, pagination.itemsPerPage]);
 
   useEffect(() => {
