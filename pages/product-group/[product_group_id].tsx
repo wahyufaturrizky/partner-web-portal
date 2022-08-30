@@ -399,7 +399,7 @@ const ProductGroupCreate = () => {
                       </>
                     )}
 
-                    <div style={{ display: "flex" }}>
+                    <div style={{ display: "flex", gap: "5px" }}>
                       <Controller
                         control={control}
                         name={`items.${index}.group`}
@@ -453,8 +453,6 @@ const ProductGroupCreate = () => {
                         )}
                       />
 
-                      <Spacer size={20} />
-
                       {(itemsWatch[index]?.group === "PRICE" ||
                         itemsWatch[index]?.group === "") && (
                         <Controller
@@ -479,6 +477,9 @@ const ProductGroupCreate = () => {
                                 ]}
                                 onChange={(value: any) => {
                                   onChange(value);
+
+                                  setValue(`items.${index}.value_from`, "0");
+                                  setValue(`items.${index}.value_to`, "0");
 
                                   const mapFilterProduct = itemsWatch.map(
                                     (el: any, elIndex: any) => {
@@ -630,19 +631,21 @@ const ProductGroupCreate = () => {
                     {(itemsWatch[index]?.condition === "GT" ||
                       itemsWatch[index]?.condition === "EQ") &&
                       itemsWatch[index]?.group === "PRICE" && (
-                        <Input
-                          width="100%"
-                          label="Price"
-                          height="40px"
-                          defaultValue={item?.value_from}
-                          placeholder={"e.g 1000"}
-                          {...register(`items.${index}.value_from`, {
-                            shouldUnregister: true,
-                            onChange: (e: any) => {
-                              setMinValue(e.target.value);
-                            },
-                          })}
-                        />
+                        <Row width="50%" noWrap>
+                          <Input
+                            width="100%"
+                            label="Price"
+                            height="40px"
+                            defaultValue={item?.value_from}
+                            placeholder={"e.g 1000"}
+                            {...register(`items.${index}.value_from`, {
+                              shouldUnregister: true,
+                              onChange: (e: any) => {
+                                setMinValue(e.target.value);
+                              },
+                            })}
+                          />
+                        </Row>
                       )}
 
                     {itemsWatch[index]?.condition === "BETWEEN" &&
