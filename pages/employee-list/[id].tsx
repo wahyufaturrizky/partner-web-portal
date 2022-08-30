@@ -590,12 +590,18 @@ const EmployeeDetail = () => {
   const { mutate: updateEmployeeList, isLoading: isLoadingUpdateEmployeeList } =
     useUpdateEmployeeListMDM({
       options: {
-        onSuccess: () => {},
+        onSuccess: () => {
+          router.back();
+        },
       },
       id: idEmployee,
     });
 
   const onSubmit = (data: any) => {
+    if (data.hasOwnProperty("id")) {
+      delete data.id;
+    }
+
     data.address.map((dataAddress: any) => {
       if (dataAddress.hasOwnProperty("id") || dataAddress.hasOwnProperty("key")) {
         delete dataAddress.id;
