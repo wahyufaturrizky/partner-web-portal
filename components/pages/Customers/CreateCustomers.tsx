@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   Button,
   Col,
@@ -61,6 +61,14 @@ export default function CreateCustomers({ isUpdate, detailCustomer }: any) {
     contact: ''
   })
 
+  // useEffect(() => {
+  //   if (detailCustomer) {
+  //     setValue('customer.name', 'ttestingg')
+  //   }
+  // }, [setValue, isUpdate, detailCustomer])
+
+  console.log('detailCustomer', detailCustomer)
+
   const isCompany: boolean = formType === 'Company'
   const _formType: string[] = ['Company', 'Individu']
   const listTabItems: { title: string }[] = [
@@ -90,29 +98,19 @@ export default function CreateCustomers({ isUpdate, detailCustomer }: any) {
     key: 0,
   };
 
-  //use-forms customers
-  const {
-    control,
-    handleSubmit,
-    register,
-    setValue,
-    getValues,
-    formState: { errors },
-  } = useForm({
-    shouldUseNativeValidation: true,
-    defaultValues: {
-      name:'',
+  const defaultValuesCreate = {
+      name: '',
       is_company: true,
-      phone:'',
-      tax_number:'',
-      mobile:'',
+      phone: '',
+      tax_number: '',
+      mobile: '',
       ppkp: false,
-      website:'',
-      email:'',
-      language:'',
-      customer_group:'',
-      external_code:'',
-      company_code:'',
+      website: '',
+      email: '',
+      language: '',
+      customer_group: '',
+      external_code: '',
+      company_code: '',
       bank: [],
       contact: [],
       sales: {
@@ -138,7 +136,19 @@ export default function CreateCustomers({ isUpdate, detailCustomer }: any) {
         currency: ""
       },
       address: [addressBodyField],
-    }
+  }
+
+  //use-forms customers
+  const {
+    control,
+    handleSubmit,
+    register,
+    setValue,
+    getValues,
+    formState: { errors },
+  } = useForm({
+    shouldUseNativeValidation: true,
+    defaultValues: isUpdate ? detailCustomer : defaultValuesCreate
   });
 
   //use-forms PURCHASINGS
@@ -400,7 +410,11 @@ export default function CreateCustomers({ isUpdate, detailCustomer }: any) {
   }
 
 
-  // if status update
+  useEffect(() => {
+    if(isUpdate && detailCustomer) {
+      setIsPKP(detailCustomer?.ppkp)
+    }
+  }, [detailCustomer, isUpdate])
 
   return (
     <div>
@@ -465,6 +479,7 @@ export default function CreateCustomers({ isUpdate, detailCustomer }: any) {
                     width="100%"
                     label="Name"
                     height="50px"
+                    defaultValue={detailCustomer?.name}
                     placeholder="e.g PT. Kaldu Sari Nabati Indonesia"
                     required
                     error={errors?.name?.message}
@@ -479,6 +494,7 @@ export default function CreateCustomers({ isUpdate, detailCustomer }: any) {
                     height="50px"
                     placeholder="e.g 123456789"
                     required
+                    defaultValue={detailCustomer?.taxNumber}
                     type="number"
                     error={errors?.tax_number?.message}
                     {...register('tax_number', {
@@ -501,6 +517,7 @@ export default function CreateCustomers({ isUpdate, detailCustomer }: any) {
                     width="100%"
                     label="Website"
                     height="50px"
+                    defaultValue={detailCustomer?.website}
                     placeholder={"e.g ksni.com"}
                     error={errors?.website?.message}
                     required
@@ -535,6 +552,7 @@ export default function CreateCustomers({ isUpdate, detailCustomer }: any) {
                     label="Phone"
                     height="50px"
                     type="number"
+                    defaultValue={detailCustomer?.phone}
                     error={errors?.phone?.message}
                     placeholder="e.g 021 123456"
                     {...register('phone', {
@@ -546,6 +564,7 @@ export default function CreateCustomers({ isUpdate, detailCustomer }: any) {
                     width="100%"
                     label="Mobile"
                     height="50px"
+                    defaultValue={detailCustomer?.mobile}
                     type="number"
                     error={errors?.mobile?.message}
                     placeholder="e.g 081234567891011"
@@ -559,6 +578,7 @@ export default function CreateCustomers({ isUpdate, detailCustomer }: any) {
                     label="Email"
                     height="50px"
                     type="email"
+                    defaultValue={detailCustomer?.email}
                     error={errors?.email?.message}
                     placeholder={"e.g admin@kasni.co.id"}
                     {...register('email', {
@@ -587,6 +607,7 @@ export default function CreateCustomers({ isUpdate, detailCustomer }: any) {
                     label="External Code"
                     height="50px"
                     type="number"
+                    deafaultV
                     error={errors?.external_code?.message}
                     placeholder={"e.g 123456"}
                     {...register('external_code', {
