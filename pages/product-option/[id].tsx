@@ -21,7 +21,7 @@ const ProductOptionDetail = () => {
   const { id } = router.query;
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [dataItem, setDataItem] = useState([]);
-  const [modalChannelForm, setModalChannelForm] = useState({
+  const [modalChannelForm, setModalChannelForm] = useState <any>({
     open: false,
     data: {},
     typeForm: "create",
@@ -51,7 +51,7 @@ const ProductOptionDetail = () => {
       id: `KSNI/${id}`,
     });
 
-  const { mutate: updateProductOptionItem, isLoading: isLoadingUpdateProductOptionItem } =
+  const { mutate: updateProductOptionItem, isLoading: isLoadingUpdateProductOptionItem }: any =
     useUpdateProductOptionItemMDM({
       options: {
         onSuccess: () => {
@@ -61,7 +61,7 @@ const ProductOptionDetail = () => {
       id: modalChannelForm.data.id,
     });
 
-  const { mutate: createProductOptionItem, isLoading: isLoadingCreateProductOptionItem } =
+  const { mutate: createProductOptionItem, isLoading: isLoadingCreateProductOptionItem }: any =
     useCreateProductOptionItemMDM({
       options: {
         onSuccess: () => {
@@ -70,7 +70,7 @@ const ProductOptionDetail = () => {
       },
     });
 
-  const { mutate: deleteProductOption, isLoading: isLoadingDeleteProductOption } =
+  const { mutate: deleteProductOption, isLoading: isLoadingDeleteProductOption }: any =
     useDeleteProductOptionMDM({
       options: {
         onSuccess: () => {
@@ -80,7 +80,7 @@ const ProductOptionDetail = () => {
       },
     });
 
-  const { mutate: deleteProductOptionItem, isLoading: isLoadingDeleteProductOptionItem } =
+  const { mutate: deleteProductOptionItem, isLoading: isLoadingDeleteProductOptionItem }: any =
     useDeleteProductOptionItemMDM({
       options: {
         onSuccess: () => {
@@ -97,11 +97,10 @@ const ProductOptionDetail = () => {
     updateProductOption(formData);
   };
 
-  const handleAddItem = (data) => {
+  const handleAddItem = (data: any) => {
     if (modalChannelForm.typeForm === "edit") {
       updateProductOptionItem({ name: data.items });
     } else {
-      console.log(data);
       createProductOptionItem({
         product_option_id: dataProductOption.productOptionId,
         company_id: "KSNI",
@@ -126,7 +125,7 @@ const ProductOptionDetail = () => {
       dataIndex: "action",
       width: "15%",
       align: "left",
-      render: (_, record) => {
+      render: (_: any, record: any) => {
         return (
           <Row gap="16px" alignItems="center" nowrap>
             <Col>
@@ -228,7 +227,7 @@ const ProductOptionDetail = () => {
                     columns={columns.filter(
                       (filtering) => filtering.dataIndex !== "id" && filtering.dataIndex !== "key"
                     )}
-                    data={dataProductOption.items.map((data) => ({
+                    data={dataProductOption.items.map((data: any) => ({
                       key: data.id,
                       id: data.id,
                       name: data.name,

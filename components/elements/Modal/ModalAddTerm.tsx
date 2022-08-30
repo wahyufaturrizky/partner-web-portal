@@ -246,7 +246,6 @@ const ModalAddTerm = ({
                       onChange={(value: any) => {
                         setDaysList(value);
                         onChange(value);
-                        // console.log("value", value);
                       }}
                     />{" "}
                     <Text variant="headingRegular" inline>

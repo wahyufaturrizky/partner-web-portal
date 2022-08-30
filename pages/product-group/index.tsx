@@ -15,10 +15,10 @@ import {
 } from "pink-lava-ui";
 import usePagination from "@lucasmogari/react-pagination";
 import {
-  useTermOfPayments,
-  useUploadFileTermOfPayment,
-  useDeleteTermOfPayment,
-} from "../../hooks/mdm/term-of-payment/useTermOfPayment";
+  useProductsGroup,
+  useUploadFileProductGroup,
+  useDeleteProductGroup,
+} from "../../hooks/mdm/product-group/useProductGroup";
 import useDebounce from "../../lib/useDebounce";
 import { queryClient } from "../_app";
 import { ICDownload, ICUpload } from "../../assets/icons";
@@ -26,11 +26,11 @@ import { mdmDownloadService } from "../../lib/client";
 import { useRouter } from "next/router";
 
 const downloadFile = (params: any) =>
-  mdmDownloadService("/top/download", { params }).then((res) => {
+  mdmDownloadService("/product-group/download", { params }).then((res) => {
     let dataUrl = window.URL.createObjectURL(new Blob([res.data]));
     let tempLink = document.createElement("a");
     tempLink.href = dataUrl;
-    tempLink.setAttribute("download", `term_of_payment_${new Date().getTime()}.xlsx`);
+    tempLink.setAttribute("download", `product_group_${new Date().getTime()}.xlsx`);
     tempLink.click();
   });
 
@@ -39,18 +39,18 @@ const renderConfirmationText = (type: any, data: any) => {
     case "selection":
       return data.selectedRowKeys.length > 1
         ? `Are you sure to delete ${data.selectedRowKeys.length} items ?`
-        : `Are you sure to delete Term of Payment ${
+        : `Are you sure to delete Product Grouping ${
             data?.topData?.data.find((el: any) => el.key === data.selectedRowKeys[0])?.topName
           } ?`;
     case "detail":
-      return `Are you sure to delete Term of Payment ${data.topName} ?`;
+      return `Are you sure to delete Product Grouping ${data.topName} ?`;
 
     default:
       break;
   }
 };
 
-const TermOfPayment = () => {
+const ProductGroup = () => {
   const router = useRouter();
   const pagination = usePagination({
     page: 1,
@@ -68,10 +68,10 @@ const TermOfPayment = () => {
   const debounceSearch = useDebounce(search, 1000);
 
   const {
-    data: TopData,
-    isLoading: isLoadingTop,
-    isFetching: isFetchingTop,
-  } = useTermOfPayments({
+    data: productsGroupData,
+    isLoading: isLoadingProductsGroup,
+    isFetching: isFetchingProductsGroup,
+  } = useProductsGroup({
     query: {
       search: debounceSearch,
       page: pagination.page,
@@ -85,15 +85,15 @@ const TermOfPayment = () => {
       select: (data: any) => {
         const mappedData = data?.rows?.map((element: any) => {
           return {
-            key: element.topId,
-            id: element.topId,
-            topTerm: element.name,
+            key: element.productGroupId,
+            id: element.productGroupId,
+            productGroupName: element.name,
             action: (
               <div style={{ display: "flex", justifyContent: "left" }}>
                 <Button
                   size="small"
                   onClick={() => {
-                    router.push(`/term-of-payment/${element.topId}`);
+                    router.push(`/product-group/${element.productGroupId}`);
                   }}
                   variant="tertiary"
                 >
@@ -109,33 +109,35 @@ const TermOfPayment = () => {
     },
   });
 
-  const { mutate: deleteTop, isLoading: isLoadingDeleteTop } = useDeleteTermOfPayment({
-    options: {
-      onSuccess: () => {
-        setShowDelete({ open: false, data: {}, type: "" });
-        setSelectedRowKeys([]);
-        queryClient.invalidateQueries(["top-list"]);
+  const { mutate: deleteProductGroup, isLoading: isLoadingDeleteProductGroup } =
+    useDeleteProductGroup({
+      options: {
+        onSuccess: () => {
+          setShowDelete({ open: false, data: {}, type: "" });
+          setSelectedRowKeys([]);
+          queryClient.invalidateQueries(["products-group"]);
+        },
       },
-    },
-  });
+    });
 
-  const { mutate: uploadFileTop, isLoading: isLoadingUploadFileTop } = useUploadFileTermOfPayment({
-    options: {
-      onSuccess: () => {
-        queryClient.invalidateQueries(["top-list"]);
-        setShowUpload(false);
+  const { mutate: uploadFileProductGroup, isLoading: isLoadingUploadFileProductGroup } =
+    useUploadFileProductGroup({
+      options: {
+        onSuccess: () => {
+          queryClient.invalidateQueries(["products-group"]);
+          setShowUpload(false);
+        },
       },
-    },
-  });
+    });
 
   const columns = [
     {
-      title: "Term of Payment ID",
+      title: "Product Grouping",
       dataIndex: "id",
     },
     {
-      title: "Payment Term",
-      dataIndex: "topTerm",
+      title: "Product Grouping Name",
+      dataIndex: "productGroupName",
     },
     {
       title: "Action",
@@ -157,20 +159,20 @@ const TermOfPayment = () => {
     formData.append("company_id", "KSNI");
     formData.append("file", file);
 
-    uploadFileTop(formData);
+    uploadFileProductGroup(formData);
   };
 
   return (
     <>
       <Col>
-        <Text variant={"h4"}>Term of Payment</Text>
+        <Text variant={"h4"}>Product Group</Text>
         <Spacer size={20} />
       </Col>
       <Card>
         <Row justifyContent="space-between">
           <Search
             width="340px"
-            placeholder="Search Term of Payment ID, Term."
+            placeholder="Search Product Grouping, Name"
             onChange={(e: any) => {
               setSearch(e.target.value);
             }}
@@ -183,7 +185,7 @@ const TermOfPayment = () => {
                 setShowDelete({
                   open: true,
                   type: "selection",
-                  data: { uomData: TopData, selectedRowKeys },
+                  data: { uomData: productsGroupData, selectedRowKeys },
                 })
               }
               disabled={rowSelection.selectedRowKeys?.length === 0}
@@ -247,7 +249,7 @@ const TermOfPayment = () => {
             <Button
               size="big"
               variant="primary"
-              onClick={() => router.push("/term-of-payment/create")}
+              onClick={() => router.push("/product-group/create")}
             >
               Create
             </Button>
@@ -258,9 +260,9 @@ const TermOfPayment = () => {
       <Card style={{ padding: "16px 20px" }}>
         <Col gap={"60px"}>
           <Table
-            loading={isLoadingTop || isFetchingTop}
+            loading={isLoadingProductsGroup || isFetchingProductsGroup}
             columns={columns}
-            data={TopData?.data}
+            data={productsGroupData?.data}
             rowSelection={rowSelection}
           />
           <Pagination pagination={pagination} />
@@ -307,10 +309,10 @@ const TermOfPayment = () => {
                   variant="primary"
                   size="big"
                   onClick={() => {
-                    deleteTop({ ids: selectedRowKeys, company_id: "KSNI" });
+                    deleteProductGroup({ ids: selectedRowKeys, company_id: "KSNI" });
                   }}
                 >
-                  {isLoadingDeleteTop ? "loading..." : "Yes"}
+                  {isLoadingDeleteProductGroup ? "loading..." : "Yes"}
                 </Button>
               </div>
             </div>
@@ -335,4 +337,4 @@ const Card = styled.div`
   padding: 16px;
 `;
 
-export default TermOfPayment;
+export default ProductGroup;

@@ -99,7 +99,7 @@ export default function CreateCustomers({ isUpdate }: any) {
       phone:'',
       tax_number:'',
       mobile:'',
-      ppkp:false,
+      ppkp: false,
       website:'',
       email:'',
       language:'',
@@ -107,13 +107,13 @@ export default function CreateCustomers({ isUpdate }: any) {
       external_code:'',
       company_code:'',
       bank: [],
+      contact: [],
       address: [addressBodyField],
     }
   });
 
   //use-forms PURCHASING
   const {
-    handleSubmit: handleSubmitPurchasing,
     setValue: setValuePurchasing,
     getValues: getValuesPurchasing
   } = useForm({
@@ -131,7 +131,6 @@ export default function CreateCustomers({ isUpdate }: any) {
 
   //use-forms INVOICING
   const {
-    handleSubmit: handleSubmitInvoicing,
     setValue: setValueInvoicing,
     register: registerInvoicing,
     getValues: getValuesInvoicing,
@@ -154,7 +153,6 @@ export default function CreateCustomers({ isUpdate }: any) {
 
   //use-forms SALES
   const {
-    handleSubmit: handleSubmitSales,
     setValue: setValueSales,
     getValues: getValuesSales,
   } = useForm({
@@ -174,7 +172,7 @@ export default function CreateCustomers({ isUpdate }: any) {
     handleSubmit: handleSubmitContact,
     register: registerContact,
     setValue: setValueContact,
-    formState: { errors: contact },
+    formState: { errors: { contact } },
   } = useForm({
     shouldUseNativeValidation: true
   })
@@ -201,6 +199,17 @@ export default function CreateCustomers({ isUpdate }: any) {
     name: "bank"
   });
 
+  // useFieldArray CONTACT
+  const {
+    fields: fieldsContact,
+    append: appendContact,
+    remove: removeContact,
+    replace: replaceContact,
+  } = useFieldArray({
+    control,
+    name: "contact"
+  });
+
   const { mutate: createCustomer } = useCreateCustomers({
     options: {
       onSuccess: () => alert('create success!')
@@ -216,7 +225,10 @@ export default function CreateCustomers({ isUpdate }: any) {
     const result = { ...data, ...invoicing, purchasing, sales }
   };
 
-  const onHandleCreateContact = (data: any) => { }
+  const onHandleCreateContact = (data: any) => {
+    appendContact({ ...data, key: fieldsContact.length })
+    setVisible({ ...visible, contact: false })
+  }
 
   const handleAddItemBankAccount = async (data: any) => {
     if (modalChannelForm?.typeForm === "Edit Bank Account") {
@@ -241,11 +253,12 @@ export default function CreateCustomers({ isUpdate }: any) {
 
   const propsContacts = {
     setValueContact: setValueContact,
-    control: controlContact,
-    register: registerContact,
-    contact: contact,
+    controlContact,
+    registerContact,
+    contact,
     onCreate: handleSubmitContact(onHandleCreateContact),
     visible: visible.contact,
+    fieldsContact,
     setVisible: () => setVisible({ ...visible, contact: !visible.contact })
   }
 

@@ -118,7 +118,6 @@ const DetailMenuDesignList: any = () => {
 	const [gData, setGData] = useState(defaultData);
 
 	const onDragEnter = (info: any) => {
-		console.log(info); // expandedKeys 需要受控时设置
 		// setExpandedKeys(info.expandedKeys)
 	};
 
