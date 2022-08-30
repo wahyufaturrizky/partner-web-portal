@@ -129,17 +129,10 @@ const fetchInfiniteProductBrand = async ({ pageParam = 1, queryKey }) => {
   }).then((data) => data);
 };
 
-const useProductBrandInfiniteLists = ({ query = {}, options }) => {
-  return useInfiniteQuery(["product-brand/infinite", query], fetchInfiniteProductBrand, {
-    keepPreviousData: true,
-    ...options,
-  });
-};
 
 export {
   useProductBrandsMDM,
   useProductBrandMDM,
-  useProductBrandInfiniteLists,
   useCreateProductBrandMDM,
   useUpdateProductBrandMDM,
   useDeleteProductBrandMDM,
