@@ -45,48 +45,6 @@ const useCountryInfiniteLists = ({ query = {}, options }) => {
   });
 };
 
-const fetchInfiniteeProvinceLists = async ({ pageParam = 1, queryKey }) => {
-  const searchQuery = queryKey[1].search;
-  return mdmService(`/province`, {
-    params: {
-      search: searchQuery,
-      limit: 10,
-      page: pageParam,
-      sortBy: "id",
-      sortOrder: "DESC",
-      ...queryKey[1],
-    },
-  }).then((data) => data);
-};
-
-const useProvinceInfiniteLists = ({ query = {}, options }) => {
-  return useInfiniteQuery(["province/infinite", query], fetchInfiniteeProvinceLists, {
-    keepPreviousData: true,
-    ...options,
-  });
-};
-
-const fetchInfiniteeDistrictLists = async ({ pageParam = 1, queryKey }) => {
-  const searchQuery = queryKey[1].search;
-  return mdmService(`/district`, {
-    params: {
-      search: searchQuery,
-      limit: 10,
-      page: pageParam,
-      sortBy: "id",
-      sortOrder: "DESC",
-      ...queryKey[1],
-    },
-  }).then((data) => data);
-};
-
-const useDistrictInfiniteLists = ({ query = {}, options }) => {
-  return useInfiniteQuery(["district/infinite", query], fetchInfiniteeDistrictLists, {
-    keepPreviousData: true,
-    ...options,
-  });
-};
-
 const fetchDetailCountry = async ({ country_id }) => {
   return mdmService(`/country/${country_id}`).then((data) => data);
 };
@@ -165,6 +123,4 @@ export {
   useUpdateCountry,
   useFetchCountriesStructure,
   useCountryInfiniteLists,
-  useProvinceInfiniteLists,
-  useDistrictInfiniteLists,
 };

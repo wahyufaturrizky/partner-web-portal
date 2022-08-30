@@ -27,7 +27,7 @@ const TermOfPaymentEdit = () => {
   const [termList, setTermList] = useState<any[]>([]);
   const [removeList, setRemoveList] = useState<any[]>([]);
 
-  const { register, control, handleSubmit } = useForm();
+  const { register, handleSubmit } = useForm();
 
   const { mutate: updateTermOfPayment, isLoading: isLoadingUpdateTermOfPayment } =
     useUpdateTermOfPayment({
@@ -189,7 +189,7 @@ const TermOfPaymentEdit = () => {
   return (
     <>
       <Col>
-        <Row gap="4px">
+        <Row gap="4px" alignItems={"center"}>
           <ArrowLeft style={{ cursor: "pointer" }} onClick={() => router.back()} />
           <Text variant={"h4"}>Term of Payment</Text>
         </Row>

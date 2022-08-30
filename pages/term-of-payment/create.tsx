@@ -20,7 +20,7 @@ const TermOfPaymentCreate = () => {
   const [showDisableTerm, setShowDisableTerm] = useState(false);
   const [termList, setTermList] = useState<any[]>([]);
 
-  const { register, control, handleSubmit } = useForm();
+  const { register, handleSubmit } = useForm();
 
   const { mutate: createTermOfPayment, isLoading: isLoadingTermOfPayment } = useCreateTermOfPayment(
     {

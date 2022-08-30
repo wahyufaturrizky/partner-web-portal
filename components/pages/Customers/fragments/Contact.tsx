@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React from 'react'
 import { Col, Row, Search, Spacer } from "pink-lava-ui";
 import styled from 'styled-components'
 
@@ -7,10 +7,18 @@ import IconAdd from '../../../../.../../assets/icons/ic-add-rounded.svg'
 import IconAvatar from '../../../../.../../assets/icons/ic-avatar-xs.svg'
 import IconEdit from '../../../../.../../assets/icons/ic-more.svg'
 
-import styles from './styles.module.css'
+import styles from '../styles.module.css'
 
-export default function Contact() {
-  const [visible, setVisible] = useState(false)
+export default function Contact(props: any) {
+  const {
+      onCreate,
+      setVisible,
+      visible,
+      registerContact,
+      contact,
+      setValueContact,
+      fieldsContact
+    } = props 
 
   return (
     <div>
@@ -22,27 +30,30 @@ export default function Contact() {
       <Spacer size={20} />
       <Row gap="12px" width="100%">
         <Col width="32%">
-          <CardAddContact onClick={() => setVisible(!visible)} />
+          <CardAddContact onClick={setVisible} />
         </Col>
         {
-          [1, 2].map((index) => (
+          fieldsContact.map((items: any, index: number) => (
             <Col key={index} width="32%">
-              <CardContact />
+              <CardContact key={index} {...items} />
             </Col>
           ))
         }
       </Row>
 
       <ModalAddNewContact
+        setValueContact={setValueContact}
+        contact={contact}
         visible={visible}
-        onSubmit={() => setVisible(!visible)}
-        onCancel={() => setVisible(!visible)}
+        onSubmit={onCreate}
+        onCancel={setVisible}
+        registerContact={registerContact}
       />
     </div>
   )
 }
 
-const CardContact = () => {
+const CardContact = ({ contact  }: any) => {
   return (
     <CardUser>
       <div className={styles['card-contact-user']}>
@@ -50,9 +61,9 @@ const CardContact = () => {
           <IconAvatar />
           <Spacer size={10} />
           <div className={styles['detail-contact']}>
-            <p className={styles['title']}>Tri Tipang</p>
-            <p className={styles['status']}>COO</p>
-            <p className={styles['email']}>duolipa@indomarco.com</p>
+            <p className={styles['title']}>{contact?.name}</p>
+            <p className={styles['status']}>{contact?.role}</p>
+            <p className={styles['email']}>{contact?.email}</p>
           </div>
         </FlexElement>
         <IconEdit />

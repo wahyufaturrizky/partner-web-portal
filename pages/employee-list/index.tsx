@@ -5,7 +5,6 @@ import {
   Col,
   DropdownMenu,
   FileUploadModal,
-  Lozenge,
   Modal,
   Pagination,
   Row,
@@ -15,7 +14,6 @@ import {
   Text,
 } from "pink-lava-ui";
 import { useState } from "react";
-import { useForm } from "react-hook-form";
 import styled from "styled-components";
 import { ICDownload, ICUpload } from "../../assets/icons";
 import {
@@ -84,7 +82,7 @@ const EmployeeList = () => {
       search: debounceSearch,
       page: pagination.page,
       limit: pagination.itemsPerPage,
-      company_id: "KSNI",
+      company: "KSNI",
     },
     options: {
       onSuccess: (data: any) => {
@@ -130,16 +128,14 @@ const EmployeeList = () => {
       },
     });
 
-  const { mutate: uploadFileUom, isLoading: isLoadingUploadFileUom } = useUploadFileEmployeeListMDM(
-    {
-      options: {
-        onSuccess: () => {
-          queryClient.invalidateQueries(["employee-list"]);
-          setShowUpload(false);
-        },
+  const { mutate: uploadFileEmployee } = useUploadFileEmployeeListMDM({
+    options: {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["employee-list"]);
+        setShowUpload(false);
       },
-    }
-  );
+    },
+  });
 
   const columns = [
     {
@@ -174,10 +170,10 @@ const EmployeeList = () => {
 
   const onSubmitFile = (file: any) => {
     const formData = new FormData();
-    formData.append("company_id", "KSNI");
+    formData.append("company", "KSNI");
     formData.append("file", file);
 
-    uploadFileUom(formData);
+    uploadFileEmployee(formData);
   };
 
   return (
@@ -220,13 +216,13 @@ const EmployeeList = () => {
               onClick={(e: any) => {
                 switch (parseInt(e.key)) {
                   case 1:
-                    downloadFile({ with_data: "N", company_id: "KSNI" });
+                    downloadFile({ with_data: "N", company: "KSNI" });
                     break;
                   case 2:
                     setShowUpload(true);
                     break;
                   case 3:
-                    downloadFile({ with_data: "Y", company_id: "KSNI" });
+                    downloadFile({ with_data: "Y", company: "KSNI" });
                     break;
                   case 4:
                     break;
@@ -328,9 +324,9 @@ const EmployeeList = () => {
                   size="big"
                   onClick={() => {
                     if (isShowDelete.type === "selection") {
-                      deleteEmployeeList({ ids: selectedRowKeys, company_id: "KSNI" });
+                      deleteEmployeeList({ ids: selectedRowKeys });
                     } else {
-                      deleteEmployeeList({ ids: [modalForm.data.id], company_id: "KSNI" });
+                      deleteEmployeeList({ ids: [modalForm.data.id] });
                     }
                   }}
                 >

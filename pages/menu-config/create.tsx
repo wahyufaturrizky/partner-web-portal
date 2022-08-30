@@ -27,16 +27,16 @@ import { useFilterListPermissions } from "../../hooks/permission/usePermission";
 
 const CreateMenuList: any = () => {
 	const [isLoading, setLoading] = useState(true);
-	const [searchAllowedField, setSearchAllowedField] = useState("");
+	const [setSearchAllowedField] = useState("");
 	const [searchTableField, setSearchTableField] = useState("");
 	const [searchTablePermission, setSearchTablePermission] = useState("");
 	const [isMenuProcess, setIsMenuProcess] = useState(false);
 	const [isZeus, setIsZeus] = useState(true);
 	const [isHermes, setIsHermes] = useState(false);
-	const [dataAllowedField, setDataAllowedField] = useState([]);
+	const [dataAllowedField, setDataAllowedField] = useState<any[]>([]);
 	const [dataAssociatedPermissionsField, setDataAssociatedPermissionsField] = useState([]);
 	const [modalCreate, setModalCreate] = useState({ open: false });
-	const [stateFieldInput, setStateFieldInput] = useState({
+	const [stateFieldInput, setStateFieldInput] = useState<any>({
 		name: "",
 		screen: "",
 		process_name: "",
@@ -53,7 +53,7 @@ const CreateMenuList: any = () => {
 	const [selectedRowKeysTablePermission, setSelectedRowKeysTablePermission] = useState([]);
 	const [selectedRowTablePermission, setSelectedRowTablePermission] = useState([]);
 	const [selectedRowKeysTableField, setSelectedRowKeysTableField] = useState([]);
-	const [selectedRowTableField, setSelectedRowTableField] = useState([]);
+	const [selectedRowTableField, setSelectedRowTableField] = useState<any[]>([]);
 	const [selectedFilter, setSelectedFilter] = useState([]);
 	const paginationTableField = usePagination({
 		page: 1,
@@ -94,7 +94,7 @@ const CreateMenuList: any = () => {
 		},
 	});
 
-	const { mutate: reqBodyFilterListPermission, data: fieldsTablePermissionFilter } =
+	const { mutate: reqBodyFilterListPermission, data: fieldsTablePermissionFilter }: any =
 		useFilterListPermissions({
 			options: {
 				onSuccess: (data: any) => {
@@ -135,12 +135,12 @@ const CreateMenuList: any = () => {
 
 	const paginateFieldTablePermission = dataTablePermission;
 
-	const onSelectChangeTablePermission = (selectedRowKeys: any, selectedRows: any) => {
+	const onSelectChangeTablePermission: any = (selectedRowKeys: any, selectedRows: any): void => {
 		setSelectedRowKeysTablePermission(selectedRowKeys);
 		setSelectedRowTablePermission(selectedRows);
 	};
 
-	const rowSelectionTablePermission = {
+	const rowSelectionTablePermission: any = {
 		selectedRowKeys: selectedRowKeysTablePermission,
 		onChange: onSelectChangeTablePermission,
 	};
@@ -182,7 +182,7 @@ const CreateMenuList: any = () => {
 		},
 	];
 
-	const handleChangeInput = (e) => {
+	const handleChangeInput = (e: any) => {
 		setStateFieldInput({
 			...stateFieldInput,
 			[e.target.id]: e.target.value,
@@ -242,7 +242,7 @@ const CreateMenuList: any = () => {
 
 	const paginateTableField = dataTableField;
 
-	const onSelectChangeTableField = (value: any, rowSelected: any) => {
+	const onSelectChangeTableField: any = (value: any, rowSelected: any): void => {
 		setSelectedRowKeysTableField(value);
 		setSelectedRowTableField(rowSelected);
 	};
@@ -281,12 +281,12 @@ const CreateMenuList: any = () => {
 		} else {
 			const tempDataAllowedField: any = [];
 			dataTableField?.map((field: any) => {
-				if (rowSelectionTableField.selectedRowKeys.includes(field.key)) {
+				if (rowSelectionTableField?.selectedRowKeys?.includes(field.key)) {
 					tempDataAllowedField.push({
-						key: field.key,
-						allowed_field: field.field_name,
-						allowed_field_id: field.field_id,
-						allowed_field_key: field.field_key,
+						key: field?.key,
+						allowed_field: field?.field_name,
+						allowed_field_id: field?.field_id,
+						allowed_field_key: field?.field_key,
 					});
 
 					setDataAllowedField(tempDataAllowedField);
@@ -294,9 +294,9 @@ const CreateMenuList: any = () => {
 				} else {
 					setDataAllowedField(
 						selectedRowTableField.map((data) => ({
-							allowed_field: data.field_name,
-							allowed_field_id: data.key,
-							key: data.key,
+							allowed_field: data?.field_name,
+							allowed_field_id: data?.key,
+							key: data?.key,
 						}))
 					);
 					setStateModal({ ...stateModal, isShowModal: false });
@@ -309,7 +309,7 @@ const CreateMenuList: any = () => {
 		let tempDataAllowedField: any = [];
 
 		tempDataAllowedField = dataAllowedField?.filter(
-			(field) => !rowSelectionAllowedField.selectedRowKeys.includes(field.key)
+			(field: any) => !rowSelectionAllowedField.selectedRowKeys.includes(field.key)
 		);
 
 		onSelectChangeTableField(tempDataAllowedField.map((data: any) => data.key));
@@ -333,7 +333,7 @@ const CreateMenuList: any = () => {
 	useEffect(() => {
 		if (isShowModal && titleModal === "Associated Permissions") {
 			setLoading(true);
-			const tempCheck = selectedFilter.find((finding) => finding);
+			const tempCheck: any = selectedFilter.find((finding) => finding);
 			reqBodyFilterListPermission({
 				ids: rowSelectionTablePermission.selectedRowKeys,
 				checked: tempCheck === "Checked" ?? false,
@@ -346,7 +346,7 @@ const CreateMenuList: any = () => {
 
 	const handleCreateMenuList = () => {
 		setLoading(true);
-		const isEmptyField = Object.keys(stateFieldInput).find(
+		const isEmptyField: any = Object.keys(stateFieldInput).find(
 			(thereIsEmptyField) =>
 				thereIsEmptyField !== "process_name" &&
 				stateFieldInput &&
@@ -524,7 +524,7 @@ const CreateMenuList: any = () => {
 									dataAssociatedPermissionsField &&
 									dataAssociatedPermissionsField?.map((data: any) => data.key)
 								}
-								label="Associated Permissions"
+								label="Associated Module"
 								listItems={datFieldPermission}
 							/>
 
@@ -534,7 +534,7 @@ const CreateMenuList: any = () => {
 									setStateModal({
 										...stateModal,
 										isShowModal: true,
-										titleModal: "Associated Permissions",
+										titleModal: "Associated Module",
 										widthModal: 1000,
 									})
 								}

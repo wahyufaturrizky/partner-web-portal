@@ -1,3 +1,5 @@
+import moment from "moment";
+import Image from "next/image";
 import { useRouter } from "next/router";
 import {
   Accordion,
@@ -6,12 +8,14 @@ import {
   DatePickerInput,
   Dropdown,
   FileUploaderAllFiles,
+  FileUploaderAllFilesDragger,
   FormSelect,
   Input,
   Lozenge,
   Modal,
   Row,
   Spacer,
+  Switch,
   Table,
   Tabs,
   Text,
@@ -23,23 +27,23 @@ import styled from "styled-components";
 import { ICCheckPrimary, ICDelete, ICEdit, ICPlusWhite, ICView } from "../../assets";
 import { useCityInfiniteLists } from "../../hooks/city/useCity";
 import { useLanguages } from "../../hooks/languages/useLanguages";
-import {
-  useCountryInfiniteLists,
-  useDistrictInfiniteLists,
-  useProvinceInfiniteLists,
-} from "../../hooks/mdm/country-structure/useCountries";
+import { useCountryInfiniteLists } from "../../hooks/mdm/country-structure/useCountries";
 import { useDepartmentInfiniteLists } from "../../hooks/mdm/department/useDepartment";
 import {
   useBranchInfiniteLists,
+  useCountryStructureListMDM,
   useCreateEmployeeListMDM,
   useEmployeeInfiniteLists,
+  useReportToInfiniteLists,
+  useUploadFilePhotoEmployeeMDM,
 } from "../../hooks/mdm/employee-list/useEmployeeListMDM";
 import { useJobLevelInfiniteLists } from "../../hooks/mdm/job-level/useJobLevel";
 import { useJobPositionInfiniteLists } from "../../hooks/mdm/job-position/useJobPositon";
+import { usePostalCodeInfiniteLists } from "../../hooks/mdm/postal-code/usePostalCode";
+import { useTrainingTypeInfiniteLists } from "../../hooks/mdm/training-type/useTrainingType";
 import useDebounce from "../../lib/useDebounce";
 import { colors } from "../../utils/color";
 import { queryClient } from "../_app";
-import moment from "moment";
 
 const EmployeeListCreate = () => {
   const router = useRouter();
@@ -72,13 +76,21 @@ const EmployeeListCreate = () => {
   const [totalRowsCountryList, setTotalRowsCountryList] = useState(0);
   const [searchCountry, setSearchCountry] = useState("");
 
-  const [provinceList, setProvinceList] = useState<any[]>([]);
-  const [totalRowsProvinceList, setTotalRowsProvinceList] = useState(0);
-  const [searchProvince, setSearchProvince] = useState("");
+  const [postalCodeList, setPostalCodeList] = useState<any[]>([]);
+  const [totalRowsPostalCodeList, setTotalRowsPostalCodeList] = useState(0);
+  const [searchPostalCode, setSearchPostalCode] = useState("");
 
-  const [districtList, setDistrictList] = useState<any[]>([]);
-  const [totalRowsDistrictList, setTotalRowsDistrictList] = useState(0);
-  const [searchDistrict, setSearchDistrict] = useState("");
+  const [trainingTypeList, setTrainingTypeList] = useState<any[]>([]);
+  const [totalRowsTrainingTypeList, setTotalRowsTrainingTypeList] = useState(0);
+  const [searchTrainingType, setSearchTrainingType] = useState("");
+
+  const [reportToList, setReportToList] = useState<any[]>([]);
+  const [totalRowsReportToList, setTotalRowsReportToList] = useState(0);
+  const [searchReportTo, setSearchReportTo] = useState("");
+
+  const [typePhoto, setTypePhoto] = useState("");
+
+  const [countryId, setCountryId] = useState();
 
   const [modalChannelForm, setModalChannelForm] = useState({
     open: false,
@@ -91,28 +103,30 @@ const EmployeeListCreate = () => {
   const debounceFetch = useDebounce(
     searchDepartment ||
       searchJobPosition ||
+      searchReportTo ||
       searchJobLevel ||
       searchEmployee ||
       searchBranch ||
       searchCity ||
-      searchProvince ||
-      searchDistrict ||
+      searchPostalCode ||
+      searchTrainingType ||
       searchCountry,
     1000
   );
 
   const addressBodyField = {
-    is_primary_address: false,
-    address_type: "",
+    primary: false,
+    type: "",
     street: "",
     country: "",
+    country_levels: [],
     province: "",
     city: "",
     district: "",
     zone: "",
     postal_code: "",
-    longitude: "",
-    latitude: "",
+    lon: "",
+    lat: "",
     key: 0,
   };
 
@@ -122,42 +136,45 @@ const EmployeeListCreate = () => {
     handleSubmit,
     formState: { errors },
     getValues,
+    setValue,
   } = useForm({
     shouldUseNativeValidation: true,
     defaultValues: {
-      employee_type: "",
-      employee_photo: "",
+      type: "",
+      photo: "",
       title: "",
       name: "",
       nik: "",
       department: "",
       job_position: "",
       job_level: "",
+      is_salesman: false,
       report_to: "",
       branch: "",
-      join_date: "",
-      resign_date: "",
-      preferred_language: "",
+      date_join: "",
+      date_resign: "",
+      languages: [],
+      tax: "",
       external_code: "",
-      detailInformation: {
-        personal: {
-          placeof_birth: "",
-          date_of_birth: "",
-          nationality: "",
-          marital_status: "",
-          blood_type: "",
-          religion: "",
-          medical_number_insurance: "",
-          personal_email: "",
-          phone_number: "",
-          mobile_number: "",
-          visa_number: "",
-          visa_expired_date: "",
-        },
-        addresess: [addressBodyField],
-        bankAccount: [],
-        education: [],
-        family: [],
+      personal: {
+        pob: "",
+        dob: "",
+        nationality: "",
+        martial: "",
+        blood: "",
+        religion: "",
+        insurance: "",
+        email: "",
+        phone: "",
+        mobile: "",
+        visa: "",
+        visa_expire: null,
+      },
+      address: [addressBodyField],
+      bank: [],
+      education: [],
+      family: [],
+      development: {
         training: [],
         certification: [],
       },
@@ -184,6 +201,7 @@ const EmployeeListCreate = () => {
     register: registerFamily,
     handleSubmit: handleSubmitFamily,
     control: controlFamily,
+    formState: { errors: errorsFamily },
   } = useForm({
     shouldUseNativeValidation: true,
   });
@@ -192,6 +210,7 @@ const EmployeeListCreate = () => {
     register: registerTraining,
     handleSubmit: handleSubmitTraining,
     control: controlTraining,
+    formState: { errors: errorTraining },
   } = useForm({
     shouldUseNativeValidation: true,
   });
@@ -200,9 +219,32 @@ const EmployeeListCreate = () => {
     register: registerCertification,
     handleSubmit: handleSubmitCertification,
     control: controlCertification,
+    formState: { errors: errorsCertification },
   } = useForm({
     shouldUseNativeValidation: true,
   });
+
+  const { mutate: uploadFilePhoto, isLoading: isLoadingFilePhoto } = useUploadFilePhotoEmployeeMDM({
+    options: {
+      onSuccess: (data: any) => {
+        if (typePhoto === "photo") {
+          setValue("photo", data);
+        } else if (typePhoto === "certification") {
+          setValue("development.certification.attachments", data);
+        } else {
+          setValue("development.training.attachments", data);
+        }
+        alert("Upload Success");
+      },
+    },
+  });
+
+  const handleUploadPhotoFile = (file: any, type: string) => {
+    const formData = new FormData();
+    formData.append("upload_file", file);
+    setTypePhoto(type);
+    uploadFilePhoto(formData);
+  };
 
   const {
     isFetching: isFetchingDepartment,
@@ -236,6 +278,42 @@ const EmployeeListCreate = () => {
           return undefined;
         }
       },
+    },
+  });
+
+  const {
+    isFetching: isFetchingReportTo,
+    isFetchingNextPage: isFetchingMoreReportTo,
+    hasNextPage: hasNextPageReportTo,
+    fetchNextPage: fetchNextPageReportTo,
+  } = useReportToInfiniteLists({
+    query: {
+      search: debounceFetch,
+      company: "KSNI",
+      limit: 10,
+    },
+    options: {
+      onSuccess: (data: any) => {
+        setTotalRowsReportToList(data.pages[0].totalRow);
+        const mappedData = data?.pages?.map((group: any) => {
+          return group.rows?.map((element: any) => {
+            return {
+              value: element.ReportToId,
+              label: element.name,
+            };
+          });
+        });
+        const flattenArray = [].concat(...mappedData);
+        setReportToList(flattenArray);
+      },
+      getNextPageParam: (_lastPage: any, pages: any) => {
+        if (reportToList.length < totalRowsReportToList) {
+          return pages.length + 1;
+        } else {
+          return undefined;
+        }
+      },
+      enabled: false,
     },
   });
 
@@ -274,36 +352,54 @@ const EmployeeListCreate = () => {
   });
 
   const {
-    isFetching: isFetchingDistrict,
-    isFetchingNextPage: isFetchingMoreDistrict,
-    hasNextPage: hasNextPageDistrict,
-    fetchNextPage: fetchNextPageDistrict,
-  } = useDistrictInfiniteLists({
+    isFetching: isFetchingPostalCode,
+    isFetchingNextPage: isFetchingMorePostalCode,
+    hasNextPage: hasNextPagePostalCode,
+    fetchNextPage: fetchNextPagePostalCode,
+  } = usePostalCodeInfiniteLists({
     query: {
       search: debounceFetch,
       limit: 10,
     },
     options: {
       onSuccess: (data: any) => {
-        setTotalRowsDistrictList(data.pages[0].totalRow);
+        setTotalRowsPostalCodeList(data.pages[0].totalRow);
         const mappedData = data?.pages?.map((group: any) => {
           return group.rows?.map((element: any) => {
             return {
-              value: element.DistrictId,
-              label: element.name,
+              value: element.codeText,
+              label: element.code,
             };
           });
         });
         const flattenArray = [].concat(...mappedData);
-        setDistrictList(flattenArray);
+        setPostalCodeList(flattenArray);
       },
       getNextPageParam: (_lastPage: any, pages: any) => {
-        if (districtList.length < totalRowsDistrictList) {
+        if (postalCodeList.length < totalRowsPostalCodeList) {
           return pages.length + 1;
         } else {
           return undefined;
         }
       },
+    },
+  });
+
+  const {
+    fields: fieldsAddresess,
+    append: appendAddresess,
+    replace: replaceAddresess,
+    remove: removeAddresess,
+  } = useFieldArray({
+    control,
+    name: "address",
+  });
+
+  const { data: countryStructureListData } = useCountryStructureListMDM({
+    id: countryId,
+    options: {
+      onSuccess: (data: any) => {},
+      enabled: countryId || countryId !== undefined ? true : false,
     },
   });
 
@@ -323,7 +419,7 @@ const EmployeeListCreate = () => {
         const mappedData = data?.pages?.map((group: any) => {
           return group.rows?.map((element: any) => {
             return {
-              value: element.CountryId,
+              value: element.id,
               label: element.name,
             };
           });
@@ -342,31 +438,31 @@ const EmployeeListCreate = () => {
   });
 
   const {
-    isFetching: isFetchingProvince,
-    isFetchingNextPage: isFetchingMoreProvince,
-    hasNextPage: hasNextPageProvince,
-    fetchNextPage: fetchNextPageProvince,
-  } = useProvinceInfiniteLists({
+    isFetching: isFetchingTrainingType,
+    isFetchingNextPage: isFetchingMoreTrainingType,
+    hasNextPage: hasNextPageTrainingType,
+    fetchNextPage: fetchNextPageTrainingType,
+  } = useTrainingTypeInfiniteLists({
     query: {
       search: debounceFetch,
       limit: 10,
     },
     options: {
       onSuccess: (data: any) => {
-        setTotalRowsProvinceList(data.pages[0].totalRow);
+        setTotalRowsTrainingTypeList(data.pages[0].totalRow);
         const mappedData = data?.pages?.map((group: any) => {
           return group.rows?.map((element: any) => {
             return {
-              value: element.ProvinceId,
+              value: element.trainingTypeId,
               label: element.name,
             };
           });
         });
         const flattenArray = [].concat(...mappedData);
-        setProvinceList(flattenArray);
+        setTrainingTypeList(flattenArray);
       },
       getNextPageParam: (_lastPage: any, pages: any) => {
-        if (provinceList.length < totalRowsProvinceList) {
+        if (trainingTypeList.length < totalRowsTrainingTypeList) {
           return pages.length + 1;
         } else {
           return undefined;
@@ -407,6 +503,7 @@ const EmployeeListCreate = () => {
           return undefined;
         }
       },
+      enabled: false,
     },
   });
 
@@ -453,7 +550,7 @@ const EmployeeListCreate = () => {
   } = useEmployeeInfiniteLists({
     query: {
       search: debounceFetch,
-      company_id: "KSNI",
+      company: "KSNI",
       limit: 10,
     },
     options: {
@@ -526,8 +623,68 @@ const EmployeeListCreate = () => {
     });
 
   const onSubmit = (data: any) => {
+    data.address.map((dataAddress: any) => {
+      if (dataAddress.hasOwnProperty("id") || dataAddress.hasOwnProperty("key")) {
+        delete dataAddress.id;
+        delete dataAddress.key;
+      }
+    });
+
+    data.bank.map((dataBank: any) => {
+      if (dataBank.hasOwnProperty("id") || dataBank.hasOwnProperty("key")) {
+        delete dataBank.id;
+        delete dataBank.key;
+      }
+    });
+
+    data.development.certification.map((dataCertification: any) => {
+      if (dataCertification.hasOwnProperty("id") || dataCertification.hasOwnProperty("key")) {
+        delete dataCertification.id;
+        delete dataCertification.key;
+      }
+    });
+
+    data.development.training.map((dataTraining: any) => {
+      if (dataTraining.hasOwnProperty("id") || dataTraining.hasOwnProperty("key")) {
+        delete dataTraining.id;
+        delete dataTraining.key;
+      }
+    });
+
+    data.education.map((dataEducation: any) => {
+      if (dataEducation.hasOwnProperty("id") || dataEducation.hasOwnProperty("key")) {
+        delete dataEducation.id;
+        delete dataEducation.key;
+      }
+    });
+
+    data.family.map((dataFamily: any) => {
+      if (dataFamily.hasOwnProperty("id") || dataFamily.hasOwnProperty("key")) {
+        delete dataFamily.id;
+        delete dataFamily.key;
+      }
+    });
+
+    data.address.map((dataAddress: any) => {
+      if (
+        dataAddress.hasOwnProperty("province") ||
+        dataAddress.hasOwnProperty("city") ||
+        dataAddress.hasOwnProperty("district") ||
+        dataAddress.hasOwnProperty("zone") ||
+        dataAddress.hasOwnProperty("id") ||
+        dataAddress.hasOwnProperty("key")
+      ) {
+        delete dataAddress.id;
+        delete dataAddress.key;
+        delete dataAddress.province;
+        delete dataAddress.city;
+        delete dataAddress.district;
+        delete dataAddress.zone;
+      }
+    });
+
     const formData = {
-      company_id: "KSNI",
+      company: "KSNI",
       ...data,
     };
 
@@ -552,23 +709,13 @@ const EmployeeListCreate = () => {
   };
 
   const {
-    fields: fieldsAddresess,
-    append: appendAddresess,
-    replace: replaceAddresess,
-    remove: removeAddresess,
-  } = useFieldArray({
-    control,
-    name: "detailInformation.addresess",
-  });
-
-  const {
     fields: fieldsBankAccount,
     append: appendBankAccount,
     remove: removeBankAccount,
     replace: replaceBankAccount,
   } = useFieldArray({
     control,
-    name: "detailInformation.bankAccount",
+    name: "bank",
   });
 
   const {
@@ -578,7 +725,7 @@ const EmployeeListCreate = () => {
     replace: replaceEducation,
   } = useFieldArray({
     control,
-    name: "detailInformation.education",
+    name: "education",
   });
 
   const {
@@ -588,7 +735,7 @@ const EmployeeListCreate = () => {
     replace: replaceFamily,
   } = useFieldArray({
     control,
-    name: "detailInformation.family",
+    name: "family",
   });
 
   const {
@@ -598,7 +745,7 @@ const EmployeeListCreate = () => {
     replace: replaceTraining,
   } = useFieldArray({
     control,
-    name: "detailInformation.training",
+    name: "development.training",
   });
 
   const {
@@ -608,16 +755,16 @@ const EmployeeListCreate = () => {
     replace: replaceCertification,
   } = useFieldArray({
     control,
-    name: "detailInformation.certification",
+    name: "development.certification",
   });
 
   const handleAddItemBankAccount = (data: any) => {
     if (modalChannelForm.typeForm === "Edit Bank Account") {
       let tempEdit = fieldsBankAccount.map((mapDataItem) => {
         if (mapDataItem.id === modalChannelForm.data.id) {
-          mapDataItem.bankName = data.bankName;
-          mapDataItem.accountNumber = data.accountNumber;
-          mapDataItem.accountName = data.accountName;
+          mapDataItem.bank = data.bank;
+          mapDataItem.account_number = data.account_number;
+          mapDataItem.account_name = data.account_name;
 
           return { ...mapDataItem };
         } else {
@@ -627,7 +774,6 @@ const EmployeeListCreate = () => {
 
       replaceBankAccount(tempEdit);
     } else {
-      console.log("asdasdasd", data);
       appendBankAccount({
         ...data,
         key: fieldsBankAccount.length,
@@ -643,11 +789,11 @@ const EmployeeListCreate = () => {
     if (modalChannelForm.typeForm === "Edit Education") {
       let tempEdit = fieldsEducation.map((mapDataItem) => {
         if (mapDataItem.id === modalChannelForm.data.id) {
-          mapDataItem.schoolName = data.schoolName;
+          mapDataItem.school = data.school;
           mapDataItem.degree = data.degree;
-          mapDataItem.fieldOfStudy = data.fieldOfStudy;
-          mapDataItem.startYear = data.startYear;
-          mapDataItem.endYear = data.endYear;
+          mapDataItem.study = data.study;
+          mapDataItem.start = data.start;
+          mapDataItem.end = data.end;
           mapDataItem.gpa = data.gpa;
 
           return { ...mapDataItem };
@@ -672,10 +818,10 @@ const EmployeeListCreate = () => {
     if (modalChannelForm.typeForm === "Edit Family") {
       let tempEdit = fieldsFamily.map((mapDataItem) => {
         if (mapDataItem.id === modalChannelForm.data.id) {
-          mapDataItem.familyRelation = data.familyRelation;
+          mapDataItem.relation = data.relation;
           mapDataItem.name = data.name;
           mapDataItem.gender = data.gender;
-          mapDataItem.birthOfDate = data.birthOfDate;
+          mapDataItem.dob = data.dob;
           mapDataItem.mobile = data.mobile;
 
           return { ...mapDataItem };
@@ -700,11 +846,13 @@ const EmployeeListCreate = () => {
     if (modalChannelForm.typeForm === "Edit Training") {
       let tempEdit = fieldsTraining.map((mapDataItem) => {
         if (mapDataItem.id === modalChannelForm.data.id) {
-          mapDataItem.trainingType = data.trainingType;
-          mapDataItem.trainingName = data.trainingName;
-          mapDataItem.trainingStatus = data.trainingStatus;
-          mapDataItem.startDate = data.startDate;
-          mapDataItem.endDate = data.endDate;
+          mapDataItem.type = data.type;
+          mapDataItem.name = data.name;
+          mapDataItem.status = data.status;
+          mapDataItem.start = data.start;
+          mapDataItem.end = data.end;
+          mapDataItem.description = data.description;
+          mapDataItem.attachments = data.attachments;
 
           return { ...mapDataItem };
         } else {
@@ -728,10 +876,11 @@ const EmployeeListCreate = () => {
     if (modalChannelForm.typeForm === "Edit Certification") {
       let tempEdit = fieldsCertification.map((mapDataItem) => {
         if (mapDataItem.id === modalChannelForm.data.id) {
-          mapDataItem.certificationName = data.certificationName;
+          mapDataItem.name = data.name;
           mapDataItem.institution = data.institution;
-          mapDataItem.certificationNumber = data.certificationNumber;
-          mapDataItem.certificationDate = data.certificationDate;
+          mapDataItem.number = data.number;
+          mapDataItem.date = data.date;
+          mapDataItem.attachments = data.attachments;
 
           return { ...mapDataItem };
         } else {
@@ -788,7 +937,7 @@ const EmployeeListCreate = () => {
     },
     {
       title: "School Name",
-      dataIndex: "schoolName",
+      dataIndex: "school",
     },
     {
       title: "Degree",
@@ -796,15 +945,15 @@ const EmployeeListCreate = () => {
     },
     {
       title: "Field of Study",
-      dataIndex: "fieldOfStudy",
+      dataIndex: "study",
     },
     {
       title: "Start Year",
-      dataIndex: "startYear",
+      dataIndex: "start",
     },
     {
       title: "End Year",
-      dataIndex: "endYear",
+      dataIndex: "end",
     },
     {
       title: "GPA",
@@ -849,7 +998,7 @@ const EmployeeListCreate = () => {
     },
     {
       title: "Family Relation",
-      dataIndex: "familyRelation",
+      dataIndex: "relation",
     },
     {
       title: "Name",
@@ -861,7 +1010,7 @@ const EmployeeListCreate = () => {
     },
     {
       title: "Birth of Date",
-      dataIndex: "birthOfDate",
+      dataIndex: "dob",
     },
     {
       title: "Mobile",
@@ -917,15 +1066,15 @@ const EmployeeListCreate = () => {
     },
     {
       title: "Training Type",
-      dataIndex: "trainingType",
+      dataIndex: "type",
     },
     {
       title: "Training Name",
-      dataIndex: "trainingName",
+      dataIndex: "name",
     },
     {
       title: "Training Status",
-      dataIndex: "trainingStatus",
+      dataIndex: "status",
     },
     {
       title: "Description",
@@ -933,15 +1082,15 @@ const EmployeeListCreate = () => {
     },
     {
       title: "Start Date",
-      dataIndex: "startDate",
+      dataIndex: "start",
     },
     {
       title: "End Date",
-      dataIndex: "endDate",
+      dataIndex: "end",
     },
     {
       title: "Image Cert Training",
-      dataIndex: "imageCertTraining",
+      dataIndex: "attachments",
     },
   ];
 
@@ -993,7 +1142,7 @@ const EmployeeListCreate = () => {
     },
     {
       title: "Certification Name",
-      dataIndex: "certificationName",
+      dataIndex: "name",
     },
     {
       title: "Institution",
@@ -1001,15 +1150,15 @@ const EmployeeListCreate = () => {
     },
     {
       title: "Certification Number",
-      dataIndex: "certificationNumber",
+      dataIndex: "number",
     },
     {
       title: "Certification  Date",
-      dataIndex: "certificationDate",
+      dataIndex: "date",
     },
     {
-      title: "imageCertCertification",
-      dataIndex: "imageCertCertification",
+      title: "attachments",
+      dataIndex: "attachments",
     },
   ];
 
@@ -1050,15 +1199,15 @@ const EmployeeListCreate = () => {
     },
     {
       title: "Bank Name",
-      dataIndex: "bankName",
+      dataIndex: "bank",
     },
     {
       title: "Account Number",
-      dataIndex: "accountNumber",
+      dataIndex: "account_number",
     },
     {
       title: "Account Name",
-      dataIndex: "accountName",
+      dataIndex: "account_name",
     },
     {
       title: "Primary",
@@ -1113,23 +1262,40 @@ const EmployeeListCreate = () => {
 
       <Card padding="20px">
         <Row justifyContent="space-between" alignItems="center" nowrap>
-          <Controller
-            control={control}
-            name="employee_type"
-            defaultValue={"FULLTIME"}
-            render={({ field: { onChange } }) => (
-              <Dropdown
-                label=""
-                width="185px"
-                noSearch
-                items={[{ id: "FULLTIME", value: "Fulltime" }]}
-                defaultValue="FULLTIME"
-                handleChange={(value: any) => {
-                  onChange(value);
-                }}
-              />
-            )}
-          />
+          <Row alignItems="center" gap="16px">
+            <Text color="grey.regular">
+              Employee Type <span style={{ color: colors.red.regular }}>*</span>
+            </Text>
+            <Controller
+              control={control}
+              name="type"
+              rules={{
+                required: {
+                  value: true,
+                  message: "Please enter type employee.",
+                },
+              }}
+              render={({ field: { onChange }, fieldState: { error } }) => (
+                <Dropdown
+                  error={error?.message}
+                  label=""
+                  width="185px"
+                  noSearch
+                  items={[
+                    { id: "Fulltime", value: "Fulltime" },
+                    { id: "Contract", value: "Contract" },
+                    { id: "Freelance", value: "Freelance" },
+                    { id: "Outsource", value: "Outsource" },
+                    { id: "Part Time", value: "Part Time" },
+                    { id: "Intern", value: "Intern" },
+                  ]}
+                  handleChange={(value: any) => {
+                    onChange(value);
+                  }}
+                />
+              )}
+            />
+          </Row>
 
           <Row gap="16px">
             <Button size="big" variant={"tertiary"} onClick={() => router.back()}>
@@ -1150,24 +1316,18 @@ const EmployeeListCreate = () => {
           <Accordion.Body>
             <Row width="100%" noWrap>
               <Col>
-                <Controller
-                  control={control}
-                  rules={{ required: true }}
-                  name="employee_photo"
-                  render={({ field: { onChange } }) => (
-                    <FileUploaderAllFiles
-                      label="Employee Photo"
-                      onSubmit={(file: any) => onChange(file)}
-                      defaultFile={"/placeholder-employee-photo.svg"}
-                      withCrop
-                      sizeImagePhoto="125px"
-                      removeable
-                      textPhoto={[
-                        "This Photo will also be used for account profiles and employee identities.",
-                        "Photo size 500 x 500 recommended. Drag & Drop Photo or pressing “Upload”",
-                      ]}
-                    />
-                  )}
+                <FileUploaderAllFiles
+                  label="Employee Photo"
+                  onSubmit={(file: any) => handleUploadPhotoFile(file, "photo")}
+                  defaultFile={"/placeholder-employee-photo.svg"}
+                  withCrop
+                  disabled={isLoadingFilePhoto}
+                  sizeImagePhoto="125px"
+                  removeable
+                  textPhoto={[
+                    "This Photo will also be used for account profiles and employee identities.",
+                    "Photo size 500 x 500 recommended. Drag & Drop Photo or pressing “Upload”",
+                  ]}
                 />
               </Col>
             </Row>
@@ -1217,8 +1377,14 @@ const EmployeeListCreate = () => {
                   height="48px"
                   error={errors.name?.message}
                   required
-                  placeholder={"e.g 123456789"}
-                  {...register("name", { required: "Please enter Name." })}
+                  placeholder={"e.g Jane Doe"}
+                  {...register("name", {
+                    required: "Please enter Name.",
+                    maxLength: {
+                      value: 100,
+                      message: "Max length exceeded",
+                    },
+                  })}
                 />
               </Col>
             </Row>
@@ -1229,10 +1395,17 @@ const EmployeeListCreate = () => {
                   type="number"
                   width="100%"
                   label="NIK"
+                  error={errors.nik?.message}
                   height="48px"
                   required
                   placeholder={"e.g 123456789"}
-                  {...register("nik", { required: "Please enter NIK." })}
+                  {...register("nik", {
+                    required: "Please enter NIK.",
+                    maxLength: {
+                      value: 16,
+                      message: "Max length exceeded",
+                    },
+                  })}
                 />
               </Col>
               <Spacer size={10} />
@@ -1311,6 +1484,19 @@ const EmployeeListCreate = () => {
                         }}
                       />
                     </>
+                  )}
+                />
+
+                <Spacer size={8} />
+
+                <Controller
+                  control={control}
+                  name="job_position"
+                  render={({ field: { onChange, value } }) => (
+                    <Row alignItems="center" gap="12px">
+                      <Text>Is Salesman</Text>
+                      <Switch defaultChecked={value} checked={value} onChange={onChange} />
+                    </Row>
                   )}
                 />
               </Col>
@@ -1423,7 +1609,11 @@ const EmployeeListCreate = () => {
                             fetchNextPageBranch();
                           }
                         }}
-                        items={isFetchingBranch && !isFetchingMoreBranch ? [] : branchList}
+                        items={
+                          isFetchingBranch && !isFetchingMoreBranch
+                            ? []
+                            : [{ id: "test branch", value: "test branch" }]
+                        }
                         onChange={(value: any) => {
                           onChange(value);
                         }}
@@ -1441,7 +1631,7 @@ const EmployeeListCreate = () => {
               <Col width="100%">
                 <Controller
                   control={control}
-                  name="join_date"
+                  name="date_join"
                   render={({ field: { onChange } }) => (
                     <DatePickerInput
                       fullWidth
@@ -1456,12 +1646,12 @@ const EmployeeListCreate = () => {
               <Col width="100%">
                 <Controller
                   control={control}
-                  name="resign_date"
+                  name="date_resign"
                   render={({ field: { onChange } }) => (
                     <DatePickerInput
                       fullWidth
                       onChange={(date: any, dateString: any) => onChange(dateString)}
-                      label="Join Date"
+                      label="Resign Date"
                     />
                   )}
                 />
@@ -1472,16 +1662,35 @@ const EmployeeListCreate = () => {
               <Col width="100%">
                 <Controller
                   control={control}
-                  name="preferred_language"
+                  name="languages"
                   render={({ field: { onChange } }) => (
-                    <Dropdown
-                      label="Language"
-                      items={language}
-                      width={"100%"}
-                      placeholder={"Select"}
-                      handleChange={onChange}
-                      noSearch
-                    />
+                    <>
+                      <Label>Language</Label>
+                      <Spacer size={3} />
+                      <FormSelect
+                        height="48px"
+                        style={{ width: "100%" }}
+                        size={"large"}
+                        placeholder={"Select"}
+                        borderColor={"#AAAAAA"}
+                        arrowColor={"#000"}
+                        withSearch
+                        isLoading={isFetchingCountry}
+                        isLoadingMore={isFetchingMoreCountry}
+                        fetchMore={() => {
+                          if (hasNextPageCountry) {
+                            fetchNextPageCountry();
+                          }
+                        }}
+                        items={isFetchingCountry && !isFetchingMoreCountry ? [] : countryList}
+                        onChange={(value: any) => {
+                          onChange(value);
+                        }}
+                        onSearch={(value: any) => {
+                          setSearchCountry(value);
+                        }}
+                      />
+                    </>
                   )}
                 />
               </Col>
@@ -1493,8 +1702,14 @@ const EmployeeListCreate = () => {
                   type="number"
                   label="Tax Number"
                   height="48px"
+                  error={errors.tax?.message}
                   placeholder={"e.g 123456789 "}
-                  {...register("external_code")}
+                  {...register("tax", {
+                    maxLength: {
+                      value: 16,
+                      message: "Max length exceeded",
+                    },
+                  })}
                 />
               </Col>
             </Row>
@@ -1504,8 +1719,14 @@ const EmployeeListCreate = () => {
                 width="100%"
                 label="External Code"
                 height="48px"
+                error={errors.external_code?.message}
                 placeholder={"e.g ABC12345"}
-                {...register("external_code")}
+                {...register("external_code", {
+                  maxLength: {
+                    value: 100,
+                    message: "Max length exceeded",
+                  },
+                })}
               />
             </Row>
           </Accordion.Body>
@@ -1530,7 +1751,7 @@ const EmployeeListCreate = () => {
                   <Col width={"100%"}>
                     <Controller
                       control={control}
-                      name="detailInformation.personal.placeof_birth"
+                      name="personal.pob"
                       render={({ field: { onChange } }) => (
                         <>
                           <Label>Place of Birth</Label>
@@ -1567,7 +1788,7 @@ const EmployeeListCreate = () => {
                   <Col width="100%">
                     <Controller
                       control={control}
-                      name="detailInformation.personal.date_of_birth"
+                      name="personal.dob"
                       render={({ field: { onChange } }) => (
                         <DatePickerInput
                           fullWidth
@@ -1583,7 +1804,7 @@ const EmployeeListCreate = () => {
                   <Col width={"100%"}>
                     <Controller
                       control={control}
-                      name="detailInformation.personal.nationality"
+                      name="personal.nationality"
                       render={({ field: { onChange } }) => (
                         <>
                           <Label>Nationality</Label>
@@ -1620,7 +1841,7 @@ const EmployeeListCreate = () => {
                   <Col width="100%">
                     <Controller
                       control={control}
-                      name="detailInformation.personal.marital_status"
+                      name="personal.martial"
                       render={({ field: { onChange } }) => (
                         <>
                           <Label>Marital Status</Label>
@@ -1647,7 +1868,7 @@ const EmployeeListCreate = () => {
                   <Col width={"100%"}>
                     <Controller
                       control={control}
-                      name="detailInformation.personal.blood_type"
+                      name="personal.blood"
                       render={({ field: { onChange } }) => (
                         <>
                           <Label>Blood Type</Label>
@@ -1658,6 +1879,7 @@ const EmployeeListCreate = () => {
                             items={[
                               { id: "A", value: "A" },
                               { id: "B", value: "B" },
+                              { id: "AB", value: "AB" },
                               { id: "O", value: "O" },
                             ]}
                             handleChange={(value: any) => {
@@ -1673,7 +1895,7 @@ const EmployeeListCreate = () => {
                   <Col width="100%">
                     <Controller
                       control={control}
-                      name="detailInformation.personal.religion"
+                      name="personal.religion"
                       render={({ field: { onChange } }) => (
                         <>
                           <Label>Religion</Label>
@@ -1682,12 +1904,13 @@ const EmployeeListCreate = () => {
                             noSearch
                             width="100%"
                             items={[
-                              { id: "islam", value: "Islam" },
-                              { id: "kristen", value: "Kristen" },
-                              { id: "katolik", value: "Katolik" },
-                              { id: "budha", value: "Budha" },
-                              { id: "hindu", value: "Hindu" },
-                              { id: "other", value: "Other" },
+                              { id: "Moslem", value: "Moslem" },
+                              { id: "Cristian", value: "Cristian" },
+                              { id: "Catholic", value: "Catholic" },
+                              { id: "Budhist", value: "Budhist" },
+                              { id: "Hindu", value: "Hindu" },
+                              { id: "Konghucu", value: "Konghucu" },
+                              { id: "Other", value: "Other" },
                             ]}
                             handleChange={(value: any) => {
                               onChange(value);
@@ -1704,10 +1927,16 @@ const EmployeeListCreate = () => {
                     <Input
                       type="number"
                       width="100%"
+                      error={errors.personal?.insurance?.message}
                       label="Medical Number (Insurance)"
                       height="48px"
                       placeholder={"e.g 123456789"}
-                      {...register("detailInformation.personal.medical_number_insurance")}
+                      {...register("personal.insurance", {
+                        maxLength: {
+                          value: 50,
+                          message: "Max length exceeded",
+                        },
+                      })}
                     />
                   </Col>
                   <Spacer size={10} />
@@ -1718,12 +1947,16 @@ const EmployeeListCreate = () => {
                       width="100%"
                       label="Personal Email"
                       height="48px"
-                      error={errors.detailInformation?.personal?.personal_email?.message}
+                      error={errors.personal?.email?.message}
                       placeholder={"e.g you@email.com"}
-                      {...register("detailInformation.personal.personal_email", {
+                      {...register("personal.email", {
                         pattern: {
                           value: /\S+@\S+\.\S+/,
                           message: "Entered value does not match email format",
+                        },
+                        maxLength: {
+                          value: 200,
+                          message: "Max length exceeded",
                         },
                       })}
                     />
@@ -1735,25 +1968,35 @@ const EmployeeListCreate = () => {
                     <Input
                       type="number"
                       width="100%"
+                      error={errors.personal?.phone?.message}
                       label="Phone Number"
                       height="48px"
                       placeholder={"e.g 022 709999"}
-                      {...register("detailInformation.personal.phone_number")}
+                      {...register("personal.phone", {
+                        maxLength: {
+                          value: 15,
+                          message: "Max length exceeded",
+                        },
+                      })}
                     />
                   </Col>
                   <Spacer size={10} />
 
                   <Col width="100%">
                     <Input
-                      type="email"
+                      type="number"
                       width="100%"
                       label="Mobile Number"
                       height="48px"
                       required
-                      error={errors.detailInformation?.personal?.mobile_number?.message}
+                      error={errors.personal?.mobile?.message}
                       placeholder={"e.g you@email.com"}
-                      {...register("detailInformation.personal.mobile_number", {
+                      {...register("personal.mobile", {
                         required: "Please enter mobile number.",
+                        maxLength: {
+                          value: 15,
+                          message: "Max length exceeded",
+                        },
                       })}
                     />
                   </Col>
@@ -1764,10 +2007,16 @@ const EmployeeListCreate = () => {
                     <Input
                       type="number"
                       width="100%"
+                      error={errors.personal?.visa?.message}
                       label="Visa Number"
                       height="48px"
                       placeholder={"e.g 123456789"}
-                      {...register("detailInformation.personal.visa_number")}
+                      {...register("personal.visa", {
+                        maxLength: {
+                          value: 30,
+                          message: "Max length exceeded",
+                        },
+                      })}
                     />
                   </Col>
                   <Spacer size={10} />
@@ -1775,7 +2024,7 @@ const EmployeeListCreate = () => {
                   <Col width="100%">
                     <Controller
                       control={control}
-                      name="detailInformation.personal.visa_expired_date"
+                      name="personal.visa_expire"
                       render={({ field: { onChange } }) => (
                         <DatePickerInput
                           fullWidth
@@ -1805,18 +2054,14 @@ const EmployeeListCreate = () => {
 
                       <Controller
                         control={control}
-                        name={`detailInformation.addresess.${index}.is_primary_address`}
+                        name={`address.${index}.primary`}
                         render={({ field: {} }) => (
                           <>
                             <Text color={"blue.dark"} variant={"headingMedium"}>
-                              {getValues(`detailInformation.addresess.${index}.is_primary_address`)
-                                ? "Home"
-                                : "New Address"}
+                              {getValues(`address.${index}.primary`) ? "Home" : "New Address"}
                             </Text>
                             <Row gap="12px" alignItems="center">
-                              {getValues(
-                                `detailInformation.addresess.${index}.is_primary_address`
-                              ) ? (
+                              {getValues(`address.${index}.primary`) ? (
                                 <Lozenge variant="blue">
                                   <Row alignItems="center">
                                     <ICCheckPrimary />
@@ -1830,11 +2075,11 @@ const EmployeeListCreate = () => {
                                   onClick={() => {
                                     let tempEdit = fieldsAddresess.map((mapDataItem) => {
                                       if (mapDataItem.key === index) {
-                                        mapDataItem.is_primary_address = true;
+                                        mapDataItem.primary = true;
 
                                         return { ...mapDataItem };
                                       } else {
-                                        mapDataItem.is_primary_address = false;
+                                        mapDataItem.primary = false;
                                         return { ...mapDataItem };
                                       }
                                     });
@@ -1862,18 +2107,28 @@ const EmployeeListCreate = () => {
                         <Col width={"100%"}>
                           <Controller
                             control={control}
-                            name={`detailInformation.addresess.${index}.address_type`}
-                            render={({ field: { onChange } }) => (
+                            rules={{
+                              required: {
+                                value: true,
+                                message: "Please enter address type.",
+                              },
+                            }}
+                            name={`address.${index}.type`}
+                            render={({ field: { onChange }, fieldState: { error } }) => (
                               <>
-                                <Label>Address Type</Label>
+                                <Label>
+                                  Address Type <span style={{ color: colors.red.regular }}>*</span>
+                                </Label>
                                 <Spacer size={3} />
                                 <Dropdown
+                                  error={error?.message}
                                   noSearch
                                   width="100%"
                                   items={[
                                     { id: "home", value: "Home" },
                                     { id: "office", value: "Office" },
                                     { id: "apartment", value: "Apartment" },
+                                    { id: "School", value: "School" },
                                   ]}
                                   handleChange={(value: any) => {
                                     onChange(value);
@@ -1886,20 +2141,30 @@ const EmployeeListCreate = () => {
                         <Spacer size={10} />
 
                         <Col width="100%">
-                          <TextArea
-                            width="100%"
-                            rows={2}
-                            required
-                            error={
-                              errors?.["detailInformation"]?.["addresess"]?.[index]?.["street"]?.[
-                                "message"
-                              ]
-                            }
-                            placeholder="e.g Front Groceries No. 5"
-                            label="Street"
-                            {...register(`detailInformation.addresess.${index}.street`, {
-                              required: "Please enter street.",
-                            })}
+                          <Controller
+                            control={control}
+                            rules={{
+                              maxLength: {
+                                value: 225,
+                                message: "Max length exceeded",
+                              },
+                              required: {
+                                value: true,
+                                message: "Please enter account street.",
+                              },
+                            }}
+                            name={`address.${index}.street`}
+                            render={({ field: { onChange } }) => (
+                              <TextArea
+                                width="100%"
+                                rows={2}
+                                onChange={onChange}
+                                required
+                                error={errors?.["address"]?.[index]?.["street"]?.["message"]}
+                                placeholder="e.g Front Groceries No. 5"
+                                label="Street"
+                              />
+                            )}
                           />
                         </Col>
                       </Row>
@@ -1908,7 +2173,7 @@ const EmployeeListCreate = () => {
                         <Col width={"100%"}>
                           <Controller
                             control={control}
-                            name={`detailInformation.addresess.${index}.country`}
+                            name={`address.${index}.country`}
                             render={({ field: { onChange } }) => (
                               <>
                                 <Label>Country</Label>
@@ -1932,6 +2197,7 @@ const EmployeeListCreate = () => {
                                     isFetchingCountry && !isFetchingMoreCountry ? [] : countryList
                                   }
                                   onChange={(value: any) => {
+                                    setCountryId(value);
                                     onChange(value);
                                   }}
                                   onSearch={(value: any) => {
@@ -1947,39 +2213,16 @@ const EmployeeListCreate = () => {
                         <Col width="100%">
                           <Controller
                             control={control}
-                            name={`detailInformation.addresess.${index}.province`}
+                            name={`address.${index}.province`}
                             render={({ field: { onChange } }) => (
-                              <>
-                                <Label>Province</Label>
-                                <Spacer size={3} />
-                                <FormSelect
-                                  height="48px"
-                                  style={{ width: "100%" }}
-                                  size={"large"}
-                                  placeholder={"Select"}
-                                  borderColor={"#AAAAAA"}
-                                  arrowColor={"#000"}
-                                  withSearch
-                                  isLoading={isFetchingProvince}
-                                  isLoadingMore={isFetchingMoreProvince}
-                                  fetchMore={() => {
-                                    if (hasNextPageProvince) {
-                                      fetchNextPageProvince();
-                                    }
-                                  }}
-                                  items={
-                                    isFetchingProvince && !isFetchingMoreProvince
-                                      ? []
-                                      : provinceList
-                                  }
-                                  onChange={(value: any) => {
-                                    onChange(value);
-                                  }}
-                                  onSearch={(value: any) => {
-                                    setSearchProvince(value);
-                                  }}
-                                />
-                              </>
+                              <Dropdown
+                                label="Province"
+                                width="100%"
+                                items={countryStructureListData?.structures?.[0]?.values.map(
+                                  (data) => ({ id: data.id, value: data.name })
+                                )}
+                                handleChange={onChange}
+                              />
                             )}
                           />
                         </Col>
@@ -1989,35 +2232,16 @@ const EmployeeListCreate = () => {
                         <Col width={"100%"}>
                           <Controller
                             control={control}
-                            name={`detailInformation.addresess.${index}.city`}
+                            name={`address.${index}.city`}
                             render={({ field: { onChange } }) => (
-                              <>
-                                <Label>City</Label>
-                                <Spacer size={3} />
-                                <FormSelect
-                                  height="48px"
-                                  style={{ width: "100%" }}
-                                  size={"large"}
-                                  placeholder={"Select"}
-                                  borderColor={"#AAAAAA"}
-                                  arrowColor={"#000"}
-                                  withSearch
-                                  isLoading={isFetchingCity}
-                                  isLoadingMore={isFetchingMoreCity}
-                                  fetchMore={() => {
-                                    if (hasNextPageCity) {
-                                      fetchNextPageCity();
-                                    }
-                                  }}
-                                  items={isFetchingCity && !isFetchingMoreCity ? [] : cityList}
-                                  onChange={(value: any) => {
-                                    onChange(value);
-                                  }}
-                                  onSearch={(value: any) => {
-                                    setSearchCity(value);
-                                  }}
-                                />
-                              </>
+                              <Dropdown
+                                label="City"
+                                width="100%"
+                                items={countryStructureListData?.structures?.[1]?.values.map(
+                                  (data) => ({ id: data.id, value: data.name })
+                                )}
+                                handleChange={onChange}
+                              />
                             )}
                           />
                         </Col>
@@ -2026,39 +2250,16 @@ const EmployeeListCreate = () => {
                         <Col width="100%">
                           <Controller
                             control={control}
-                            name={`detailInformation.addresess.${index}.district`}
+                            name={`address.${index}.district`}
                             render={({ field: { onChange } }) => (
-                              <>
-                                <Label>District</Label>
-                                <Spacer size={3} />
-                                <FormSelect
-                                  height="48px"
-                                  style={{ width: "100%" }}
-                                  size={"large"}
-                                  placeholder={"Select"}
-                                  borderColor={"#AAAAAA"}
-                                  arrowColor={"#000"}
-                                  withSearch
-                                  isLoading={isFetchingDistrict}
-                                  isLoadingMore={isFetchingMoreDistrict}
-                                  fetchMore={() => {
-                                    if (hasNextPageDistrict) {
-                                      fetchNextPageDistrict();
-                                    }
-                                  }}
-                                  items={
-                                    isFetchingDistrict && !isFetchingMoreDistrict
-                                      ? []
-                                      : districtList
-                                  }
-                                  onChange={(value: any) => {
-                                    onChange(value);
-                                  }}
-                                  onSearch={(value: any) => {
-                                    setSearchDistrict(value);
-                                  }}
-                                />
-                              </>
+                              <Dropdown
+                                label="District"
+                                width="100%"
+                                items={countryStructureListData?.structures?.[2]?.values.map(
+                                  (data) => ({ id: data.id, value: data.name })
+                                )}
+                                handleChange={onChange}
+                              />
                             )}
                           />
                         </Col>
@@ -2068,37 +2269,58 @@ const EmployeeListCreate = () => {
                         <Col width={"100%"}>
                           <Controller
                             control={control}
-                            name={`detailInformation.addresess.${index}.zone`}
+                            name={`address.${index}.zone`}
                             render={({ field: { onChange } }) => (
-                              <>
-                                <Label>Zone</Label>
-                                <Spacer size={3} />
-                                <Dropdown
-                                  noSearch
-                                  width="100%"
-                                  items={[{ id: "Andir", value: "Andir" }]}
-                                  handleChange={(value: any) => {
-                                    onChange(value);
-                                  }}
-                                />
-                              </>
+                              <Dropdown
+                                label="Zone"
+                                width="100%"
+                                items={countryStructureListData?.structures?.[3]?.values.map(
+                                  (data) => ({ id: data.id, value: data.name })
+                                )}
+                                handleChange={onChange}
+                              />
                             )}
                           />
                         </Col>
                         <Spacer size={10} />
 
                         <Col width="100%">
-                          <Input
-                            type="number"
-                            width="100%"
-                            error={
-                              errors?.["detailInformation"]?.["addresess"]?.[index]?.[
-                                "postal_code"
-                              ]?.["message"]
-                            }
-                            placeholder="e.g 40123"
-                            label="Postal Code"
-                            {...register(`detailInformation.addresess.${index}.postal_code`)}
+                          <Controller
+                            control={control}
+                            name={`address.${index}.postal_code`}
+                            render={({ field: { onChange } }) => (
+                              <>
+                                <Label>Postal Code</Label>
+                                <Spacer size={3} />
+                                <FormSelect
+                                  height="48px"
+                                  style={{ width: "100%" }}
+                                  size={"large"}
+                                  placeholder={"Select"}
+                                  borderColor={"#AAAAAA"}
+                                  arrowColor={"#000"}
+                                  withSearch
+                                  isLoading={isFetchingPostalCode}
+                                  isLoadingMore={isFetchingMorePostalCode}
+                                  fetchMore={() => {
+                                    if (hasNextPagePostalCode) {
+                                      fetchNextPagePostalCode();
+                                    }
+                                  }}
+                                  items={
+                                    isFetchingPostalCode && !isFetchingMorePostalCode
+                                      ? []
+                                      : postalCodeList
+                                  }
+                                  onChange={(value: any) => {
+                                    onChange(value);
+                                  }}
+                                  onSearch={(value: any) => {
+                                    setSearchPostalCode(value);
+                                  }}
+                                />
+                              </>
+                            )}
                           />
                         </Col>
                       </Row>
@@ -2108,14 +2330,15 @@ const EmployeeListCreate = () => {
                           <Input
                             type="number"
                             width="100%"
-                            error={
-                              errors?.["detailInformation"]?.["addresess"]?.[index]?.[
-                                "longitude"
-                              ]?.["message"]
-                            }
+                            error={errors?.["address"]?.[index]?.["lon"]?.["message"]}
                             placeholder="e.g -6.909829165558788, 107.57502431159176"
                             label="Longitude"
-                            {...register(`detailInformation.addresess.${index}.longitude`)}
+                            {...register(`address.${index}.lon`, {
+                              maxLength: {
+                                value: 225,
+                                message: "Max length exceeded",
+                              },
+                            })}
                           />
                         </Col>
                         <Spacer size={10} />
@@ -2124,14 +2347,15 @@ const EmployeeListCreate = () => {
                           <Input
                             type="number"
                             width="100%"
-                            error={
-                              errors?.["detailInformation"]?.["addresess"]?.[index]?.["latitude"]?.[
-                                "message"
-                              ]
-                            }
+                            error={errors?.["address"]?.[index]?.["lat"]?.["message"]}
                             placeholder="e.g -6.909829165558788, 107.57502431159176"
                             label="Latitude"
-                            {...register(`detailInformation.addresess.${index}.latitude`)}
+                            {...register(`address.${index}.lat`, {
+                              maxLength: {
+                                value: 225,
+                                message: "Max length exceeded",
+                              },
+                            })}
                           />
                         </Col>
                       </Row>
@@ -2221,7 +2445,7 @@ const EmployeeListCreate = () => {
                     (filtering) =>
                       filtering.dataIndex !== "id" &&
                       filtering.dataIndex !== "key" &&
-                      filtering.dataIndex !== "imageCertTraining"
+                      filtering.dataIndex !== "attachments"
                   )}
                   data={fieldsTraining}
                 />
@@ -2245,7 +2469,7 @@ const EmployeeListCreate = () => {
                     (filtering) =>
                       filtering.dataIndex !== "id" &&
                       filtering.dataIndex !== "key" &&
-                      filtering.dataIndex !== "imageCertCertification"
+                      filtering.dataIndex !== "attachments"
                   )}
                   data={fieldsCertification}
                 />
@@ -2258,6 +2482,12 @@ const EmployeeListCreate = () => {
       {modalChannelForm.open && (
         <Modal
           centered
+          width={
+            modalChannelForm.typeForm === "View Training" ||
+            modalChannelForm.typeForm === "View Certification"
+              ? "80%"
+              : undefined
+          }
           closable={true}
           visible={modalChannelForm.open}
           onCancel={() => setModalChannelForm({ open: false, data: {}, typeForm: "" })}
@@ -2277,48 +2507,60 @@ const EmployeeListCreate = () => {
               modalChannelForm.typeForm === "Edit Bank Account" ? (
                 <>
                   <Input
-                    defaultValue={modalChannelForm.data?.bankName}
+                    defaultValue={modalChannelForm.data?.bank}
                     width="100%"
                     label="Bank Name"
                     height="48px"
                     required
-                    error={errorsBankAccount.bankName?.message}
+                    error={errorsBankAccount.bank?.message}
                     placeholder={"e.g BCA"}
-                    {...registerBankAccount("bankName", {
+                    {...registerBankAccount("bank", {
                       shouldUnregister: true,
                       required: "Please enter bank name.",
+                      maxLength: {
+                        value: 100,
+                        message: "Max length exceeded",
+                      },
                     })}
                   />
 
                   <Spacer size={20} />
 
                   <Input
-                    defaultValue={modalChannelForm.data?.accountNumber}
+                    defaultValue={modalChannelForm.data?.account_number}
                     type="number"
                     width="100%"
                     label="Account Number"
                     height="48px"
                     required
-                    error={errorsBankAccount.accountNumber?.message}
+                    error={errorsBankAccount.account_number?.message}
                     placeholder={"e.g 123456789"}
-                    {...registerBankAccount("accountNumber", {
+                    {...registerBankAccount("account_number", {
                       shouldUnregister: true,
                       required: "Please enter account number.",
+                      maxLength: {
+                        value: 20,
+                        message: "Max length exceeded",
+                      },
                     })}
                   />
                   <Spacer size={20} />
 
                   <Input
-                    defaultValue={modalChannelForm.data?.accountName}
+                    defaultValue={modalChannelForm.data?.account_name}
                     width="100%"
                     label="Account Name"
                     height="48px"
                     required
-                    error={errorsBankAccount.accountName?.message}
+                    error={errorsBankAccount.account_name?.message}
                     placeholder={"e.g Jane Doe"}
-                    {...registerBankAccount("accountName", {
+                    {...registerBankAccount("account_name", {
                       shouldUnregister: true,
                       required: "Please enter account name.",
+                      maxLength: {
+                        value: 100,
+                        message: "Max length exceeded",
+                      },
                     })}
                   />
                 </>
@@ -2326,12 +2568,18 @@ const EmployeeListCreate = () => {
                 modalChannelForm.typeForm === "Edit Education" ? (
                 <>
                   <Input
-                    defaultValue={modalChannelForm.data?.schoolName}
+                    defaultValue={modalChannelForm.data?.school}
                     width="100%"
                     label="School Name"
                     height="48px"
                     placeholder={"e.g Lala University"}
-                    {...registerEducation("schoolName")}
+                    {...registerEducation("school", {
+                      shouldUnregister: true,
+                      maxLength: {
+                        value: 100,
+                        message: "Max length exceeded",
+                      },
+                    })}
                   />
 
                   <Spacer size={20} />
@@ -2348,7 +2596,19 @@ const EmployeeListCreate = () => {
                           noSearch
                           defaul
                           width="100%"
-                          items={[{ id: "S1", value: "S1" }]}
+                          items={[
+                            { id: "Master Degree", value: "Master Degree" },
+                            { id: "Magister Degree", value: "Magister Degree" },
+                            { id: "Magister Degree", value: "Magister Degree" },
+                            { id: "Doctor", value: "Doctor" },
+                            { id: "Bachelor Degree", value: "Bachelor Degree" },
+                            { id: "Associate", value: "Associate" },
+                            { id: "Diploma 4", value: "Diploma 4" },
+                            { id: "Diploma 3", value: "Diploma 3" },
+                            { id: "Diploma 2", value: "Diploma 2" },
+                            { id: "Diploma 1", value: "Diploma 1" },
+                            { id: "Senior High School", value: "Senior High School" },
+                          ]}
                           handleChange={(value: any) => {
                             onChange(value);
                           }}
@@ -2360,26 +2620,33 @@ const EmployeeListCreate = () => {
                   <Spacer size={20} />
 
                   <Input
-                    defaultValue={modalChannelForm.data?.fieldOfStudy}
+                    defaultValue={modalChannelForm.data?.study}
                     width="100%"
                     label="Field of Study"
                     height="48px"
                     placeholder={"e.g Business"}
-                    {...registerEducation("fieldOfStudy")}
+                    {...registerEducation("study", {
+                      shouldUnregister: true,
+                      maxLength: {
+                        value: 150,
+                        message: "Max length exceeded",
+                      },
+                    })}
                   />
 
                   <Spacer size={20} />
 
                   <Controller
                     control={controlEducation}
-                    name="startYear"
+                    name="start"
                     render={({ field: { onChange } }) => (
                       <DatePickerInput
                         fullWidth
-                        defaultValue={moment(
-                          modalChannelForm.data?.startYear || new Date(),
-                          "YYYY-MM-DD"
-                        )}
+                        defaultValue={
+                          modalChannelForm.data?.start
+                            ? moment(modalChannelForm.data?.start, "YYYY-MM-DD")
+                            : ""
+                        }
                         picker="year"
                         onChange={(date: any, dateString: any) => onChange(dateString)}
                         label="Start Year"
@@ -2391,14 +2658,15 @@ const EmployeeListCreate = () => {
 
                   <Controller
                     control={controlEducation}
-                    name="endYear"
+                    name="end"
                     render={({ field: { onChange } }) => (
                       <DatePickerInput
                         fullWidth
-                        defaultValue={moment(
-                          modalChannelForm.data?.endYear || new Date(),
-                          "YYYY-MM-DD"
-                        )}
+                        defaultValue={
+                          modalChannelForm.data?.end
+                            ? moment(modalChannelForm.data?.end, "YYYY-MM-DD")
+                            : ""
+                        }
                         picker="year"
                         onChange={(date: any, dateString: any) => onChange(dateString)}
                         label="End Year"
@@ -2415,7 +2683,13 @@ const EmployeeListCreate = () => {
                     type="number"
                     height="48px"
                     placeholder={"e.g 4.0"}
-                    {...registerEducation("gpa")}
+                    {...registerEducation("gpa", {
+                      shouldUnregister: true,
+                      maxLength: {
+                        value: 5,
+                        message: "Max length exceeded",
+                      },
+                    })}
                   />
                 </>
               ) : modalChannelForm.typeForm === "Add Family" ||
@@ -2423,17 +2697,23 @@ const EmployeeListCreate = () => {
                 <>
                   <Controller
                     control={controlFamily}
-                    name="familyRelation"
+                    name="relation"
                     render={({ field: { onChange } }) => (
                       <>
                         <Label>Family Relation</Label>
                         <Spacer size={3} />
                         <Dropdown
-                          defaultValue={modalChannelForm.data?.familyRelation}
+                          defaultValue={modalChannelForm.data?.relation}
                           noSearch
                           defaul
                           width="100%"
-                          items={[{ id: "Husband", value: "Husband" }]}
+                          items={[
+                            { id: "Husband", value: "Husband" },
+                            { id: "Father", value: "Father" },
+                            { id: "Mother", value: "Mother" },
+                            { id: "Wife", value: "Wife" },
+                            { id: "Child", value: "Child" },
+                          ]}
                           handleChange={(value: any) => {
                             onChange(value);
                           }}
@@ -2449,8 +2729,14 @@ const EmployeeListCreate = () => {
                     width="100%"
                     label="Name"
                     height="48px"
+                    error={errorsFamily.name?.message}
                     placeholder={"e.g Jane Doe"}
-                    {...registerFamily("name")}
+                    {...registerFamily("name", {
+                      maxLength: {
+                        value: 100,
+                        message: "Max length exceeded",
+                      },
+                    })}
                   />
 
                   <Spacer size={20} />
@@ -2483,14 +2769,15 @@ const EmployeeListCreate = () => {
 
                   <Controller
                     control={controlFamily}
-                    name="birthOfDate"
+                    name="dob"
                     render={({ field: { onChange } }) => (
                       <DatePickerInput
                         fullWidth
-                        defaultValue={moment(
-                          modalChannelForm.data?.birthOfDate || new Date(),
-                          "YYYY-DD-MM"
-                        )}
+                        defaultValue={
+                          modalChannelForm.data?.dob
+                            ? moment(modalChannelForm.data?.dob, "YYYY-DD-MM")
+                            : ""
+                        }
                         onChange={(date: any, dateString: any) => onChange(dateString)}
                         label="Birth of Date"
                       />
@@ -2500,44 +2787,75 @@ const EmployeeListCreate = () => {
                   <Spacer size={20} />
 
                   <Input
-                    defaultValue={modalChannelForm.data?.gpa}
+                    defaultValue={modalChannelForm.data?.mobile}
                     width="100%"
                     label="Mobile"
+                    error={errorsFamily.mobile?.message}
                     type="number"
                     height="48px"
                     placeholder={"e.g 08123456789"}
-                    {...registerFamily("mobile")}
+                    {...registerFamily("mobile", {
+                      maxLength: {
+                        value: 15,
+                        message: "Max length exceeded",
+                      },
+                    })}
                   />
                 </>
               ) : modalChannelForm.typeForm === "Add Training" ||
                 modalChannelForm.typeForm === "Edit Training" ? (
                 <>
                   <Input
-                    defaultValue={modalChannelForm.data?.trainingName}
+                    defaultValue={modalChannelForm.data?.name}
+                    error={errorTraining.name?.message}
                     width="100%"
                     label="Training Name"
                     height="48px"
                     placeholder={"e.g Training Business"}
-                    {...registerTraining("trainingName")}
+                    {...registerTraining("name", {
+                      maxLength: {
+                        value: 100,
+                        message: "Max length exceeded",
+                      },
+                      shouldUnregister: true,
+                    })}
                   />
 
                   <Spacer size={20} />
 
                   <Controller
                     control={controlTraining}
-                    name="trainingType"
-                    render={({ field: { onChange } }) => (
+                    name="type"
+                    render={({ field: { onChange }, fieldState: { error } }) => (
                       <>
                         <Label>Training Type</Label>
                         <Spacer size={3} />
-                        <Dropdown
-                          defaultValue={modalChannelForm.data?.trainingType}
-                          noSearch
-                          defaul
-                          width="100%"
-                          items={[{ id: "lorem", value: "lorem" }]}
-                          handleChange={(value: any) => {
+                        <FormSelect
+                          error={error?.message}
+                          height="48px"
+                          style={{ width: "100%" }}
+                          size={"large"}
+                          placeholder={"Select"}
+                          borderColor={error?.message ? "#ED1C24" : "#AAAAAA"}
+                          arrowColor={"#000"}
+                          withSearch
+                          isLoading={isFetchingTrainingType}
+                          isLoadingMore={isFetchingMoreTrainingType}
+                          fetchMore={() => {
+                            if (hasNextPageTrainingType) {
+                              fetchNextPageTrainingType();
+                            }
+                          }}
+                          items={
+                            isFetchingTrainingType && !isFetchingMoreTrainingType
+                              ? []
+                              : trainingTypeList
+                          }
+                          onChange={(value: any) => {
                             onChange(value);
+                          }}
+                          onSearch={(value: any) => {
+                            setSearchTrainingType(value);
                           }}
                         />
                       </>
@@ -2548,17 +2866,21 @@ const EmployeeListCreate = () => {
 
                   <Controller
                     control={controlTraining}
-                    name="trainingStatus"
+                    name="status"
                     render={({ field: { onChange } }) => (
                       <>
                         <Label>Training Status</Label>
                         <Spacer size={3} />
                         <Dropdown
-                          defaultValue={modalChannelForm.data?.trainingStatus}
+                          defaultValue={modalChannelForm.data?.status}
                           noSearch
                           defaul
                           width="100%"
-                          items={[{ id: "lorem", value: "lorem" }]}
+                          items={[
+                            { id: "Completed", value: "Completed" },
+                            { id: "In Progress", value: "In Progress" },
+                            { id: "Plan", value: "Plan" },
+                          ]}
                           handleChange={(value: any) => {
                             onChange(value);
                           }}
@@ -2571,14 +2893,15 @@ const EmployeeListCreate = () => {
 
                   <Controller
                     control={controlTraining}
-                    name="startDate"
+                    name="start"
                     render={({ field: { onChange } }) => (
                       <DatePickerInput
                         fullWidth
-                        defaultValue={moment(
-                          modalChannelForm.data?.startDate || new Date(),
-                          "YYYY-DD-MM"
-                        )}
+                        defaultValue={
+                          modalChannelForm.data?.start
+                            ? moment(modalChannelForm.data?.start, "YYYY-DD-MM")
+                            : ""
+                        }
                         onChange={(date: any, dateString: any) => onChange(dateString)}
                         label="Start Date"
                       />
@@ -2589,14 +2912,15 @@ const EmployeeListCreate = () => {
 
                   <Controller
                     control={controlTraining}
-                    name="endDate"
+                    name="end"
                     render={({ field: { onChange } }) => (
                       <DatePickerInput
                         fullWidth
-                        defaultValue={moment(
-                          modalChannelForm.data?.endDate || new Date(),
-                          "YYYY-DD-MM"
-                        )}
+                        defaultValue={
+                          modalChannelForm.data?.end
+                            ? moment(modalChannelForm.data?.end, "YYYY-DD-MM")
+                            : ""
+                        }
                         onChange={(date: any, dateString: any) => onChange(dateString)}
                         label="End Date"
                       />
@@ -2605,93 +2929,154 @@ const EmployeeListCreate = () => {
 
                   <Spacer size={20} />
 
-                  <TextArea
-                    width="100%"
-                    rows={2}
-                    required
-                    placeholder="e.g Training very helpfull"
-                    label="Description"
-                    {...registerTraining("description")}
+                  <Controller
+                    control={controlTraining}
+                    rules={{
+                      maxLength: {
+                        value: 225,
+                        message: "Max length exceeded",
+                      },
+                    }}
+                    name="description"
+                    render={({ field: { onChange } }) => (
+                      <TextArea
+                        width="100%"
+                        rows={2}
+                        onChange={onChange}
+                        defaultValue={modalChannelForm.data?.description}
+                        error={errorTraining.description?.message}
+                        placeholder="e.g Training very helpfull"
+                        label="Description"
+                      />
+                    )}
                   />
 
                   <Spacer size={20} />
 
-                  <Controller
-                    control={controlTraining}
-                    name="imageCertTraining"
-                    render={({ field: { onChange } }) => (
-                      <FileUploaderAllFiles
-                        label="Cert. Training Photo"
-                        onSubmit={(file: any) => onChange(file)}
-                        defaultFile={"/placeholder-employee-photo.svg"}
-                        withCrop
-                        sizeImagePhoto="125px"
-                        removeable
-                        textPhoto={[
-                          "Upload Training Certification",
-                          "(Max. 5MB, Format .jpeg, .pdf)",
-                        ]}
-                      />
-                    )}
+                  <Text variant="headingRegular">
+                    Upload Certification <Text variant="body1">(Max. 5MB, Format .jpeg, .pdf)</Text>
+                  </Text>
+
+                  <Spacer size={16} />
+
+                  <FileUploaderAllFilesDragger
+                    onSubmit={(file: any) => handleUploadPhotoFile(file, "training")}
+                    defaultFileList={
+                      modalChannelForm.data?.attachments ? [modalChannelForm.data?.attachments] : []
+                    }
+                    defaultFile={
+                      modalChannelForm.data?.attachments
+                        ? URL.createObjectURL(modalChannelForm.data?.attachments)
+                        : "/placeholder-employee-photo.svg"
+                    }
+                    withCrop
+                    removeable
                   />
                 </>
               ) : modalChannelForm.typeForm === "View Training" ? (
                 <>
                   <Spacer size={20} />
-                  View Training
+
+                  <Image
+                    src={
+                      modalChannelForm.data?.attachments
+                        ? URL.createObjectURL(modalChannelForm.data?.attachments)
+                        : "/sample-cert.svg"
+                    }
+                    layout="responsive"
+                    width={100}
+                    height={100}
+                    placeholder="blur"
+                    blurDataURL={
+                      modalChannelForm.data?.attachments
+                        ? URL.createObjectURL(modalChannelForm.data?.attachments)
+                        : "/placeholder-employee-photo.svg"
+                    }
+                    alt="iew-training"
+                  />
                   <Spacer size={20} />
                 </>
               ) : modalChannelForm.typeForm === "View Certification" ? (
                 <>
                   <Spacer size={20} />
-                  View Certification
+
+                  <Image
+                    src={
+                      modalChannelForm.data?.attachments
+                        ? URL.createObjectURL(modalChannelForm.data?.attachments)
+                        : "/sample-cert.svg"
+                    }
+                    layout="responsive"
+                    width={100}
+                    height={100}
+                    placeholder="blur"
+                    blurDataURL={
+                      modalChannelForm.data?.attachments
+                        ? URL.createObjectURL(modalChannelForm.data?.attachments)
+                        : "/placeholder-employee-photo.svg"
+                    }
+                    alt="iew-training"
+                  />
                   <Spacer size={20} />
                 </>
               ) : (
                 <>
                   <Input
-                    defaultValue={modalChannelForm.data?.certificationName}
+                    defaultValue={modalChannelForm.data?.name}
                     width="100%"
+                    error={errorsCertification.name?.message}
                     label="Certification Name"
                     height="48px"
                     placeholder={"e.g Business Cetification"}
-                    {...registerCertification("certificationName")}
+                    {...registerCertification("name", {
+                      maxLength: {
+                        value: 50,
+                        message: "Max length exceeded",
+                      },
+                    })}
                   />
 
                   <Spacer size={20} />
 
                   <Input
                     defaultValue={modalChannelForm.data?.institution}
+                    error={errorsCertification.institution?.message}
                     width="100%"
                     label="Institution"
                     height="48px"
                     placeholder={"e.g Business Center"}
-                    {...registerCertification("institution")}
+                    {...registerCertification("institution", {
+                      maxLength: {
+                        value: 50,
+                        message: "Max length exceeded",
+                      },
+                    })}
                   />
 
                   <Spacer size={20} />
 
                   <Input
-                    defaultValue={modalChannelForm.data?.certificationNumber}
+                    defaultValue={modalChannelForm.data?.number}
                     width="100%"
                     label="Certification Number"
                     height="48px"
                     placeholder={"e.g Business Center"}
-                    {...registerCertification("certificationNumber")}
+                    {...registerCertification("number")}
                   />
 
                   <Spacer size={20} />
 
                   <Controller
                     control={controlCertification}
-                    name="certificationDate"
+                    name="date"
                     render={({ field: { onChange } }) => (
                       <DatePickerInput
                         fullWidth
-                        defaultValue={moment(
-                          modalChannelForm.data?.certificationDate || new Date(),
-                          "YYYY-DD-MM"
-                        )}
+                        defaultValue={
+                          modalChannelForm.data?.date
+                            ? moment(modalChannelForm.data?.date, "YYYY-DD-MM")
+                            : ""
+                        }
                         onChange={(date: any, dateString: any) => onChange(dateString)}
                         label="Certification Date"
                       />
@@ -2700,23 +3085,24 @@ const EmployeeListCreate = () => {
 
                   <Spacer size={20} />
 
-                  <Controller
-                    control={controlCertification}
-                    name="imageCertCertification"
-                    render={({ field: { onChange } }) => (
-                      <FileUploaderAllFiles
-                        label="Certification Photo"
-                        onSubmit={(file: any) => onChange(file)}
-                        defaultFile={"/placeholder-employee-photo.svg"}
-                        withCrop
-                        sizeImagePhoto="125px"
-                        removeable
-                        textPhoto={[
-                          "Upload Certification Certification",
-                          "(Max. 5MB, Format .jpeg, .pdf)",
-                        ]}
-                      />
-                    )}
+                  <Text variant="headingRegular">
+                    Upload Certification <Text variant="body1">(Max. 5MB, Format .jpeg, .pdf)</Text>
+                  </Text>
+
+                  <Spacer size={16} />
+
+                  <FileUploaderAllFilesDragger
+                    onSubmit={(file: any) => handleUploadPhotoFile(file, "certification")}
+                    defaultFileList={
+                      modalChannelForm.data?.attachments ? [modalChannelForm.data?.attachments] : []
+                    }
+                    defaultFile={
+                      modalChannelForm.data?.attachments
+                        ? URL.createObjectURL(modalChannelForm.data?.attachments)
+                        : "/placeholder-employee-photo.svg"
+                    }
+                    withCrop
+                    removeable
                   />
                 </>
               )}
@@ -2730,15 +3116,18 @@ const EmployeeListCreate = () => {
                   marginBottom: "20px",
                 }}
               >
-                <Button
-                  size="big"
-                  variant={"tertiary"}
-                  key="submit"
-                  type="primary"
-                  onClick={() => setModalChannelForm({ open: false, data: {}, typeForm: "" })}
-                >
-                  Cancel
-                </Button>
+                {modalChannelForm.typeForm === "View Certification" ||
+                  (modalChannelForm.typeForm === "View Training" ? null : (
+                    <Button
+                      size="big"
+                      variant={"tertiary"}
+                      key="submit"
+                      type="primary"
+                      onClick={() => setModalChannelForm({ open: false, data: {}, typeForm: "" })}
+                    >
+                      Cancel
+                    </Button>
+                  ))}
 
                 {modalChannelForm.typeForm === "Add Bank Account" ||
                 modalChannelForm.typeForm === "Edit Bank Account" ? (
@@ -2749,8 +3138,8 @@ const EmployeeListCreate = () => {
                   >
                     Save
                   </Button>
-                ) : modalChannelForm.typeForm === "Add Bank Education" ||
-                  modalChannelForm.typeForm === "Edit Bank Education" ? (
+                ) : modalChannelForm.typeForm === "Add Education" ||
+                  modalChannelForm.typeForm === "Edit Education" ? (
                   <Button
                     onClick={handleSubmitEducation(handleAddItemEducation)}
                     variant="primary"
@@ -2776,7 +3165,8 @@ const EmployeeListCreate = () => {
                   >
                     Save
                   </Button>
-                ) : (
+                ) : modalChannelForm.typeForm === "Add Certification" ||
+                  modalChannelForm.typeForm === "Edit Certification" ? (
                   <Button
                     onClick={handleSubmitCertification(handleAddItemCertification)}
                     variant="primary"
@@ -2784,7 +3174,7 @@ const EmployeeListCreate = () => {
                   >
                     Save
                   </Button>
-                )}
+                ) : null}
               </div>
             </div>
           }
@@ -2798,12 +3188,6 @@ const Card = styled.div`
   background: #ffffff;
   border-radius: 16px;
   padding: ${(p: any) => (p.padding ? p.padding : "16px")};
-`;
-
-const Center = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
 `;
 
 const Label = styled.div`

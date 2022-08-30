@@ -114,8 +114,6 @@ const DetailMenuList: any = () => {
 					});
 				});
 
-				console.log('============', data)
-
 				if (data.menu.processName) {
 					setIsMenuProcess(true);
 				}
@@ -563,8 +561,6 @@ const DetailMenuList: any = () => {
 			setIsHermes(!isHermes);
 		}
 	};
-
-	console.log('isMenuProcess', isMenuProcess)
 
 	return (
 		<>

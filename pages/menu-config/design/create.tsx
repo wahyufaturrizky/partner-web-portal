@@ -115,9 +115,7 @@ const CreateMenuDesignList: any = () => {
 
 	const [gData, setGData] = useState(defaultData);
 
-	const onDragEnter = (info: any) => {
-		console.log(info);
-	};
+	const onDragEnter = (info: any) => {};
 
 	const onDrop = (info: any) => {
 		const dropKey = info.node.key;

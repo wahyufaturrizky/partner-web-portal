@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useRouter } from "next/router";
 import styled from "styled-components";
 import {
@@ -11,23 +12,37 @@ import {
   Table,
   Text,
 } from "pink-lava-ui";
+import usePagination from "@lucasmogari/react-pagination";
+import { useListCustomers, useDeleteCustomers } from '../../hooks/mdm/customers/useCustomersMDM'
 import { ICDownload, ICUpload } from "../../assets";
+import { ModalDeleteConfirmation } from '../../components/elements/Modal/ModalConfirmationDelete'
 
 export default function Customer() {
+  const pagination = usePagination({
+    page: 1,
+    itemsPerPage: 10,
+    maxPageItems: Infinity,
+    numbers: true,
+    arrows: true,
+    totalItems: 100,
+  });
   const router = useRouter()
+  const [search, setSearch] = useState("");
+  const [itemsSelected, setItemsSelected] = useState([]);
+  const [visible, setVisible] = useState(false)
 
   const columns = [
     {
       title: "Customer ID",
-      dataIndex: "customer_code",
+      dataIndex: "id",
     },
     {
       title: "Customer Name",
-      dataIndex: "customer_name",
+      dataIndex: "name",
     },
     {
       title: "Customer Group",
-      dataIndex: "customer_group",
+      dataIndex: "group",
     },
     {
       title: "Salesman",
@@ -35,11 +50,94 @@ export default function Customer() {
     },
     {
       title: "Action",
-      dataIndex: "action",
+      dataIndex: "id",
       width: "15%",
       align: "left",
+      render: (id: any) => (
+        <div style={{ display: "flex", justifyContent: "left" }}>
+          <Button
+            size="small"
+            onClick={() => router.push(`/customers/${id}`)}
+            variant="tertiary"
+          >
+            View Detail
+          </Button>
+        </div>
+      )
     },
   ];
+
+  const { data: listCustomers, isLoading, refetch } = useListCustomers({
+    options: {
+      onSuccess: (items: any) => {
+        pagination.setTotalItems(items?.totalRow);
+      },
+      select: ({ rows, totalRow }: any) => {
+        const data =  rows?.map((items: any) => {
+          return {
+            key: items?.id,
+            id: items?.id,
+            name: items?.name,
+            group: items?.group,
+            salesman: items?.salesman
+          }
+        }) 
+        return { data, totalRow }
+      }
+    },
+    query: {
+      search,
+      page: pagination.page,
+      limit: pagination.itemsPerPage,
+    },
+  });
+
+  const { mutate: deleteCustomer, isLoading: loadingDelete }: any = useDeleteCustomers({
+    options: {
+      onSuccess: () => {
+        refetch()
+        setItemsSelected([])
+        setVisible(false)
+      }
+    }
+  })
+
+  const actDrowpdown = [
+    {
+      key: 1,
+      value: (
+        <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+          <ICDownload />
+          <p style={{ margin: "0" }}>Download Template</p>
+        </div>
+      ),
+    },
+    {
+      key: 2,
+      value: (
+        <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+          <ICUpload />
+          <p style={{ margin: "0" }}>Upload Template</p>
+        </div>
+      ),
+    },
+    {
+      key: 3,
+      value: (
+        <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+          <ICDownload />
+          <p style={{ margin: "0" }}>Download Data</p>
+        </div>
+      ),
+    },
+  ]
+
+  const rowSelection = {
+    itemsSelected,
+    onChange: (selected: any) => {
+      setItemsSelected(selected)
+    },
+  }
 
   return (
     <div>
@@ -52,14 +150,14 @@ export default function Customer() {
           <Search
             width="340px"
             placeholder="Search Customer, Salesman, etc"
-            onChange={() => {}}
+            onChange={({ target }: any) => setSearch(target.value)}
           />
           <Row gap="16px">
             <Button
               size="big"
               variant={"tertiary"}
-              onClick={() => {}}
-              disabled={false}
+              onClick={() => setVisible(true)}
+              disabled={itemsSelected?.length < 1}
             >
               Delete
             </Button>
@@ -71,35 +169,7 @@ export default function Customer() {
               textColor={"pink.regular"}
               iconStyle={{ fontSize: "12px" }}
               onClick={() => {}}
-              menuList={[
-                {
-                  key: 1,
-                  value: (
-                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                      <ICDownload />
-                      <p style={{ margin: "0" }}>Download Template</p>
-                    </div>
-                  ),
-                },
-                {
-                  key: 2,
-                  value: (
-                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                      <ICUpload />
-                      <p style={{ margin: "0" }}>Upload Template</p>
-                    </div>
-                  ),
-                },
-                {
-                  key: 3,
-                  value: (
-                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                      <ICDownload />
-                      <p style={{ margin: "0" }}>Download Data</p>
-                    </div>
-                  ),
-                },
-              ]}
+              menuList={actDrowpdown}
             />
             <Button
               size="big"
@@ -115,14 +185,23 @@ export default function Customer() {
       <Card style={{ padding: "16px 20px" }}>
         <Col gap={"60px"}>
           <Table
-            loading={false}
+            loading={isLoading}
             columns={columns}
-            data={[]}
-            rowSelection={() => {}}
+            data={listCustomers?.data || []}
+            rowSelection={rowSelection}
           />
-          <Pagination pagination={[]} />
+          <Pagination pagination={pagination} />
         </Col>
       </Card>
+
+      <ModalDeleteConfirmation
+        totalSelected={itemsSelected.length}
+        visible={visible}
+        itemTitle={listCustomers?.data?.find((item: any) => item.key === itemsSelected[0])?.name}
+        isLoading={loadingDelete}
+        onCancel={() => setVisible(false)}
+        onOk={() => deleteCustomer({ delete: itemsSelected })}
+      />
     </div>
   )
 }

@@ -25,7 +25,6 @@ const UserConfigApproval: any = () => {
 
 	const { data: dataFieldsProcessLists, isLoading: isLoadingieldsProcessLists } = useProcessLists();
 
-	console.log("dataFieldsProcessLists", dataFieldsProcessLists);
 	const {
 		data: fields,
 		refetch: refetchFields,
