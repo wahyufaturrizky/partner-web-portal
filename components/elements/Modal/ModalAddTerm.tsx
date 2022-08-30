@@ -280,13 +280,15 @@ const ModalAddTerm = ({
                       size="large"
                       style={{ width: 60 }}
                       defaultValue={formType === "add" ? 0 : formData?.optionValue}
+                      min={0}
+                      max={31}
                       // status={errors?.company_name?.type === "required" && "error"}
                       onChange={(value: any) => {
-                        onChange(value);
+                        onChange(value?.toString());
                       }}
                     />{" "}
                     <Text variant="headingRegular" inline>
-                      Of The Month
+                      Of The Week
                     </Text>
                     {/* {errors?.company_name?.type === "required" && (
                   <Text variant="alert" color={"red.regular"}>
@@ -321,6 +323,9 @@ const ModalAddTerm = ({
                       onSelect={(value: any) => {
                         setTime(moment(value).format("HH:mm"));
                         onChange(moment(value).format("HH:mm"));
+                      }}
+                      onChange={(value: any) => {
+                        setTime(moment(value).format("HH:mm"));
                       }}
                     />
                     {/* {errors?.company_name?.type === "required" && (
