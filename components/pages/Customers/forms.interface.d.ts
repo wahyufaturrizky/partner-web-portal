@@ -1,23 +1,4 @@
 
-
-export interface FormContacts {
-  address: {
-    is_primary_address: boolean;
-    address_type: string;
-    street: string;
-    country: string;
-    province: string;
-    city: string;
-    district: string;
-    zone: string;
-    postal_code: string;
-    longitude: string;
-    store_picture: string
-    latitude: string;
-    key: number;
-  }[];
-}
-
 export interface FormValues {
   profile_picture?: string;
   customer: PropsFormsCustomes

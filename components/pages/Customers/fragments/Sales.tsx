@@ -9,6 +9,7 @@ import {
   Dropdown
 } from 'pink-lava-ui'
 import styled from 'styled-components'
+import { useTermOfPayments } from '../../../../hooks/mdm/term-of-payment/useTermOfPayment';
 
 export default function Sales(props: any) {
   const { setValueSales } = props
@@ -18,26 +19,26 @@ export default function Sales(props: any) {
     delivery: false,
   })
 
+  const { data: getDataTermOfPayment } = useTermOfPayments({
+    options: { onSuccess: () => { } },
+    query: { company_id: "KSNI" }
+  })
+
+  const listItemsOfPayment = getDataTermOfPayment?.rows?.map
+    (({ topId, name }: any) => { return { value: name, id: topId } })
+
+
   const listSalesItems = [
     { id: 'sales', label: 'Sales Order Blocking', value: 'sales_order_blocking' },
     { id: 'invoice', label: 'Invoice/Billing Blocking', value: 'billing_blocking' },
     { id: 'delivery', label: 'Delivery Order Blocking', value: 'delivery_order_blocking' },
   ]
-
   const listFakeBranch = [
     { value: 'example-branch-1', id: 1 },
     { value: 'example-branch-2', id: 2 },
     { value: 'example-branch-3', id: 3 },
     { value: 'example-branch-4', id: 4 },
   ]
-
-
-  const listFakeTermpayment = [
-    { value: '7 days of payment', id: '7d' },
-    { value: '15 days of payment', id: '15d' },
-    { value: '30 days of payment', id: '30d' },
-  ]
-
   const listFakeSalesman = [
     { value: 'Billa yuvila', id: 1 },
     { value: 'Gween sticky', id: 2 },
@@ -68,7 +69,7 @@ export default function Sales(props: any) {
           actionLabel="Add New Term of Payment"
           isShowActionLabel
           noSearch
-          items={listFakeTermpayment}
+            items={listItemsOfPayment}
           handleClickActionLabel={() => window.open('/term-of-payment/create')}
           handleChange={(value: string) => setValueSales("sales.term_payment", value)}
           required

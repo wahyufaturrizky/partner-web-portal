@@ -303,19 +303,23 @@ const ButtonSetFormsPrimary = ({
           : "New Address"}
       </Text>
       <Row gap="12px" alignItems="center">
-        {getValues(`address.${index}.is_primary`)
-          ? <Lozenge variant="blue">
-            <Row alignItems="center">
-              <ICCheckPrimary />
-              Primary
-            </Row>
-          </Lozenge>
-          : <Text
-            clickable
-            color="pink.regular"
-            onClick={setAsPrimary}>
-            Set as Primary
-          </Text>
+        {(index === 0 && fieldsAddress.length < 2) || getValues(`address.${index}.is_primary`)
+          ? (
+            <Lozenge variant="blue">
+              <Row alignItems="center">
+                <ICCheckPrimary />
+                Primary
+              </Row>
+            </Lozenge>
+          )
+          : (
+            <Text
+              clickable
+              color="pink.regular"
+              onClick={setAsPrimary}>
+              Set as Primary
+            </Text>
+          )
         }
         {
           isDeleteAktifed && (

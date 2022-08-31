@@ -1,31 +1,40 @@
 import React from 'react'
 import styled from 'styled-components'
-import { Spacer, Dropdown2 } from 'pink-lava-ui'
+import { Spacer, Dropdown } from 'pink-lava-ui'
+
+import { useTermOfPayments } from '../../../../hooks/mdm/term-of-payment/useTermOfPayment';
 
 export default function Purchasing(props: any) {
   const { setValuePurchasing } = props
-  const listFakeBranch = [
-    { value: 'items-1', id: 'items-1' },
-    { value: 'items-2', id: 'items-2' },
-    { value: 'items-3', id: 'items-3' },
-    { value: 'items-4', id: 'items-4' },
-  ]
 
+  const { data: getDataTermOfPayment } = useTermOfPayments({
+    options: {
+      onSuccess: () => {}
+    },
+    query: {
+      company_id: "KSNI"
+    }
+  })
+
+  const listItemsOfPayment = getDataTermOfPayment?.rows?.map
+    (({ topId, name }: any) => { return { value: name, id: topId } })
+  
   return (
     <div>
       <Label>Payment</Label>
       <Spacer size={20} />
-      <Dropdown2
+      <Dropdown
         label="Term of Payment"
-        width="60%"
+        width="70%"
         actionLabel="Add New Term of Payment"
         isShowActionLabel
-        handleClickActionLabel={() => { }}
-        items={listFakeBranch}
-        handleChange={(value: string) =>
-          setValuePurchasing("purchasing.term_of_payment", value)}
-        onSearch={(search: string) => { }}
-        required
+        handleClickActionLabel={() => window.open('/term-of-payment/create')}
+        items={listItemsOfPayment}
+        handleChange={(value: string) => {
+          console.log('ini adalah opoennnsnsns', value)
+          setValuePurchasing("purchasing.term_of_payment", value)
+        }}
+        noSearch
       />
     </div>
   )

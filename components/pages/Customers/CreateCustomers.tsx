@@ -16,25 +16,26 @@ import { useForm, useFieldArray } from 'react-hook-form'
 import { ExclamationCircleOutlined } from "@ant-design/icons";
 import { useRouter } from 'next/router';
 import styled from 'styled-components'
+import dynamic from 'next/dynamic'
 
-import {
-  Sales,
-  Addresses,
-  Contact,
-  Invoicing,
-  Purchasing,
-  UploadImage
-} from './fragments'
+const Contact = dynamic(() => import('./fragments/Contact'))
+const Addresses = dynamic(() => import('./fragments/Addresses'))
+const Sales = dynamic(() => import('./fragments/Sales'))
+const Invoicing = dynamic(() => import('./fragments/Invoicing'))
+const Purchasing = dynamic(() => import('./fragments/Purchasing'))
+import UploadImage from './fragments/UploadImages'
+
+import { defaultValuesCreate, addressBodyField, listTabItems, status } from './constants'
 import { useCreateCustomers, useUploadLogo } from '../../../hooks/mdm/customers/useCustomersMDM';
 
-const listFakeItems = [
-  { id: 1, value: 'Indonesia' },
-  { id: 2, value: 'Japan' },
-  { id: 3, value: 'Malaysia' },
-  { id: 4, value: 'Singepore' },
-]
-
-export default function CreateCustomers({ isUpdate, detailCustomer }: any) {
+export default function CreateCustomers({
+  isUpdate,
+  detailCustomer,
+  getDataLanguages,
+  getDataCustomerGroup,
+  setSearchCustomerGroup,
+  setSearchLanguages
+}: any) {
   const router = useRouter();
   const [tabAktived, setTabAktived] = useState<string>('Contact')
   const [formType, setFormType] = useState<string>('Company')
@@ -47,96 +48,19 @@ export default function CreateCustomers({ isUpdate, detailCustomer }: any) {
     contact: false,
     bank: false
   });
-  const [modalChannelForm, setModalChannelForm] = useState({
+  const [modalChannelForm, setModalChannelForm] = useState<any>({
     data: {},
     typeForm: "create",
   });
-  const [search, setSearch] = useState<{
-    languages: string
-    branch: string
-    contact: string
-  }>({
-    languages: '',
-    branch: '',
-    contact: ''
-  })
 
-  // useEffect(() => {
-  //   if (detailCustomer) {
-  //     setValue('customer.name', 'ttestingg')
-  //   }
-  // }, [setValue, isUpdate, detailCustomer])
+  const listItemsCustomerGruop = getDataCustomerGroup?.rows?.map
+    (({ id, name }: any) => { return { value: name, id }})
 
-  console.log('detailCustomer', detailCustomer)
+  const listItemsLanguages = getDataLanguages?.rows?.map
+    (({ name, id }: any) => { return { value: name, id }});
 
   const isCompany: boolean = formType === 'Company'
   const _formType: string[] = ['Company', 'Individu']
-  const listTabItems: { title: string }[] = [
-    { title: "Contact" },
-    { title: "Addresses" },
-    { title: "Sales" },
-    { title: "Purchasing" },
-    { title: "Invoicing" },
-  ];
-  const status: { id: string, value: string }[] = [
-    { id: "ACTIVE", value: "Active" },
-    { id: "INACTIVE", value: "Inactive" },
-  ]
-
-  const addressBodyField = {
-    is_primary: false,
-    address_type: "",
-    street: "",
-    country: "",
-    province: "",
-    city: "",
-    district: "",
-    zone: "",
-    postal_code: "",
-    longtitude: "",
-    latitude: "",
-    key: 0,
-  };
-
-  const defaultValuesCreate = {
-      name: '',
-      is_company: true,
-      phone: '',
-      tax_number: '',
-      mobile: '',
-      ppkp: false,
-      website: '',
-      email: '',
-      language: '',
-      customer_group: '',
-      external_code: '',
-      company_code: '',
-      bank: [],
-      contact: [],
-      sales: {
-        branch: 0,
-        salesman: 0,
-        term_payment: "",
-        sales_order_blocking: false,
-        billing_blocking: false,
-        delivery_order_blocking: false
-      },
-      purchasing: {
-        term_of_payment: "enum"
-      },
-      invoicing: {
-        credit_limit: 0,
-        expense_account: "",
-        credit_balance: 0,
-        tax_name: "",
-        credit_used: 0,
-        income_account: "",
-        tax_city: "",
-        tax_address: "",
-        currency: ""
-      },
-      address: [addressBodyField],
-  }
 
   //use-forms customers
   const {
@@ -268,6 +192,7 @@ export default function CreateCustomers({ isUpdate, detailCustomer }: any) {
   const onSubmit = (data: any) => {
     const { sales } = getValuesSales()
     const { invoicing } = getValueInvoicing()
+  
     const result: any = { 
       customer: {
         active_status: 'ACTIVE',
@@ -284,7 +209,7 @@ export default function CreateCustomers({ isUpdate, detailCustomer }: any) {
         external_code: data?.external_code,
         company_logo: imageLogo
       },
-      sales: sales,
+      sales,
       address: data?.address?.map((item: any) =>  {
         return {
           is_primary: item?.is_primary,
@@ -363,7 +288,6 @@ export default function CreateCustomers({ isUpdate, detailCustomer }: any) {
     register,
     fieldsAddress,
     appendAddress,
-    listFakeItems,
     replaceAddress,
     removeAddress,
     addressBodyField,
@@ -408,7 +332,6 @@ export default function CreateCustomers({ isUpdate, detailCustomer }: any) {
         return null
     }
   }
-
 
   useEffect(() => {
     if(isUpdate && detailCustomer) {
@@ -530,13 +453,8 @@ export default function CreateCustomers({ isUpdate, detailCustomer }: any) {
                     label="Language"
                     height="50px"
                     width="100%"
-                    isShowActionLabel
-                    items={[
-                      { id: 1, value: 'Indonesia' },
-                      { id: 2, value: 'Malaysia' },
-                      { id: 3, value: 'Thailand' },
-                    ]}
-                    handleClickActionLabel={() => { }}
+                    items={listItemsLanguages}
+                    onSearch={(value: string) => setSearchLanguages(value)}
                     handleChange={(value: any) => {
                       setValue('language', value)
                     }}
@@ -590,16 +508,12 @@ export default function CreateCustomers({ isUpdate, detailCustomer }: any) {
                     label="Customer Group"
                     height="50px"
                     width="100%" 
-                    isShowActionLabel
-                    items={[
-                      { id: 1, value: 'Indonesia' },
-                      { id: 2, value: 'Malaysia' },
-                      { id: 3, value: 'Thailand' },
-                    ]}
-                    handleClickActionLabel={() => { }}
+                    isLoading
+                    items={listItemsCustomerGruop}
                     handleChange={(value: any) => {
                       setValue('customer_group', value)
                     }}
+                    onSearch={(value: string) => setSearchCustomerGroup(value)}
                 />
                   <Spacer size={10} />
                   <Input
