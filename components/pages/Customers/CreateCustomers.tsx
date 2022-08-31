@@ -521,7 +521,7 @@ export default function CreateCustomers({
                     label="External Code"
                     height="50px"
                     type="number"
-                    deafaultV
+                    defaultValue={detailCustomer?.external_code}
                     error={errors?.external_code?.message}
                     placeholder={"e.g 123456"}
                     {...register('external_code', {

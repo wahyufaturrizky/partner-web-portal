@@ -78,8 +78,8 @@ export default function Customer() {
             key: items?.id,
             id: items?.id,
             name: items?.name,
-            group: items?.group,
-            salesman: items?.salesman
+            group: items?.group?.name || '-', 
+            salesman: items?.salesman?.name || '-'
           }
         }) 
         return { data, totalRow }
