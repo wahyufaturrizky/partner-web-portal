@@ -99,6 +99,8 @@ const EmployeeDetail = () => {
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
+  const [isPhoto, setIsPhoto] = useState("");
+
   const [modalChannelForm, setModalChannelForm] = useState({
     open: false,
     data: {},
@@ -245,6 +247,7 @@ const EmployeeDetail = () => {
         } else {
           setValue("development.training.attachments", data);
         }
+        setIsPhoto("");
         alert("Upload Success");
       },
     },
@@ -254,7 +257,9 @@ const EmployeeDetail = () => {
     const formData = new FormData();
     formData.append("upload_file", file);
     setTypePhoto(type);
-    uploadFilePhoto(formData);
+    if (isPhoto || type === "photo") {
+      uploadFilePhoto(formData);
+    }
   };
 
   const {
@@ -1803,39 +1808,14 @@ const EmployeeDetail = () => {
               <>
                 <Row width="100%" noWrap>
                   <Col width={"100%"}>
-                    <Controller
-                      control={control}
-                      name="personal.pob"
-                      render={({ field: { onChange } }) => (
-                        <>
-                          <Label>Place of Birth</Label>
-                          <Spacer size={3} />
-                          <FormSelect
-                            height="48px"
-                            defaultValue={dataEmployee?.personal?.pob}
-                            style={{ width: "100%" }}
-                            size={"large"}
-                            placeholder={"Select"}
-                            borderColor={"#AAAAAA"}
-                            arrowColor={"#000"}
-                            withSearch
-                            isLoading={isFetchingCity}
-                            isLoadingMore={isFetchingMoreCity}
-                            fetchMore={() => {
-                              if (hasNextPageCity) {
-                                fetchNextPageCity();
-                              }
-                            }}
-                            items={isFetchingCity && !isFetchingMoreCity ? [] : cityList}
-                            onChange={(value: any) => {
-                              onChange(value);
-                            }}
-                            onSearch={(value: any) => {
-                              setSearchCity(value);
-                            }}
-                          />
-                        </>
-                      )}
+                    <Input
+                      width="100%"
+                      label="Place of Birth"
+                      defaultValue={dataEmployee?.personal?.pob}
+                      height="48px"
+                      required
+                      placeholder={"e.g Medan"}
+                      {...register("personal.pob")}
                     />
                   </Col>
                   <Spacer size={10} />
@@ -2116,7 +2096,7 @@ const EmployeeDetail = () => {
                         render={({ field: {} }) => (
                           <>
                             <Text color={"blue.dark"} variant={"headingMedium"}>
-                              {getValues(`address.${index}.primary`) ? "Home" : "New Address"}
+                              {getValues(`address.${index}.type`)}
                             </Text>
                             <Row gap="12px" alignItems="center">
                               {getValues(`address.${index}.primary`) ? (
@@ -2185,9 +2165,9 @@ const EmployeeDetail = () => {
                                   noSearch
                                   width="100%"
                                   items={[
-                                    { id: "home", value: "Home" },
-                                    { id: "office", value: "Office" },
-                                    { id: "apartment", value: "Apartment" },
+                                    { id: "Home", value: "Home" },
+                                    { id: "Office", value: "Office" },
+                                    { id: "Apartment", value: "Apartment" },
                                     { id: "School", value: "School" },
                                   ]}
                                   handleChange={(value: any) => {
@@ -3023,7 +3003,10 @@ const EmployeeDetail = () => {
 
                   <FileUploaderAllFilesDragger
                     disabled={isLoadingFilePhoto}
-                    onSubmit={(file: any) => handleUploadPhotoFile(file, "training")}
+                    onSubmit={(file: any) => {
+                      setIsPhoto(file);
+                      handleUploadPhotoFile(file, "training");
+                    }}
                     defaultFileList={
                       modalChannelForm.data?.attachments ? [modalChannelForm.data?.attachments] : []
                     }
@@ -3156,7 +3139,10 @@ const EmployeeDetail = () => {
 
                   <FileUploaderAllFilesDragger
                     disabled={isLoadingFilePhoto}
-                    onSubmit={(file: any) => handleUploadPhotoFile(file, "certification")}
+                    onSubmit={(file: any) => {
+                      setIsPhoto(file);
+                      handleUploadPhotoFile(file, "certification");
+                    }}
                     defaultFileList={
                       modalChannelForm.data?.attachments ? [modalChannelForm.data?.attachments] : []
                     }
