@@ -1251,10 +1251,12 @@ const EmployeeDetail = () => {
                     let tempEdit = fieldsBankAccount.map((mapDataItem) => {
                       if (mapDataItem.id === record.id) {
                         mapDataItem.primary = true;
+                        mapDataItem.type = "Home";
 
                         return { ...mapDataItem };
                       } else {
                         mapDataItem.primary = false;
+                        mapDataItem.type = "";
                         return { ...mapDataItem };
                       }
                     });

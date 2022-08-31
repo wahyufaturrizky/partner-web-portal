@@ -2040,7 +2040,7 @@ const EmployeeListCreate = () => {
                         render={({ field: {} }) => (
                           <>
                             <Text color={"blue.dark"} variant={"headingMedium"}>
-                              {getValues(`address.${index}.type`)}
+                              {getValues(`address.${index}.type`) || "New Address"}
                             </Text>
                             <Row gap="12px" alignItems="center">
                               {getValues(`address.${index}.primary`) ? (
@@ -2058,7 +2058,7 @@ const EmployeeListCreate = () => {
                                     let tempEdit = fieldsAddresess.map((mapDataItem) => {
                                       if (mapDataItem.key === index) {
                                         mapDataItem.primary = true;
-                                        mapDataItem.type = "home";
+                                        mapDataItem.type = "Home";
 
                                         return { ...mapDataItem };
                                       } else {
