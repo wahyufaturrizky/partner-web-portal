@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Text,
   Col,
@@ -6,7 +6,6 @@ import {
   Spacer,
   Button,
   Input,
-  FormSelect,
   Accordion,
   Table,
   Pagination,
@@ -14,33 +13,18 @@ import {
 } from "pink-lava-ui";
 import styled from "styled-components";
 import { useRouter } from "next/router";
-import { useForm, Controller, useFieldArray, useWatch } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import {
   useUpdateProductGroup,
   useProductGroup,
   useFilterProductGroup,
   useDeleteProductGroup,
 } from "../../hooks/mdm/product-group/useProductGroup";
-import { useProductBrandInfiniteLists } from "../../hooks/mdm/product-brand/useProductBrandMDM";
 import { queryClient } from "../_app";
 import usePagination from "@lucasmogari/react-pagination";
-import useDebounce from "../../lib/useDebounce";
 import ArrowLeft from "../../assets/icons/arrow-left.svg";
 import { ModalDeleteConfirmation } from "../../components/elements/Modal/ModalConfirmationDelete";
-
-const getFilterOption = (group: any) => {
-  switch (group) {
-    case "PRICE":
-      return { label: "Sales Price", value: "PRICE" };
-    case "CATEGORY":
-      return { label: "Product Category", value: "CATEGORY" };
-    case "BRAND":
-      return { label: "Product Brand", value: "BRAND" };
-
-    default:
-      return [];
-  }
-};
+import ConditionalField from "../../components/pages/ProductGroup/ConditionalField";
 
 const itemDefaultValue = [
   { id: 0, group: "", condition: "", value_from: "0", value_to: "0", values: "0" },
@@ -62,22 +46,8 @@ const ProductGroupCreate = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isSuccessGetAllData, setIsSuccessGetAllData] = useState(false);
   const [filteredProduct, setFilteredProduct] = useState([]);
-  const [groupingOption, setGroupingOption] = useState([
-    { label: "Sales Price", value: "PRICE" },
-    { label: "Product Category", value: "CATEGORY" },
-    { label: "Product Brand", value: "BRAND" },
-  ]);
-  const [minValue, setMinValue] = useState("0");
-  const debounceMin = useDebounce(minValue, 1000);
-  const [maxValue, setMaxValue] = useState("0");
-  const debounceMax = useDebounce(maxValue, 1000);
-  const [searchProductBrand, setSearchProductBrand] = useState("");
-  const debounceSearchProductBrand = useDebounce(searchProductBrand, 1000);
-  const [totalRowsProductBrand, setTotalRowsProductBrand] = useState(0);
-  const [listProductBrand, setListProductBrand] = useState([]);
   const [removeList, setRemoveList] = useState<any[]>([]);
-
-  const initialRender = useRef(true);
+  const [isFetchingProductBrand, setIsFetchingProductBrand] = useState(true);
 
   const {
     register,
@@ -91,49 +61,9 @@ const ProductGroupCreate = () => {
     },
   });
 
-  const { fields, append, remove } = useFieldArray({
-    control,
-    name: "items",
-  });
-
   const itemsWatch = useWatch({
     name: "items",
     control,
-  });
-
-  const {
-    isFetching: isFetchingProductBrand,
-    isFetchingNextPage: isFetchingMoreProductBrand,
-    hasNextPage: hasNextPageProductBrand,
-    fetchNextPage: fetchNextPageProductBrand,
-  } = useProductBrandInfiniteLists({
-    query: {
-      search: debounceSearchProductBrand,
-      company: "KSNI",
-      limit: 10,
-    },
-    options: {
-      onSuccess: (data: any) => {
-        setTotalRowsProductBrand(data.pages[0].totalRow);
-        const mappedData = data?.pages?.map((group: any) => {
-          return group.rows?.map((element: any) => {
-            return {
-              label: element.brand,
-              value: element.id,
-            };
-          });
-        });
-        const flattenArray = [].concat(...mappedData);
-        setListProductBrand(flattenArray);
-      },
-      getNextPageParam: (_lastPage: any, pages: any) => {
-        if (listProductBrand.length < totalRowsProductBrand) {
-          return pages.length + 1;
-        } else {
-          return undefined;
-        }
-      },
-    },
   });
 
   const { mutate: updateProductGroup, isLoading: isLoadingUpdateProductGroup } =
@@ -277,30 +207,6 @@ const ProductGroupCreate = () => {
     }
   }, [isLoadingProductGroup, isFetchingProductGroup, isFetchingProductBrand]);
 
-  useEffect(() => {
-    if (initialRender.current) {
-      initialRender.current = false;
-      return;
-    }
-
-    const mapFilterProduct = itemsWatch.map((item: any) => {
-      return {
-        group: item.group,
-        condition: item.condition,
-        value_from: item.value_from === "" ? "0" : item.value_from,
-        value_to: item.value_to === "" ? "0" : item.value_to,
-        values: "0",
-      };
-    });
-
-    const requestBody: any = {
-      company_id: "KSNI",
-      items: mapFilterProduct,
-    };
-
-    filterProduct(requestBody);
-  }, [debounceMin, debounceMax]);
-
   if ((isLoadingProductGroup || isFetchingProductGroup) && !isSuccessGetAllData)
     return (
       <Center>
@@ -355,360 +261,16 @@ const ProductGroupCreate = () => {
                 </Col>
               </Row>
 
-              {fields.map((item, index) => {
-                return (
-                  <Col key={index}>
-                    <Spacer size={20} />
-
-                    {index > 0 && (
-                      <>
-                        <Separator />
-
-                        <Spacer size={10} />
-
-                        <div>
-                          <Text variant={"subtitle1"} inline color={"blue.regular"}>
-                            Grouping {index + 1}
-                          </Text>
-                          {"  "}|{"  "}
-                          <Text
-                            variant={"subtitle1"}
-                            clickable
-                            inline
-                            color={"pink.regular"}
-                            onClick={() => {
-                              if (item.id !== 0) {
-                                setRemoveList((prevList: any) => {
-                                  return [...prevList, { id: item.id }];
-                                });
-                              }
-                              remove(index);
-                              setGroupingOption((prevList: any) => {
-                                return [...prevList, getFilterOption(itemsWatch[index]?.group)];
-                              });
-                            }}
-                          >
-                            Delete
-                          </Text>
-                        </div>
-                        <Spacer size={10} />
-                      </>
-                    )}
-
-                    <div style={{ display: "flex", gap: "5px" }}>
-                      <Controller
-                        control={control}
-                        name={`items.${index}.group`}
-                        rules={{ required: true }}
-                        render={({ field: { onChange }, formState: { errors } }) => (
-                          <Col width={"100%"}>
-                            <Label>Grouping Based On</Label>
-                            <Spacer size={3} />
-                            <FormSelect
-                              defaultValue={item?.group}
-                              style={{ width: "100%" }}
-                              size={"large"}
-                              placeholder={"Select"}
-                              borderColor={"#AAAAAA"}
-                              arrowColor={"#000"}
-                              items={groupingOption}
-                              onChange={(value: any) => {
-                                // filterProduct()
-                                onChange(value);
-                                const mapFilterProduct = itemsWatch.map((el: any, elIndex: any) => {
-                                  if (index === elIndex) {
-                                    return {
-                                      group: value,
-                                      condition: value === "PRICE" ? "BETWEEN" : "",
-                                      value_from: "0",
-                                      value_to: "0",
-                                      values: "0",
-                                    };
-                                  } else {
-                                    return el;
-                                  }
-                                });
-
-                                setMinValue("0");
-                                setMaxValue("0");
-
-                                const requestBody: any = {
-                                  company_id: "KSNI",
-                                  items: mapFilterProduct,
-                                };
-
-                                filterProduct(requestBody);
-                              }}
-                            />
-                            {errors?.items?.[index]?.group?.type === "required" && (
-                              <Text variant="alert" color={"red.regular"}>
-                                This field is required
-                              </Text>
-                            )}
-                          </Col>
-                        )}
-                      />
-
-                      {(itemsWatch[index]?.group === "PRICE" ||
-                        itemsWatch[index]?.group === "") && (
-                        <Controller
-                          control={control}
-                          rules={{ required: true }}
-                          name={`items.${index}.condition`}
-                          render={({ field: { onChange }, formState: { errors } }) => (
-                            <Col width="100%">
-                              <Label>Condition</Label>
-                              <Spacer size={3} />
-                              <FormSelect
-                                defaultValue={item?.condition}
-                                style={{ width: "100%" }}
-                                size={"large"}
-                                placeholder={"Select"}
-                                borderColor={"#AAAAAA"}
-                                arrowColor={"#000"}
-                                items={[
-                                  { label: "Is Between", value: "BETWEEN" },
-                                  { label: "Greater Than", value: "GT" },
-                                  { label: "Is Set", value: "EQ" },
-                                ]}
-                                onChange={(value: any) => {
-                                  onChange(value);
-
-                                  setValue(`items.${index}.value_from`, "0");
-                                  setValue(`items.${index}.value_to`, "0");
-
-                                  const mapFilterProduct = itemsWatch.map(
-                                    (el: any, elIndex: any) => {
-                                      if (index === elIndex) {
-                                        return {
-                                          group: el.group,
-                                          condition: value,
-                                          value_from: "0",
-                                          value_to: "0",
-                                          values: "0",
-                                        };
-                                      } else {
-                                        return el;
-                                      }
-                                    }
-                                  );
-
-                                  const requestBody: any = {
-                                    company_id: "KSNI",
-                                    items: mapFilterProduct,
-                                  };
-
-                                  filterProduct(requestBody);
-                                }}
-                              />
-                              {errors?.items?.[index]?.condition?.type === "required" && (
-                                <Text variant="alert" color={"red.regular"}>
-                                  This field is required
-                                </Text>
-                              )}
-                            </Col>
-                          )}
-                        />
-                      )}
-
-                      {itemsWatch[index]?.group === "CATEGORY" && (
-                        <Controller
-                          control={control}
-                          name={`items.${index}.values`}
-                          shouldUnregister={true}
-                          rules={{
-                            required: true,
-                            validate: {
-                              isNull: (value: any) => value !== "0",
-                            },
-                          }}
-                          render={({ field: { onChange }, formState: { errors } }) => (
-                            <Col width="100%">
-                              <Label>Product Category Name</Label>
-                              <Spacer size={3} />
-                              <FormSelect
-                                defaultValue={item?.values}
-                                style={{ width: "100%" }}
-                                size={"large"}
-                                placeholder={"Select"}
-                                borderColor={"#AAAAAA"}
-                                arrowColor={"#000"}
-                                items={[]}
-                                onChange={(value: any) => {
-                                  onChange(value);
-                                }}
-                              />
-                              {errors?.items?.[index]?.values?.type === "isNull" && (
-                                <Text variant="alert" color={"red.regular"}>
-                                  This field is required
-                                </Text>
-                              )}
-                            </Col>
-                          )}
-                        />
-                      )}
-
-                      {itemsWatch[index]?.group === "BRAND" && (
-                        <Controller
-                          control={control}
-                          name={`items.${index}.values`}
-                          rules={{
-                            required: true,
-                            validate: {
-                              isNull: (value: any) => value !== "0",
-                            },
-                          }}
-                          shouldUnregister={true}
-                          render={({ field: { onChange }, formState: { errors } }) => (
-                            <Col width="100%">
-                              <Label>Product Brand Name</Label>
-                              <Spacer size={3} />
-                              <FormSelect
-                                defaultValue={parseInt(item?.values)}
-                                style={{ width: "100%" }}
-                                size={"large"}
-                                placeholder={"Select"}
-                                borderColor={"#AAAAAA"}
-                                arrowColor={"#000"}
-                                withSearch
-                                isLoading={isFetchingProductBrand}
-                                isLoadingMore={isFetchingMoreProductBrand}
-                                fetchMore={() => {
-                                  if (hasNextPageProductBrand) {
-                                    fetchNextPageProductBrand();
-                                  }
-                                }}
-                                items={
-                                  isFetchingProductBrand && !isFetchingMoreProductBrand
-                                    ? []
-                                    : listProductBrand
-                                }
-                                onChange={(value: any) => {
-                                  onChange(value?.toString());
-
-                                  const mapFilterProduct = itemsWatch.map(
-                                    (el: any, elIndex: any) => {
-                                      if (index === elIndex) {
-                                        return {
-                                          group: el.group,
-                                          condition: el.condition,
-                                          value_from: "0",
-                                          value_to: "0",
-                                          values: value?.toString(),
-                                        };
-                                      } else {
-                                        return el;
-                                      }
-                                    }
-                                  );
-
-                                  const requestBody: any = {
-                                    company_id: "KSNI",
-                                    items: mapFilterProduct,
-                                  };
-
-                                  filterProduct(requestBody);
-                                }}
-                                onSearch={(value: any) => {
-                                  setSearchProductBrand(value);
-                                }}
-                              />
-                              {errors?.items?.[index]?.values?.type === "isNull" && (
-                                <Text variant="alert" color={"red.regular"}>
-                                  This field is required
-                                </Text>
-                              )}
-                            </Col>
-                          )}
-                        />
-                      )}
-                    </div>
-
-                    {(itemsWatch[index]?.condition === "GT" ||
-                      itemsWatch[index]?.condition === "EQ") &&
-                      itemsWatch[index]?.group === "PRICE" && (
-                        <Row width="50%" noWrap>
-                          <Input
-                            width="100%"
-                            label="Price"
-                            height="40px"
-                            defaultValue={item?.value_from}
-                            placeholder={"e.g 1000"}
-                            {...register(`items.${index}.value_from`, {
-                              shouldUnregister: true,
-                              onChange: (e: any) => {
-                                setMinValue(e.target.value);
-                              },
-                            })}
-                          />
-                        </Row>
-                      )}
-
-                    {itemsWatch[index]?.condition === "BETWEEN" &&
-                      itemsWatch[index]?.group === "PRICE" && (
-                        <>
-                          <Row width="100%" noWrap>
-                            <Input
-                              width="100%"
-                              label="Min"
-                              height="40px"
-                              defaultValue={item?.value_from}
-                              placeholder={"e.g 1000"}
-                              {...register(`items.${index}.value_from`, {
-                                shouldUnregister: true,
-                                onChange: (e: any) => {
-                                  setMinValue(e.target.value);
-                                },
-                              })}
-                            />
-
-                            <Spacer size={20} />
-
-                            <Input
-                              width="100%"
-                              label="Max"
-                              height="40px"
-                              defaultValue={item?.value_to}
-                              placeholder={"e.g 1000"}
-                              {...register(`items.${index}.value_to`, {
-                                onChange: (e: any) => {
-                                  setMaxValue(e.target.value);
-                                },
-                              })}
-                            />
-                          </Row>
-                        </>
-                      )}
-                  </Col>
-                );
-              })}
-
-              <Spacer size={10} />
-
-              {itemsWatch[0]?.group !== "" && itemsWatch.length !== 3 && (
-                <Text
-                  onClick={() => {
-                    const filterGroupingOption = groupingOption.filter(
-                      (item: any) => !itemsWatch.some((element) => element.group === item.value)
-                    );
-                    setGroupingOption(filterGroupingOption);
-
-                    append({
-                      id: 0,
-                      group: "",
-                      condition: filterGroupingOption[0]?.value === "PRICE" ? "BETWEEN" : "",
-                      value_from: "0",
-                      value_to: "0",
-                      values: "0",
-                    });
-                  }}
-                  clickable
-                  variant="headingSmall"
-                  color="pink.regular"
-                >
-                  + Add More Grouping
-                </Text>
-              )}
+              <ConditionalField
+                register={register}
+                control={control}
+                setValue={setValue}
+                itemsWatch={itemsWatch}
+                filterProduct={filterProduct}
+                setIsFetchingBrand={setIsFetchingProductBrand}
+                removeList={setRemoveList}
+                type={"edit"}
+              />
             </Accordion.Body>
           </Accordion.Item>
         </Accordion>

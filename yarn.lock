@@ -4373,7 +4373,7 @@ pify@^3.0.0:
   resolved "https://registry.npmjs.org/pify/-/pify-3.0.0.tgz"
   integrity sha512-C3FsVNH1udSEX48gGX1xfvwTWfsYWj5U+8/uK15BGzIGrKoUpghX8hWZwa/OFnakBiiVNmBvemTJR5mcy7iPcg==
 
-"pink-lava-ui@file:../pink-lava-react/dist":
+"pink-lava-ui@file:../pink-lava-design/dist":
   version "0.0.0"
 
 postcss-value-parser@^4.0.2, postcss-value-parser@^4.2.0:

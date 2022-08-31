@@ -40,10 +40,11 @@ const renderConfirmationText = (type: any, data: any) => {
       return data.selectedRowKeys.length > 1
         ? `Are you sure to delete ${data.selectedRowKeys.length} items ?`
         : `Are you sure to delete Product Grouping ${
-            data?.topData?.data.find((el: any) => el.key === data.selectedRowKeys[0])?.topName
+            data?.productsGroupData?.data.find((el: any) => el.key === data.selectedRowKeys[0])
+              ?.productGroupName
           } ?`;
     case "detail":
-      return `Are you sure to delete Product Grouping ${data.topName} ?`;
+      return `Are you sure to delete Product Grouping ${data.name} ?`;
 
     default:
       break;
@@ -185,7 +186,7 @@ const ProductGroup = () => {
                 setShowDelete({
                   open: true,
                   type: "selection",
-                  data: { uomData: productsGroupData, selectedRowKeys },
+                  data: { productsGroupData, selectedRowKeys },
                 })
               }
               disabled={rowSelection.selectedRowKeys?.length === 0}

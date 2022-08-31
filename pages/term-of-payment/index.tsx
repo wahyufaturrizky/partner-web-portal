@@ -40,10 +40,10 @@ const renderConfirmationText = (type: any, data: any) => {
       return data.selectedRowKeys.length > 1
         ? `Are you sure to delete ${data.selectedRowKeys.length} items ?`
         : `Are you sure to delete Term of Payment ${
-            data?.topData?.data.find((el: any) => el.key === data.selectedRowKeys[0])?.topName
+            data?.topData?.data.find((el: any) => el.key === data.selectedRowKeys[0])?.topTerm
           } ?`;
     case "detail":
-      return `Are you sure to delete Term of Payment ${data.topName} ?`;
+      return `Are you sure to delete Term of Payment ${data.topTerm} ?`;
 
     default:
       break;
@@ -183,7 +183,7 @@ const TermOfPayment = () => {
                 setShowDelete({
                   open: true,
                   type: "selection",
-                  data: { uomData: TopData, selectedRowKeys },
+                  data: { topData: TopData, selectedRowKeys },
                 })
               }
               disabled={rowSelection.selectedRowKeys?.length === 0}

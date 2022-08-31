@@ -70,8 +70,6 @@ const UOM = () => {
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const debounceSearch = useDebounce(search, 1000);
 
-  const { register, handleSubmit } = useForm();
-
   const {
     data: UOMData,
     isLoading: isLoadingUOM,
