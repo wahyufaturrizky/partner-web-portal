@@ -1,5 +1,5 @@
 import React from 'react'
-import { Controller } from 'react-hook-form'
+import { Controller, useWatch } from 'react-hook-form'
 import {
   Button,
   Col,
@@ -11,6 +11,7 @@ import {
 } from "pink-lava-ui";
 
 import styled from 'styled-components';
+import moment from 'moment';
 
 export default function Registration(props: any) {
   const {
@@ -37,6 +38,11 @@ export default function Registration(props: any) {
     })
   }
 
+  const registrationForm = useWatch({
+    control,
+    name: 'registration'
+  });
+
   return (
     <div>
       <Text variant="headingMedium" color="blue.darker">Registration</Text>
@@ -52,7 +58,7 @@ export default function Registration(props: any) {
       {
         fieldsRegistration.map((field: any, index: number | string) =>
         <React.Fragment key={index}>
-          <FormContact key={index} index={index} {...propsFieldForm} />
+          <FormContact registrationForm={registrationForm} key={index} index={index} {...propsFieldForm} />
           <Spacer size={30} />
           <Divider />
           <Spacer size={30} />
@@ -68,6 +74,7 @@ const FormContact = ({
   index,
   removeRegistration,
   register,
+  registrationForm
 }: any) => {
 
   const propsButtonSetPrimary = {
@@ -85,10 +92,7 @@ const FormContact = ({
             placeholder="e.g 1421.31231.1231"
             label={`Registration Number Type ${index+1}`}
             width="100%"
-            required
-            {...register(`registration.${index}.number_type`, {
-              required: 'registration number type must be filled'
-            })}
+            {...register(`registration.${index}.number_type`)}
           />
           <Spacer size={20} />
           <Input
@@ -96,10 +100,7 @@ const FormContact = ({
             placeholder="e.g 1421.31231.1231"
             label={`Registration Number`}
             width="100%"
-            required
-            {...register(`registration.${index}.number`, {
-              required: 'registration number must be filled'
-            })}
+            {...register(`registration.${index}.number`)}
           />
       </Row>
 
@@ -115,6 +116,7 @@ const FormContact = ({
                 fullWidth
                 onChange={(date: any, dateString: any) => onChange(dateString)}
                 label="Valid From"
+                defaultValue={moment(registrationForm.valid_from)} format={'DD/MM/YYYY'}
               />
             )}
           />
@@ -129,6 +131,7 @@ const FormContact = ({
                 fullWidth
                 onChange={(date: any, dateString: any) => onChange(dateString)}
                 label="Valid To"
+                defaultValue={moment(registrationForm.valid_to)} format={'DD/MM/YYYY'}
               />
             )}
           />

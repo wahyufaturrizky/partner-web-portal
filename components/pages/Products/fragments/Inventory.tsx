@@ -11,10 +11,16 @@ import {
 import styled from 'styled-components'
 import useDebounce from '../../../../lib/useDebounce'
 import { useUOMInfiniteLists } from '../../../../hooks/mdm/unit-of-measure/useUOM'
-import { Controller } from 'react-hook-form'
+import { Controller, useWatch } from 'react-hook-form'
 
 export default function Inventory(props: any) {
-  const { setValueInventory, registerValueInventory, controlValueInventory, product } = props
+  const { setValue, register, control } = props
+
+  const inventoryForm = useWatch({
+    control: control,
+    name: 'inventory'
+  });
+
   const storageCondition = [
     { id: 'cold', label: 'Cold', value: 'Cold' },
     { id: 'chilled', label: 'Chilled', value: 'Chilled' },
@@ -26,9 +32,9 @@ export default function Inventory(props: any) {
     { id: 'months', label: 'Months', value: 'Months' },
   ]
 
-  const [length, setLength] = useState(product?.inventory?.volume?.length ?? 0);
-  const [width, setWidth] = useState(product?.inventory?.volume?.width ?? 0);
-  const [height, setHeight] = useState(product?.inventory?.volume?.height ?? 0);
+  const [length, setLength] = useState(inventoryForm?.volume?.length ?? 0);
+  const [width, setWidth] = useState(inventoryForm.volume?.width ?? 0);
+  const [height, setHeight] = useState(inventoryForm.volume?.height ?? 0);
 
   const [totalRowsUomTemplate, setTotalRowsUomTemplate] = useState(0);
   const [searchUomTemplate, setSearchUomTemplate] = useState("");
@@ -82,14 +88,15 @@ export default function Inventory(props: any) {
               label="Net Weight"
               height="48px"
               placeholder={"e.g Nabati Cheese"}
-              {...registerValueInventory("weight.net")}
-              required
+              {...register("inventory.weight.net", {
+                required: 'Net Weight must be filled'
+              })}
             />
           <Spacer size={20} />
             <Controller
-              control={controlValueInventory}
-              name="weight.uom_id"
-              defaultValue={product?.weight?.uom?.name}
+              control={control}
+              name="inventory.weight.uom.id"
+              defaultValue={inventoryForm?.weight?.uom?.id}
               render={({ field: { onChange } }) => (
                 <Col width="100%">
                   <span>
@@ -99,7 +106,7 @@ export default function Inventory(props: any) {
 
                   <Spacer size={3} />
                   <CustomFormSelect
-                    defaultValue={product?.inventory?.weight?.uom?.name}
+                    defaultValue={inventoryForm.weight?.uom?.name}
                     style={{ width: "100%", height: '48px' }}
                     size={"large"}
                     placeholder={"Select"}
@@ -135,8 +142,7 @@ export default function Inventory(props: any) {
               label="Gross Weight"
               height="48px"
               placeholder={"e.g Nabati Cheese"}
-              {...registerValueInventory("weight.gross")}
-              required
+              {...register("inventory.weight.gross")}
             />
           </Col>
         </Row>
@@ -158,7 +164,7 @@ export default function Inventory(props: any) {
                 minValue="0"
                 onChange={(e:any) => {
                   setLength(e.target.value)
-                  setValueInventory("volume.dimension.length", e.target.value)
+                  setValue("inventory.volume.length", e.target.value)
                 }}
               />
               <Symbol>
@@ -173,7 +179,7 @@ export default function Inventory(props: any) {
                 minValue="0"
                 onChange={(e:any) => {
                   setWidth(e.target.value)
-                  setValueInventory("volume.dimension.width", e.target.value)
+                  setValue("inventory.volume.width", e.target.value)
                 }}
               />
               <Symbol>
@@ -188,15 +194,15 @@ export default function Inventory(props: any) {
                 minValue="0"
                 onChange={(e:any) => {
                   setHeight(e.target.value)
-                  setValueInventory("volume.dimension.height", e.target.value)
+                  setValue("inventory.volume.height", e.target.value)
                 }}
               />
             </Row>
           </Col>
           <Controller
-              control={controlValueInventory}
-              name="volume.uom_id"
-              defaultValue={product?.inventory?.volume?.uom?.name}
+              control={control}
+              name="inventory.volume.uom.id"
+              defaultValue={inventoryForm.volume?.uom?.id}
               render={({ field: { onChange } }) => (
                 <Col width="100%">
                   <span>
@@ -206,7 +212,7 @@ export default function Inventory(props: any) {
 
                   <Spacer size={3} />
                   <CustomFormSelect
-                    defaultValue={product?.inventory?.volume?.uom?.name}
+                    defaultValue={inventoryForm.volume?.uom?.name}
                     style={{ width: "100%", height: '48px' }}
                     size={"large"}
                     placeholder={"Select"}
@@ -244,7 +250,6 @@ export default function Inventory(props: any) {
             height="48px"
             placeholder={"e.g 7"}
             value={length * height * width}
-            required
             disabled
           />
         </Row>
@@ -258,18 +263,16 @@ export default function Inventory(props: any) {
             label="Storage Condition"
             width="100%"
             items={storageCondition}
-            handleChange={(value: string) => setValueInventory("storage_management.condition", value)}
+            handleChange={(value: string) => setValue("inventory.storage_management.condition", value)}
             onSearch={(search: string) => {}}
-            required
-            defaultValue={product?.inventory?.storage_management?.condition}
+            defaultValue={inventoryForm.storage_management?.condition}
           />
           <Input
               width="100%"
               label="Temperature Condition"
               height="48px"
               placeholder={"e.g 30 Degree Celcius"}
-              {...registerValueInventory("storage_management.temperature")}
-              required
+              {...register("inventory.storage_management.temperature")}
             />
         </Row>
         <Spacer size={20} />
@@ -278,19 +281,17 @@ export default function Inventory(props: any) {
             label="Transportation Group"
             width="100%"
             items={[]}
-            handleChange={(value: string) => setValueInventory("storage_management.transportationGroup", value)}
+            handleChange={(value: string) => setValue("inventory.storage_management.transportation_group", value)}
             onSearch={(search: string) => {}}
-            required
-            defaultValue={product?.inventory?.storage_management?.transportation_group}
+            defaultValue={inventoryForm.storage_management?.transportation_group}
           />
           <Dropdown2
             label="Transportation Type"
             width="100%"
             items={[]}
-            handleChange={(value: string) => setValueInventory("storage_management.transportationType", value)}
+            handleChange={(value: string) => setValue("inventory.storage_management.transportation_type.id", value)}
             onSearch={(search: string) => {}}
-            required
-            defaultValue={product?.inventory?.storage_management?.transportation_type}
+            defaultValue={inventoryForm.storage_management?.transportation_type?.name}
           />
         </Row>
         <Spacer size={20} />
@@ -300,17 +301,15 @@ export default function Inventory(props: any) {
             label="Shelf Life"
             height="48px"
             placeholder={"e.g 7"}
-            {...registerValueInventory("storage_management.self_life")}
-            required
+            {...register("inventory.storage_management.self_life")}
           />
           <Dropdown2
             label="Shelf Life Unit"
             width="100%"
             items={shelfLifeUnit}
-            handleChange={(value: string) => setValueInventory("storage_management.self_life_unit", value)}
+            handleChange={(value: string) => setValue("inventory.storage_management.self_life_unit", value)}
             onSearch={(search: string) => {}}
-            required
-            defaultValue={product?.inventory?.storage_management?.self_life_unit}
+            defaultValue={inventoryForm.storage_management?.self_life_unit}
           />
         </Row>
       </Col>

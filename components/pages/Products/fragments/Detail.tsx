@@ -10,12 +10,13 @@ import {
   Text,
   Switch,
   Search,
-  Pagination
+  Pagination,
+  Input
 } from 'pink-lava-ui'
 
 import { useUOMInfiniteLists } from '../../../../hooks/mdm/unit-of-measure/useUOM';
 import useDebounce from '../../../../lib/useDebounce';
-import { Controller } from 'react-hook-form';
+import { Controller, useFieldArray, useWatch } from 'react-hook-form';
 import _ from 'lodash';
 import usePagination from '@lucasmogari/react-pagination';
 import ProductOptions from './ProductOptions';
@@ -25,7 +26,9 @@ export default function Detail(props: any) {
     control,
     watch,
     setValue,
-    product
+    product,
+    register,
+
   } = props
 
   const columsVariant = [
@@ -95,37 +98,31 @@ export default function Detail(props: any) {
     },
   });
 
-  const combinationVariant = (list:string[][] = [[]], n = 0, result:any=[], current:any = []) => {
-    if (n === list.length) result.push(current)
-    else list[n].forEach(item => combinationVariant(list, n+1, result, [...current, item]))
- 
-    return result
-  }
-
+    // useFieldArray Product Variants
+  const {
+    fields: fieldsProductVariants,
+    replace: replaceProductVariants,
+  } = useFieldArray({
+    control,
+    name: "variants"
+  });
 
   const [searchVariant, setSearchVariant] = useState('')
-  let options = watch('options')?.filter(data => {
-    if(data.options_id && data.options_values) return true
-    return false
-  })
-
-  let allValues = options.map(data => data.options_values.map(data => data.label));
-  const variants = combinationVariant(allValues)?.map(data => data.join(" "));
-  const variantsData = variants.map(variant => ({
-    name: variant,
-    cost: 0,
-    price: 0,
-    sku: '-',
-    barcode: '-',
-    action: (
-        <Button
-          size="small"
-          onClick={() => {}}
-          variant="tertiary"
-        >
-          View Detail
-        </Button>
-      )
+  let variantsData = fieldsProductVariants.map((variant:any) => ({
+        name: variant.name,
+        cost: variant.cost,
+        price: variant.price,
+        sku: variant.sku,
+        barcode: variant.barcode,
+        action: (
+            <Button
+              size="small"
+              onClick={() => {}}
+              variant="tertiary"
+            >
+              View Detail
+            </Button>
+        )
   }))
 
   const paginationVariant = usePagination({
@@ -137,16 +134,20 @@ export default function Detail(props: any) {
 		totalItems: variantsData.length,
 	});
 	const page = paginationVariant?.page;
-  let paginateVariant = variantsData?.slice(5 * (page - 1), 5 * page) || [];
+  let paginateVariant = variantsData?.slice( paginationVariant.itemsPerPage * (page - 1), paginationVariant.itemsPerPage * page) || [];
   paginateVariant = paginateVariant.filter(variant => variant.name.toLowerCase().includes(searchVariant.toLowerCase()));
+
+  const detailForm = useWatch({
+    control
+  });
 
   return (
     <div>
       <Row gap="20px" width="100%" noWrap>
           <Controller
             control={control}
-            name="base_uom_id"
-            //defaultValue={accounting?.incomeAccountId?.id}
+            name="base_uom.uom_id"
+            defaultValue={detailForm.base_uom?.uom_id}
             render={({ field: { onChange } }) => (
               <Col width="100%">
                 <span>
@@ -156,7 +157,7 @@ export default function Detail(props: any) {
 
                 <Spacer size={3} />
                 <CustomFormSelect
-                  //defaultValue={product?.base_uom?.name}
+                  defaultValue={detailForm.base_uom?.name}
                   style={{ width: "100%", height: '48px' }}
                   size={"large"}
                   placeholder={"Select"}
@@ -187,8 +188,8 @@ export default function Detail(props: any) {
           />
           <Controller
             control={control}
-            name="purchase_uom_id"
-            //defaultValue={accounting?.incomeAccountId?.id}
+            name="purchase_uom.uom_id"
+            defaultValue={detailForm.purchase_uom?.uom_id}
             render={({ field: { onChange } }) => (
               <Col width="100%">
                 <span>
@@ -198,7 +199,7 @@ export default function Detail(props: any) {
 
                 <Spacer size={3} />
                 <CustomFormSelect
-                  defaultValue={product?.purchase_uom?.name}
+                  defaultValue={detailForm?.purchase_uom?.name}
                   style={{ width: "100%", height: '48px' }}
                   size={"large"}
                   placeholder={"Select"}
@@ -236,7 +237,7 @@ export default function Detail(props: any) {
         <Controller
           control={control}
           name="use_unit_leveling"
-          //defaultValue={companyData.useApproval}
+          defaultValue={detailForm?.use_unit_leveling}
           render={({ field: { onChange } }) => (
             <Switch
               defaultChecked={product?.use_unit_leveling}
@@ -249,6 +250,37 @@ export default function Detail(props: any) {
         />
       </Col>
 
+      <Spacer size={20} />
+      
+      <Row gap="20px">
+        <Col width="48%">
+          <Input
+            width="100%%"
+            label="Packaging size"
+            height="48px"
+            placeholder={"e.g Nabati Cheese"}
+            {...register('packaging_size')}
+          />
+          <Spacer size={20} />
+          <Input
+            width="100%"
+            label="Cost of Product"
+            height="48px"
+            placeholder={"e.g Nabati Cheese"}
+            {...register('cost_of_product')}
+          />
+        </Col>
+        <Col width="48%" justifyContent="flex-end">
+          <Input
+            width="100%"
+            label="Sales Price"
+            height="48px"
+            placeholder={"e.g Nabati Cheese"}
+            {...register('sales_price')}
+          />
+        </Col>
+      </Row>
+
       <Spacer size={42} />
       <Divider />
       <Spacer size={39} />
@@ -256,6 +288,9 @@ export default function Detail(props: any) {
         <ProductOptions 
           control={control} 
           setValue={setValue}
+          watch={watch}
+          replaceProductVariants={replaceProductVariants}
+          fieldsProductVariants={fieldsProductVariants}
         />
       </Col>
       <Spacer size={48} />
@@ -287,13 +322,6 @@ const Label = styled.div`
   line-height: 24px;
   color: #000000;
 `;
-
-const HeaderLabel = styled.p`
-  font-weight: 600;
-  font-size: 20px;
-  line-height: 27px;
-  color: #1E858E;
-`
 
 const CustomFormSelect = styled(FormSelect)`
   

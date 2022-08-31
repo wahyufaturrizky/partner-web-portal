@@ -13,24 +13,68 @@ import styled from 'styled-components';
 import { useProductOptionsInfiniteLists } from '../../../../hooks/mdm/product-option/useProductOptionMDM';
 import useDebounce from '../../../../lib/useDebounce';
 import { ICDelete } from '../../../../assets';
-import { Controller, useFieldArray } from 'react-hook-form';
+import { Controller, useFieldArray, useWatch } from 'react-hook-form';
 
-export default function ProductOptions({control, setValue}: any) {
+export default function ProductOptions({control, setValue, fieldsProductVariants, replaceProductVariants}: any) {
 
-  // useFieldArray BANK
+  // useFieldArray Product Option
   const {
     fields: fieldsProductOption,
     append: appendProductOption,
     remove: removeProductOption,
   } = useFieldArray({
     control,
-    name: "product_option"
+    name: "options"
   });
+
+  const optionsForm = useWatch({
+    control,
+    name: 'options'
+  })
+
+  const productForm = useWatch({
+    control,
+  })
+
+  const combinationVariant = (list:string[][] = [[]], n = 0, result:any=[], current:any = []) => {
+    if (n === list.length) result.push(current)
+    else list[n].forEach(item => combinationVariant(list, n+1, result, [...current, item]))
+ 
+    return result
+  }
+  useEffect(() => {
+    let options = optionsForm?.filter(data => {
+      if(data?.option?.id && data?.option_items?.length > 0) return true
+      return false
+    })
+
+    if(options.map(data => data.option_items.map(data => data.id))?.length > 0){
+      let allValues = options.map(data => data.option_items.map(data => data.name || data.label));
+      allValues.unshift([productForm.name])
+      const variants = combinationVariant(allValues)?.map(data => data.join(" "));
+
+      let finalVariants = variants.map(variant => ({
+        name: variant,
+        cost: productForm.cost_of_product,
+        price: productForm.sales_price,
+        sku: '-',
+        barcode: '-',
+      }))
+      replaceProductVariants(finalVariants)
+    }
+
+  }, [optionsForm])
+
+
+  const variantsForm = useWatch({
+    control,
+    name: 'variants'
+  })
 
   const handleAddMoreProductOption = () => {
     appendProductOption({
-      options_id: '',
-      options_value: [],
+      option: '',
+      option_items: [],
       key: fieldsProductOption?.length
     })
   }
@@ -101,8 +145,11 @@ export default function ProductOptions({control, setValue}: any) {
         </Row>
         <Spacer size={12} />
         <Col gap="20px">
+          <TableHeader />
           {fieldsProductOption.map((product, index) => 
             <ProductOption
+              variantsForm={variantsForm}
+              optionsForm={optionsForm}
               index={index}
               key={index}
               product={product}
@@ -124,6 +171,29 @@ export default function ProductOptions({control, setValue}: any) {
   )
 }
 
+const TableHeader  = () => {
+  return (
+    <>
+    <Row style={{background: "#F4F4F4", borderRadius: "8px 8px 0px 0px", height:"55px"}} 
+      justifyContent="center"
+      alignItems="center"
+      width="100%" noWrap>
+      <Row width="20px" gap="16px" alignItems="center" nowrap></Row>
+
+      <Row width="360px">
+        <Text variant="headingRegular">Option Name</Text>
+      </Row>
+
+      <Spacer size={32} />
+         
+      <Row width="616px">
+        <Text variant="headingRegular">Option Value</Text>
+      </Row>
+    </Row>
+  </>
+  )
+}
+
 const ProductOption = ({
   listProductOptions,
   listProductOptionsValues,
@@ -135,12 +205,12 @@ const ProductOption = ({
   removeProductOption,
   control,
   index,
-  setValue
+  optionsForm,
+  variantsForm
 }: any) => {
 
-  const [productOption, setProductOption] = useState(0)
+  const [productOption, setProductOption] = useState(optionsForm?.[index]?.option?.id ?? 0)
   const productValues = listProductOptionsValues.find(value => value.id === productOption);
-
   let productOptionValues = [];
 
   if(productValues){
@@ -149,6 +219,8 @@ const ProductOption = ({
       value: item.id
     })))
   }
+
+  const productName = listProductOptionsValues?.find(product => product.id === productOption)?.name
 
   return (
     <>
@@ -163,10 +235,10 @@ const ProductOption = ({
 
         <Controller
             control={control}
-            name={`options.${index}.options_id`}
+            name={`options.${index}.option.id`}
             render={({ field: { onChange } }) => (
               <CustomFormSelect
-                //defaultValue={accounting?.incomeAccountId?.name}
+                defaultValue={optionsForm?.[index]?.option?.name || productName}
                 style={{ width: "360px", height: '48px' }}
                 size={"large"}
                 placeholder={"Select"}
@@ -201,7 +273,7 @@ const ProductOption = ({
         <Row width="616px">
           <Controller
             control={control}
-            name={`options.${index}.options_values`}
+            name={`options.${index}.option_items`}
             render={({ field: { onChange } }) => (
               <CustomDropdownOption
                   label=""
@@ -209,6 +281,7 @@ const ProductOption = ({
                     onChange(value);
                   }}
                   listItems={productOptionValues}
+                  valueSelectedItems={optionsForm?.[index]?.option_items?.map(data => data.id || data.value)}
                 />
             )}
           />

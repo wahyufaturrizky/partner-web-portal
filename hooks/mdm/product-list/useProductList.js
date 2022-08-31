@@ -43,10 +43,10 @@ function useCreateProduct({ options }) {
   );
 }
 
-function useUpdateProduct({ id, companyId, options }) {
+function useUpdateProduct({ id, options }) {
   return useMutation(
     (data) =>
-      mdmService(`/product/${companyId}/${id}`, {
+      mdmService(`/product/${id}`, {
         method: "PUT",
         data,
       }),
@@ -82,4 +82,17 @@ const useUploadFileProduct = ({ options }) => {
   );
 };
 
-export { useProductList, useProductDetail, useCreateProduct, useUpdateProduct, useDeleteProduct, useUploadFileProduct };
+const useUploadImageProduct = ({ options }) => {
+  return useMutation(
+    (data) =>
+      mdmService(`/product/image`, {
+        method: "POST",
+        data,
+      }),
+    {
+      ...options,
+    }
+  );
+};
+
+export { useUploadImageProduct, useProductList, useProductDetail, useCreateProduct, useUpdateProduct, useDeleteProduct, useUploadFileProduct };

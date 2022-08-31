@@ -26,14 +26,14 @@ import { mdmDownloadService } from "../../lib/client";
 import useDebounce from "../../lib/useDebounce";
 import { queryClient } from "../_app";
 
-const downloadFile = (params: any) => {}
-  // mdmDownloadService("/product/download", { params }).then((res) => {
-  //   let dataUrl = window.URL.createObjectURL(new Blob([res.data]));
-  //   let tempLink = document.createElement("a");
-  //   tempLink.href = dataUrl;
-  //   tempLink.setAttribute("download", `employee_list_${new Date().getTime()}.xlsx`);
-  //   tempLink.click();
-  // });
+const downloadFile = (params: any) =>
+  mdmDownloadService("/product/download", { params }).then((res) => {
+    let dataUrl = window.URL.createObjectURL(new Blob([res.data]));
+    let tempLink = document.createElement("a");
+    tempLink.href = dataUrl;
+    tempLink.setAttribute("download", `product_list_${new Date().getTime()}.xlsx`);
+    tempLink.click();
+  });
 
 const renderConfirmationText = (type: any, data: any) => {
   switch (type) {
@@ -42,7 +42,7 @@ const renderConfirmationText = (type: any, data: any) => {
         ? `Are you sure to delete ${data.selectedRowKeys.length} items ?`
         : `Are you sure to delete Product Name ${
             data?.productListData?.data.find((el: any) => el.key === data.selectedRowKeys[0])
-              ?.uomName
+              ?.name
           } ?`;
     case "detail":
       return `Are you sure to delete Product Name ${data.productName} ?`;
@@ -90,7 +90,6 @@ const Product = () => {
         pagination.setTotalItems(data.totalRow);
       },
       select: (data: any) => {
-        console.log("data", data)
         const mappedData = data?.rows?.map((element: any) => {
           return {
             key: element.productId,
@@ -105,7 +104,6 @@ const Product = () => {
                   onClick={() => {
                     router.push(`/product-list/${element.productId}`);
                   }}
-                  disabled={true}
                   variant="tertiary"
                 >
                   View Detail
@@ -334,9 +332,9 @@ const Product = () => {
                   size="big"
                   onClick={() => {
                     if (isShowDelete.type === "selection") {
-                      deleteProductList({ ids: selectedRowKeys, company_id: "KSNI" });
+                      deleteProductList({ ids: selectedRowKeys });
                     } else {
-                      deleteProductList({ ids: [modalForm.data.id], company_id: "KSNI" });
+                      deleteProductList({ ids: [modalForm.data.id] });
                     }
                   }}
                 >

@@ -6,7 +6,7 @@ import {
   Text,
   FormSelect,
 } from "pink-lava-ui";
-import { Controller } from 'react-hook-form'
+import { Controller, useWatch } from 'react-hook-form'
 import styled from 'styled-components';
 import useDebounce from '../../../../lib/useDebounce';
 import { useCoaInfiniteLists } from '../../../../hooks/finance-config/useCoaTemplate';
@@ -52,6 +52,11 @@ export default function Accounting({ control, accounting }: any) {
     },
   });
 
+  const accountingForm = useWatch({
+    control,
+    name: 'accounting'
+  });
+
   return (
     <Row width="100%" noWrap>
       <Col width={"50%"}>
@@ -60,8 +65,8 @@ export default function Accounting({ control, accounting }: any) {
         <Spacer size={20} />
         <Controller
             control={control}
-            name="accounting.income_account_id"
-            defaultValue={accounting?.incomeAccountId?.id}
+            name="accounting.income_account.id"
+            defaultValue={accountingForm?.income_account?.value}
             render={({ field: { onChange } }) => (
               <>
                 <span>
@@ -71,7 +76,7 @@ export default function Accounting({ control, accounting }: any) {
 
                 <Spacer size={3} />
                 <CustomFormSelect
-                  defaultValue={accounting?.incomeAccountId?.name}
+                  defaultValue={accountingForm?.income_account?.value}
                   style={{ width: "100%", height: '48px' }}
                   size={"large"}
                   placeholder={"Select"}
@@ -105,8 +110,8 @@ export default function Accounting({ control, accounting }: any) {
         <Spacer size={20} />
         <Controller
             control={control}
-            name="accounting.expense_account_id"
-            defaultValue={accounting?.expenseAccountId?.id}
+            name="accounting.expense_account.id"
+            defaultValue={accountingForm?.expense_account?.value}
             render={({ field: { onChange } }) => (
               <>
                 <span>
@@ -116,7 +121,7 @@ export default function Accounting({ control, accounting }: any) {
 
                 <Spacer size={3} />
                 <CustomFormSelect
-                  defaultValue={accounting?.expenseAccountId?.name}
+                  defaultValue={accountingForm?.expense_account?.value}
                   style={{ width: "100%", height: '48px' }}
                   size={"large"}
                   placeholder={"Select"}

@@ -13,9 +13,11 @@ import {
   FormSelect,
   Checkbox,
   Dropdown2,
-  Spin
+  Spin,
+  DatePickerInput,
+  Modal
 } from "pink-lava-ui";
-import { Controller, useForm, Control, useFieldArray } from 'react-hook-form'
+import { Controller, useForm, Control, useFieldArray, useWatch } from 'react-hook-form'
 import { useRouter } from 'next/router';
 import {
   Branch,
@@ -26,10 +28,14 @@ import {
   Detail
 } from './fragments'
 import styled from 'styled-components'
-import { useCreateProduct, useProductDetail } from '../../../hooks/mdm/product-list/useProductList';
+import { useCreateProduct, useDeleteProduct, useProductDetail, useUpdateProduct, useUploadImageProduct } from '../../../hooks/mdm/product-list/useProductList';
 import { useProductBrandInfiniteLists } from '../../../hooks/mdm/product-brand/useProductBrandMDM';
 import useDebounce from '../../../lib/useDebounce';
-import { toSnakeCase} from "../../../lib/caseConverter";
+import { toSnakeCase } from "../../../lib/caseConverter";
+import moment from 'moment';
+import _ from 'lodash';
+import ArrowLeft from "../../../assets/icons/arrow-left.svg";
+import { queryClient } from "../../../pages/_app";
 
 export default function CreateProduct() {
   const router = useRouter();
@@ -38,11 +44,16 @@ export default function CreateProduct() {
 
   const [listProductBrand , setListProductBrand] = useState<any[]>([]);
   const [totalRowsProductBrand, setTotalRowsProductBrand] = useState(0);
+  const [searchProductBrand, setSearchProductBrand] = useState("");
+  const debounceFetchProductBrand = useDebounce(searchProductBrand, 1000);
 
   const [canBePurchased, setCanBePurchased] = useState(false);
   const [canBeSold, setCanBeSold] = useState(false);
   const [canBeExpensed, setCanExpensed] = useState(false);
 
+  const [isShowDelete, setShowDelete] = useState({ open: false });
+
+  // DUMMY DATA
   const listTabItems: { title: string }[] = [
     { title: "Detail" },
     { title: "Inventory" },
@@ -60,9 +71,19 @@ export default function CreateProduct() {
   const registrationBodyField = {
     number_type: "",
     number: "",
-    valid_from: "",
-    valid_to: ""
+    valid_from: moment(),
+    valid_to: moment()
   };
+
+  const productType = [
+    { value: 'Consumable', id: 'consumable' },
+    { value: 'Storable', id: 'storable' },
+    { value: 'Service', id: 'service' },
+  ]
+
+  const productCategory: any = []
+
+  // FORM
 
   const {
     control,
@@ -75,83 +96,31 @@ export default function CreateProduct() {
   } = useForm({
     shouldUseNativeValidation: true,
     defaultValues: {
+      image: "",
       company_id: "KSNI",
       company_code: "KSNI",
+      product_type: "",
+      name: "",
       status: "active",
       can_be_sold: false,
       can_be_purchased: false,
       can_be_expensed: false,
-      name: "",
-      product_type: "",
-      product_category_id: 1,
-      product_brand_id: 0,
+      expired_date: moment(),
       external_code: "",
-      expired_date: "",
-      base_uom_id: "",
-      purchase_uom_id: "",
       use_unit_leveling: false,
-      cost_of_product: 0,
       packaging_size: "",
+      cost_of_product: 0,
       sales_price: 0,
-      options: [
-        {
-          options_id: "MPA-0000005",
-          options_values: ["9", "8"]
-        }
-      ],
-      variants: [
-        {
-            "name": "variantname12",
-            "cost": 13213,
-            "price": 12121,
-            "sku": "SKU001",
-            "barcode":"13124csdfcwrrw3ewew"
-        },
-        {
-            "name": "dad23dyyy",
-            "cost": 1321311,
-            "price": 1211121,
-            "sku": "SKU002",
-            "barcode":"13124csdfcwrrw3ewew"
-        }
-     ],
-      purchasing_tax: 0,
-      branch: {
-        ids: []
-      },
-    }
-  });
-
-  //use-forms INVENTORY
-  const {
-    setValue: setValueInventory,
-    getValues: getValuesInventory,
-    register: registerValueInventory,
-    control: controlValueInventory,
-  } = useForm({
-    shouldUseNativeValidation: true,
-    defaultValues: {
-      weight: {
-        net: "",
-        gross: "",
-        uom_id: ""
-      },
-      volume: {
-        dimension: {
-          length: 0,
-          width: 0,
-          height: 0
-        },
-        uom_id: ""
-      },
-      storage_management: {
-        condition: "",
-        transportation_type: "belum ada",
-        transportation_group: "belum ada",
-        temperature: "",
-        self_life: 0,
-        self_life_unit: ""
-      }
+      category: null,
+      brand: {},
+      base_uom: {},
+      purchase_uom: {},
+      options: [],
+      variants: [],
+      inventory: {},
+      accounting: {},
+      registration: [],
+      branch: []
     }
   });
 
@@ -165,212 +134,23 @@ export default function CreateProduct() {
     name: "registration",
   });
 
-    
-  const data = useProductDetail({
+  const {
+    isLoading: isLoadingProduct
+  } = useProductDetail({
     id:id,
     options: {
       enabled: !!id,
-      onSuccess: (data) => {
+      onSuccess: (data: any) => {
         data = toSnakeCase(data);
         Object.keys(data).forEach(key => {
-          if(key === 'brand'){
-            setValue('product_brand_id', data[key].id)
-          } else if(key === 'purchase_uom'){
-            setValue('purchase_uom_id', data[key].uom_id)
-          } else if(key === 'base_uom'){
-            setValue('base_uom_id', data[key].uom_id)
-          } else {
-            setValue(key, data[key]);
-          }
+          setValue(key, data[key]);
+          setCanBePurchased(data.canBePurchased);
+          setCanBeSold(data.canBeSold);
+          setCanExpensed(data.canBeExpensed)
         })
-
-        setCanBePurchased(data.canBePurchased);
-        setCanBeSold(data.canBeSold);
-        setCanExpensed(data.canBeExpensed)
-
-        setValueInventory('weight.net', data.inventory.weight.net )
-        setValueInventory('weight.gross',data.inventory.weight.gross )
-        setValueInventory('weight.uom_id', data.inventory.weight.uom.id)
-        setValueInventory('volume.dimension.width', data.inventory.volume.width)
-        setValueInventory('volume.dimension.length', data.inventory.volume.length)
-        setValueInventory('volume.dimension.height', data.inventory.volume.height)
-        setValueInventory('volume.uom_id', data.inventory.volume.uom.id)
-        setValueInventory('storage_management.condition', data.inventory.storage_management.condition)
-        setValueInventory('storage_management.self_life', data.inventory.storage_management.self_life)
-        setValueInventory('storage_management.self_life_unit', data.inventory.storage_management.self_life_unit)
-        setValueInventory('storage_management.temperature', data.inventory.storage_management.temperature)
-        setValueInventory('storage_management.transportation_group', data.inventory.storage_management.transportation_group)
-        setValueInventory('storage_management.transportation_type', data.inventory.storage_management.transportation_type)
-      } 
+      return data;
     }
-  })
-
-  const product = data ? toSnakeCase(data?.data) : undefined;
-  const isLoadingProduct = id ? data.isLoading : false;
-
-  const getProductVariants = (variant) => variant;
-  const { mutate: createProduct, isLoading: isLoadingCreateProduct } = useCreateProduct({
-    options: {
-      onSuccess: () => router.push('/product-list')
-    }
-  })
-  
-  // action function
-  const onSubmit = (data: any) => {
-    createProduct({   
-      "company_id": "KSNI",
-      "company_code": "KSNI",
-      "status": "active",
-      "can_be_sold": true,
-      "can_be_purchased": true,
-      "can_be_expensed": false,
-      "name": getValues('name'),
-      "product_type": "consumable",
-      "product_category_id": "1",
-      "product_brand_id": 9,
-      "external_code": "123",
-      "expired_date": "2022-11-14 22:11:11",
-      "base_uom_id": "MPC-0000004",
-      "purchase_uom_id": "MPC-0000005",
-      "use_unit_leveling": true,
-      "cost_of_product": 123,
-      "packaging_size": "20x20",
-      "sales_price" : 2000,
-      "options": [
-          {
-          "options_id": "MPA-0000005",
-          "options_values": ["9", "8"]
-          }
-      ],
-      "variants" : 
-          [
-              {
-                  "name": "variantname12",
-                  "cost": 13213,
-                  "price": 12121,
-                  "sku": "SKU001",
-                  "barcode":"13124csdfcwrrw3ewew"
-              },
-              {
-                  "name": "dad23dyyy",
-                  "cost": 1321311,
-                  "price": 1211121,
-                  "sku": "SKU002",
-                  "barcode":"13124csdfcwrrw3ewew"
-              }
-          ],
-      "inventory" : {
-          "weight": {
-              "net":"123",
-              "gross": "1212",
-              "uom_id": "MPC-0000005"
-          },
-          "volume" : {
-              "dimension" : {
-                  "length": 1,
-                  "width": 2,
-                  "height": 2
-              },
-              "uom_id": "MPC-0000005"
-          },
-          "storage_management": {
-              "condition" : "chilled",
-              "transportation_type": "121",
-              "transportation_group": "road",
-              "temperature" : "gatau",
-              "self_life": 9,
-              "self_life_unit": "days"
-          }
-      },
-      "purchasing_tax" : 1,
-      "accounting" : {
-          "income_account_id": 1,
-          "expense_account_id": 2
-      },
-      "branch": {
-          "ids": ["1"]
-      },
-      "registration": [
-          {
-              "number_type" : "uwu1",
-              "number": "",
-              "valid_from": "2022-11-14 22:11:11",
-              "valid_to": "2022-11-14 22:11:11"
-          },
-          {
-              "number_type" : "uwu2",
-              "number": "",
-              "valid_from": "2022-11-14 22:11:11",
-              "valid_to": "2022-11-14 22:11:11"
-          }
-      ]
-  
-      
-  })
-  };
-
-  const propsInventory = {
-    setValueInventory,
-    getValuesInventory,
-    registerValueInventory,
-    controlValueInventory,
-    product
-  }
-
-  const propsRegistrations = {
-    control,
-    register,
-    fieldsRegistration,
-    appendRegistration,
-    removeRegistration,
-    registrationBodyField,
-  }
-
-  const propsAccounting = {
-    control,
-    accounting: {},
-  }
-
-  const propsDetail = { 
-    control,
-    getProductVariants,
-    getValues,
-    watch,
-    setValue,
-    product
-  }
-
-  const switchTabItem = () => {
-    switch (tabAktived) {
-      // case formType === 'Company' && 'Contact':
-      //   return <Contact {...propsContacts} />
-      case 'Registration':
-        return <Registration {...propsRegistrations} />
-      case 'Branch':
-        return <Branch />
-      case 'Purchasing':
-        return <Purchasing />
-      case 'Accounting':
-        return <Accounting {...propsAccounting} />
-      case 'Inventory':
-        return <Inventory {...propsInventory} />
-      case 'Detail':
-        return <Detail {...propsDetail} />
-      default:
-        return null
-    }
-  }
-
-  const [searchProductBrand, setSearchProductBrand] = useState("");
-  const debounceFetchProductBrand = useDebounce(searchProductBrand, 1000);
-
-  const productType = [
-    { value: 'Consumable', id: 'consumable' },
-    { value: 'Storagble', id: 'storagble' },
-    { value: 'Service', id: 'service' },
-  ]
-
-  const productCategory: any = []
+  }})
 
   const {
     isFetching: isFetchingProductBrand,
@@ -407,6 +187,144 @@ export default function CreateProduct() {
     },
   });
 
+  const { mutate: uploadImage, isLoading: isLoadingUploadImage } = useUploadImageProduct({
+    options: {
+      onSuccess: () => {
+        router.push('/product-list')
+      }
+    }
+  })
+
+  const { mutate: createProduct, isLoading: isLoadingCreateProduct } = useCreateProduct({
+    options: {
+      onSuccess: (data:any) => {
+        const formData:any = new FormData();
+        formData.append("image", getValues('image'));
+        formData.append("company_id", "KSNI");
+        formData.append("product_id", data.product_id);
+
+        uploadImage(formData);
+      }
+    }
+  })
+
+  const { mutate: updateProduct, isLoading: isLoadingUpdateProduct } = useUpdateProduct({
+    id,
+    options: {
+      onSuccess: (data:any) => {
+        const formData:any = new FormData();
+        formData.append("image", getValues('image'));
+        formData.append("company_id", "KSNI");
+        formData.append("product_id", data.product_id);
+
+        uploadImage(formData);
+      }
+    }
+  })
+  
+  const { mutate: deleteProductList, isLoading: isLoadingDeleteProductList } =
+  useDeleteProduct({
+    options: {
+      onSuccess: () => {
+        setShowDelete({ open: false });
+        queryClient.invalidateQueries(["product-list"]);
+        router.push('/product-list')
+      },
+    },
+  });
+  
+  // VARIABLE
+  const onSubmit = (data: any) => {
+    let payload:any = _.pick(data,[
+      'company_id',
+      'company_code',
+      'status',
+      'can_be_sold',
+      'can_be_purchased',
+      'can_be_expensed',
+      'name',
+      'product_type',
+      'external_code',
+      'expired_date',
+      'use_unit_leveling',
+      'cost_of_product',
+      'packaging_size',
+      'sales_price',
+      'variants',
+      'inventory',
+      'registration',
+    ])
+    payload.product_brand_id = data.brand.id;
+    payload.base_uom_id = data.base_uom.uom_id;
+    payload.purchase_uom_id = data.purchase_uom.uom_id;
+    payload.options = data.options.map((data:any) => ({
+      option_id: data.option.id,
+      option_values: data.option.option_items
+    }));
+    payload.accounting = {
+      income_account_id: data?.accounting?.income_account?.id || 0,
+      expense_account_id: data?.accounting?.expense_account?.id || 0
+    };
+    payload.company_code = 'KSNI'
+    if(id){
+      payload.product_id = id
+    }
+
+    id ? updateProduct(payload) : createProduct(payload)
+  };
+
+  const propsInventory = {
+    setValue,
+    getValues,
+    register,
+    control,
+  }
+
+  const propsRegistrations = {
+    control,
+    register,
+    fieldsRegistration,
+    appendRegistration,
+    removeRegistration,
+    registrationBodyField,
+  }
+
+  const propsAccounting = {
+    control,
+    accounting: {},
+  }
+
+  const propsDetail = { 
+    control,
+    getValues,
+    watch,
+    setValue,
+    register
+  }
+
+  const switchTabItem = () => {
+    switch (tabAktived) {
+      case 'Registration':
+        return <Registration {...propsRegistrations} />
+      case 'Branch':
+        return <Branch />
+      case 'Purchasing':
+        return <Purchasing />
+      case 'Accounting':
+        return <Accounting {...propsAccounting} />
+      case 'Inventory':
+        return <Inventory {...propsInventory} />
+      case 'Detail':
+        return <Detail {...propsDetail} />
+      default:
+        return null
+    }
+  }
+
+  const productForm = useWatch({
+    control,
+  });
+  
   return (
     <Col>
       {
@@ -414,9 +332,17 @@ export default function CreateProduct() {
           <Spin tip="Loading data..." />
        : 
       <>
-      <Row gap="4px">
-        <Text variant={"h4"}>Create Product</Text>
-      </Row>
+
+      {!id ? 
+        <Row gap="4px">
+          <Text variant={"h4"}>Create Product</Text>
+        </Row> :
+        <Row gap="4px">
+          <ArrowLeft style={{ cursor: "pointer" }} onClick={() => router.back()} />
+          <Text variant={"h4"}>{productForm?.name}</Text>
+        </Row>
+      }
+
       <Spacer size={8} />
       <Row alignItems="center" gap="12px">
       <Col>
@@ -459,7 +385,7 @@ export default function CreateProduct() {
                 width="185px"
                 noSearch
                 items={status}
-                defaultValue="active"
+                defaultValue={productForm.status}
                 handleChange={(value: any) => {
                   onChange(value);
                 }}
@@ -468,11 +394,16 @@ export default function CreateProduct() {
           />
 
           <Row gap="16px">
-            <Button size="big" variant={"tertiary"} onClick={() => router.back()}>
-              Cancel
-            </Button>
-            <Button size="big" variant={"primary"} onClick={onSubmit}>
-              {isLoadingCreateProduct ? "Loading..." : "Save"}
+            {id ?
+              <Button size="big" variant={"tertiary"} onClick={() => setShowDelete({ open: true})}>
+                Delete
+             </Button> :
+              <Button size="big" variant={"tertiary"} onClick={() => router.back()}>
+                Cancel
+              </Button>
+            }
+            <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
+              {isLoadingCreateProduct || isLoadingUploadImage || isLoadingUpdateProduct? "Loading..." : "Save"}
             </Button>
           </Row>
         </Row>
@@ -484,7 +415,7 @@ export default function CreateProduct() {
         <Accordion.Item key={1}>
           <Accordion.Header variant="blue">General</Accordion.Header>
           <Accordion.Body>
-            <UploadImage control={control} />
+            <UploadImage control={control} productForm={productForm} />
             <Spacer size={20} />
             <Row width="100%" noWrap>
               <Col width={"100%"}>
@@ -493,7 +424,9 @@ export default function CreateProduct() {
                   label="Product Name"
                   height="48px"
                   placeholder={"e.g Nabati Cheese"}
-                  {...register("name")}
+                  {...register("name", {
+                    required: 'Product Name must be filled'
+                  })}
                   required
                 />
               </Col>
@@ -505,7 +438,7 @@ export default function CreateProduct() {
                   name="product_type"
                   render={({ field: { onChange } }) => (
                     <Dropdown2
-                      defaultValue={product?.product_type}
+                      defaultValue={productForm?.product_type}
                       label="Product Type"
                       width="100%"
                       noSearch
@@ -513,7 +446,6 @@ export default function CreateProduct() {
                       handleChange={(value: any) => {
                         onChange(value);
                       }}
-                      required
                     />
                   )}
                 />
@@ -529,6 +461,7 @@ export default function CreateProduct() {
                   name="product_category_id"
                   render={({ field: { onChange } }) => (
                     <Dropdown
+                      defaultValue={productForm?.category?.name}
                       label="Product Category"
                       width="100%"
                       noSearch
@@ -546,8 +479,8 @@ export default function CreateProduct() {
               <Col width="100%">
                 <Controller
                   control={control}
-                  name="product_brand_id"
-                 // defaultValue={salesmanGroupFormData?.parentId ?? ""}
+                  name="brand.id"
+                  defaultValue={productForm?.brand?.id}
                   render={({ field: { onChange } }) => (
                     <>
                       <span>
@@ -557,7 +490,7 @@ export default function CreateProduct() {
 
                       <Spacer size={3} />
                       <CustomFormSelect
-                        defaultValue={product?.brand?.name}
+                        defaultValue={productForm?.brand?.name}
                         style={{ width: "100%", height: '48px' }}
                         size={"large"}
                         placeholder={"Select"}
@@ -605,13 +538,18 @@ export default function CreateProduct() {
               <Spacer size={10} />
 
               <Col width="100%">
-                <Input
-                    width="100%"
-                    label="Expired Date"
-                    height="48px"
-                    placeholder={"e.g 413111"}
-                    {...register("expired_date")}
-                  />
+                <Controller
+                  control={control}
+                  name={`expired_date`}
+                  render={({ field: { onChange } }) => (
+                    <DatePickerInput
+                      fullWidth
+                      onChange={(date: any, dateString: any) => onChange(dateString)}
+                      label="Expired Date"
+                      defaultValue={moment(productForm.expired_date)} format={'DD/MM/YYYY'}
+                    />
+                  )}
+                />
               </Col>
             </Row>
             <Spacer size={20} />
@@ -638,21 +576,71 @@ export default function CreateProduct() {
       </Accordion>
       </>
     }
+
+    {isShowDelete.open && (
+        <Modal
+          closable={false}
+          centered
+          visible={isShowDelete.open}
+          onCancel={() => setShowDelete({ open: false })}
+          title={"Confirm Delete"}
+          footer={null}
+          content={
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
+              }}
+            >
+              <Spacer size={4} />
+                Are you sure to delete Product Name {productForm?.name}
+              <Spacer size={20} />
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  gap: "10px",
+                  marginBottom: "20px",
+                }}
+              >
+                <Button
+                  size="big"
+                  variant="tertiary"
+                  key="submit"
+                  type="primary"
+                  onClick={() => setShowDelete({ open: false })}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="primary"
+                  size="big"
+                  onClick={() => {
+                      deleteProductList({ ids: [id] });
+                  }}
+                >
+                  {isLoadingDeleteProductList ? "loading..." : "Yes"}
+                </Button>
+              </div>
+            </div>
+          }
+        />
+      )}
     </Col>
   )
 }
 
-const UploadImage = ({ control }: { control: Control<FormValues> }) => {
+const UploadImage = ({ control, productForm }: { control: Control<FormValues>, productForm: any }) => {
   return (
     <Controller
       control={control}
-      rules={{ required: true }}
       name="image"
       render={({ field: { onChange } }) => (
         <FileUploaderAllFiles
           label="Product Photo"
           onSubmit={(file: any) => onChange(file)}
-          defaultFile="/placeholder-employee-photo.svg"
+          defaultFile={productForm?.image}
           withCrop
           sizeImagePhoto="125px"
           removeable
@@ -680,11 +668,6 @@ const Card = styled.div`
   padding: 16px;
 `;
 
-const FlexElement = styled.div`
-  display: flex;
-  align-items: center;
-`
-
 const CustomFormSelect = styled(FormSelect)`
   
   .ant-select-selection-placeholder {
@@ -697,5 +680,10 @@ const CustomFormSelect = styled(FormSelect)`
 
   .ant-select-selector {
     height: 48px !important;
+  }
+
+  .ant-select-selection-item {
+    display: flex;
+    align-items: center;
   }
 `
