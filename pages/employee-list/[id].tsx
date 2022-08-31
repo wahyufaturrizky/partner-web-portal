@@ -223,6 +223,7 @@ const EmployeeDetail = () => {
     register: registerTraining,
     handleSubmit: handleSubmitTraining,
     control: controlTraining,
+    setValue: setValueTraining,
     formState: { errors: errorTraining },
   } = useForm({
     shouldUseNativeValidation: true,
@@ -232,6 +233,7 @@ const EmployeeDetail = () => {
     register: registerCertification,
     handleSubmit: handleSubmitCertification,
     control: controlCertification,
+    setValue: setValueCertification,
     formState: { errors: errorsCertification },
   } = useForm({
     shouldUseNativeValidation: true,
@@ -243,9 +245,9 @@ const EmployeeDetail = () => {
         if (typePhoto === "photo") {
           setValue("photo", data);
         } else if (typePhoto === "certification") {
-          setValue("development.certification.attachments", data);
+          setValueCertification("attachments", data);
         } else {
-          setValue("development.training.attachments", data);
+          setValueTraining("attachments", data);
         }
         setIsPhoto("");
         alert("Upload Success");
@@ -2097,39 +2099,15 @@ const EmployeeDetail = () => {
                         name={`address.${index}.primary`}
                         render={({ field: {} }) => (
                           <>
-                            <Text color={"blue.dark"} variant={"headingMedium"}>
-                              {getValues(`address.${index}.type`)}
-                            </Text>
+                            <DisplayAddess index={index} control={control} />
+
                             <Row gap="12px" alignItems="center">
-                              {getValues(`address.${index}.primary`) ? (
-                                <Lozenge variant="blue">
-                                  <Row alignItems="center">
-                                    <ICCheckPrimary />
-                                    Primary
-                                  </Row>
-                                </Lozenge>
-                              ) : (
-                                <Text
-                                  clickable
-                                  color="pink.regular"
-                                  onClick={() => {
-                                    let tempEdit = fieldsAddresess.map((mapDataItem) => {
-                                      if (mapDataItem.key === index) {
-                                        mapDataItem.primary = true;
-
-                                        return { ...mapDataItem };
-                                      } else {
-                                        mapDataItem.primary = false;
-                                        return { ...mapDataItem };
-                                      }
-                                    });
-
-                                    replaceAddresess(tempEdit);
-                                  }}
-                                >
-                                  Set as Primary
-                                </Text>
-                              )}
+                              <DisplayAddessCheckPrimary
+                                index={index}
+                                control={control}
+                                fieldsAddresess={fieldsAddresess}
+                                replaceAddresess={replaceAddresess}
+                              />
                               |
                               <div style={{ cursor: "pointer" }}>
                                 <Text color="pink.regular" onClick={() => removeAddresess(index)}>
@@ -2145,40 +2123,7 @@ const EmployeeDetail = () => {
 
                       <Row width="100%" noWrap>
                         <Col width={"100%"}>
-                          <Controller
-                            control={control}
-                            defaultValue={dataEmployee?.address?.[index]?.type}
-                            rules={{
-                              required: {
-                                value: true,
-                                message: "Please enter address type.",
-                              },
-                            }}
-                            name={`address.${index}.type`}
-                            render={({ field: { onChange }, fieldState: { error } }) => (
-                              <>
-                                <Label>
-                                  Address Type <span style={{ color: colors.red.regular }}>*</span>
-                                </Label>
-                                <Spacer size={3} />
-                                <Dropdown
-                                  defaultValue={dataEmployee?.address?.[index]?.type}
-                                  error={error?.message}
-                                  noSearch
-                                  width="100%"
-                                  items={[
-                                    { id: "Home", value: "Home" },
-                                    { id: "Office", value: "Office" },
-                                    { id: "Apartment", value: "Apartment" },
-                                    { id: "School", value: "School" },
-                                  ]}
-                                  handleChange={(value: any) => {
-                                    onChange(value);
-                                  }}
-                                />
-                              </>
-                            )}
-                          />
+                          <InputAddressType index={index} control={control} />
                         </Col>
                         <Spacer size={10} />
 
@@ -2631,6 +2576,9 @@ const EmployeeDetail = () => {
                   <Controller
                     control={controlEducation}
                     name="degree"
+                    rules={{
+                      shouldUnregister: true,
+                    }}
                     render={({ field: { onChange } }) => (
                       <>
                         <Label>Degree</Label>
@@ -2683,6 +2631,9 @@ const EmployeeDetail = () => {
                   <Controller
                     control={controlEducation}
                     name="start"
+                    rules={{
+                      shouldUnregister: true,
+                    }}
                     render={({ field: { onChange } }) => (
                       <DatePickerInput
                         fullWidth
@@ -2703,6 +2654,9 @@ const EmployeeDetail = () => {
                   <Controller
                     control={controlEducation}
                     name="end"
+                    rules={{
+                      shouldUnregister: true,
+                    }}
                     render={({ field: { onChange } }) => (
                       <DatePickerInput
                         fullWidth
@@ -2780,6 +2734,7 @@ const EmployeeDetail = () => {
                         value: 100,
                         message: "Max length exceeded",
                       },
+                      shouldUnregister: true,
                     })}
                   />
 
@@ -2843,6 +2798,7 @@ const EmployeeDetail = () => {
                         value: 15,
                         message: "Max length exceeded",
                       },
+                      shouldUnregister: true,
                     })}
                   />
                 </>
@@ -3014,7 +2970,7 @@ const EmployeeDetail = () => {
                     }
                     defaultFile={
                       modalChannelForm.data?.attachments
-                        ? URL.createObjectURL(modalChannelForm.data?.attachments)
+                        ? modalChannelForm.data?.attachments
                         : "/placeholder-employee-photo.svg"
                     }
                     withCrop
@@ -3028,7 +2984,7 @@ const EmployeeDetail = () => {
                   <Image
                     src={
                       modalChannelForm.data?.attachments
-                        ? URL.createObjectURL(modalChannelForm.data?.attachments)
+                        ? modalChannelForm.data?.attachments
                         : "/sample-cert.svg"
                     }
                     layout="responsive"
@@ -3037,7 +2993,7 @@ const EmployeeDetail = () => {
                     placeholder="blur"
                     blurDataURL={
                       modalChannelForm.data?.attachments
-                        ? URL.createObjectURL(modalChannelForm.data?.attachments)
+                        ? modalChannelForm.data?.attachments
                         : "/placeholder-employee-photo.svg"
                     }
                     alt="iew-training"
@@ -3051,7 +3007,7 @@ const EmployeeDetail = () => {
                   <Image
                     src={
                       modalChannelForm.data?.attachments
-                        ? URL.createObjectURL(modalChannelForm.data?.attachments)
+                        ? modalChannelForm.data?.attachments
                         : "/sample-cert.svg"
                     }
                     layout="responsive"
@@ -3060,7 +3016,7 @@ const EmployeeDetail = () => {
                     placeholder="blur"
                     blurDataURL={
                       modalChannelForm.data?.attachments
-                        ? URL.createObjectURL(modalChannelForm.data?.attachments)
+                        ? modalChannelForm.data?.attachments
                         : "/placeholder-employee-photo.svg"
                     }
                     alt="iew-training"
@@ -3150,7 +3106,7 @@ const EmployeeDetail = () => {
                     }
                     defaultFile={
                       modalChannelForm.data?.attachments
-                        ? URL.createObjectURL(modalChannelForm.data?.attachments)
+                        ? modalChannelForm.data?.attachments
                         : "/placeholder-employee-photo.svg"
                     }
                     withCrop
@@ -3244,6 +3200,113 @@ const EmployeeDetail = () => {
         />
       )}
     </Col>
+  );
+};
+
+const DisplayAddess = ({ control, index }: { control: any; index: any }) => {
+  const data = useWatch({
+    control,
+    name: `address.${index}`,
+  });
+  return (
+    <Text color={"blue.dark"} variant={"headingMedium"}>
+      {data.type || "New Address"}
+    </Text>
+  );
+};
+
+const InputAddressType = ({ control, index }: { control: any; index: any }) => {
+  const data = useWatch({
+    control,
+    name: `address.${index}`,
+  });
+  return (
+    <Controller
+      control={control}
+      rules={{
+        required: {
+          value: true,
+          message: "Please enter address type.",
+        },
+      }}
+      defaultValue={data.type}
+      name={`address.${index}.type`}
+      render={({ field: { onChange }, fieldState: { error } }) => (
+        <>
+          <Label>
+            Address Type <span style={{ color: colors.red.regular }}>*</span>
+          </Label>
+          <Spacer size={3} />
+          <Dropdown
+            defaultValue={data.type}
+            error={error?.message}
+            noSearch
+            width="100%"
+            items={[
+              { id: "Home", value: "Home" },
+              { id: "Office", value: "Office" },
+              { id: "Apartment", value: "Apartment" },
+              { id: "School", value: "School" },
+            ]}
+            handleChange={(value: any) => {
+              onChange(value);
+            }}
+          />
+        </>
+      )}
+    />
+  );
+};
+
+const DisplayAddessCheckPrimary = ({
+  control,
+  index,
+  fieldsAddresess,
+  replaceAddresess,
+}: {
+  control: any;
+  index: any;
+  fieldsAddresess: any;
+  replaceAddresess: any;
+}) => {
+  const data = useWatch({
+    control,
+    name: `address.${index}`,
+  });
+  return (
+    <>
+      {data.primary && data.type === "Home" ? (
+        <Lozenge variant="blue">
+          <Row alignItems="center">
+            <ICCheckPrimary />
+            Primary
+          </Row>
+        </Lozenge>
+      ) : (
+        <Text
+          clickable
+          color="pink.regular"
+          onClick={() => {
+            let tempEdit = fieldsAddresess.map((mapDataItem: any) => {
+              if (mapDataItem.key === index) {
+                mapDataItem.primary = true;
+                mapDataItem.type = "Home";
+
+                return { ...mapDataItem };
+              } else {
+                mapDataItem.primary = false;
+                mapDataItem.type = "";
+                return { ...mapDataItem };
+              }
+            });
+
+            replaceAddresess(tempEdit);
+          }}
+        >
+          Set as Primary
+        </Text>
+      )}
+    </>
   );
 };
 

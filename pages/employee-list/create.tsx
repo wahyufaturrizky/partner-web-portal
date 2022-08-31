@@ -22,7 +22,7 @@ import {
   TextArea,
 } from "pink-lava-ui";
 import { useState } from "react";
-import { Controller, useFieldArray, useForm } from "react-hook-form";
+import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form";
 import styled from "styled-components";
 import { ICCheckPrimary, ICDelete, ICEdit, ICPlusWhite, ICView } from "../../assets";
 import { useCityInfiniteLists } from "../../hooks/city/useCity";
@@ -222,6 +222,7 @@ const EmployeeListCreate = () => {
     register: registerCertification,
     handleSubmit: handleSubmitCertification,
     control: controlCertification,
+    setValue: setValueCertification,
     formState: { errors: errorsCertification },
   } = useForm({
     shouldUseNativeValidation: true,
@@ -233,7 +234,7 @@ const EmployeeListCreate = () => {
         if (typePhoto === "photo") {
           setValue("photo", data);
         } else if (typePhoto === "certification") {
-          setValueTraining("attachments", data);
+          setValueCertification("attachments", data);
         } else {
           setValueTraining("attachments", data);
         }
@@ -1257,7 +1258,6 @@ const EmployeeListCreate = () => {
       },
     },
   ];
-  console.log("asdasd", modalChannelForm);
 
   return (
     <Col>
@@ -2039,41 +2039,15 @@ const EmployeeListCreate = () => {
                         name={`address.${index}.primary`}
                         render={({ field: {} }) => (
                           <>
-                            <Text color={"blue.dark"} variant={"headingMedium"}>
-                              {getValues(`address.${index}.type`) || "New Address"}
-                            </Text>
+                            <DisplayAddess index={index} control={control} />
+
                             <Row gap="12px" alignItems="center">
-                              {getValues(`address.${index}.primary`) ? (
-                                <Lozenge variant="blue">
-                                  <Row alignItems="center">
-                                    <ICCheckPrimary />
-                                    Primary
-                                  </Row>
-                                </Lozenge>
-                              ) : (
-                                <Text
-                                  clickable
-                                  color="pink.regular"
-                                  onClick={() => {
-                                    let tempEdit = fieldsAddresess.map((mapDataItem) => {
-                                      if (mapDataItem.key === index) {
-                                        mapDataItem.primary = true;
-                                        mapDataItem.type = "Home";
-
-                                        return { ...mapDataItem };
-                                      } else {
-                                        mapDataItem.primary = false;
-                                        mapDataItem.type = "";
-                                        return { ...mapDataItem };
-                                      }
-                                    });
-
-                                    replaceAddresess(tempEdit);
-                                  }}
-                                >
-                                  Set as Primary
-                                </Text>
-                              )}
+                              <DisplayAddessCheckPrimary
+                                index={index}
+                                control={control}
+                                fieldsAddresess={fieldsAddresess}
+                                replaceAddresess={replaceAddresess}
+                              />
                               <div style={{ cursor: "pointer" }}>
                                 <Text color="pink.regular" onClick={() => removeAddresess(index)}>
                                   Delete
@@ -2088,40 +2062,7 @@ const EmployeeListCreate = () => {
 
                       <Row width="100%" noWrap>
                         <Col width={"100%"}>
-                          <Controller
-                            control={control}
-                            rules={{
-                              required: {
-                                value: true,
-                                message: "Please enter address type.",
-                              },
-                            }}
-                            defaultValue={getValues(`address.${index}.type`)}
-                            name={`address.${index}.type`}
-                            render={({ field: { onChange }, fieldState: { error } }) => (
-                              <>
-                                <Label>
-                                  Address Type <span style={{ color: colors.red.regular }}>*</span>
-                                </Label>
-                                <Spacer size={3} />
-                                <Dropdown
-                                  defaultValue={getValues(`address.${index}.type`)}
-                                  error={error?.message}
-                                  noSearch
-                                  width="100%"
-                                  items={[
-                                    { id: "Home", value: "Home" },
-                                    { id: "Office", value: "Office" },
-                                    { id: "Apartment", value: "Apartment" },
-                                    { id: "School", value: "School" },
-                                  ]}
-                                  handleChange={(value: any) => {
-                                    onChange(value);
-                                  }}
-                                />
-                              </>
-                            )}
-                          />
+                          <InputAddressType index={index} control={control} />
                         </Col>
                         <Spacer size={10} />
 
@@ -2572,6 +2513,9 @@ const EmployeeListCreate = () => {
                   <Controller
                     control={controlEducation}
                     name="degree"
+                    rules={{
+                      shouldUnregister: true,
+                    }}
                     render={({ field: { onChange } }) => (
                       <>
                         <Label>Degree</Label>
@@ -2583,7 +2527,6 @@ const EmployeeListCreate = () => {
                           width="100%"
                           items={[
                             { id: "Master Degree", value: "Master Degree" },
-                            { id: "Magister Degree", value: "Magister Degree" },
                             { id: "Magister Degree", value: "Magister Degree" },
                             { id: "Doctor", value: "Doctor" },
                             { id: "Bachelor Degree", value: "Bachelor Degree" },
@@ -2623,6 +2566,9 @@ const EmployeeListCreate = () => {
 
                   <Controller
                     control={controlEducation}
+                    rules={{
+                      shouldUnregister: true,
+                    }}
                     name="start"
                     render={({ field: { onChange } }) => (
                       <DatePickerInput
@@ -2642,6 +2588,9 @@ const EmployeeListCreate = () => {
                   <Spacer size={20} />
 
                   <Controller
+                    rules={{
+                      shouldUnregister: true,
+                    }}
                     control={controlEducation}
                     name="end"
                     render={({ field: { onChange } }) => (
@@ -2721,6 +2670,7 @@ const EmployeeListCreate = () => {
                         value: 100,
                         message: "Max length exceeded",
                       },
+                      shouldUnregister: true,
                     })}
                   />
 
@@ -2755,6 +2705,9 @@ const EmployeeListCreate = () => {
                   <Controller
                     control={controlFamily}
                     name="dob"
+                    rules={{
+                      shouldUnregister: true,
+                    }}
                     render={({ field: { onChange } }) => (
                       <DatePickerInput
                         fullWidth
@@ -2784,6 +2737,7 @@ const EmployeeListCreate = () => {
                         value: 15,
                         message: "Max length exceeded",
                       },
+                      shouldUnregister: true,
                     })}
                   />
                 </>
@@ -2955,7 +2909,7 @@ const EmployeeListCreate = () => {
                     }
                     defaultFile={
                       modalChannelForm.data?.attachments
-                        ? URL.createObjectURL(modalChannelForm.data?.attachments)
+                        ? modalChannelForm.data?.attachments
                         : "/placeholder-employee-photo.svg"
                     }
                     withCrop
@@ -2969,7 +2923,7 @@ const EmployeeListCreate = () => {
                   <Image
                     src={
                       modalChannelForm.data?.attachments
-                        ? URL.createObjectURL(modalChannelForm.data?.attachments)
+                        ? modalChannelForm.data?.attachments
                         : "/sample-cert.svg"
                     }
                     layout="responsive"
@@ -2978,10 +2932,10 @@ const EmployeeListCreate = () => {
                     placeholder="blur"
                     blurDataURL={
                       modalChannelForm.data?.attachments
-                        ? URL.createObjectURL(modalChannelForm.data?.attachments)
+                        ? modalChannelForm.data?.attachments
                         : "/placeholder-employee-photo.svg"
                     }
-                    alt="iew-training"
+                    alt="view-training"
                   />
                   <Spacer size={20} />
                 </>
@@ -2992,7 +2946,7 @@ const EmployeeListCreate = () => {
                   <Image
                     src={
                       modalChannelForm.data?.attachments
-                        ? URL.createObjectURL(modalChannelForm.data?.attachments)
+                        ? modalChannelForm.data?.attachments
                         : "/sample-cert.svg"
                     }
                     layout="responsive"
@@ -3001,10 +2955,10 @@ const EmployeeListCreate = () => {
                     placeholder="blur"
                     blurDataURL={
                       modalChannelForm.data?.attachments
-                        ? URL.createObjectURL(modalChannelForm.data?.attachments)
+                        ? modalChannelForm.data?.attachments
                         : "/placeholder-employee-photo.svg"
                     }
-                    alt="iew-training"
+                    alt="view-training"
                   />
                   <Spacer size={20} />
                 </>
@@ -3091,7 +3045,7 @@ const EmployeeListCreate = () => {
                     }
                     defaultFile={
                       modalChannelForm.data?.attachments
-                        ? URL.createObjectURL(modalChannelForm.data?.attachments)
+                        ? modalChannelForm.data?.attachments
                         : "/placeholder-employee-photo.svg"
                     }
                     withCrop
@@ -3174,6 +3128,113 @@ const EmployeeListCreate = () => {
         />
       )}
     </Col>
+  );
+};
+
+const DisplayAddess = ({ control, index }: { control: any; index: any }) => {
+  const data = useWatch({
+    control,
+    name: `address.${index}`,
+  });
+  return (
+    <Text color={"blue.dark"} variant={"headingMedium"}>
+      {data.type || "New Address"}
+    </Text>
+  );
+};
+
+const InputAddressType = ({ control, index }: { control: any; index: any }) => {
+  const data = useWatch({
+    control,
+    name: `address.${index}`,
+  });
+  return (
+    <Controller
+      control={control}
+      rules={{
+        required: {
+          value: true,
+          message: "Please enter address type.",
+        },
+      }}
+      defaultValue={data.type}
+      name={`address.${index}.type`}
+      render={({ field: { onChange }, fieldState: { error } }) => (
+        <>
+          <Label>
+            Address Type <span style={{ color: colors.red.regular }}>*</span>
+          </Label>
+          <Spacer size={3} />
+          <Dropdown
+            defaultValue={data.type}
+            error={error?.message}
+            noSearch
+            width="100%"
+            items={[
+              { id: "Home", value: "Home" },
+              { id: "Office", value: "Office" },
+              { id: "Apartment", value: "Apartment" },
+              { id: "School", value: "School" },
+            ]}
+            handleChange={(value: any) => {
+              onChange(value);
+            }}
+          />
+        </>
+      )}
+    />
+  );
+};
+
+const DisplayAddessCheckPrimary = ({
+  control,
+  index,
+  fieldsAddresess,
+  replaceAddresess,
+}: {
+  control: any;
+  index: any;
+  fieldsAddresess: any;
+  replaceAddresess: any;
+}) => {
+  const data = useWatch({
+    control,
+    name: `address.${index}`,
+  });
+  return (
+    <>
+      {data.primary && data.type === "Home" ? (
+        <Lozenge variant="blue">
+          <Row alignItems="center">
+            <ICCheckPrimary />
+            Primary
+          </Row>
+        </Lozenge>
+      ) : (
+        <Text
+          clickable
+          color="pink.regular"
+          onClick={() => {
+            let tempEdit = fieldsAddresess.map((mapDataItem: any) => {
+              if (mapDataItem.key === index) {
+                mapDataItem.primary = true;
+                mapDataItem.type = "Home";
+
+                return { ...mapDataItem };
+              } else {
+                mapDataItem.primary = false;
+                mapDataItem.type = "";
+                return { ...mapDataItem };
+              }
+            });
+
+            replaceAddresess(tempEdit);
+          }}
+        >
+          Set as Primary
+        </Text>
+      )}
+    </>
   );
 };
 
