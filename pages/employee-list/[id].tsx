@@ -1293,7 +1293,6 @@ const EmployeeDetail = () => {
       </Row>
 
       <Spacer size={20} />
-      {console.log("sadasdasd", dataEmployee)}
 
       <Card padding="20px">
         <Row justifyContent="space-between" alignItems="center" nowrap>
@@ -1531,7 +1530,6 @@ const EmployeeDetail = () => {
                 />
 
                 <Spacer size={8} />
-                {console.log("cvbcbc", dataEmployee)}
 
                 <Controller
                   control={control}
@@ -3024,6 +3022,7 @@ const EmployeeDetail = () => {
                   <Spacer size={16} />
 
                   <FileUploaderAllFilesDragger
+                    disabled={isLoadingFilePhoto}
                     onSubmit={(file: any) => handleUploadPhotoFile(file, "training")}
                     defaultFileList={
                       modalChannelForm.data?.attachments ? [modalChannelForm.data?.attachments] : []
@@ -3156,6 +3155,7 @@ const EmployeeDetail = () => {
                   <Spacer size={16} />
 
                   <FileUploaderAllFilesDragger
+                    disabled={isLoadingFilePhoto}
                     onSubmit={(file: any) => handleUploadPhotoFile(file, "certification")}
                     defaultFileList={
                       modalChannelForm.data?.attachments ? [modalChannelForm.data?.attachments] : []

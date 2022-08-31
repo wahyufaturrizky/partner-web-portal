@@ -1251,7 +1251,6 @@ const EmployeeListCreate = () => {
       },
     },
   ];
-  console.log("xcvxvxcv", errors);
 
   return (
     <Col>
@@ -2077,10 +2076,12 @@ const EmployeeListCreate = () => {
                                     let tempEdit = fieldsAddresess.map((mapDataItem) => {
                                       if (mapDataItem.key === index) {
                                         mapDataItem.primary = true;
+                                        mapDataItem.type = "home";
 
                                         return { ...mapDataItem };
                                       } else {
                                         mapDataItem.primary = false;
+                                        mapDataItem.type = "";
                                         return { ...mapDataItem };
                                       }
                                     });
@@ -2091,7 +2092,6 @@ const EmployeeListCreate = () => {
                                   Set as Primary
                                 </Text>
                               )}
-                              |
                               <div style={{ cursor: "pointer" }}>
                                 <Text color="pink.regular" onClick={() => removeAddresess(index)}>
                                   Delete
@@ -2114,6 +2114,7 @@ const EmployeeListCreate = () => {
                                 message: "Please enter address type.",
                               },
                             }}
+                            defaultValue={getValues(`address.${index}.type`)}
                             name={`address.${index}.type`}
                             render={({ field: { onChange }, fieldState: { error } }) => (
                               <>
@@ -2122,6 +2123,7 @@ const EmployeeListCreate = () => {
                                 </Label>
                                 <Spacer size={3} />
                                 <Dropdown
+                                  defaultValue={getValues(`address.${index}.type`)}
                                   error={error?.message}
                                   noSearch
                                   width="100%"
@@ -2961,6 +2963,7 @@ const EmployeeListCreate = () => {
                   <Spacer size={16} />
 
                   <FileUploaderAllFilesDragger
+                  disabled={isLoadingFilePhoto}
                     onSubmit={(file: any) => handleUploadPhotoFile(file, "training")}
                     defaultFileList={
                       modalChannelForm.data?.attachments ? [modalChannelForm.data?.attachments] : []
@@ -3091,8 +3094,10 @@ const EmployeeListCreate = () => {
                   </Text>
 
                   <Spacer size={16} />
+                  {console.log("asddsa", modalChannelForm)}
 
                   <FileUploaderAllFilesDragger
+                  disabled={isLoadingFilePhoto}
                     onSubmit={(file: any) => handleUploadPhotoFile(file, "certification")}
                     defaultFileList={
                       modalChannelForm.data?.attachments ? [modalChannelForm.data?.attachments] : []
