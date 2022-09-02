@@ -22,7 +22,6 @@ const useProductBrandsMDM = ({ query = {}, options }) => {
 };
 
 const fetchInfiniteProductBrandLists = async ({ pageParam = 1, queryKey }) => {
-  console.log("queryKey", queryKey)
   const searchQuery = queryKey[1].search;
   return mdmService(`/product-brand`, {
     params: {

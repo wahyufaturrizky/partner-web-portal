@@ -32,7 +32,6 @@ const fetchDetailCoa = async ({ coa_id, query }) => {
 
 const fetchInfiniteCoaLists = async ({ pageParam = 1, queryKey }) => {
   const searchQuery = queryKey[1].search;
-  console.log('search', searchQuery)
   return client(`/coa`, {
     params: {
       search: searchQuery,
@@ -46,7 +45,6 @@ const fetchInfiniteCoaLists = async ({ pageParam = 1, queryKey }) => {
 };
 
 const useCoaInfiniteLists = ({ query = {}, options }) => {
-  console.log("oik")
   return useInfiniteQuery(["coa-template/infinite", query], fetchInfiniteCoaLists, {
     keepPreviousData: true,
     ...options,

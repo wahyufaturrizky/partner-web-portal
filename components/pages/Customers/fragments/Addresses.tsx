@@ -122,12 +122,11 @@ const FormContact = ({
   ]
 
   const listFakeAddressType = [
-    { id: 'TYPE-1', value: 'Type 1' },
-    { id: 'TYPE-2', value: 'Type 3' },
-    { id: 'TYPE-3', value: 'Type 3' },
-    { id: 'TYPE-4', value: 'Type 4' },
+    { id: "Home", value: "Home" },
+    { id: "Office", value: "Office" },
+    { id: "Apartment", value: "Apartment" },
+    { id: "School", value: "School" },
   ]
-
 
   return (
     <>

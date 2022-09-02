@@ -43,7 +43,7 @@ const CreateSequenceNumber: any = () => {
     arrows: true,
     totalItems: 100,
   });
-  console.log(isAdd);
+
   return (
     <>
       {isAdd ? (

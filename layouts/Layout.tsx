@@ -377,7 +377,7 @@ const flexStyles = {
 const AdminLayout = (props: any) => {
   const [current, setCurrent] = useState("0");
 
-  const handleCLickTabNav = (e) => {
+  const handleCLickTabNav = (e: any) => {
     setCurrent(e.key);
   };
 

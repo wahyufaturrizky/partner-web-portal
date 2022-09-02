@@ -43,10 +43,9 @@ const SequenceNumber = () => {
     isLoading: isLoadingData,
   } = useAllSequenceNumber({
     options: {
-      onSuccess: (data) => {
+      onSuccess: (data: any) => {
         pagination.setTotalItems(data.totalRow);
         // setIsLoading(false);
-        console.log(data, "data response");
       },
     },
     query: {
@@ -62,16 +61,15 @@ const SequenceNumber = () => {
     isLoading: isLoadingDataCompany,
   } = useCompanyList({
     options: {
-      onSuccess: (data) => {
+      onSuccess: (data: any) => {
         pagination.setTotalItems(data.totalRow);
         // setIsLoading(false);
-        console.log(data, "COMPANUES");
       },
     },
   });
 
-  const handleCompanyId = (companyId) => {
-    const company = fieldsCompany.rows.find((item) => item.id == companyId);
+  const handleCompanyId = (companyId: any) => {
+    const company = fieldsCompany.rows.find((item: any) => item.id == companyId);
     if (company) return company.name;
   };
 

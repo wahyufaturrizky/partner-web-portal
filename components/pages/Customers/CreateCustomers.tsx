@@ -34,11 +34,12 @@ export default function CreateCustomers({
   getDataLanguages,
   getDataCustomerGroup,
   setSearchCustomerGroup,
-  setSearchLanguages
+  setSearchLanguages,
 }: any) {
   const router = useRouter();
   const [tabAktived, setTabAktived] = useState<string>('Contact')
   const [formType, setFormType] = useState<string>('Company')
+  const [defaultValueCG, setDefaultValueCG] = useState<string>('')
   const [imageLogo, setImageLogo] = useState<string>('')
   const [isPKP, setIsPKP] = useState<boolean>(false)
   const [visible, setVisible] = useState<{
@@ -48,6 +49,7 @@ export default function CreateCustomers({
     contact: false,
     bank: false
   });
+  const [editContact, setEditContact] = useState({})
   const [modalChannelForm, setModalChannelForm] = useState<any>({
     data: {},
     typeForm: "create",
@@ -59,10 +61,13 @@ export default function CreateCustomers({
   const listItemsLanguages = getDataLanguages?.rows?.map
     (({ name, id }: any) => { return { value: name, id }});
 
+    const setFieldCustomerGroup = listItemsCustomerGruop?.find
+    (({id }: any) => id === detailCustomer?.group?.id)
+  
   const isCompany: boolean = formType === 'Company'
   const _formType: string[] = ['Company', 'Individu']
 
-  //use-forms customers
+  //use-forms customers / global
   const {
     control,
     handleSubmit,
@@ -272,6 +277,9 @@ export default function CreateCustomers({
     return uploadCustomer(formData)
   }
 
+  const handleEditContact = (data: any) => {}
+
+  // destructure properties
   const propsContacts = {
     setValueContact: setValueContact,
     controlContact,
@@ -279,7 +287,9 @@ export default function CreateCustomers({
     contact,
     onCreate: handleSubmitContact(onHandleCreateContact),
     visible: visible.contact,
+    handleEditContact,
     fieldsContact,
+    removeContact,
     setVisible: () => setVisible({ ...visible, contact: !visible.contact })
   }
 
@@ -316,6 +326,7 @@ export default function CreateCustomers({
     replaceBankAccount, 
   }
 
+  // switch elements detail information
   const switchTabItem = () => {
     switch (tabAktived) {
     case formType === 'Company' && 'Contact':
@@ -333,11 +344,16 @@ export default function CreateCustomers({
     }
   }
 
+  // side effects
   useEffect(() => {
     if(isUpdate && detailCustomer) {
       setIsPKP(detailCustomer?.ppkp)
+      setDefaultValueCG(setFieldCustomerGroup?.value)
+      detailCustomer?.isCompany
+        ? setFormType('Company')
+        : setFormType('Individu')
     }
-  }, [detailCustomer, isUpdate])
+  }, [detailCustomer, isUpdate, setFieldCustomerGroup])
 
   return (
     <div>
@@ -368,7 +384,7 @@ export default function CreateCustomers({
             noSearch
             items={status}
             defaultValue="ACTIVE"
-            handleChange={() => { }}
+            handleChange={(value: any) => {}}
           />
           <Row gap="16px">
             <Button
@@ -453,6 +469,7 @@ export default function CreateCustomers({
                     label="Language"
                     height="50px"
                     width="100%"
+                    defaultValue={detailCustomer?.language}
                     items={listItemsLanguages}
                     onSearch={(value: string) => setSearchLanguages(value)}
                     handleChange={(value: any) => {
@@ -509,6 +526,7 @@ export default function CreateCustomers({
                     height="50px"
                     width="100%" 
                     isLoading
+                    defaultValue={defaultValueCG}
                     items={listItemsCustomerGruop}
                     handleChange={(value: any) => {
                       setValue('customer_group', value)
@@ -521,7 +539,7 @@ export default function CreateCustomers({
                     label="External Code"
                     height="50px"
                     type="number"
-                    defaultValue={detailCustomer?.external_code}
+                    defaultValue={detailCustomer?.externalCode}
                     error={errors?.external_code?.message}
                     placeholder={"e.g 123456"}
                     {...register('external_code', {

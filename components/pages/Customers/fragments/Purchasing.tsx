@@ -31,7 +31,6 @@ export default function Purchasing(props: any) {
         handleClickActionLabel={() => window.open('/term-of-payment/create')}
         items={listItemsOfPayment}
         handleChange={(value: string) => {
-          console.log('ini adalah opoennnsnsns', value)
           setValuePurchasing("purchasing.term_of_payment", value)
         }}
         noSearch

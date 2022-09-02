@@ -14,7 +14,6 @@ export default function PageCreateCustomer() {
       search: search.customerGroup
     }
   })
-
   const { data: getDataLanguages } = useDataCountries({
     options: { onSuccess: () => {} },
     query: {

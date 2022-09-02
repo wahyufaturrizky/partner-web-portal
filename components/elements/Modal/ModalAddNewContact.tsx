@@ -11,7 +11,7 @@ import styled from 'styled-components';
 interface PropsContactModal {
   visible: true | false
   onCancel: () => void
-  onSubmit: () => VoidFunction
+  onSubmit: () => void
   registerContact: any
   setValueContact: any
   contact: any
@@ -26,9 +26,8 @@ export default function ModalAddNewContact({
   setValueContact
 }: PropsContactModal) {
   const listFakeTitle = [
-    { id: 'frontend', value: 'Frontend Engineer' },
-    { id: 'backend', value: 'Backend Engineer' },
-    { id: 'qa', value: 'Quality Asurance' },
+    { id: 'mr.', value: 'Mr.' },
+    { id: 'mrs.', value: 'Mrs.' },
   ]
 
   return (
@@ -63,7 +62,7 @@ export default function ModalAddNewContact({
             noSearch
             required
             handleChange={(value: string) => {
-              setValueContact('contact.tittle', value)
+              setValueContact(`contact.tittle`, value)
             }}
             items={listFakeTitle}
           />

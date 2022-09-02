@@ -1,18 +1,47 @@
-import React from 'react'
+import React, { useState } from 'react'
+import { useRouter } from 'next/router'
 import CreateCustomers from '../../components/pages/Customers/CreateCustomers'
 import { useDetailCustomer } from '../../hooks/mdm/customers/useCustomersMDM';
-import { useRouter } from 'next/router'
+import { useCustomerGroupsMDM } from '../../hooks/mdm/customers/useCustomersGroupMDM'
+import { useDataCountries } from '../../hooks/mdm/country-structure/useCountries';
 
 export default function CustomersDetail() {
   const router = useRouter()
   const { customers_id } = router.query
-
-  const { data } = useDetailCustomer({
+  const [search, setSearch] = useState({
+    languages: '',
+    customerGroup: ''
+  })
+  const { data: getDataCustomerGroup } = useCustomerGroupsMDM({
+    options: { onSuccess: () => { } },
+    query: {
+      search: search.customerGroup
+    }
+  })
+  const { data: getDataLanguages } = useDataCountries({
+    options: { onSuccess: () => { } },
+    query: {
+      search: search?.languages
+    }
+  })
+  const { data: detailCustomer } = useDetailCustomer({
     options: {
       onSuccess: () => alert('fetching detail customer success!')
     },
     id: customers_id
   })
 
-  return <CreateCustomers detailCustomer={data} isUpdate />
+
+  const propsDropdownField = {
+    getDataCustomerGroup,
+    getDataLanguages,
+    detailCustomer,
+    setSearchLanguage: () => { },
+    setSearchLanguages: (value: string) =>
+      setSearch({ ...search, languages: value }),
+    setSearchCustomerGroup: (value: string) =>
+      setSearch({ ...search, customerGroup: value })
+  }
+  
+  return <CreateCustomers isUpdate {...propsDropdownField} />
 }
