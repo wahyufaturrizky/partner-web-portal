@@ -16,6 +16,7 @@ import usePagination from "@lucasmogari/react-pagination";
 import { useListCustomers, useDeleteCustomers } from '../../hooks/mdm/customers/useCustomersMDM'
 import { ICDownload, ICUpload } from "../../assets";
 import { ModalDeleteConfirmation } from '../../components/elements/Modal/ModalConfirmationDelete'
+import { mdmDownloadService } from "../../lib/client";
 
 export default function Customer() {
   const pagination = usePagination({
@@ -106,28 +107,28 @@ export default function Customer() {
     {
       key: 1,
       value: (
-        <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+        <ButtonAction>
           <ICDownload />
           <p style={{ margin: "0" }}>Download Template</p>
-        </div>
+        </ButtonAction>
       ),
     },
     {
       key: 2,
       value: (
-        <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+        <ButtonAction disabled>
           <ICUpload />
           <p style={{ margin: "0" }}>Upload Template</p>
-        </div>
+        </ButtonAction>
       ),
     },
     {
       key: 3,
       value: (
-        <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+        <ButtonAction>
           <ICDownload />
           <p style={{ margin: "0" }}>Download Data</p>
-        </div>
+        </ButtonAction>
       ),
     },
   ]
@@ -137,6 +138,16 @@ export default function Customer() {
     onChange: (selected: any) => {
       setItemsSelected(selected)
     },
+  }
+
+  const handleDownloadFile = (id: any) => {
+    mdmDownloadService(`/customer/download/MCS-0000012`, {params: {}}).then(res => {
+      let dataUrl = window.URL.createObjectURL(new Blob([res?.data]));
+      let tempLink = document.createElement("a");
+      tempLink.href = dataUrl;
+      tempLink.setAttribute("download", `customers_${id} ${new Date().getTime()}.xlsx`);
+      tempLink.click();
+    })
   }
 
   return (
@@ -168,7 +179,7 @@ export default function Customer() {
               textVariant={"button"}
               textColor={"pink.regular"}
               iconStyle={{ fontSize: "12px" }}
-              onClick={() => {}}
+              onClick={({ key }: any) => key === '1' && handleDownloadFile()}
               menuList={actDrowpdown}
             />
             <Button
@@ -212,4 +223,13 @@ const Card = styled.div`
   border-radius: 16px;
   padding: 16px;
 `;
+
+const ButtonAction = styled.button`
+  background: transparent;
+  border: 0;
+  outline: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+`
 
