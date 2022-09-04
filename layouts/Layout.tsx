@@ -10,6 +10,7 @@ import {
   ICFinance,
   ICInventory,
   ICPurchasOrg,
+  ICDollar,
 } from "../assets";
 import ICAccount from "../assets/icons/ic-avatar-default.svg";
 import ICAccountSetting from "../assets/icons/ic-setting.svg";
@@ -228,6 +229,19 @@ const menuMdm = [
   },
   { type: "divider" },
   { type: "title", title: "SALES" },
+  {
+    key: "pricing",
+    title: "Pricing",
+    icon: ICDollar,
+    children: [
+      {
+        key: "pricing-structure",
+        title: "Pricing Structure",
+        content: () => "Pricing Structure",
+        onClick: () => Router.push("/pricing-structure"),
+      },
+    ],
+  },
   {
     key: "customer",
     title: "Customer",

@@ -16,6 +16,7 @@ import ICDelete from "./ic-delete.svg";
 import ICPlusWhite from "./ic-plus-white.svg";
 import ICCheckPrimary from "./check-as-primary.svg";
 import ICView from "./ic-view.svg";
+import ICDollar from "./dollar.svg";
 
 export {
   ICField,
@@ -36,4 +37,5 @@ export {
   ICPlusWhite,
   ICCheckPrimary,
   ICView,
+  ICDollar,
 };
