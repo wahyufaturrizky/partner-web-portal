@@ -17,6 +17,7 @@ import ICPlusWhite from "./ic-plus-white.svg";
 import ICCheckPrimary from "./check-as-primary.svg";
 import ICView from "./ic-view.svg";
 import ICDollar from "./dollar.svg";
+import ICManageCustGroupBuyingPrice from "./manage-cust-group-buying-price.svg";
 
 export {
   ICField,
@@ -38,4 +39,5 @@ export {
   ICCheckPrimary,
   ICView,
   ICDollar,
+  ICManageCustGroupBuyingPrice,
 };

@@ -12,11 +12,28 @@ import {
   Lozenge,
   Spin,
   EmptyState,
+  DropdownMenu,
+  FileUploadModal,
 } from "pink-lava-ui";
+import { mdmDownloadService } from "../../lib/client";
 import usePagination from "@lucasmogari/react-pagination";
+import { ICDollar, ICDownload, ICManageCustGroupBuyingPrice, ICUpload } from "../../assets";
 import { useRouter } from "next/router";
 import { STATUS_APPROVAL_VARIANT, STATUS_APPROVAL_TEXT } from "../../utils/utils";
-import { usePricingStructureLists } from "../../hooks/pricing-structure/usePricingStructure";
+import {
+  usePricingStructureLists,
+  useUploadFilePricingStructureMDM,
+} from "../../hooks/pricing-structure/usePricingStructure";
+import { queryClient } from "../../pages/_app";
+
+const downloadFile = (params: any) =>
+  mdmDownloadService("/pricing-structure/template/download", { params }).then((res) => {
+    let dataUrl = window.URL.createObjectURL(new Blob([res.data]));
+    let tempLink = document.createElement("a");
+    tempLink.href = dataUrl;
+    tempLink.setAttribute("download", `pricing-structure_${new Date().getTime()}.xlsx`);
+    tempLink.click();
+  });
 
 const ActivePricingStructure: any = () => {
   const router = useRouter();
@@ -28,6 +45,8 @@ const ActivePricingStructure: any = () => {
     arrows: true,
     totalItems: 100,
   });
+
+  const [isShowUpload, setShowUpload] = useState(false);
 
   const [search, setSearch] = useState("");
 
@@ -46,6 +65,15 @@ const ActivePricingStructure: any = () => {
       },
     });
 
+  const { mutate: uploadFileProductBrandMDM } = useUploadFilePricingStructureMDM({
+    options: {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["pricing-structure"]);
+        setShowUpload(false);
+      },
+    },
+  });
+
   const columns = [
     {
       title: "Proposal Number",
@@ -60,7 +88,7 @@ const ActivePricingStructure: any = () => {
     {
       title: "Status",
       dataIndex: "status",
-      render: (text) => (
+      render: (text: any) => (
         <Lozenge variant={STATUS_APPROVAL_VARIANT[text]}>{STATUS_APPROVAL_TEXT[text]}</Lozenge>
       ),
       width: "28%",
@@ -95,6 +123,13 @@ const ActivePricingStructure: any = () => {
   });
   const paginateField = data;
 
+  const onSubmitFile = (file: any) => {
+    const formData = new FormData();
+    formData.append("upload_file", file);
+
+    uploadFileProductBrandMDM(formData);
+  };
+
   return (
     <>
       <Card>
@@ -105,6 +140,69 @@ const ActivePricingStructure: any = () => {
             onChange={(e: any) => setSearch(e.target.value)}
           />
           <Row gap="16px" justifyContent="flex-end">
+            <DropdownMenu
+              title={"More"}
+              buttonVariant={"secondary"}
+              buttonSize={"big"}
+              textVariant={"button"}
+              textColor={"pink.regular"}
+              iconStyle={{ fontSize: "12px" }}
+              onClick={(e: any) => {
+                switch (parseInt(e.key)) {
+                  case 1:
+                    downloadFile({ with_data: "N", company_id: "KSNI" });
+                    break;
+                  case 2:
+                    setShowUpload(true);
+                    break;
+                  case 3:
+                    break;
+                  case 4:
+                    break;
+                  default:
+                    break;
+                }
+              }}
+              menuList={[
+                {
+                  key: 1,
+                  value: (
+                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                      <ICDownload />
+                      <p style={{ margin: "0" }}>Download Template</p>
+                    </div>
+                  ),
+                },
+                {
+                  key: 2,
+                  value: (
+                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                      <ICUpload />
+                      <p style={{ margin: "0" }}>Upload Template</p>
+                    </div>
+                  ),
+                },
+                {
+                  key: 3,
+                  value: (
+                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                      <ICManageCustGroupBuyingPrice />
+                      <p style={{ margin: "0" }}>Manage Customer Group Buying Price</p>
+                    </div>
+                  ),
+                },
+                {
+                  key: 4,
+                  value: (
+                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                      <ICDollar />
+                      <p style={{ margin: "0" }}>Manage Price Structure Config</p>
+                    </div>
+                  ),
+                },
+              ]}
+            />
+
             <Button
               size="big"
               variant={"primary"}
@@ -147,6 +245,14 @@ const ActivePricingStructure: any = () => {
         )}
       </Col>
       <Spacer size={10} />
+
+      {isShowUpload && (
+        <FileUploadModal
+          visible={isShowUpload}
+          setVisible={setShowUpload}
+          onSubmit={onSubmitFile}
+        />
+      )}
     </>
   );
 };

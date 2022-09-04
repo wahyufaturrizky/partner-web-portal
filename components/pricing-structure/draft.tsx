@@ -12,6 +12,8 @@ import {
   Pagination,
   Lozenge,
   Spin,
+  DropdownMenu,
+  FileUploadModal,
 } from "pink-lava-ui";
 import usePagination from "@lucasmogari/react-pagination";
 import { useRouter } from "next/router";
@@ -19,10 +21,23 @@ import { STATUS_APPROVAL_VARIANT, STATUS_APPROVAL_TEXT } from "../../utils/utils
 import {
   useDeletePricingStructureList,
   usePricingStructureLists,
+  useUploadFilePricingStructureMDM,
 } from "../../hooks/pricing-structure/usePricingStructure";
 import { ModalDeleteConfirmation } from "../../components/elements/Modal/ModalConfirmationDelete";
+import { ICDollar, ICDownload, ICManageCustGroupBuyingPrice, ICUpload } from "../../assets";
+import { queryClient } from "../../pages/_app";
+import { mdmDownloadService } from "../../lib/client";
 
-const DraftPricingStructure: any = ({ refetchCount }) => {
+const downloadFile = (params: any) =>
+  mdmDownloadService("/pricing-structure/template/download", { params }).then((res) => {
+    let dataUrl = window.URL.createObjectURL(new Blob([res.data]));
+    let tempLink = document.createElement("a");
+    tempLink.href = dataUrl;
+    tempLink.setAttribute("download", `pricing-structure_${new Date().getTime()}.xlsx`);
+    tempLink.click();
+  });
+
+const DraftPricingStructure: any = ({ refetchCount }: { refetchCount: any }) => {
   const router = useRouter();
   const pagination = usePagination({
     page: 1,
@@ -34,6 +49,8 @@ const DraftPricingStructure: any = ({ refetchCount }) => {
   });
 
   const [search, setSearch] = useState("");
+  const [isShowUpload, setShowUpload] = useState(false);
+
   const [isLoading, setLoading] = useState(true);
   const [modalDelete, setModalDelete] = useState({ open: false });
 
@@ -52,6 +69,15 @@ const DraftPricingStructure: any = ({ refetchCount }) => {
         status: "DRAFT",
       },
     });
+
+  const { mutate: uploadFileProductBrandMDM } = useUploadFilePricingStructureMDM({
+    options: {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["pricing-structure"]);
+        setShowUpload(false);
+      },
+    },
+  });
 
   const { mutate: deletePricingStructure } = useDeletePricingStructureList({
     options: {
@@ -78,7 +104,7 @@ const DraftPricingStructure: any = ({ refetchCount }) => {
     {
       title: "Status",
       dataIndex: "status",
-      render: (text) => (
+      render: (text: any) => (
         <Lozenge variant={STATUS_APPROVAL_VARIANT[text]}>{STATUS_APPROVAL_TEXT[text]}</Lozenge>
       ),
       width: "28%",
@@ -115,13 +141,20 @@ const DraftPricingStructure: any = ({ refetchCount }) => {
 
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
 
-  const onSelectChange = (selectedRowKeys) => {
+  const onSelectChange = (selectedRowKeys: any) => {
     setSelectedRowKeys(selectedRowKeys);
   };
 
   const rowSelection = {
     selectedRowKeys,
     onChange: onSelectChange,
+  };
+
+  const onSubmitFile = (file: any) => {
+    const formData = new FormData();
+    formData.append("upload_file", file);
+
+    uploadFileProductBrandMDM(formData);
   };
 
   return (
@@ -131,7 +164,7 @@ const DraftPricingStructure: any = ({ refetchCount }) => {
           <Search
             width="450px"
             placeholder="Search Proposal Number, Product, Date, Status"
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e: any) => setSearch(e.target.value)}
           />
           <Row gap="16px">
             <Button
@@ -142,6 +175,70 @@ const DraftPricingStructure: any = ({ refetchCount }) => {
             >
               Delete
             </Button>
+
+            <DropdownMenu
+              title={"More"}
+              buttonVariant={"secondary"}
+              buttonSize={"big"}
+              textVariant={"button"}
+              textColor={"pink.regular"}
+              iconStyle={{ fontSize: "12px" }}
+              onClick={(e: any) => {
+                switch (parseInt(e.key)) {
+                  case 1:
+                    downloadFile({ with_data: "N", company_id: "KSNI" });
+                    break;
+                  case 2:
+                    setShowUpload(true);
+                    break;
+                  case 3:
+                    break;
+                  case 4:
+                    break;
+                  default:
+                    break;
+                }
+              }}
+              menuList={[
+                {
+                  key: 1,
+                  value: (
+                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                      <ICDownload />
+                      <p style={{ margin: "0" }}>Download Template</p>
+                    </div>
+                  ),
+                },
+                {
+                  key: 2,
+                  value: (
+                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                      <ICUpload />
+                      <p style={{ margin: "0" }}>Upload Template</p>
+                    </div>
+                  ),
+                },
+                {
+                  key: 3,
+                  value: (
+                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                      <ICManageCustGroupBuyingPrice />
+                      <p style={{ margin: "0" }}>Manage Customer Group Buying Price</p>
+                    </div>
+                  ),
+                },
+                {
+                  key: 4,
+                  value: (
+                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                      <ICDollar />
+                      <p style={{ margin: "0" }}>Manage Price Structure Config</p>
+                    </div>
+                  ),
+                },
+              ]}
+            />
+
             <Button
               size="big"
               variant={"primary"}
@@ -191,6 +288,14 @@ const DraftPricingStructure: any = ({ refetchCount }) => {
           visible={modalDelete.open}
           onCancel={() => setModalDelete({ open: false })}
           onOk={() => deletePricingStructure({ ids: selectedRowKeys })}
+        />
+      )}
+
+      {isShowUpload && (
+        <FileUploadModal
+          visible={isShowUpload}
+          setVisible={setShowUpload}
+          onSubmit={onSubmitFile}
         />
       )}
     </>

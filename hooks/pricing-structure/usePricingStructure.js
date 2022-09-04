@@ -113,6 +113,19 @@ function useApprovePricingStructureList({ options, partner_id }) {
   );
 }
 
+const useUploadFilePricingStructureMDM = ({ options }) => {
+  return useMutation(
+    (data) =>
+      mdmService(`/pricing-structure/upload`, {
+        method: "POST",
+        data,
+      }),
+    {
+      ...options,
+    }
+  );
+};
+
 export {
   usePricingStructureLists,
   usePricingStructureList,
@@ -122,4 +135,5 @@ export {
   useDeletePricingStructureList,
   useValidatePricingStructureInput,
   useApprovePricingStructureList,
+  useUploadFilePricingStructureMDM,
 };
