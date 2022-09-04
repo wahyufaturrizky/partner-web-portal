@@ -4,6 +4,7 @@ import Branch from './Branch'
 import Accounting from './Accounting'
 import Inventory from './Inventory'
 import Detail from './Detail'
+import Division from './Division'
 
 export {
   Purchasing,
@@ -11,5 +12,6 @@ export {
   Branch,
   Accounting,
   Inventory,
-  Detail
+  Detail,
+  Division
 }

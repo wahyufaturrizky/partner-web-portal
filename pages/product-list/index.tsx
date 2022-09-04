@@ -97,6 +97,7 @@ const Product = () => {
             name: element.name,
             status: element.status,
             productCategoryName: element.productCategoryName,
+            hasVariant: element.hasVariant,
             action: (
               <div style={{ display: "flex", justifyContent: "left" }}>
                 <Button
@@ -174,11 +175,16 @@ const Product = () => {
     onChange: (selectedRowKeys: any) => {
       setSelectedRowKeys(selectedRowKeys);
     },
+    getCheckboxProps: (record: any) => ({
+      disabled: !!record.hasVariant, // Column configuration not to be checked
+      name: record.name,
+    }),
   };
 
   const onSubmitFile = (file: any) => {
     const formData = new FormData();
-    formData.append("company", "KSNI");
+    formData.append("company_id", "KSNI");
+    formData.append("company_code", "KSNI");
     formData.append("file", file);
 
     uploadFileProduct(formData);
@@ -224,13 +230,13 @@ const Product = () => {
               onClick={(e: any) => {
                 switch (parseInt(e.key)) {
                   case 1:
-                    downloadFile({ with_data: "N", company: "KSNI" });
+                    downloadFile({ with_data: "N", company_id: "KSNI" });
                     break;
                   case 2:
                     setShowUpload(true);
                     break;
                   case 3:
-                    downloadFile({ with_data: "Y", company: "KSNI" });
+                    downloadFile({ with_data: "Y", company_id: "KSNI" });
                     break;
                   case 4:
                     break;

@@ -16,10 +16,11 @@ import {
 
 import { useUOMInfiniteLists } from '../../../../hooks/mdm/unit-of-measure/useUOM';
 import useDebounce from '../../../../lib/useDebounce';
-import { Controller, useFieldArray, useWatch } from 'react-hook-form';
+import { Controller, useWatch } from 'react-hook-form';
 import _ from 'lodash';
 import usePagination from '@lucasmogari/react-pagination';
-import ProductOptions from './ProductOptions';
+import ProductOptionsCreate from './ProductOptionsCreate';
+import ProductOptions from './ProductOptions'
 
 export default function Detail(props: any) {
   const {
@@ -28,7 +29,8 @@ export default function Detail(props: any) {
     setValue,
     product,
     register,
-
+    isUpdate,
+    fieldsProductVariants,
   } = props
 
   const columsVariant = [
@@ -96,15 +98,6 @@ export default function Detail(props: any) {
         }
       },
     },
-  });
-
-    // useFieldArray Product Variants
-  const {
-    fields: fieldsProductVariants,
-    replace: replaceProductVariants,
-  } = useFieldArray({
-    control,
-    name: "variants"
   });
 
   const [searchVariant, setSearchVariant] = useState('')
@@ -285,13 +278,17 @@ export default function Detail(props: any) {
       <Divider />
       <Spacer size={39} />
       <Col>
-        <ProductOptions 
-          control={control} 
-          setValue={setValue}
-          watch={watch}
-          replaceProductVariants={replaceProductVariants}
-          fieldsProductVariants={fieldsProductVariants}
-        />
+        {isUpdate ?
+          <ProductOptions
+            control={control} 
+          />
+          :
+          <ProductOptionsCreate 
+            control={control} 
+            setValue={setValue}
+            watch={watch}
+          />
+        }
       </Col>
       <Spacer size={48} />
 
@@ -303,14 +300,14 @@ export default function Detail(props: any) {
             onChange={(e: any) => setSearchVariant(e.target.value)}
             width="360px"
             height="48px"
-				/>
+        />
         <Spacer size={16} />
         <Table
           columns={columsVariant}
           data={paginateVariant}
           width="100%"
         />
-        <Pagination pagination={paginationVariant} />
+        {variantsData.length > 5 && <Pagination pagination={paginationVariant} /> }
       </Col>
     </div>
   )
