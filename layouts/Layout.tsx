@@ -21,6 +21,7 @@ import ICArrowBottom from "../assets/icons/ic-arrow-bottom.svg";
 import ICBadge from "../assets/icons/ic-badge.svg";
 import ICSalesman from "../assets/icons/ic-salesman.svg";
 import ICDocument from "../assets/icons/ic-document.svg";
+import ICTransportation from "../assets/icons/ic-transportation.svg";
 import styled from "styled-components";
 
 const menuConfig = [
@@ -300,6 +301,15 @@ const menuMdm = [
     content: () => "Term Of Payment",
     icon: ICDocument,
     onClick: () => Router.push("/term-of-payment"),
+  },
+  { type: "divider" },
+  { type: "title", title: "LOGISTIC" },
+  {
+    key: "transportation-group",
+    title: "Transportation Group",
+    content: () => "Transportation Group",
+    icon: ICTransportation,
+    onClick: () => Router.push("/transportation-group"),
   },
   { type: "divider" },
   { type: "title", title: "HUMAN CAPITAL" },
