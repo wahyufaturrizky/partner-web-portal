@@ -373,6 +373,12 @@ const menuMdm = [
         onClick: () => Router.push("/channel"),
       },
       {
+        key: "branch",
+        title: "Branch/Depo",
+        content: () => "Branch/Depo",
+        onClick: () => Router.push("/branch"),
+      },
+      {
         key: "sales-organization",
         title: "Sales Organization",
         content: () => "Sales Organization",

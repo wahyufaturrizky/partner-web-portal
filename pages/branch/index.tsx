@@ -12,10 +12,13 @@ import {
   Modal,
   DropdownMenu,
   FileUploadModal,
-  Lozenge,
 } from "pink-lava-ui";
 import usePagination from "@lucasmogari/react-pagination";
-import { useUOMList, useUploadFileUOM, useDeletUOM } from "../../hooks/mdm/unit-of-measure/useUOM";
+import {
+  useBranchList,
+  useUploadFileBranch,
+  useDeleteBranch,
+} from "../../hooks/mdm/branch/useBranch";
 import useDebounce from "../../lib/useDebounce";
 import { queryClient } from "../_app";
 import { ICDownload, ICUpload } from "../../assets/icons";
@@ -23,11 +26,11 @@ import { mdmDownloadService } from "../../lib/client";
 import { useRouter } from "next/router";
 
 const downloadFile = (params: any) =>
-  mdmDownloadService("/uom/download", { params }).then((res) => {
+  mdmDownloadService("/branch/download", { params }).then((res) => {
     let dataUrl = window.URL.createObjectURL(new Blob([res.data]));
     let tempLink = document.createElement("a");
     tempLink.href = dataUrl;
-    tempLink.setAttribute("download", `uom_${new Date().getTime()}.xlsx`);
+    tempLink.setAttribute("download", `branch_${new Date().getTime()}.xlsx`);
     tempLink.click();
   });
 
@@ -36,18 +39,18 @@ const renderConfirmationText = (type: any, data: any) => {
     case "selection":
       return data.selectedRowKeys.length > 1
         ? `Are you sure to delete ${data.selectedRowKeys.length} items ?`
-        : `Are you sure to delete Uom Name ${
+        : `Are you sure to delete Branch Name ${
             data?.uomData?.data.find((el: any) => el.key === data.selectedRowKeys[0])?.uomName
           } ?`;
     case "detail":
-      return `Are you sure to delete Uom Name ${data.uomName} ?`;
+      return `Are you sure to delete Branch Name ${data.uomName} ?`;
 
     default:
       break;
   }
 };
 
-const UOM = () => {
+const Branch = () => {
   const router = useRouter();
   const pagination = usePagination({
     page: 1,
@@ -70,10 +73,10 @@ const UOM = () => {
   const debounceSearch = useDebounce(search, 1000);
 
   const {
-    data: UOMData,
-    isLoading: isLoadingUOM,
-    isFetching: isFetchingUOM,
-  } = useUOMList({
+    data: branchData,
+    isLoading: isLoadingBranch,
+    isFetching: isFetchingBranch,
+  } = useBranchList({
     query: {
       search: debounceSearch,
       page: pagination.page,
@@ -81,23 +84,22 @@ const UOM = () => {
       company_id: "KSNI",
     },
     options: {
+      initialData: [],
       onSuccess: (data: any) => {
         pagination.setTotalItems(data.totalRow);
       },
       select: (data: any) => {
         const mappedData = data?.rows?.map((element: any) => {
           return {
-            key: element.uomId,
-            id: element.uomId,
-            uomName: element.name,
-            uomCategoryName: element.uomCategoryName,
-            status: element.activeStatus,
+            key: element.branchId,
+            id: element.branchId,
+            branchName: element.name,
             action: (
               <div style={{ display: "flex", justifyContent: "left" }}>
                 <Button
                   size="small"
                   onClick={() => {
-                    router.push(`/unit-of-measure/${element.uomId}`);
+                    router.push(`/branch/${element.branchId}`);
                   }}
                   variant="tertiary"
                 >
@@ -113,20 +115,20 @@ const UOM = () => {
     },
   });
 
-  const { mutate: deleteUom, isLoading: isLoadingDeleteUom } = useDeletUOM({
+  const { mutate: deleteUom, isLoading: isLoadingDeleteUom } = useDeleteBranch({
     options: {
       onSuccess: () => {
         setShowDelete({ open: false, data: {}, type: "" });
         setSelectedRowKeys([]);
-        queryClient.invalidateQueries(["uom-list"]);
+        queryClient.invalidateQueries(["branch-list"]);
       },
     },
   });
 
-  const { mutate: uploadFileUom, isLoading: isLoadingUploadFileUom } = useUploadFileUOM({
+  const { mutate: uploadFileBranch, isLoading: isLoadingUploadFileBranch } = useUploadFileBranch({
     options: {
       onSuccess: () => {
-        queryClient.invalidateQueries(["uom-list"]);
+        queryClient.invalidateQueries(["branch-list"]);
         setShowUpload(false);
       },
     },
@@ -134,25 +136,12 @@ const UOM = () => {
 
   const columns = [
     {
-      title: "Uom ID",
+      title: "Branch ID",
       dataIndex: "id",
     },
     {
-      title: "Uom Name",
-      dataIndex: "uomName",
-    },
-    {
-      title: "Uom Category",
-      dataIndex: "uomCategoryName",
-    },
-    {
-      title: "status",
-      dataIndex: "status",
-      render: (status: any) => (
-        <Lozenge variant={status === "ACTIVE" ? "green" : "black"}>
-          {status === "ACTIVE" ? "Active" : "Inactive"}
-        </Lozenge>
-      ),
+      title: "Branch Name",
+      dataIndex: "branchName",
     },
     {
       title: "Action",
@@ -174,20 +163,20 @@ const UOM = () => {
     formData.append("company_id", "KSNI");
     formData.append("file", file);
 
-    uploadFileUom(formData);
+    uploadFileBranch(formData);
   };
 
   return (
     <>
       <Col>
-        <Text variant={"h4"}>Unit of Measure</Text>
+        <Text variant={"h4"}>Branch</Text>
         <Spacer size={20} />
       </Col>
       <Card>
         <Row justifyContent="space-between">
           <Search
             width="340px"
-            placeholder="Search Uom ID, Name."
+            placeholder="Search Branch ID, Name."
             onChange={(e: any) => {
               setSearch(e.target.value);
             }}
@@ -200,7 +189,7 @@ const UOM = () => {
                 setShowDelete({
                   open: true,
                   type: "selection",
-                  data: { uomData: UOMData, selectedRowKeys },
+                  data: { branchData, selectedRowKeys },
                 })
               }
               disabled={rowSelection.selectedRowKeys?.length === 0}
@@ -261,11 +250,7 @@ const UOM = () => {
                 },
               ]}
             />
-            <Button
-              size="big"
-              variant="primary"
-              onClick={() => router.push("/unit-of-measure/create")}
-            >
+            <Button size="big" variant="primary" onClick={() => router.push("/branch/create")}>
               Create
             </Button>
           </Row>
@@ -275,9 +260,9 @@ const UOM = () => {
       <Card style={{ padding: "16px 20px" }}>
         <Col gap={"60px"}>
           <Table
-            loading={isLoadingUOM || isFetchingUOM}
+            loading={isLoadingBranch || isFetchingBranch}
             columns={columns}
-            data={UOMData?.data}
+            data={branchData?.data}
             rowSelection={rowSelection}
           />
           <Pagination pagination={pagination} />
@@ -356,4 +341,4 @@ const Card = styled.div`
   padding: 16px;
 `;
 
-export default UOM;
+export default Branch;
