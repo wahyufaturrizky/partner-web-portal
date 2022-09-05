@@ -25,7 +25,8 @@ import {
   Accounting,
   Purchasing,
   Inventory,
-  Detail
+  Detail,
+  Division
 } from './fragments'
 import styled from 'styled-components'
 import { useCreateProduct, useDeleteProduct, useProductDetail, useUpdateProduct, useUploadImageProduct } from '../../../hooks/mdm/product-list/useProductList';
@@ -37,7 +38,7 @@ import _ from 'lodash';
 import ArrowLeft from "../../../assets/icons/arrow-left.svg";
 import { queryClient } from "../../../pages/_app";
 
-export default function CreateProduct({ isCreateProductVariant = true}) {
+export default function CreateProductVariant({ isCreateProductVariant = true}) {
   const router = useRouter();
   const { id } = router.query;
   const isUpdate = !!id;
@@ -64,6 +65,12 @@ export default function CreateProduct({ isCreateProductVariant = true}) {
     { title: "Branch" },
     { title: "Registration" },
   ];
+
+  if(isCreateProductVariant){
+    listTabItems.pop();
+    listTabItems.push({ title: "Division" })
+    listTabItems.push({ title: "Registration" })
+  }
 
   const status: { id: string, value: string }[] = [
     { id: "active", value: "Active" },
@@ -94,11 +101,12 @@ export default function CreateProduct({ isCreateProductVariant = true}) {
     setValue,
     getValues,
     watch,
-    getFieldState,
     formState: { errors },
   } = useForm({
     shouldUseNativeValidation: true,
     defaultValues: {
+      sku_number: "",
+      barcode: "",
       image: "",
       company_id: "KSNI",
       company_code: "KSNI",
@@ -145,8 +153,7 @@ export default function CreateProduct({ isCreateProductVariant = true}) {
   });
 
   const {
-    isLoading: isLoadingProduct,
-    data: productData
+    isLoading: isLoadingProduct
   } = useProductDetail({
     id:id,
     options: {
@@ -155,9 +162,9 @@ export default function CreateProduct({ isCreateProductVariant = true}) {
         data = toSnakeCase(data);
         Object.keys(data).forEach(key => {
           setValue(key, data[key]);
-          setCanBePurchased(data?.canBePurchased);
-          setCanBeSold(data?.canBeSold);
-          setCanExpensed(data?.canBeExpensed)
+          setCanBePurchased(data.canBePurchased);
+          setCanBeSold(data.canBeSold);
+          setCanExpensed(data.canBeExpensed)
         })
       return data;
     }
@@ -176,7 +183,7 @@ export default function CreateProduct({ isCreateProductVariant = true}) {
     },
     options: {
       onSuccess: (data: any) => {
-        setTotalRowsProductBrand(data?.pages[0].totalRow);
+        setTotalRowsProductBrand(data.pages[0].totalRow);
         const mappedData = data?.pages?.map((group: any) => {
           return group.rows?.map((element: any) => {
             return {
@@ -214,7 +221,7 @@ export default function CreateProduct({ isCreateProductVariant = true}) {
           const formData:any = new FormData();
           formData.append("image", getValues('image'));
           formData.append("company_id", "KSNI");
-          formData.append("product_id", data?.productId);
+          formData.append("product_id", data.productId);
   
           uploadImage(formData);
         } else {
@@ -229,16 +236,12 @@ export default function CreateProduct({ isCreateProductVariant = true}) {
     id,
     options: {
       onSuccess: (data:any) => {
-        if( getValues('image') && getFieldState('image').isDirty){
-          const formData:any = new FormData();
-          formData.append("image", getValues('image'));
-          formData.append("company_id", "KSNI");
-          formData.append("product_id", id);
-  
-          uploadImage(formData);
-        } else {
-          router.push('/product-list')
-        }
+        const formData:any = new FormData();
+        formData.append("image", getValues('image'));
+        formData.append("company_id", "KSNI");
+        formData.append("product_id", data.product_id);
+
+        uploadImage(formData);
       }
     }
   })
@@ -275,14 +278,13 @@ export default function CreateProduct({ isCreateProductVariant = true}) {
       'registration',
     ])
 
-    payload.expired_date = moment(data?.expired_date).utc().toString();
-    payload.purchase_uom_id = data.purchase_uom.uom_id || "";
-    payload.product_brand_id = data.brand.id || "";
-    payload.base_uom_id = data.base_uom.uom_id || "";
-    payload.purchase_uom_id = data?.purchase_uom?.uom_id || "";
-    payload.options = data?.options?.map((data:any) => ({
-      options_id: data?.option.id,
-      options_values: data?.option_items?.map(data => data?.value) || []
+    payload.expired_date = moment(data.expired_date).utc().toString();
+    payload.product_brand_id = data.brand.id;
+    payload.base_uom_id = data.base_uom.uom_id;
+    payload.purchase_uom_id = data.purchase_uom.uom_id;
+    payload.options = data.options.map((data:any) => ({
+      options_id: data.option.id,
+      options_values: data.option_items.map(data => data.value)
     }));
     payload.accounting = {
       income_account_id: data?.accounting?.income_account?.id || 0,
@@ -291,18 +293,17 @@ export default function CreateProduct({ isCreateProductVariant = true}) {
     payload.company_code = 'KSNI'
     payload.inventory = {
       weight: {
-          net: data?.inventory?.weight?.net ,
-          gross: data?.inventory?.weight?.gross,
-          uom_id: data?.inventory?.weight?.uom?.id
+          net: data.inventory.weight.net ,
+          gross: data.inventory.weight.gross,
+          uom_id: data.inventory.weight.uom.id
       },
       volume : {
           dimension : {
-              length: data?.inventory?.volume?.length,
-              width: data?.inventory?.volume?.width,
-              height: data?.inventory?.volume?.height,
-              total_volume: data?.inventory?.volume?.total_volume
+              length: data.inventory.volume.length,
+              width: data.inventory.volume.width,
+              height: data.inventory.volume.height
           },
-          uom_id:data?.inventory?.volume?.uom?.id
+          uom_id:data.inventory.volume.uom.id
       },
       storage_management:  {
         "condition" : "chilled",
@@ -313,18 +314,15 @@ export default function CreateProduct({ isCreateProductVariant = true}) {
         "self_life_unit": "days"
     }
     }
-    payload.registration = data?.registration?.map(data => ({
-      number_type : data?.number_type,
-      number: data?.number,
-      valid_from: moment(data?.valid_from).utc().toString(),
-      valid_to: moment(data?.valid_to).utc().toString()
+    payload.registration = data.registration.map(data => ({
+      number_type : data.number_type,
+      number: data.number,
+      valid_from: moment(data.valid_from).utc().toString(),
+      valid_to: moment(data.valid_to).utc().toString()
     }))
 
-    payload.variants = data?.variants?.map(({id, ...rest}) => rest)
-
     if(isUpdate){
-      delete payload.company_id;
-      delete payload.company_code;
+      payload.product_id = id
     }
 
     isUpdate ? updateProduct(payload) : createProduct(payload)
@@ -365,6 +363,8 @@ export default function CreateProduct({ isCreateProductVariant = true}) {
         return <Inventory {...propsInventory} />
       case 'Detail':
         return <Detail {...propsDetail} />
+      case 'Division':
+        return <Division />
       default:
         return null
     }
@@ -394,15 +394,6 @@ export default function CreateProduct({ isCreateProductVariant = true}) {
     name: 'name'
   })
 
-  const costOfProductForm = useWatch({
-    control,
-    name: 'cost_of_product'
-  })
-
-  const salesPriceForm = useWatch({
-    control,
-    name: 'sales_price'
-  })
 
   const combinationVariant = (list:string[][] = [[]], n = 0, result:any=[], current:any = []) => {
     if (n === list.length) result.push(current)
@@ -410,17 +401,16 @@ export default function CreateProduct({ isCreateProductVariant = true}) {
  
     return result
   }
-
-  const generateVariantInCreate = () => {
+  useEffect(() => {
     let options = optionsForm?.filter(data => {
       if(data?.option?.id && data?.option_items?.length > 0) return true
       return false
     })
 
-    if(options.map(data => data?.option_items.map(data => data?.id))?.length > 0){
-      let allValues = options.map(data => data?.option_items.map(data => data?.name || data?.label));
+    if(options.map(data => data.option_items.map(data => data.id))?.length > 0){
+      let allValues = options.map(data => data.option_items.map(data => data.name || data.label));
       allValues.unshift([productForm.name])
-      const variants = combinationVariant(allValues)?.map(data => data?.join(" "));
+      const variants = combinationVariant(allValues)?.map(data => data.join(" "));
 
       let finalVariants = variants.map(variant => ({
         name: variant,
@@ -431,33 +421,8 @@ export default function CreateProduct({ isCreateProductVariant = true}) {
       }))
       replaceProductVariants(finalVariants)
     }
-  }
 
-  const generateVariantInDetail = () => {
-      let finalVariants = getValues('variants').map((variant:any) => {
-        return {
-          name: variant.name,
-          cost: variant.cost,
-          price: variant.price,
-          sku: variant.sku,
-          barcode: variant.barcode,
-        }
-      })
-      replaceProductVariants(finalVariants)
-  }
-
-  useEffect(() => {
-      generateVariantInCreate()
-  }, [optionsForm, salesPriceForm, costOfProductForm])
-
-  useEffect(() => {
-    if(isUpdate){
-      generateVariantInDetail()
-    } else {
-      generateVariantInCreate()
-    }
-  }, [nameForm])
-
+  }, [optionsForm, nameForm])
 
   const propsDetail = { 
     control,
@@ -467,14 +432,15 @@ export default function CreateProduct({ isCreateProductVariant = true}) {
     register,
     isUpdate,
     fieldsProductVariants,
-    replaceProductVariants
+    replaceProductVariants,
+    isCreateProductVariant
   }
   
   return (
     <Col>
       {
        isLoadingProduct ?
-          <Spin tip="Loading data?..." />
+          <Spin tip="Loading data..." />
        : 
       <>
 
@@ -666,6 +632,38 @@ export default function CreateProduct({ isCreateProductVariant = true}) {
                 />
               </Col>
             </Row>
+
+            {isCreateProductVariant && (
+              <>
+                <Spacer size={10} />
+
+                <Row width="100%" noWrap>
+                  <Col width="100%">
+                    <Input
+                        width="100%"
+                        label="SKU Number"
+                        height="48px"
+                        placeholder={"e.g 413111"}
+                        {...register("sku_number", {
+                          required: 'Sku Number is required'
+                        })}
+                      />
+                  </Col>
+
+                  <Spacer size={10} />
+
+                  <Col width="100%">
+                    <Input
+                        width="100%"
+                        label="Barcode"
+                        height="48px"
+                        placeholder={"e.g 413111"}
+                        {...register("barcode")}
+                      />
+                  </Col>
+                </Row>
+              </>
+            )}
 
             <Spacer size={10} />
 

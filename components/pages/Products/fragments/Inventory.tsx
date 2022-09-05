@@ -165,6 +165,7 @@ export default function Inventory(props: any) {
                 onChange={(e:any) => {
                   setLength(e.target.value)
                   setValue("inventory.volume.length", e.target.value)
+                  setValue("inventory.volume.total_volume", e.target.value * width * height)
                 }}
               />
               <Symbol>
@@ -180,6 +181,7 @@ export default function Inventory(props: any) {
                 onChange={(e:any) => {
                   setWidth(e.target.value)
                   setValue("inventory.volume.width", e.target.value)
+                  setValue("inventory.volume.total_volume", e.target.value * length * height)
                 }}
               />
               <Symbol>
@@ -195,6 +197,7 @@ export default function Inventory(props: any) {
                 onChange={(e:any) => {
                   setHeight(e.target.value)
                   setValue("inventory.volume.height", e.target.value)
+                  setValue("inventory.volume.total_volume", e.target.value * width * length)
                 }}
               />
             </Row>
@@ -251,6 +254,7 @@ export default function Inventory(props: any) {
             placeholder={"e.g 7"}
             value={length * height * width}
             disabled
+            
           />
         </Row>
         <Spacer size={32} />
