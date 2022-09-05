@@ -225,6 +225,12 @@ const menuMdm = [
         content: () => "UoM Category",
         onClick: () => Router.push("/unit-of-measure-category"),
       },
+      {
+        key: "uom-convertion",
+        title: "UoM Convertion",
+        content: () => "UoM Convertion",
+        onClick: () => Router.push("/unit-of-measure-convertion"),
+      },
     ],
   },
   { type: "divider" },
