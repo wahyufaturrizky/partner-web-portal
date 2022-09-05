@@ -6,7 +6,7 @@ interface ModalProps {
 	onCancel?: React.MouseEventHandler<HTMLButtonElement>;
 	onOk?: React.MouseEventHandler<HTMLButtonElement>;
 	totalSelected?: string | number | undefined;
-	itemTitle?: string;
+	itemTitle?: string | string[];
 	isLoading?: boolean;
 }
 
