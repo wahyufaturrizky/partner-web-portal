@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import {
   Text,
@@ -12,6 +12,7 @@ import {
   Modal,
   DropdownMenu,
   FileUploadModal,
+  Switch,
   Lozenge,
 } from "pink-lava-ui";
 import usePagination from "@lucasmogari/react-pagination";
@@ -22,6 +23,7 @@ import { useForm } from "react-hook-form";
 import { ICDownload, ICUpload } from "../../assets/icons";
 import { mdmDownloadService } from "../../lib/client";
 import { useRouter } from "next/router";
+import styles from './index.module.css'
 
 const downloadFile = (params: any) =>
   mdmDownloadService("/uom/download", { params }).then((res) => {
@@ -69,6 +71,7 @@ const UOMConvertion = () => {
   });
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const debounceSearch = useDebounce(search, 1000);
+  const [dataUoM, setDataUoM] = useState(null)
 
   const {
     data: UOMData,
@@ -113,6 +116,84 @@ const UOMConvertion = () => {
       },
     },
   });
+  
+  useEffect(() => {
+    let data = [
+      {
+        // key:'UMC-0000001',
+        id: 'UMC-0000001',
+        name: 'Conversion Product',
+        action: (
+          <div style={{ display: "flex", justifyContent: "left" }}>
+            <Button
+              size="small"
+              onClick={() => {
+                router.push(`/unit-of-measure-convertion/${'MPC-0000005'}`);
+              }}
+              variant="tertiary"
+            >
+              View Detail
+            </Button>
+          </div>
+        ),
+        children: [
+          {
+          key: 'UMC-0000001-1',
+          Qty: 1,
+          UoM: 'PACK',
+          conversionNumber: 12,
+          baseUoM: 'PCS',
+          status: "ACTIVE"
+          },
+          {
+          key: 'UMC-0000001-2',
+          Qty: 1,
+          UoM: 'CTN',
+          conversionNumber: 24,
+          baseUoM: 'PCS',
+          status: "INACTIVE"
+          },
+        ]
+      },
+      {
+        // key: 'UMC-0000002',
+        id: 'UMC-0000002',
+        name: 'Conversion Transport',
+        action: (
+          <div style={{ display: "flex", justifyContent: "left" }}>
+            <Button
+              size="small"
+              onClick={() => {
+                router.push(`/unit-of-measure-convertion/${'MPC-0000006'}`);
+              }}
+              variant="tertiary"
+            >
+              View Detail
+            </Button>
+          </div>
+        ),
+        children: [
+          {
+          key: 'UMC-0000002-1',
+          Qty: 1,
+          UoM: 'PACK',
+          conversionNumber: 22,
+          baseUoM: 'PCS',
+          status: "ACTIVE"
+          },
+          {
+          key: 'UMC-0000002-2',
+          Qty: 1,
+          UoM: 'CTN',
+          conversionNumber: 21,
+          baseUoM: 'PCS',
+          status: "INACTIVE"
+          },
+        ]
+      }
+    ]
+    setDataUoM(data)
+  }, [])
 
   const { mutate: deleteUom, isLoading: isLoadingDeleteUom } = useDeletUOM({
     options: {
@@ -133,38 +214,65 @@ const UOMConvertion = () => {
     },
   });
 
+  const checkTableChildren = (rowKey: any) => {
+    const data = dataUoM?.map(element => element.children.map(el => {
+      if(el.key === rowKey.key){
+        el.status === 'ACTIVE' ? el.status = 'INACTIVE' : el.status = 'ACTIVE'
+      }
+      return el
+    }))
+    const dataSekarang = [...dataUoM]
+
+    dataSekarang.forEach((el, i) => {
+      el.children = data[i]
+    })
+    setDataUoM(dataSekarang)
+  }
+
+  const checkedStatus = (status: string) => {
+    return status === 'ACTIVE' ? true : false
+  }
+
   const columns = [
     {
       title: "UoM Conversion ID",
       dataIndex: "id",
+      key: 'id',
     },
     {
       title: "Uom Conversion Name",
-      dataIndex: "uomName",
+      dataIndex: "name",
+      key: 'name'
     },
     {
       title: "Qty",
-      dataIndex: "uomCategoryName",
+      dataIndex: "Qty",
+      key: 'Qty',
     },
     {
       title: "UoM",
-      dataIndex: "uomCategoryName",
+      dataIndex: "UoM",
+      key: 'UoM'
     },
     {
       title: "Conversion Number",
-      dataIndex: "uomCategoryName",
+      dataIndex: "conversionNumber",
+      key: 'conversionNumber'
     },
     {
       title: "Base UoM",
-      dataIndex: "uomCategoryName",
+      dataIndex: "baseUoM",
+      key: 'baseUoM',
     },
     {
       title: "Active",
-      dataIndex: "status",
-      render: (status: any) => (
-        <Lozenge variant={status === "ACTIVE" ? "green" : "black"}>
-          {status === "ACTIVE" ? "Active" : "Inactive"}
-        </Lozenge>
+      dataIndex: 'status',
+      render: (status: string, rowKey: any) => (
+        <>
+        {rowKey.action? '' :
+          <Switch checked={checkedStatus(status)} onChange={() => checkTableChildren(rowKey)}/>
+        }
+        </>
       ),
     },
     {
@@ -174,10 +282,27 @@ const UOMConvertion = () => {
       align: "left",
     },
   ];
+  
 
   const rowSelection = {
     selectedRowKeys,
-    onChange: (selectedRowKeys: any) => {
+    getCheckboxProps: (record: any) => {
+      console.log(record.action)
+      if(record?.action){
+        return {
+          disabled: false,
+        }
+      } else {
+        return {
+          className: styles.overideAntdCheckbox,
+        }
+      }
+    },
+    onChange: (selectedRowKeys: any, selectedRows: any, getCheckboxProps: any) => {
+      console.log(getCheckboxProps, '<<<,')
+      if(!selectedRowKeys) {
+      }
+      console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows, 'getcheckbox:', getCheckboxProps);
       setSelectedRowKeys(selectedRowKeys);
     },
   };
@@ -213,7 +338,7 @@ const UOMConvertion = () => {
                 setShowDelete({
                   open: true,
                   type: "selection",
-                  data: { uomData: UOMData, selectedRowKeys },
+                  data: { uomData: dataUoM, selectedRowKeys },
                 })
               }
               disabled={rowSelection.selectedRowKeys?.length === 0}
@@ -290,8 +415,9 @@ const UOMConvertion = () => {
           <Table
             loading={isLoadingUOM || isFetchingUOM}
             columns={columns}
-            data={UOMData?.data}
+            data={dataUoM}
             rowSelection={rowSelection}
+            rowKey={"id"}
           />
           <Pagination pagination={pagination} />
         </Col>
@@ -306,13 +432,7 @@ const UOMConvertion = () => {
           title={"Confirm Delete"}
           footer={null}
           content={
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "center",
-              }}
-            >
+            <TopButtonHolder>
               <Spacer size={4} />
               {renderConfirmationText(isShowDelete.type, isShowDelete.data)}
               <Spacer size={20} />
@@ -347,7 +467,7 @@ const UOMConvertion = () => {
                   {isLoadingDeleteUom ? "loading..." : "Yes"}
                 </Button>
               </div>
-            </div>
+            </TopButtonHolder>
           }
         />
       )}
@@ -369,4 +489,13 @@ const Card = styled.div`
   padding: 16px;
 `;
 
+const HideCheckBox = styled.input.attrs({ type: 'checkbox' })`
+  opacity: 0;
+`;
+
+const TopButtonHolder = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+`
 export default UOMConvertion;

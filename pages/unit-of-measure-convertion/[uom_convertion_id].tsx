@@ -24,7 +24,7 @@ import ArrowLeft from "../../assets/icons/arrow-left.svg";
 const UOMConvertionDetail = () => {
   const router = useRouter();
   const { uom_convertion_id } = router.query;
-
+  console.log(uom_convertion_id)
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [listUomCategory, setListUomCategory] = useState<any[]>([]);
   const [totalRows, setTotalRows] = useState(0);
