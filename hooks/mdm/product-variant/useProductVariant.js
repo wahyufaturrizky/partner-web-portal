@@ -2,7 +2,7 @@ import { useQuery, useMutation } from "react-query";
 import { mdmService } from "../../../lib/client";
 
 const fetchProductVariant = async ({ query = {} }) => {
-  return mdmService(`/product-variant-variants`, {
+  return mdmService(`/product-variant`, {
     params: {
       search: "",
       page: 1,

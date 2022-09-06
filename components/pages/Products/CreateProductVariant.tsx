@@ -29,7 +29,7 @@ import {
   Division
 } from './fragments'
 import styled from 'styled-components'
-import { useCreateProduct, useDeleteProduct, useProductDetail, useUpdateProduct, useUploadImageProduct } from '../../../hooks/mdm/product-list/useProductList';
+import { useCreateProductVariant, useDeleteProductVariant, useProductVariantDetail, useUpdateProductVariant, useUploadImageProductVariant } from '../../../hooks/mdm/product-variant/useProductVariant';
 import { useProductBrandInfiniteLists } from '../../../hooks/mdm/product-brand/useProductBrandMDM';
 import useDebounce from '../../../lib/useDebounce';
 import { toSnakeCase } from "../../../lib/caseConverter";
@@ -52,7 +52,6 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
 
   const [canBePurchased, setCanBePurchased] = useState(false);
   const [canBeSold, setCanBeSold] = useState(false);
-  const [canBeExpensed, setCanExpensed] = useState(false);
 
   const [isShowDelete, setShowDelete] = useState({ open: false });
 
@@ -63,14 +62,9 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
     { title: "Purchasing" },
     { title: "Accounting" },
     { title: "Branch" },
+    { title: "Division" },
     { title: "Registration" },
   ];
-
-  if(isCreateProductVariant){
-    listTabItems.pop();
-    listTabItems.push({ title: "Division" })
-    listTabItems.push({ title: "Registration" })
-  }
 
   const status: { id: string, value: string }[] = [
     { id: "active", value: "Active" },
@@ -154,7 +148,7 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
 
   const {
     isLoading: isLoadingProduct
-  } = useProductDetail({
+  } = useProductVariantDetail({
     id:id,
     options: {
       enabled: isUpdate,
@@ -164,7 +158,6 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
           setValue(key, data[key]);
           setCanBePurchased(data.canBePurchased);
           setCanBeSold(data.canBeSold);
-          setCanExpensed(data.canBeExpensed)
         })
       return data;
     }
@@ -205,7 +198,7 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
     },
   });
 
-  const { mutate: uploadImage, isLoading: isLoadingUploadImage } = useUploadImageProduct({
+  const { mutate: uploadImage, isLoading: isLoadingUploadImage } = useUploadImageProductVariant({
     options: {
       onSuccess: () => {
         router.push('/product-list')
@@ -213,7 +206,7 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
     }
   })
 
-  const { mutate: createProduct, isLoading: isLoadingCreateProduct } = useCreateProduct({
+  const { mutate: createProduct, isLoading: isLoadingCreateProduct } = useCreateProductVariant({
     options: {
       onSuccess: (data:any) => {
         console.log("data", data)
@@ -232,7 +225,7 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
     }
   })
 
-  const { mutate: updateProduct, isLoading: isLoadingUpdateProduct } = useUpdateProduct({
+  const { mutate: updateProduct, isLoading: isLoadingUpdateProduct } = useUpdateProductVariant({
     id,
     options: {
       onSuccess: (data:any) => {
@@ -247,7 +240,7 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
   })
   
   const { mutate: deleteProductList, isLoading: isLoadingDeleteProductList } =
-  useDeleteProduct({
+  useDeleteProductVariant({
     options: {
       onSuccess: () => {
         setShowDelete({ open: false });
@@ -446,7 +439,7 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
 
       {!isUpdate ? 
         <Row gap="4px">
-          <Text variant={"h4"}>Create Product</Text>
+          <Text variant={"h4"}>Create Product Variant</Text>
         </Row> :
         <Row gap="4px">
           <ArrowLeft style={{ cursor: "pointer" }} onClick={() => router.back()} />
@@ -469,14 +462,6 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
           <Checkbox size="small" checked={canBeSold} onChange={()=>setCanBeSold(!canBeSold)}/>
           <div style={{ cursor: "pointer" }} onClick={()=>setCanBeSold(!canBeSold)}>
             <Text variant={"h6"}>Can Be Sold</Text>
-          </div>
-        </Row>
-      </Col>
-      <Col>
-        <Row alignItems="center">
-          <Checkbox size="small" checked={canBeExpensed} onChange={()=>setCanExpensed(!canBeExpensed)}/>
-          <div style={{ cursor: "pointer" }} onClick={()=>setCanExpensed(!canBeExpensed)}>
-            <Text variant={"h6"}>Can Be Expensed</Text>
           </div>
         </Row>
       </Col>
@@ -584,6 +569,7 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
                   )}
                 />
               </Col>
+              
 
               <Spacer size={10} />
 
@@ -633,37 +619,33 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
               </Col>
             </Row>
 
-            {isCreateProductVariant && (
-              <>
-                <Spacer size={10} />
+            <Spacer size={10} />
 
-                <Row width="100%" noWrap>
-                  <Col width="100%">
-                    <Input
-                        width="100%"
-                        label="SKU Number"
-                        height="48px"
-                        placeholder={"e.g 413111"}
-                        {...register("sku_number", {
-                          required: 'Sku Number is required'
-                        })}
-                      />
-                  </Col>
+            <Row width="100%" noWrap>
+              <Col width="100%">
+                <Input
+                    width="100%"
+                    label="SKU Number"
+                    height="48px"
+                    placeholder={"e.g 413111"}
+                    {...register("sku_number", {
+                      required: 'Sku Number is required'
+                    })}
+                  />
+              </Col>
 
-                  <Spacer size={10} />
+              <Spacer size={10} />
 
-                  <Col width="100%">
-                    <Input
-                        width="100%"
-                        label="Barcode"
-                        height="48px"
-                        placeholder={"e.g 413111"}
-                        {...register("barcode")}
-                      />
-                  </Col>
-                </Row>
-              </>
-            )}
+              <Col width="100%">
+                <Input
+                    width="100%"
+                    label="Barcode"
+                    height="48px"
+                    placeholder={"e.g 413111"}
+                    {...register("barcode")}
+                  />
+              </Col>
+            </Row>
 
             <Spacer size={10} />
 

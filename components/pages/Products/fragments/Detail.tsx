@@ -31,6 +31,7 @@ export default function Detail(props: any) {
     register,
     isUpdate,
     fieldsProductVariants,
+    isCreateProductVariant
   } = props
 
   const columsVariant = [
@@ -274,41 +275,47 @@ export default function Detail(props: any) {
         </Col>
       </Row>
 
-      <Spacer size={42} />
-      <Divider />
-      <Spacer size={39} />
-      <Col>
-        {isUpdate ?
-          <ProductOptions
-            control={control} 
-          />
-          :
-          <ProductOptionsCreate 
-            control={control} 
-            setValue={setValue}
-            watch={watch}
-          />
-        }
-      </Col>
-      <Spacer size={48} />
+      {
+        !isCreateProductVariant && (
+        <>
+          <Spacer size={42} />
+          <Divider />
+          <Spacer size={39} />
+          <Col>
+            {isUpdate ?
+              <ProductOptions
+                control={control} 
+              />
+              :
+              <ProductOptionsCreate 
+                control={control} 
+                setValue={setValue}
+                watch={watch}
+              />
+            }
+          </Col>
+          <Spacer size={48} />
 
-      <Col>
-        <Text variant="headingMedium" color="blue.darker">Variant</Text>
-        <Spacer size={26} />
-        <Search
-            placeholder={`Search Variant Name, SKU Code `}
-            onChange={(e: any) => setSearchVariant(e.target.value)}
-            width="360px"
-            height="48px"
-        />
-        <Spacer size={16} />
-        <Table
-          columns={columsVariant}
-          data={paginateVariant}
-          width="100%"
-        />
-        {variantsData.length > 5 && <Pagination pagination={paginationVariant} /> }
-      </Col>
+          <Col>
+            <Text variant="headingMedium" color="blue.darker">Variant</Text>
+            <Spacer size={26} />
+            <Search
+                placeholder={`Search Variant Name, SKU Code `}
+                onChange={(e: any) => setSearchVariant(e.target.value)}
+                width="360px"
+                height="48px"
+            />
+            <Spacer size={16} />
+            <Table
+              columns={columsVariant}
+              data={paginateVariant}
+              width="100%"
+            />
+            {variantsData.length > 5 && <Pagination pagination={paginationVariant} /> }
+          </Col>
+        </>
+        )
+      }
     </div>
   )
 }
