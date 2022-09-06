@@ -15,23 +15,24 @@ import { useRouter } from 'next/router'
 
 import ArrowLeft from '../../../assets/icons/arrow-left.svg'
 
-export default function ComponentDetailSalesman() {
+export default function ComponentDetailSalesman({
+  listCustomers
+}: any) {
   const router = useRouter();
   const { status, salesman_id } = router.query
 
   const columns = [
     {
       title: 'Customer',
-      dataIndex: 'customer',
+      dataIndex: 'name',
       width: "80%"
     },
     {
       title: 'Action',
-      dataIndex: 'action',
-      render: () => (
+      render: ({ id }: any) => (
         <Button
           size="small"
-          onClick={() => router.push(`/customer/1334`)}
+          onClick={() => router.push(`/customers/${id}`)}
           variant="tertiary"
         >
           View Detail
@@ -39,6 +40,8 @@ export default function ComponentDetailSalesman() {
       )
     },
   ]
+
+  console.log(listCustomers)
 
   const statusSalesman = () => {
     switch (status) {
@@ -182,7 +185,7 @@ export default function ComponentDetailSalesman() {
               <Spacer size={20} />
               <TextWarning> *Auto added from Customer</TextWarning>
               <Spacer size={20} />
-              <Table columns={columns} data={[1, 2, 3]} />
+              <Table columns={columns} data={listCustomers} />
             </Accordion.Body>
           </Accordion.Item>
         </Accordion>
