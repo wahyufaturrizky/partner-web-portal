@@ -1,5 +1,12 @@
 import React, { useState } from 'react'
-import { Search, ContentSwitcher, DropdownMenu, Text, Spacer } from 'pink-lava-ui'
+import {
+  Search,
+  DropdownMenuOptionGroupCustom,
+  ContentSwitcher,
+  DropdownMenu,
+  Text,
+  Spacer
+} from 'pink-lava-ui'
 import styled from 'styled-components'
 
 import {
@@ -59,10 +66,24 @@ export default function Salesman() {
             placeholder="Search Salesman ID, Employee, etc"
             onChange={({ target }: any) => { }}
           /> 
-          <Search
-            width="260px"
-            placeholder="Search Salesman ID, Employee, etc"
-            onChange={({ target }: any) => { }}
+          <DropdownMenuOptionGroupCustom
+            handleChangeValue={(value: string[]) => {}}
+            listItems={[
+              {
+                label: "By Country",
+                list: [
+                  { label: 'filter-1', value: 'filter-1' },
+                  { label: 'filter-2', value: 'filter-2' },
+                  { label: 'filter-3', value: 'filter-3' },
+                ]
+              }
+            ]}
+            label={false}
+            width={194}
+            roundedSelector
+            defaultValue="All"
+            placeholder="Filter"
+            noSearch
           />
         </FlexElement>
 
