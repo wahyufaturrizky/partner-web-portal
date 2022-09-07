@@ -419,10 +419,12 @@ const UOMConversionDetail = () => {
         width={'400px'}
         visible={showCreateModal}
         onCancel={() => setShowCreateModal(false)}
-        title={"Add New Conversion"}
         footer={null}
         content={
           <TopButtonHolder>
+            <CreateTitle>
+              Add New Conversion
+            </CreateTitle>
             <Spacer size={20} />
             <Col width="100%">
               <Controller
@@ -433,28 +435,12 @@ const UOMConversionDetail = () => {
                   <>
                     <Label>UoM</Label>
                     <Spacer size={3} />
-                    <div style={{
-                      display: 'flex',
-                      position: 'relative',
-                      justifyContent: 'space-between'
-                    }}
-                    >
-                      <div style={{
-                        zIndex: '10',
-                        background: 'lightgray',
-                        position: 'absolute',
-                        height: '40px',
-                        width: '25%',
-                        borderRadius: '5px 0 0 5px',
-                        margin: '0 auto',
-                        textAlign: 'center',
-                        paddingTop: '.5rem',
-                        border: '1px solid gray'
-                      }}>Per</div>
+                    <CreateSelectDiv>
+                      <InputAddonAfter>Per</InputAddonAfter>
                       <FormSelect
                         // dropdownStyle={{ borderRadius: '0 5px 5px 0' }}
                         defaultValue={UomData.uomCategoryId}
-                        style={{ width: "77%", marginLeft: '23%', paddingLeft: '2px' }}
+                        style={{ width: "82%", marginLeft: '18%', paddingLeft: '2px' }}
                         size={"large"}
                         placeholder={"PCS"}
                         borderColor={"#AAAAAA"}
@@ -479,7 +465,7 @@ const UOMConversionDetail = () => {
                           setSearch(value);
                         }}
                       />
-                    </div>
+                    </CreateSelectDiv>
                   </>
                 )}
               />
@@ -487,10 +473,7 @@ const UOMConversionDetail = () => {
               <Spacer size={15} />
 
               <Col width={"100%"}>
-                <div style={{
-                  display: 'flex',
-                  position: 'relative'
-                }}>
+                <CreateInputDiv>
                   {UOMDataFake && 
                     <Input
                       width="80%"
@@ -502,22 +485,8 @@ const UOMConversionDetail = () => {
                       {...register("name", { required: "Please enter name." })}
                     />
                   }
-                  <div style={{
-                          zIndex: '10',
-                          position: 'absolute',
-                          right: 0,
-                          bottom: 4,
-                          background: 'lightgray',
-                          height: '40px',
-                          width: '25%',
-                          borderRadius: '0 5px 5px 0',
-                          margin: '0 auto',
-                          marginTop: '2rem',
-                          textAlign: 'center',
-                          paddingTop: '.5rem',
-                          border: '1px solid gray'
-                        }}>PCS</div>
-                </div>
+                  <InputAddonBefore>PCS</InputAddonBefore>
+                </CreateInputDiv>
               </Col>
               
             <Spacer size={100} />
@@ -634,6 +603,51 @@ const TopButtonHolder = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: center;
+`
+
+const CreateInputDiv = styled.div`
+  display: flex;
+  position: relative;
+`
+
+const CreateSelectDiv = styled.div`
+  display: flex;
+  position: relative;
+  justify-content: space-between;
+`
+
+const CreateTitle = styled.div`
+  margin-top: 1rem;
+  font-weight: 600;
+  font-size: 1.5rem;
+`
+const InputAddonAfter = styled.div`
+  z-index: 10;
+  background: #f4f4f4;
+  position: absolute;
+  height: 40px;
+  width: 20%;
+  border-radius: 5px 0 0 5px;
+  margin: 0 auto;
+  text-align: center;
+  padding-top: .5rem;
+  border: 1px solid #aaaaaa;
+`
+
+const InputAddonBefore = styled.div`
+  z-index: 10;
+  right: 0;
+  bottom: 4;
+  background: #f4f4f4;
+  position: absolute;
+  height: 40px;
+  width: 20%;
+  border-radius: 0 5px 5px 0;
+  margin: 0 auto;
+  margin-top: 1.75rem;
+  text-align: center;
+  padding-top: .5rem;
+  border: 1px solid #aaaaaa;
 `
 
 export default UOMConversionDetail;
