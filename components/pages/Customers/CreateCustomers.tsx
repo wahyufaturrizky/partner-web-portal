@@ -23,10 +23,10 @@ const Addresses = dynamic(() => import('./fragments/Addresses'))
 const Sales = dynamic(() => import('./fragments/Sales'))
 const Invoicing = dynamic(() => import('./fragments/Invoicing'))
 const Purchasing = dynamic(() => import('./fragments/Purchasing'))
-import UploadImage from './fragments/UploadImages'
 
+import UploadImage from './fragments/UploadImages'
 import { defaultValuesCreate, addressBodyField, listTabItems, status } from './constants'
-import { useCreateCustomers, useUploadLogo } from 'hooks/mdm/customers/useCustomersMDM';
+import { useCreateCustomers, useUpdateCustomer, useUploadLogo } from 'hooks/mdm/customers/useCustomersMDM';
 
 export default function CreateCustomers({
   isUpdate,
@@ -192,6 +192,15 @@ export default function CreateCustomers({
       }
     }
   })
+
+  const { mutate: updateCustomer } = useUpdateCustomer({
+    id: router.query,
+    options: {
+      onSuccess: () => {}
+    }
+  })
+
+  console.log(router.query)
   
   // action function
   const onSubmit = (data: any) => {
@@ -278,6 +287,7 @@ export default function CreateCustomers({
   }
 
   const handleEditContact = (data: any) => {}
+  
 
   // destructure properties
   const propsContacts = {
