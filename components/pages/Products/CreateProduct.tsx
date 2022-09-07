@@ -209,7 +209,6 @@ export default function CreateProduct({ isCreateProductVariant = true}) {
   const { mutate: createProduct, isLoading: isLoadingCreateProduct } = useCreateProduct({
     options: {
       onSuccess: (data:any) => {
-        console.log("data", data)
         if( getValues('image')){
           const formData:any = new FormData();
           formData.append("image", getValues('image'));

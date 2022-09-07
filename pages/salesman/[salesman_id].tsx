@@ -3,13 +3,13 @@ import ComponentDetailSalesman from '../../components/pages/Salesman/DetailSales
 import { useListCustomers } from '../../hooks/mdm/customers/useCustomersMDM'
 
 export default function DetailSalesman() {
-  const { data: listCustomers } = useListCustomers({
+  const { data: listCustomers, isLoading } = useListCustomers({
     options: { onSuccess: () => {} },
     query: {},
   });
 
   return (
-    <ComponentDetailSalesman listCustomers={listCustomers?.rows} />
+    <ComponentDetailSalesman isLoading={isLoading} listCustomers={listCustomers?.rows} />
   )
 }
 

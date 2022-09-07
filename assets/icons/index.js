@@ -18,8 +18,10 @@ import ICCheckPrimary from "./check-as-primary.svg";
 import ICView from "./ic-view.svg";
 import ICDollar from "./dollar.svg";
 import ICManageCustGroupBuyingPrice from "./manage-cust-group-buying-price.svg";
+import IconAdd from './ICAdd'
 
 export {
+  IconAdd,
   ICField,
   ICUser,
   ICMenu,

@@ -26,7 +26,7 @@ const Purchasing = dynamic(() => import('./fragments/Purchasing'))
 import UploadImage from './fragments/UploadImages'
 
 import { defaultValuesCreate, addressBodyField, listTabItems, status } from './constants'
-import { useCreateCustomers, useUploadLogo } from '../../../hooks/mdm/customers/useCustomersMDM';
+import { useCreateCustomers, useUploadLogo } from 'hooks/mdm/customers/useCustomersMDM';
 
 export default function CreateCustomers({
   isUpdate,

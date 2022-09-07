@@ -1,7 +1,7 @@
 import styled from "styled-components";
 
-import DownloadSvg from "../../../assets/icons/ic-download.svg";
-import UploadSvg from "../../../assets/icons/ic-upload.svg";
+import DownloadSvg from "assets/icons/ic-download.svg";
+import UploadSvg from "assets/icons/ic-upload.svg";
 
 export const options = ({ status: {
   active,
