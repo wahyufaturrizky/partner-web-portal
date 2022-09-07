@@ -302,7 +302,7 @@ const UOMConversion = () => {
             <Button
               size="big"
               variant="primary"
-              onClick={() => router.push("/unit-of-measure/create")}
+              onClick={() => router.push("/unit-of-measure-conversion/create")}
             >
               Create
             </Button>
