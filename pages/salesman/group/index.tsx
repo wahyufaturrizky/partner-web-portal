@@ -101,7 +101,7 @@ const SalesmanGroup = () => {
         const mappedData = data?.map((element: any) => {
           return {
             value: element.code,
-            label: element.brand,
+            label: element.name,
           };
         });
 
@@ -126,7 +126,7 @@ const SalesmanGroup = () => {
         const mappedData = {
           key: data.id,
           id: data.code,
-          name: data.brand,
+          name: data.name,
           parent: data.parent,
           parentId: data?.parentRecord?.code,
           externalCode: data.externalCode,
@@ -167,7 +167,7 @@ const SalesmanGroup = () => {
           return {
             key: element.id,
             id: element.code,
-            name: element.brand,
+            name: element.name,
             parent: element.parent,
             action: (
               <div style={{ display: "flex", justifyContent: "left" }}>
@@ -437,7 +437,7 @@ const SalesmanGroup = () => {
                     label="Salesman Group Name"
                     height="40px"
                     placeholder={"e.g Motoris"}
-                    {...register("brand", {
+                    {...register("name", {
                       shouldUnregister: true,
                     })}
                   />
