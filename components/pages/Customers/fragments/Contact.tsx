@@ -2,10 +2,10 @@ import React from 'react'
 import { Col, Row, Search, Spacer, CustomPopover } from "pink-lava-ui";
 import styled from 'styled-components'
 
-import ModalAddNewContact from '../../../elements/Modal/ModalAddNewContact';
-import IconAdd from '../../../../.../../assets/icons/ic-add-rounded.svg'
-import IconAvatar from '../../../../.../../assets/icons/ic-avatar-xs.svg'
-import IconEdit from '../../../../.../../assets/icons/ic-more.svg'
+import ModalAddNewContact from 'components/elements/Modal/ModalAddNewContact';
+import IconAdd from 'assets/icons/ic-add-rounded.svg'
+import IconAvatar from 'assets/icons/ic-avatar-xs.svg'
+import IconEdit from 'assets/icons/ic-more.svg'
 
 import styles from '../styles.module.css'
 

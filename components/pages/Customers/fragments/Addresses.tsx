@@ -12,8 +12,7 @@ import {
   FileUploaderAllFiles
 } from "pink-lava-ui";
 
-import { ICCheckPrimary } from "../../../../assets";
-import IconAdd from '../../../../assets/icons/ICAdd'
+import { ICCheckPrimary, IconAdd } from "assets";
 
 export default function Addresses(props: any) {
   const {

@@ -68,9 +68,7 @@ export default function SalesmanDivision() {
     }
   }
 
-  const handleCreteaSales = (items: string[]) => {
-    console.log(items)
-  }
+  const handleCreteaSales = (items: string[]) => {}
 
   return (
     <div>
