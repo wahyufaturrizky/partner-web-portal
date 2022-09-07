@@ -13,13 +13,11 @@ import {
   DropdownMenu,
   FileUploadModal,
   Switch,
-  Lozenge,
 } from "pink-lava-ui";
 import usePagination from "@lucasmogari/react-pagination";
 import { useUOMList, useUploadFileUOM, useDeletUOM } from "../../hooks/mdm/unit-of-measure/useUOM";
 import useDebounce from "../../lib/useDebounce";
 import { queryClient } from "../_app";
-import { useForm } from "react-hook-form";
 import { ICDownload, ICUpload } from "../../assets/icons";
 import { mdmDownloadService } from "../../lib/client";
 import { useRouter } from "next/router";
@@ -50,7 +48,7 @@ const renderConfirmationText = (type: any, data: any) => {
   }
 };
 
-const UOMConvertion = () => {
+const UOMConversion = () => {
   const router = useRouter();
   const pagination = usePagination({
     page: 1,
@@ -101,7 +99,7 @@ const UOMConvertion = () => {
                 <Button
                   size="small"
                   onClick={() => {
-                    router.push(`/unit-of-measure-convertion/${element.uomId}`);
+                    router.push(`/unit-of-measure-conversion/${element.uomId}`);
                   }}
                   variant="tertiary"
                 >
@@ -128,7 +126,7 @@ const UOMConvertion = () => {
             <Button
               size="small"
               onClick={() => {
-                router.push(`/unit-of-measure-convertion/${'MPC-0000005'}`);
+                router.push(`/unit-of-measure-conversion/${'MPC-0000005'}`);
               }}
               variant="tertiary"
             >
@@ -164,7 +162,7 @@ const UOMConvertion = () => {
             <Button
               size="small"
               onClick={() => {
-                router.push(`/unit-of-measure-convertion/${'MPC-0000006'}`);
+                router.push(`/unit-of-measure-conversion/${'MPC-0000006'}`);
               }}
               variant="tertiary"
             >
@@ -215,18 +213,19 @@ const UOMConvertion = () => {
   });
 
   const checkTableChildren = (rowKey: any) => {
-    const data = dataUoM?.map(element => element.children.map(el => {
-      if(el.key === rowKey.key){
-        el.status === 'ACTIVE' ? el.status = 'INACTIVE' : el.status = 'ACTIVE'
-      }
-      return el
-    }))
-    const dataSekarang = [...dataUoM]
-
-    dataSekarang.forEach((el, i) => {
-      el.children = data[i]
-    })
-    setDataUoM(dataSekarang)
+      const data = dataUoM?.map(element => element.children.map(el => {
+        if(el.key === rowKey.key){
+          el.status === 'ACTIVE' ? el.status = 'INACTIVE' : el.status = 'ACTIVE'
+        }
+        return el
+      }))
+      const dataSekarang = [...dataUoM]
+  
+      dataSekarang.forEach((el, i) => {
+        el.children = data[i]
+      })
+      setDataUoM(dataSekarang)
+      
   }
 
   const checkedStatus = (status: string) => {
@@ -319,7 +318,7 @@ const UOMConvertion = () => {
   return (
     <>
       <Col>
-        <Text variant={"h4"}>UoM Convertion</Text>
+        <Text variant={"h4"}>UoM Conversion</Text>
         <Spacer size={20} />
       </Col>
       <Card>
@@ -490,13 +489,9 @@ const Card = styled.div`
   padding: 16px;
 `;
 
-const HideCheckBox = styled.input.attrs({ type: 'checkbox' })`
-  opacity: 0;
-`;
-
 const TopButtonHolder = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: center;
 `
-export default UOMConvertion;
+export default UOMConversion;
