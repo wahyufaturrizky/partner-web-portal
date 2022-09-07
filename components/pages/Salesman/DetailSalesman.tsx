@@ -14,13 +14,16 @@ import {
   Button,
   Checkbox,
   TextArea,
+  Pagination,
   DatePickerInput,
 } from 'pink-lava-ui'
 import moment from 'moment'
 import styled from 'styled-components'
+usePagination
 
 import ArrowLeft from 'assets/icons/arrow-left.svg'
 import { ModalConfirmation } from 'components/elements/Modal/ModalConfirmation'
+import usePagination from '@lucasmogari/react-pagination'
 
 const dropdownStatus = [
   { id: "active", value: "active" },
@@ -31,12 +34,23 @@ export default function ComponentDetailSalesman({
   listCustomers,
   isLoading
 }: any) {
+  const pagination = usePagination({
+    page: 1,
+    itemsPerPage: 10,
+    maxPageItems: Infinity,
+    numbers: true,
+    arrows: true,
+    totalItems: 100,
+  });
   const router = useRouter();
   const { status, salesman_id }: any = router.query || {}
-  const [labelConfirmation, setLabelConfirmation] = useState('')
-  const [titleModal, setTitleModal] = useState('')
-  const [modalCustomer, setModalCustomer] = useState(false)
-  const [defaultChecked, setDefaultChecked] = useState(false)
+  const [labelConfirmation, setLabelConfirmation] = useState<string>('')
+  const [titleModal, setTitleModal] = useState<string>('')
+  const [modalCustomer, setModalCustomer] = useState<{ visible: boolean, data: any }>({
+    visible: false,
+    data: {}
+  })
+  const [defaultChecked, setDefaultChecked] = useState<boolean>(false)
   const [modalConfirmation, setModalConfirmation] = useState<any>({
     active: false,
     inactive: false,
@@ -53,10 +67,10 @@ export default function ComponentDetailSalesman({
     },
     {
       title: 'Action',
-      render: ({ id }: any) => (
+      render: (items: any) => (
         <Button
           size="small"
-          onClick={() => setModalCustomer(true)}
+          onClick={() => setModalCustomer({ ...modalCustomer, visible: true, data: items })}
           variant="tertiary"
         >
           View Detail
@@ -210,13 +224,23 @@ export default function ComponentDetailSalesman({
       />
 
       {/* modal view detail customers */}
+      {console.log(modalConfirmation)}
       <Modal
         width={900}
-        visible={modalCustomer}
-        title="PT. Indomarco Jaya"
-        footer={<Button>Open Customer Page</Button>}
+        visible={modalCustomer.visible}
+        title={modalCustomer?.data?.name}
+        onCancel={() => setModalCustomer({visible: false, data: {}})}
+        footer={
+          <Row justifyContent="end">
+            <Button onClick={() => window.open(`/customers/${modalCustomer?.data?.id}`)}>
+              Open Customer Page
+            </Button>
+          </Row>
+        }
         content={
           <ContentDetailCustomer
+            detailCustomer={modalCustomer.data}
+            pagination={pagination}
             checkedDate={defaultChecked}
             onChecked={(value: any) => {
               setDefaultChecked(!defaultChecked)
@@ -228,31 +252,50 @@ export default function ComponentDetailSalesman({
   )
 }
 
-const ContentDetailCustomer = ({ checkedDate, onChecked }:any) => {
+const ContentDetailCustomer = ({ checkedDate, onChecked, pagination, detailCustomer = {} }:any) => {
+  const columns: any = [
+    { title: 'Permission Name', dataIndex: 'customer' },
+    { title: 'Module', dataIndex: 'module' },
+  ]
+  console.log(detailCustomer)
   return (
-    <Row alignItems="center" justifyContent="space-between">
-      <Col width="45%">
-        <DatePickerInput
-          fullWidth
-          label="Start Date"
-        />
-      </Col>
-      <Col width="45%">
-        <DatePickerInput
-          fullWidth
-          disabled={checkedDate}
-          value={checkedDate ? moment('2015-06-06', 'YYYY-MM-DD').toString() : '2015-06-11'}
-          label="End Date"
-        />
-      </Col>
-      <FlexElement style={{ paddingTop: "1.5rem", gap: "1px" }}>
-        <Checkbox
-          checked={checkedDate}
-          onChange={onChecked}
-        />
-        <Text>Today</Text>
-      </FlexElement>
-    </Row>
+    <div>
+      <Spacer size={20} />
+      <Row alignItems="center" justifyContent="space-between">
+        <Col width="45%">
+          <DatePickerInput
+            fullWidth
+            value={checkedDate && moment()}
+            label="Start Date"
+          />
+        </Col>
+        <Col width="45%">
+          <DatePickerInput
+            fullWidth
+            disabled={checkedDate}
+            value={checkedDate && moment()}
+            label="End Date"
+          />
+        </Col>
+        <FlexElement style={{ paddingTop: "1.5rem", gap: "1px" }}>
+          <Checkbox
+            checked={checkedDate}
+            onChange={onChecked}
+          />
+          <Text>Today</Text>
+        </FlexElement>
+      </Row>
+      <Spacer size={20} />
+      <Table columns={columns} data={[
+        { customer: 'Approval Payment', module: 'Finance' },
+        { customer: 'Create Payment', module: 'Finance' },
+        { customer: 'Create Payment', module: 'Finance' },
+        ]}
+      />
+      <Spacer size={20} />
+      <Pagination pagination={pagination} />
+      <Spacer size={20} />
+    </div>
   )
 }
 

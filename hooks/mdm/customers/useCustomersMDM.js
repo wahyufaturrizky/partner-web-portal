@@ -63,9 +63,23 @@ const useDeleteCustomers = ({ options }) => {
   )
 }
 
+
+const useUpdateCustomer = ({ id, options }) => {
+  return useMutation(
+    (data) => {
+      return mdmService(`/customer/${id}`, {
+        method: 'PUT',
+        data
+      }),
+        { ...options }
+    }
+  )
+}
+
 export {
   useListCustomers,
   useCreateCustomers,
+  useUpdateCustomer,
   useDeleteCustomers,
   useDetailCustomer,
   useUploadLogo
