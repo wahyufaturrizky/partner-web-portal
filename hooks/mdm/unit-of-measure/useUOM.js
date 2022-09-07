@@ -45,7 +45,7 @@ const fetchUOMDetail = async ({ id, companyId }) => {
   return mdmService(`/uom/${companyId}/${id}`).then((data) => data);
 };
 
-const useUOMDetail = ({ id,companyId, options }) => {
+const useUOMDetail = ({ id, companyId, options }) => {
   return useQuery(["uom-detail", id], () => fetchUOMDetail({ id, companyId }), {
     ...options,
   });
@@ -103,4 +103,12 @@ const useUploadFileUOM = ({ options }) => {
   );
 };
 
-export { useUOMList, useUOMInfiniteLists,  useUOMDetail, useCreateUOM, useUpdateUOM, useDeletUOM, useUploadFileUOM };
+export {
+  useUOMList,
+  useUOMInfiniteLists,
+  useUOMDetail,
+  useCreateUOM,
+  useUpdateUOM,
+  useDeletUOM,
+  useUploadFileUOM,
+};
