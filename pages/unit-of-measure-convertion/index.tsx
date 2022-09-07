@@ -298,6 +298,7 @@ const UOMConvertion = () => {
         }
       }
     },
+    
     onChange: (selectedRowKeys: any, selectedRows: any, getCheckboxProps: any) => {
       console.log(getCheckboxProps, '<<<,')
       if(!selectedRowKeys) {
