@@ -25,6 +25,23 @@ import { useUOMCategoryInfiniteLists } from "../../hooks/mdm/unit-of-measure-cat
 import { ModalDeleteConfirmation } from "../../components/elements/Modal/ModalConfirmationDelete";
 import ArrowLeft from "../../assets/icons/arrow-left.svg";
 import usePagination from "@lucasmogari/react-pagination";
+import styles from './index.module.css'
+
+const renderConfirmationText = (type: any, data: any) => {
+switch (type) {
+  case "selection":
+    return data.selectedRowKeys.length > 1
+      ? `Are you sure to delete ${data.selectedRowKeys.length} items ?`
+      : `Are you sure to delete Uom with ID's ${
+          data?.uomData?.find((el: any) => el.key === data.selectedRowKeys[0]).key
+        } ?`;
+  case "detail":
+    return `Are you sure to delete Uom Name ${data.uomName} ?`;
+
+  default:
+    break;
+}
+};
 
 const UOMConversionDetail = () => {
   const router = useRouter();
@@ -37,10 +54,14 @@ const UOMConversionDetail = () => {
     totalItems: 100,
   });
   const { uom_conversion_id } = router.query;
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [listUomCategory, setListUomCategory] = useState<any[]>([]);
   const [totalRows, setTotalRows] = useState(0);
   const [search, setSearch] = useState("");
+
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [isShowDelete, setShowDelete] = useState({ open: false, type: "selection", data: {} });
+  const [showCreateModal, setShowCreateModal] = useState(false)
+
   const debounceFetch = useDebounce(search, 1000);
   const [dataUoM, setDataUoM] = useState<any | null>(null)
   const [UOMDataFake, setUOMDataFake] = useState<any | null>(null)
@@ -197,6 +218,14 @@ const UOMConversionDetail = () => {
     },
   });
 
+  const deletedProduct = (id: any) => {
+    console.log(id, '<<delete prod')
+  }
+
+  const createProduct = () => {
+    const newDataUOM = [...dataUoM]
+
+  }
   const onSubmit = (data: any) => {
     updateUom(data);
   };
@@ -351,10 +380,21 @@ const UOMConversionDetail = () => {
               <HeaderLabel>Conversion</HeaderLabel>
               <Spacer size={20} />
               <Row gap="16px">
-                <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
-                  {isLoadingUpdateUom ? "Loading..." : "+ Add New"}
+                <Button size="big" variant={"primary"} onClick={() => setShowCreateModal(true)}>
+                  + Add New
                 </Button>
-                <Button size="big" variant={"tertiary"} onClick={() => setShowDeleteModal(true)}>
+                <Button
+                  size="big"
+                  variant={"tertiary"}
+                  onClick={() =>
+                    setShowDelete({
+                      open: true,
+                      type: "selection",
+                      data: { uomData: dataUoM, selectedRowKeys },
+                    })
+                  }
+                  disabled={rowSelection.selectedRowKeys?.length === 0}
+                >
                   Delete
                 </Button>
               </Row>
@@ -372,7 +412,139 @@ const UOMConversionDetail = () => {
           </Col>
         </Card>
       </Col>
+      {showCreateModal && (
+        <Modal
+        // style={{fontSize: '20px'}}
+        centered
+        width={'400px'}
+        visible={showCreateModal}
+        onCancel={() => setShowCreateModal(false)}
+        title={"Add New Conversion"}
+        footer={null}
+        content={
+          <TopButtonHolder>
+            <Spacer size={20} />
+            <Col width="100%">
+              <Controller
+                control={control}
+                name="uom_category_id"
+                defaultValue={UomData.uomCategoryId}
+                render={({ field: { onChange } }) => (
+                  <>
+                    <Label>UoM</Label>
+                    <Spacer size={3} />
+                    <div style={{
+                      display: 'flex',
+                      position: 'relative',
+                      justifyContent: 'space-between'
+                    }}
+                    >
+                      <div style={{
+                        zIndex: '10',
+                        background: 'lightgray',
+                        position: 'absolute',
+                        height: '40px',
+                        width: '25%',
+                        borderRadius: '5px 0 0 5px',
+                        margin: '0 auto',
+                        textAlign: 'center',
+                        paddingTop: '.5rem',
+                        border: '1px solid gray'
+                      }}>Per</div>
+                      <FormSelect
+                        // dropdownStyle={{ borderRadius: '0 5px 5px 0' }}
+                        defaultValue={UomData.uomCategoryId}
+                        style={{ width: "77%", marginLeft: '23%', paddingLeft: '2px' }}
+                        size={"large"}
+                        placeholder={"PCS"}
+                        borderColor={"#AAAAAA"}
+                        arrowColor={"#000"}
+                        withSearch
+                        isLoading={isFetchingUomCategory}
+                        isLoadingMore={isFetchingMoreUomCategory}
+                        fetchMore={() => {
+                          if (hasNextPage) {
+                            fetchNextPage();
+                          }
+                        }}
+                        items={
+                          isFetchingUomCategory && !isFetchingMoreUomCategory
+                            ? []
+                            : listUomCategory
+                        }
+                        onChange={(value: any) => {
+                          onChange(value);
+                        }}
+                        onSearch={(value: any) => {
+                          setSearch(value);
+                        }}
+                      />
+                    </div>
+                  </>
+                )}
+              />
+            </Col>
+              <Spacer size={15} />
 
+              <Col width={"100%"}>
+                <div style={{
+                  display: 'flex',
+                  position: 'relative'
+                }}>
+                  {UOMDataFake && 
+                    <Input
+                      width="80%"
+                      label="Conversion Number"
+                      height="40px"
+                      defaultValue={UOMDataFake?.name}
+                      placeholder={"e.g gram"}
+                      addonAfter="PCS"
+                      {...register("name", { required: "Please enter name." })}
+                    />
+                  }
+                  <div style={{
+                          zIndex: '10',
+                          position: 'absolute',
+                          right: 0,
+                          bottom: 4,
+                          background: 'lightgray',
+                          height: '40px',
+                          width: '25%',
+                          borderRadius: '0 5px 5px 0',
+                          margin: '0 auto',
+                          marginTop: '2rem',
+                          textAlign: 'center',
+                          paddingTop: '.5rem',
+                          border: '1px solid gray'
+                        }}>PCS</div>
+                </div>
+              </Col>
+              
+            <Spacer size={100} />
+            <DeleteCardButtonHolder>
+              <Button
+                // size="medium"
+                variant="tertiary"
+                key="submit"
+                type="primary"
+                onClick={() => setShowDelete({ open: false, type: "", data: {} })}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="primary"
+                // size="small"
+                onClick={() => {
+                    deletedProduct(selectedRowKeys)
+                }}
+              >
+                save
+              </Button>
+            </DeleteCardButtonHolder>
+          </TopButtonHolder>
+        }
+      />
+      )}
       {showDeleteModal && (
         <ModalDeleteConfirmation
           totalSelected={1}
@@ -381,6 +553,44 @@ const UOMConversionDetail = () => {
           isLoading={isLoadingDeleteUOM}
           onCancel={() => setShowDeleteModal(false)}
           onOk={() => deleteUOM({ ids: [uom_conversion_id], company_id: "KSNI" })}
+        />
+      )}
+
+      {isShowDelete.open && (
+        <Modal
+          closable={false}
+          centered
+          visible={isShowDelete.open}
+          onCancel={() => setShowDelete({ open: false, type: "", data: {} })}
+          title={"Confirm Delete"}
+          footer={null}
+          content={
+            <TopButtonHolder>
+              <Spacer size={4} />
+              {renderConfirmationText(isShowDelete.type, isShowDelete.data)}
+              <Spacer size={20} />
+              <DeleteCardButtonHolder>
+                <Button
+                  size="big"
+                  variant="tertiary"
+                  key="submit"
+                  type="primary"
+                  onClick={() => setShowDelete({ open: false, type: "", data: {} })}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="primary"
+                  size="big"
+                  onClick={() => {
+                      deletedProduct(selectedRowKeys)
+                  }}
+                >
+                  {isLoadingDeleteUOM ? "loading..." : "Yes"}
+                </Button>
+              </DeleteCardButtonHolder>
+            </TopButtonHolder>
+          }
         />
       )}
     </>
@@ -411,6 +621,19 @@ const HeaderLabel = styled.p`
   font-size: 20px;
   line-height: 27px;
   color: #1E858E;
+`
+
+const DeleteCardButtonHolder = styled.div`
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 20px;
+`
+
+const TopButtonHolder = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 `
 
 export default UOMConversionDetail;
