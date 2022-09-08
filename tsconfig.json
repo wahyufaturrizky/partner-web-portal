@@ -24,6 +24,7 @@
 		"next-env.d.ts",
 		"additional-env.d.ts",
 		"**/*.ts",
+		"**/*.js",
 		"**/*.tsx",
 		"utils/index.js"
 	],

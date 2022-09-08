@@ -224,7 +224,6 @@ export default function ComponentDetailSalesman({
       />
 
       {/* modal view detail customers */}
-      {console.log(modalConfirmation)}
       <Modal
         width={900}
         visible={modalCustomer.visible}
@@ -257,7 +256,7 @@ const ContentDetailCustomer = ({ checkedDate, onChecked, pagination, detailCusto
     { title: 'Permission Name', dataIndex: 'customer' },
     { title: 'Module', dataIndex: 'module' },
   ]
-  console.log(detailCustomer)
+
   return (
     <div>
       <Spacer size={20} />
