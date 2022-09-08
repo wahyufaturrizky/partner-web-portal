@@ -9,7 +9,10 @@ export default function DetailSalesman() {
   });
 
   return (
-    <ComponentDetailSalesman isLoading={isLoading} listCustomers={listCustomers?.rows} />
+    <ComponentDetailSalesman
+      isLoading={isLoading}
+      listCustomers={listCustomers?.rows}
+    />
   )
 }
 

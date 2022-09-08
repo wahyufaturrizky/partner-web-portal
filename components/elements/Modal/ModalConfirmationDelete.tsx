@@ -36,7 +36,7 @@ export const ModalDeleteConfirmation = ({
 					<Button size="big" variant="secondary" key="submit" type="primary" onClick={onCancel}>
 						No
 					</Button>
-					<Button variant="primary" size="big" onClick={onOk}>
+					<Button disabled={isLoading} variant="primary" size="big" onClick={onOk}>
 						{isLoading ? "loading..." : "Yes"}
 					</Button>
 				</div>

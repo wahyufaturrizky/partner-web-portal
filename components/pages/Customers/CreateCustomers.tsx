@@ -199,8 +199,6 @@ export default function CreateCustomers({
       onSuccess: () => {}
     }
   })
-
-  console.log(router.query)
   
   // action function
   const onSubmit = (data: any) => {
