@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import Router from "next/router";
-import { Sidebar, Layout, Header, MenuLogout } from "pink-lava-ui";
-
+import { Sidebar, Layout, Header, MenuLogout, Notification, Spacer } from "pink-lava-ui";
 import {
   ICField,
   ICUser,
@@ -413,6 +412,33 @@ const menuMdm = [
 
 const itemsMenu = [{ label: "Config" }, { label: "Master Data Management" }];
 
+const notifItems = [
+  {
+    isRead: false,
+    content: (
+      <p style={{ fontWeight: "600", marginBottom: 0 }}>
+        Term of payment of the week, Please complete it before 01-01-2022
+      </p>
+    ),
+  },
+  {
+    isRead: false,
+    content: (
+      <p style={{ fontWeight: "600", marginBottom: 0 }}>
+        Term of payment following the month, Please complete it before 01-01-2022
+      </p>
+    ),
+  },
+  {
+    isRead: true,
+    content: <p style={{ fontWeight: "600", marginBottom: 0 }}>New Product Launch</p>,
+  },
+  {
+    isRead: true,
+    content: <p style={{ fontWeight: "600", marginBottom: 0 }}>You need review a approval Here</p>,
+  },
+];
+
 const flexStyles = {
   display: "flex",
   alignItems: "center",
@@ -448,6 +474,10 @@ const AdminLayout = (props: any) => {
           selectedKeys={[current]}
           items={itemsMenu}
         >
+          <Notification items={notifItems} />
+
+          <Spacer size={10} />
+
           <MenuLogout
             menu={
               <WrapperMenuLogout>
