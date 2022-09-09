@@ -308,6 +308,13 @@ const menuMdm = [
     icon: ICDocument,
     onClick: () => Router.push("/term-of-payment"),
   },
+  {
+    key: "tax",
+    title: "Tax",
+    content: () => "Tax",
+    icon: ICDocument,
+    onClick: () => Router.push("/tax"),
+  },
   { type: "divider" },
   { type: "title", title: "LOGISTIC" },
   {
