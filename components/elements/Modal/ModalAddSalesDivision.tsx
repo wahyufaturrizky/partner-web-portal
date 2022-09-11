@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
 	Button,
 	Spacer,
@@ -7,14 +7,43 @@ import {
 	DropdownMenuOptionCustome
 } from "pink-lava-ui";
 import styled from "styled-components";
+import { useFetchDetailSalesman } from "hooks/mdm/salesman/useSalesmanDivision";
 
-export const ModalAddSalesDivision: any = ({ visible, onCancel, onOk }: any) => {
+const ModalAddSalesDivision = ({
+	listProducts,
+	formsUpdate,
+	onCancel,
+	visible,
+	onOk
+}: any) => {
 	const [itemSelected, setItemSelected] = useState<string[]>([])
 	const [forms, setForms] = useState({
 		name: '',
 		description: ''
 	})
-	const isDisabledButton = itemSelected.length === 0 && forms.name.length === 0
+	const isDisabledButton = !(itemSelected?.length > 0 && forms?.name?.length > 3)
+
+	useEffect(() => {
+		if(visible === false) {
+			setItemSelected([])
+			setForms({ name: '', description: '' })
+		}
+	}, [visible])
+
+	const { data: detailSalesman } = useFetchDetailSalesman({
+		id: formsUpdate?.id,
+		options: { onSuccess: () => {}}
+	})
+
+	useEffect(() => {
+		if(formsUpdate) {
+			setForms({
+				name: formsUpdate?.divisiName,
+				description: formsUpdate?.shortDesc
+			})
+			setItemSelected(detailSalesman?.product?.split(','))
+		}
+	}, [formsUpdate, detailSalesman])
 
 	return (
 		<Modal
@@ -49,6 +78,7 @@ export const ModalAddSalesDivision: any = ({ visible, onCancel, onOk }: any) => 
 				<Container>
 					<Spacer size={20} />
 					<Input
+						value={forms.name}
 						onChange={({ target }: any) =>
 							setForms({ ...forms, name: target.value })}
 						required
@@ -56,24 +86,23 @@ export const ModalAddSalesDivision: any = ({ visible, onCancel, onOk }: any) => 
 					/>
 					<Spacer size={20} />
 					<Input
+						value={forms.description}
 						onChange={({ target }: any) =>
 							setForms({ ...forms, description: target.value })} 
 							label="Short Description"
 					/>
 					<Spacer size={20} />
 					<DropdownMenuOptionCustome
-						handleOpenTotalBadge={() => {}}
+						label="Product"
 						isAllowClear
 						required
 						handleChangeValue={(value: string[]) => setItemSelected(value)}
-						valueSelectedItems={[]}
-						label="Product"
+						valueSelectedItems={itemSelected}
 						noSearch
-						listItems={[
-							{ label: 'test-1', value: 'test-1' },
-							{ label: 'test-2', value: 'test-2' },
-							{ label: 'test-3', value: 'test-3' },
-							]}
+						listItems={listProducts?.map(({ name, productId }:
+							{ name: string, productId: string  }) => {
+							return { value: productId , label: name }
+						})}
 						/>
 					<Spacer size={30} />
 				</Container>
@@ -92,3 +121,5 @@ const Footer = styled.div`
 
 const Container = styled.div`
 `
+
+export default ModalAddSalesDivision

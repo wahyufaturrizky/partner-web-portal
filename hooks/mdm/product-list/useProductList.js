@@ -95,4 +95,12 @@ const useUploadImageProduct = ({ options }) => {
   );
 };
 
-export { useUploadImageProduct, useProductList, useProductDetail, useCreateProduct, useUpdateProduct, useDeleteProduct, useUploadFileProduct };
+export {
+  useUploadImageProduct,
+  useProductList,
+  useProductDetail,
+  useCreateProduct,
+  useUpdateProduct,
+  useDeleteProduct,
+  useUploadFileProduct
+};
