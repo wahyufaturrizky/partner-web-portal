@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import {
   Search,
   Row,
@@ -9,14 +9,24 @@ import {
   Text,
   Spacer
 } from 'pink-lava-ui'
-import { useRouter } from 'next/router'
 import styled from 'styled-components'
 import usePagination from '@lucasmogari/react-pagination';
+import dynamic from 'next/dynamic';
 
 import { ModalDeleteConfirmation } from "components/elements/Modal/ModalConfirmationDelete";
 import { downloadOptions } from 'components/pages/Salesman/constants'
-import { ModalAddSalesDivision } from 'components/elements/Modal/ModalAddSalesDivision';
-import { useDeleteSalesmanDivision, useFetchSalesmanDivision } from 'hooks/mdm/salesman/useSalesmanDivision'
+
+const ModalAddSalesDivision = dynamic(() => import('components/elements/Modal/ModalAddSalesDivision'), {
+  loading: () => <p>...loading</p>,
+})
+
+import { useProductList } from 'hooks/mdm/product-list/useProductList';
+import {
+  useCreateSalesmanDivision,
+  useDeleteSalesmanDivision,
+  useFetchSalesmanDivision,
+  useUpdateSalesmanDivision
+} from 'hooks/mdm/salesman/useSalesmanDivision'
 
 
 export default function ComponentSalesmanDivision() {
@@ -28,14 +38,13 @@ export default function ComponentSalesmanDivision() {
     arrows: true,
     totalItems: 100,
   });
-  const router = useRouter()
   const [search, setSearch] = useState<string>('')
+  const [formsUpdate, setFormsUpdate] = useState<any>({})
   const [selectedItems, setSelectedItems] = useState<string[]>([])
   const [visible, setVisible] = useState({
     delete: false,
     create: false
   });
-
 
   const columns = [
     {
@@ -55,17 +64,13 @@ export default function ComponentSalesmanDivision() {
     },
     {
       title: "Action",
-      dataIndex: "action",
-      render: () => (
+      render: (items: any) => (
         <Button
           size="small"
-          onClick={() => router.push({
-            pathname: '/salesman/[salesman_id]',
-            query: {
-              status: 'active',
-              salesman_id: 123,
-            },
-          })}
+          onClick={() => {
+            setFormsUpdate({...items})
+            setVisible({  ...visible, create: true })
+          }}
           variant="tertiary"
         >
           View Detail
@@ -80,7 +85,6 @@ export default function ComponentSalesmanDivision() {
       setSelectedItems(value)
     }
   }
-
 
   const { data, isLoading, refetch } =
   useFetchSalesmanDivision({
@@ -104,7 +108,49 @@ export default function ComponentSalesmanDivision() {
     }
   })
 
-  const handleCreateSales = (items: string[]) => { }
+  const { mutate: handleCreateSalesDivision }: { mutate: any } = useCreateSalesmanDivision({
+    options: { onSuccess: () => {
+      refetch()
+      setVisible({ ...visible, create: false })
+    } }
+  })
+  
+  const { mutate: handleUpdateSalesDivision }: { mutate: any } = useUpdateSalesmanDivision({
+    options: {
+      onSuccess: () => {
+        refetch()
+        setVisible({ ...visible, create: false })
+      }
+    },
+    id: formsUpdate?.id
+  })
+
+  const { data: { rows: listProducts } = {} } = useProductList({
+    options: { onSuccess: () => {} },
+    query: { company_id: 'KSNI' }
+  })
+
+  const _handleCreateSalesDivision = (items: {
+    name: string, description?: string, itemSelected: string[]
+  }) => {
+    handleCreateSalesDivision({
+      company: 'KSNI',
+      divisi_name: items?.name,
+      short_desc: items?.description,
+      product: items?.itemSelected
+    })
+  }
+
+  const _handleUpdateSalesDivision = (items: {
+    name: string, description?: string, itemSelected: string[]
+  }) => {
+    handleUpdateSalesDivision({
+      company: 'KSNI',
+      divisi_name: items?.name,
+      short_desc: items?.description,
+      product: items?.itemSelected
+    })
+  }
 
   return (
     <div>
@@ -164,9 +210,18 @@ export default function ComponentSalesmanDivision() {
 
       {/* modal add sales division */}
       <ModalAddSalesDivision
+        listProducts={listProducts}
         visible={visible.create}
+        formsUpdate={formsUpdate}
         onCancel={() => setVisible({ ...visible, create: false })}
-        onOk={(items: string[]) => handleCreateSales(items)}
+        onOk={(items: {
+          name: string,
+          description?: string,
+          itemSelected: string[]
+        }) =>
+          formsUpdate
+            ? _handleUpdateSalesDivision(items)
+            : _handleCreateSalesDivision(items)}
       />
     </div>
   )

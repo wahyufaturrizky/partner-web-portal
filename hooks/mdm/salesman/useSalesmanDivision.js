@@ -1,11 +1,11 @@
 import { useQuery, useMutation } from "react-query";
-import {mdmser, mdmService} from 'lib/client'
+import {mdmService} from 'lib/client'
 
 const fetchSalesmanDivision = async ({query = {}}) => {
   return mdmService('/sales-division', {
     params: {
       company: 'KSNI',
-      sortOrder: 'ASC',
+      sortOrder: 'DESC',
       ...query
   }}).then(data => data)
 }
@@ -17,6 +17,16 @@ const useFetchSalesmanDivision = ({ query, options }) => {
   })
 }
 
+const fetchDetailSalesman = async ({ id }) => {
+  return mdmService(`/sales-division/${id}`).then(data => data)
+}
+
+const useFetchDetailSalesman = ({ id, options }) => {
+  return useQuery(['salesman-detail', id], () => fetchDetailSalesman({ id }), {
+    ...options
+  })
+}
+
 const useDeleteSalesmanDivision = ({ options }) => {
   return useMutation(
     (data) =>
@@ -24,8 +34,34 @@ const useDeleteSalesmanDivision = ({ options }) => {
         method: 'DELETE',
         data
       }),
-      { ...options }
+    { ...options }
   )
 }
 
-export { useFetchSalesmanDivision, useDeleteSalesmanDivision }
+const useCreateSalesmanDivision = ({ options }) => {
+  return useMutation(
+    (data) =>
+      mdmService('/sales-division', {
+        method: 'POST',
+        data
+      }),
+    { ...options }
+  )
+}
+
+const useUpdateSalesmanDivision = ({ id, options }) => {
+  return useMutation((data) =>
+    mdmService(`/sales-division/${id}`, {
+      method: 'PUT',
+      data
+    }), { ...options }
+  )
+}
+
+export {
+  useUpdateSalesmanDivision,
+  useFetchDetailSalesman,
+  useFetchSalesmanDivision,
+  useDeleteSalesmanDivision,
+  useCreateSalesmanDivision
+}
