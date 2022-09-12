@@ -2,7 +2,7 @@ import { useQuery, useMutation } from "react-query";
 import { mdmService } from "../../../lib/client";
 
 const fetchProductVariant = async ({ query = {} }) => {
-  return mdmService(`/product-variant`, {
+  return mdmService(`/product-variants`, {
     params: {
       search: "",
       page: 1,
@@ -15,7 +15,7 @@ const fetchProductVariant = async ({ query = {} }) => {
 };
 
 const useProductVariantList = ({ query = {}, options }) => {
-  return useQuery(["product-variant-list", query], () => fetchProductVariant({ query }), {
+  return useQuery(["product-variant", query], () => fetchProductVariant({ query }), {
     ...options,
   });
 };
