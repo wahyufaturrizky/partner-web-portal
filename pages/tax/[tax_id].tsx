@@ -45,7 +45,14 @@ switch (type) {
 }
 };
 
-const TaxCreate = () => {
+interface TaxDetail {
+    countryName: string; 
+    taxId: string; 
+    name: string;
+    percentage: string; 
+}
+
+const TaxDetail = () => {
 
   const router = useRouter();
   const pagination = usePagination({
@@ -56,7 +63,7 @@ const TaxCreate = () => {
     arrows: true,
     totalItems: 100,
   });
-  const { uom_conversion_id } = router.query;
+  const { tax_id } = router.query;
   const [listTaxCountries, setListTaxCountries] = useState<any[]>([]);
   const [totalRows, setTotalRows] = useState(0);
   const [search, setSearch] = useState("");
@@ -66,7 +73,7 @@ const TaxCreate = () => {
   const [showCreateModal, setShowCreateModal] = useState(false)
 
   const debounceFetch = useDebounce(search, 1000);
-  const [taxData, setTaxData] = useState<any | null>(null)
+//   const [taxData, setTaxData] = useState<any | null>(null)
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
 
 
@@ -80,22 +87,18 @@ const TaxCreate = () => {
   } = useCountryInfiniteLists({
     query: {
       search: debounceFetch,
-    //   company_id: "KSNI",
       limit: 10,
     },
     options: {
       onSuccess: (data: any) => {
-        console.log(data, '<<<<<data country')
         setTotalRows(data.pages[0].totalRow);
         const mappedData = data?.pages[0]?.rows?.map((country: any) => {
-            console.log(country, '<<coutry ni')
           return {
             id: country.id,
             value: country.id,
             label: country.name
           }
         });
-        console.log(mappedData, '<<<<')
         setListTaxCountries(mappedData);
       },
       getNextPageParam: (_lastPage: any, pages: any) => {
@@ -108,6 +111,37 @@ const TaxCreate = () => {
     },
   });
 
+  const {
+    data: TaxData,
+    isLoading: isLoadingTax,
+    isFetching: isFetchingTax,
+  } = useTax({
+    query: {
+    country_id: tax_id,
+    limit: 10,
+      },
+    options: {
+      onSuccess: (data: any) => {
+        pagination.setTotalItems(data.totalRow);
+      },
+      select: (data: any) => {
+        const mappedData = data?.rows?.map((taxDetail: TaxDetail) => {
+            return {
+                id: taxDetail.taxId,
+                key: taxDetail.taxId,
+                country_name: taxDetail.countryName,
+                name: taxDetail.name,
+                percentage: taxDetail.percentage,
+                active_status: "ACTIVE"
+            }
+        })
+
+        return {data :mappedData, totalRows: data.totalRow}
+      }
+    },
+  });
+
+  console.log(TaxData, '999999')
 
   const { mutate: deleteUOM, isLoading: isLoadingDeleteUOM } = useDeletTax({
     options: {
@@ -124,15 +158,15 @@ const TaxCreate = () => {
   }
 
 
-  const checkTableChildren = (rowKey: any) => {
-    const newTableData = taxData?.map(el => {
-      if(el.key === rowKey.key){
-        el.status === 'ACTIVE' ? el.status = 'INACTIVE' : el.status = 'ACTIVE'
-      }
-      return el
-    })
-    setTaxData(newTableData)
-  }
+//   const checkTableChildren = (rowKey: any) => {
+//     const newTableData = taxData?.map(el => {
+//       if(el.key === rowKey.key){
+//         el.status === 'ACTIVE' ? el.status = 'INACTIVE' : el.status = 'ACTIVE'
+//       }
+//       return el
+//     })
+//     setTaxData(newTableData)
+//   }
 
   const checkedStatus = (status: string) => {
     return status === 'ACTIVE' ? true : false
@@ -185,12 +219,20 @@ const TaxCreate = () => {
             active_status:"ACTIVE"
     }
     createTax(newTax)
-    if(taxData){
-        setTaxData((prev: any) => [...prev, newTax])
-    } else setTaxData([newTax])
+    // if(taxData){
+    //     setTaxData((prev: any) => [...prev, newTax])
+    // } else setTaxData([newTax])
     setShowCreateModal(false)
   }
 
+  if(isLoadingTax || isFetchingTax) {
+    return (
+        <Center>
+            <Spin tip="Loading data..." />
+        </Center>
+    )
+  }
+  console.log(TaxData?.data)
   return (
     <>
       <Col>
@@ -220,47 +262,48 @@ const TaxCreate = () => {
 
         <Card>
           <Spacer size={10} />
-          <Row width="50%" noWrap>
-            <Col width="100%">
-              <Controller
-                control={control}
-                name="country_id"
-                render={({ field: { onChange } }) => (
-                  <>
-                    <Label>Country</Label>
-                    <Spacer size={3} />
-                    <FormSelect
-                      style={{ width: "100%" }}
-                      size={"large"}
-                      placeholder={"Select"}
-                      borderColor={"#AAAAAA"}
-                      arrowColor={"#000"}
-                      required
-                      withSearch
-                      isLoading={isFetchingCountryList}
-                      isLoadingMore={isFetchingMoreCountryList}
-                      fetchMore={() => {
-                        if (hasNextPage) {
-                          fetchNextPage();
+            <Row width="50%" noWrap>
+                <Col width="100%">
+                <Controller
+                    control={control}
+                    name="country_id"
+                    render={({ field: { onChange } }) => (
+                    <>
+                        <Label>Country</Label>
+                        <Spacer size={3} />
+                        <FormSelect
+                        defaultValue={TaxData?.data[0]?.country_name}
+                        style={{ width: "100%" }}
+                        size={"large"}
+                        placeholder={"Select"}
+                        borderColor={"#AAAAAA"}
+                        arrowColor={"#000"}
+                        required
+                        withSearch
+                        isLoading={isFetchingCountryList}
+                        isLoadingMore={isFetchingMoreCountryList}
+                        fetchMore={() => {
+                            if (hasNextPage) {
+                            fetchNextPage();
+                            }
+                        }}
+                        items={
+                            isFetchingCountryList && !isFetchingMoreCountryList
+                            ? []
+                            : listTaxCountries
                         }
-                      }}
-                      items={
-                        isFetchingCountryList && !isFetchingMoreCountryList
-                          ? []
-                          : listTaxCountries
-                      }
-                      onChange={(value: any) => {
-                        onChange(value);
-                      }}
-                      onSearch={(value: any) => {
-                        setSearch(value);
-                      }}
-                    />
-                  </>
-                )}
-              />
-            </Col>
-          </Row>
+                        onChange={(value: any) => {
+                            onChange(value);
+                        }}
+                        onSearch={(value: any) => {
+                            setSearch(value);
+                        }}
+                        />
+                    </>
+                    )}
+                />
+                </Col>
+            </Row>
           <Spacer size={20} />
           <Col>
               <HeaderLabel>Conversion</HeaderLabel>
@@ -276,7 +319,7 @@ const TaxCreate = () => {
                     setShowDelete({
                       open: true,
                       type: "selection",
-                      data: { uomData: taxData, selectedRowKeys },
+                      data: { taxData: TaxData?.data, selectedRowKeys },
                     })
                   }
                   disabled={rowSelection.selectedRowKeys?.length === 0}
@@ -287,9 +330,9 @@ const TaxCreate = () => {
               <Spacer size={20} />
                 <Col gap={"60px"}>
                   <Table
-                    // loading={isLoadingUOM || isFetchingUomCategory}
+                    loading={isLoadingTax || isFetchingTax}
                     columns={columns}
-                    data={taxData}
+                    data={TaxData?.data}
                     rowSelection={rowSelection}
                     rowKey={"name"}
                   />
@@ -373,7 +416,7 @@ const TaxCreate = () => {
           visible={showDeleteModal}
           isLoading={isLoadingDeleteUOM}
           onCancel={() => setShowDeleteModal(false)}
-          onOk={() => deleteUOM({ ids: [uom_conversion_id], company_id: "KSNI" })}
+          onOk={() => deleteUOM({ ids: [tax_id], company_id: "KSNI" })}
         />
       )}
 
@@ -502,4 +545,4 @@ const InputAddonBefore = styled.div`
   border: 1px solid #aaaaaa;
 `
 
-export default TaxCreate;
+export default TaxDetail;

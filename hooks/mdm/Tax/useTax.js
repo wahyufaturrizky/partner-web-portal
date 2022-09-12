@@ -20,12 +20,20 @@ const useTaxes = ({ query = {}, options }) => {
   });
 };
 
-const fetchTax = async ({ id, countryId }) => {
-  return mdmService(`/tax/${countryId}/${id}`).then((data) => data);
+const fetchTax = async ({ query = {} }) => {
+  return mdmService(`/tax`, {
+    params: {
+      search: "",
+      page: 1,
+      limit: 10,
+      sortOrder: "DESC",
+      ...query,
+    },
+  }).then((data) => data);
 };
 
-const useTax = ({ id, countryId, options }) => {
-  return useQuery(["tax-detail", id], () => fetchTax({ id, countryId }), {
+const useTax = ({ query = {}, options }) => {
+  return useQuery(["tax-detail", query], () => fetchTax({ query }), {
     ...options,
   });
 };
