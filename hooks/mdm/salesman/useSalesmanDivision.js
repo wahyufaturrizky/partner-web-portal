@@ -58,7 +58,19 @@ const useUpdateSalesmanDivision = ({ id, options }) => {
   )
 }
 
+const useUploadDocumentSalesDivision = ({ options }) => {
+  return useMutation(
+    (data) =>
+      mdmService('/sales-division/upload', {
+        method: 'POST',
+        data
+      }),
+      { ...options }
+  )
+}
+
 export {
+  useUploadDocumentSalesDivision,
   useUpdateSalesmanDivision,
   useFetchDetailSalesman,
   useFetchSalesmanDivision,
