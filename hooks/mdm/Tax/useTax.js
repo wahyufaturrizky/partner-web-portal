@@ -7,7 +7,7 @@ const fetchTaxes = async ({ query = {} }) => {
       search: "",
       page: 1,
       limit: 10,
-      sortBy: "created_at",
+      sortBy: "country_id",
       sortOrder: "DESC",
       ...query,
     },
