@@ -34,7 +34,6 @@ const downloadFile = (params: any) =>
   });
 
 const renderConfirmationText = (type: any, data: any) => {
-    console.log(data, type, '<<<<<<')
   switch (type) {
     case "selection":
       return data.selectedRowKeys.length > 1
@@ -71,7 +70,7 @@ const UOMConversion = () => {
   });
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const debounceSearch = useDebounce(search, 1000);
-  const [dataUoM, setDataUoM] = useState(null)
+  // const [dataUoM, setDataUoM] = useState(null)
 
   const {
     data: UOMConversionData,
@@ -99,7 +98,7 @@ const UOMConversion = () => {
                 <Button
                   size="small"
                   onClick={() => {
-                    router.push(`/unit-of-measure-conversion/${element.uomId}`);
+                    router.push(`/unit-of-measure-conversion/${element.conversionId}`);
                   }}
                   variant="tertiary"
                 >
@@ -114,47 +113,6 @@ const UOMConversion = () => {
       },
     },
   });
-  
-  useEffect(() => {
-    let data = [
-      {
-        // key:'UMC-0000001',
-        id: 'UMC-0000001',
-        name: 'Conversion Product',
-        action: (
-          <div style={{ display: "flex", justifyContent: "left" }}>
-            <Button
-              size="small"
-              onClick={() => {
-                router.push(`/unit-of-measure-conversion/${'MPC-0000005'}`);
-              }}
-              variant="tertiary"
-            >
-              View Detail
-            </Button>
-          </div>
-        ),
-      },
-      {
-        id: 'UMC-0000002',
-        name: 'Conversion Transport',
-        action: (
-          <div style={{ display: "flex", justifyContent: "left" }}>
-            <Button
-              size="small"
-              onClick={() => {
-                router.push(`/unit-of-measure-conversion/${'MPC-0000006'}`);
-              }}
-              variant="tertiary"
-            >
-              View Detail
-            </Button>
-          </div>
-        ),
-      }
-    ]
-    setDataUoM(data)
-  }, [])
 
     // for delete
   const { mutate: deleteUom, isLoading: isLoadingDeleteUom } = useDeletUOM({
@@ -201,7 +159,6 @@ const UOMConversion = () => {
     onChange: (selectedRowKeys: any, selectedRows: any) => {
       if(!selectedRowKeys) {
       }
-      console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
       setSelectedRowKeys(selectedRowKeys);
     },
   };
@@ -237,7 +194,7 @@ const UOMConversion = () => {
                 setShowDelete({
                   open: true,
                   type: "selection",
-                  data: { uomData: dataUoM, selectedRowKeys },
+                  data: { uomData: UOMConversionData?.data, selectedRowKeys },
                 })
               }
               disabled={rowSelection.selectedRowKeys?.length === 0}

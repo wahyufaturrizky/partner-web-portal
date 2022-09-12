@@ -20,14 +20,20 @@ const useUOMConversions = ({ query = {}, options }) => {
   });
 };
 
-const fetchUOMConversion = async ({ id, companyId }) => {
-  return mdmService(`/uom-conversion/${companyId}/${id}`).then((data) => data);
+const fetchUOMConversion = async ({ id, companyId, query = {} }) => {
+  return mdmService(`/uom-conversion/${companyId}/${id}`, {
+    params: { ...query },
+  }).then((data) => data);
 };
 
-const useUOMConversion = ({ id, options }) => {
-  return useQuery(["uom-conversion", id], () => fetchUOMConversion({ id }), {
-    ...options,
-  });
+const useUOMConversion = ({ id, companyId, query, options }) => {
+  return useQuery(
+    ["uom-conversion", id, companyId, query],
+    () => fetchUOMConversion({ id, companyId, query }),
+    {
+      ...options,
+    }
+  );
 };
 
 const fetchInfiniteUOMConversionLists = async ({ pageParam = 1, queryKey }) => {
