@@ -12,14 +12,12 @@ import {
 } from 'pink-lava-ui'
 import styled from 'styled-components'
 import usePagination from '@lucasmogari/react-pagination';
-import dynamic from 'next/dynamic';
 
+import { queryClient } from "pages/_app";
+import { mdmDownloadService } from 'lib/client';
 import { ModalDeleteConfirmation } from "components/elements/Modal/ModalConfirmationDelete";
 import { downloadOptions } from 'components/pages/Salesman/constants'
-
 import ModalAddSalesDivision from 'components/elements/Modal/ModalAddSalesDivision'
-
-import { mdmDownloadService } from 'lib/client';
 import { useProductList } from 'hooks/mdm/product-list/useProductList';
 import {
   useUploadDocumentSalesDivision,
@@ -28,7 +26,6 @@ import {
   useFetchSalesmanDivision,
   useUpdateSalesmanDivision
 } from 'hooks/mdm/salesman/useSalesmanDivision'
-import { queryClient } from "pages/_app";
 
 
 const downloadFileSalesDivision = (params: any) =>

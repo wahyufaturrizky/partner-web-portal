@@ -32,7 +32,7 @@ const ModalAddSalesDivision = ({
 
 	const { data: detailSalesman } = useFetchDetailSalesman({
 		id: formsUpdate?.id,
-		options: { onSuccess: () => { } }
+		options: { onSuccess: () => { }, enabled: visible, }
 	})
 
 	useEffect(() => {
