@@ -27,11 +27,11 @@ import useDebounce from "../../lib/useDebounce";
 import { queryClient } from "../_app";
 
 const downloadFile = (params: any) =>
-  mdmDownloadService("/product/download", { params }).then((res) => {
+  mdmDownloadService("/product-variant/download", { params }).then((res) => {
     let dataUrl = window.URL.createObjectURL(new Blob([res.data]));
     let tempLink = document.createElement("a");
     tempLink.href = dataUrl;
-    tempLink.setAttribute("download", `product_list_${new Date().getTime()}.xlsx`);
+    tempLink.setAttribute("download", `product_variant_list_${new Date().getTime()}.xlsx`);
     tempLink.click();
   });
 
@@ -92,8 +92,8 @@ const ProductVariant = () => {
       select: (data: any) => {
         const mappedData = data?.rows?.map((element: any) => {
           return {
-            key: element.productId,
-            id: element.productId,
+            key: element.productVariantId,
+            id: element.productVariantId,
             name: element.name,
             status: element.status,
             productCategoryName: element.productCategoryName,
@@ -103,7 +103,7 @@ const ProductVariant = () => {
                 <Button
                   size="small"
                   onClick={() => {
-                    router.push(`/product-variant/${element.productId}`);
+                    router.push(`/product-variant/${element.productVariantId}`);
                   }}
                   variant="tertiary"
                 >

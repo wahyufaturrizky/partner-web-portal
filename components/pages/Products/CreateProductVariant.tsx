@@ -109,7 +109,6 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
       status: "active",
       can_be_sold: false,
       can_be_purchased: false,
-      can_be_expensed: false,
       expired_date: moment().format('DD/MM/YYYY'),
       external_code: "",
       use_unit_leveling: false,
@@ -201,7 +200,7 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
   const { mutate: uploadImage, isLoading: isLoadingUploadImage } = useUploadImageProductVariant({
     options: {
       onSuccess: () => {
-        router.push('/product-list')
+        router.push('/product-variant')
       }
     }
   })
@@ -217,7 +216,7 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
   
           uploadImage(formData);
         } else {
-          router.push('/product-list')
+          router.push('/product-variant')
         }
        
       }
@@ -243,8 +242,8 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
     options: {
       onSuccess: () => {
         setShowDelete({ open: false });
-        queryClient.invalidateQueries(["product-list"]);
-        router.push('/product-list')
+        queryClient.invalidateQueries(["product-variant"]);
+        router.push('/product-variant')
       },
     },
   });
@@ -257,7 +256,6 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
       'status',
       'can_be_sold',
       'can_be_purchased',
-      'can_be_expensed',
       'name',
       'product_type',
       'external_code',
@@ -266,7 +264,6 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
       'cost_of_product',
       'packaging_size',
       'sales_price',
-      'variants',
       'registration',
     ])
 
@@ -274,10 +271,6 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
     payload.product_brand_id = data.brand.id;
     payload.base_uom_id = data.base_uom.uom_id;
     payload.purchase_uom_id = data.purchase_uom.uom_id;
-    payload.options = data.options.map((data:any) => ({
-      options_id: data.option.id,
-      options_values: data.option_items.map(data => data.value)
-    }));
     payload.accounting = {
       income_account_id: data?.accounting?.income_account?.id || 0,
       expense_account_id: data?.accounting?.expense_account?.id || 0
