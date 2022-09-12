@@ -2,7 +2,7 @@ import { useQuery, useMutation, useInfiniteQuery } from "react-query";
 import { mdmService } from "../../../lib/client";
 
 const fetchUOMConversions = async ({ query = {} }) => {
-  return mdmService(`/uom-category`, {
+  return mdmService(`/uom-conversion`, {
     params: {
       search: "",
       page: 1,
@@ -15,24 +15,24 @@ const fetchUOMConversions = async ({ query = {} }) => {
 };
 
 const useUOMConversions = ({ query = {}, options }) => {
-  return useQuery(["uom-categories", query], () => fetchUOMConversions({ query }), {
+  return useQuery(["uom-conversions", query], () => fetchUOMConversions({ query }), {
     ...options,
   });
 };
 
 const fetchUOMConversion = async ({ id, companyId }) => {
-  return mdmService(`/uom-category/${companyId}/${id}`).then((data) => data);
+  return mdmService(`/uom-conversion/${companyId}/${id}`).then((data) => data);
 };
 
 const useUOMConversion = ({ id, options }) => {
-  return useQuery(["uom-category", id], () => fetchUOMConversion({ id }), {
+  return useQuery(["uom-conversion", id], () => fetchUOMConversion({ id }), {
     ...options,
   });
 };
 
 const fetchInfiniteUOMConversionLists = async ({ pageParam = 1, queryKey }) => {
   const searchQuery = queryKey[1].search;
-  return mdmService(`/uom-category`, {
+  return mdmService(`/uom-conversion`, {
     params: {
       search: searchQuery,
       limit: 10,
@@ -45,7 +45,7 @@ const fetchInfiniteUOMConversionLists = async ({ pageParam = 1, queryKey }) => {
 };
 
 const useUOMConversionInfiniteLists = ({ query = {}, options }) => {
-  return useInfiniteQuery(["uom-category/infinite", query], fetchInfiniteUOMConversionLists, {
+  return useInfiniteQuery(["uom-conversion/infinite", query], fetchInfiniteUOMConversionLists, {
     keepPreviousData: true,
     ...options,
   });
@@ -54,7 +54,7 @@ const useUOMConversionInfiniteLists = ({ query = {}, options }) => {
 function useCreateUOMConversion({ options }) {
   return useMutation(
     (data) =>
-      mdmService(`/uom-category`, {
+      mdmService(`/uom-conversion`, {
         method: "POST",
         data,
       }),
@@ -67,7 +67,7 @@ function useCreateUOMConversion({ options }) {
 function useUpdateUOMConversion({ id, companyId, options }) {
   return useMutation(
     (data) =>
-      mdmService(`/uom-category/${companyId}/${id}`, {
+      mdmService(`/uom-conversion/${companyId}/${id}`, {
         method: "PUT",
         data,
       }),
@@ -80,7 +80,7 @@ function useUpdateUOMConversion({ id, companyId, options }) {
 const useDeletUOMConversion = ({ options }) => {
   return useMutation(
     (data) =>
-      mdmService(`/uom-category`, {
+      mdmService(`/uom-conversion`, {
         method: "DELETE",
         data,
       }),
@@ -93,7 +93,7 @@ const useDeletUOMConversion = ({ options }) => {
 const useUploadFileUOMConversion = ({ options }) => {
   return useMutation(
     (data) =>
-      mdmService(`/uom-category/upload`, {
+      mdmService(`/uom-conversion/upload`, {
         method: "POST",
         data,
       }),

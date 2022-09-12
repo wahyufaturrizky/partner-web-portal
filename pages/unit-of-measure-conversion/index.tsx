@@ -16,6 +16,7 @@ import {
 } from "pink-lava-ui";
 import usePagination from "@lucasmogari/react-pagination";
 import { useUOMList, useUploadFileUOM, useDeletUOM } from "../../hooks/mdm/unit-of-measure/useUOM";
+import { useUOMConversions } from "../../hooks/mdm/unit-of-measure-conversion/useUOMConversion";
 import useDebounce from "../../lib/useDebounce";
 import { queryClient } from "../_app";
 import { ICDownload, ICUpload } from "../../assets/icons";
@@ -73,10 +74,10 @@ const UOMConversion = () => {
   const [dataUoM, setDataUoM] = useState(null)
 
   const {
-    data: UOMData,
+    data: UOMConversionData,
     isLoading: isLoadingUOM,
     isFetching: isFetchingUOM,
-  } = useUOMList({
+  } = useUOMConversions({
     query: {
       search: debounceSearch,
       page: pagination.page,
@@ -90,11 +91,9 @@ const UOMConversion = () => {
       select: (data: any) => {
         const mappedData = data?.rows?.map((element: any) => {
           return {
-            key: element.uomId,
-            id: element.uomId,
-            uomName: element.name,
-            uomCategoryName: element.uomCategoryName,
-            status: element.activeStatus,
+            key: element.conversionId,
+            id: element.conversionId,
+            name: element.name,
             action: (
               <div style={{ display: "flex", justifyContent: "left" }}>
                 <Button
@@ -163,7 +162,7 @@ const UOMConversion = () => {
       onSuccess: () => {
         setShowDelete({ open: false, data: {}, type: "" });
         setSelectedRowKeys([]);
-        queryClient.invalidateQueries(["uom-list"]);
+        queryClient.invalidateQueries(["uom-conversions"]);
       },
     },
   });
@@ -315,7 +314,7 @@ const UOMConversion = () => {
           <Table
             loading={isLoadingUOM || isFetchingUOM}
             columns={columns}
-            data={dataUoM}
+            data={UOMConversionData?.data}
             rowSelection={rowSelection}
             rowKey={"id"}
           />
