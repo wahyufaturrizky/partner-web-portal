@@ -32,18 +32,18 @@ const ModalAddSalesDivision = ({
 
 	const { data: detailSalesman } = useFetchDetailSalesman({
 		id: formsUpdate?.id,
-		options: { onSuccess: () => {}}
+		options: { onSuccess: () => { } }
 	})
 
 	useEffect(() => {
-		if(formsUpdate) {
+		if(formsUpdate && visible) {
 			setForms({
 				name: formsUpdate?.divisiName,
 				description: formsUpdate?.shortDesc
 			})
 			setItemSelected(detailSalesman?.product?.split(','))
 		}
-	}, [formsUpdate, detailSalesman])
+	}, [formsUpdate, detailSalesman, visible])
 
 	return (
 		<Modal

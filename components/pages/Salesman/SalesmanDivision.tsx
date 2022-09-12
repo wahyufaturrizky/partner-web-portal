@@ -1,13 +1,14 @@
 import React, { useState } from 'react'
 import {
+  FileUploadModal,
+  DropdownMenu,
+  Pagination,
+  Spacer,
   Search,
-  Row,
   Button,
   Table,
-  Pagination,
-  DropdownMenu,
+  Row,
   Text,
-  Spacer
 } from 'pink-lava-ui'
 import styled from 'styled-components'
 import usePagination from '@lucasmogari/react-pagination';
@@ -16,18 +17,28 @@ import dynamic from 'next/dynamic';
 import { ModalDeleteConfirmation } from "components/elements/Modal/ModalConfirmationDelete";
 import { downloadOptions } from 'components/pages/Salesman/constants'
 
-const ModalAddSalesDivision = dynamic(() => import('components/elements/Modal/ModalAddSalesDivision'), {
-  loading: () => <p>...loading</p>,
-})
+import ModalAddSalesDivision from 'components/elements/Modal/ModalAddSalesDivision'
 
+import { mdmDownloadService } from 'lib/client';
 import { useProductList } from 'hooks/mdm/product-list/useProductList';
 import {
+  useUploadDocumentSalesDivision,
   useCreateSalesmanDivision,
   useDeleteSalesmanDivision,
   useFetchSalesmanDivision,
   useUpdateSalesmanDivision
 } from 'hooks/mdm/salesman/useSalesmanDivision'
+import { queryClient } from "pages/_app";
 
+
+const downloadFileSalesDivision = (params: any) =>
+  mdmDownloadService("/sales-division/template/download", { params }).then((res) => {
+    let dataUrl = window.URL.createObjectURL(new Blob([res.data]));
+    let tempLink = document.createElement("a");
+    tempLink.href = dataUrl;
+    tempLink.setAttribute("download", `sales_division${new Date().getTime()}.xlsx`);
+    tempLink.click();
+  });
 
 export default function ComponentSalesmanDivision() {
   const pagination = usePagination({
@@ -43,7 +54,8 @@ export default function ComponentSalesmanDivision() {
   const [selectedItems, setSelectedItems] = useState<string[]>([])
   const [visible, setVisible] = useState({
     delete: false,
-    create: false
+    create: false,
+    upload: false,
   });
 
   const columns = [
@@ -130,6 +142,16 @@ export default function ComponentSalesmanDivision() {
     query: { company_id: 'KSNI' }
   })
 
+  const { mutate: handleUploadDocuments } = useUploadDocumentSalesDivision({
+    options: {
+      onSuccess: () => {
+        refetch()
+        setVisible({ ...visible, upload: false })
+        queryClient.invalidateQueries(["sales-division"]);
+      }
+    }
+  })
+
   const _handleCreateSalesDivision = (items: {
     name: string, description?: string, itemSelected: string[]
   }) => {
@@ -150,6 +172,26 @@ export default function ComponentSalesmanDivision() {
       short_desc: items?.description,
       product: items?.itemSelected
     })
+  }
+
+  const _handleDropdownMore = ({ key }: { key: string }) => {
+    switch (key) {
+      case '1':
+        return downloadFileSalesDivision({ company_id: 'KSNI', with_data: 'n' })
+      case '2':
+        return setVisible({ ...visible, upload: true })
+      case '1':
+        return downloadFileSalesDivision({ company_id: 'KSNI', with_data: 'y' })
+      default:
+        return null
+    }
+  }
+
+  const submitDocumentsUploader = (file: any) => {
+    const formData: any = new FormData();
+    formData.append("upload_file", file);
+
+    handleUploadDocuments(formData)
   }
 
   return (
@@ -177,7 +219,7 @@ export default function ComponentSalesmanDivision() {
               buttonSize="big"
               textVariant="button"
               textColor="pink.regular"
-              onClick={(e: any) => { }}
+              onClick={(value: any) => _handleDropdownMore(value)}
               menuList={downloadOptions()}
             />
             <Button onClick={() => setVisible({ ...visible, create: true })} variant="primary">
@@ -222,6 +264,13 @@ export default function ComponentSalesmanDivision() {
           formsUpdate
             ? _handleUpdateSalesDivision(items)
             : _handleCreateSalesDivision(items)}
+      />
+
+      {/* modal upload documents */}
+      <FileUploadModal
+        visible={visible.upload}
+        setVisible={() => setVisible({ ...visible, upload: false })}
+        onSubmit={submitDocumentsUploader}
       />
     </div>
   )
