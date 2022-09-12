@@ -141,7 +141,6 @@ const TaxDetail = () => {
     },
   });
 
-  console.log(TaxData, '999999')
 
   const { mutate: deleteUOM, isLoading: isLoadingDeleteUOM } = useDeletTax({
     options: {

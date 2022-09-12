@@ -112,7 +112,6 @@ const Tax = () => {
         pagination.setTotalItems(data.totalRow);
       },
       select: (data: any) => {
-        console.log(data,'<<<<')
         const mappedData: TaxTable[] = [];
         let n = 1;
         let taxes: any = {}
@@ -174,7 +173,6 @@ const Tax = () => {
     onChange: (selectedRowKeys: any, selectedRows: any) => {
       if(!selectedRowKeys) {
       }
-      console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
       setSelectedRowKeys(selectedRowKeys);
     },
   };

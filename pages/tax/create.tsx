@@ -85,17 +85,14 @@ const TaxCreate = () => {
     },
     options: {
       onSuccess: (data: any) => {
-        console.log(data, '<<<<<data country')
         setTotalRows(data.pages[0].totalRow);
         const mappedData = data?.pages[0]?.rows?.map((country: any) => {
-            console.log(country, '<<coutry ni')
           return {
             id: country.id,
             value: country.id,
             label: country.name
           }
         });
-        console.log(mappedData, '<<<<')
         setListTaxCountries(mappedData);
       },
       getNextPageParam: (_lastPage: any, pages: any) => {
