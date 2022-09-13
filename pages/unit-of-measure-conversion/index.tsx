@@ -15,8 +15,8 @@ import {
   Switch,
 } from "pink-lava-ui";
 import usePagination from "@lucasmogari/react-pagination";
-import { useUOMList, useUploadFileUOM, useDeletUOM } from "../../hooks/mdm/unit-of-measure/useUOM";
-import { useUOMConversions } from "../../hooks/mdm/unit-of-measure-conversion/useUOMConversion";
+// import { useUOMList, useUploadFileUOM, useDeletUOM } from "../../hooks/mdm/unit-of-measure/useUOM";
+import { useDeletUOMConversion, useUOMConversions, useUploadFileUOMConversion } from "../../hooks/mdm/unit-of-measure-conversion/useUOMConversion";
 import useDebounce from "../../lib/useDebounce";
 import { queryClient } from "../_app";
 import { ICDownload, ICUpload } from "../../assets/icons";
@@ -115,7 +115,7 @@ const UOMConversion = () => {
   });
 
     // for delete
-  const { mutate: deleteUom, isLoading: isLoadingDeleteUom } = useDeletUOM({
+  const { mutate: deleteUom, isLoading: isLoadingDeleteUom } = useDeletUOMConversion({
     options: {
       onSuccess: () => {
         setShowDelete({ open: false, data: {}, type: "" });
@@ -125,7 +125,7 @@ const UOMConversion = () => {
     },
   });
     // for upload
-  const { mutate: uploadFileUom, isLoading: isLoadingUploadFileUom } = useUploadFileUOM({
+  const { mutate: uploadFileUom, isLoading: isLoadingUploadFileUom } = useUploadFileUOMConversion({
     options: {
       onSuccess: () => {
         queryClient.invalidateQueries(["uom-list"]);

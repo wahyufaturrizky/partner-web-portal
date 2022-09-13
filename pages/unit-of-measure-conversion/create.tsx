@@ -29,7 +29,6 @@ import { useCreateUOMConversion } from "hooks/mdm/unit-of-measure-conversion/use
 import { useUOMInfiniteLists } from "hooks/mdm/unit-of-measure/useUOM";
 
 const renderConfirmationText = (type: any, data: any) => {
-  console.log(data, type)
 switch (type) {
   case "selection":
     return data.selectedRowKeys.length > 1
@@ -69,10 +68,9 @@ const UOMConversionCreate = () => {
   const [newUom, setNewUom] = useState({
     company_id: "KSNI",
     name: "",
-    base_uom: "",
-    items: []
+    base_uom_id: "",
   })
-  const [newUomTable, setNewUomTable] = useState(null)
+  const [newUomTable, setNewUomTable] = useState<any[] | null>(null)
   const { register, control, handleSubmit } = useForm();
 
 
@@ -94,13 +92,12 @@ const UOMConversionCreate = () => {
         const mappedData = data?.pages?.map((group: any) => {
           return group.rows?.map((element: any) => {
             return {
-              value: element.name,
+              value: element.uomId,
               label: element.name,
             };
           });
         });
         const flattenArray = [].concat(...mappedData);
-        console.log(flattenArray, '<<<<')
         setListUomCategory(flattenArray);
       },
       getNextPageParam: (_lastPage: any, pages: any) => {
@@ -145,19 +142,24 @@ const UOMConversionCreate = () => {
       setNewUomTable([{
         id: 1,
         qty: 1,
-        uom: data.uom,
+        uom: listUomCategory.find(e => e.value === data.uom).label,
         conversionNumber: data.conversionNumber,
-        baseUom: data.baseUom
+        baseUom: listUomCategory.find(e => e.value === data.baseUom).label
       }])
     } else {
       setNewUomTable(prev => [...prev, {
         id: newUomTable.length+1,
         qty: 1,
-        uom: data.uom,
+        uom: listUomCategory.find(e => e.value === data.uom).label,
         conversionNumber: data.conversionNumber,
-        baseUom: data.baseUom
+        baseUom: listUomCategory.find(e => e.value === data.baseUom).label
       }])
     }
+    setNewUom({
+      company_id: "KSNI",
+      name: data.name,
+      base_uom_id: listUomCategory.find(e => e.value === data.uom).label,
+    })
     setShowCreateModal(false)
   };
 
@@ -170,17 +172,17 @@ const UOMConversionCreate = () => {
     const savedTable = tempTable.map(uom => {
       return {
         qty: uom.qty,
-        uom: uom.uom,
+        uom_id: listUomCategory.find(e => e.label === uom.uom).value,
         conversion_number: uom.conversionNumber
       }
     })
     const saveData = {
     company_id: "KSNI",
     name: data.name,
-    base_uom: data.baseUom,
+    base_uom_id: data.baseUom,
     items: savedTable
     }
-    console.log(saveData, 'savedata ni')
+    console.log(saveData, 910192)
     createUom(saveData)
   }
 
@@ -247,7 +249,6 @@ const UOMConversionCreate = () => {
               <Button size="big" variant={"tertiary"} onClick={() => router.back()}>
                 Cancel
               </Button>
-              {/* <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}> */}
               <Button size="big" variant={"primary"} onClick={handleSubmit(onSave)}>
                 {isLoadingCreateUom? "Loading..." : "Save"}
               </Button>
@@ -285,7 +286,7 @@ const UOMConversionCreate = () => {
                     <Spacer size={3} />
                     <FormSelect
                       style={{ width: "100%" }}
-                      defaultValue={newUom.base_uom}
+                      defaultValue={newUom.base_uom_id}
                       size={"large"}
                       required
                       placeholder={"Select"}
