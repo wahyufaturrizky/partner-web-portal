@@ -208,6 +208,12 @@ const menuMdm = [
         onClick: () => Router.push("/product-option"),
       },
       {
+        key: "product-category",
+        title: "Product Category",
+        content: () => "Product Category",
+        onClick: () => Router.push("/product-category"),
+      },
+      {
         key: "product-brand",
         title: "Product Brand",
         content: () => "Product Brand",
