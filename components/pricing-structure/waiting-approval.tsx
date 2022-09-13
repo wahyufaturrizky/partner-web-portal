@@ -22,7 +22,7 @@ import {
   usePricingStructureLists,
   useUploadFilePricingStructureMDM,
 } from "../../hooks/pricing-structure/usePricingStructure";
-import { ICDollar, ICDownload, ICManageCustGroupBuyingPrice, ICUpload } from "../../assets";
+import { ICDollarBlack, ICDownload, ICManageCustGroupBuyingPrice, ICUpload } from "../../assets";
 import { queryClient } from "../../pages/_app";
 import { mdmDownloadService } from "../../lib/client";
 
@@ -35,7 +35,7 @@ const downloadFile = (params: any) =>
     tempLink.click();
   });
 
-const WaitingApprovalPricingStructure: any = () => {
+const WaitingApprovalPricingStructure: any = (props: any) => {
   const router = useRouter();
   const pagination = usePagination({
     page: 1,
@@ -55,6 +55,7 @@ const WaitingApprovalPricingStructure: any = () => {
       onSuccess: (data: any) => {
         pagination.setTotalItems(data.totalRow);
       },
+      enabled: false,
     },
     query: {
       search,
@@ -155,8 +156,18 @@ const WaitingApprovalPricingStructure: any = () => {
                     setShowUpload(true);
                     break;
                   case 3:
+                    props.setModalPricingStructureForm({
+                      ...props.modalPricingStructureForm,
+                      open: true,
+                      typeForm: "Manage Customer Group Buying Price",
+                    });
                     break;
                   case 4:
+                    props.setModalPricingStructureForm({
+                      ...props.modalPricingStructureForm,
+                      open: true,
+                      typeForm: "Manage Price Structure Config",
+                    });
                     break;
                   default:
                     break;
@@ -194,7 +205,7 @@ const WaitingApprovalPricingStructure: any = () => {
                   key: 4,
                   value: (
                     <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                      <ICDollar />
+                      <ICDollarBlack />
                       <p style={{ margin: "0" }}>Manage Price Structure Config</p>
                     </div>
                   ),
@@ -205,6 +216,7 @@ const WaitingApprovalPricingStructure: any = () => {
             <Button
               size="big"
               variant={"primary"}
+              disabled
               onClick={() => {
                 router.push("/pricing-structure/create");
               }}
