@@ -18,22 +18,24 @@ import {
 import styled from "styled-components";
 import { Controller, useForm } from "react-hook-form";
 import { useRouter } from "next/router";
-import { useUOMDetail, useUpdateUOM, useDeletUOM } from "../../hooks/mdm/unit-of-measure/useUOM";
 import { queryClient } from "../_app";
 import useDebounce from "../../lib/useDebounce";
 import { useUOMCategoryInfiniteLists } from "../../hooks/mdm/unit-of-measure-category/useUOMCategory";
 import { ModalDeleteConfirmation } from "../../components/elements/Modal/ModalConfirmationDelete";
 import ArrowLeft from "../../assets/icons/arrow-left.svg";
 import usePagination from "@lucasmogari/react-pagination";
-import styles from './index.module.css'
+
+import { useCreateUOMConversion } from "hooks/mdm/unit-of-measure-conversion/useUOMConversion";
+import { useUOMInfiniteLists } from "hooks/mdm/unit-of-measure/useUOM";
 
 const renderConfirmationText = (type: any, data: any) => {
+  console.log(data, type)
 switch (type) {
   case "selection":
     return data.selectedRowKeys.length > 1
       ? `Are you sure to delete ${data.selectedRowKeys.length} items ?`
-      : `Are you sure to delete Uom with ID's ${
-          data?.uomData?.find((el: any) => el.key === data.selectedRowKeys[0]).key
+      : `Are you sure to delete Uom Conversion with ID's ${
+          data?.uomData?.find((el: any) => el.id === data.selectedRowKeys[0]).id
         } ?`;
   case "detail":
     return `Are you sure to delete Uom Name ${data.uomName} ?`;
@@ -43,7 +45,7 @@ switch (type) {
 }
 };
 
-const UOMConversionDetail = () => {
+const UOMConversionCreate = () => {
   const router = useRouter();
   const pagination = usePagination({
     page: 1,
@@ -53,7 +55,6 @@ const UOMConversionDetail = () => {
     arrows: true,
     totalItems: 100,
   });
-  const { uom_conversion_id } = router.query;
   const [listUomCategory, setListUomCategory] = useState<any[]>([]);
   const [totalRows, setTotalRows] = useState(0);
   const [search, setSearch] = useState("");
@@ -63,152 +64,56 @@ const UOMConversionDetail = () => {
   const [showCreateModal, setShowCreateModal] = useState(false)
 
   const debounceFetch = useDebounce(search, 1000);
-  const [dataUoM, setDataUoM] = useState<any | null>(null)
-  const [UOMDataFake, setUOMDataFake] = useState<any | null>(null)
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
 
-
+  const [newUom, setNewUom] = useState({
+    company_id: "KSNI",
+    name: "",
+    base_uom: "",
+    items: []
+  })
+  const [newUomTable, setNewUomTable] = useState(null)
   const { register, control, handleSubmit } = useForm();
 
-  useEffect(() => {
-    let data = [
-      {
-        id: 'MPC-0000005',
-        name: 'Conversion Product',
-        action: (
-          <div style={{ display: "flex", justifyContent: "left" }}>
-            <Button
-              size="small"
-              onClick={() => {
-                router.push(`/unit-of-measure-conversion/${'MPC-0000005'}`);
-              }}
-              variant="tertiary"
-            >
-              View Detail
-            </Button>
-          </div>
-        ),
-        children: [
-          {
-          key: 'UMC-0000001-1',
-          Qty: 1,
-          UoM: 'PACK',
-          conversionNumber: 12,
-          baseUoM: 'PCS',
-          status: "ACTIVE"
-          },
-          {
-          key: 'UMC-0000001-2',
-          Qty: 1,
-          UoM: 'CTN',
-          conversionNumber: 24,
-          baseUoM: 'PCS',
-          status: "INACTIVE"
-          },
-        ]
-      },
-      {
-        // key: 'UMC-0000002',
-        id: 'MPC-0000006',
-        name: 'Conversion Transport',
-        action: (
-          <div style={{ display: "flex", justifyContent: "left" }}>
-            <Button
-              size="small"
-              onClick={() => {
-                router.push(`/unit-of-measure-conversion/${'MPC-0000006'}`);
-              }}
-              variant="tertiary"
-            >
-              View Detail
-            </Button>
-          </div>
-        ),
-        children: [
-          {
-          key: 'UMC-0000002-1',
-          Qty: 1,
-          UoM: 'PACK',
-          conversionNumber: 22,
-          baseUoM: 'PCS',
-          status: "ACTIVE"
-          },
-          {
-          key: 'UMC-0000002-2',
-          Qty: 1,
-          UoM: 'CTN',
-          conversionNumber: 21,
-          baseUoM: 'PCS',
-          status: "INACTIVE"
-          },
-        ]
-      }
-    ]
-    // const filteredData = data.filter(el => el.id === uom_conversion_id)
-    setDataUoM(data[1].children)
-    setUOMDataFake(data[1])
-  }, [])
-  
-  // const {
-  //   isFetching: isFetchingUomCategory,
-  //   isFetchingNextPage: isFetchingMoreUomCategory,
-  //   isLoading: isLoadingUOM,
-  //   hasNextPage,
-  //   fetchNextPage,
-  // } = useUOMCategoryInfiniteLists({
-  //   query: {
-  //     search: debounceFetch,
-  //     company_id: "KSNI",
-  //     limit: 10,
-  //   },
-  //   options: {
-  //     onSuccess: (data: any) => {
-  //       setTotalRows(data.pages[0].totalRow);
-  //       const mappedData = data?.pages?.map((group: any) => {
-  //         return group.rows?.map((element: any) => {
-  //           return {
-  //             value: element.uomCategoryId,
-  //             label: element.name,
-  //           };
-  //         });
-  //       });
-  //       const flattenArray = [].concat(...mappedData);
-  //       setListUomCategory(flattenArray);
-  //     },
-  //     getNextPageParam: (_lastPage: any, pages: any) => {
-  //       if (listUomCategory.length < totalRows) {
-  //         return pages.length + 1;
-  //       } else {
-  //         return undefined;
-  //       }
-  //     },
-  //   },
-  // });
 
-  // const {
-  //   data: UomData,
-  //   isLoading: isLoadingUom,
-  //   isFetching: isFetchingUom,
-  // } = useUOMDetail({
-  //   id: uom_conversion_id,
-  //   companyId: "KSNI",
-  //   options: {
-  //     onSuccess: (data: any) => {},
-  //   },
-  // });
-
-  const { mutate: updateUom, isLoading: isLoadingUpdateUom } = useUpdateUOM({
-    companyId: "KSNI",
-    id: uom_conversion_id,
+  const {
+    isFetching: isFetchingUomCategory,
+    isFetchingNextPage: isFetchingMoreUomCategory,
+    isLoading: isLoadingUOM,
+    hasNextPage,
+    fetchNextPage,
+  } = useUOMInfiniteLists({
+    query: {
+      search: debounceFetch,
+      company_id: "KSNI",
+      limit: 10,
+    },
     options: {
-      onSuccess: () => {
-        router.back();
-        queryClient.invalidateQueries(["uom-list"]);
+      onSuccess: (data: any) => {
+        setTotalRows(data.pages[0].totalRow);
+        const mappedData = data?.pages?.map((group: any) => {
+          return group.rows?.map((element: any) => {
+            return {
+              value: element.name,
+              label: element.name,
+            };
+          });
+        });
+        const flattenArray = [].concat(...mappedData);
+        console.log(flattenArray, '<<<<')
+        setListUomCategory(flattenArray);
+      },
+      getNextPageParam: (_lastPage: any, pages: any) => {
+        if (listUomCategory.length < totalRows) {
+          return pages.length + 1;
+        } else {
+          return undefined;
+        }
       },
     },
   });
 
-  const { mutate: deleteUOM, isLoading: isLoadingDeleteUOM } = useDeletUOM({
+  const { mutate: createUom, isLoading: isLoadingCreateUom } = useCreateUOMConversion({
     options: {
       onSuccess: () => {
         queryClient.invalidateQueries(["uom-list"]);
@@ -218,49 +123,76 @@ const UOMConversionDetail = () => {
     },
   });
 
-  const deletedProduct = (id: any) => {
-    console.log(id, '<<delete prod')
+  const updateDeleteUom = (id: any) => {
+    let tempDataTable = [...newUomTable]
+    id.forEach((uomId: number) => {
+      tempDataTable = tempDataTable.filter(el => el.id !== uomId)
+    })
+    tempDataTable = tempDataTable.map((el, i) => {
+      return {
+        ...el,
+        id : i + 1
+      }
+    })    
+    setNewUomTable(tempDataTable)
+    setShowDelete({ open: false, type: "selection", data: {} })
+  
   }
 
-  const createProduct = () => {
-    const newDataUOM = [...dataUoM]
-
-  }
-  const onSubmit = (data: any) => {
-    updateUom(data);
+  const updateCreateUom = (data: any) => {
+    if(!newUomTable){
+      setNewUomTable([{
+        id: 1,
+        qty: 1,
+        uom: data.uom,
+        conversionNumber: data.conversionNumber,
+        baseUom: data.baseUom
+      }])
+    } else {
+      setNewUomTable(prev => [...prev, {
+        id: newUomTable.length+1,
+        qty: 1,
+        uom: data.uom,
+        conversionNumber: data.conversionNumber,
+        baseUom: data.baseUom
+      }])
+    }
+    setShowCreateModal(false)
   };
 
-  // if (isLoadingUom || isFetchingUomCategory)
-  //   return (
-  //     <Center>
-  //       <Spin tip="Loading data..." />
-  //     </Center>
-  //   );
-
-  const checkTableChildren = (rowKey: any) => {
-    const newTableData = dataUoM?.map(el => {
-      if(el.key === rowKey.key){
-        el.status === 'ACTIVE' ? el.status = 'INACTIVE' : el.status = 'ACTIVE'
-      }
-      return el
-    })
-    setDataUoM(newTableData)
+  const updateStatusUom = (rowKey: any) => {
+    console.log(rowKey)
   }
 
-  const checkedStatus = (status: string) => {
-    return status === 'ACTIVE' ? true : false
+  const onSave = (data: any) => {
+    const tempTable = [...newUomTable]
+    const savedTable = tempTable.map(uom => {
+      return {
+        qty: uom.qty,
+        uom: uom.uom,
+        conversion_number: uom.conversionNumber
+      }
+    })
+    const saveData = {
+    company_id: "KSNI",
+    name: data.name,
+    base_uom: data.baseUom,
+    items: savedTable
+    }
+    console.log(saveData, 'savedata ni')
+    createUom(saveData)
   }
 
   const columns = [
     {
       title: "Qty",
-      dataIndex: "Qty",
-      key: 'Qty',
+      dataIndex: "qty",
+      key: 'qty',
     },
     {
       title: "UoM",
-      dataIndex: "UoM",
-      key: 'UoM'
+      dataIndex: "uom",
+      key: 'uom'
     },
     {
       title: "Conversion Number",
@@ -269,21 +201,20 @@ const UOMConversionDetail = () => {
     },
     {
       title: "Base UoM",
-      dataIndex: "baseUoM",
-      key: 'baseUoM',
+      dataIndex: "baseUom",
+      key: 'baseUom',
     },
     {
       title: "Active",
       dataIndex: 'status',
       render: (status: string, rowKey: any) => (
         <>
-          <Switch checked={checkedStatus(status)} onChange={() => checkTableChildren(rowKey)}/>
+          <Switch checked={status} onChange={() => updateStatusUom(rowKey)}/>
         </>
       ),
     },
   ];
   
-
   const rowSelection = {
     selectedRowKeys,
     onChange: (selectedRowKeys: any, selectedRows: any) => {
@@ -291,12 +222,18 @@ const UOMConversionDetail = () => {
     },
   };
 
+  if (isFetchingUomCategory)
+  return (
+    <Center>
+      <Spin tip="Loading data..." />
+    </Center>
+  );
+
   return (
     <>
       <Col>
         <Row gap="4px">
-          {/* <ArrowLeft style={{ cursor: "pointer" }} onClick={() => router.back()} /> */}
-          <Text variant={"h4"}>{"Create UoM Conversion"}</Text>
+          <Text variant={"h4"}>Create UoM Conversion</Text>
         </Row>
 
         <Spacer size={20} />
@@ -307,10 +244,11 @@ const UOMConversionDetail = () => {
 
             <Row gap="16px">
               <Button size="big" variant={"tertiary"} onClick={() => router.back()}>
-                cancel
+                Cancel
               </Button>
-              <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
-                {isLoadingUpdateUom ? "Loading..." : "Save"}
+              {/* <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}> */}
+              <Button size="big" variant={"primary"} onClick={handleSubmit(onSave)}>
+                {isLoadingCreateUom? "Loading..." : "Save"}
               </Button>
             </Row>
           </Row>
@@ -320,49 +258,51 @@ const UOMConversionDetail = () => {
 
         <Card>
           <Spacer size={10} />
+
           <Row width="100%" noWrap>
             <Col width={"100%"}>
-              {UOMDataFake && 
                 <Input
                   width="100%"
                   label="Uom Conversion Name"
+                  defaultValue={newUom.name}
                   height="40px"
-                  // defaultValue={UOMDataFake?.name}
-                  placeholder={"e.g gram"}
+                  required
+                  placeholder={"e.g Product Conversion"}
                   {...register("name", { required: "Please enter name." })}
                 />
-              }
             </Col>
+
             <Spacer size={10} />
+
             <Col width="100%">
               <Controller
                 control={control}
-                name="uom_category_id"
-                // defaultValue={UomData.uomCategoryId}
+                name="baseUom"
                 render={({ field: { onChange } }) => (
                   <>
                     <Label>Base UoM</Label>
                     <Spacer size={3} />
                     <FormSelect
-                      // defaultValue={UomData.uomCategoryId}
                       style={{ width: "100%" }}
+                      defaultValue={newUom.base_uom}
                       size={"large"}
-                      placeholder={"PCS"}
+                      required
+                      placeholder={"Select"}
                       borderColor={"#AAAAAA"}
                       arrowColor={"#000"}
                       withSearch
-                      // isLoading={isFetchingUomCategory}
-                      // isLoadingMore={isFetchingMoreUomCategory}
-                      // fetchMore={() => {
-                      //   if (hasNextPage) {
-                      //     fetchNextPage();
-                      //   }
-                      // }}
-                      // items={
-                      //   isFetchingUomCategory && !isFetchingMoreUomCategory
-                      //     ? []
-                      //     : listUomCategory
-                      // }
+                      isLoading={isFetchingUomCategory}
+                      isLoadingMore={isFetchingMoreUomCategory}
+                      fetchMore={() => {
+                        if (hasNextPage) {
+                          fetchNextPage();
+                        }
+                      }}
+                      items={
+                        isFetchingUomCategory && !isFetchingMoreUomCategory
+                          ? []
+                          : listUomCategory
+                      }
                       onChange={(value: any) => {
                         onChange(value);
                       }}
@@ -375,7 +315,9 @@ const UOMConversionDetail = () => {
               />
             </Col>
           </Row>
+
           <Spacer size={20} />
+
           <Col>
               <HeaderLabel>Conversion</HeaderLabel>
               <Spacer size={20} />
@@ -390,7 +332,8 @@ const UOMConversionDetail = () => {
                     setShowDelete({
                       open: true,
                       type: "selection",
-                      data: { uomData: dataUoM, selectedRowKeys },
+                      // data: { uomData: UomData?.data, selectedRowKeys },
+                      data: { uomData: newUomTable, selectedRowKeys },
                     })
                   }
                   disabled={rowSelection.selectedRowKeys?.length === 0}
@@ -401,20 +344,20 @@ const UOMConversionDetail = () => {
               <Spacer size={20} />
                 <Col gap={"60px"}>
                   <Table
-                    // loading={isLoadingUOM || isFetchingUomCategory}
+                    // loading={isLoadingUOM || isFetchingUom}
                     columns={columns}
-                    data={dataUoM}
+                    data={newUomTable}
                     rowSelection={rowSelection}
-                    // rowKey={"id"}
+                    rowKey={"id"}
                   />
                   <Pagination pagination={pagination} />
                 </Col>
           </Col>
         </Card>
       </Col>
+
       {showCreateModal && (
         <Modal
-        // style={{fontSize: '20px'}}
         centered
         width={'400px'}
         visible={showCreateModal}
@@ -429,8 +372,7 @@ const UOMConversionDetail = () => {
             <Col width="100%">
               <Controller
                 control={control}
-                name="uom_category_id"
-                // defaultValue={UomData.uomCategoryId}
+                name="uom"
                 render={({ field: { onChange } }) => (
                   <>
                     <Label>UoM</Label>
@@ -438,61 +380,58 @@ const UOMConversionDetail = () => {
                     <CreateSelectDiv>
                       <InputAddonAfter>Per</InputAddonAfter>
                       <FormSelect
-                        // dropdownStyle={{ borderRadius: '0 5px 5px 0' }}
-                        // defaultValue={UomData.uomCategoryId}
                         style={{ width: "82%", marginLeft: '18%', paddingLeft: '2px' }}
                         size={"large"}
                         placeholder={"PCS"}
+                        required
                         borderColor={"#AAAAAA"}
                         arrowColor={"#000"}
                         withSearch
-                        // isLoading={isFetchingUomCategory}
-                        // isLoadingMore={isFetchingMoreUomCategory}
-                        // fetchMore={() => {
-                        //   if (hasNextPage) {
-                        //     fetchNextPage();
-                        //   }
-                        // }}
-                        // items={
-                        //   isFetchingUomCategory && !isFetchingMoreUomCategory
-                        //     ? []
-                        //     : listUomCategory
-                        // }
+                        isLoading={isFetchingUomCategory}
+                        isLoadingMore={isFetchingMoreUomCategory}
+                        fetchMore={() => {
+                          if (hasNextPage) {
+                            fetchNextPage();
+                          }
+                        }}
+                        items={
+                          isFetchingUomCategory && !isFetchingMoreUomCategory
+                            ? []
+                            : listUomCategory
+                        }
                         onChange={(value: any) => {
                           onChange(value);
                         }}
                         onSearch={(value: any) => {
                           setSearch(value);
                         }}
-                      />
+                        />
                     </CreateSelectDiv>
                   </>
                 )}
+                // {...register("Uom", { required: "Please enter Uom." })}
               />
             </Col>
               <Spacer size={15} />
 
               <Col width={"100%"}>
                 <CreateInputDiv>
-                  {UOMDataFake && 
                     <Input
                       width="80%"
                       label="Conversion Number"
                       height="40px"
-                      // defaultValue={UOMDataFake?.name}
-                      placeholder={"e.g gram"}
+                      required
+                      placeholder={"e.g 12"}
                       addonAfter="PCS"
-                      {...register("name", { required: "Please enter name." })}
+                      {...register("conversionNumber", { required: "Please enter Conversion Number." })}
                     />
-                  }
-                  <InputAddonBefore>PCS</InputAddonBefore>
+                  <InputAddonBefore>{"PCS"}</InputAddonBefore>
                 </CreateInputDiv>
               </Col>
               
             <Spacer size={100} />
             <DeleteCardButtonHolder>
               <Button
-                // size="medium"
                 variant="tertiary"
                 key="submit"
                 type="primary"
@@ -502,10 +441,7 @@ const UOMConversionDetail = () => {
               </Button>
               <Button
                 variant="primary"
-                // size="small"
-                onClick={() => {
-                    deletedProduct(selectedRowKeys)
-                }}
+                onClick={handleSubmit(updateCreateUom)}
               >
                 save
               </Button>
@@ -518,11 +454,11 @@ const UOMConversionDetail = () => {
       {showDeleteModal && (
         <ModalDeleteConfirmation
           totalSelected={1}
-          itemTitle={UOMDataFake.name}
+          itemTitle={"electrical conversion"}
           visible={showDeleteModal}
-          isLoading={isLoadingDeleteUOM}
+          // isLoading={isLoadingDeleteUOM}
           onCancel={() => setShowDeleteModal(false)}
-          onOk={() => deleteUOM({ ids: [uom_conversion_id], company_id: "KSNI" })}
+          // onOk={() => deleteUOM({ ids: [uom_conversion_id], company_id: "KSNI" })}
         />
       )}
 
@@ -553,10 +489,10 @@ const UOMConversionDetail = () => {
                   variant="primary"
                   size="big"
                   onClick={() => {
-                      deletedProduct(selectedRowKeys)
+                      updateDeleteUom(selectedRowKeys)
                   }}
                 >
-                  {isLoadingDeleteUOM ? "loading..." : "Yes"}
+                  {"Yes"}
                 </Button>
               </DeleteCardButtonHolder>
             </TopButtonHolder>
@@ -651,4 +587,4 @@ const InputAddonBefore = styled.div`
   border: 1px solid #aaaaaa;
 `
 
-export default UOMConversionDetail;
+export default UOMConversionCreate;

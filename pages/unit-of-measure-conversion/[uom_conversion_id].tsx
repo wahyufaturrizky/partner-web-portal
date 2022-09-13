@@ -26,6 +26,7 @@ import ArrowLeft from "../../assets/icons/arrow-left.svg";
 import usePagination from "@lucasmogari/react-pagination";
 
 import { useDeletUOMConversion, useUOMConversion, useUpdateUOMConversion } from "hooks/mdm/unit-of-measure-conversion/useUOMConversion";
+import { useUOMInfiniteLists } from "hooks/mdm/unit-of-measure/useUOM";
 
 const renderConfirmationText = (type: any, data: any) => {
 switch (type) {
@@ -74,7 +75,7 @@ const UOMConversionDetail = () => {
     isLoading: isLoadingUOM,
     hasNextPage,
     fetchNextPage,
-  } = useUOMCategoryInfiniteLists({
+  } = useUOMInfiniteLists({
     query: {
       search: debounceFetch,
       company_id: "KSNI",
@@ -86,7 +87,7 @@ const UOMConversionDetail = () => {
         const mappedData = data?.pages?.map((group: any) => {
           return group.rows?.map((element: any) => {
             return {
-              value: element.uomCategoryId,
+              value: element.name,
               label: element.name,
             };
           });
@@ -198,6 +199,7 @@ const UOMConversionDetail = () => {
       conversion_number: data?.conversionNumber,
       active_status: true
     })
+    console.log(newData, 7777)
     setShowCreateModal(false)
     updateUom(newData);
   };
@@ -229,6 +231,16 @@ const UOMConversionDetail = () => {
     updateUom(newData)
   }
 
+  const onSave = (data: any) => {
+    console.log(data, '<<<<<21212')
+    const newData = {
+      name: data?.name,
+      baseUom: data?.baseUom,
+      items: UomData?.dataForUpdate
+    }
+    updateUom(newData)
+    router.back()
+  }
   const columns = [
     {
       title: "Qty",
@@ -294,7 +306,7 @@ const UOMConversionDetail = () => {
                 Delete
               </Button>
               {/* <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}> */}
-              <Button size="big" variant={"primary"} onClick={() => router.back()}>
+              <Button size="big" variant={"primary"} onClick={handleSubmit(onSave)}>
                 {isLoadingUpdateUom ? "Loading..." : "Save"}
               </Button>
             </Row>
@@ -474,7 +486,7 @@ const UOMConversionDetail = () => {
                       addonAfter="PCS"
                       {...register("conversionNumber", { required: "Please enter Conversion Number." })}
                     />
-                  <InputAddonBefore>PCS</InputAddonBefore>
+                  <InputAddonBefore>{UomData?.baseUom}</InputAddonBefore>
                 </CreateInputDiv>
               </Col>
               
