@@ -73,8 +73,8 @@ export default function CreateProduct({ isCreateProductVariant = true}) {
   const registrationBodyField = {
     number_type: "",
     number: "",
-    valid_from: moment().format('DD/MM/YYYY'),
-    valid_to: moment().format('DD/MM/YYYY')
+    valid_from: moment().utc().toString(),
+    valid_to: moment().utc().toString()
   };
 
   const productType = [
@@ -108,7 +108,7 @@ export default function CreateProduct({ isCreateProductVariant = true}) {
       can_be_sold: false,
       can_be_purchased: false,
       can_be_expensed: false,
-      expired_date: moment().format('DD/MM/YYYY'),
+      expired_date: moment().utc().toString(),
       external_code: "",
       use_unit_leveling: false,
       packaging_size: "",
@@ -274,14 +274,14 @@ export default function CreateProduct({ isCreateProductVariant = true}) {
       'registration',
     ])
 
-    payload.expired_date = moment(data?.expired_date).utc().toString();
+    data?.expired_date?.includes('/') ? moment(data.expired_date, 'DD/MM/YYYY').utc().toString() : moment(data.expired_date).utc().toString();
     payload.purchase_uom_id = data.purchase_uom.uom_id || "";
     payload.product_brand_id = data.brand.id || "";
     payload.base_uom_id = data.base_uom.uom_id || "";
     payload.purchase_uom_id = data?.purchase_uom?.uom_id || "";
     payload.options = data?.options?.map((data:any) => ({
       options_id: data?.option.id,
-      options_values: data?.option_items?.map(data => data?.value) || []
+      options_values: data?.option_items?.map(data => data?.value || data?.id) || []
     }));
     payload.accounting = {
       income_account_id: data?.accounting?.income_account?.id || 0,
@@ -315,8 +315,8 @@ export default function CreateProduct({ isCreateProductVariant = true}) {
     payload.registration = data?.registration?.map(data => ({
       number_type : data?.number_type,
       number: data?.number,
-      valid_from: moment(data?.valid_from).utc().toString(),
-      valid_to: moment(data?.valid_to).utc().toString()
+      valid_from: data.valid_from?.includes('/') ? moment(data.valid_from, 'DD/MM/YYYY').utc().toString() : moment(data.valid_from).utc().toString(),
+      valid_to: data.valid_to?.includes('/') ? moment(data.valid_to, 'DD/MM/YYYY').utc().toString() : moment(data.valid_to).utc().toString(),
     }))
 
     payload.variants = data?.variants?.map(({id, ...rest}) => rest)
@@ -446,7 +446,9 @@ export default function CreateProduct({ isCreateProductVariant = true}) {
   }
 
   useEffect(() => {
+    if(!isUpdate){
       generateVariantInCreate()
+    }
   }, [optionsForm, salesPriceForm, costOfProductForm])
 
   useEffect(() => {
@@ -584,6 +586,7 @@ export default function CreateProduct({ isCreateProductVariant = true}) {
                     <Dropdown2
                       defaultValue={productForm?.product_type}
                       label="Product Type"
+                      labelBold={true}
                       width="100%"
                       noSearch
                       items={productType}

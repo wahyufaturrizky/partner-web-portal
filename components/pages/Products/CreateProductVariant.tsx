@@ -74,8 +74,8 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
   const registrationBodyField = {
     number_type: "",
     number: "",
-    valid_from: moment().format('DD/MM/YYYY'),
-    valid_to: moment().format('DD/MM/YYYY')
+    valid_from: moment().utc().toString(),
+    valid_to: moment().utc().toString()
   };
 
   const productType = [
@@ -109,7 +109,7 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
       status: "active",
       can_be_sold: false,
       can_be_purchased: false,
-      expired_date: moment().format('DD/MM/YYYY'),
+      expired_date: moment().utc().toString(),
       external_code: "",
       use_unit_leveling: false,
       packaging_size: "",
@@ -212,7 +212,7 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
           const formData:any = new FormData();
           formData.append("image", getValues('image'));
           formData.append("company_id", "KSNI");
-          formData.append("product_id", data.productId);
+          formData.append("product_variant_id", data.productId);
   
           uploadImage(formData);
         } else {
@@ -227,12 +227,16 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
     id,
     options: {
       onSuccess: (data:any) => {
-        const formData:any = new FormData();
-        formData.append("image", getValues('image'));
-        formData.append("company_id", "KSNI");
-        formData.append("product_id", data.product_id);
-
-        uploadImage(formData);
+        if( getValues('image')){
+          const formData:any = new FormData();
+          formData.append("image", getValues('image'));
+          formData.append("company_id", "KSNI");
+          formData.append("product_variant_id", data.productId);
+  
+          uploadImage(formData);
+        } else {
+          router.push('/product-variant')
+        }
       }
     }
   })
@@ -265,9 +269,10 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
       'packaging_size',
       'sales_price',
       'registration',
+      'barcode'
     ])
 
-    payload.expired_date = moment(data.expired_date).utc().toString();
+    payload.expired_date = data?.expired_date?.includes('/') ? moment(data.expired_date, 'DD/MM/YYYY').utc().toString() : moment(data.expired_date).utc().toString();
     payload.product_brand_id = data.brand.id;
     payload.base_uom_id = data.base_uom.uom_id;
     payload.purchase_uom_id = data.purchase_uom.uom_id;
@@ -278,17 +283,17 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
     payload.company_code = 'KSNI'
     payload.inventory = {
       weight: {
-          net: data.inventory.weight.net ,
-          gross: data.inventory.weight.gross,
-          uom_id: data.inventory.weight.uom.id
+          net: data?.inventory?.weight?.net || 0,
+          gross: data?.inventory?.weight?.gross || 0,
+          uom_id: data?.inventory?.weight?.uom?.id || ''
       },
       volume : {
           dimension : {
-              length: data.inventory.volume.length,
-              width: data.inventory.volume.width,
-              height: data.inventory.volume.height
+              length: data?.inventory?.volume?.length || 0,
+              width: data?.inventory?.volume?.width || 0,
+              height: data?.inventory?.volume?.height || 0
           },
-          uom_id:data.inventory.volume.uom.id
+          uom_id:data?.inventory?.volume?.uom?.id || ''
       },
       storage_management:  {
         "condition" : "chilled",
@@ -302,13 +307,15 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
     payload.registration = data.registration.map(data => ({
       number_type : data.number_type,
       number: data.number,
-      valid_from: moment(data.valid_from).utc().toString(),
-      valid_to: moment(data.valid_to).utc().toString()
+      valid_from: data.valid_from?.includes('/') ? moment(data.valid_from, 'DD/MM/YYYY').utc().toString() : moment(data.valid_from).utc().toString(),
+      valid_to: data.valid_to?.includes('/') ? moment(data.valid_to, 'DD/MM/YYYY').utc().toString() : moment(data.valid_to).utc().toString(),
     }))
 
     if(isUpdate){
-      payload.product_id = id
+      delete payload.company_id
+      delete payload.company_code
     }
+
 
     isUpdate ? updateProduct(payload) : createProduct(payload)
   };
@@ -529,6 +536,7 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
                       defaultValue={productForm?.product_type}
                       label="Product Type"
                       width="100%"
+                      labelBold={true}
                       noSearch
                       items={productType}
                       handleChange={(value: any) => {
@@ -619,7 +627,7 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
                     width="100%"
                     label="SKU Number"
                     height="48px"
-                    placeholder={"e.g 413111"}
+                    placeholder={"e.g NXT-100021"}
                     {...register("sku_number", {
                       required: 'Sku Number is required'
                     })}
@@ -633,7 +641,7 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
                     width="100%"
                     label="Barcode"
                     height="48px"
-                    placeholder={"e.g 413111"}
+                    placeholder={"e.g 131311113411111"}
                     {...register("barcode")}
                   />
               </Col>

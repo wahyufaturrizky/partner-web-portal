@@ -58,7 +58,7 @@ export default function Registration(props: any) {
       {
         fieldsRegistration.map((field: any, index: number | string) =>
         <React.Fragment key={index}>
-          <FormContact registrationForm={registrationForm} key={index} index={index} {...propsFieldForm} />
+          <FormContact registrationForm={field} key={index} index={index} {...propsFieldForm} />
           <Spacer size={30} />
           <Divider />
           <Spacer size={30} />

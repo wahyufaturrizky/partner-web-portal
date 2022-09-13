@@ -110,29 +110,30 @@ export default function ProductOptionsCreate({control, setValue }: any) {
           </Button>
         </Row>
         <Spacer size={12} />
-        <Col gap="20px">
-          <TableHeader />
-          {fieldsProductOption.map((product, index) => 
-            <ProductOption
-              variantsForm={variantsForm}
-              optionsForm={optionsForm}
-              index={index}
-              key={index}
-              product={product}
-              removeProductOption={removeProductOption}
-              control={control}
-              listProductOptionsValues={listProductOptionsValues}
-              listProductOptions={listProductOptions}
-              isFetchingProductOptions={isFetchingProductOptions}
-              setSearchProductOptions={setSearchProductOptions}
-              isFetchingMoreProductOptions={isFetchingMoreProductOptions}
-              fetchNextPageProductOptions={fetchNextPageProductOptions}
-              hasNextProductOptions={hasNextProductOptions}
-              setValue={setValue}
-            />
-          )}
-        </Col>
-        
+        {fieldsProductOption?.length > 0 &&
+          <Col gap="20px">
+            <TableHeader />
+            {fieldsProductOption.map((product, index) => 
+              <ProductOption
+                variantsForm={variantsForm}
+                optionsForm={optionsForm}
+                index={index}
+                key={index}
+                product={product}
+                removeProductOption={removeProductOption}
+                control={control}
+                listProductOptionsValues={listProductOptionsValues}
+                listProductOptions={listProductOptions}
+                isFetchingProductOptions={isFetchingProductOptions}
+                setSearchProductOptions={setSearchProductOptions}
+                isFetchingMoreProductOptions={isFetchingMoreProductOptions}
+                fetchNextPageProductOptions={fetchNextPageProductOptions}
+                hasNextProductOptions={hasNextProductOptions}
+                setValue={setValue}
+              />
+            )}
+          </Col>
+        }
     </Col>
   )
 }
