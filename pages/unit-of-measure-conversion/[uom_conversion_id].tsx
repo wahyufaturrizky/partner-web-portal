@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   Text,
   Col,
@@ -18,14 +18,13 @@ import {
 import styled from "styled-components";
 import { Controller, useForm } from "react-hook-form";
 import { useRouter } from "next/router";
-import { useUOMDetail, useUpdateUOM, useDeletUOM } from "../../hooks/mdm/unit-of-measure/useUOM";
 import { queryClient } from "../_app";
 import useDebounce from "../../lib/useDebounce";
 import { useUOMCategoryInfiniteLists } from "../../hooks/mdm/unit-of-measure-category/useUOMCategory";
 import { ModalDeleteConfirmation } from "../../components/elements/Modal/ModalConfirmationDelete";
 import ArrowLeft from "../../assets/icons/arrow-left.svg";
 import usePagination from "@lucasmogari/react-pagination";
-import styles from './index.module.css'
+
 import { useDeletUOMConversion, useUOMConversion, useUpdateUOMConversion } from "hooks/mdm/unit-of-measure-conversion/useUOMConversion";
 
 const renderConfirmationText = (type: any, data: any) => {
@@ -114,7 +113,7 @@ const UOMConversionDetail = () => {
     id: uom_conversion_id,
     companyId: "KSNI",
     query: {
-      uom: "PACK",
+      // uom: "PACK",
       page: pagination.page,
       limit: pagination.itemsPerPage
     },
@@ -125,7 +124,7 @@ const UOMConversionDetail = () => {
       select: (data: any) => {
         const mappedData: { id: any; key: any; uom: any; conversionNumber: any; baseUom: any; qty: any; active: boolean; }[] = []
         const dataForUpdate: { id: any; uom: any; conversionNumber: any; qty: any; activeStatus: any; }[] = []
-        data?.uomConversion?.rows?.forEach((uomConversion: any) => {
+        data?.uomConversionItem?.rows?.forEach((uomConversion: any) => {
           mappedData.push({
             id: uomConversion.id,
             key: uomConversion.id,
@@ -143,6 +142,7 @@ const UOMConversionDetail = () => {
             activeStatus: uomConversion.activeStatus
           })
         });
+        console.log(data,111)
         return { dataForUpdate: dataForUpdate, data: mappedData, totalRow: data?.uomConversion?.totalRow, name: data?.name, baseUom: data?.baseUom}
       },
     },
@@ -153,7 +153,7 @@ const UOMConversionDetail = () => {
     id: uom_conversion_id,
     options: {
       onSuccess: () => {
-        queryClient.invalidateQueries(["uom-list"]);
+        queryClient.invalidateQueries(["uom-conversion"]);
       },
     },
   });
@@ -168,35 +168,41 @@ const UOMConversionDetail = () => {
     },
   });
 
-  const deletedProduct = (id: any) => {
+
+  const updateDeleteUom = (id: any) => {
     let newData = {
       name: UomData?.name,
       baseUom: UomData?.baseUom,
-      items: UomData?.dataForUpdate
+      items: UomData?.dataForUpdate,
+      remove_items: []
     }
-    let updatedItems = []
-    if(id.length === 1) updatedItems = newData?.items.filter((e: any) => e.id !== id[0])
-    else {
-      let data = newData?.items
-      id.forEach((el: number) => {
-        data = data.filter((e: any) => e.id !== el)
-        updatedItems = data
-      })
-    }
-    newData.items = updatedItems
-    console.log(newData, 11111)
+    
+    id.forEach((uomId:number) => {
+      newData.remove_items.push({id: uomId})
+    })
+
     updateUom(newData)
     setShowDelete({ open: false, type: "", data: {} })
-
   }
 
-  const onSubmit = (data: any) => {
-    updateUom(data);
+  const updateCreateUom = (data: any) => {
+    const newData = {
+      name: data?.name,
+      baseUom: data?.baseUom,
+      items: UomData?.dataForUpdate
+    }
+    newData.items.push({
+      id: 0,
+      qty: 3,
+      uom: data?.uom,
+      conversion_number: data?.conversionNumber,
+      active_status: true
+    })
+    setShowCreateModal(false)
+    updateUom(newData);
   };
 
-
-
-  const checkTableChildren = (rowKey: any) => {
+  const updateStatusUom = (rowKey: any) => {
     let newData = {
       name: UomData?.name,
       baseUom: UomData?.baseUom,
@@ -249,13 +255,12 @@ const UOMConversionDetail = () => {
       dataIndex: 'status',
       render: (status: string, rowKey: any) => (
         <>
-          <Switch checked={status} onChange={() => checkTableChildren(rowKey)}/>
+          <Switch checked={status} onChange={() => updateStatusUom(rowKey)}/>
         </>
       ),
     },
   ];
   
-
   const rowSelection = {
     selectedRowKeys,
     onChange: (selectedRowKeys: any, selectedRows: any) => {
@@ -288,7 +293,8 @@ const UOMConversionDetail = () => {
               <Button size="big" variant={"tertiary"} onClick={() => setShowDeleteModal(true)}>
                 Delete
               </Button>
-              <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
+              {/* <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}> */}
+              <Button size="big" variant={"primary"} onClick={() => router.back()}>
                 {isLoadingUpdateUom ? "Loading..." : "Save"}
               </Button>
             </Row>
@@ -318,7 +324,7 @@ const UOMConversionDetail = () => {
             <Col width="100%">
               <Controller
                 control={control}
-                name="uom_category_id"
+                name="baseUom"
                 defaultValue={UomData?.baseUom}
                 render={({ field: { onChange } }) => (
                   <>
@@ -413,7 +419,8 @@ const UOMConversionDetail = () => {
             <Col width="100%">
               <Controller
                 control={control}
-                name="uom_category_id"
+                name="uom"
+                defaultValue={UomData?.baseUom}
                 render={({ field: { onChange } }) => (
                   <>
                     <Label>UoM</Label>
@@ -424,7 +431,7 @@ const UOMConversionDetail = () => {
                         style={{ width: "82%", marginLeft: '18%', paddingLeft: '2px' }}
                         size={"large"}
                         placeholder={"PCS"}
-                        defaultValue={"PCS"}
+                        defaultValue={UomData?.baseUom}
                         required
                         borderColor={"#AAAAAA"}
                         arrowColor={"#000"}
@@ -447,10 +454,11 @@ const UOMConversionDetail = () => {
                         onSearch={(value: any) => {
                           setSearch(value);
                         }}
-                      />
+                        />
                     </CreateSelectDiv>
                   </>
                 )}
+                // {...register("Uom", { required: "Please enter Uom." })}
               />
             </Col>
               <Spacer size={15} />
@@ -464,7 +472,7 @@ const UOMConversionDetail = () => {
                       required
                       placeholder={"e.g 12"}
                       addonAfter="PCS"
-                      {...register("name", { required: "Please enter name." })}
+                      {...register("conversionNumber", { required: "Please enter Conversion Number." })}
                     />
                   <InputAddonBefore>PCS</InputAddonBefore>
                 </CreateInputDiv>
@@ -482,9 +490,7 @@ const UOMConversionDetail = () => {
               </Button>
               <Button
                 variant="primary"
-                onClick={() => {
-                    deletedProduct(selectedRowKeys)
-                }}
+                onClick={handleSubmit(updateCreateUom)}
               >
                 save
               </Button>
@@ -532,7 +538,7 @@ const UOMConversionDetail = () => {
                   variant="primary"
                   size="big"
                   onClick={() => {
-                      deletedProduct(selectedRowKeys)
+                      updateDeleteUom(selectedRowKeys)
                   }}
                 >
                   {isLoadingDeleteUOM ? "loading..." : "Yes"}
