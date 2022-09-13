@@ -95,11 +95,12 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
     setValue,
     getValues,
     watch,
+    getFieldState,
     formState: { errors },
   } = useForm({
     shouldUseNativeValidation: true,
     defaultValues: {
-      sku_number: "",
+      sku: "",
       barcode: "",
       image: "",
       company_id: "KSNI",
@@ -227,11 +228,11 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
     id,
     options: {
       onSuccess: (data:any) => {
-        if( getValues('image')){
+        if( getValues('image') && getFieldState('image').isDirty){
           const formData:any = new FormData();
           formData.append("image", getValues('image'));
           formData.append("company_id", "KSNI");
-          formData.append("product_variant_id", data.productId);
+          formData.append("product_variant_id", id);
   
           uploadImage(formData);
         } else {
@@ -269,7 +270,8 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
       'packaging_size',
       'sales_price',
       'registration',
-      'barcode'
+      'barcode',
+      'sku'
     ])
 
     payload.expired_date = data?.expired_date?.includes('/') ? moment(data.expired_date, 'DD/MM/YYYY').utc().toString() : moment(data.expired_date).utc().toString();
@@ -628,7 +630,7 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
                     label="SKU Number"
                     height="48px"
                     placeholder={"e.g NXT-100021"}
-                    {...register("sku_number", {
+                    {...register("sku", {
                       required: 'Sku Number is required'
                     })}
                   />
