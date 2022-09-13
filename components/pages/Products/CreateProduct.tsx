@@ -156,8 +156,8 @@ export default function CreateProduct({ isCreateProductVariant = true}) {
         Object.keys(data).forEach(key => {
           setValue(key, data[key]);
           setCanBePurchased(data?.canBePurchased);
-          setCanBeSold(data?.canBeSold);
-          setCanExpensed(data?.canBeExpensed)
+          setCanBePurchased(data.can_be_purchased);
+          setCanBeSold(data.can_be_sold);
         })
       return data;
     }
@@ -274,6 +274,9 @@ export default function CreateProduct({ isCreateProductVariant = true}) {
       'registration',
     ])
 
+    payload.can_be_sold = canBeSold;
+    payload.can_be_purchased = canBePurchased;
+
     data?.expired_date?.includes('/') ? moment(data.expired_date, 'DD/MM/YYYY').utc().toString() : moment(data.expired_date).utc().toString();
     payload.purchase_uom_id = data.purchase_uom.uom_id || "";
     payload.product_brand_id = data.brand.id || "";
@@ -290,9 +293,9 @@ export default function CreateProduct({ isCreateProductVariant = true}) {
     payload.company_code = 'KSNI'
     payload.inventory = {
       weight: {
-          net: data?.inventory?.weight?.net ,
-          gross: data?.inventory?.weight?.gross,
-          uom_id: data?.inventory?.weight?.uom?.id
+        net: data?.inventory?.weight?.net,
+        gross: data?.inventory?.weight?.gross,
+        uom_id: data?.inventory?.weight?.uom?.id
       },
       volume : {
           dimension : {
@@ -304,13 +307,8 @@ export default function CreateProduct({ isCreateProductVariant = true}) {
           uom_id:data?.inventory?.volume?.uom?.id
       },
       storage_management:  {
-        "condition" : "chilled",
-        "transportation_type": "121",
-        "transportation_group": "road",
-        "temperature" : "gatau",
-        "self_life": 9,
-        "self_life_unit": "days"
-    }
+        ...data?.inventory?.storage_management,
+      }
     }
     payload.registration = data?.registration?.map(data => ({
       number_type : data?.number_type,
