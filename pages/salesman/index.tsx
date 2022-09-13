@@ -5,21 +5,21 @@ import {
   ContentSwitcher,
   DropdownMenu,
   Text,
-  Spacer
+  Spacer,
+  Button,
+  Table,
+  Pagination,
 } from 'pink-lava-ui'
 import styled from 'styled-components'
 
-import {
-  Active,
-  Draft,
-  Inactive,
-  Rejected,
-  WaitingForApproval
-} from '../../components/pages/Salesman/fragments'
-import { options, downloadOptions } from '../../components/pages/Salesman/constants'
+import { useFetchListSalesman } from 'hooks/mdm/salesman/useSalesman'
+import { options, downloadOptions } from 'components/pages/Salesman/constants'
+import { useRouter } from 'next/router'
 
 export default function Salesman() {
   const [tabActived, setTabActived] = useState('active')
+  const [search, setSearch] = useState('')
+  const router = useRouter()
   const propsSet = {
     status: {
       active: 10,
@@ -30,22 +30,88 @@ export default function Salesman() {
     }
   }
 
-  const switchTabItem = () => {
+  const columns = [
+    {
+      title: "Salesman ID",
+      dataIndex: "idCard",
+    },
+    {
+      title: "Salesman Name",
+      dataIndex: "name",
+    },
+    {
+      title: "Division Name",
+      dataIndex: "division",
+    },
+    {
+      title: "Status",
+      dataIndex: "statusText",
+      render: (value: string) => {
+        const colors = value === 'Active'
+          ? '#01A862'
+          : value === 'Waiting for Approval'
+            ? '#FFB400'
+            : value === 'Rejected'
+              ? '#ED1C24'
+              : '#000000'
+        const backgrounds = value === 'Active'
+          ? '#E2FFF3'
+          : value === 'Waiting for Approval'
+            ? '#FFFBDF'
+            : value === 'Rejected'
+              ? '#FFE4E5'
+              : '#F4F4F4'
+        return (
+          <StatusAktif style={{ background: backgrounds, color: colors}}>
+            {value}
+          </StatusAktif>
+        )
+      }
+    },
+    {
+      title: "Action",
+      render: ({ id, statusText }: any) => (
+        <Button
+          size="small"
+          variant="tertiary"
+          onClick={() => router.push({
+            pathname: '/salesman/[salesman_id]',
+            query: {
+              salesman_id: id,
+              status: statusText
+            },
+          })}
+        >
+          View Detail
+        </Button>
+      )
+    },
+  ]
+
+  const isStatus = () => {
     switch (tabActived) {
       case 'active':
-        return <Active />
+        return '0'
       case 'inactive':
-        return <Inactive />
+        return '1'
       case 'waiting':
-        return <WaitingForApproval />
+        return '2'
       case 'rejected':
-        return <Rejected />
+        return '3'
       case 'draft':
-        return <Draft />
+        return '4'
       default:
-        return <Active />
+        return '0'
     }
   }
+
+  const { data, isLoading } = useFetchListSalesman({
+    options: { onSuccess: () => {} },
+    query: {
+      status: isStatus(),
+      search
+    }
+  })
 
   return (
     <div>
@@ -59,12 +125,12 @@ export default function Salesman() {
 
       <Spacer size={10} />
 
-      <Card>
+      <CardHeader>
         <FlexElement>
           <Search
             width="380px"
             placeholder="Search Salesman ID, Employee, etc"
-            onChange={({ target }: any) => { }}
+            onChange={({ target }: any) => setSearch(target.value)}
           /> 
           <DropdownMenuOptionGroupCustom
             handleChangeValue={(value: string[]) => {}}
@@ -94,11 +160,20 @@ export default function Salesman() {
           textVariant="button"
           textColor="pink.regular"
           onClick={(e: any) => {}}
-          menuList={downloadOptions()}
+          menuList={downloadOptions(data)}
         />
-      </Card>
+      </CardHeader>
       <Spacer size={10} />
-      {switchTabItem()}
+      <Card>
+        <Table
+          width="100%"
+          loading={isLoading}
+          columns={columns}
+          data={data?.rows}
+        />
+        <Spacer size={50} />
+        <Pagination pagination={{}} />
+      </Card>
     </div>
   )
 }
@@ -109,7 +184,14 @@ const FlexElement = styled.div`
   gap: 1rem;
 `
 
+
 const Card = styled.div`
+  background: #ffff;
+  padding: 1rem;
+  border-radius: 16px;
+`
+
+const CardHeader = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -117,3 +199,17 @@ const Card = styled.div`
 	border-radius: 16px;
 	padding: 16px;
 `;
+
+const StatusAktif = styled.div`
+  background: #F4F4F4;
+  border-radius: 4px;
+  color: ${({ style }: any) => style.color};
+  background: ${({ style }) => style?.background};
+  width: 150px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 24px;
+`

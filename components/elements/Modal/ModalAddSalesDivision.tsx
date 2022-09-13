@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useEffect, useState } from "react";
 import {
 	Button,
@@ -10,40 +11,47 @@ import styled from "styled-components";
 import { useFetchDetailSalesman } from "hooks/mdm/salesman/useSalesmanDivision";
 
 const ModalAddSalesDivision = ({
+	resetFormsUpdate,
 	listProducts,
 	formsUpdate,
 	onCancel,
 	visible,
 	onOk
 }: any) => {
-	const [itemSelected, setItemSelected] = useState<string[]>([])
+	const [itemSelected, setItemSelected] = useState<any>([])
 	const [forms, setForms] = useState({
 		name: '',
 		description: ''
 	})
 	const isDisabledButton = !(itemSelected?.length > 0 && forms?.name?.length > 3)
 
-	useEffect(() => {
-		if(visible === false) {
-			setItemSelected([])
-			setForms({ name: '', description: '' })
-		}
-	}, [visible])
-
 	const { data: detailSalesman } = useFetchDetailSalesman({
 		id: formsUpdate?.id,
-		options: { onSuccess: () => { }, enabled: visible, }
+		options: {
+			onSuccess: () => { },
+			enabled: visible === true
+		}
 	})
 
 	useEffect(() => {
-		if(formsUpdate && visible) {
+		if (formsUpdate?.code?.length > 1 && visible === true) {
 			setForms({
 				name: formsUpdate?.divisiName,
 				description: formsUpdate?.shortDesc
 			})
 			setItemSelected(detailSalesman?.product?.split(','))
+		} else {
+			setItemSelected([null])
 		}
-	}, [formsUpdate, detailSalesman, visible])
+	}, [formsUpdate, detailSalesman])
+
+	useEffect(() => {
+		if(visible === false) {
+			resetFormsUpdate
+			setItemSelected([])
+			setForms({ name: '', description: '' })
+		}
+	}, [visible]);
 
 	return (
 		<Modal

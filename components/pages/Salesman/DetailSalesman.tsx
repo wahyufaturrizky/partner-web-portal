@@ -19,15 +19,16 @@ import {
 } from 'pink-lava-ui'
 import moment from 'moment'
 import styled from 'styled-components'
-usePagination
+import usePagination from '@lucasmogari/react-pagination'
 
 import ArrowLeft from 'assets/icons/arrow-left.svg'
 import { ModalConfirmation } from 'components/elements/Modal/ModalConfirmation'
-import usePagination from '@lucasmogari/react-pagination'
+import { useFetchDetailSalesman, useUpdateSalesman } from 'hooks/mdm/salesman/useSalesman'
+import { useFetchSalesmanDivision } from 'hooks/mdm/salesman/useSalesmanDivision'
 
 const dropdownStatus = [
-  { id: "active", value: "active" },
-  { id: "inactive", value: "Inactive" },
+  { id: "Active", value: "Active" },
+  { id: "Inactive", value: "Inactive" },
 ]
 
 export default function ComponentDetailSalesman({
@@ -44,19 +45,51 @@ export default function ComponentDetailSalesman({
   });
   const router = useRouter();
   const { status, salesman_id }: any = router.query || {}
-  const [labelConfirmation, setLabelConfirmation] = useState<string>('')
-  const [titleModal, setTitleModal] = useState<string>('')
+  const [search, setSearch] = useState<string>('')
+  const [division, setDivision] = useState('')
+  const [remarks, setRemarks] = useState('')
   const [modalCustomer, setModalCustomer] = useState<{ visible: boolean, data: any }>({
     visible: false,
     data: {}
   })
   const [defaultChecked, setDefaultChecked] = useState<boolean>(false)
+  const [modalActive, setModalActive] = useState('')
+  const [modal, setModal] = useState({
+    visible: false,
+    confirmation: false,
+    reason: false
+  })
   const [modalConfirmation, setModalConfirmation] = useState<any>({
-    active: false,
-    inactive: false,
-    approve: false,
-    reject: false,
-    waiting: false
+    Active: false,
+    Inactive: false,
+    Approve: false,
+    Rejected: false,
+    Waiting: false
+  })
+
+  const { data } = useFetchDetailSalesman({
+    id: salesman_id,
+    options: {
+      onSuccess: (response: any) => {
+        setDivision(response?.division)
+      }
+    }
+  })
+
+  const { data: listSalesDivision } = useFetchSalesmanDivision({
+    options: { onSuccess: () => { } },
+    query: {
+      search
+    }
+  })
+
+  const { mutate: handleUpdateSalesman } = useUpdateSalesman({
+    options: {
+      onSuccess: () => {
+        router.push('/salesman')
+      }
+    },
+    id: salesman_id,
   })
 
   const columns = [
@@ -70,8 +103,8 @@ export default function ComponentDetailSalesman({
       render: (items: any) => (
         <Button
           size="small"
-          onClick={() => setModalCustomer({ ...modalCustomer, visible: true, data: items })}
           variant="tertiary"
+          onClick={() => setModalCustomer({ ...modalCustomer, visible: true, data: items })}
         >
           View Detail
         </Button>
@@ -79,83 +112,99 @@ export default function ComponentDetailSalesman({
     },
   ]
 
-  const statusSalesman = () => {
-    switch (status) {
-      case 'active':
-        return 'Active'
-      case 'waiting':
-        return 'Waiting for Approval'
-      case 'rejected':
-        return 'Rejected'
-      case 'inactive':
-        return 'Inactive'
-      case 'draft':
-        return 'Draft'
-      default:
-        return 'active'
-    }
+  let setDvs = status === 'Waiting for Approval' ? data?.division : division
+  const payloads = {
+    code: data?.code,
+    company: data?.company,
+    name: data?.name,
+    division: data?.division,
+    branch: data?.branch,
+    mobile_number: data?.mobileNumber,
+    email: data?.email,
+    external_code: data?.externalCode,
+    id_card: data?.idCard,
+    status: 0,
+    remark: ""
   }
+
 
   const setActionButton = () => {
     switch(status) {
-      case 'aktif' || 'inactive' || 'reject':
-        return <ActionButton status={status} onCancel={() => router.back()} />
-      case 'waiting':
-        return <ActionButton status={status} onReject={() => onHandleRejected()} />
-      case 'draft':
-        return <ActionButton status={status} />
+      case 'Active' || 'Inactive' || 'Rejected':
+        return <ActionButton
+          status={status}
+          onSubmit={_handleUpdateSalesman}
+          onCancel={() => router.back()}
+        />
+      case 'Waiting for Approval':
+        return <ActionButton
+          status={status}
+          onSubmit={_handleUpdateSalesman}
+          onReject={() => setModalConfirmation({ ...modalConfirmation, Rejected: true  })}
+        />
+      case 'Draft':
+        return <ActionButton
+          onSubmit={_handleUpdateSalesman}
+          status={status}
+          onDraft={_handleDraftedSalesman}
+        />
       default:
-        return <ActionButton status={status} onCancel={() => router.back()} />
+        return <ActionButton
+          status={status}
+          onCancel={() => router.back()} />
     }
+  }
+
+  const _handleUpdateSalesman = () => {
+    const stt = status === 'Draft' ? 2 : 0
+    const dataUpdated: any = {
+      ...payloads,
+      division: setDvs,
+      status: stt
+    }
+
+    handleUpdateSalesman(dataUpdated)
+  }
+
+  const _handleDraftedSalesman = () => {
+    const dataUpdated: any = {
+      ...payloads,
+      division,
+      status: 4
+    }
+
+    handleUpdateSalesman(dataUpdated)
   }
 
   const setColorStatus = () => {
     switch(status) {
-      case 'waiting':
+      case 'Waiting for Approval':
         return '#FFB400'
-      case 'rejected':
+      case 'Rejected':
         return '#ED1C24'
-      case 'draft':
+      case 'Draft':
         return '#00000'
     }
   }
 
-  const modalContent = () => {
-    switch(titleModal) {
-      case "Are you sure to reject?":
-        return (
-           <>
-           <Spacer size={20} />
-            <TextArea
-              rows={5}
-              label={false}
-              placeholder="Write your remarks here..."
-              onChange={({ target }: any) => {}}
-            />
-            <Spacer size={20} />
-           </>
-        )
-      case "Confirmation":
-        return (
-          <>
-            <TextConfirmation>
-              Are you sure to {labelConfirmation} this salesman?
-            </TextConfirmation>
-            <Spacer size={30} />
-          </>
-        );
+  const onhandleSwitchStatus = () => {
+    const dataUpdated: any = {
+      ...payloads,
+      division,
+      status: modalActive === 'Active' ? 0 : 1,
+      remark: remarks
     }
+    handleUpdateSalesman(dataUpdated)
   }
 
-  const onhandleSetStatus = (value: string) => {
-    setTitleModal("Confirmation")
-    setModalConfirmation({ ...modalConfirmation, [status]: value })
-    setLabelConfirmation(value)
-  }
-
-  const onHandleRejected = () => {
-    setTitleModal("Are you sure to reject?")
-    setModalConfirmation({ ...modalConfirmation, [status]: true })
+  const onhandleRejected = () => {
+    const dataUpdated: any = {
+      ...payloads,
+      division: setDvs,
+      remark: remarks,
+      status: 3
+    }
+    return handleUpdateSalesman(dataUpdated)
   }
 
   return (
@@ -168,7 +217,7 @@ export default function ComponentDetailSalesman({
       <Card>
         <Row justifyContent="space-between">
           {
-            status === 'active' || status === 'inactive'
+            status === 'Active' || status === 'Inactive'
               ? (
                 <Dropdown
                   label={false}
@@ -177,11 +226,19 @@ export default function ComponentDetailSalesman({
                   items={dropdownStatus}
                   defaultValue={status}
                   placeholder="Select"
-                  handleChange={(value: any) => onhandleSetStatus(value)}
+                  handleChange={(value: any) => {
+                    setModalActive(value)
+                    setModal({
+                      ...modal,
+                      visible: true,
+                      confirmation: true,
+                      reason: false
+                    })
+                  }}
                 />
               ) : (
                 <StatusCustomer color={setColorStatus()}>
-                  {statusSalesman()}
+                  {status}
                 </StatusCustomer>
               )
           }
@@ -194,7 +251,13 @@ export default function ComponentDetailSalesman({
           <Accordion.Item key={1}>
             <Accordion.Header variant="blue">General</Accordion.Header>
             <Accordion.Body>
-              <Forms status={status} />
+              <Forms
+                forms={data}
+                salesDivision={listSalesDivision?.rows || []}
+                status={status}
+                setDivision={setDivision}
+                setSearch={setSearch}  
+              />
             </Accordion.Body>
           </Accordion.Item>
         </Accordion>
@@ -208,19 +271,84 @@ export default function ComponentDetailSalesman({
               <Spacer size={20} />
               <TextWarning> *Auto added from Customer</TextWarning>
               <Spacer size={20} />
-              <Table loading={isLoading} columns={columns} data={listCustomers} />
+              <Table
+                loading={isLoading}
+                columns={columns}
+                data={listCustomers}
+              />
             </Accordion.Body>
           </Accordion.Item>
         </Accordion>
       </Card>
 
-      {/* modal confirmation */}
       <ModalConfirmation
-        title={titleModal}
-        visible={modalConfirmation[status]}
-        content={modalContent()}
+        title={
+          modal.reason
+            ? `Add Reason ${modalActive}`
+            : 'Confirmation'
+        }
+        visible={modal.visible}
+        content={[
+          modal.confirmation === true && modal.reason === false
+          ? (
+              <>
+                <TextConfirmation>
+                  Are you sure to {modalActive} this salesman?
+                  <Spacer size={30} />
+                </TextConfirmation>
+              </>
+          )
+          : (
+              <>
+                <Spacer size={20} />
+                <TextArea
+                  rows={5}
+                  label={false}
+                  placeholder="type here..."
+                  onChange={({ target }: any) => setRemarks(target.value)}
+                />
+                <Spacer size={20} />
+              </>
+          )
+        ]}
+        onOk={() => modal.reason
+          ? onhandleSwitchStatus()
+          : setModal({
+            ...modal,
+            visible: true,
+            confirmation: false,
+            reason: true
+          })
+        }
+        variantBtnLeft={status === "Waiting For Approval" ? "tertiary" : "secondary"}
+        onCancel={() =>
+          setModal({
+            ...modal,
+            confirmation: false,
+            visible: false,
+            reason: false
+          })}
+      />
+
+      {/* modal confirmation rejected */}
+      <ModalConfirmation
+        title="Are you sure to reject?"
+        visible={modalConfirmation.Rejected}
+        content={[
+          <>
+            <Spacer size={20} />
+            <TextArea
+              rows={5}
+              label={false}
+              placeholder="Write your remarks here..."
+              onChange={({ target }: any) => setRemarks(target.value)}
+            />
+            <Spacer size={20} />
+          </>
+        ]}
+        onOk={onhandleRejected}
         variantBtnLeft={status === "waiting" ? "tertiary" : "secondary"}
-        onCancel={() => setModalConfirmation({ ...modalConfirmation, [status]: false })}
+        onCancel={() => setModalConfirmation({ ...modalConfirmation, Rejected: false })}
       />
 
       {/* modal view detail customers */}
@@ -251,7 +379,11 @@ export default function ComponentDetailSalesman({
   )
 }
 
-const ContentDetailCustomer = ({ checkedDate, onChecked, pagination, detailCustomer = {} }:any) => {
+const ContentDetailCustomer = ({
+  checkedDate,
+  onChecked,
+  pagination
+}:any) => {
   const columns: any = [
     { title: 'Permission Name', dataIndex: 'customer' },
     { title: 'Module', dataIndex: 'module' },
@@ -298,14 +430,19 @@ const ContentDetailCustomer = ({ checkedDate, onChecked, pagination, detailCusto
   )
 }
 
-const ActionButton = ({ onCancel, onReject, status }: any) => {
-  const labelButtonLeft = status === "waiting" ? "Reject" : "Cancel"
-  const labelButtonRight = status === "waiting" ? "Approve" : status === "draft" ? "Submit" : "Save"
-  const fnButtonLeft = status === "waiting" ? onReject : onCancel
-  const fnButtonRight = status === "waiting" ? onReject : onCancel
+const ActionButton = ({
+  onCancel,
+  onReject,
+  onSubmit,
+  onDraft,
+  status
+}: any) => {
+  const labelButtonLeft = status === "Waiting for Approval" ? "Reject" : "Cancel"
+  const labelButtonRight = status === "Waiting for Approval" ? "Approve" : status === "Draft" ? "Submit" : "Save"
+  const fnButtonLeft = status === "Waiting for Approval" ? onReject : onCancel
 
-  const middleButtonAction = status === "draft" && (
-    <Button variant="secondary">
+  const middleButtonAction = status === "Draft" && (
+    <Button onClick={onDraft} variant="secondary">
       Save as Draft
     </Button>
   )
@@ -316,14 +453,20 @@ const ActionButton = ({ onCancel, onReject, status }: any) => {
         {labelButtonLeft}
       </Button>
       {middleButtonAction}
-      <Button onClick={fnButtonRight} variant="primary">
+      <Button onClick={onSubmit} variant="primary">
         {labelButtonRight}
       </Button>
     </FlexElement>
   )
 }
 
-const Forms = ({ status }: any) => {
+const Forms = ({
+  status,
+  forms,
+  setDivision,
+  salesDivision,
+  setSearch
+}: any) => {
   return (
     <Row width="100%" gap="12px">
       <Col width="48%">
@@ -333,6 +476,7 @@ const Forms = ({ status }: any) => {
           height="50px"
           placeholder="Salesman Name"
           required
+          value={forms?.name}
           disabled
         />
         <Spacer size={10} />
@@ -342,6 +486,7 @@ const Forms = ({ status }: any) => {
           height="50px"
           placeholder="Branch"
           required
+          value={forms?.branch}
           disabled
         />
         <Spacer size={10} />
@@ -351,6 +496,7 @@ const Forms = ({ status }: any) => {
           height="50px"
           placeholder="ID Card"
           required
+          value={forms?.idCard}
           disabled
         />
         <Spacer size={10} />
@@ -360,6 +506,7 @@ const Forms = ({ status }: any) => {
           height="50px"
           placeholder="External Code"
           required
+          value={forms?.externalCode}
           disabled
         />
       </Col>
@@ -370,13 +517,21 @@ const Forms = ({ status }: any) => {
           height="50px"
           placeholder="Division Name"
           required
-          disabled={status === "rejected" || status === "waiting"}
+          items={salesDivision?.map((item: any) => { return {
+            id: item?.code,
+            value: item?.divisiName,
+          } })}
+          handleChange={(value: any) => setDivision(value)}
+          defaultValue={forms?.division}
+          onSearch={(value: any) => setSearch(value)}
+          disabled={status === "Rejected" || status === "Waiting for Approval"}
         />
         <Spacer size={10} />
         <Input
           width="100%"
           label="Mobile Number"
           height="50px"
+          value={forms?.mobileNumber}
           placeholder="External Code"
           required
           disabled
@@ -388,6 +543,7 @@ const Forms = ({ status }: any) => {
           height="50px"
           placeholder="Email"
           required
+          value={forms?.email}
           disabled
         />
       </Col>

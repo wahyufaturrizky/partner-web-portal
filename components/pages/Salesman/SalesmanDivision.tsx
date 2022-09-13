@@ -77,7 +77,7 @@ export default function ComponentSalesmanDivision() {
         <Button
           size="small"
           onClick={() => {
-            setFormsUpdate({...items})
+            setFormsUpdate({ ...items })
             setVisible({  ...visible, create: true })
           }}
           variant="tertiary"
@@ -187,7 +187,6 @@ export default function ComponentSalesmanDivision() {
   const submitDocumentsUploader = (file: any) => {
     const formData: any = new FormData();
     formData.append("upload_file", file);
-
     handleUploadDocuments(formData)
   }
 
@@ -251,16 +250,16 @@ export default function ComponentSalesmanDivision() {
       <ModalAddSalesDivision
         listProducts={listProducts}
         visible={visible.create}
+        resetFormsUpdate={() => setFormsUpdate(null)}
         formsUpdate={formsUpdate}
         onCancel={() => setVisible({ ...visible, create: false })}
         onOk={(items: {
           name: string,
           description?: string,
           itemSelected: string[]
-        }) =>
-          formsUpdate
-            ? _handleUpdateSalesDivision(items)
-            : _handleCreateSalesDivision(items)}
+        }) => visible.create
+          ? _handleCreateSalesDivision(items)
+          : _handleUpdateSalesDivision(items)}
       />
 
       {/* modal upload documents */}
