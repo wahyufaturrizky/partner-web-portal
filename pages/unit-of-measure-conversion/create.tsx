@@ -133,7 +133,8 @@ const UOMConversionCreate = () => {
         ...el,
         id : i + 1
       }
-    })    
+    })
+    setSelectedRowKeys([])
     setNewUomTable(tempDataTable)
     setShowDelete({ open: false, type: "selection", data: {} })
   
@@ -435,7 +436,7 @@ const UOMConversionCreate = () => {
                 variant="tertiary"
                 key="submit"
                 type="primary"
-                onClick={() => setShowDelete({ open: false, type: "", data: {} })}
+                onClick={() => setShowCreateModal(false)}
               >
                 Cancel
               </Button>

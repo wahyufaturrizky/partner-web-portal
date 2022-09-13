@@ -493,7 +493,7 @@ const AdminLayout = (props: any) => {
           selectedKeys={[current]}
           items={itemsMenu}
         >
-          <Notification items={notifItems} />
+          {/* <Notification items={notifItems} /> */}
 
           <Spacer size={10} />
 

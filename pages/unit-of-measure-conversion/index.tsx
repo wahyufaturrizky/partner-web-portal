@@ -307,8 +307,10 @@ const UOMConversion = () => {
                   size="big"
                   onClick={() => {
                     if (isShowDelete.type === "selection") {
+                      console.log(selectedRowKeys, '<<<<<')
                       deleteUom({ ids: selectedRowKeys, company_id: "KSNI" });
                     } else {
+                      console.log(modalForm.data, '<<<<')
                       deleteUom({ ids: [modalForm.data.id], company_id: "KSNI" });
                     }
                   }}
