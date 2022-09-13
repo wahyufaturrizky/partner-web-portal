@@ -601,7 +601,8 @@ const PricingStructureList: any = () => {
         <Modal
           centered
           width={
-            modalPricingStructureForm.typeForm === "Manage Customer Group Buying Price"
+            modalPricingStructureForm.typeForm === "Manage Customer Group Buying Price" ||
+            modalPricingStructureForm.typeForm === "Manage Price Structure Config"
               ? "90%"
               : "50%"
           }
