@@ -15,7 +15,8 @@ import {
   Dropdown2,
   Spin,
   DatePickerInput,
-  Modal
+  Modal,
+  Lozenge
 } from "pink-lava-ui";
 import { Controller, useForm, Control, useFieldArray, useWatch } from 'react-hook-form'
 import { useRouter } from 'next/router';
@@ -147,6 +148,7 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
   });
 
   const {
+    data: productDetail,
     isLoading: isLoadingProduct
   } = useProductVariantDetail({
     id:id,
@@ -429,7 +431,9 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
     replaceProductVariants,
     isCreateProductVariant
   }
-  
+
+  // const currentDate = moment();
+  // const createdAtDate = productDetail?.createdAt;
   return (
     <Col>
       {
@@ -442,9 +446,13 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
         <Row gap="4px">
           <Text variant={"h4"}>Create Product Variant</Text>
         </Row> :
-        <Row gap="4px">
+        <Row gap="4px" alignItems="center">
           <ArrowLeft style={{ cursor: "pointer" }} onClick={() => router.back()} />
           <Text variant={"h4"}>{productForm?.name}</Text>
+          <Spacer size={8} />
+          <CustomLozenge variant={'blue'}>
+            New Product Launch
+          </CustomLozenge>
         </Row>
       }
 
@@ -512,7 +520,19 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
         <Accordion.Item key={1}>
           <Accordion.Header variant="blue">General</Accordion.Header>
           <Accordion.Body>
-            <UploadImage control={control} productForm={productForm} />
+            <Row width="100%" noWrap>
+              <UploadImage control={control} productForm={productForm} />
+              {productDetail?.product && 
+                <Col width="100%">
+                  <Text variant="subtitle1" color="black.regular">Product Master</Text>
+                  <Spacer size={8} />
+                  <CustomForm>
+                    <Span>{productDetail?.product?.name} </Span>
+                    <Link href={`/product-list/${productDetail?.product?.id}`}  target="_blank">View Detail</Link>
+                  </CustomForm>
+                </Col>
+              }
+            </Row>
             <Spacer size={20} />
             <Row width="100%" noWrap>
               <Col width={"100%"}>
@@ -780,6 +800,41 @@ const UploadImage = ({ control, productForm }: { control: Control<FormValues>, p
     ></Controller>
   )
 }
+
+const CustomForm = styled.div`
+  background: #D5FAFD;
+  opacity: 0.5;
+  border-radius: 8px;
+  padding: 15px 16px;
+  display: flex;
+  gap: 8px;
+`
+
+const Span = styled.div`
+  font-family: 'Nunito Sans';
+  font-style: normal;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 18px;
+  color: #165F66;
+`
+
+const Link = styled.a`  
+  font-family: 'Nunito Sans';
+  font-style: normal;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 19px;
+  color: #EB008B;
+`
+
+const CustomLozenge = styled(Lozenge)`
+  && {
+    border-radius: 64px !important;
+    text-align: center !important;
+    padding: 4px 12px;
+  }
+`
 
 const Label = styled.div`
   font-weight: bold;
