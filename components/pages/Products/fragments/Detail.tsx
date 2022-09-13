@@ -21,6 +21,7 @@ import _ from 'lodash';
 import usePagination from '@lucasmogari/react-pagination';
 import ProductOptionsCreate from './ProductOptionsCreate';
 import ProductOptions from './ProductOptions'
+import { useRouter } from 'next/router';
 
 export default function Detail(props: any) {
   const {
@@ -111,7 +112,10 @@ export default function Detail(props: any) {
         action: (
             <Button
               size="small"
-              onClick={() => {}}
+              onClick={() => {
+                window.open(`/product-variant/${variant.id}`,'_blank');
+              }}
+              disabled={!isUpdate}
               variant="tertiary"
             >
               View Detail
@@ -252,7 +256,7 @@ export default function Detail(props: any) {
             width="100%%"
             label="Packaging size"
             height="48px"
-            placeholder={"e.g Nabati Cheese"}
+            placeholder={"e.g 12 x 8 ib"}
             {...register('packaging_size')}
           />
           <Spacer size={20} />
@@ -260,7 +264,7 @@ export default function Detail(props: any) {
             width="100%"
             label="Cost of Product"
             height="48px"
-            placeholder={"e.g Nabati Cheese"}
+            placeholder={"e.g 5000"}
             {...register('cost_of_product')}
           />
         </Col>
@@ -269,7 +273,7 @@ export default function Detail(props: any) {
             width="100%"
             label="Sales Price"
             height="48px"
-            placeholder={"e.g Nabati Cheese"}
+            placeholder={"e.g Rp 50.000"}
             {...register('sales_price')}
           />
         </Col>

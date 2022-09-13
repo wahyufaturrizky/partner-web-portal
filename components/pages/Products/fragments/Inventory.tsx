@@ -153,7 +153,7 @@ export default function Inventory(props: any) {
         <Spacer size={20} />
         <Row gap="20px" width="100%" noWrap>
           <Col gap="4px" width="100%" noWrap>
-            <Text style={{ position: 'absolute' }} variant="subtitle1" color="black.regular">Dimension (Length x Width x Height)</Text>
+            <Text style={{ position: 'absolute', fontWeight: 'bold' }} variant="subtitle1" color="black.regular">Dimension (Length x Width x Height)</Text>
             <Row gap="4px" width="100%" noWrap>
               <CustomInput
                 label=""
@@ -264,6 +264,7 @@ export default function Inventory(props: any) {
         <Spacer size={20} />
         <Row gap="20px" width="100%" noWrap>
           <Dropdown2
+            labelBold
             label="Storage Condition"
             width="100%"
             items={storageCondition}
@@ -282,6 +283,7 @@ export default function Inventory(props: any) {
         <Spacer size={20} />
         <Row gap="20px" width="100%" noWrap>
           <Dropdown2
+            labelBold
             label="Transportation Group"
             width="100%"
             items={[]}
@@ -290,6 +292,7 @@ export default function Inventory(props: any) {
             defaultValue={inventoryForm.storage_management?.transportation_group}
           />
           <Dropdown2
+            labelBold
             label="Transportation Type"
             width="100%"
             items={[]}
@@ -308,6 +311,7 @@ export default function Inventory(props: any) {
             {...register("inventory.storage_management.self_life")}
           />
           <Dropdown2
+            labelBold
             label="Shelf Life Unit"
             width="100%"
             items={shelfLifeUnit}
