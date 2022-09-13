@@ -194,7 +194,7 @@ const UOMConversionDetail = () => {
     }
     newData.items.push({
       id: 0,
-      qty: 3,
+      qty: 1,
       uom: data?.uom,
       conversion_number: data?.conversionNumber,
       active_status: true
