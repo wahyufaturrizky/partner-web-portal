@@ -158,8 +158,8 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
         data = toSnakeCase(data);
         Object.keys(data).forEach(key => {
           setValue(key, data[key]);
-          setCanBePurchased(data.canBePurchased);
-          setCanBeSold(data.canBeSold);
+          setCanBePurchased(data.can_be_purchased);
+          setCanBeSold(data.can_be_sold);
         })
       return data;
     }
@@ -261,8 +261,6 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
       'company_id',
       'company_code',
       'status',
-      'can_be_sold',
-      'can_be_purchased',
       'name',
       'product_type',
       'external_code',
@@ -276,6 +274,9 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
       'sku'
     ])
 
+    payload.can_be_sold = canBeSold;
+    payload.can_be_purchased = canBePurchased;
+
     payload.expired_date = data?.expired_date?.includes('/') ? moment(data.expired_date, 'DD/MM/YYYY').utc().toString() : moment(data.expired_date).utc().toString();
     payload.product_brand_id = data.brand.id;
     payload.base_uom_id = data.base_uom.uom_id;
@@ -287,25 +288,21 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
     payload.company_code = 'KSNI'
     payload.inventory = {
       weight: {
-          net: data?.inventory?.weight?.net || 0,
-          gross: data?.inventory?.weight?.gross || 0,
-          uom_id: data?.inventory?.weight?.uom?.id || ''
+          net: data?.inventory?.weight?.net,
+          gross: data?.inventory?.weight?.gross,
+          uom_id: data?.inventory?.weight?.uom?.id
       },
       volume : {
           dimension : {
-              length: data?.inventory?.volume?.length || 0,
-              width: data?.inventory?.volume?.width || 0,
-              height: data?.inventory?.volume?.height || 0
+              length: data?.inventory?.volume?.length,
+              width: data?.inventory?.volume?.width,
+              height: data?.inventory?.volume?.height,
+              total_volume: data?.inventory?.volume?.total_volume
           },
-          uom_id:data?.inventory?.volume?.uom?.id || ''
+          uom_id:data?.inventory?.volume?.uom?.id
       },
       storage_management:  {
-        "condition" : "chilled",
-        "transportation_type": "121",
-        "transportation_group": "road",
-        "temperature" : "gatau",
-        "self_life": 9,
-        "self_life_unit": "days"
+        ...data?.inventory?.storage_management,
     }
     }
     payload.registration = data.registration.map(data => ({
@@ -321,7 +318,7 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
     }
 
 
-    isUpdate ? updateProduct(payload) : createProduct(payload)
+   isUpdate ? updateProduct(payload) : createProduct(payload)
   };
 
   const propsInventory = {
