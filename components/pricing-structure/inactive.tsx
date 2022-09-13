@@ -23,7 +23,7 @@ import {
   useUploadFilePricingStructureMDM,
 } from "../../hooks/pricing-structure/usePricingStructure";
 import { queryClient } from "../../pages/_app";
-import { ICDollar, ICDownload, ICManageCustGroupBuyingPrice, ICUpload } from "../../assets";
+import { ICDollarBlack, ICDownload, ICManageCustGroupBuyingPrice, ICUpload } from "../../assets";
 import { mdmDownloadService } from "../../lib/client";
 
 const downloadFile = (params: any) =>
@@ -35,7 +35,7 @@ const downloadFile = (params: any) =>
     tempLink.click();
   });
 
-const InActivePricingStructure: any = () => {
+const InActivePricingStructure: any = (props: any) => {
   const router = useRouter();
   const pagination = usePagination({
     page: 1,
@@ -56,6 +56,7 @@ const InActivePricingStructure: any = () => {
         onSuccess: (data: any) => {
           pagination.setTotalItems(data.totalRow);
         },
+        enabled: false,
       },
       query: {
         search,
@@ -156,8 +157,18 @@ const InActivePricingStructure: any = () => {
                     setShowUpload(true);
                     break;
                   case 3:
+                    props.setModalPricingStructureForm({
+                      ...props.modalPricingStructureForm,
+                      open: true,
+                      typeForm: "Manage Customer Group Buying Price",
+                    });
                     break;
                   case 4:
+                    props.setModalPricingStructureForm({
+                      ...props.modalPricingStructureForm,
+                      open: true,
+                      typeForm: "Manage Price Structure Config",
+                    });
                     break;
                   default:
                     break;
@@ -195,7 +206,7 @@ const InActivePricingStructure: any = () => {
                   key: 4,
                   value: (
                     <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                      <ICDollar />
+                      <ICDollarBlack />
                       <p style={{ margin: "0" }}>Manage Price Structure Config</p>
                     </div>
                   ),
@@ -206,6 +217,7 @@ const InActivePricingStructure: any = () => {
             <Button
               size="big"
               variant={"primary"}
+              disabled
               onClick={() => {
                 router.push("/pricing-structure/create");
               }}

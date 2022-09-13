@@ -24,7 +24,7 @@ import {
   useUploadFilePricingStructureMDM,
 } from "../../hooks/pricing-structure/usePricingStructure";
 import { ModalDeleteConfirmation } from "../../components/elements/Modal/ModalConfirmationDelete";
-import { ICDollar, ICDownload, ICManageCustGroupBuyingPrice, ICUpload } from "../../assets";
+import { ICDollarBlack, ICDownload, ICManageCustGroupBuyingPrice, ICUpload } from "../../assets";
 import { queryClient } from "../../pages/_app";
 import { mdmDownloadService } from "../../lib/client";
 
@@ -37,7 +37,15 @@ const downloadFile = (params: any) =>
     tempLink.click();
   });
 
-const DraftPricingStructure: any = ({ refetchCount }: { refetchCount: any }) => {
+const DraftPricingStructure: any = ({
+  refetchCount,
+  modalPricingStructureForm,
+  setModalPricingStructureForm,
+}: {
+  refetchCount: any;
+  modalPricingStructureForm: any;
+  setModalPricingStructureForm: any;
+}) => {
   const router = useRouter();
   const pagination = usePagination({
     page: 1,
@@ -51,24 +59,26 @@ const DraftPricingStructure: any = ({ refetchCount }: { refetchCount: any }) => 
   const [search, setSearch] = useState("");
   const [isShowUpload, setShowUpload] = useState(false);
 
-  const [isLoading, setLoading] = useState(true);
   const [modalDelete, setModalDelete] = useState({ open: false });
 
-  const { data: pricingStructureLists, refetch: refetchPricingStructure } =
-    usePricingStructureLists({
-      options: {
-        onSuccess: (data: any) => {
-          pagination.setTotalItems(data.totalRow);
-          setLoading(false);
-        },
+  const {
+    data: pricingStructureLists,
+    refetch: refetchPricingStructure,
+    isLoading: isLoadingPricingStructureList,
+  } = usePricingStructureLists({
+    options: {
+      onSuccess: (data: any) => {
+        pagination.setTotalItems(data.totalRow);
       },
-      query: {
-        search,
-        page: pagination.page,
-        limit: pagination.itemsPerPage,
-        status: "DRAFT",
-      },
-    });
+      enabled: false,
+    },
+    query: {
+      search,
+      page: pagination.page,
+      limit: pagination.itemsPerPage,
+      status: "DRAFT",
+    },
+  });
 
   const { mutate: uploadFileProductBrandMDM } = useUploadFilePricingStructureMDM({
     options: {
@@ -192,8 +202,18 @@ const DraftPricingStructure: any = ({ refetchCount }: { refetchCount: any }) => 
                     setShowUpload(true);
                     break;
                   case 3:
+                    setModalPricingStructureForm({
+                      ...modalPricingStructureForm,
+                      open: true,
+                      typeForm: "Manage Customer Group Buying Price",
+                    });
                     break;
                   case 4:
+                    setModalPricingStructureForm({
+                      ...modalPricingStructureForm,
+                      open: true,
+                      typeForm: "Manage Price Structure Config",
+                    });
                     break;
                   default:
                     break;
@@ -231,7 +251,7 @@ const DraftPricingStructure: any = ({ refetchCount }: { refetchCount: any }) => 
                   key: 4,
                   value: (
                     <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                      <ICDollar />
+                      <ICDollarBlack />
                       <p style={{ margin: "0" }}>Manage Price Structure Config</p>
                     </div>
                   ),
@@ -242,6 +262,7 @@ const DraftPricingStructure: any = ({ refetchCount }: { refetchCount: any }) => 
             <Button
               size="big"
               variant={"primary"}
+              disabled
               onClick={() => {
                 router.push("/pricing-structure/create");
               }}
@@ -253,7 +274,7 @@ const DraftPricingStructure: any = ({ refetchCount }: { refetchCount: any }) => 
       </Card>
       <Spacer size={10} />
       <Col>
-        {isLoading ? (
+        {isLoadingPricingStructureList ? (
           <Center>
             <Spin tip="Loading data..." />
           </Center>

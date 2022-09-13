@@ -137,7 +137,6 @@ const EmployeeListCreate = () => {
     control,
     handleSubmit,
     formState: { errors },
-    getValues,
     setValue,
   } = useForm({
     shouldUseNativeValidation: true,
