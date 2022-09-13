@@ -3,7 +3,7 @@ import { Table, Button, Spacer, Pagination } from 'pink-lava-ui'
 import { useRouter } from 'next/router'
 import styled from 'styled-components'
 
-export default function WaitingForApproval() {
+export default function WaitingForApproval(data: any) {
   const router = useRouter()
 
   const columns = [

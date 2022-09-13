@@ -3,7 +3,7 @@ import { Table, Button, Spacer, Pagination } from 'pink-lava-ui'
 import { useRouter } from 'next/router'
 import styled from 'styled-components'
 
-export default function Active() {
+export default function Active(data: any) {
   const router = useRouter()
 
   const columns = [
@@ -51,7 +51,7 @@ export default function Active() {
         width="100%"
         loading={false}
         columns={columns}
-        data={[1, 2, 3, 4]}
+        data={data || []}
       />
       <Spacer size={50} />
       <Pagination pagination={{}} />
