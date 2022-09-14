@@ -48,11 +48,11 @@ export default function ComponentDetailSalesman({
   const [search, setSearch] = useState<string>('')
   const [division, setDivision] = useState('')
   const [remarks, setRemarks] = useState('')
-  const [modalCustomer, setModalCustomer] = useState<{ visible: boolean, data: any }>({
+  const [defaultChecked, setDefaultChecked] = useState<boolean>(false)
+  const [modalCustomer, setModalCustomer] = useState<any>({
     visible: false,
     data: {}
   })
-  const [defaultChecked, setDefaultChecked] = useState<boolean>(false)
   const [modalActive, setModalActive] = useState('')
   const [modal, setModal] = useState({
     visible: false,
@@ -124,6 +124,7 @@ export default function ComponentDetailSalesman({
     external_code: data?.externalCode,
     id_card: data?.idCard,
     status: 0,
+    tobe: 0,
     remark: ""
   }
 
@@ -157,10 +158,12 @@ export default function ComponentDetailSalesman({
 
   const _handleUpdateSalesman = () => {
     const stt = status === 'Draft' ? 2 : 0
+    const setTobe = status === 'Waiting for Approval' ? -1: 0
     const dataUpdated: any = {
       ...payloads,
       division: setDvs,
-      status: stt
+      status: stt,
+      tobe: setTobe
     }
 
     handleUpdateSalesman(dataUpdated)
@@ -170,7 +173,8 @@ export default function ComponentDetailSalesman({
     const dataUpdated: any = {
       ...payloads,
       division,
-      status: 4
+      status: 4,
+      tobe: -1
     }
 
     handleUpdateSalesman(dataUpdated)
@@ -192,7 +196,8 @@ export default function ComponentDetailSalesman({
       ...payloads,
       division,
       status: modalActive === 'Active' ? 0 : 1,
-      remark: remarks
+      tobe: modalActive === 'Active' ? 0 : 1,
+      remark: remarks,
     }
     handleUpdateSalesman(dataUpdated)
   }
@@ -202,7 +207,8 @@ export default function ComponentDetailSalesman({
       ...payloads,
       division: setDvs,
       remark: remarks,
-      status: 3
+      status: 3,
+      tobe: -1
     }
     return handleUpdateSalesman(dataUpdated)
   }
@@ -352,11 +358,12 @@ export default function ComponentDetailSalesman({
       />
 
       {/* modal view detail customers */}
+      {console.log(modalCustomer.data)}
       <Modal
         width={900}
         visible={modalCustomer.visible}
         title={modalCustomer?.data?.name}
-        onCancel={() => setModalCustomer({visible: false, data: {}})}
+        onCancel={() => setModalCustomer({ visible: false, data: {}})}
         footer={
           <Row justifyContent="end">
             <Button onClick={() => window.open(`/customers/${modalCustomer?.data?.id}`)}>
@@ -366,12 +373,10 @@ export default function ComponentDetailSalesman({
         }
         content={
           <ContentDetailCustomer
-            detailCustomer={modalCustomer.data}
+            detailCustomer={modalCustomer?.data}
             pagination={pagination}
             checkedDate={defaultChecked}
-            onChecked={(value: any) => {
-              setDefaultChecked(!defaultChecked)
-            }}
+            // onChecked={(value: any) => setDefaultChecked(!defaultChecked)}
           />
         }
       />
@@ -380,13 +385,19 @@ export default function ComponentDetailSalesman({
 }
 
 const ContentDetailCustomer = ({
-  checkedDate,
+  checkedDate = false,
   onChecked,
   pagination
 }:any) => {
   const columns: any = [
-    { title: 'Permission Name', dataIndex: 'customer' },
-    { title: 'Module', dataIndex: 'module' },
+    {
+      title: 'Permission Name',
+      dataIndex: 'customer'
+    },
+    {
+      title: 'Module',
+      dataIndex: 'module'
+    },
   ]
 
   return (
@@ -396,22 +407,22 @@ const ContentDetailCustomer = ({
         <Col width="45%">
           <DatePickerInput
             fullWidth
-            value={checkedDate && moment()}
+            // value={checkedDate && moment()}
             label="Start Date"
           />
         </Col>
         <Col width="45%">
           <DatePickerInput
             fullWidth
-            disabled={checkedDate}
-            value={checkedDate && moment()}
+            // disabled={checkedDate}
+            // value={checkedDate && moment()}
             label="End Date"
           />
         </Col>
         <FlexElement style={{ paddingTop: "1.5rem", gap: "1px" }}>
           <Checkbox
-            checked={checkedDate}
-            onChange={onChecked}
+            // checked={checkedDate}
+            // onChange={onChecked}
           />
           <Text>Today</Text>
         </FlexElement>
@@ -424,7 +435,7 @@ const ContentDetailCustomer = ({
         ]}
       />
       <Spacer size={20} />
-      <Pagination pagination={pagination} />
+      {/* <Pagination pagination={pagination} /> */}
       <Spacer size={20} />
     </div>
   )

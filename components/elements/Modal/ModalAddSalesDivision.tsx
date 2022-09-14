@@ -11,17 +11,13 @@ const ModalAddSalesDivision = ({ listProducts, formsUpdate, onCancel, visible, o
   });
   const isDisabledButton = !(itemSelected?.length > 0 && forms?.name?.length > 3);
 
-  useEffect(() => {
-    if (visible === false) {
-      setItemSelected([]);
-      setForms({ name: "", description: "" });
-    }
-  }, [visible]);
-
-  const { data: detailSalesman } = useFetchDetailSalesman({
-    id: formsUpdate?.id,
-    options: { onSuccess: () => {}, enabled: visible },
-  });
+	const { data: detailSalesman } = useFetchDetailSalesman({
+		id: formsUpdate?.id,
+		options: {
+			onSuccess: () => { },
+			enabled: visible === true && formsUpdate?.code?.length > 1
+		}
+	})
 
   useEffect(() => {
     if (formsUpdate && visible) {
@@ -33,67 +29,70 @@ const ModalAddSalesDivision = ({ listProducts, formsUpdate, onCancel, visible, o
     }
   }, [formsUpdate, detailSalesman, visible]);
 
-  return (
-    <Modal
-      width={500}
-      visible={visible}
-      onCancel={onCancel}
-      title="Create Division"
-      footer={
-        <Footer>
-          <Button onClick={onCancel} full variant="tertiary" size="big">
-            Cancel
-          </Button>
-          <Button
-            onClick={() =>
-              onOk({
-                ...forms,
-                itemSelected,
-              })
-            }
-            full
-            variant="primary"
-            size="big"
-            disabled={isDisabledButton}
-          >
-            Save
-          </Button>
-        </Footer>
-      }
-      content={
-        <Container>
-          <Spacer size={20} />
-          <Input
-            value={forms.name}
-            onChange={({ target }: any) => setForms({ ...forms, name: target.value })}
-            required
-            label="Division Name*"
-          />
-          <Spacer size={20} />
-          <Input
-            value={forms.description}
-            onChange={({ target }: any) => setForms({ ...forms, description: target.value })}
-            label="Short Description"
-          />
-          <Spacer size={20} />
-          <DropdownMenuOptionCustome
-            label="Product"
-            isAllowClear
-            required
-            handleChangeValue={(value: string[]) => setItemSelected(value)}
-            valueSelectedItems={itemSelected}
-            noSearch
-            listItems={listProducts?.map(
-              ({ name, productId }: { name: string; productId: string }) => {
-                return { value: productId, label: name };
-              }
-            )}
-          />
-          <Spacer size={30} />
-        </Container>
-      }
-    />
-  );
+	return (
+		<Modal
+			width={500}
+			visible={visible}
+			onCancel={onCancel}
+			title="Create Division"
+			footer={
+				<Footer>
+					<Button
+						onClick={onCancel}
+						full
+						variant="tertiary"
+						size="big">
+						Cancel
+					</Button>
+					<Button
+						onClick={() => onOk({
+							...forms,
+							itemSelected
+						})}
+						full
+						variant="primary"
+						size="big"
+						disabled={isDisabledButton}
+					>
+						Save
+					</Button>
+				</Footer>
+			}
+			content={
+				<Container>
+					<Spacer size={20} />
+					<Input
+						value={forms.name}
+						onChange={({ target }: any) =>
+							setForms({ ...forms, name: target.value })}
+						required
+						label="Division Name"
+					/>
+					<Spacer size={20} />
+					<Input
+						value={forms.description}
+						onChange={({ target }: any) =>
+							setForms({ ...forms, description: target.value })} 
+							label="Short Description"
+					/>
+					<Spacer size={20} />
+					<DropdownMenuOptionCustome
+						label="Product"
+						isAllowClear
+						required
+						handleChangeValue={(value: string[]) => setItemSelected(value)}
+						valueSelectedItems={itemSelected}
+						noSearch
+						listItems={listProducts?.map(({ name, productId }:
+							{ name: string, productId: string  }) => {
+							return { value: productId , label: name }
+						})}
+						/>
+					<Spacer size={30} />
+				</Container>
+			}
+		/>
+	);
 };
 
 const Footer = styled.div`

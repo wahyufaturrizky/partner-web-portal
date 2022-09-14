@@ -666,7 +666,7 @@ const PricingStructureList: any = () => {
                           handleChangeValue={(value: string[]) => onChange(value)}
                           valueSelectedItems={
                             value ||
-                            modalPricingStructureForm.data?.groupBuyingPriceToCustomerGroups.map(
+                            modalPricingStructureForm.data?.groupBuyingPriceToCustomerGroups?.map(
                               (data) => data.customerGroupId
                             ) ||
                             []
@@ -747,7 +747,10 @@ const PricingStructureList: any = () => {
                   return (
                     <div key={index}>
                       <Row width="100%" gap="16px" alignItems="center" noWrap>
-                        <Col width="10%">
+                        <Col justifyContent="space-between" width="10%">
+                          <Text color={"blue.dark"} variant={"headingMedium"}>
+                            {`Level ${index + 1}`}
+                          </Text>
                           <ICDelete onClick={() => removeLeveling(index)} />
                         </Col>
 
