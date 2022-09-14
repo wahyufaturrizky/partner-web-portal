@@ -118,6 +118,7 @@ const UOMConversionDetail = () => {
         pagination.setTotalItems(data.totalRow);
       },
       select: (data: any) => {
+        console.log(data, '<<<<<')
         const mappedData: { id: any; key: any; uom: any; conversionNumber: any; baseUom: any; qty: any; active: boolean; }[] = []
         const dataForUpdate: { 
           // base_uom_id: any; 
@@ -125,8 +126,8 @@ const UOMConversionDetail = () => {
           uom_id: any; conversion_number: any; qty: any; active_status: any; }[] = []
         data?.uomConversionItem?.rows?.forEach((uomConversion: any, i: number) => {
           mappedData.push({
-            id: i+1,
-            key: i+1,
+            id: uomConversion.id,
+            key: uomConversion.id,
             uom: uomConversion.uom?.name,
             conversionNumber: uomConversion.conversionNumber,
             baseUom: data?.baseUom?.name,
@@ -136,7 +137,7 @@ const UOMConversionDetail = () => {
           dataForUpdate.push({
             // id ini required tapi belum di kasih pak anang
             // id: data?.baseUomId,
-            id: i+1,
+            id: uomConversion.id,
             qty: uomConversion.qty,
             uom_id: uomConversion.uomId,
             conversion_number: uomConversion.conversionNumber,
