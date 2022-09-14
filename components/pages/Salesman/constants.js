@@ -14,35 +14,35 @@ export const options = ({ status: {
     label: (
       <Flex> Active {active > 0 && <Notif>{active}</Notif>}</Flex>
     ),
-    value: "active",
+    value: "Active",
   },
   {
     label: (
       <Flex> Inactive {inactive > 0 && <Notif>{inactive}</Notif>} </Flex>
     ),
-    value: "inactive",
+    value: "Inactive",
   },
   {
     label: (
       <Flex> Waiting for Approval {waiting > 0 && <Notif>{waiting}</Notif>} </Flex>
     ),
-    value: "waiting",
+    value: "Waiting for Approval",
   },
   {
     label: (
       <Flex> Rejected {reject > 0 && <Notif>{reject}</Notif>} </Flex>
     ),
-    value: "rejected",
+    value: "Rejected",
   },
   {
     label: (
       <Flex>Draft {draft > 0 && <Notif>{draft}</Notif>}</Flex>
     ),
-    value: "draft",
+    value: "Draft",
   },
 ];
 
-export const downloadOptions = ({ }) => [
+export const downloadOptions = () => [
   {
     key: 1,
     value: (

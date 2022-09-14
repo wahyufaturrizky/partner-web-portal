@@ -40,4 +40,21 @@ const useUpdateSalesman = ({ id, options }) => {
     { ...options }
   )}
 
-export { useUpdateSalesman, useFetchListSalesman, useFetchDetailSalesman }
+const useUploadDocumentSalesman = ({ options }) => {
+  return useMutation(
+    (data) =>
+      mdmService('/salesman/upload', {
+        method: 'POST',
+        data
+      }),
+    { ...options }
+  )
+}
+
+
+export {
+  useUploadDocumentSalesman,
+  useUpdateSalesman,
+  useFetchListSalesman,
+  useFetchDetailSalesman
+}

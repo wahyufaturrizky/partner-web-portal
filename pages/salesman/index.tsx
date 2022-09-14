@@ -1,25 +1,48 @@
 import React, { useState } from 'react'
+import usePagination from "@lucasmogari/react-pagination";
 import {
-  Search,
   DropdownMenuOptionGroupCustom,
+  FileUploadModal,
   ContentSwitcher,
   DropdownMenu,
-  Text,
+  Pagination,
+  Search,
   Spacer,
   Button,
+  Text,
   Table,
-  Pagination,
 } from 'pink-lava-ui'
+import { mdmDownloadService } from 'lib/client';
+import { useRouter } from 'next/router'
 import styled from 'styled-components'
 
-import { useFetchListSalesman } from 'hooks/mdm/salesman/useSalesman'
+import { useFetchListSalesman, useUploadDocumentSalesman } from 'hooks/mdm/salesman/useSalesman'
 import { options, downloadOptions } from 'components/pages/Salesman/constants'
-import { useRouter } from 'next/router'
+
+
+const downloadFile = (params: any) =>
+  mdmDownloadService("/salesman/template/download", { params }).then((res) => {
+    let dataUrl = window.URL.createObjectURL(new Blob([res.data]));
+    let tempLink = document.createElement("a");
+    tempLink.href = dataUrl;
+    tempLink.setAttribute("download", `salesman_${new Date().getTime()}.xlsx`);
+    tempLink.click();
+  });
+
 
 export default function Salesman() {
-  const [tabActived, setTabActived] = useState('active')
+  const [tabActived, setTabActived] = useState('Active')
   const [search, setSearch] = useState('')
+  const [visible, setVisible] = useState(false)
   const router = useRouter()
+  const pagination = usePagination({
+    page: 1,
+    itemsPerPage: 10,
+    maxPageItems: Infinity,
+    numbers: true,
+    arrows: true,
+    totalItems: 100,
+  });
   const propsSet = {
     status: {
       active: 10,
@@ -90,28 +113,59 @@ export default function Salesman() {
 
   const isStatus = () => {
     switch (tabActived) {
-      case 'active':
+      case 'Active':
         return '0'
-      case 'inactive':
+      case 'Inactive':
         return '1'
-      case 'waiting':
+      case 'Waiting for Approval':
         return '2'
-      case 'rejected':
+      case 'Rejected':
         return '3'
-      case 'draft':
+      case 'Draft':
         return '4'
       default:
         return '0'
     }
   }
 
-  const { data, isLoading } = useFetchListSalesman({
-    options: { onSuccess: () => {} },
+  const { data, isLoading, refetch } = useFetchListSalesman({
+    options: { onSuccess: (items: any) => {
+      pagination.setTotalItems(items?.totalRow);
+    } },
     query: {
       status: isStatus(),
-      search
+      search,
+      page: pagination.page,
+      limit: pagination.itemsPerPage,
     }
   })
+
+  const { mutate: handleUploadDocuments } = useUploadDocumentSalesman({
+    options: {
+      onSuccess: () => {
+        refetch()
+      }
+    }
+  })
+
+  const onhandleActDownload = (key: string) => {
+    switch (key) {
+      case '1':
+        return downloadFile({ company_id: 'KSNI', with_data: 'N' })
+      case '2':
+        return setVisible(true)
+      case '3':
+        return downloadFile({ company_id: 'KSNI', with_data: 'Y' })
+      default:
+        return null
+    }
+  }
+
+  const submitDocumentsUploader = (file: any) => {
+    const formData: any = new FormData();
+    formData.append("upload_file", file);
+    handleUploadDocuments(formData)
+  }
 
   return (
     <div>
@@ -159,12 +213,15 @@ export default function Salesman() {
           buttonSize="big"
           textVariant="button"
           textColor="pink.regular"
-          onClick={(e: any) => {}}
-          menuList={downloadOptions(data)}
+          onClick={({ key }: any) => onhandleActDownload(key)}
+          menuList={downloadOptions()}
         />
       </CardHeader>
       <Spacer size={10} />
       <Card>
+        <Spacer size={20} />
+        <CountList>Total {tabActived} Partner : {data?.totalRow || 0}</CountList>
+        <Spacer size={20} />
         <Table
           width="100%"
           loading={isLoading}
@@ -172,8 +229,15 @@ export default function Salesman() {
           data={data?.rows}
         />
         <Spacer size={50} />
-        <Pagination pagination={{}} />
+        <Pagination pagination={pagination} />
       </Card>
+
+      {/* modal upload documents */}
+      <FileUploadModal
+        visible={visible}
+        setVisible={() => setVisible(false)}
+        onSubmit={submitDocumentsUploader}
+      />
     </div>
   )
 }
@@ -184,6 +248,12 @@ const FlexElement = styled.div`
   gap: 1rem;
 `
 
+const CountList = styled.p`
+  color: #1A727A;
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 22px;
+`
 
 const Card = styled.div`
   background: #ffff;
