@@ -14,6 +14,7 @@ import {
   EmptyState,
   DropdownMenu,
   FileUploadModal,
+  Modal,
 } from "pink-lava-ui";
 import { mdmDownloadService } from "../../lib/client";
 import usePagination from "@lucasmogari/react-pagination";
@@ -21,10 +22,27 @@ import { ICDollarBlack, ICDownload, ICManageCustGroupBuyingPrice, ICUpload } fro
 import { useRouter } from "next/router";
 import { STATUS_APPROVAL_VARIANT, STATUS_APPROVAL_TEXT } from "../../utils/utils";
 import {
+  useDeletePricingStructureList,
   usePricingStructureLists,
   useUploadFilePricingStructureMDM,
 } from "../../hooks/pricing-structure/usePricingStructure";
 import { queryClient } from "../../pages/_app";
+
+const renderConfirmationText = (type: any, data: any) => {
+  switch (type) {
+    case "selection":
+      return data.selectedRowKeys.length > 1
+        ? `Are you sure to delete ${data.selectedRowKeys.length} items ?`
+        : `Are you sure to delete name ${
+            data?.data?.data.find((el: any) => el.key === data.selectedRowKeys[0])?.name
+          } ?`;
+    case "detail":
+      return `Are you sure to delete name ${data.name} ?`;
+
+    default:
+      break;
+  }
+};
 
 const downloadFile = (params: any) =>
   mdmDownloadService("/pricing-structure/template/download", { params }).then((res) => {
@@ -46,25 +64,36 @@ const ActivePricingStructure: any = (props: any) => {
     totalItems: 100,
   });
 
+  const [isShowDelete, setShowDelete] = useState({
+    open: false,
+    type: "selection",
+    data: {},
+  });
+
   const [isShowUpload, setShowUpload] = useState(false);
+
+  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
 
   const [search, setSearch] = useState("");
 
-  const { data: pricingStructureLists, isLoading: isLoadingPricingStructureList } =
-    usePricingStructureLists({
-      options: {
-        onSuccess: (data: any) => {
-          pagination.setTotalItems(data.totalRow);
-        },
-        enabled: false,
+  const {
+    data: pricingStructureLists,
+    isLoading: isLoadingPricingStructureList,
+    isFetching: isFetchingPricingStructureList,
+  } = usePricingStructureLists({
+    options: {
+      onSuccess: (data: any) => {
+        pagination.setTotalItems(data.totalRow);
       },
-      query: {
-        search,
-        page: pagination.page,
-        limit: pagination.itemsPerPage,
-        status: "ACTIVE",
-      },
-    });
+      enabled: false,
+    },
+    query: {
+      search,
+      page: pagination.page,
+      limit: pagination.itemsPerPage,
+      status: "ACTIVE",
+    },
+  });
 
   const { mutate: uploadFileProductBrandMDM } = useUploadFilePricingStructureMDM({
     options: {
@@ -135,6 +164,24 @@ const ActivePricingStructure: any = (props: any) => {
 
     uploadFileProductBrandMDM(formData);
   };
+
+  const rowSelection = {
+    selectedRowKeys,
+    onChange: (selectedRowKeys: any) => {
+      setSelectedRowKeys(selectedRowKeys);
+    },
+  };
+
+  const { mutate: deletePricingStructure, isLoading: isLoadingDeletePricingStructure }: any =
+    useDeletePricingStructureList({
+      options: {
+        onSuccess: () => {
+          setShowDelete({ open: false, data: {}, type: "" });
+          setSelectedRowKeys([]);
+          queryClient.invalidateQueries(["price-structure"]);
+        },
+      },
+    });
 
   return (
     <>
@@ -234,7 +281,7 @@ const ActivePricingStructure: any = (props: any) => {
       </Card>
       <Spacer size={10} />
       <Col>
-        {isLoadingPricingStructureList ? (
+        {isLoadingPricingStructureList || isFetchingPricingStructureList ? (
           <Center>
             <Spin tip="Loading data..." />
           </Center>
@@ -254,7 +301,12 @@ const ActivePricingStructure: any = (props: any) => {
               />
             ) : (
               <Col gap="60px">
-                <Table columns={columns} data={paginateField} />
+                <Table
+                  loading={isLoadingPricingStructureList || isFetchingPricingStructureList}
+                  columns={columns}
+                  data={paginateField}
+                  rowSelection={rowSelection}
+                />
                 <Pagination pagination={pagination} />
               </Col>
             )}
@@ -268,6 +320,59 @@ const ActivePricingStructure: any = (props: any) => {
           visible={isShowUpload}
           setVisible={setShowUpload}
           onSubmit={onSubmitFile}
+        />
+      )}
+
+      {isShowDelete.open && (
+        <Modal
+          closable={false}
+          centered
+          visible={isShowDelete.open}
+          onCancel={() => setShowDelete({ open: false, type: "", data: {} })}
+          title={"Confirm Delete"}
+          footer={null}
+          content={
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
+              }}
+            >
+              <Spacer size={4} />
+              {renderConfirmationText(isShowDelete.type, isShowDelete.data)}
+              <Spacer size={20} />
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  gap: "10px",
+                  marginBottom: "20px",
+                }}
+              >
+                <Button
+                  size="big"
+                  variant="tertiary"
+                  key="submit"
+                  type="primary"
+                  onClick={() => setShowDelete({ open: false, type: "", data: {} })}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="primary"
+                  size="big"
+                  onClick={() => {
+                    if (isShowDelete.type === "selection") {
+                      deletePricingStructure({ ids: selectedRowKeys });
+                    }
+                  }}
+                >
+                  {isLoadingDeletePricingStructure ? "loading..." : "Yes"}
+                </Button>
+              </div>
+            </div>
+          }
         />
       )}
     </>
