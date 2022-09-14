@@ -1,5 +1,7 @@
+import usePagination from "@lucasmogari/react-pagination";
 import { useChannelsMDM } from "hooks/mdm/channel/useChannelMDM";
 import { useCurrenciesInfiniteLists } from "hooks/mdm/country-structure/useCurrencyMDM";
+import { useProductList } from "hooks/mdm/product-list/useProductList";
 import {
   useCreatePricingStructureDraftList,
   useCreatePricingStructureList,
@@ -11,22 +13,55 @@ import { useRouter } from "next/router";
 import {
   Button,
   Col,
+  DropdownMenuOptionCustome,
   FormSelect,
   Row,
+  Search,
   Spacer,
   Spin,
   Text,
-  DropdownMenuOptionCustome,
+  Modal,
+  DropdownMenuOptionGroup,
+  Table,
+  Pagination,
 } from "pink-lava-ui";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import styled from "styled-components";
 import { colors } from "utils/color";
+import { ICPlus, ICCopy } from "../../assets";
 
 const CreatePricingStructure: any = () => {
+  const paginationProducts = usePagination({
+    page: 1,
+    itemsPerPage: 10,
+    maxPageItems: Infinity,
+    numbers: true,
+    arrows: true,
+    totalItems: 100,
+  });
+
+  const paginateCopyFromPriceStructure = usePagination({
+    page: 1,
+    itemsPerPage: 10,
+    maxPageItems: Infinity,
+    numbers: true,
+    arrows: true,
+    totalItems: 100,
+  });
+
+  const [modal, setModal] = useState({
+    open: false,
+    data: {},
+    typeForm: "create",
+  });
+  const { open, data, typeForm } = modal;
+
   const [totalRowsPricingConfigInfiniteList, setTotalRowsPricingConfigInfiniteList] = useState(0);
   const [pricingConfigInfiniteList, setPricingConfigInfiniteList] = useState<any[]>([]);
   const [searchPricingConfigInfinite, setSearchPricingConfigInfinite] = useState("");
+
+  const [searchProduct, setSearchProduct] = useState("");
 
   const [totalRowsCurrenciesInfiniteList, setTotalRowsCurrenciesInfiniteList] = useState(0);
   const [currenciesInfiniteList, setCurrenciesInfiniteList] = useState<any[]>([]);
@@ -36,6 +71,12 @@ const CreatePricingStructure: any = () => {
     useState(0);
   const [salesOrganizationInfiniteList, setSalesOrganizationInfiniteList] = useState<any[]>([]);
   const [searchSalesOrganizationInfinite, setSearchSalesOrganizationInfinite] = useState("");
+
+  const [selectedFilter, setSelectedFilter] = useState([]);
+
+  const [selectedRowKeysProduct, setSelectedRowKeysProduct] = useState([]);
+  const [selectedRowKeysCopyFromPriceStructure, setSelectedRowKeysCopyFromPriceStructure] =
+    useState([]);
 
   const router = useRouter();
   const {
@@ -69,7 +110,10 @@ const CreatePricingStructure: any = () => {
   });
 
   const debounceFetch = useDebounce(
-    searchPricingConfigInfinite || searchSalesOrganizationInfinite || searchCurrenciesInfinite,
+    searchPricingConfigInfinite ||
+      searchProduct ||
+      searchSalesOrganizationInfinite ||
+      searchCurrenciesInfinite,
     1000
   );
 
@@ -104,6 +148,51 @@ const CreatePricingStructure: any = () => {
         } else {
           return undefined;
         }
+      },
+    },
+  });
+
+  const {
+    data: productListData,
+    isLoading: isLoadingProductList,
+    isFetching: isFetchingProductList,
+  } = useProductList({
+    query: {
+      search: debounceFetch,
+      page: paginationProducts.page,
+      limit: paginationProducts.itemsPerPage,
+      company_id: "KSNI",
+    },
+    options: {
+      onSuccess: (data: any) => {
+        paginationProducts.setTotalItems(data.totalRow);
+      },
+      select: (data: any) => {
+        const mappedData = data?.rows?.map((element: any) => {
+          return {
+            key: element.productId,
+            id: element.productId,
+            name: element.name,
+            status: element.status,
+            productCategoryName: element.productCategoryName,
+            hasVariant: element.hasVariant,
+            action: (
+              <div style={{ display: "flex", justifyContent: "left" }}>
+                <Button
+                  size="small"
+                  onClick={() => {
+                    router.push(`/product-list/${element.productId}`);
+                  }}
+                  variant="tertiary"
+                >
+                  View Detail
+                </Button>
+              </div>
+            ),
+          };
+        });
+
+        return { data: mappedData, totalRow: data.totalRow };
       },
     },
   });
@@ -203,12 +292,105 @@ const CreatePricingStructure: any = () => {
     pricingStructureDraft(data);
   };
 
+  const handleSelectedField = () => {
+    if (typeForm === "Add Products") {
+    } else {
+    }
+  };
+
+  const listFilterProducts = [
+    {
+      label: "All",
+      list: [
+        {
+          label: "All",
+          value: "All",
+        },
+      ],
+    },
+    {
+      label: "By Category",
+      list: [
+        {
+          label: "FG / Wafer",
+          value: "FG / Wafer",
+        },
+        {
+          label: "FG / Instant Noodle",
+          value: "FG / Instant Noodle",
+        },
+        {
+          label: "FG / Confection",
+          value: "FG / Confection",
+        },
+      ],
+    },
+  ];
+
+  const columnsProduct = [
+    {
+      title: "id",
+      dataIndex: "id",
+    },
+    {
+      title: "key",
+      dataIndex: "key",
+    },
+    {
+      title: "status",
+      dataIndex: "status",
+    },
+    {
+      title: "hasVariant",
+      dataIndex: "hasVariant",
+    },
+    {
+      title: "Product",
+      dataIndex: "name",
+    },
+    {
+      title: "Product Category",
+      dataIndex: "productCategoryName",
+    },
+  ];
+
+  const columnsCopyFromPriceStructure = [
+    {
+      title: "id",
+      dataIndex: "id",
+    },
+    {
+      title: "key",
+      dataIndex: "key",
+    },
+    {
+      title: "name",
+      dataIndex: "name",
+    },
+  ];
+
+  const rowSelectionProduct = {
+    selectedRowKeys: selectedRowKeysProduct,
+    onChange: (selectedRowKeys: any) => {
+      setSelectedRowKeysProduct(selectedRowKeys);
+    },
+  };
+
+  const rowSelectionCopyFromPriceStructure = {
+    selectedRowKeys: selectedRowKeysCopyFromPriceStructure,
+    onChange: (selectedRowKeys: any) => {
+      setSelectedRowKeysCopyFromPriceStructure(selectedRowKeys);
+    },
+  };
+
   return (
     <>
       {isLoadingPricingConfigInfinite ||
       isLoadingCurrenciesInfinite ||
       isLoadingChannelsMDM ||
       isFetchingChannelsMDM ||
+      isLoadingProductList ||
+      isFetchingProductList ||
       isLoadingSalesOrganizationInfinite ? (
         <Center>
           <Spin tip="Loading data..." />
@@ -453,11 +635,141 @@ const CreatePricingStructure: any = () => {
             <Spacer size={12} />
 
             <Col width="100%" gap="20px">
-              {/*  */}
+              <Row justifyContent="space-between" alignItems="center">
+                <Col>
+                  <Search
+                    width="450px"
+                    placeholder="Search Products"
+                    onChange={(e: any) => setSearchProduct(e.target.value)}
+                  />
+                </Col>
+
+                <Col>
+                  <Row gap="14px" justifyContent="space-between" alignItems="center">
+                    <Col>
+                      <Button
+                        size="big"
+                        variant={"tertiary"}
+                        onClick={() =>
+                          setModal({ open: true, typeForm: "Copy From Price Structure", data: {} })
+                        }
+                      >
+                        <ICCopy /> Copy From Price Stucture Existing
+                      </Button>
+                    </Col>
+
+                    <Col>
+                      <Button
+                        size="big"
+                        variant={"tertiary"}
+                        onClick={() => setModal({ open: true, typeForm: "Add Products", data: {} })}
+                      >
+                        <ICPlus /> Add Product
+                      </Button>
+                    </Col>
+                  </Row>
+                </Col>
+              </Row>
             </Col>
           </Card>
         </Col>
       )}
+
+      <Modal
+        width={"80%"}
+        visible={open}
+        onCancel={() => {
+          setSearchProduct("");
+          setModal({ ...modal, open: false });
+        }}
+        title={typeForm}
+        centered
+        afterClose={() => {
+          setSearchProduct("");
+        }}
+        closable={true}
+        footer={
+          <div
+            style={{
+              display: "flex",
+              marginBottom: "12px",
+              marginRight: "12px",
+              justifyContent: "flex-end",
+              gap: "12px",
+            }}
+          >
+            <Button
+              onClick={() => {
+                setSearchProduct("");
+                setModal({ ...modal, open: false });
+              }}
+              variant="tertiary"
+              size="big"
+            >
+              Cancel
+            </Button>
+            <Button onClick={handleSelectedField} variant="primary" size="big">
+              {typeForm === "Add Products" ? "Add" : "Copy"}
+            </Button>
+          </div>
+        }
+        content={
+          typeForm === "Add Products" ? (
+            <>
+              <Spacer size={20} />
+              <Row alignItems="flex-end" justifyContent="space-between">
+                <Search
+                  width="380px"
+                  placeholder="Search Product, Product Category, Variant"
+                  onChange={(e: any) => setSearchProduct(e.target.value)}
+                />
+                <DropdownMenuOptionGroup
+                  label="Filter"
+                  handleChangeValue={(e: any) => setSelectedFilter(e)}
+                  isShowClearFilter
+                  listItems={listFilterProducts}
+                />
+              </Row>
+              <Spacer size={10} />
+              <Table
+                loading={isLoadingProductList || isFetchingProductList}
+                columns={columnsProduct.filter(
+                  (filtering) =>
+                    filtering.dataIndex !== "id" &&
+                    filtering.dataIndex !== "key" &&
+                    filtering.dataIndex !== "hasVariant" &&
+                    filtering.dataIndex !== "status"
+                )}
+                data={productListData?.data}
+                rowSelection={rowSelectionProduct}
+              />
+              <Pagination pagination={paginationProducts} />
+              <Spacer size={14} />
+            </>
+          ) : (
+            <>
+              <Spacer size={20} />
+              <Row alignItems="flex-end" justifyContent="space-between">
+                <Search
+                  width="380px"
+                  placeholder="Search Product Name, Variant"
+                  onChange={(e: any) => setSearchProduct(e.target.value)}
+                />
+              </Row>
+              <Spacer size={10} />
+              <Table
+                columns={columnsCopyFromPriceStructure.filter(
+                  (filtering) => filtering.dataIndex !== "id" && filtering.dataIndex !== "key"
+                )}
+                data={[]}
+                rowSelection={rowSelectionCopyFromPriceStructure}
+              />
+              <Pagination pagination={paginateCopyFromPriceStructure} />
+              <Spacer size={14} />
+            </>
+          )
+        }
+      />
     </>
   );
 };
