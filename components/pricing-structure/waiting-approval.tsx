@@ -14,17 +14,35 @@ import {
   EmptyState,
   DropdownMenu,
   FileUploadModal,
+  Modal,
 } from "pink-lava-ui";
 import usePagination from "@lucasmogari/react-pagination";
 import { useRouter } from "next/router";
 import { STATUS_APPROVAL_VARIANT, STATUS_APPROVAL_TEXT } from "../../utils/utils";
 import {
+  useDeletePricingStructureList,
   usePricingStructureLists,
   useUploadFilePricingStructureMDM,
 } from "../../hooks/pricing-structure/usePricingStructure";
 import { ICDollarBlack, ICDownload, ICManageCustGroupBuyingPrice, ICUpload } from "../../assets";
 import { queryClient } from "../../pages/_app";
 import { mdmDownloadService } from "../../lib/client";
+
+const renderConfirmationText = (type: any, data: any) => {
+  switch (type) {
+    case "selection":
+      return data.selectedRowKeys.length > 1
+        ? `Are you sure to delete ${data.selectedRowKeys.length} items ?`
+        : `Are you sure to delete name ${
+            data?.data?.data.find((el: any) => el.key === data.selectedRowKeys[0])?.name
+          } ?`;
+    case "detail":
+      return `Are you sure to delete name ${data.name} ?`;
+
+    default:
+      break;
+  }
+};
 
 const downloadFile = (params: any) =>
   mdmDownloadService("/pricing-structure/template/download", { params }).then((res) => {
@@ -49,6 +67,12 @@ const WaitingApprovalPricingStructure: any = (props: any) => {
   const [search, setSearch] = useState("");
 
   const [isShowUpload, setShowUpload] = useState(false);
+  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+  const [isShowDelete, setShowDelete] = useState({
+    open: false,
+    type: "selection",
+    data: {},
+  });
 
   const { data: pricingStructureLists, isLoading } = usePricingStructureLists({
     options: {
@@ -129,6 +153,24 @@ const WaitingApprovalPricingStructure: any = (props: any) => {
 
     uploadFileProductBrandMDM(formData);
   };
+
+  const rowSelection = {
+    selectedRowKeys,
+    onChange: (selectedRowKeys: any) => {
+      setSelectedRowKeys(selectedRowKeys);
+    },
+  };
+
+  const { mutate: deletePricingStructure, isLoading: isLoadingDeletePricingStructure }: any =
+    useDeletePricingStructureList({
+      options: {
+        onSuccess: () => {
+          setShowDelete({ open: false, data: {}, type: "" });
+          setSelectedRowKeys([]);
+          queryClient.invalidateQueries(["price-structure"]);
+        },
+      },
+    });
 
   return (
     <>
@@ -248,7 +290,7 @@ const WaitingApprovalPricingStructure: any = (props: any) => {
               />
             ) : (
               <Col gap="60px">
-                <Table columns={columns} data={paginateField} />
+                <Table columns={columns} data={paginateField} rowSelection={rowSelection} />
                 <Pagination pagination={pagination} />
               </Col>
             )}
@@ -262,6 +304,59 @@ const WaitingApprovalPricingStructure: any = (props: any) => {
           visible={isShowUpload}
           setVisible={setShowUpload}
           onSubmit={onSubmitFile}
+        />
+      )}
+
+      {isShowDelete.open && (
+        <Modal
+          closable={false}
+          centered
+          visible={isShowDelete.open}
+          onCancel={() => setShowDelete({ open: false, type: "", data: {} })}
+          title={"Confirm Delete"}
+          footer={null}
+          content={
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
+              }}
+            >
+              <Spacer size={4} />
+              {renderConfirmationText(isShowDelete.type, isShowDelete.data)}
+              <Spacer size={20} />
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  gap: "10px",
+                  marginBottom: "20px",
+                }}
+              >
+                <Button
+                  size="big"
+                  variant="tertiary"
+                  key="submit"
+                  type="primary"
+                  onClick={() => setShowDelete({ open: false, type: "", data: {} })}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="primary"
+                  size="big"
+                  onClick={() => {
+                    if (isShowDelete.type === "selection") {
+                      deletePricingStructure({ ids: selectedRowKeys });
+                    }
+                  }}
+                >
+                  {isLoadingDeletePricingStructure ? "loading..." : "Yes"}
+                </Button>
+              </div>
+            </div>
+          }
         />
       )}
     </>

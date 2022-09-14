@@ -14,6 +14,7 @@ import {
   Spin,
   DropdownMenu,
   FileUploadModal,
+  Modal,
 } from "pink-lava-ui";
 import usePagination from "@lucasmogari/react-pagination";
 import { useRouter } from "next/router";
@@ -60,6 +61,8 @@ const DraftPricingStructure: any = ({
   const [isShowUpload, setShowUpload] = useState(false);
 
   const [modalDelete, setModalDelete] = useState({ open: false });
+
+  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
 
   const {
     data: pricingStructureLists,
@@ -149,15 +152,15 @@ const DraftPricingStructure: any = ({
   });
   const paginateField = data;
 
-  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
-
   const onSelectChange = (selectedRowKeys: any) => {
     setSelectedRowKeys(selectedRowKeys);
   };
 
   const rowSelection = {
     selectedRowKeys,
-    onChange: onSelectChange,
+    onChange: (selectedRowKeys: any) => {
+      setSelectedRowKeys(selectedRowKeys);
+    },
   };
 
   const onSubmitFile = (file: any) => {
@@ -294,7 +297,7 @@ const DraftPricingStructure: any = ({
               />
             ) : (
               <Col gap="60px">
-                <Table columns={columns} data={paginateField} />
+                <Table columns={columns} data={paginateField} rowSelection={rowSelection} />
                 <Pagination pagination={pagination} />
               </Col>
             )}

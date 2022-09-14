@@ -13,6 +13,12 @@ const fetchListSalesman = async ({ query }) => {
   }).then((data) => data);
 };
 
+const fetchCountTabItems = async ({ query }) => {
+  return mdmService("/salesman/count/stats", {
+    params: { company: "KSNI" },
+  }).then((data) => data);
+};
+
 const fetchDetailSalesman = async ({ id }) => {
   return mdmService(`/salesman/${id}`).then((data) => data);
 };
@@ -53,7 +59,15 @@ const useUploadDocumentSalesman = ({ options }) => {
   );
 };
 
+const useFetchCountTabItems = ({ query, options }) => {
+  return useQuery(["count-tab-items", query], () => fetchCountTabItems({ query }), {
+    keepPreviousData: true,
+    ...options,
+  });
+};
+
 export {
+  useFetchCountTabItems,
   useUploadDocumentSalesman,
   useUpdateSalesman,
   useFetchListSalesman,
