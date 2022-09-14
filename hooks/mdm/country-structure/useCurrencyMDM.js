@@ -1,4 +1,4 @@
-import { useQuery, useMutation } from "react-query";
+import { useQuery, useMutation, useInfiniteQuery } from "react-query";
 import { mdmService } from "../../../lib/client";
 
 const fetchCurrenciesMDM = async ({ query = {} }) => {
@@ -16,6 +16,27 @@ const fetchCurrenciesMDM = async ({ query = {} }) => {
 
 const useCurrenciesMDM = ({ query = {}, options }) => {
   return useQuery(["currencies-mdm", query], () => fetchCurrenciesMDM({ query }), {
+    keepPreviousData: true,
+    ...options,
+  });
+};
+
+const fetchInfiniteCurrenciesLists = async ({ pageParam = 1, queryKey }) => {
+  const searchQuery = queryKey[1].search;
+  return mdmService(`/currency`, {
+    params: {
+      search: searchQuery,
+      limit: 10,
+      page: pageParam,
+      sortBy: "id",
+      sortOrder: "DESC",
+      ...queryKey[1],
+    },
+  }).then((data) => data);
+};
+
+const useCurrenciesInfiniteLists = ({ query = {}, options }) => {
+  return useInfiniteQuery(["currency/infinite", query], fetchInfiniteCurrenciesLists, {
     keepPreviousData: true,
     ...options,
   });
@@ -90,4 +111,5 @@ export {
   useUpdateCurrencyMDM,
   useDeletCurrencyMDM,
   useUploadFileCurrencyMDM,
+  useCurrenciesInfiniteLists,
 };
