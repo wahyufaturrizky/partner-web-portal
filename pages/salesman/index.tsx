@@ -16,7 +16,11 @@ import { mdmDownloadService } from 'lib/client';
 import { useRouter } from 'next/router'
 import styled from 'styled-components'
 
-import { useFetchListSalesman, useUploadDocumentSalesman } from 'hooks/mdm/salesman/useSalesman'
+import {
+  useFetchCountTabItems,
+  useFetchListSalesman,
+  useUploadDocumentSalesman
+} from 'hooks/mdm/salesman/useSalesman'
 import { options, downloadOptions } from 'components/pages/Salesman/constants'
 
 
@@ -148,6 +152,11 @@ export default function Salesman() {
     }
   })
 
+  const { data: countTabItems } = useFetchCountTabItems({
+    options: { onSuccess: () => { } },
+    query: {}
+  })
+
   const onhandleActDownload = (key: string) => {
     switch (key) {
       case '1':
@@ -172,7 +181,15 @@ export default function Salesman() {
       <Text variant="h4">Salesman List</Text>
       <Spacer size={20} />
       <ContentSwitcher
-        options={options(propsSet)}
+        options={options({
+         status: {
+            active: countTabItems?.active || 0,
+            inactive: countTabItems?.inactive || 0,
+            waiting: countTabItems?.waitingForApproval || 0,
+            reject: countTabItems?.rejected || 0,
+            draft: countTabItems?.draft || 0,
+         }
+        })}
         defaultValue={tabActived}
         onChange={(value: string) => setTabActived(value)}
       />
