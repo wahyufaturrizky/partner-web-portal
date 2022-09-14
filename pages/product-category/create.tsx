@@ -45,7 +45,6 @@ const CreateProductCategory: any = () => {
     // resolver: yupResolver(schema),
     // defaultValues: defaultValue,
   });
-  console.log(automate);
   return (
     <>
       <Col>

@@ -358,7 +358,6 @@ export default function ComponentDetailSalesman({
       />
 
       {/* modal view detail customers */}
-      {console.log(modalCustomer.data)}
       <Modal
         width={900}
         visible={modalCustomer.visible}
@@ -533,7 +532,7 @@ const Forms = ({
             value: item?.divisiName,
           } })}
           handleChange={(value: any) => setDivision(value)}
-          defaultValue={forms?.division}
+          defaultValue={forms?.division || 'sales division not found'}
           onSearch={(value: any) => setSearch(value)}
           disabled={status === "Rejected" || status === "Waiting for Approval"}
         />
