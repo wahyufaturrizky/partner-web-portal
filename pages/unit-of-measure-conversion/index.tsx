@@ -25,7 +25,7 @@ import { useRouter } from "next/router";
 import styles from './index.module.css'
 
 const downloadFile = (params: any) =>
-  mdmDownloadService("/uom/download", { params }).then((res) => {
+  mdmDownloadService("/uom-conversion/download", { params }).then((res) => {
     let dataUrl = window.URL.createObjectURL(new Blob([res.data]));
     let tempLink = document.createElement("a");
     tempLink.href = dataUrl;
@@ -167,7 +167,7 @@ const UOMConversion = () => {
     const formData = new FormData();
     formData.append("company_id", "KSNI");
     formData.append("file", file);
-
+    console.log(formData, '<<<<<')
     uploadFileUom(formData);
   };
 

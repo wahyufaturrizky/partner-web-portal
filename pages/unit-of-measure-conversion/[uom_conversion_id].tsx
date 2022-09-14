@@ -118,7 +118,6 @@ const UOMConversionDetail = () => {
         pagination.setTotalItems(data.totalRow);
       },
       select: (data: any) => {
-        console.log(data, '<<<<<')
         const mappedData: { id: any; key: any; uom: any; conversionNumber: any; baseUom: any; qty: any; active: boolean; }[] = []
         const dataForUpdate: { 
           // base_uom_id: any; 
@@ -135,8 +134,6 @@ const UOMConversionDetail = () => {
             active: uomConversion.activeStatus
           })
           dataForUpdate.push({
-            // id ini required tapi belum di kasih pak anang
-            // id: data?.baseUomId,
             id: uomConversion.id,
             qty: uomConversion.qty,
             uom_id: uomConversion.uomId,
@@ -181,7 +178,6 @@ const UOMConversionDetail = () => {
     id.forEach((uomId:number) => {
       newData.remove_items.push({id: uomId})
     })
-    console.log(newData, '<<<<')
     updateUom(newData)
     setShowDelete({ open: false, type: "", data: {} })
   }
@@ -237,6 +233,8 @@ const UOMConversionDetail = () => {
     updateUom(newData)
     router.back()
   }
+
+  console.log(UomData?.data, '<<<buat table')
   const columns = [
     {
       title: "Qty",
@@ -260,10 +258,10 @@ const UOMConversionDetail = () => {
     },
     {
       title: "Active",
-      dataIndex: 'status',
-      render: (status: string, rowKey: any) => (
+      dataIndex: 'active',
+      render: (active: boolean, rowKey: any) => (
         <>
-          <Switch checked={status} onChange={() => updateStatusUom(rowKey)}/>
+          <Switch checked={active} onChange={() => updateStatusUom(rowKey)}/>
         </>
       ),
     },
@@ -301,7 +299,6 @@ const UOMConversionDetail = () => {
               <Button size="big" variant={"tertiary"} onClick={() => setShowDeleteModal(true)}>
                 Delete
               </Button>
-              {/* <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}> */}
               <Button size="big" variant={"primary"} onClick={handleSubmit(onSave)}>
                 {isLoadingUpdateUom ? "Loading..." : "Save"}
               </Button>
