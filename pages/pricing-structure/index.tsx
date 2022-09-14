@@ -666,7 +666,7 @@ const PricingStructureList: any = () => {
                           handleChangeValue={(value: string[]) => onChange(value)}
                           valueSelectedItems={
                             value ||
-                            modalPricingStructureForm.data?.groupBuyingPriceToCustomerGroups.map(
+                            modalPricingStructureForm.data?.groupBuyingPriceToCustomerGroups?.map(
                               (data) => data.customerGroupId
                             ) ||
                             []
