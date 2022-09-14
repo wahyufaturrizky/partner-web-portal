@@ -132,6 +132,52 @@ export default function Salesman() {
     }
   }
 
+
+  const { mutate: handleUploadDocuments } = useUploadDocumentSalesman({
+    options: {
+      onSuccess: () => {
+        refetch()
+      }
+    }
+  })
+
+  const onhandleActDownload = (key: string) => {
+    switch (key) {
+      case '1':
+        return downloadFile({ company_id: 'KSNI', with_data: 'N' })
+      case '2':
+        return setVisible(true)
+      case '3':
+        return downloadFile({ company_id: 'KSNI', with_data: 'Y' })
+      default:
+        return '0'
+    }
+  }
+
+  const submitDocumentsUploader = (file: any) => {
+    const formData: any = new FormData();
+    formData.append("upload_file", file);
+    handleUploadDocuments(formData)
+  }
+
+  const { data, isLoading } = useFetchListSalesman({
+    options: { onSuccess: () => {} },
+    query: {
+      status: isStatus(),
+      search
+    }
+  })
+
+<<<<<<< HEAD
+  const { data, isLoading } = useFetchListSalesman({
+    options: { onSuccess: () => {} },
+    query: {
+      status: isStatus(),
+      search
+    }
+  })
+
+=======
   const { data, isLoading, refetch } = useFetchListSalesman({
     options: { onSuccess: (items: any) => {
       pagination.setTotalItems(items?.totalRow);
@@ -176,6 +222,7 @@ export default function Salesman() {
     handleUploadDocuments(formData)
   }
 
+>>>>>>> develop
   return (
     <div>
       <Text variant="h4">Salesman List</Text>
