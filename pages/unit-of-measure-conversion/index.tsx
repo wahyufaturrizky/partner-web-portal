@@ -108,7 +108,6 @@ const UOMConversion = () => {
             ),
           };
         });
-
         return { data: mappedData, totalRow: data.totalRow };
       },
     },
@@ -124,9 +123,14 @@ const UOMConversion = () => {
       },
     },
   });
+
     // for upload
   const { mutate: uploadFileUom, isLoading: isLoadingUploadFileUom } = useUploadFileUOMConversion({
     options: {
+      query: {
+        with_data: "N",
+        company_id: "KSNI",
+      },
       onSuccess: () => {
         queryClient.invalidateQueries(["uom-list"]);
         setShowUpload(false);

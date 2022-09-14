@@ -59,6 +59,45 @@ const useTaxInfiniteLists = ({ query = {}, options }) => {
   });
 };
 
+const fetchCountryTaxes = async ({ query = {} }) => {
+  return mdmService(`/tax`, {
+    params: {
+      search: "",
+      page: 1,
+      limit: 10,
+      sortOrder: "DESC",
+      ...query,
+    },
+  }).then((data) => data);
+};
+
+const useCountryTaxes = ({ query = {}, options }) => {
+  return useQuery(["tax-detail", query], () => fetchCountryTaxes({ query }), {
+    ...options,
+  });
+};
+
+const fetchInfiniteeCountryTaxLists = async ({ pageParam = 1, queryKey }) => {
+  const searchQuery = queryKey[1].search;
+  return mdmService(`/tax/country/list`, {
+    params: {
+      search: searchQuery,
+      limit: 10,
+      page: pageParam,
+      sortBy: "id",
+      sortOrder: "DESC",
+      ...queryKey[1],
+    },
+  }).then((data) => data);
+};
+
+const useCountryTaxInfiniteLists = ({ query = {}, options }) => {
+  return useInfiniteQuery(["tax/country/infinite", query], fetchInfiniteeCountryTaxLists, {
+    keepPreviousData: true,
+    ...options,
+  });
+};
+
 function useCreateTax({ options }) {
   return useMutation(
     (data) =>
@@ -98,11 +137,14 @@ const useDeletTax = ({ options }) => {
   );
 };
 
-const useUploadFileTax = ({ options }) => {
+const useUploadFileTax = ({ query: {}, options }) => {
   return useMutation(
     (data) =>
       mdmService(`/tax/upload`, {
         method: "POST",
+        params: {
+          ...query,
+        },
         data,
       }),
     {
@@ -115,6 +157,8 @@ export {
   useTaxes,
   useTax,
   useTaxInfiniteLists,
+  useCountryTaxes,
+  useCountryTaxInfiniteLists,
   useCreateTax,
   useUpdateTax,
   useDeletTax,

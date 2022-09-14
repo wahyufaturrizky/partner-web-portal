@@ -15,7 +15,7 @@ import {
   Switch,
 } from "pink-lava-ui";
 import usePagination from "@lucasmogari/react-pagination";
-import {useDeletTax, useTax, useTaxes, useTaxInfiniteLists, useUploadFileTax} from '../../hooks/mdm/Tax/useTax'
+import {useCountryTaxes, useDeletTax, useTaxes, useUploadFileTax} from '../../hooks/mdm/Tax/useTax'
 import useDebounce from "../../lib/useDebounce";
 import { queryClient } from "../_app";
 import { ICDownload, ICUpload } from "../../assets/icons";
@@ -109,46 +109,59 @@ const Tax = () => {
     },
     options: {
       onSuccess: (data: any) => {
-        pagination.setTotalItems(data.totalRow);
+        pagination.setTotalItems(data.total_row);
       },
       select: (data: any) => {
-        const mappedData: TaxTable[] = [];
-        let n = 1;
-        let taxes: any = {}
-        data?.rows?.forEach((element: any, i: number) => {
-          if(!taxes[element.countryName]) {
-            taxes[element.countryName] = 1
-            let padded = ('000000'+ n).slice(-7); // Prefix three zeros, and get the last 4 chars
-            padded = 'TAX-' + padded
-            n++
-            mappedData.push({
-              key: padded,
-              id: padded,
-              taxId: element.taxId,
-              country_id: element.countryId,
-              taxCountryName: element.countryName,
-              action: (
-                <div style={{ display: "flex", justifyContent: "left" }}>
-                  <Button
-                    size="small"
-                    onClick={() => {
-                      router.push(`/tax/${element.countryId}`);
-                    }}
-                    variant="tertiary"
-                  >
-                    View Detail
-                  </Button>
-                </div>
-              ),
-            })
-          }
-        });
-        return { data: mappedData, totalRow: data.totalRow };
+        console.log(data, '<<<<<data pajak')
+        // const mappedData: TaxTable[] = [];
+        // let n = 1;
+        // let taxes: any = {}
+        // data?.rows?.forEach((element: any, i: number) => {
+        //   if(!taxes[element.countryName]) {
+        //     taxes[element.countryName] = 1
+        //     let padded = ('000000'+ n).slice(-7); // Prefix three zeros, and get the last 4 chars
+        //     padded = 'TAX-' + padded
+        //     n++
+        //     mappedData.push({
+        //       key: padded,
+        //       id: padded,
+        //       taxId: element.taxId,
+        //       country_id: element.countryId,
+        //       taxCountryName: element.countryName,
+        //       action: (
+        //         <div style={{ display: "flex", justifyContent: "left" }}>
+        //           <Button
+        //             size="small"
+        //             onClick={() => {
+        //               router.push(`/tax/${element.countryId}`);
+        //             }}
+        //             variant="tertiary"
+        //           >
+        //             View Detail
+        //           </Button>
+        //         </div>
+        //       ),
+        //     })
+        //   }
+        // });
+        // return { data: mappedData, totalRow: data.totalRow };
       },
     },
   });
 
-  //   // for delete
+  const {
+    data: CountryData,
+    isLoading: isLoadingCountry,
+    isFetching: isFetchingCountry
+  } = useCountryTaxes({
+    options: {
+      select: (data: any) => {
+        console.log(data)
+      }
+    }
+  })
+
+
   const { mutate: deleteTax, isLoading: isLoadingDeleteTax } = useDeletTax({
     options: {
       onSuccess: () => {
@@ -167,6 +180,7 @@ const Tax = () => {
       },
     },
   });
+
 
   const rowSelection = {
     selectedRowKeys,
@@ -195,10 +209,8 @@ const Tax = () => {
         <Row justifyContent="space-between">
           <Search
             width="340px"
-            placeholder="Search Tax ID, Country"
-            onChange={(e: any) => {
-              setSearch(e.target.value);
-            }}
+            placeholder="Search Country ID, Country"
+            onChange={(e: any) => {setSearch(e.target.value)}}
           />
           <Row gap="16px">
             <Button
