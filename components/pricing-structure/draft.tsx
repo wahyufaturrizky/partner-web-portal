@@ -14,7 +14,6 @@ import {
   Spin,
   DropdownMenu,
   FileUploadModal,
-  Modal,
 } from "pink-lava-ui";
 import usePagination from "@lucasmogari/react-pagination";
 import { useRouter } from "next/router";
@@ -265,7 +264,6 @@ const DraftPricingStructure: any = ({
             <Button
               size="big"
               variant={"primary"}
-              disabled
               onClick={() => {
                 router.push("/pricing-structure/create");
               }}

@@ -82,6 +82,27 @@ const usePricingConfigLists = ({ query = {}, options } = {}) => {
   });
 };
 
+const fetchInfinitePricingConfigLists = async ({ pageParam = 1, queryKey }) => {
+  const searchQuery = queryKey[1].search;
+  return mdmService(`/pricing-config`, {
+    params: {
+      search: searchQuery,
+      limit: 10,
+      page: pageParam,
+      sortBy: "id",
+      sortOrder: "ASC",
+      ...queryKey[1],
+    },
+  }).then((data) => data);
+};
+
+const usePricingConfigInfiniteLists = ({ query = {}, options }) => {
+  return useInfiniteQuery(["pricing-config/infinite", query], fetchInfinitePricingConfigLists, {
+    keepPreviousData: true,
+    ...options,
+  });
+};
+
 function useCreateGroupBuying({ options }) {
   return useMutation(
     (updates) =>
@@ -314,4 +335,5 @@ export {
   usePricingConfigList,
   useUpdatePricingConfigList,
   useGroupBuyingInfiniteLists,
+  usePricingConfigInfiniteLists,
 };

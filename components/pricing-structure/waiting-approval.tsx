@@ -258,7 +258,6 @@ const WaitingApprovalPricingStructure: any = (props: any) => {
             <Button
               size="big"
               variant={"primary"}
-              disabled
               onClick={() => {
                 router.push("/pricing-structure/create");
               }}

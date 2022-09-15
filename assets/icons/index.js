@@ -20,6 +20,8 @@ import ICDollar from "./dollar.svg";
 import ICManageCustGroupBuyingPrice from "./manage-cust-group-buying-price.svg";
 import IconAdd from "./ICAdd";
 import ICDollarBlack from "./ic-dollar-black.svg";
+import ICInfo from "./ic-info.svg";
+import ICCopy from "./ic-copy.svg";
 
 export {
   IconAdd,
@@ -44,4 +46,6 @@ export {
   ICDollar,
   ICManageCustGroupBuyingPrice,
   ICDollarBlack,
+  ICInfo,
+  ICCopy,
 };
