@@ -4,9 +4,7 @@ import {
   Col,
   Row,
   Spacer,
-  Dropdown,
   Button,
-  Accordion,
   Input,
   Table,
   Pagination,
@@ -18,32 +16,40 @@ import {
 import styled from "styled-components";
 import { Controller, useForm } from "react-hook-form";
 import { useRouter } from "next/router";
-import { useUOMDetail, useUpdateUOM, useDeletUOM } from "../../hooks/mdm/unit-of-measure/useUOM";
 import { queryClient } from "../_app";
 import useDebounce from "../../lib/useDebounce";
-import { useUOMCategoryInfiniteLists } from "../../hooks/mdm/unit-of-measure-category/useUOMCategory";
 import { ModalDeleteConfirmation } from "../../components/elements/Modal/ModalConfirmationDelete";
 import ArrowLeft from "../../assets/icons/arrow-left.svg";
 import usePagination from "@lucasmogari/react-pagination";
-import styles from './index.module.css'
-import { useCreateTax, useDeletTax, useTax } from "hooks/mdm/Tax/useTax";
-import { useCountryInfiniteLists } from "hooks/mdm/country-structure/useCountries";
+import { useCountryTaxInfiniteLists, useCreateTax, useDeletTax, useTaxInfiniteLists, useUpdateTax } from "hooks/mdm/Tax/useTax";
+import Tax from ".";
 
 const renderConfirmationText = (type: any, data: any) => {
-switch (type) {
-  case "selection":
-    return data.selectedRowKeys.length > 1
-      ? `Are you sure to delete ${data.selectedRowKeys.length} items ?`
-      : `Are you sure to delete Uom with ID's ${
-          data?.uomData?.find((el: any) => el.key === data.selectedRowKeys[0]).key
-        } ?`;
-  case "detail":
-    return `Are you sure to delete Uom Name ${data.uomName} ?`;
+  switch (type) {
+    case "selection":
+      return data.selectedRowKeys.length > 1
+        ? `Are you sure to delete ${data.selectedRowKeys.length} items ?`
+        : `Are you sure to delete Uom with ID's ${
+            data?.taxData?.find((el: any) => el.key === data.selectedRowKeys[0]).key
+          } ?`;
+    case "detail":
+      return `Are you sure to delete Uom Name ${data.uomName} ?`;
 
-  default:
-    break;
-}
+    default:
+      break;
+  }
 };
+
+interface TaxCreate {
+    countryName: string; 
+    taxId: string; 
+    country: {name: string};
+    countryId: string;
+    name: string;
+    percentage: string; 
+}
+
+
 
 const TaxCreate = () => {
 
@@ -56,7 +62,7 @@ const TaxCreate = () => {
     arrows: true,
     totalItems: 100,
   });
-  const { uom_conversion_id } = router.query;
+  const { tax_id } = router.query;
   const [listTaxCountries, setListTaxCountries] = useState<any[]>([]);
   const [totalRows, setTotalRows] = useState(0);
   const [search, setSearch] = useState("");
@@ -65,10 +71,11 @@ const TaxCreate = () => {
   const [isShowDelete, setShowDelete] = useState({ open: false, type: "selection", data: {} });
   const [showCreateModal, setShowCreateModal] = useState(false)
 
-  const debounceFetch = useDebounce(search, 1000);
-  const [taxData, setTaxData] = useState<any | null>(null)
+  const debounceSearch = useDebounce(search, 1000);
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+  const [statusId, setStatusId] = useState(null)
 
+  const [taxData, setTaxData] = useState(null)
 
   const { register, control, handleSubmit } = useForm();
   
@@ -77,16 +84,15 @@ const TaxCreate = () => {
     isFetchingNextPage: isFetchingMoreCountryList,
     hasNextPage,
     fetchNextPage,
-  } = useCountryInfiniteLists({
+  } = useCountryTaxInfiniteLists({
     query: {
-      search: debounceFetch,
-    //   company_id: "KSNI",
+      search: debounceSearch,
       limit: 10,
     },
     options: {
       onSuccess: (data: any) => {
         setTotalRows(data.pages[0].totalRow);
-        const mappedData = data?.pages[0]?.rows?.map((country: any) => {
+        const mappedData = data?.pages[0]?.map((country: any) => {
           return {
             id: country.id,
             value: country.id,
@@ -105,36 +111,139 @@ const TaxCreate = () => {
     },
   });
 
-
   const { mutate: deleteUOM, isLoading: isLoadingDeleteUOM } = useDeletTax({
     options: {
       onSuccess: () => {
-        queryClient.invalidateQueries(["tax-list"]);
+        queryClient.invalidateQueries(["tax/infinite"]);
         setShowDeleteModal(false);
         router.back();
       },
     },
   });
 
-  const deletedProduct = (id: any) => {
-    console.log(id, '<<delete prod')
+  const { mutate: updateTax, isLoading: isLoadingUpdateTax } = useUpdateTax({
+    countryId: tax_id,
+    id: statusId && statusId,
+    options: {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["tax/infinite"]);
+      },
+    },
+  });
+
+  const { mutate: createTax, isLoading: isLoadingCreateTax } = useCreateTax({
+    options: {
+      onSuccess: () => {
+        // queryClient.invalidateQueries(["tax/infinite"]);
+      },
+    },
+  });
+
+  // belum bisa dari backend
+  const deleteTax = (id: any) => {
+    // deleteUOM({
+    //   pph_ids:[...id]
+    // }) takut kepake
+    let newTaxData = [...taxData]
+    id.forEach((taxId: number) => {
+      newTaxData = newTaxData?.filter(tax => tax.key !== taxId)
+      newTaxData = newTaxData?.map((tax,i) => {
+        tax.key = i+1
+        return tax
+      })
+    })
+    setTaxData(newTaxData)
   }
 
+  const handleNewTax = (tax: any) => {
+    // const newTax = {
+    //         country_id : tax.country_id,
+    //         name : tax.name,
+    //         percentage : tax.percentage,
+    //         active_status:"ACTIVE"
+    // }
+    // createTax(newTax) takut kepake
 
-  const checkTableChildren = (rowKey: any) => {
-    const newTableData = taxData?.map(el => {
-      if(el.key === rowKey.key){
-        el.status === 'ACTIVE' ? el.status = 'INACTIVE' : el.status = 'ACTIVE'
+
+    let n = taxData? taxData.length + 1 : 1 
+    const newTax = {
+            key: n,
+            country_id : tax.country_id,
+            name : tax.name,
+            percentage : tax.percentage,
+            active_status:"ACTIVE"
+    }
+    
+    if(!taxData){
+      setTaxData([newTax])
+    } else {
+      if(!taxData?.find(e => e.name === newTax.name)) {
+        setTaxData(prev => [...prev, newTax])
       }
-      return el
+
+    }
+    // createTax(newTax)
+    setShowCreateModal(false)
+  }
+
+  const updateTaxStatus = (rowKey: any) => {
+    // setStatusId(rowKey.key)
+    // if(statusId){
+    //   const data = {
+    //     name: rowKey.name,
+    //     percentage: rowKey.percentage,
+    //     active_status: rowKey?.active_status === "ACTIVE"? "INACTIVE" : "ACTIVE"
+    //   }
+    //   console.log(data)
+    //   updateTax(data)
+    // }
+
+
+    let newTable = [...taxData]
+    newTable = newTable.map(tax => {
+      if(tax.key === rowKey.key){
+        rowKey.active_status === "ACTIVE" ? tax.active_status = "INACTIVE" : tax.active_status = "ACTIVE"
+      }
+      return tax
     })
-    setTaxData(newTableData)
+    setTaxData(newTable)
   }
 
   const checkedStatus = (status: string) => {
     return status === 'ACTIVE' ? true : false
   }
 
+  const onSubmit = (taxesData: any) => {
+    const savedData = []
+    taxData.forEach(tax => {
+      if(taxesData.country_id){
+        savedData.push({
+          country_id: tax.country_id? tax.country_id : taxesData.country_id,
+          name: tax.name,
+          percentage: tax.percentage,
+          active_status: tax.active_status
+        })
+      } else {
+        if(!tax.country_id) return console.log('failed')
+        else savedData.push({
+          country_id: tax.country_id,
+          name: tax.name,
+          percentage: tax.percentage,
+          active_status: tax.active_status
+        })
+      }
+    })
+
+    savedData.forEach((tax, i) => {
+      setTimeout(() => {
+        createTax(tax)
+        console.log(tax[i], 'success')
+      },3000)
+      router.back()
+    })
+
+  }
+  
   const columns = [
     {
       title: "Tax Name",
@@ -151,12 +260,11 @@ const TaxCreate = () => {
       dataIndex: 'active_status',
       render: (status: string, rowKey: any) => (
         <>
-          <Switch checked={checkedStatus(status)} onChange={() => checkTableChildren(rowKey)}/>
+          <Switch checked={checkedStatus(status)} onChange={() => updateTaxStatus(rowKey)}/>
         </>
       ),
     },
   ];
-  
 
   const rowSelection = {
     selectedRowKeys,
@@ -165,34 +273,20 @@ const TaxCreate = () => {
     },
   };
 
-  const { mutate: createTax, isLoading: isLoadingCreateTax } = useCreateTax({
-    options: {
-      onSuccess: () => {
-        // router.back();
-        queryClient.invalidateQueries(["tax-list"]);
-      },
-    },
-  });
-
-  const handleDataTax = (tax: any) => {
-    const newTax = {
-            country_id : tax.country_id,
-            name : tax.name,
-            percentage : tax.percentage,
-            active_status:"ACTIVE"
-    }
-    createTax(newTax)
-    if(taxData){
-        setTaxData((prev: any) => [...prev, newTax])
-    } else setTaxData([newTax])
-    setShowCreateModal(false)
+  if(isFetchingCountryList || isFetchingMoreCountryList) {
+    return (
+        <Center>
+            <Spin tip="Loading data..." />
+        </Center>
+    )
   }
 
   return (
     <>
       <Col>
         <Row gap="4px">
-          <Text variant={"h4"}>{"Create UoM Conversion"}</Text>
+        <ArrowLeft style={{ cursor: "pointer" }} onClick={() => router.back()} />
+          <Text variant={"h4"}>{"Create Tax"}</Text>
         </Row>
 
         <Spacer size={20} />
@@ -206,7 +300,7 @@ const TaxCreate = () => {
                 cancel
               </Button>
               {/* <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}> */}
-              <Button size="big" variant={"primary"} onClick={() => router.back()}>
+              <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
                 {isLoadingCreateTax ? "Loading..." : "Save"}
               </Button>
             </Row>
@@ -217,47 +311,47 @@ const TaxCreate = () => {
 
         <Card>
           <Spacer size={10} />
-          <Row width="50%" noWrap>
-            <Col width="100%">
-              <Controller
-                control={control}
-                name="country_id"
-                render={({ field: { onChange } }) => (
-                  <>
-                    <Label>Country</Label>
-                    <Spacer size={3} />
-                    <FormSelect
-                      style={{ width: "100%" }}
-                      size={"large"}
-                      placeholder={"Select"}
-                      borderColor={"#AAAAAA"}
-                      arrowColor={"#000"}
-                      required
-                      withSearch
-                      isLoading={isFetchingCountryList}
-                      isLoadingMore={isFetchingMoreCountryList}
-                      fetchMore={() => {
-                        if (hasNextPage) {
-                          fetchNextPage();
+            <Row width="50%" noWrap>
+                <Col width="100%">
+                <Controller
+                    control={control}
+                    name="country_id"
+                    render={({ field: { onChange } }) => (
+                    <>
+                        <Label>Country</Label>
+                        <Spacer size={3} />
+                        <FormSelect
+                        style={{ width: "100%" }}
+                        size={"large"}
+                        placeholder={"Select"}
+                        borderColor={"#AAAAAA"}
+                        arrowColor={"#000"}
+                        required
+                        withSearch
+                        isLoading={isFetchingCountryList}
+                        isLoadingMore={isFetchingMoreCountryList}
+                        fetchMore={() => {
+                            if (hasNextPage) {
+                            fetchNextPage();
+                            }
+                        }}
+                        items={
+                            isFetchingCountryList && !isFetchingMoreCountryList
+                            ? []
+                            : listTaxCountries
                         }
-                      }}
-                      items={
-                        isFetchingCountryList && !isFetchingMoreCountryList
-                          ? []
-                          : listTaxCountries
-                      }
-                      onChange={(value: any) => {
-                        onChange(value);
-                      }}
-                      onSearch={(value: any) => {
-                        setSearch(value);
-                      }}
-                    />
-                  </>
-                )}
-              />
-            </Col>
-          </Row>
+                        onChange={(value: any) => {
+                            onChange(value);
+                        }}
+                        onSearch={(value: any) => {
+                            setSearch(value);
+                        }}
+                        />
+                    </>
+                    )}
+                />
+                </Col>
+            </Row>
           <Spacer size={20} />
           <Col>
               <HeaderLabel>Conversion</HeaderLabel>
@@ -273,7 +367,7 @@ const TaxCreate = () => {
                     setShowDelete({
                       open: true,
                       type: "selection",
-                      data: { uomData: taxData, selectedRowKeys },
+                      data: { taxData: taxData, selectedRowKeys },
                     })
                   }
                   disabled={rowSelection.selectedRowKeys?.length === 0}
@@ -284,11 +378,9 @@ const TaxCreate = () => {
               <Spacer size={20} />
                 <Col gap={"60px"}>
                   <Table
-                    // loading={isLoadingUOM || isFetchingUomCategory}
                     columns={columns}
                     data={taxData}
                     rowSelection={rowSelection}
-                    rowKey={"name"}
                   />
                   <Pagination pagination={pagination} />
                 </Col>
@@ -353,7 +445,7 @@ const TaxCreate = () => {
               <Button
                 variant="primary"
                 // size="small"
-                onClick={handleSubmit(handleDataTax)}
+                onClick={handleSubmit(handleNewTax)}
               >
                 save
               </Button>
@@ -370,7 +462,7 @@ const TaxCreate = () => {
           visible={showDeleteModal}
           isLoading={isLoadingDeleteUOM}
           onCancel={() => setShowDeleteModal(false)}
-          onOk={() => deleteUOM({ ids: [uom_conversion_id], company_id: "KSNI" })}
+          onOk={() => deleteUOM({ ids: [tax_id], company_id: "KSNI" })}
         />
       )}
 
@@ -401,7 +493,7 @@ const TaxCreate = () => {
                   variant="primary"
                   size="big"
                   onClick={() => {
-                      deletedProduct(selectedRowKeys)
+                      deleteTax(selectedRowKeys)
                   }}
                 >
                   {isLoadingDeleteUOM ? "loading..." : "Yes"}

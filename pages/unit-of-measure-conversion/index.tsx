@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
 import {
   Text,
@@ -12,17 +12,14 @@ import {
   Modal,
   DropdownMenu,
   FileUploadModal,
-  Switch,
 } from "pink-lava-ui";
 import usePagination from "@lucasmogari/react-pagination";
-// import { useUOMList, useUploadFileUOM, useDeletUOM } from "../../hooks/mdm/unit-of-measure/useUOM";
 import { useDeletUOMConversion, useUOMConversions, useUploadFileUOMConversion } from "../../hooks/mdm/unit-of-measure-conversion/useUOMConversion";
 import useDebounce from "../../lib/useDebounce";
 import { queryClient } from "../_app";
 import { ICDownload, ICUpload } from "../../assets/icons";
 import { mdmDownloadService } from "../../lib/client";
 import { useRouter } from "next/router";
-import styles from './index.module.css'
 
 const downloadFile = (params: any) =>
   mdmDownloadService("/uom-conversion/download", { params }).then((res) => {
@@ -70,7 +67,6 @@ const UOMConversion = () => {
   });
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const debounceSearch = useDebounce(search, 1000);
-  // const [dataUoM, setDataUoM] = useState(null)
 
   const {
     data: UOMConversionData,
@@ -108,13 +104,11 @@ const UOMConversion = () => {
             ),
           };
         });
-
         return { data: mappedData, totalRow: data.totalRow };
       },
     },
   });
 
-    // for delete
   const { mutate: deleteUom, isLoading: isLoadingDeleteUom } = useDeletUOMConversion({
     options: {
       onSuccess: () => {
@@ -124,11 +118,15 @@ const UOMConversion = () => {
       },
     },
   });
-    // for upload
+
   const { mutate: uploadFileUom, isLoading: isLoadingUploadFileUom } = useUploadFileUOMConversion({
+    query: {
+      with_data: "N",
+      company_id: "KSNI",
+    },
     options: {
       onSuccess: () => {
-        queryClient.invalidateQueries(["uom-list"]);
+        queryClient.invalidateQueries(["uom-conversions"]);
         setShowUpload(false);
       },
     },
