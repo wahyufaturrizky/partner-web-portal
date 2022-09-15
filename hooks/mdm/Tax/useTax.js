@@ -137,14 +137,11 @@ const useDeletTax = ({ options }) => {
   );
 };
 
-const useUploadFileTax = ({ query: {}, options }) => {
+const useUploadFileTax = ({ options }) => {
   return useMutation(
     (data) =>
       mdmService(`/tax/upload`, {
         method: "POST",
-        params: {
-          ...query,
-        },
         data,
       }),
     {

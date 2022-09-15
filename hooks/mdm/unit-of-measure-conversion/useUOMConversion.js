@@ -96,13 +96,16 @@ const useDeletUOMConversion = ({ options }) => {
   );
 };
 
-const useUploadFileUOMConversion = ({ options }) => {
+const useUploadFileUOMConversion = ({ query = {}, options }) => {
   return useMutation(
     (data) =>
-      mdmService(`/uom-conversion/upload`, {
-        method: "POST",
-        data,
-      }),
+      mdmService(
+        `/uom-conversion/upload?with_data=${query.with_data}&company_id=${query.company_id}`,
+        {
+          method: "POST",
+          data,
+        }
+      ),
     {
       ...options,
     }

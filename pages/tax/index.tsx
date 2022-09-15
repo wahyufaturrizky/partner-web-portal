@@ -15,7 +15,7 @@ import {
   Switch,
 } from "pink-lava-ui";
 import usePagination from "@lucasmogari/react-pagination";
-import {useCountryTaxes, useDeletTax, useTaxes, useUploadFileTax} from '../../hooks/mdm/Tax/useTax'
+import {useCountryTaxes, useDeletTax, useTaxes, useTaxInfiniteLists, useUploadFileTax} from '../../hooks/mdm/Tax/useTax'
 import useDebounce from "../../lib/useDebounce";
 import { queryClient } from "../_app";
 import { ICDownload, ICUpload } from "../../assets/icons";
@@ -87,21 +87,15 @@ const Tax = () => {
   });
 
   const [search, setSearch] = useState("");
-  const [isShowDelete, setShowDelete] = useState({ open: false, type: "selection", data: {} });
   const [isShowUpload, setShowUpload] = useState(false);
-  const [modalForm, setModalForm] = useState({
-    open: false,
-    data: {},
-    typeForm: "create",
-  });
-  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+
   const debounceSearch = useDebounce(search, 1000);
 
   const {
     data: TaxData,
     isLoading: isLoadingTax,
     isFetching: isFetchingTax,
-  } = useTaxes({
+  } = useTaxInfiniteLists({
     query: {
       search: debounceSearch,
       page: pagination.page,
@@ -109,68 +103,45 @@ const Tax = () => {
     },
     options: {
       onSuccess: (data: any) => {
-        pagination.setTotalItems(data.total_row);
+        pagination.setTotalItems(data?.totalRow);
       },
       select: (data: any) => {
-        console.log(data, '<<<<<data pajak')
-        // const mappedData: TaxTable[] = [];
-        // let n = 1;
-        // let taxes: any = {}
-        // data?.rows?.forEach((element: any, i: number) => {
-        //   if(!taxes[element.countryName]) {
-        //     taxes[element.countryName] = 1
-        //     let padded = ('000000'+ n).slice(-7); // Prefix three zeros, and get the last 4 chars
-        //     padded = 'TAX-' + padded
-        //     n++
-        //     mappedData.push({
-        //       key: padded,
-        //       id: padded,
-        //       taxId: element.taxId,
-        //       country_id: element.countryId,
-        //       taxCountryName: element.countryName,
-        //       action: (
-        //         <div style={{ display: "flex", justifyContent: "left" }}>
-        //           <Button
-        //             size="small"
-        //             onClick={() => {
-        //               router.push(`/tax/${element.countryId}`);
-        //             }}
-        //             variant="tertiary"
-        //           >
-        //             View Detail
-        //           </Button>
-        //         </div>
-        //       ),
-        //     })
-        //   }
-        // });
-        // return { data: mappedData, totalRow: data.totalRow };
+        const mappedData: TaxTable[] = [];
+        let n = 1;
+        let taxes: any = {}
+        data?.pages[0]?.rows?.forEach((element: any, i: number) => {
+          if(!taxes[element.country?.name]) {
+            taxes[element.country?.name] = 1
+            let padded = ('000000'+ n).slice(-7); // Prefix three zeros, and get the last 4 chars
+            padded = 'TAX-' + padded
+            n++
+            mappedData.push({
+              key: element.taxId,
+              id: element.taxId,
+              taxId: element.taxId,
+              country_id: element.countryId,
+              taxCountryName: element.country?.name,
+              action: (
+                <div style={{ display: "flex", justifyContent: "left" }}>
+                  <Button
+                    size="small"
+                    onClick={() => {
+                      router.push(`/tax/${element.countryId}`);
+                    }}
+                    variant="tertiary"
+                  >
+                    View Detail
+                  </Button>
+                </div>
+              ),
+            })
+          }
+        });
+        return { data: mappedData, totalRow: data.totalRow };
       },
     },
   });
 
-  const {
-    data: CountryData,
-    isLoading: isLoadingCountry,
-    isFetching: isFetchingCountry
-  } = useCountryTaxes({
-    options: {
-      select: (data: any) => {
-        console.log(data)
-      }
-    }
-  })
-
-
-  const { mutate: deleteTax, isLoading: isLoadingDeleteTax } = useDeletTax({
-    options: {
-      onSuccess: () => {
-        setShowDelete({ open: false, data: {}, type: "" });
-        setSelectedRowKeys([]);
-        queryClient.invalidateQueries(["tax-list"]);
-      },
-    },
-  });
   //   // for upload
   const { mutate: uploadFileTax, isLoading: isLoadingUploadFileTax } = useUploadFileTax({
     options: {
@@ -181,15 +152,6 @@ const Tax = () => {
     },
   });
 
-
-  const rowSelection = {
-    selectedRowKeys,
-    onChange: (selectedRowKeys: any, selectedRows: any) => {
-      if(!selectedRowKeys) {
-      }
-      setSelectedRowKeys(selectedRowKeys);
-    },
-  };
 
   const onSubmitFile = (file: any) => {
     const formData = new FormData();
@@ -202,31 +164,17 @@ const Tax = () => {
   return (
     <>
       <Col>
-        <Text variant={"h4"}>UoM Conversion</Text>
+        <Text variant={"h4"}>Tax</Text>
         <Spacer size={20} />
       </Col>
       <Card>
         <Row justifyContent="space-between">
           <Search
             width="340px"
-            placeholder="Search Country ID, Country"
+            placeholder="Search Tax ID, Country"
             onChange={(e: any) => {setSearch(e.target.value)}}
           />
           <Row gap="16px">
-            <Button
-              size="big"
-              variant={"tertiary"}
-              onClick={() =>
-                setShowDelete({
-                  open: true,
-                  type: "selection",
-                  data: { taxData: TaxData?.data, selectedRowKeys },
-                })
-              }
-              disabled={rowSelection.selectedRowKeys?.length === 0}
-            >
-              Delete
-            </Button>
             <DropdownMenu
               title={"More"}
               buttonVariant={"secondary"}
@@ -237,13 +185,13 @@ const Tax = () => {
               onClick={(e: any) => {
                 switch (parseInt(e.key)) {
                   case 1:
-                    downloadFile({ with_data: "N", country_id: "MCS-1015213" });
+                    downloadFile({ with_data: "N", country_id: "MCS-1015229" });
                     break;
                   case 2:
                     setShowUpload(true);
                     break;
                   case 3:
-                    downloadFile({ with_data: "Y", country_id: "MCS-1015213" });
+                    downloadFile({ with_data: "Y", country_id: "MCS-1015229" });
                     break;
                   case 4:
                     break;
@@ -298,57 +246,11 @@ const Tax = () => {
             loading={isLoadingTax || isFetchingTax}
             columns={columns}
             data={TaxData?.data}
-            rowSelection={rowSelection}
             rowKey={"id"}
           />
           <Pagination pagination={pagination} />
         </Col>
       </Card>
-
-      {isShowDelete.open && (
-        <Modal
-          closable={false}
-          centered
-          visible={isShowDelete.open}
-          onCancel={() => setShowDelete({ open: false, type: "", data: {} })}
-          title={"Confirm Delete"}
-          footer={null}
-          content={
-            <TopButtonHolder>
-              <Spacer size={4} />
-              {renderConfirmationText(isShowDelete.type, isShowDelete.data)}
-              <Spacer size={20} />
-              <DeleteCardButtonHolder>
-                <Button
-                  size="big"
-                  variant="tertiary"
-                  key="submit"
-                  type="primary"
-                  onClick={() => setShowDelete({ open: false, type: "", data: {} })}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  variant="primary"
-                  size="big"
-                  onClick={() => {
-                    if (isShowDelete.type === "selection") {
-                      const deletedData = isShowDelete?.data?.taxData.find(element => element.key === isShowDelete?.data?.selectedRowKeys[0])
-                      console.log(isShowDelete?.data?.taxData.find(element => element.key === isShowDelete?.data?.selectedRowKeys[0]), '<<<<<<<')
-                      // deleteTax({ ids: selectedRowKeys, country_id: deletedData?.country_id });
-                      deleteTax({ ids: [deletedData?.taxId], country_id: deletedData?.country_id });
-                    } else {
-                      // deleteTax({ ids: [modalForm.data.id], company_id: "MCS-0000001" });
-                    }
-                  }}
-                >
-                  {isLoadingDeleteTax ? "loading..." : "Yes"}
-                </Button>
-              </DeleteCardButtonHolder>
-            </TopButtonHolder>
-          }
-        />
-      )}
 
       {isShowUpload && (
         <FileUploadModal
@@ -366,13 +268,6 @@ const Card = styled.div`
   border-radius: 16px;
   padding: 16px;
 `;
-
-const DeleteCardButtonHolder = styled.div`
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    margin-bottom: 20px;
-`
 
 const TopButtonHolder = styled.div`
   display: flex;

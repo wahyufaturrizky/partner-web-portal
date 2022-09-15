@@ -4,9 +4,7 @@ import {
   Col,
   Row,
   Spacer,
-  Dropdown,
   Button,
-  Accordion,
   Input,
   Table,
   Pagination,
@@ -18,24 +16,21 @@ import {
 import styled from "styled-components";
 import { Controller, useForm } from "react-hook-form";
 import { useRouter } from "next/router";
-import { useUOMDetail, useUpdateUOM, useDeletUOM } from "../../hooks/mdm/unit-of-measure/useUOM";
 import { queryClient } from "../_app";
 import useDebounce from "../../lib/useDebounce";
-import { useUOMCategoryInfiniteLists } from "../../hooks/mdm/unit-of-measure-category/useUOMCategory";
 import { ModalDeleteConfirmation } from "../../components/elements/Modal/ModalConfirmationDelete";
 import ArrowLeft from "../../assets/icons/arrow-left.svg";
 import usePagination from "@lucasmogari/react-pagination";
-import styles from './index.module.css'
-import { useCreateTax, useDeletTax, useTax } from "hooks/mdm/Tax/useTax";
-import { useCountryInfiniteLists } from "hooks/mdm/country-structure/useCountries";
+import { useCountryTaxInfiniteLists, useCreateTax, useDeletTax, useTaxInfiniteLists, useUpdateTax } from "hooks/mdm/Tax/useTax";
 
 const renderConfirmationText = (type: any, data: any) => {
+  console.log(data, '<<<<delete')
 switch (type) {
   case "selection":
     return data.selectedRowKeys.length > 1
       ? `Are you sure to delete ${data.selectedRowKeys.length} items ?`
       : `Are you sure to delete Uom with ID's ${
-          data?.uomData?.find((el: any) => el.key === data.selectedRowKeys[0]).key
+          data?.taxData?.find((el: any) => el.key === data.selectedRowKeys[0]).key
         } ?`;
   case "detail":
     return `Are you sure to delete Uom Name ${data.uomName} ?`;
@@ -48,9 +43,13 @@ switch (type) {
 interface TaxDetail {
     countryName: string; 
     taxId: string; 
+    country: {name: string};
+    countryId: string;
     name: string;
     percentage: string; 
 }
+
+
 
 const TaxDetail = () => {
 
@@ -72,10 +71,9 @@ const TaxDetail = () => {
   const [isShowDelete, setShowDelete] = useState({ open: false, type: "selection", data: {} });
   const [showCreateModal, setShowCreateModal] = useState(false)
 
-  const debounceFetch = useDebounce(search, 1000);
-//   const [taxData, setTaxData] = useState<any | null>(null)
+  const debounceSearch = useDebounce(search, 1000);
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
-
+  const [statusId, setStatusId] = useState(null)
 
   const { register, control, handleSubmit } = useForm();
   
@@ -84,15 +82,15 @@ const TaxDetail = () => {
     isFetchingNextPage: isFetchingMoreCountryList,
     hasNextPage,
     fetchNextPage,
-  } = useCountryInfiniteLists({
+  } = useCountryTaxInfiniteLists({
     query: {
-      search: debounceFetch,
+      search: debounceSearch,
       limit: 10,
     },
     options: {
       onSuccess: (data: any) => {
         setTotalRows(data.pages[0].totalRow);
-        const mappedData = data?.pages[0]?.rows?.map((country: any) => {
+        const mappedData = data?.pages[0]?.map((country: any) => {
           return {
             id: country.id,
             value: country.id,
@@ -115,21 +113,25 @@ const TaxDetail = () => {
     data: TaxData,
     isLoading: isLoadingTax,
     isFetching: isFetchingTax,
-  } = useTax({
+  } = useTaxInfiniteLists({
     query: {
     country_id: tax_id,
-    limit: 10,
+    search: debounceSearch,
+      page: pagination.page,
+      limit: pagination.itemsPerPage,
       },
     options: {
       onSuccess: (data: any) => {
-        pagination.setTotalItems(data.totalRow);
+        pagination.setTotalItems(data?.totalRow);
       },
       select: (data: any) => {
-        const mappedData = data?.rows?.map((taxDetail: TaxDetail) => {
+        
+        const mappedData = data?.pages[0]?.rows?.map((taxDetail: TaxDetail) => {
             return {
                 id: taxDetail.taxId,
                 key: taxDetail.taxId,
-                country_name: taxDetail.countryName,
+                country_name: taxDetail.country.name,
+                country_id: taxDetail.countryId,
                 name: taxDetail.name,
                 percentage: taxDetail.percentage,
                 active_status: "ACTIVE"
@@ -145,32 +147,67 @@ const TaxDetail = () => {
   const { mutate: deleteUOM, isLoading: isLoadingDeleteUOM } = useDeletTax({
     options: {
       onSuccess: () => {
-        queryClient.invalidateQueries(["tax-list"]);
+        queryClient.invalidateQueries(["tax/infinite"]);
         setShowDeleteModal(false);
         router.back();
       },
     },
   });
 
-  const deletedProduct = (id: any) => {
+  const { mutate: updateTax, isLoading: isLoadingUpdateTax } = useUpdateTax({
+    countryId: tax_id,
+    id: statusId && statusId,
+    options: {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["tax/infinite"]);
+      },
+    },
+  });
+
+  const { mutate: createTax, isLoading: isLoadingCreateTax } = useCreateTax({
+    options: {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["tax/infinite"]);
+      },
+    },
+  });
+
+  // belum bisa dari backend
+  const deleteTax = (id: any) => {
+    deleteUOM({
+      pph_ids:[...id]
+    })
     console.log(id, '<<delete prod')
   }
 
+  const handleNewTax = (tax: any) => {
+    const newTax = {
+            country_id : tax.country_id,
+            name : tax.name,
+            percentage : tax.percentage,
+            active_status:"ACTIVE"
+    }
+    createTax(newTax)
+    setShowCreateModal(false)
+  }
 
-//   const checkTableChildren = (rowKey: any) => {
-//     const newTableData = taxData?.map(el => {
-//       if(el.key === rowKey.key){
-//         el.status === 'ACTIVE' ? el.status = 'INACTIVE' : el.status = 'ACTIVE'
-//       }
-//       return el
-//     })
-//     setTaxData(newTableData)
-//   }
+  const updateTaxStatus = (rowKey: any) => {
+    setStatusId(rowKey.key)
+    if(statusId){
+      const data = {
+        name: rowKey.name,
+        percentage: rowKey.percentage,
+        active_status: rowKey?.active_status === "ACTIVE"? "INACTIVE" : "ACTIVE"
+      }
+      console.log(data)
+      updateTax(data)
+    }
+  }
 
   const checkedStatus = (status: string) => {
     return status === 'ACTIVE' ? true : false
   }
-
+  
   const columns = [
     {
       title: "Tax Name",
@@ -187,42 +224,19 @@ const TaxDetail = () => {
       dataIndex: 'active_status',
       render: (status: string, rowKey: any) => (
         <>
-          <Switch checked={checkedStatus(status)} onChange={() => checkTableChildren(rowKey)}/>
+          <Switch checked={checkedStatus(status)} onChange={() => updateTaxStatus(rowKey)}/>
         </>
       ),
     },
   ];
-  
 
   const rowSelection = {
     selectedRowKeys,
     onChange: (selectedRowKeys: any, selectedRows: any) => {
+      console.log(selectedRowKeys, '<<<<')
       setSelectedRowKeys(selectedRowKeys);
     },
   };
-
-  const { mutate: createTax, isLoading: isLoadingCreateTax } = useCreateTax({
-    options: {
-      onSuccess: () => {
-        // router.back();
-        queryClient.invalidateQueries(["tax-list"]);
-      },
-    },
-  });
-
-  const handleDataTax = (tax: any) => {
-    const newTax = {
-            country_id : tax.country_id,
-            name : tax.name,
-            percentage : tax.percentage,
-            active_status:"ACTIVE"
-    }
-    createTax(newTax)
-    // if(taxData){
-    //     setTaxData((prev: any) => [...prev, newTax])
-    // } else setTaxData([newTax])
-    setShowCreateModal(false)
-  }
 
   if(isLoadingTax || isFetchingTax) {
     return (
@@ -231,12 +245,13 @@ const TaxDetail = () => {
         </Center>
     )
   }
-  console.log(TaxData?.data)
+
   return (
     <>
       <Col>
         <Row gap="4px">
-          <Text variant={"h4"}>{"Create UoM Conversion"}</Text>
+        <ArrowLeft style={{ cursor: "pointer" }} onClick={() => router.back()} />
+          <Text variant={"h4"}>{TaxData?.data[0]?.country_name}</Text>
         </Row>
 
         <Spacer size={20} />
@@ -246,9 +261,9 @@ const TaxDetail = () => {
             <Row gap="16px"></Row>
 
             <Row gap="16px">
-              <Button size="big" variant={"tertiary"} onClick={() => router.back()}>
+              {/* <Button size="big" variant={"tertiary"} onClick={() => router.back()}>
                 cancel
-              </Button>
+              </Button> */}
               {/* <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}> */}
               <Button size="big" variant={"primary"} onClick={() => router.back()}>
                 {isLoadingCreateTax ? "Loading..." : "Save"}
@@ -266,6 +281,7 @@ const TaxDetail = () => {
                 <Controller
                     control={control}
                     name="country_id"
+                    defaultValue={TaxData?.data[0]?.country_id}
                     render={({ field: { onChange } }) => (
                     <>
                         <Label>Country</Label>
@@ -279,6 +295,7 @@ const TaxDetail = () => {
                         arrowColor={"#000"}
                         required
                         withSearch
+                        disabled
                         isLoading={isFetchingCountryList}
                         isLoadingMore={isFetchingMoreCountryList}
                         fetchMore={() => {
@@ -333,7 +350,6 @@ const TaxDetail = () => {
                     columns={columns}
                     data={TaxData?.data}
                     rowSelection={rowSelection}
-                    rowKey={"name"}
                   />
                   <Pagination pagination={pagination} />
                 </Col>
@@ -398,7 +414,7 @@ const TaxDetail = () => {
               <Button
                 variant="primary"
                 // size="small"
-                onClick={handleSubmit(handleDataTax)}
+                onClick={handleSubmit(handleNewTax)}
               >
                 save
               </Button>
@@ -446,7 +462,7 @@ const TaxDetail = () => {
                   variant="primary"
                   size="big"
                   onClick={() => {
-                      deletedProduct(selectedRowKeys)
+                      deleteTax(selectedRowKeys)
                   }}
                 >
                   {isLoadingDeleteUOM ? "loading..." : "Yes"}
