@@ -175,7 +175,7 @@ const TaxDetail = () => {
   // belum bisa dari backend
   const deleteTax = (id: any) => {
     deleteUOM({
-      pph_ids:[...id]
+      ids:[...id]
     })
     console.log(id, '<<delete prod')
   }
