@@ -128,7 +128,6 @@ export default function ComponentDetailSalesman({
     remark: ""
   }
 
-
   const setActionButton = () => {
     switch(status) {
       case 'Active' || 'Inactive' || 'Rejected':
@@ -375,7 +374,7 @@ export default function ComponentDetailSalesman({
             detailCustomer={modalCustomer?.data}
             pagination={pagination}
             checkedDate={defaultChecked}
-            // onChecked={(value: any) => setDefaultChecked(!defaultChecked)}
+            onChecked={(value: any) => setDefaultChecked(!defaultChecked)}
           />
         }
       />
@@ -406,22 +405,26 @@ const ContentDetailCustomer = ({
         <Col width="45%">
           <DatePickerInput
             fullWidth
-            // value={checkedDate && moment()}
+            placeholder="input start date"
+            value={checkedDate && moment()}
+            defaultValue={moment()}
             label="Start Date"
           />
         </Col>
         <Col width="45%">
           <DatePickerInput
             fullWidth
-            // disabled={checkedDate}
-            // value={checkedDate && moment()}
+            disabled={checkedDate}
+            placeholder="end start date"
+            defaultValue={moment()}
+            value={checkedDate && moment()}
             label="End Date"
           />
         </Col>
         <FlexElement style={{ paddingTop: "1.5rem", gap: "1px" }}>
           <Checkbox
-            // checked={checkedDate}
-            // onChange={onChecked}
+            checked={checkedDate}
+            onChange={onChecked}
           />
           <Text>Today</Text>
         </FlexElement>
@@ -434,7 +437,7 @@ const ContentDetailCustomer = ({
         ]}
       />
       <Spacer size={20} />
-      {/* <Pagination pagination={pagination} /> */}
+      <Pagination pagination={pagination} />
       <Spacer size={20} />
     </div>
   )
@@ -560,7 +563,6 @@ const Forms = ({
     </Row>
   )
 }
-
 
 const Card = styled.div`
   background: #ffff;

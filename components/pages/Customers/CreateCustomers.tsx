@@ -16,13 +16,12 @@ import { useForm, useFieldArray } from 'react-hook-form'
 import { ExclamationCircleOutlined } from "@ant-design/icons";
 import { useRouter } from 'next/router';
 import styled from 'styled-components'
-import dynamic from 'next/dynamic'
 
-const Contact = dynamic(() => import('./fragments/Contact'))
-const Addresses = dynamic(() => import('./fragments/Addresses'))
-const Sales = dynamic(() => import('./fragments/Sales'))
-const Invoicing = dynamic(() => import('./fragments/Invoicing'))
-const Purchasing = dynamic(() => import('./fragments/Purchasing'))
+import Contact from './fragments/Contact'
+import Addresses from './fragments/Addresses'
+import Sales from './fragments/Sales'
+import Invoicing from './fragments/Invoicing'
+import Purchasing from './fragments/Purchasing'
 
 import UploadImage from './fragments/UploadImages'
 import { defaultValuesCreate, addressBodyField, listTabItems, status } from './constants'
@@ -49,7 +48,6 @@ export default function CreateCustomers({
     contact: false,
     bank: false
   });
-  const [editContact, setEditContact] = useState({})
   const [modalChannelForm, setModalChannelForm] = useState<any>({
     data: {},
     typeForm: "create",
@@ -172,7 +170,6 @@ export default function CreateCustomers({
     fields: fieldsContact,
     append: appendContact,
     remove: removeContact,
-    replace: replaceContact,
   } = useFieldArray<any>({
     control,
     name: "contact"
@@ -440,13 +437,9 @@ export default function CreateCustomers({
                     label="Tax Number"
                     height="50px"
                     placeholder="e.g 123456789"
-                    required
                     defaultValue={detailCustomer?.taxNumber}
                     type="number"
-                    error={errors?.tax_number?.message}
-                    {...register('tax_number', {
-                      required: 'tax number must be filled'
-                    })}
+                    {...register('tax_number')}
                   />
                   <FlexElement>
                     <Spacer size={5} />
@@ -468,9 +461,7 @@ export default function CreateCustomers({
                     placeholder={"e.g ksni.com"}
                     error={errors?.website?.message}
                     required
-                    {...register('website', {
-                      required: 'website must be filled'
-                    })}
+                    {...register('website')}
                   />
                   <Spacer size={10} />
                   <Dropdown
@@ -496,11 +487,8 @@ export default function CreateCustomers({
                     height="50px"
                     type="number"
                     defaultValue={detailCustomer?.phone}
-                    error={errors?.phone?.message}
                     placeholder="e.g 021 123456"
-                    {...register('phone', {
-                      required: 'phone must be filled'
-                    })}
+                    {...register('phone')}
                   />
                   <Spacer size={10} />
                   <Input
@@ -522,11 +510,8 @@ export default function CreateCustomers({
                     height="50px"
                     type="email"
                     defaultValue={detailCustomer?.email}
-                    error={errors?.email?.message}
                     placeholder={"e.g admin@kasni.co.id"}
-                    {...register('email', {
-                      required: 'email must be filled'
-                    })}
+                    {...register('email')}
                   />
                   <Spacer size={10} />
                   <Dropdown
@@ -548,11 +533,8 @@ export default function CreateCustomers({
                     height="50px"
                     type="number"
                     defaultValue={detailCustomer?.externalCode}
-                    error={errors?.external_code?.message}
                     placeholder={"e.g 123456"}
-                    {...register('external_code', {
-                      required: 'external code must be filled'
-                    })}
+                    {...register('external_code')}
                   />
                 </Col>
               </Row>
