@@ -217,7 +217,6 @@ export default function Customer() {
   )
 }
 
-
 const Card = styled.div`
   background: #ffffff;
   border-radius: 16px;
