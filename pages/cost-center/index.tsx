@@ -20,9 +20,10 @@ import { queryClient } from "../_app";
 import { ICDownload, ICUpload } from "../../assets/icons";
 import { mdmDownloadService } from "../../lib/client";
 import { useRouter } from "next/router";
+import { useCostCenterInfiniteLists, useCostCenters, useDeletCostCenter } from "hooks/mdm/cost-center";
 
 const downloadFile = (params: any) =>
-  mdmDownloadService("/uom-conversion/download", { params }).then((res) => {
+  mdmDownloadService("/cost-center/download", { params }).then((res) => {
     let dataUrl = window.URL.createObjectURL(new Blob([res.data]));
     let tempLink = document.createElement("a");
     tempLink.href = dataUrl;
@@ -35,7 +36,7 @@ const renderConfirmationText = (type: any, data: any) => {
     case "selection":
       return data.selectedRowKeys.length > 1
         ? `Are you sure to delete ${data.selectedRowKeys.length} items ?`
-        : `Are you sure to delete Uom Name ${
+        : `Are you sure to delete Cost Center - ${
             data?.uomData?.find((el: any) => el.id === data.selectedRowKeys[0])?.name
           } ?`;
     case "detail":
@@ -60,41 +61,40 @@ const CostCenter = () => {
   const [search, setSearch] = useState("");
   const [isShowDelete, setShowDelete] = useState({ open: false, type: "selection", data: {} });
   const [isShowUpload, setShowUpload] = useState(false);
-  const [modalForm, setModalForm] = useState({
-    open: false,
-    data: {},
-    typeForm: "create",
-  });
+
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const debounceSearch = useDebounce(search, 1000);
 
   const {
-    data: UOMConversionData,
-    isLoading: isLoadingUOM,
-    isFetching: isFetchingUOM,
-  } = useUOMConversions({
+    data: costCenterData,
+    isLoading: isLoadingCostCenter,
+    isFetching: isFetchingCostCenter,
+  } = useCostCenters({
     query: {
       search: debounceSearch,
       page: pagination.page,
       limit: pagination.itemsPerPage,
-      company_id: "KSNI",
+    //   company_id: "KSNI",
     },
     options: {
       onSuccess: (data: any) => {
+        
         pagination.setTotalItems(data.totalRow);
       },
       select: (data: any) => {
         const mappedData = data?.rows?.map((element: any) => {
           return {
-            key: element.conversionId,
-            id: element.conversionId,
-            name: element.name,
+            key: element.costCenterId,
+            id: element.costCenterId,
+            companyId: element.companyId,
+            code: element.profitCenterCode,
+            name: element.profitCenterName,
             action: (
               <div style={{ display: "flex", justifyContent: "left" }}>
                 <Button
                   size="small"
                   onClick={() => {
-                    router.push(`/unit-of-measure-conversion/${element.conversionId}`);
+                    router.push(`/cost-center/${element.costCenterId}`);
                   }}
                   variant="tertiary"
                 >
@@ -109,24 +109,24 @@ const CostCenter = () => {
     },
   });
 
-  const { mutate: deleteUom, isLoading: isLoadingDeleteUom } = useDeletUOMConversion({
+  const { mutate: deleteCostCenter, isLoading: isLoadingDeleteCostCenter } = useDeletCostCenter({
     options: {
       onSuccess: () => {
         setShowDelete({ open: false, data: {}, type: "" });
         setSelectedRowKeys([]);
-        queryClient.invalidateQueries(["uom-conversions"]);
+        queryClient.invalidateQueries(["cost-centers"]);
       },
     },
   });
 
-  const { mutate: uploadFileUom, isLoading: isLoadingUploadFileUom } = useUploadFileUOMConversion({
+  const { mutate: uploadFileCostCenter, isLoading: isLoadingUploadFileCostCenter } = useUploadFileUOMConversion({
     query: {
       with_data: "N",
       company_id: "KSNI",
     },
     options: {
       onSuccess: () => {
-        queryClient.invalidateQueries(["uom-conversions"]);
+        queryClient.invalidateQueries(["cost-centers"]);
         setShowUpload(false);
       },
     },
@@ -140,13 +140,13 @@ const CostCenter = () => {
     },
     {
       title: "Cost Center Code",
-      dataIndex: "name",
-      key: 'name'
+      dataIndex: "code",
+      key: 'profitCenterCode'
     },
     {
       title: "Cost Center Name",
       dataIndex: "name",
-      key: 'name'
+      key: 'profitCenterCode'
     },
     {
       title: "Action",
@@ -170,14 +170,32 @@ const CostCenter = () => {
     const formData = new FormData();
     formData.append("company_id", "KSNI");
     formData.append("file", file);
-    console.log(formData, '<<<<<')
-    uploadFileUom(formData);
+    uploadFileCostCenter(formData);
   };
+
+  const handleDelete = (ids, rows) => {
+    const deletedCostCenter = {
+        cost_center_ids :[...ids],
+        company_ids :[]
+    }
+    let filteredCostCenter = {}
+    ids.forEach(id => {
+        rows.forEach(costCenter => {
+            if(id === costCenter?.id) {
+                if(!filteredCostCenter[costCenter?.id]) {
+                    deletedCostCenter.company_ids.push(costCenter.companyId)
+                    filteredCostCenter[costCenter?.id] = 1
+                }
+            }
+        });
+    });
+    deleteCostCenter(deletedCostCenter)
+  }
 
   return (
     <>
       <Col>
-        <Text variant={"h4"}>UoM Conversion</Text>
+        <Text variant={"h4"}>Cost Center List</Text>
         <Spacer size={20} />
       </Col>
       <Card>
@@ -197,7 +215,7 @@ const CostCenter = () => {
                 setShowDelete({
                   open: true,
                   type: "selection",
-                  data: { uomData: UOMConversionData?.data, selectedRowKeys },
+                  data: { uomData: costCenterData?.data, selectedRowKeys },
                 })
               }
               disabled={rowSelection.selectedRowKeys?.length === 0}
@@ -272,9 +290,9 @@ const CostCenter = () => {
       <Card style={{ padding: "16px 20px" }}>
         <Col gap={"60px"}>
           <Table
-            loading={isLoadingUOM || isFetchingUOM}
+            loading={isLoadingCostCenter || isFetchingCostCenter}
             columns={columns}
-            data={UOMConversionData?.data}
+            data={costCenterData?.data}
             rowSelection={rowSelection}
             rowKey={"id"}
           />
@@ -308,17 +326,14 @@ const CostCenter = () => {
                 <Button
                   variant="primary"
                   size="big"
-                  onClick={() => {
-                    if (isShowDelete.type === "selection") {
-                      console.log(selectedRowKeys, '<<<<<')
-                      deleteUom({ ids: selectedRowKeys, company_id: "KSNI" });
-                    } else {
-                      console.log(modalForm.data, '<<<<')
-                      deleteUom({ ids: [modalForm.data.id], company_id: "KSNI" });
-                    }
-                  }}
+                  onClick={() => handleDelete(selectedRowKeys, costCenterData?.data)}
+                //     () => {
+                //       console.log(selectedRowKeys, '<<<<<')
+                //         console.log(costCenterData?.data.filter(costCenter => costCenter.id === selectedRowKeys[0]))
+                //     //   deleteCostCenter({ ids: selectedRowKeys, company_id: "KSNI" });
+                //   }}
                 >
-                  {isLoadingDeleteUom ? "loading..." : "Yes"}
+                  {isLoadingDeleteCostCenter ? "loading..." : "Yes"}
                 </Button>
               </DeleteCardButtonHolder>
             </TopButtonHolder>
