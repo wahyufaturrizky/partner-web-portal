@@ -337,6 +337,11 @@ const UOMConversionCreate = () => {
     }
   }
 
+  const disabledDate: RangePickerProps['disabledDate'] = current => {
+    // Can not select days before today and today
+    return current <= moment().startOf('day');
+  };
+
   if (isFetchingUomCategory)
   return (
     <Center>
@@ -383,7 +388,7 @@ const UOMConversionCreate = () => {
                     height="48px"
                     required
                     placeholder={"e.g Product Conversion"}
-                    {...register("name", { required: "Please enter name." })}
+                    {...register("costCenterCode", { required: "Please enter name." })}
                     />
                 </Col>
 
@@ -397,7 +402,7 @@ const UOMConversionCreate = () => {
                     height="48px"
                     required
                     placeholder={"e.g Product Conversion"}
-                    {...register("name", { required: "Please enter name." })}
+                    {...register("costCenterName", { required: "Please enter name." })}
                     />
                 </Col>
             </Row>
@@ -413,6 +418,7 @@ const UOMConversionCreate = () => {
                     render={({ field: { onChange } }) => (
                         <DatePickerInput
                         fullWidth
+                        disabledDate={disabledDate}
                         onChange={(date: any, dateString: any) => onChange(dateString)}
                         label="Valid From"
                         defaultValue={moment()} format={'DD/MM/YYYY'}
@@ -430,6 +436,7 @@ const UOMConversionCreate = () => {
                     render={({ field: { onChange } }) => (
                         <DatePickerInput
                         fullWidth
+                        disabledDate={disabledDate}
                         onChange={(date: any, dateString: any) => onChange(dateString)}
                         label="Valid To"
                         defaultValue={moment()} format={'DD/MM/YYYY'}
