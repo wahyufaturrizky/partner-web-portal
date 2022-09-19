@@ -203,7 +203,7 @@ export default function ComponentSalesmanDivision() {
 
   return (
     <div>
-      <Text variant="h4">Salesman List</Text>
+      <Text variant="h4">Sales Division</Text>
       <Spacer size={20} />
       <Card>
         <Row justifyContent="space-between">
