@@ -279,7 +279,7 @@ const CostCenter = () => {
             <Button
               size="big"
               variant="primary"
-              onClick={() => router.push("/unit-of-measure-conversion/create")}
+              onClick={() => router.push("/cost-center/create")}
             >
               Create
             </Button>
