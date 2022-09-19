@@ -48,6 +48,7 @@ export default function ComponentSalesmanDivision() {
   });
   const [search, setSearch] = useState<string>('')
   const [formsUpdate, setFormsUpdate] = useState<any>({})
+  const [singleTitle, setSingleTitile] = useState('')
   const [selectedItems, setSelectedItems] = useState<string[]>([])
   const [visible, setVisible] = useState({
     delete: false,
@@ -90,8 +91,18 @@ export default function ComponentSalesmanDivision() {
 
   const rowSelection = {
     selectedItems,
-    onChange: (value: any) => {
+    onChange: async (value: any) => {
+      const findName = await data?.rows?.find((el: any) => el.id === value[0])
       setSelectedItems(value)
+      setSingleTitile(findName?.divisiName)
+    }
+  }
+
+  const isLabelConfirmationDelete = (): any => {
+    if (selectedItems.length > 1) {
+      selectedItems?.map((label: string) => label)
+    } else {
+      return singleTitle
     }
   }
 
@@ -177,7 +188,7 @@ export default function ComponentSalesmanDivision() {
         return downloadFileSalesDivision({ company_id: 'KSNI', with_data: 'n' })
       case '2':
         return setVisible({ ...visible, upload: true })
-      case '1':
+      case '3':
         return downloadFileSalesDivision({ company_id: 'KSNI', with_data: 'y' })
       default:
         return null
@@ -241,7 +252,7 @@ export default function ComponentSalesmanDivision() {
         visible={visible.delete}
         totalSelected={selectedItems?.length}
         isLoading={isLoading}
-        itemTitle={selectedItems?.map((label: string) => label)}
+        itemTitle={isLabelConfirmationDelete()}
         onCancel={() => setVisible({ ...visible, delete: false })}
         onOk={() => handleDeleteDivision({ ids: selectedItems })}
       />

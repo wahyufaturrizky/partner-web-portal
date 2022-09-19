@@ -225,8 +225,6 @@ const CreatePricingStructure: any = () => {
     },
     options: {
       onSuccess: (data: any) => {
-        console.log("@data", data);
-
         setTotalRowsSalesOrganizationInfiniteList(data.pages[0].totalRow);
         const mappedData = data?.pages?.map((group: any) => {
           return group.salesOrganizationStructures?.map((element: any) => {

@@ -163,9 +163,7 @@ const UOMConversionCreate = () => {
     setShowCreateModal(false)
   };
 
-  const updateStatusUom = (rowKey: any) => {
-    console.log(rowKey)
-  }
+  const updateStatusUom = (rowKey: any) => {}
 
   const onSave = (data: any) => {
     const tempTable = [...newUomTable]
@@ -182,7 +180,6 @@ const UOMConversionCreate = () => {
     base_uom_id: data.baseUom,
     items: savedTable
     }
-    console.log(saveData, 910192)
     createUom(saveData)
   }
 

@@ -162,10 +162,9 @@ const UOMConversion = () => {
   };
 
   const onSubmitFile = (file: any) => {
-    const formData = new FormData();
+    const formData: any = new FormData();
     formData.append("company_id", "KSNI");
     formData.append("file", file);
-    console.log(formData, '<<<<<')
     uploadFileUom(formData);
   };
 
@@ -305,10 +304,8 @@ const UOMConversion = () => {
                   size="big"
                   onClick={() => {
                     if (isShowDelete.type === "selection") {
-                      console.log(selectedRowKeys, '<<<<<')
                       deleteUom({ ids: selectedRowKeys, company_id: "KSNI" });
                     } else {
-                      console.log(modalForm.data, '<<<<')
                       deleteUom({ ids: [modalForm.data.id], company_id: "KSNI" });
                     }
                   }}
