@@ -44,7 +44,7 @@ export default function ComponentDetailSalesman({
     totalItems: 100,
   });
   const router = useRouter();
-  const { status, salesman_id }: any = router.query || {}
+  const { status, salesman_id, name, idCard, code }: any = router.query || {}
   const [search, setSearch] = useState<string>('')
   const [division, setDivision] = useState('')
   const [remarks, setRemarks] = useState('')
@@ -171,11 +171,10 @@ export default function ComponentDetailSalesman({
   const _handleDraftedSalesman = () => {
     const dataUpdated: any = {
       ...payloads,
-      division,
+      division: division,
       status: 4,
       tobe: -1
     }
-
     handleUpdateSalesman(dataUpdated)
   }
 
@@ -194,7 +193,7 @@ export default function ComponentDetailSalesman({
     const dataUpdated: any = {
       ...payloads,
       division,
-      status: modalActive === 'Active' ? 0 : 1,
+      status: 2,
       tobe: modalActive === 'Active' ? 0 : 1,
       remark: remarks,
     }
@@ -216,7 +215,7 @@ export default function ComponentDetailSalesman({
     <div>
       <Row gap="4px" alignItems="center">
         <ArrowLeft style={{ cursor: "pointer" }} onClick={() => router.back()} />
-        <Text variant="h4">Detail Salesman {salesman_id}</Text>
+        <Text variant="h4">{name} - {idCard}</Text>
       </Row>
       <Spacer size={30} />
       <Card>
@@ -257,6 +256,7 @@ export default function ComponentDetailSalesman({
             <Accordion.Header variant="blue">General</Accordion.Header>
             <Accordion.Body>
               <Forms
+                code={code}
                 forms={data}
                 salesDivision={listSalesDivision?.rows || []}
                 status={status}
@@ -374,7 +374,7 @@ export default function ComponentDetailSalesman({
             detailCustomer={modalCustomer?.data}
             pagination={pagination}
             checkedDate={defaultChecked}
-            onChecked={(value: any) => setDefaultChecked(!defaultChecked)}
+            onChecked={() => setDefaultChecked(!defaultChecked)}
           />
         }
       />
@@ -474,6 +474,7 @@ const ActionButton = ({
 }
 
 const Forms = ({
+  code,
   status,
   forms,
   setDivision,
@@ -535,7 +536,7 @@ const Forms = ({
             value: item?.divisiName,
           } })}
           handleChange={(value: any) => setDivision(value)}
-          defaultValue={forms?.division || 'sales division not found'}
+          defaultValue={code || 'sales division not found'}
           onSearch={(value: any) => setSearch(value)}
           disabled={status === "Rejected" || status === "Waiting for Approval"}
         />
