@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   Text,
   Col,
@@ -6,13 +6,10 @@ import {
   Spacer,
   Dropdown2,
   Button,
-  Accordion,
   TextArea,
   Input,
   Table,
-  Pagination,
   Switch,
-  Modal,  
   FormSelect,
   Checkbox,
   DatePickerInput,
@@ -24,12 +21,9 @@ import { Controller, useForm } from "react-hook-form";
 import { useRouter } from "next/router";
 import { queryClient } from "../_app";
 import useDebounce from "../../lib/useDebounce";
-import { ModalDeleteConfirmation } from "../../components/elements/Modal/ModalConfirmationDelete";
 import ArrowLeft from "../../assets/icons/arrow-left.svg";
 import usePagination from "@lucasmogari/react-pagination";
 
-import { useCreateUOMConversion } from "hooks/mdm/unit-of-measure-conversion/useUOMConversion";
-import { useUOMInfiniteLists } from "hooks/mdm/unit-of-measure/useUOM";
 import { useCompanyList, useCurrenciesMDM } from "hooks/company-list/useCompany";
 import { useProfitCenters } from "hooks/mdm/profit-center/useProfitCenter";
 import { useLanguages } from "hooks/languages/useLanguages";
@@ -148,6 +142,19 @@ export interface RowLanguagesData {
     modifiedAt: null;
     deletedBy:  null;
     deletedAt:  null;
+}
+
+export interface CostCenterSave { 
+    language: string; 
+    currency: string; 
+    profit_center_id: string; 
+    company_id: string; 
+    code: string; 
+    name: string; 
+    valid_from: string; 
+    valid_to: string; 
+    external_code: string; 
+    person_responsible: string; 
 }
 
 const CostCenterCreate = () => {
@@ -295,11 +302,11 @@ const CostCenterCreate = () => {
   });
 
 
-  const onSave = (data) => {
+  const onSave = (data: CostCenterSave) => {
     const newCostCenter = {
-        profit_center_id :data?.profit_center_id, 
         language : data?.language,
         currency : data?.currency,
+        profit_center_id :data?.profit_center_id, 
         company_id :data?.company_id.toString(),
         code :data?.code,
         name : data?.name,
@@ -473,7 +480,7 @@ const CostCenterCreate = () => {
     setCurrencyStatus(prev => !prev)
   }
 
-  const disabledDate: RangePickerProps['disabledDate'] = current => {
+  const disabledDate: RangePickerProps['disabledDate'] = (current: number) => {
     // Can not select days before today and today
     return current <= moment().startOf('day');
   };
@@ -520,7 +527,6 @@ const CostCenterCreate = () => {
                     <Input
                         width="100%"
                         label="Cost Center Code"
-                        // defaultValue={newUom.name}
                         height="48px"
                         required
                         placeholder={"e.g 0131930111"}
@@ -534,7 +540,6 @@ const CostCenterCreate = () => {
                     <Input
                         width="100%"
                         label="Cost Center Name"
-                        // defaultValue={newUom.name}
                         height="48px"
                         required
                         placeholder={"e.g Dept IT"}
@@ -596,7 +601,6 @@ const CostCenterCreate = () => {
                         <Spacer size={3} />
                         <FormSelect
                         style={{ width: "100%" }}
-                        // defaultValue={newUom.base_uom_id}
                         size={"large"}
                         required
                         placeholder={"Select"}
@@ -637,7 +641,7 @@ const CostCenterCreate = () => {
                         fontSize: '17px',
                     }}>
                         <Text>Refer To Company?</Text>
-                        <Switch checked={languageStatus} onChange={() => setLanguageFromCompany(languageStatus)}/>
+                        <Switch checked={languageStatus} onChange={() => setLanguageFromCompany()}/>
                     </div>
                 </Col>
 
@@ -654,7 +658,6 @@ const CostCenterCreate = () => {
                             <Spacer size={3} />
                             <FormSelect
                             style={{ width: "100%" }}
-                            // defaultValue={newUom.base_uom_id}
                             size={"large"}
                             required
                             placeholder={"Select"}
@@ -696,7 +699,6 @@ const CostCenterCreate = () => {
                         <Spacer size={3} />
                         <FormSelect
                         style={{ width: "100%" }}
-                        // defaultValue={newUom.base_uom_id}
                         size={"large"}
                         required
                         placeholder={"Select"}
@@ -704,12 +706,6 @@ const CostCenterCreate = () => {
                         arrowColor={"#000"}
                         withSearch
                         isLoading={isLoadingProfitCenterData}
-                        // isLoadingMore={isFetchingMoreCompanyData}
-                        // fetchMore={() => {
-                        //     if (hasNextPage) {
-                        //     fetchNextPage();
-                        //     }
-                        // }}
                         items={
                             isFetchingProfitCenterData && !isFetchingMoreProfitCenterData
                             ? []
@@ -745,10 +741,9 @@ const CostCenterCreate = () => {
                         alignItems: 'center',
                         fontWeight: 'bold',
                         fontSize: '17px',
-                        // justifyContent: 'space-between'
                     }}>
                         <Text>Refer To Company?</Text>
-                        <Switch checked={currencyStatus} onChange={() => setCurrencyFromCompany(currencyStatus)}/>
+                        <Switch checked={currencyStatus} onChange={() => setCurrencyFromCompany()}/>
 
                     </div>
                 </Col>
@@ -763,7 +758,6 @@ const CostCenterCreate = () => {
                             name="currency"
                             render={({ field: { onChange } }) => (
                             <>
-                                {/* <Label>Company</Label> */}
                                 <Spacer size={3} />
                                 <FormSelect
                                 style={{ width: "100%" }}
@@ -775,12 +769,6 @@ const CostCenterCreate = () => {
                                 arrowColor={"#000"}
                                 withSearch
                                 isLoading={isFetchingCurrenciesData}
-                                // isLoadingMore={isFetchingMoreCurrenciesData}
-                                // fetchMore={() => {
-                                //     if (hasNextPage) {
-                                //     fetchNextPage();
-                                //     }
-                                // }}
                                 items={
                                     isFetchingCurrenciesData && !isFetchingMoreCurrenciesData
                                     ? []
@@ -813,7 +801,6 @@ const CostCenterCreate = () => {
                   items={costCenterCategoryTable}
                   placeholder={"Select"}
                   noSearch
-                //   {...register("costCenterCategory")}
                 />
                 </Col>
 
@@ -824,8 +811,6 @@ const CostCenterCreate = () => {
                     width="100%"
                     label="Person Responsible"
                     height="48px"
-                    // required
-                    // defaultValue={" "}
                     placeholder={"e.g TBD"}
                     {...register("person_responsible")}
                     />
@@ -841,7 +826,6 @@ const CostCenterCreate = () => {
                         width="100%"
                         label="Description"
                         defaultValue={description}
-                        // required
                         placeholder={"e.g New Cost Center"}
                         onChange={handleDescription}
                         />
@@ -854,8 +838,6 @@ const CostCenterCreate = () => {
                     width="100%"
                     label="External Code"
                     height="54px"
-                    // required
-                    // defaultValue={" "}
                     placeholder={"e.g 321001112"}
                     {...register("external_code")}
                     />
