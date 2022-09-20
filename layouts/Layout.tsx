@@ -314,6 +314,13 @@ const menuMdm = [
     onClick: () => Router.push("/term-of-payment"),
   },
   {
+    key: "profit-center",
+    title: "Profit Center",
+    content: () => "Profit Center",
+    icon: ICDollar,
+    onClick: () => Router.push("/profit-center"),
+  },
+  {
     key: "tax",
     title: "Tax",
     content: () => "Tax",
