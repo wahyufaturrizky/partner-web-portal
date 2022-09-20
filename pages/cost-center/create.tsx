@@ -30,7 +30,10 @@ import usePagination from "@lucasmogari/react-pagination";
 
 import { useCreateUOMConversion } from "hooks/mdm/unit-of-measure-conversion/useUOMConversion";
 import { useUOMInfiniteLists } from "hooks/mdm/unit-of-measure/useUOM";
-import { useCompanyList } from "hooks/company-list/useCompany";
+import { useCompanyList, useCurrenciesMDM } from "hooks/company-list/useCompany";
+import { useProfitCenters } from "hooks/mdm/profit-center/useProfitCenter";
+import { useLanguages } from "hooks/languages/useLanguages";
+import { useCreateCostCenter } from "hooks/mdm/cost-center";
 
 
 const costCenterCategoryTable = [
@@ -88,6 +91,65 @@ export interface RowCompanyList {
     isActive:    boolean;
 }
 
+export interface ProfitCenterList {
+    rows:     RowProfitCenter[];
+    totalRow: number;
+    sortBy:   string[];
+}
+
+export interface RowProfitCenter {
+    companyId:         string;
+    profitCenterId:    string;
+    code:              string;
+    name:              string;
+    validFrom:         Date;
+    validTo:           Date;
+    externalCode:      string;
+    description:       string;
+    personResponsible: string;
+    createdAt:         Date;
+    createdBy:         number;
+    modifiedAt:        Date;
+    modifiedBy:        number | null;
+    deletedBy:         null;
+    deletedAt:         null;
+}
+
+export interface CurrenciesData {
+    rows:     RowCurrenciesData[];
+    totalRow: number;
+    sortBy:   string[];
+}
+
+export interface RowCurrenciesData {
+    id:           string;
+    currency:     string;
+    currencyName: string;
+    createdAt:    Date;
+    createdBy:    number;
+    modifiedAt:   Date;
+    modifiedBy:   number | null;
+    deletedBy:    null;
+    deletedAt:    null;
+}
+
+export interface LanguagesData {
+    rows:     RowLanguagesData[];
+    totalRow: number;
+    sortBy:   string[];
+}
+
+export interface RowLanguagesData {
+    id:         string;
+    name:       string;
+    createdBy:  number;
+    createdAt:  Date;
+    modifiedBy: null;
+    modifiedAt: null;
+    deletedBy:  null;
+    deletedAt:  null;
+}
+
 const CostCenterCreate = () => {
   const router = useRouter();
   const pagination = usePagination({
@@ -98,20 +160,20 @@ const CostCenterCreate = () => {
     arrows: true,
     totalItems: 100,
   });
+
   const [listUomCategory, setListUomCategory] = useState<any[]>([]);
-  const [totalRows, setTotalRows] = useState(0);
+  const [listProfitCenter, setListProfitCenter] = useState([])
+  const [listCurrencies, setListCurrencies] = useState([])
+  const [listLanguages, setListLanguages] = useState([])
+
   const [search, setSearch] = useState("");
 
-//   const [showDeleteModal, setShowDeleteModal] = useState(false);
-//   const [isShowDelete, setShowDelete] = useState({ open: false, type: "selection", data: {} });
-//   const [showCreateModal, setShowCreateModal] = useState(false)
-// const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [languageStatus, setLanguageStatus] = useState(true)
   const [currencyStatus, setCurrencyStatus] = useState(true)
+  const [checkSelectAll, setCheckSelectAll] = useState(false)
   const [description, setDescription] = useState("")
   const [costCenterCategory, setCostCenterCategory] = useState("")
   const debounceFetch = useDebounce(search, 1000);
-  const [checkSelectAll, setCheckSelectAll] = useState(false)
 
 
   const [newCostCenterTable, setNewCostCenterTable] = useState([{
@@ -124,107 +186,138 @@ const CostCenterCreate = () => {
     commitment_update: false,
   }])
   const { register, control, handleSubmit } = useForm();
+  
+  const {
+        data: companyData,
+        refetch: isFetchingMoreCompanyData,
+        isFetching: isFetchingCompanyData,
+        isLoading: isLoadingCompanyData,
+    } = useCompanyList({
+        options: {
+        onSuccess: (data: CompanyList) => {
+            const mappedCompanyData = data?.rows?.map((element: RowCompanyList) => {
+                return {
+                    value: element.id,
+                    label: element.name,
+                };
+            });
+            setListUomCategory(mappedCompanyData);
+        },
+        },
+        query: {
+        search: debounceFetch,
+        page: pagination.page,
+        limit: pagination.itemsPerPage,
+        },
+    });
 
-//   const {
-//     isFetching: isFetchingCompanyData,
-//     isFetchingNextPage: isFetchingMoreCompanyData,
-//     isLoading: isLoadingUOM,
-//     hasNextPage,
-//     fetchNextPage,
-//   } = useCompanyInfiniteLists({
-//     query: {
-//       search: debounceFetch,
-//     //   company_id: "KSNI",
-//       limit: 10,
-//     },
-//     options: {
-//       onSuccess: (data: any) => {
-//         console.log(data, '<<<<')
-//         setTotalRows(data.pages[0].totalRow);
-//         const mappedData = data?.pages?.map((group: any) => {
-//           return group.rows?.map((element: any) => {
-//             return {
-//               value: element.id,
-//               label: element.name,
-//             };
-//           });
-//         });
-//         const flattenArray = [].concat(...mappedData);
-//         // setListUomCategory(flattenArray);
-//       },
-//       getNextPageParam: (_lastPage: any, pages: any) => {
-//         if (listUomCategory.length < totalRows) {
-//           return pages.length + 1;
-//         } else {
-//           return undefined;
-//         }
-//       },
-//     },
-//   });
+  const {
+        data: profitCenterData,
+        refetch: isFetchingMoreProfitCenterData,
+        isFetching: isFetchingProfitCenterData,
+        isLoading: isLoadingProfitCenterData,
+    } = useProfitCenters({
+        options: {
+        onSuccess: (data: ProfitCenterList) => {
+            const mappedProfitCenterData = data?.rows?.map((element: RowProfitCenter) => {
+                return {
+                    value: element.profitCenterId,
+                    label: element.name,
+                };
+            });
+            setListProfitCenter(mappedProfitCenterData);
+        },
+        },
+        query: {
+        search: debounceFetch,
+        page: pagination.page,
+        limit: pagination.itemsPerPage,
+        },
+    });
 
-const {
-    data: companyData,
-    refetch: isFetchingMoreCompanyData,
-    isFetching: isFetchingCompanyData,
-    isLoading: isLoadingCompanyData,
-  } = useCompanyList({
+  const {
+        data: languagesData,
+        refetch: isFetchingMoreLanguagesData,
+        isFetching: isFetchingLanguagesData,
+        isLoading: isLoadingLanguagesData,
+    } = useLanguages({
+        options: {
+        onSuccess: (data: LanguagesData) => {
+            console.log(data, 'languagedata')
+            const mappedLanguagesData = data?.rows?.map((element: RowLanguagesData) => {
+                return {
+                    value: element.id,
+                    label: element.id,
+                };
+            });
+            setListLanguages(mappedLanguagesData)
+        },
+        },
+        query: {
+        search: debounceFetch,
+        page: pagination.page,
+        limit: pagination.itemsPerPage,
+        },
+    });
+
+  const {
+        data: currenciesData,
+        refetch: isFetchingMoreCurrenciesData,
+        isFetching: isFetchingCurrenciesData,
+        isLoading: isLoadingCurrenciesData,
+    } = useCurrenciesMDM({
+        options: {
+        onSuccess: (data: CurrenciesData) => {
+            console.log(data, 'currencyData')
+            const mappedCurrenciesData = data?.rows?.map((element: RowCurrenciesData) => {
+                return {
+                    value: element.currency + '-' + element.currencyName,
+                    label: element.currency + '-' + element.currencyName,
+                };
+            });
+            setListCurrencies(mappedCurrenciesData)
+        },
+        },
+        query: {
+        search: debounceFetch,
+        page: pagination.page,
+        limit: pagination.itemsPerPage,
+        },
+    });
+
+  const { mutate: createCostCenter, isLoading: isLoadingCreateCostCenter } = useCreateCostCenter({
     options: {
-      onSuccess: (data: CompanyList) => {
-        pagination.setTotalItems(data.totalRow);
-        const mappedCompanyData = data?.rows?.map((element: RowCompanyList) => {
-              return {
-                value: element.id,
-                label: element.name,
-              };
-          });
-          setListUomCategory(mappedCompanyData);
+      onSuccess: () => {
+        queryClient.invalidateQueries(["uom-list"]);
+        router.back();
       },
-    },
-    query: {
-      search: debounceFetch,
-      page: pagination.page,
-      limit: pagination.itemsPerPage,
     },
   });
 
-  console.log(companyData, '<<<ini companyData')
-
-//   const { mutate: createUom, isLoading: isLoadingCreateUom } = useCreateUOMConversion({
-//     options: {
-//       onSuccess: () => {
-//         queryClient.invalidateQueries(["uom-list"]);
-//         setShowDeleteModal(false);
-//         router.back();
-//       },
-//     },
-//   });
-
 
   const onSave = (data) => {
-    console.log(data)
     const newCostCenter = {
-        // profit_center_id :data?.profit_center_id, 
-        // language :"EN-US",
-        // currency :"IDR-Indonesia",
-        company_id :data?.company_id,
-        // code :data?.code,
-        // name : data?.name,
-        // cost_center_category : costCenterCategory,
-        // valid_from : data?.valid_from? data?.valid_from : moment().format("DD/MM/YY"),
-        // valid_to : data?.valid_to? data?.valid_to : moment().format("DD/MM/YY"),
-        // external_code : data?.external_code,
-        // description : description,
-        // person_responsible :data?.person_responsible,
-        // actual_primary_cost :newCostCenterTable[0].actual_primary_cost ? "YES" : "NO",
-        // plant_primary_cost :newCostCenterTable[0].plant_primary_cost ? "YES" : "NO",
-        // actual_secondary_cost :newCostCenterTable[0].actual_secondary_cost ? "YES" : "NO",
-        // plant_secondary_cost :newCostCenterTable[0].plant_secondary_cost ? "YES" : "NO",
-        // actual_revenues :newCostCenterTable[0].actual_revenues ? "YES" : "NO",
-        // plant_revenues :newCostCenterTable[0].plant_revenues ? "YES" : "NO",
-        // commitment_update :newCostCenterTable[0].commitment_update ? "YES" : "NO"
+        profit_center_id :data?.profit_center_id, 
+        language : data?.language,
+        currency : data?.currency,
+        company_id :data?.company_id.toString(),
+        code :data?.code,
+        name : data?.name,
+        cost_center_category : costCenterCategory,
+        valid_from : data?.valid_from? data?.valid_from : moment().format("DD/MM/YYYY"),
+        valid_to : data?.valid_to? data?.valid_to : moment().format("DD/MM/YYYY"),
+        external_code : data?.external_code,
+        description : description,
+        person_responsible :data?.person_responsible,
+        actual_primary_cost :newCostCenterTable[0].actual_primary_cost ? "YES" : "NO",
+        plant_primary_cost :newCostCenterTable[0].plant_primary_cost ? "YES" : "NO",
+        actual_secondary_cost :newCostCenterTable[0].actual_secondary_cost ? "YES" : "NO",
+        plant_secondary_cost :newCostCenterTable[0].plant_secondary_cost ? "YES" : "NO",
+        actual_revenues :newCostCenterTable[0].actual_revenues ? "YES" : "NO",
+        plant_revenues :newCostCenterTable[0].plant_revenues ? "YES" : "NO",
+        commitment_update :newCostCenterTable[0].commitment_update ? "YES" : "NO"
     }
-
-    console.log(newCostCenter)
+    createCostCenter(newCostCenter)
   }
 
   const columns = [
@@ -410,7 +503,7 @@ const {
                 Cancel
               </Button>
               <Button size="big" variant={"primary"} onClick={handleSubmit(onSave)}>
-                {"Save"}
+                {isLoadingCreateCostCenter? "Loading..." : "Save"}
               </Button>
             </Row>
           </Row>
@@ -430,7 +523,7 @@ const {
                         // defaultValue={newUom.name}
                         height="48px"
                         required
-                        placeholder={"e.g Product Conversion"}
+                        placeholder={"e.g 0131930111"}
                         {...register("code", { required: "Please enter name." })}
                     />
                 </Col>
@@ -444,7 +537,7 @@ const {
                         // defaultValue={newUom.name}
                         height="48px"
                         required
-                        placeholder={"e.g Product Conversion"}
+                        placeholder={"e.g Dept IT"}
                         {...register("name", { required: "Please enter name." })}
                     />
                 </Col>
@@ -542,7 +635,6 @@ const {
                         alignItems: 'center',
                         fontWeight: 'bold',
                         fontSize: '17px',
-                        // justifyContent: 'space-between'
                     }}>
                         <Text>Refer To Company?</Text>
                         <Switch checked={languageStatus} onChange={() => setLanguageFromCompany(languageStatus)}/>
@@ -559,7 +651,6 @@ const {
                         name="language"
                         render={({ field: { onChange } }) => (
                         <>
-                            {/* <Label>Company</Label> */}
                             <Spacer size={3} />
                             <FormSelect
                             style={{ width: "100%" }}
@@ -570,17 +661,11 @@ const {
                             borderColor={"#AAAAAA"}
                             arrowColor={"#000"}
                             withSearch
-                            isLoading={isFetchingCompanyData}
-                            isLoadingMore={isFetchingMoreCompanyData}
-                            fetchMore={() => {
-                                if (hasNextPage) {
-                                fetchNextPage();
-                                }
-                            }}
+                            isLoading={isFetchingLanguagesData}
                             items={
-                                isFetchingCompanyData && !isFetchingMoreCompanyData
+                                isFetchingLanguagesData && !isFetchingMoreLanguagesData
                                 ? []
-                                : listUomCategory
+                                : listLanguages
                             }
                             onChange={(value: any) => {
                                 onChange(value);
@@ -618,17 +703,17 @@ const {
                         borderColor={"#AAAAAA"}
                         arrowColor={"#000"}
                         withSearch
-                        isLoading={isFetchingCompanyData}
-                        isLoadingMore={isFetchingMoreCompanyData}
-                        fetchMore={() => {
-                            if (hasNextPage) {
-                            fetchNextPage();
-                            }
-                        }}
+                        isLoading={isLoadingProfitCenterData}
+                        // isLoadingMore={isFetchingMoreCompanyData}
+                        // fetchMore={() => {
+                        //     if (hasNextPage) {
+                        //     fetchNextPage();
+                        //     }
+                        // }}
                         items={
-                            isFetchingCompanyData && !isFetchingMoreCompanyData
+                            isFetchingProfitCenterData && !isFetchingMoreProfitCenterData
                             ? []
-                            : listUomCategory
+                            : listProfitCenter
                         }
                         onChange={(value: any) => {
                             onChange(value);
@@ -689,17 +774,17 @@ const {
                                 borderColor={"#AAAAAA"}
                                 arrowColor={"#000"}
                                 withSearch
-                                isLoading={isFetchingCompanyData}
-                                isLoadingMore={isFetchingMoreCompanyData}
-                                fetchMore={() => {
-                                    if (hasNextPage) {
-                                    fetchNextPage();
-                                    }
-                                }}
+                                isLoading={isFetchingCurrenciesData}
+                                // isLoadingMore={isFetchingMoreCurrenciesData}
+                                // fetchMore={() => {
+                                //     if (hasNextPage) {
+                                //     fetchNextPage();
+                                //     }
+                                // }}
                                 items={
-                                    isFetchingCompanyData && !isFetchingMoreCompanyData
+                                    isFetchingCurrenciesData && !isFetchingMoreCurrenciesData
                                     ? []
-                                    : listUomCategory
+                                    : listCurrencies
                                 }
                                 onChange={(value: any) => {
                                     onChange(value);
@@ -771,7 +856,7 @@ const {
                     height="54px"
                     // required
                     // defaultValue={" "}
-                    placeholder={"e.g TBD"}
+                    placeholder={"e.g 321001112"}
                     {...register("external_code")}
                     />
                 </Col>
