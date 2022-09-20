@@ -291,7 +291,7 @@ const menuMdm = [
         onClick: () => Router.push("/salesman/group"),
       },
       {
-        key: "salesman",
+        key: "salesman-sub-menu",
         title: "Salesman",
         content: () => "Salesman",
         onClick: () => Router.push("/salesman"),

@@ -20,14 +20,24 @@ const ModalAddSalesDivision = ({ listProducts, formsUpdate, onCancel, visible, o
 	})
 
   useEffect(() => {
-    if (formsUpdate && visible) {
+		if (formsUpdate?.code?.length > 1) {
       setForms({
         name: formsUpdate?.divisiName,
         description: formsUpdate?.shortDesc,
       });
       setItemSelected(detailSalesman?.product?.split(","));
     }
-  }, [formsUpdate, detailSalesman, visible]);
+  }, [formsUpdate, detailSalesman]);
+
+	useEffect(() => {
+		if (visible === false) {
+			setForms({
+				name: "",
+				description: "",
+			});
+			setItemSelected([]);
+		}
+	}, [visible])
 
 	return (
 		<Modal

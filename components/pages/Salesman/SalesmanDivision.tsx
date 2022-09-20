@@ -26,6 +26,7 @@ import {
   useFetchSalesmanDivision,
   useUpdateSalesmanDivision
 } from 'hooks/mdm/salesman/useSalesmanDivision'
+import { useForm } from 'react-hook-form';
 
 
 const downloadFileSalesDivision = (params: any) =>
@@ -55,6 +56,13 @@ export default function ComponentSalesmanDivision() {
     create: false,
     upload: false,
   });
+
+  const {
+    control,
+    getValues
+  } = useForm()
+
+  console.log(getValues())
 
   const columns = [
     {
@@ -124,6 +132,10 @@ export default function ComponentSalesmanDivision() {
       onSuccess: () => {
         setVisible({ ...visible, delete: false })
         refetch()
+      },
+      onError: ({ data }: any) => {
+        alert(`Ups sorry ${data?.data}`)
+        setVisible({ ...visible, delete: false })
       }
     }
   })
@@ -261,8 +273,8 @@ export default function ComponentSalesmanDivision() {
       <ModalAddSalesDivision
         listProducts={listProducts}
         visible={visible.create}
-        resetFormsUpdate={() => setFormsUpdate(null)}
         formsUpdate={formsUpdate}
+        control={control}
         onCancel={() => setVisible({ ...visible, create: false })}
         onOk={(items: {
           name: string,
