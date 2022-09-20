@@ -173,14 +173,22 @@ const CostCenterCreate = () => {
   const [listCurrencies, setListCurrencies] = useState([])
   const [listLanguages, setListLanguages] = useState([])
 
-  const [search, setSearch] = useState("");
+  const [searchCompany, setSearchCompany] = useState("");
+  const [searchProfitCenter, setSearchProfitCenter] = useState("");
+  const [searchLanguage, setSearchLanguage] = useState("");
+  const [searchCurrency, setSearchCurrency] = useState("");
+  
+  const debounceFetchCompany = useDebounce(searchCompany, 1000);
+  const debounceFetchProfitCenter = useDebounce(searchProfitCenter, 1000);
+  const debounceFetchLanguage = useDebounce(searchLanguage, 1000);
+  const debounceFetchCurrency = useDebounce(searchCurrency, 1000);
 
   const [languageStatus, setLanguageStatus] = useState(true)
   const [currencyStatus, setCurrencyStatus] = useState(true)
   const [checkSelectAll, setCheckSelectAll] = useState(false)
   const [description, setDescription] = useState("")
   const [costCenterCategory, setCostCenterCategory] = useState("")
-  const debounceFetch = useDebounce(search, 1000);
+  
 
 
   const [newCostCenterTable, setNewCostCenterTable] = useState([{
@@ -212,7 +220,7 @@ const CostCenterCreate = () => {
         },
         },
         query: {
-        search: debounceFetch,
+        search: debounceFetchCompany,
         page: pagination.page,
         limit: pagination.itemsPerPage,
         },
@@ -236,7 +244,7 @@ const CostCenterCreate = () => {
         },
         },
         query: {
-        search: debounceFetch,
+        search: debounceFetchProfitCenter,
         page: pagination.page,
         limit: pagination.itemsPerPage,
         },
@@ -261,7 +269,7 @@ const CostCenterCreate = () => {
         },
         },
         query: {
-        search: debounceFetch,
+        search: debounceFetchLanguage,
         page: pagination.page,
         limit: pagination.itemsPerPage,
         },
@@ -286,7 +294,7 @@ const CostCenterCreate = () => {
         },
         },
         query: {
-        search: debounceFetch,
+        search: debounceFetchCurrency,
         page: pagination.page,
         limit: pagination.itemsPerPage,
         },
@@ -613,7 +621,7 @@ const CostCenterCreate = () => {
                             onChange(value);
                         }}
                         onSearch={(value: any) => {
-                            setSearch(value);
+                            setSearchCompany(value);
                         }}
                         />
                     </>
@@ -674,7 +682,7 @@ const CostCenterCreate = () => {
                                 onChange(value);
                             }}
                             onSearch={(value: any) => {
-                                setSearch(value);
+                                setSearchLanguage(value);
                             }}
                             />
                         </>
@@ -715,7 +723,7 @@ const CostCenterCreate = () => {
                             onChange(value);
                         }}
                         onSearch={(value: any) => {
-                            setSearch(value);
+                            setSearchProfitCenter(value);
                         }}
                         />
                     </>
@@ -778,7 +786,7 @@ const CostCenterCreate = () => {
                                     onChange(value);
                                 }}
                                 onSearch={(value: any) => {
-                                    setSearch(value);
+                                    setSearchCurrency(value);
                                 }}
                                 />
                             </>
