@@ -519,6 +519,11 @@ const CreateSelectDiv = styled.div`
   position: relative;
   justify-content: space-between;
 `
+const Span = styled.span`
+  color: #ed1c24;
+  margin-left: 1px;
+  font-weight: lighter;
+`;
 
 const CreateTitle = styled.div`
   margin-top: 1rem;
