@@ -1,0 +1,303 @@
+import React, { useState, useMemo, useEffect } from "react";
+import { Text, Col, Row, Spacer, Button, Input, EmptyState, Modal ,Spin,Dropdown2,DatePickerInput} from "pink-lava-ui";
+import styled from "styled-components";
+import { useRouter } from "next/router";
+import { Controller, useForm, useWatch } from "react-hook-form";
+import { useCompanyList } from "hooks/company-list/useCompany";
+import { useCreateProfitCenter, useUpdateProfitCenter } from "hooks/mdm/profit-center/useProfitCenter";
+import moment from "moment";
+import { defaultValuesCreate } from "components/pages/ProfitCenter/contants";
+import _ from 'lodash';
+import { toSnakeCase } from "lib/caseConverter";
+
+function ProfitCenterCreate({isUpdate,detailProfitCenter} :any) {
+  const router = useRouter();  
+  const [validFromValue, setValidFromValue] = useState<any>(null);
+  const [validToValue, setValidToValue] = useState<any>(null);
+  const {
+    control,
+    handleSubmit,
+    register,
+    setValue,
+    getValues,
+    reset,
+    formState: { errors },
+  } = useForm({
+    shouldUseNativeValidation: true,
+    defaultValues: isUpdate ? detailProfitCenter : defaultValuesCreate
+  });
+  useEffect(() => {
+    if (isUpdate && detailProfitCenter) {      
+        mapDataDetail();
+    }
+  },[detailProfitCenter,isUpdate]);
+
+  const mapDataDetail = () => {
+      const dataDetail = toSnakeCase(detailProfitCenter);
+      Object.keys(dataDetail).forEach(key => {
+        if (key == 'valid_from') {
+          setValidFromValue(moment(dataDetail[key]));
+        }else if(key == 'valid_to'){
+          setValidToValue(moment(dataDetail[key]));
+        }
+          setValue(key, dataDetail[key]);
+      })
+      return dataDetail
+  }
+
+  const productForm = useWatch({
+    control
+  });
+  
+  // functional react-query
+  const { mutate: createProfitCenter } = useCreateProfitCenter({
+    options: {
+      onSuccess: () => alert('create success!')
+    }
+  })
+
+  const { mutate: updateProfitCenter } = useUpdateProfitCenter({
+    options: {
+      onSuccess: () => alert('update success!')
+    },
+    id:detailProfitCenter?.profitCenterId,
+    companyId: detailProfitCenter?.companyId
+  })
+
+  // action function
+  const onSubmit = (data: any) => {
+    let payload:any = _.pick(data,[
+      'code',
+      'name',
+      'valid_from',
+      'valid_to',
+      'company_id',
+      'external_code',
+      'description',
+      'person_responsible'
+    ])
+
+      payload.code = data.code,
+      payload.name = data.name,
+      payload.valid_from = data?.valid_from?.includes('/') ? data.valid_from : moment(data.valid_from).utc().format('DD/MM/YYYY').toString(),
+      payload.valid_to = data?.valid_to?.includes('/') ? data.valid_to : moment(data.valid_to).utc().format('DD/MM/YYYY').toString(),
+      payload.company_id = data.company_id,
+      payload.external_code = data.external_code,
+      payload.description = data.description,
+      payload.person_responsible = data.person_responsible
+      console.log(data.valid_from, payload);
+    
+    if (isUpdate && detailProfitCenter) {
+      updateProfitCenter(payload);
+    }else{      
+      createProfitCenter(payload);
+    }
+  };
+  const [searchCompany, setSearchCompany] = useState();
+  const { data: companyData, isLoading: isLoadingCompanyList } = useCompanyList({
+    options: {
+      onSuccess: (data :any) => {},
+    },
+    query: {
+      search: searchCompany,
+    },
+  });
+
+
+
+
+  
+  return (
+    <>
+      <Col>
+        <Row gap="4px">
+          <Text variant={"h4"}>Create Profit Center</Text>
+        </Row>
+
+        <Spacer size={20} />
+
+        <Card>
+          <Row justifyContent="flex-end" alignItems="center" nowrap>
+            <Row gap="16px">
+              <Button size="big" variant={"tertiary"} onClick={() => router.back()}>
+                Cancel
+              </Button>
+              <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
+                SAVE
+              </Button>
+            </Row>
+          </Row>
+        </Card>
+
+        <Spacer size={10} />
+        <Card>
+            <Row width="100%" gap="14px" noWrap>
+              <Col width={"100%"}>
+                <Input
+                  type="text"
+                  width="100%"
+                  label="Profit Center Code"
+                  height="48px"
+                  required
+                  placeholder="e.g D01G011001"
+                  defaultValue={productForm?.code}
+                  error={errors?.code?.message}
+                  {...register('code', {
+                    required: 'Profit center code must be filled'
+                  })}
+                />
+              </Col>
+
+              <Col width={"100%"}>
+                <Input
+                  type="text"
+                  width="100%"
+                  label="Profit Center Name"
+                  height="48px"
+                  placeholder="e.g Jakarta Barat"
+                  defaultValue={productForm?.name}
+                  error={errors?.name?.message}
+                  {...register('name', {
+                    required: 'Profit center name must be filled'
+                  })}
+                />
+              </Col>
+            </Row>
+            <Spacer size={10} />
+            <Row width="100%" gap="14px" noWrap>
+              <Col width={"100%"}>
+                <Controller
+                  control={control}
+                  name={`valid_from`}
+                  rules={{ required: 'Valid to must be filled' }}
+
+                  render={({ field: { onChange ,value} }) => {
+                    return(
+                      <DatePickerInput
+                        fullWidth
+                        onChange={(date: any, dateString: any) => {
+                          setValidFromValue(date);
+                          setValue('valid_from',dateString)
+                        }}
+                        label={`Valid From`}
+                        defaultValue={moment(productForm.valid_from)}
+                        value={validFromValue}
+                        format={'DD/MM/YYYY'}
+                        error={errors?.valid_from?.message}
+                      />
+                    )
+                  }}
+                />
+              </Col>
+
+              <Col width={"100%"}>
+
+                <Controller
+                  control={control}
+                  name={`valid_to`}
+                  rules={{ required: 'Valid to must be filled' }}
+                  render={({ field: { onChange ,value} }) => (
+                    <DatePickerInput
+                      fullWidth
+                      onChange={(date: any, dateString: any) => {
+                        setValidToValue(date);
+                        setValue('valid_to',dateString)
+                      }}
+                      label={`Valid To`}
+                      defaultValue={moment(productForm.valid_to)}
+                      format={'DD/MM/YYYY'}
+                      value={validToValue}
+                      error={errors?.valid_to?.message}
+                    />
+                  )}
+                />
+              </Col>
+            </Row>
+            <Spacer size={10} />
+            <Row width="100%" gap="14px" noWrap>
+              <Col width={"100%"}>
+                {isLoadingCompanyList ? (
+                    <Spin tip="Loading data..." />
+                  ) : (
+                    <Dropdown2
+                      label="Company"
+                      width={"100%"}
+                      items={companyData.rows.map((data :any) => ({
+                        id: data.id,
+                        value: data.name,
+                      }))}
+                      placeholder={"Select"}
+                      handleChange={(id : string) => setValue("company_id", `${id}`)}
+                      onSearch={(search :any) => setSearchCompany(search)}
+                      defaultValue={productForm?.company_id}
+                      error={errors?.company_id?.message}
+                      {...register("company_id",{
+                        required: 'Company must be filled'
+                      })}
+                    />
+                  )}
+              </Col>
+
+              <Col width={"100%"}>
+                <Input
+                  type="Text"
+                  width="100%"
+                  label="External Code"
+                  height="48px"
+                  required
+                  placeholder={"e.g 123456789"}
+                  defaultValue={productForm?.external_code}
+                  error={errors?.external_code?.message}
+                  {...register("external_code",{
+                    required: 'External Code must be filled'
+                  })}
+                />
+              </Col>
+            </Row>
+            <Spacer size={10} />
+            <Row width="100%" gap="14px" noWrap>
+              <Col width={"100%"}>
+                <Input
+                  type="texarea"
+                  width="100%"
+                  label="Description"
+                  height="48px"
+                  required
+                  placeholder={"e.g 123456789"}
+                  defaultValue={productForm?.description}
+                  error={errors?.description?.message}
+                  {...register('description', {
+                    required: 'Description must be filled'
+                  })}
+                />
+              </Col>
+
+              <Col width={"100%"}>
+                <Input
+                  type="text"
+                  width="100%"
+                  label="Person Responsible"
+                  height="48px"
+                  required
+                  placeholder={"e.g 123456789"}
+                  defaultValue={productForm?.person_responsible}
+                  error={errors?.person_responsible?.message}
+                  {...register('person_responsible', {
+                    required: 'Person Responsible must be filled'
+                  })}
+                />
+              </Col>
+            </Row>
+        </Card>
+      </Col>
+    </>
+  )
+};
+const Card = styled.div`
+  background: #ffffff;
+  border-radius: 16px;
+  padding: ${(p: any) => (p.padding ? p.padding : "16px")};
+`;
+
+
+export default ProfitCenterCreate
