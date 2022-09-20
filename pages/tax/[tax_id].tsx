@@ -245,7 +245,7 @@ const TaxDetail = () => {
       <Col>
         <Row gap="4px">
         <ArrowLeft style={{ cursor: "pointer" }} onClick={() => router.back()} />
-          <Text variant={"h4"}>{TaxData?.data[0]?.country_name}</Text>
+          <Text variant={"h4"}>Tax-{TaxData?.data[0]?.country_name}</Text>
         </Row>
 
         <Spacer size={20} />
