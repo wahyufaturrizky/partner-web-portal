@@ -87,8 +87,8 @@ const CostCenter = () => {
             key: element.costCenterId,
             id: element.costCenterId,
             companyId: element.companyId,
-            code: element.profitCenterCode,
-            name: element.profitCenterName,
+            code: element.code,
+            name: element.name,
             action: (
               <div style={{ display: "flex", justifyContent: "left" }}>
                 <Button
