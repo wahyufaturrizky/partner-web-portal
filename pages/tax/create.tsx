@@ -194,7 +194,6 @@ const TaxCreate = () => {
     //     percentage: rowKey.percentage,
     //     active_status: rowKey?.active_status === "ACTIVE"? "INACTIVE" : "ACTIVE"
     //   }
-    //   console.log(data)
     //   updateTax(data)
     // }
 
@@ -214,8 +213,8 @@ const TaxCreate = () => {
   }
 
   const onSubmit = (taxesData: any) => {
-    const savedData = []
-    taxData.forEach(tax => {
+    const savedData: any = []
+    taxData.forEach((tax: any) => {
       if(taxesData.country_id){
         savedData.push({
           country_id: tax.country_id? tax.country_id : taxesData.country_id,
@@ -224,7 +223,7 @@ const TaxCreate = () => {
           active_status: tax.active_status
         })
       } else {
-        if(!tax.country_id) return console.log('failed')
+        if(!tax.country_id) return 
         else savedData.push({
           country_id: tax.country_id,
           name: tax.name,
@@ -237,7 +236,6 @@ const TaxCreate = () => {
     savedData.forEach((tax, i) => {
       setTimeout(() => {
         createTax(tax)
-        console.log(tax[i], 'success')
       },3000)
       router.back()
     })

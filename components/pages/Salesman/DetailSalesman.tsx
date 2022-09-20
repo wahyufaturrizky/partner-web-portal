@@ -2,22 +2,15 @@ import React, { useState } from 'react'
 import { useRouter } from 'next/router'
 import {
   Accordion,
-  Dropdown2,
   Dropdown,
   Spacer,
   Modal,
   Text,
   Row,
-  Col,
-  Input,
   Table,
   Button,
-  Checkbox,
   TextArea,
-  Pagination,
-  DatePickerInput,
 } from 'pink-lava-ui'
-import moment from 'moment'
 import styled from 'styled-components'
 import usePagination from '@lucasmogari/react-pagination'
 
@@ -25,11 +18,10 @@ import ArrowLeft from 'assets/icons/arrow-left.svg'
 import { ModalConfirmation } from 'components/elements/Modal/ModalConfirmation'
 import { useFetchDetailSalesman, useUpdateSalesman } from 'hooks/mdm/salesman/useSalesman'
 import { useFetchSalesmanDivision } from 'hooks/mdm/salesman/useSalesmanDivision'
-
-const dropdownStatus = [
-  { id: "Active", value: "Active" },
-  { id: "Inactive", value: "Inactive" },
-]
+import { dropdownStatus } from './constants'
+import ContentDetailCustomer from './fragments/ContentDetailCustomers'
+import ActionButton from './fragments/ActionButton'
+import Forms from './fragments/Forms'
 
 export default function ComponentDetailSalesman({
   listCustomers,
@@ -44,7 +36,7 @@ export default function ComponentDetailSalesman({
     totalItems: 100,
   });
   const router = useRouter();
-  const { status, salesman_id }: any = router.query || {}
+  const { status, salesman_id, name, idCard, code }: any = router.query || {}
   const [search, setSearch] = useState<string>('')
   const [division, setDivision] = useState('')
   const [remarks, setRemarks] = useState('')
@@ -171,11 +163,10 @@ export default function ComponentDetailSalesman({
   const _handleDraftedSalesman = () => {
     const dataUpdated: any = {
       ...payloads,
-      division,
+      division: division,
       status: 4,
       tobe: -1
     }
-
     handleUpdateSalesman(dataUpdated)
   }
 
@@ -194,7 +185,7 @@ export default function ComponentDetailSalesman({
     const dataUpdated: any = {
       ...payloads,
       division,
-      status: modalActive === 'Active' ? 0 : 1,
+      status: 2,
       tobe: modalActive === 'Active' ? 0 : 1,
       remark: remarks,
     }
@@ -216,7 +207,7 @@ export default function ComponentDetailSalesman({
     <div>
       <Row gap="4px" alignItems="center">
         <ArrowLeft style={{ cursor: "pointer" }} onClick={() => router.back()} />
-        <Text variant="h4">Detail Salesman {salesman_id}</Text>
+        <Text variant="h4">{name} - {idCard}</Text>
       </Row>
       <Spacer size={30} />
       <Card>
@@ -257,6 +248,7 @@ export default function ComponentDetailSalesman({
             <Accordion.Header variant="blue">General</Accordion.Header>
             <Accordion.Body>
               <Forms
+                code={code}
                 forms={data}
                 salesDivision={listSalesDivision?.rows || []}
                 status={status}
@@ -358,7 +350,7 @@ export default function ComponentDetailSalesman({
 
       {/* modal view detail customers */}
       <Modal
-        width={900}
+        width={1100}
         visible={modalCustomer.visible}
         title={modalCustomer?.data?.name}
         onCancel={() => setModalCustomer({ visible: false, data: {}})}
@@ -374,7 +366,7 @@ export default function ComponentDetailSalesman({
             detailCustomer={modalCustomer?.data}
             pagination={pagination}
             checkedDate={defaultChecked}
-            onChecked={(value: any) => setDefaultChecked(!defaultChecked)}
+            onChecked={() => setDefaultChecked(!defaultChecked)}
           />
         }
       />
@@ -382,199 +374,12 @@ export default function ComponentDetailSalesman({
   )
 }
 
-const ContentDetailCustomer = ({
-  checkedDate = false,
-  onChecked,
-  pagination
-}:any) => {
-  const columns: any = [
-    {
-      title: 'Permission Name',
-      dataIndex: 'customer'
-    },
-    {
-      title: 'Module',
-      dataIndex: 'module'
-    },
-  ]
 
-  return (
-    <div>
-      <Spacer size={20} />
-      <Row alignItems="center" justifyContent="space-between">
-        <Col width="45%">
-          <DatePickerInput
-            fullWidth
-            placeholder="input start date"
-            value={checkedDate && moment()}
-            defaultValue={moment()}
-            label="Start Date"
-          />
-        </Col>
-        <Col width="45%">
-          <DatePickerInput
-            fullWidth
-            disabled={checkedDate}
-            placeholder="end start date"
-            defaultValue={moment()}
-            value={checkedDate && moment()}
-            label="End Date"
-          />
-        </Col>
-        <FlexElement style={{ paddingTop: "1.5rem", gap: "1px" }}>
-          <Checkbox
-            checked={checkedDate}
-            onChange={onChecked}
-          />
-          <Text>Today</Text>
-        </FlexElement>
-      </Row>
-      <Spacer size={20} />
-      <Table columns={columns} data={[
-        { customer: 'Approval Payment', module: 'Finance' },
-        { customer: 'Create Payment', module: 'Finance' },
-        { customer: 'Create Payment', module: 'Finance' },
-        ]}
-      />
-      <Spacer size={20} />
-      <Pagination pagination={pagination} />
-      <Spacer size={20} />
-    </div>
-  )
-}
-
-const ActionButton = ({
-  onCancel,
-  onReject,
-  onSubmit,
-  onDraft,
-  status
-}: any) => {
-  const labelButtonLeft = status === "Waiting for Approval" ? "Reject" : "Cancel"
-  const labelButtonRight = status === "Waiting for Approval" ? "Approve" : status === "Draft" ? "Submit" : "Save"
-  const fnButtonLeft = status === "Waiting for Approval" ? onReject : onCancel
-
-  const middleButtonAction = status === "Draft" && (
-    <Button onClick={onDraft} variant="secondary">
-      Save as Draft
-    </Button>
-  )
-
-  return (
-    <FlexElement style={{ gap: "10px" }}>
-      <Button onClick={fnButtonLeft} variant="tertiary">
-        {labelButtonLeft}
-      </Button>
-      {middleButtonAction}
-      <Button onClick={onSubmit} variant="primary">
-        {labelButtonRight}
-      </Button>
-    </FlexElement>
-  )
-}
-
-const Forms = ({
-  status,
-  forms,
-  setDivision,
-  salesDivision,
-  setSearch
-}: any) => {
-  return (
-    <Row width="100%" gap="12px">
-      <Col width="48%">
-        <Input
-          width="100%"
-          label="Salesman Name"
-          height="50px"
-          placeholder="Salesman Name"
-          required
-          value={forms?.name}
-          disabled
-        />
-        <Spacer size={10} />
-        <Input
-          width="100%"
-          label="Branch"
-          height="50px"
-          placeholder="Branch"
-          required
-          value={forms?.branch}
-          disabled
-        />
-        <Spacer size={10} />
-        <Input
-          width="100%"
-          label="ID Card"
-          height="50px"
-          placeholder="ID Card"
-          required
-          value={forms?.idCard}
-          disabled
-        />
-        <Spacer size={10} />
-        <Input
-          width="100%"
-          label="External Code"
-          height="50px"
-          placeholder="External Code"
-          required
-          value={forms?.externalCode}
-          disabled
-        />
-      </Col>
-      <Col width="48%">
-        <Dropdown2
-          width="100%"
-          label="Division Name"
-          height="50px"
-          placeholder="Division Name"
-          required
-          items={salesDivision?.map((item: any) => { return {
-            id: item?.code,
-            value: item?.divisiName,
-          } })}
-          handleChange={(value: any) => setDivision(value)}
-          defaultValue={forms?.division || 'sales division not found'}
-          onSearch={(value: any) => setSearch(value)}
-          disabled={status === "Rejected" || status === "Waiting for Approval"}
-        />
-        <Spacer size={10} />
-        <Input
-          width="100%"
-          label="Mobile Number"
-          height="50px"
-          value={forms?.mobileNumber}
-          placeholder="External Code"
-          required
-          disabled
-        />
-        <Spacer size={10} />
-        <Input
-          width="100%"
-          label="Email"
-          height="50px"
-          placeholder="Email"
-          required
-          value={forms?.email}
-          disabled
-        />
-      </Col>
-    </Row>
-  )
-}
 
 const Card = styled.div`
   background: #ffff;
   padding: 1rem;
   border-radius: 16px;
-`
-
-const FlexElement = styled.div`
-  display: flex;
-  align-items: center;
-  gap: ${({ style }: any) => style?.gap};
-  padding-top: ${({ style }: any) => style?.paddingTop};
 `
 
 const TextConfirmation = styled.p`
