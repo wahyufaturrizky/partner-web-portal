@@ -28,8 +28,8 @@ switch (type) {
   case "selection":
     return data.selectedRowKeys.length > 1
       ? `Are you sure to delete ${data.selectedRowKeys.length} items ?`
-      : `Are you sure to delete Uom with ID's ${
-          data?.taxData?.find((el: any) => el.key === data.selectedRowKeys[0]).key
+      : `Are you sure to delete Tax Name ${
+          data?.taxData?.find((el: any) => el.key === data.selectedRowKeys[0]).name
         } ?`;
   case "detail":
     return `Are you sure to delete Uom Name ${data.uomName} ?`;
@@ -46,6 +46,7 @@ interface TaxDetail {
     countryId: string;
     name: string;
     percentage: string; 
+    activeStatus: string;
 }
 
 
@@ -124,7 +125,6 @@ const TaxDetail = () => {
         pagination.setTotalItems(data?.totalRow);
       },
       select: (data: any) => {
-        
         const mappedData = data?.pages[0]?.rows?.map((taxDetail: TaxDetail) => {
             return {
                 id: taxDetail.taxId,
@@ -133,7 +133,7 @@ const TaxDetail = () => {
                 country_id: taxDetail.countryId,
                 name: taxDetail.name,
                 percentage: taxDetail.percentage,
-                active_status: "ACTIVE"
+                active_status: taxDetail.activeStatus
             }
         })
 
@@ -148,7 +148,7 @@ const TaxDetail = () => {
       onSuccess: () => {
         queryClient.invalidateQueries(["tax/infinite"]);
         setShowDeleteModal(false);
-        router.back();
+        // router.back();
       },
     },
   });
@@ -173,7 +173,7 @@ const TaxDetail = () => {
 
   // belum bisa dari backend
   const deleteTax = (id: any) => {
-    deleteUOM({ pph_ids:[...id] })
+    deleteUOM({ ids:[...id] })
   }
 
   const handleNewTax = (tax: any) => {
@@ -195,11 +195,13 @@ const TaxDetail = () => {
         percentage: rowKey.percentage,
         active_status: rowKey?.active_status === "ACTIVE"? "INACTIVE" : "ACTIVE"
       }
+      console.log(data, '<<<<<<<update status')
       updateTax(data)
     }
   }
 
   const checkedStatus = (status: string) => {
+    console.log('check status', status)
     return status === 'ACTIVE' ? true : false
   }
   
@@ -217,11 +219,12 @@ const TaxDetail = () => {
     {
       title: "Active",
       dataIndex: 'active_status',
-      render: (status: string, rowKey: any) => (
+      render: (status: string, rowKey: any) => {
+        return (
         <>
           <Switch checked={checkedStatus(status)} onChange={() => updateTaxStatus(rowKey)}/>
         </>
-      ),
+      )},
     },
   ];
 
