@@ -2,22 +2,15 @@ import React, { useState } from 'react'
 import { useRouter } from 'next/router'
 import {
   Accordion,
-  Dropdown2,
   Dropdown,
   Spacer,
   Modal,
   Text,
   Row,
-  Col,
-  Input,
   Table,
   Button,
-  Checkbox,
   TextArea,
-  Pagination,
-  DatePickerInput,
 } from 'pink-lava-ui'
-import moment from 'moment'
 import styled from 'styled-components'
 import usePagination from '@lucasmogari/react-pagination'
 
@@ -25,11 +18,10 @@ import ArrowLeft from 'assets/icons/arrow-left.svg'
 import { ModalConfirmation } from 'components/elements/Modal/ModalConfirmation'
 import { useFetchDetailSalesman, useUpdateSalesman } from 'hooks/mdm/salesman/useSalesman'
 import { useFetchSalesmanDivision } from 'hooks/mdm/salesman/useSalesmanDivision'
-
-const dropdownStatus = [
-  { id: "Active", value: "Active" },
-  { id: "Inactive", value: "Inactive" },
-]
+import { dropdownStatus } from './constants'
+import ContentDetailCustomer from './fragments/ContentDetailCustomers'
+import ActionButton from './fragments/ActionButton'
+import Forms from './fragments/Forms'
 
 export default function ComponentDetailSalesman({
   listCustomers,
@@ -382,222 +374,12 @@ export default function ComponentDetailSalesman({
   )
 }
 
-const ContentDetailCustomer = ({
-  checkedDate = false,
-  onChecked,
-  pagination
-}:any) => {
-  const columns: any = [
-    {
-      title: 'Branch Name',
-      dataIndex: 'branch'
-    },
-    {
-      title: 'Visit Frequency',
-      dataIndex: 'frequency'
-    },
-    {
-      title: 'Visit Day',
-      dataIndex: 'day'
-    },
-    {
-      title: 'Date',
-      dataIndex: 'date'
-    },
-    {
-      title: 'Start Time',
-      dataIndex: 'startTime'
-    },
-    {
-      title: 'End Time',
-      dataIndex: 'endTime'
-    },
-    {
-      title: 'Duration',
-      dataIndex: 'duration'
-    },
-  ]
 
-  return (
-    <div>
-      <Spacer size={20} />
-      <Row alignItems="center" justifyContent="space-between">
-        <Col width="45%">
-          <DatePickerInput
-            fullWidth
-            placeholder="input start date"
-            value={checkedDate && moment()}
-            defaultValue={moment()}
-            label="Start Date"
-          />
-        </Col>
-        <Col width="45%">
-          <DatePickerInput
-            fullWidth
-            disabled={checkedDate}
-            placeholder="end start date"
-            defaultValue={moment()}
-            value={checkedDate && moment()}
-            label="End Date"
-          />
-        </Col>
-        <FlexElement style={{ paddingTop: "1.5rem", gap: "1px" }}>
-          <Checkbox
-            checked={checkedDate}
-            onChange={onChecked}
-          />
-          <Text>Today</Text>
-        </FlexElement>
-      </Row>
-      <Spacer size={20} />
-      <Table
-        columns={columns}
-        data={[
-          { branch: 'PT. Indomaret Buah Batu', frequency: 'M1', day: 'Monday', date: '02/02/2022', startTime: '08:00:00', endTime: '08:30:00', duration: '0 Days, 0 Hours, 30 minutes, 00 seconds' },
-          { branch: 'PT. Indomaret Buah Batu', frequency: 'M2', day: 'Tuesday', date: '02/02/2022', startTime: '09:00:00', endTime: '08:30:00', duration: '0 Days, 0 Hours, 30 minutes, 00 seconds' },
-          { branch: 'PT. Indomaret Buah Batu', frequency: 'M3', day: 'Wednesday', date: '02/02/2022', startTime: '10:00:00', endTime: '08:30:00', duration: '0 Days, 0 Hours, 30 minutes, 00 seconds' },
-        ]}
-      />
-      <Spacer size={20} />
-      <Pagination pagination={pagination} />
-      <Spacer size={20} />
-    </div>
-  )
-}
-
-const ActionButton = ({
-  onCancel,
-  onReject,
-  onSubmit,
-  onDraft,
-  status
-}: any) => {
-  const labelButtonLeft = status === "Waiting for Approval" ? "Reject" : "Cancel"
-  const labelButtonRight = status === "Waiting for Approval" ? "Approve" : status === "Draft" ? "Submit" : "Save"
-  const fnButtonLeft = status === "Waiting for Approval" ? onReject : onCancel
-
-  const middleButtonAction = status === "Draft" && (
-    <Button onClick={onDraft} variant="secondary">
-      Save as Draft
-    </Button>
-  )
-
-  return (
-    <FlexElement style={{ gap: "10px" }}>
-      <Button onClick={fnButtonLeft} variant="tertiary">
-        {labelButtonLeft}
-      </Button>
-      {middleButtonAction}
-      <Button onClick={onSubmit} variant="primary">
-        {labelButtonRight}
-      </Button>
-    </FlexElement>
-  )
-}
-
-const Forms = ({
-  code,
-  status,
-  forms,
-  setDivision,
-  salesDivision,
-  setSearch
-}: any) => {
-  return (
-    <Row width="100%" gap="12px">
-      <Col width="48%">
-        <Input
-          width="100%"
-          label="Salesman Name"
-          height="50px"
-          placeholder="Salesman Name"
-          required
-          value={forms?.name}
-          disabled
-        />
-        <Spacer size={10} />
-        <Input
-          width="100%"
-          label="Branch"
-          height="50px"
-          placeholder="Branch"
-          required
-          value={forms?.branch}
-          disabled
-        />
-        <Spacer size={10} />
-        <Input
-          width="100%"
-          label="ID Card"
-          height="50px"
-          placeholder="ID Card"
-          required
-          value={forms?.idCard}
-          disabled
-        />
-        <Spacer size={10} />
-        <Input
-          width="100%"
-          label="External Code"
-          height="50px"
-          placeholder="External Code"
-          required
-          value={forms?.externalCode}
-          disabled
-        />
-      </Col>
-      <Col width="48%">
-        <Dropdown2
-          width="100%"
-          label="Division Name"
-          height="50px"
-          placeholder="Division Name"
-          required
-          items={salesDivision?.map((item: any) => { return {
-            id: item?.code,
-            value: item?.divisiName,
-          } })}
-          handleChange={(value: any) => setDivision(value)}
-          defaultValue={code || 'sales division not found'}
-          onSearch={(value: any) => setSearch(value)}
-          disabled={status === "Rejected" || status === "Waiting for Approval"}
-        />
-        <Spacer size={10} />
-        <Input
-          width="100%"
-          label="Mobile Number"
-          height="50px"
-          value={forms?.mobileNumber}
-          placeholder="External Code"
-          required
-          disabled
-        />
-        <Spacer size={10} />
-        <Input
-          width="100%"
-          label="Email"
-          height="50px"
-          placeholder="Email"
-          required
-          value={forms?.email}
-          disabled
-        />
-      </Col>
-    </Row>
-  )
-}
 
 const Card = styled.div`
   background: #ffff;
   padding: 1rem;
   border-radius: 16px;
-`
-
-const FlexElement = styled.div`
-  display: flex;
-  align-items: center;
-  gap: ${({ style }: any) => style?.gap};
-  padding-top: ${({ style }: any) => style?.paddingTop};
 `
 
 const TextConfirmation = styled.p`
