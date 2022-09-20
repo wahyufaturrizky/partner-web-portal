@@ -24,7 +24,6 @@ import { Controller, useForm } from "react-hook-form";
 import { useRouter } from "next/router";
 import { queryClient } from "../_app";
 import useDebounce from "../../lib/useDebounce";
-import { useUOMCategoryInfiniteLists } from "../../hooks/mdm/unit-of-measure-category/useUOMCategory";
 import { ModalDeleteConfirmation } from "../../components/elements/Modal/ModalConfirmationDelete";
 import ArrowLeft from "../../assets/icons/arrow-left.svg";
 import usePagination from "@lucasmogari/react-pagination";
@@ -62,18 +61,21 @@ const UOMConversionCreate = () => {
   const [totalRows, setTotalRows] = useState(0);
   const [search, setSearch] = useState("");
 
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [isShowDelete, setShowDelete] = useState({ open: false, type: "selection", data: {} });
-  const [showCreateModal, setShowCreateModal] = useState(false)
+//   const [showDeleteModal, setShowDeleteModal] = useState(false);
+//   const [isShowDelete, setShowDelete] = useState({ open: false, type: "selection", data: {} });
+//   const [showCreateModal, setShowCreateModal] = useState(false)
+// const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+  const [languageStatus, setLanguageStatus] = useState(true)
+  const [currencyStatus, setCurrencyStatus] = useState(true)
 
   const debounceFetch = useDebounce(search, 1000);
-  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [checkSelectAll, setCheckSelectAll] = useState(false)
   const [newUom, setNewUom] = useState({
     company_id: "KSNI",
     name: "",
     base_uom_id: "",
   })
+
   const [newUomTable, setNewUomTable] = useState([{
     actualPrimaryCost: true,
     plantPrimaryCost: true,
@@ -84,7 +86,6 @@ const UOMConversionCreate = () => {
     commitmentUpdate: false,
   }])
   const { register, control, handleSubmit } = useForm();
-
 
   const {
     isFetching: isFetchingUomCategory,
@@ -282,6 +283,7 @@ const UOMConversionCreate = () => {
       )
     },
   ];
+
   const selectOneCheckbox = (checked, name) => {
     let newCheckbox = newUomTable[0]
     switch (name) {
@@ -312,6 +314,7 @@ const UOMConversionCreate = () => {
     }
     setNewUomTable([newCheckbox])
   }
+
   const selectAllCheckbox = (checked) => {
     setCheckSelectAll(prev => !prev)
     if(checkSelectAll){
@@ -335,6 +338,14 @@ const UOMConversionCreate = () => {
             commitmentUpdate: true,
             }])
     }
+  }
+
+  const setLanguageFromCompany = (data) => {
+    setLanguageStatus(prev => !prev)
+  }
+
+  const setCurrencyFromCompany = (data) => {
+    setCurrencyStatus(prev => !prev)
   }
 
   const disabledDate: RangePickerProps['disabledDate'] = current => {
@@ -384,7 +395,7 @@ const UOMConversionCreate = () => {
                     <Input
                     width="100%"
                     label="Cost Center Code"
-                    defaultValue={newUom.name}
+                    // defaultValue={newUom.name}
                     height="48px"
                     required
                     placeholder={"e.g Product Conversion"}
@@ -398,7 +409,7 @@ const UOMConversionCreate = () => {
                     <Input
                     width="100%"
                     label="Cost Center Name"
-                    defaultValue={newUom.name}
+                    // defaultValue={newUom.name}
                     height="48px"
                     required
                     placeholder={"e.g Product Conversion"}
@@ -493,7 +504,7 @@ const UOMConversionCreate = () => {
 
                 <Spacer size={20} />
 
-                <Col width="40%">
+                <Col width={languageStatus? "100%" : "40%"}>
                     <div style={{
                         fontWeight: 'bold',
                         fontSize: '17px',
@@ -512,26 +523,56 @@ const UOMConversionCreate = () => {
                         // justifyContent: 'space-between'
                     }}>
                         <Text>Refer To Company?</Text>
-                        <Switch checked={status} onChange={() => updateStatusUom(rowKey)}/>
-
+                        <Switch checked={languageStatus} onChange={() => setLanguageFromCompany(languageStatus)}/>
                     </div>
                 </Col>
 
                 <Spacer size={10} />
-
-                <Col width="60%">
+                {!languageStatus && (
+                    <Col width="60%">
                     <Spacer size={20} />
 
-                    <Input
-                        width="100%"
-                        // isOptional={true}
-                        label=""
-                        defaultValue={newUom.name}
-                        height="40px"
-                        placeholder={"e.g Product Conversion"}
-                        {...register("name", { required: "Please enter name." })}
-                        />
+                    <Controller
+                        control={control}
+                        name="baseUom"
+                        render={({ field: { onChange } }) => (
+                        <>
+                            {/* <Label>Company</Label> */}
+                            <Spacer size={3} />
+                            <FormSelect
+                            style={{ width: "100%" }}
+                            // defaultValue={newUom.base_uom_id}
+                            size={"large"}
+                            required
+                            placeholder={"Select"}
+                            borderColor={"#AAAAAA"}
+                            arrowColor={"#000"}
+                            withSearch
+                            isLoading={isFetchingUomCategory}
+                            isLoadingMore={isFetchingMoreUomCategory}
+                            fetchMore={() => {
+                                if (hasNextPage) {
+                                fetchNextPage();
+                                }
+                            }}
+                            items={
+                                isFetchingUomCategory && !isFetchingMoreUomCategory
+                                ? []
+                                : listUomCategory
+                            }
+                            onChange={(value: any) => {
+                                onChange(value);
+                            }}
+                            onSearch={(value: any) => {
+                                setSearch(value);
+                            }}
+                            />
+                        </>
+                        )}
+                    />
                 </Col>
+                )}
+                
             </Row>
 
           <Spacer size={20} />
@@ -581,7 +622,7 @@ const UOMConversionCreate = () => {
 
                 <Spacer size={20} />
 
-                <Col width="40%">
+                <Col width={currencyStatus ? "100%" : "40%"}>
                     <div style={{
                         fontWeight: 'bold',
                         fontSize: '17px',
@@ -600,27 +641,58 @@ const UOMConversionCreate = () => {
                         // justifyContent: 'space-between'
                     }}>
                         <Text>Refer To Company?</Text>
-                        <Switch checked={status} onChange={() => updateStatusUom(rowKey)}/>
+                        <Switch checked={currencyStatus} onChange={() => setCurrencyFromCompany(currencyStatus)}/>
 
                     </div>
                 </Col>
 
                 <Spacer size={10} />
+                {!currencyStatus && (
+                    <Col width="60%">
+                        <Spacer size={20} />
 
-                <Col width="60%">
-                    <Spacer size={20} />
-
-                    <Input
-                        width="100%"
-                        // isOptional={true}
-                        label=""
-                        defaultValue={newUom.name}
-                        height="40px"
-                        placeholder={"e.g Product Conversion"}
-                        {...register("name", { required: "Please enter name." })}
+                        <Controller
+                            control={control}
+                            name="baseUom"
+                            render={({ field: { onChange } }) => (
+                            <>
+                                {/* <Label>Company</Label> */}
+                                <Spacer size={3} />
+                                <FormSelect
+                                style={{ width: "100%" }}
+                                // defaultValue={newUom.base_uom_id}
+                                size={"large"}
+                                required
+                                placeholder={"Select"}
+                                borderColor={"#AAAAAA"}
+                                arrowColor={"#000"}
+                                withSearch
+                                isLoading={isFetchingUomCategory}
+                                isLoadingMore={isFetchingMoreUomCategory}
+                                fetchMore={() => {
+                                    if (hasNextPage) {
+                                    fetchNextPage();
+                                    }
+                                }}
+                                items={
+                                    isFetchingUomCategory && !isFetchingMoreUomCategory
+                                    ? []
+                                    : listUomCategory
+                                }
+                                onChange={(value: any) => {
+                                    onChange(value);
+                                }}
+                                onSearch={(value: any) => {
+                                    setSearch(value);
+                                }}
+                                />
+                            </>
+                            )}
                         />
-                </Col>
+                    </Col>
+                )}
             </Row>
+
           <Spacer size={20} />
           
             {/* Cost Center Category */}
@@ -721,11 +793,9 @@ const UOMConversionCreate = () => {
 
 
           <Col>
-              {/* <HeaderLabel>Conversion</HeaderLabel> */}
               <div style={{
                 display: 'flex',
                 fontWeight: 'bold',
-                // justifyContent: 'center'
                 alignItems: "center"
               }}>
               <Checkbox checked={checkSelectAll} onChange={() => selectAllCheckbox(checkSelectAll)}/>
@@ -735,7 +805,6 @@ const UOMConversionCreate = () => {
               <Spacer size={20} />
                 <Col gap={"60px"}>
                   <Table
-                    // loading={isLoadingUOM || isFetchingUom}
                     columns={columns}
                     data={newUomTable}
                     bordered
@@ -746,7 +815,7 @@ const UOMConversionCreate = () => {
         </Card>
       </Col>
 
-      {showCreateModal && (
+      {/* {showCreateModal && (
         <Modal
         centered
         width={'400px'}
@@ -888,7 +957,7 @@ const UOMConversionCreate = () => {
             </TopButtonHolder>
           }
         />
-      )}
+      )} */}
     </>
   );
 };
