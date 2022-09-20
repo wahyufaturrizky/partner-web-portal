@@ -4,7 +4,7 @@ import {
   Col,
   Row,
   Spacer,
-  Dropdown,
+  Dropdown2,
   Button,
   Accordion,
   TextArea,
@@ -30,24 +30,65 @@ import usePagination from "@lucasmogari/react-pagination";
 
 import { useCreateUOMConversion } from "hooks/mdm/unit-of-measure-conversion/useUOMConversion";
 import { useUOMInfiniteLists } from "hooks/mdm/unit-of-measure/useUOM";
+import { useCompanyList } from "hooks/company-list/useCompany";
 
-const renderConfirmationText = (type: any, data: any) => {
-switch (type) {
-  case "selection":
-    return data.selectedRowKeys.length > 1
-      ? `Are you sure to delete ${data.selectedRowKeys.length} items ?`
-      : `Are you sure to delete Uom Conversion with ID's ${
-          data?.uomData?.find((el: any) => el.id === data.selectedRowKeys[0]).id
-        } ?`;
-  case "detail":
-    return `Are you sure to delete Uom Name ${data.uomName} ?`;
 
-  default:
-    break;
+const costCenterCategoryTable = [
+    {
+      id: "Development",
+      value: "Development",
+    },
+    {
+      id: "Production",
+      value: "Production",
+    },
+    {
+      id: "Logistics",
+      value: "Logistics",
+    },
+    {
+      id: "Service Cost Center",
+      value: "Service Cost Center",
+    },
+    {
+      id: "Management",
+      value: "Management",
+    },
+    {
+      id: "Material",
+      value: "Material",
+    },
+    {
+      id: "Social",
+      value: "Social",
+    },
+    {
+      id: "Sales",
+      value: "Sales",
+    },
+    {
+      id: "Administration",
+      value: "Administration",
+    },
+  ]
+
+export interface CompanyList {
+    rows:     RowCompanyList[];
+    totalRow: number;
+    sortBy:   string[];
 }
-};
 
-const UOMConversionCreate = () => {
+export interface RowCompanyList {
+    id:          number;
+    name:        string;
+    code:        string;
+    companyType: string;
+    industry:    string;
+    status:      string;
+    isActive:    boolean;
+}
+
+const CostCenterCreate = () => {
   const router = useRouter();
   const pagination = usePagination({
     page: 1,
@@ -67,284 +108,275 @@ const UOMConversionCreate = () => {
 // const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [languageStatus, setLanguageStatus] = useState(true)
   const [currencyStatus, setCurrencyStatus] = useState(true)
-
+  const [description, setDescription] = useState("")
+  const [costCenterCategory, setCostCenterCategory] = useState("")
   const debounceFetch = useDebounce(search, 1000);
   const [checkSelectAll, setCheckSelectAll] = useState(false)
-  const [newUom, setNewUom] = useState({
-    company_id: "KSNI",
-    name: "",
-    base_uom_id: "",
-  })
 
-  const [newUomTable, setNewUomTable] = useState([{
-    actualPrimaryCost: true,
-    plantPrimaryCost: true,
-    actualSecondaryCost: true,
-    plantSecondaryCost: true,
-    actualRevenues: true,
-    plantRevenues: true,
-    commitmentUpdate: false,
+
+  const [newCostCenterTable, setNewCostCenterTable] = useState([{
+    actual_primary_cost: false,
+    plant_primary_cost: false,
+    actual_secondary_cost: false,
+    plant_secondary_cost: false,
+    actual_revenues: false,
+    plant_revenues: false,
+    commitment_update: false,
   }])
   const { register, control, handleSubmit } = useForm();
 
-  const {
-    isFetching: isFetchingUomCategory,
-    isFetchingNextPage: isFetchingMoreUomCategory,
-    isLoading: isLoadingUOM,
-    hasNextPage,
-    fetchNextPage,
-  } = useUOMInfiniteLists({
+//   const {
+//     isFetching: isFetchingCompanyData,
+//     isFetchingNextPage: isFetchingMoreCompanyData,
+//     isLoading: isLoadingUOM,
+//     hasNextPage,
+//     fetchNextPage,
+//   } = useCompanyInfiniteLists({
+//     query: {
+//       search: debounceFetch,
+//     //   company_id: "KSNI",
+//       limit: 10,
+//     },
+//     options: {
+//       onSuccess: (data: any) => {
+//         console.log(data, '<<<<')
+//         setTotalRows(data.pages[0].totalRow);
+//         const mappedData = data?.pages?.map((group: any) => {
+//           return group.rows?.map((element: any) => {
+//             return {
+//               value: element.id,
+//               label: element.name,
+//             };
+//           });
+//         });
+//         const flattenArray = [].concat(...mappedData);
+//         // setListUomCategory(flattenArray);
+//       },
+//       getNextPageParam: (_lastPage: any, pages: any) => {
+//         if (listUomCategory.length < totalRows) {
+//           return pages.length + 1;
+//         } else {
+//           return undefined;
+//         }
+//       },
+//     },
+//   });
+
+const {
+    data: companyData,
+    refetch: isFetchingMoreCompanyData,
+    isFetching: isFetchingCompanyData,
+    isLoading: isLoadingCompanyData,
+  } = useCompanyList({
+    options: {
+      onSuccess: (data: CompanyList) => {
+        pagination.setTotalItems(data.totalRow);
+        const mappedCompanyData = data?.rows?.map((element: RowCompanyList) => {
+              return {
+                value: element.id,
+                label: element.name,
+              };
+          });
+          setListUomCategory(mappedCompanyData);
+      },
+    },
     query: {
       search: debounceFetch,
-      company_id: "KSNI",
-      limit: 10,
-    },
-    options: {
-      onSuccess: (data: any) => {
-        setTotalRows(data.pages[0].totalRow);
-        const mappedData = data?.pages?.map((group: any) => {
-          return group.rows?.map((element: any) => {
-            return {
-              value: element.uomId,
-              label: element.name,
-            };
-          });
-        });
-        const flattenArray = [].concat(...mappedData);
-        setListUomCategory(flattenArray);
-      },
-      getNextPageParam: (_lastPage: any, pages: any) => {
-        if (listUomCategory.length < totalRows) {
-          return pages.length + 1;
-        } else {
-          return undefined;
-        }
-      },
+      page: pagination.page,
+      limit: pagination.itemsPerPage,
     },
   });
 
-  const { mutate: createUom, isLoading: isLoadingCreateUom } = useCreateUOMConversion({
-    options: {
-      onSuccess: () => {
-        queryClient.invalidateQueries(["uom-list"]);
-        setShowDeleteModal(false);
-        router.back();
-      },
-    },
-  });
+  console.log(companyData, '<<<ini companyData')
 
-  const updateDeleteUom = (id: any) => {
-    console.log(id)
-    // let tempDataTable = [...newUomTable]
-    // id.forEach((uomId: number) => {
-    //   tempDataTable = tempDataTable.filter(el => el.id !== uomId)
-    // })
-    // tempDataTable = tempDataTable.map((el, i) => {
-    //   return {
-    //     ...el,
-    //     id : i + 1
-    //   }
-    // })
-    // setSelectedRowKeys([])
-    // setNewUomTable(tempDataTable)
-    // setShowDelete({ open: false, type: "selection", data: {} })
-  
-  }
+//   const { mutate: createUom, isLoading: isLoadingCreateUom } = useCreateUOMConversion({
+//     options: {
+//       onSuccess: () => {
+//         queryClient.invalidateQueries(["uom-list"]);
+//         setShowDeleteModal(false);
+//         router.back();
+//       },
+//     },
+//   });
 
-  const updateCreateUom = (data: any) => {
+
+  const onSave = (data) => {
     console.log(data)
-    // if(!newUomTable){
-    //   setNewUomTable([{
-    //     id: 1,
-    //     qty: 1,
-    //     uom: listUomCategory.find(e => e.value === data.uom).label,
-    //     conversionNumber: data.conversionNumber,
-    //     baseUom: listUomCategory.find(e => e.value === data.baseUom).label
-    //   }])
-    // } else {
-    //   setNewUomTable(prev => [...prev, {
-    //     id: newUomTable.length+1,
-    //     qty: 1,
-    //     uom: listUomCategory.find(e => e.value === data.uom).label,
-    //     conversionNumber: data.conversionNumber,
-    //     baseUom: listUomCategory.find(e => e.value === data.baseUom).label
-    //   }])
-    // }
-    // setNewUom({
-    //   company_id: "KSNI",
-    //   name: data.name,
-    //   base_uom_id: listUomCategory.find(e => e.value === data.uom).label,
-    // })
-    // setShowCreateModal(false)
-  };
+    const newCostCenter = {
+        // profit_center_id :data?.profit_center_id, 
+        // language :"EN-US",
+        // currency :"IDR-Indonesia",
+        company_id :data?.company_id,
+        // code :data?.code,
+        // name : data?.name,
+        // cost_center_category : costCenterCategory,
+        // valid_from : data?.valid_from? data?.valid_from : moment().format("DD/MM/YY"),
+        // valid_to : data?.valid_to? data?.valid_to : moment().format("DD/MM/YY"),
+        // external_code : data?.external_code,
+        // description : description,
+        // person_responsible :data?.person_responsible,
+        // actual_primary_cost :newCostCenterTable[0].actual_primary_cost ? "YES" : "NO",
+        // plant_primary_cost :newCostCenterTable[0].plant_primary_cost ? "YES" : "NO",
+        // actual_secondary_cost :newCostCenterTable[0].actual_secondary_cost ? "YES" : "NO",
+        // plant_secondary_cost :newCostCenterTable[0].plant_secondary_cost ? "YES" : "NO",
+        // actual_revenues :newCostCenterTable[0].actual_revenues ? "YES" : "NO",
+        // plant_revenues :newCostCenterTable[0].plant_revenues ? "YES" : "NO",
+        // commitment_update :newCostCenterTable[0].commitment_update ? "YES" : "NO"
+    }
 
-  const updateStatusUom = (rowKey: any) => {
-    console.log(rowKey)
-  }
-
-  const onSave = (data: any) => {
-    console.log(data, '<<<onsave')
-    // const tempTable = [...newUomTable]
-    // const savedTable = tempTable.map(uom => {
-    //   return {
-    //     qty: uom.qty,
-    //     uom_id: listUomCategory.find(e => e.label === uom.uom).value,
-    //     conversion_number: uom.conversionNumber
-    //   }
-    // })
-    // const saveData = {
-    // company_id: "KSNI",
-    // name: data.name,
-    // base_uom_id: data.baseUom,
-    // items: savedTable
-    // }
-    // console.log(saveData, 910192)
-    // createUom(saveData)
+    console.log(newCostCenter)
   }
 
   const columns = [
     {
       title: "Actual Primary Cost",
-      dataIndex: "actualPrimaryCost",
-      key: 'actualPrimaryCost',
+      dataIndex: "actual_primary_cost",
+      key: 'actual_primary_cost',
       align:'center',
       render: (status:boolean, rowKey: any) => (
         <>
-            <Checkbox checked={status} onChange={() => selectOneCheckbox(status, 'actualPrimaryCost')}/>
+            <Checkbox checked={status} onChange={() => selectOneCheckbox(status, 'actual_primary_cost')}/>
         </>
       )
     },
     {
       title: "Plant Primary Cost",
-      dataIndex: "plantPrimaryCost",
-      key: 'plantPrimaryCost',
+      dataIndex: "plant_primary_cost",
+      key: 'plant_primary_cost',
       align:'center',
       render: (status:boolean, rowKey: any) => (
         <>
-            <Checkbox checked={status} onChange={() => selectOneCheckbox(status, 'plantPrimaryCost')}/>
+            <Checkbox checked={status} onChange={() => selectOneCheckbox(status, 'plant_primary_cost')}/>
         </>
       )
     },
     {
       title: "Actual Secondary Cost",
-      dataIndex: "actualSecondaryCost",
-      key: 'actualSecondaryCost',
+      dataIndex: "actual_secondary_cost",
+      key: 'actual_secondary_cost',
       align:'center',
       render: (status:boolean, rowKey: any) => (
         <>
-            <Checkbox checked={status} onChange={() => selectOneCheckbox(status, 'actualSecondaryCost')}/>
+            <Checkbox checked={status} onChange={() => selectOneCheckbox(status, 'actual_secondary_cost')}/>
         </>
       )
     },
     {
       title: "Plant Secondary Cost",
-      dataIndex: "plantSecondaryCost",
-      key: 'plantSecondaryCost',
+      dataIndex: "plant_secondary_cost",
+      key: 'plant_secondary_cost',
       align:'center',
       render: (status:boolean, rowKey: any) => (
         <>
-            <Checkbox checked={status} onChange={() => selectOneCheckbox(status, 'plantSecondaryCost')}/>
+            <Checkbox checked={status} onChange={() => selectOneCheckbox(status, 'plant_secondary_cost')}/>
         </>
       )
     },
     {
       title: "Actual Revenues",
-      dataIndex: "actualRevenues",
-      key: 'actualRevenues',
+      dataIndex: "actual_revenues",
+      key: 'actual_revenues',
       align:'center',
       render: (status:boolean, rowKey: any, column) => {
         return(
             <>
-                <Checkbox checked={status} onChange={() => selectOneCheckbox(status, 'actualRevenues')}/>
+                <Checkbox checked={status} onChange={() => selectOneCheckbox(status, 'actual_revenues')}/>
             </>
           )
       }
     },
     {
       title: "Plant Revenues",
-      dataIndex: "plantRevenues",
-      key: 'plantRevenues',
+      dataIndex: "plant_revenues",
+      key: 'plant_revenues',
       align:'center',
       render: (status:boolean, rowKey: any) => (
         <>
-            <Checkbox checked={status} onChange={() => selectOneCheckbox(status, 'plantRevenues')}/>
+            <Checkbox checked={status} onChange={() => selectOneCheckbox(status, 'plant_revenues')}/>
         </>
       )
     },
     {
       title: "Comitment Update",
-      dataIndex: "commitmentUpdate",
-      key: 'commitmentUpdate',
+      dataIndex: "commitment_update",
+      key: 'commitment_update',
       align:'center',
       render: (status:boolean, rowKey: any) => (
         <>
-            <Checkbox checked={status} onChange={() => selectOneCheckbox(status, 'commitmentUpdate')}/>
+            <Checkbox checked={status} onChange={() => selectOneCheckbox(status, 'commitment_update')}/>
         </>
       )
     },
   ];
 
-  const selectOneCheckbox = (checked, name) => {
-    let newCheckbox = newUomTable[0]
+  const selectOneCheckbox = (checked: boolean, name: string) => {
+    let newCheckbox = newCostCenterTable[0]
     switch (name) {
-        case 'actualPrimaryCost':
-            newCheckbox.actualPrimaryCost = !checked
+        case 'actual_primary_cost':
+            newCheckbox.actual_primary_cost = !checked
             break;
-        case 'plantPrimaryCost':
-            newCheckbox.plantPrimaryCost = !checked
+        case 'plant_primary_cost':
+            newCheckbox.plant_primary_cost = !checked
             break;
-        case 'actualSecondaryCost':
-            newCheckbox.actualSecondaryCost = !checked
+        case 'actual_secondary_cost':
+            newCheckbox.actual_secondary_cost = !checked
             break;
-        case 'plantSecondaryCost':
-            newCheckbox.plantSecondaryCost = !checked
+        case 'plant_secondary_cost':
+            newCheckbox.plant_secondary_cost = !checked
             break;
-        case 'actualRevenues':
-            newCheckbox.actualRevenues = !checked
+        case 'actual_revenues':
+            newCheckbox.actual_revenues = !checked
             break;
-        case 'plantRevenues':
-            newCheckbox.plantRevenues = !checked
+        case 'plant_revenues':
+            newCheckbox.plant_revenues = !checked
             break;
-        case 'commitmentUpdate':
-            newCheckbox.commitmentUpdate = !checked
+        case 'commitment_update':
+            newCheckbox.commitment_update = !checked
             break;
     
         default:
             break;
     }
-    setNewUomTable([newCheckbox])
+    setNewCostCenterTable([newCheckbox])
   }
 
-  const selectAllCheckbox = (checked) => {
+  const selectAllCheckbox = () => {
     setCheckSelectAll(prev => !prev)
     if(checkSelectAll){
-        setNewUomTable([{
-            actualPrimaryCost: false,
-            plantPrimaryCost: false,
-            actualSecondaryCost: false,
-            plantSecondaryCost: false,
-            actualRevenues: false,
-            plantRevenues: false,
-            commitmentUpdate: false,
+        setNewCostCenterTable([{
+            actual_primary_cost: false,
+            plant_primary_cost: false,
+            actual_secondary_cost: false,
+            plant_secondary_cost: false,
+            actual_revenues: false,
+            plant_revenues: false,
+            commitment_update: false,
             }])
     } else{
-        setNewUomTable([{
-            actualPrimaryCost: true,
-            plantPrimaryCost: true,
-            actualSecondaryCost: true,
-            plantSecondaryCost: true,
-            actualRevenues: true,
-            plantRevenues: true,
-            commitmentUpdate: true,
+        setNewCostCenterTable([{
+            actual_primary_cost: true,
+            plant_primary_cost: true,
+            actual_secondary_cost: true,
+            plant_secondary_cost: true,
+            actual_revenues: true,
+            plant_revenues: true,
+            commitment_update: true,
             }])
     }
   }
 
-  const setLanguageFromCompany = (data) => {
+  const handleCostCenterCategory = (costCenterValue : string) => {
+    setCostCenterCategory(costCenterValue)
+  }
+
+  const handleDescription = (e: { target: { value: React.SetStateAction<string>; }; }) => {
+    setDescription(e.target.value)
+  }
+  const setLanguageFromCompany = () => {
     setLanguageStatus(prev => !prev)
   }
 
-  const setCurrencyFromCompany = (data) => {
+  const setCurrencyFromCompany = () => {
     setCurrencyStatus(prev => !prev)
   }
 
@@ -353,7 +385,7 @@ const UOMConversionCreate = () => {
     return current <= moment().startOf('day');
   };
 
-  if (isFetchingUomCategory)
+  if (isLoadingCompanyData)
   return (
     <Center>
       <Spin tip="Loading data..." />
@@ -378,7 +410,7 @@ const UOMConversionCreate = () => {
                 Cancel
               </Button>
               <Button size="big" variant={"primary"} onClick={handleSubmit(onSave)}>
-                {isLoadingCreateUom? "Loading..." : "Save"}
+                {"Save"}
               </Button>
             </Row>
           </Row>
@@ -393,13 +425,13 @@ const UOMConversionCreate = () => {
             <Row width="100%" noWrap>
                 <Col width={"100%"}>
                     <Input
-                    width="100%"
-                    label="Cost Center Code"
-                    // defaultValue={newUom.name}
-                    height="48px"
-                    required
-                    placeholder={"e.g Product Conversion"}
-                    {...register("costCenterCode", { required: "Please enter name." })}
+                        width="100%"
+                        label="Cost Center Code"
+                        // defaultValue={newUom.name}
+                        height="48px"
+                        required
+                        placeholder={"e.g Product Conversion"}
+                        {...register("code", { required: "Please enter name." })}
                     />
                 </Col>
 
@@ -407,13 +439,13 @@ const UOMConversionCreate = () => {
 
                 <Col width="100%">
                     <Input
-                    width="100%"
-                    label="Cost Center Name"
-                    // defaultValue={newUom.name}
-                    height="48px"
-                    required
-                    placeholder={"e.g Product Conversion"}
-                    {...register("costCenterName", { required: "Please enter name." })}
+                        width="100%"
+                        label="Cost Center Name"
+                        // defaultValue={newUom.name}
+                        height="48px"
+                        required
+                        placeholder={"e.g Product Conversion"}
+                        {...register("name", { required: "Please enter name." })}
                     />
                 </Col>
             </Row>
@@ -464,7 +496,7 @@ const UOMConversionCreate = () => {
                 <Col width={"100%"}>
                 <Controller
                     control={control}
-                    name="baseUom"
+                    name="company_id"
                     render={({ field: { onChange } }) => (
                     <>
                         <Label>Company</Label>
@@ -478,18 +510,8 @@ const UOMConversionCreate = () => {
                         borderColor={"#AAAAAA"}
                         arrowColor={"#000"}
                         withSearch
-                        isLoading={isFetchingUomCategory}
-                        isLoadingMore={isFetchingMoreUomCategory}
-                        fetchMore={() => {
-                            if (hasNextPage) {
-                            fetchNextPage();
-                            }
-                        }}
-                        items={
-                            isFetchingUomCategory && !isFetchingMoreUomCategory
-                            ? []
-                            : listUomCategory
-                        }
+                        isLoading={isFetchingCompanyData}
+                        items={listUomCategory}
                         onChange={(value: any) => {
                             onChange(value);
                         }}
@@ -534,7 +556,7 @@ const UOMConversionCreate = () => {
 
                     <Controller
                         control={control}
-                        name="baseUom"
+                        name="language"
                         render={({ field: { onChange } }) => (
                         <>
                             {/* <Label>Company</Label> */}
@@ -548,15 +570,15 @@ const UOMConversionCreate = () => {
                             borderColor={"#AAAAAA"}
                             arrowColor={"#000"}
                             withSearch
-                            isLoading={isFetchingUomCategory}
-                            isLoadingMore={isFetchingMoreUomCategory}
+                            isLoading={isFetchingCompanyData}
+                            isLoadingMore={isFetchingMoreCompanyData}
                             fetchMore={() => {
                                 if (hasNextPage) {
                                 fetchNextPage();
                                 }
                             }}
                             items={
-                                isFetchingUomCategory && !isFetchingMoreUomCategory
+                                isFetchingCompanyData && !isFetchingMoreCompanyData
                                 ? []
                                 : listUomCategory
                             }
@@ -582,7 +604,7 @@ const UOMConversionCreate = () => {
                 <Col width={"100%"}>
                 <Controller
                     control={control}
-                    name="baseUom"
+                    name="profit_center_id"
                     render={({ field: { onChange } }) => (
                     <>
                         <Label>Profit Center</Label>
@@ -596,15 +618,15 @@ const UOMConversionCreate = () => {
                         borderColor={"#AAAAAA"}
                         arrowColor={"#000"}
                         withSearch
-                        isLoading={isFetchingUomCategory}
-                        isLoadingMore={isFetchingMoreUomCategory}
+                        isLoading={isFetchingCompanyData}
+                        isLoadingMore={isFetchingMoreCompanyData}
                         fetchMore={() => {
                             if (hasNextPage) {
                             fetchNextPage();
                             }
                         }}
                         items={
-                            isFetchingUomCategory && !isFetchingMoreUomCategory
+                            isFetchingCompanyData && !isFetchingMoreCompanyData
                             ? []
                             : listUomCategory
                         }
@@ -653,7 +675,7 @@ const UOMConversionCreate = () => {
 
                         <Controller
                             control={control}
-                            name="baseUom"
+                            name="currency"
                             render={({ field: { onChange } }) => (
                             <>
                                 {/* <Label>Company</Label> */}
@@ -667,15 +689,15 @@ const UOMConversionCreate = () => {
                                 borderColor={"#AAAAAA"}
                                 arrowColor={"#000"}
                                 withSearch
-                                isLoading={isFetchingUomCategory}
-                                isLoadingMore={isFetchingMoreUomCategory}
+                                isLoading={isFetchingCompanyData}
+                                isLoadingMore={isFetchingMoreCompanyData}
                                 fetchMore={() => {
                                     if (hasNextPage) {
                                     fetchNextPage();
                                     }
                                 }}
                                 items={
-                                    isFetchingUomCategory && !isFetchingMoreUomCategory
+                                    isFetchingCompanyData && !isFetchingMoreCompanyData
                                     ? []
                                     : listUomCategory
                                 }
@@ -698,50 +720,15 @@ const UOMConversionCreate = () => {
             {/* Cost Center Category */}
             <Row width="100%" noWrap>
                 <Col width={"100%"}>
-                <Dropdown
+                <Dropdown2
                   label="Cost Center Category"
                   height="48px"
                   width={"100%"}
-                  items={[
-                    {
-                      id: 0,
-                      value: "Development",
-                    },
-                    {
-                      id: 1,
-                      value: "Production",
-                    },
-                    {
-                      id: 3,
-                      value: "Logistics",
-                    },
-                    {
-                      id: 4,
-                      value: "Service Cost Center",
-                    },
-                    {
-                      id: 5,
-                      value: "Management",
-                    },
-                    {
-                      id: 6,
-                      value: "Material",
-                    },
-                    {
-                      id: 7,
-                      value: "Social",
-                    },
-                    {
-                      id: 8,
-                      value: "Sales",
-                    },
-                    {
-                      id: 9,
-                      value: "Administration",
-                    },
-                  ]}
+                  handleChange={handleCostCenterCategory}
+                  items={costCenterCategoryTable}
                   placeholder={"Select"}
                   noSearch
+                //   {...register("costCenterCategory")}
                 />
                 </Col>
 
@@ -752,9 +739,10 @@ const UOMConversionCreate = () => {
                     width="100%"
                     label="Person Responsible"
                     height="48px"
-                    required
+                    // required
+                    // defaultValue={" "}
                     placeholder={"e.g TBD"}
-                    {...register("name", { required: "Please enter name." })}
+                    {...register("person_responsible")}
                     />
                 </Col>
             </Row>
@@ -767,9 +755,10 @@ const UOMConversionCreate = () => {
                     <TextArea
                         width="100%"
                         label="Description"
-                        required
+                        defaultValue={description}
+                        // required
                         placeholder={"e.g New Cost Center"}
-                        {...register("name", { required: "Please enter name." })}
+                        onChange={handleDescription}
                         />
                 </Col>
 
@@ -780,9 +769,10 @@ const UOMConversionCreate = () => {
                     width="100%"
                     label="External Code"
                     height="54px"
-                    required
+                    // required
+                    // defaultValue={" "}
                     placeholder={"e.g TBD"}
-                    {...register("name", { required: "Please enter name." })}
+                    {...register("external_code")}
                     />
                 </Col>
             </Row>
@@ -794,170 +784,28 @@ const UOMConversionCreate = () => {
 
           <Col>
               <div style={{
-                display: 'flex',
-                fontWeight: 'bold',
-                alignItems: "center"
-              }}>
-              <Checkbox checked={checkSelectAll} onChange={() => selectAllCheckbox(checkSelectAll)}/>
-              <Text>Select All</Text>
-
+                    display: 'flex',
+                    fontWeight: 'bold',
+                    alignItems: "center"
+                }}>
+                <Checkbox checked={checkSelectAll} onChange={() => selectAllCheckbox()}/>
+                <Text>Select All</Text>
               </div>
+
               <Spacer size={20} />
+
                 <Col gap={"60px"}>
-                  <Table
+                    <Table
                     columns={columns}
-                    data={newUomTable}
+                    data={newCostCenterTable}
                     bordered
                     rowKey={"id"}
-                  />
+                    />
                 </Col>
           </Col>
         </Card>
       </Col>
 
-      {/* {showCreateModal && (
-        <Modal
-        centered
-        width={'400px'}
-        visible={showCreateModal}
-        onCancel={() => setShowCreateModal(false)}
-        footer={null}
-        content={
-          <TopButtonHolder>
-            <CreateTitle>
-              Add New Conversion
-            </CreateTitle>
-            <Spacer size={20} />
-            <Col width="100%">
-              <Controller
-                control={control}
-                name="uom"
-                render={({ field: { onChange } }) => (
-                  <>
-                    <Label>UoM</Label>
-                    <Spacer size={3} />
-                    <CreateSelectDiv>
-                      <InputAddonAfter>Per</InputAddonAfter>
-                      <FormSelect
-                        style={{ width: "82%", marginLeft: '18%', paddingLeft: '2px' }}
-                        size={"large"}
-                        placeholder={"PCS"}
-                        required
-                        borderColor={"#AAAAAA"}
-                        arrowColor={"#000"}
-                        withSearch
-                        isLoading={isFetchingUomCategory}
-                        isLoadingMore={isFetchingMoreUomCategory}
-                        fetchMore={() => {
-                          if (hasNextPage) {
-                            fetchNextPage();
-                          }
-                        }}
-                        items={
-                          isFetchingUomCategory && !isFetchingMoreUomCategory
-                            ? []
-                            : listUomCategory
-                        }
-                        onChange={(value: any) => {
-                          onChange(value);
-                        }}
-                        onSearch={(value: any) => {
-                          setSearch(value);
-                        }}
-                        />
-                    </CreateSelectDiv>
-                  </>
-                )}
-                // {...register("Uom", { required: "Please enter Uom." })}
-              />
-            </Col>
-              <Spacer size={15} />
-
-              <Col width={"100%"}>
-                <CreateInputDiv>
-                    <Input
-                      width="80%"
-                      label="Conversion Number"
-                      height="48px"
-                      required
-                      placeholder={"e.g 12"}
-                      addonAfter="PCS"
-                      {...register("conversionNumber", { required: "Please enter Conversion Number." })}
-                    />
-                  <InputAddonBefore>{"PCS"}</InputAddonBefore>
-                </CreateInputDiv>
-              </Col>
-              
-            <Spacer size={100} />
-            <DeleteCardButtonHolder>
-              <Button
-                variant="tertiary"
-                key="submit"
-                type="primary"
-                onClick={() => setShowCreateModal(false)}
-              >
-                Cancel
-              </Button>
-              <Button
-                variant="primary"
-                onClick={handleSubmit(updateCreateUom)}
-              >
-                save
-              </Button>
-            </DeleteCardButtonHolder>
-          </TopButtonHolder>
-        }
-      />
-      )}
-
-      {showDeleteModal && (
-        <ModalDeleteConfirmation
-          totalSelected={1}
-          itemTitle={"electrical conversion"}
-          visible={showDeleteModal}
-          // isLoading={isLoadingDeleteUOM}
-          onCancel={() => setShowDeleteModal(false)}
-          // onOk={() => deleteUOM({ ids: [uom_conversion_id], company_id: "KSNI" })}
-        />
-      )}
-
-      {isShowDelete.open && (
-        <Modal
-          closable={false}
-          centered
-          visible={isShowDelete.open}
-          onCancel={() => setShowDelete({ open: false, type: "", data: {} })}
-          title={"Confirm Delete"}
-          footer={null}
-          content={
-            <TopButtonHolder>
-              <Spacer size={4} />
-              {renderConfirmationText(isShowDelete.type, isShowDelete.data)}
-              <Spacer size={20} />
-              <DeleteCardButtonHolder>
-                <Button
-                  size="big"
-                  variant="tertiary"
-                  key="submit"
-                  type="primary"
-                  onClick={() => setShowDelete({ open: false, type: "", data: {} })}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  variant="primary"
-                  size="big"
-                  onClick={() => {
-                      updateDeleteUom(selectedRowKeys)
-                  }}
-                >
-                  {"Yes"}
-                </Button>
-              </DeleteCardButtonHolder>
-            </TopButtonHolder>
-          }
-        />
-      )} */}
     </>
   );
 };
@@ -987,69 +835,4 @@ const Label = styled.div`
   color: #000000;
 `;
 
-const HeaderLabel = styled.p`
-  font-weight: 600;
-  font-size: 20px;
-  line-height: 27px;
-  color: #1E858E;
-`
-
-const DeleteCardButtonHolder = styled.div`
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    margin-bottom: 20px;
-`
-
-const TopButtonHolder = styled.div`
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-`
-
-const CreateInputDiv = styled.div`
-  display: flex;
-  position: relative;
-`
-
-const CreateSelectDiv = styled.div`
-  display: flex;
-  position: relative;
-  justify-content: space-between;
-`
-
-const CreateTitle = styled.div`
-  margin-top: 1rem;
-  font-weight: 600;
-  font-size: 1.5rem;
-`
-const InputAddonAfter = styled.div`
-  z-index: 10;
-  background: #f4f4f4;
-  position: absolute;
-  height: 40px;
-  width: 20%;
-  border-radius: 5px 0 0 5px;
-  margin: 0 auto;
-  text-align: center;
-  padding-top: .5rem;
-  border: 1px solid #aaaaaa;
-`
-
-const InputAddonBefore = styled.div`
-  z-index: 10;
-  right: 0;
-  bottom: 4;
-  background: #f4f4f4;
-  position: absolute;
-  height: 40px;
-  width: 20%;
-  border-radius: 0 5px 5px 0;
-  margin: 0 auto;
-  margin-top: 1.75rem;
-  text-align: center;
-  padding-top: .5rem;
-  border: 1px solid #aaaaaa;
-`
-
-export default UOMConversionCreate;
+export default CostCenterCreate;
