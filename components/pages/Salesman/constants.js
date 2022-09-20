@@ -1,4 +1,5 @@
 import styled from "styled-components";
+import { mdmDownloadService } from "lib/client";
 
 import DownloadSvg from "assets/icons/ic-download.svg";
 import UploadSvg from "assets/icons/ic-upload.svg";
@@ -69,6 +70,51 @@ export const downloadOptions = () => [
         <p>Download Data</p>
       </FlexElement>
     ),
+  },
+]
+
+export const downloadFileSalesDivision = (params) =>
+  mdmDownloadService("/sales-division/template/download", { params }).then((res) => {
+    let dataUrl = window.URL.createObjectURL(new Blob([res.data]));
+    let tempLink = document.createElement("a");
+    tempLink.href = dataUrl;
+    tempLink.setAttribute("download", `sales_division${new Date().getTime()}.xlsx`);
+    tempLink.click();
+  });
+
+export const dropdownStatus = [
+    { id: "Active", value: "Active" },
+    { id: "Inactive", value: "Inactive" },
+  ]
+
+export const columnsDetailCustomers = [
+  {
+    title: 'Branch Name',
+    dataIndex: 'branch'
+  },
+  {
+    title: 'Visit Frequency',
+    dataIndex: 'frequency'
+  },
+  {
+    title: 'Visit Day',
+    dataIndex: 'day'
+  },
+  {
+    title: 'Date',
+    dataIndex: 'date'
+  },
+  {
+    title: 'Start Time',
+    dataIndex: 'startTime'
+  },
+  {
+    title: 'End Time',
+    dataIndex: 'endTime'
+  },
+  {
+    title: 'Duration',
+    dataIndex: 'duration'
   },
 ]
 

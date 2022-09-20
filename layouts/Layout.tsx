@@ -291,7 +291,7 @@ const menuMdm = [
         onClick: () => Router.push("/salesman/group"),
       },
       {
-        key: "salesman",
+        key: "salesman-sub-menu",
         title: "Salesman",
         content: () => "Salesman",
         onClick: () => Router.push("/salesman"),
@@ -312,6 +312,13 @@ const menuMdm = [
     content: () => "Term Of Payment",
     icon: ICDocument,
     onClick: () => Router.push("/term-of-payment"),
+  },
+  {
+    key: "profit-center",
+    title: "Profit Center",
+    content: () => "Profit Center",
+    icon: ICDollar,
+    onClick: () => Router.push("/profit-center"),
   },
   {
     key: "tax",

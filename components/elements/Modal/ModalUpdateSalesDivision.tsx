@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { Button, Spacer, Modal, Input, DropdownMenuOptionCustome } from "pink-lava-ui";
 import styled from "styled-components";
+import { useFetchDetailSalesman } from "hooks/mdm/salesman/useSalesmanDivision";
 
-const ModalAddSalesDivision = ({
+const ModalUpdateSalesDivision = ({
 	listProducts,
+	formsUpdate,
 	onCancel,
 	visible,
 	onOk
@@ -15,22 +17,30 @@ const ModalAddSalesDivision = ({
   });
   const isDisabledButton = !(itemSelected?.length > 0 && forms?.name?.length > 3);
 
-	useEffect(() => {
-		if (visible === false) {
-			setForms({
-				name: "",
-				description: "",
-			});
-			setItemSelected([]);
+	const { data: detailSalesman, isLoading } = useFetchDetailSalesman({
+		id: formsUpdate?.id,
+		options: {
+			onSuccess: () => { },
+			enabled: visible === true && formsUpdate?.code?.length > 1
 		}
-	}, [visible])
+	})
+
+  useEffect(() => {
+		if (formsUpdate?.code?.length > 1) {
+      setForms({
+        name: formsUpdate?.divisiName,
+        description: formsUpdate?.shortDesc,
+      });
+      setItemSelected(detailSalesman?.product?.split(","));
+    }
+  }, [formsUpdate, detailSalesman]);
 
 	return (
 		<Modal
 			width={500}
 			visible={visible}
 			onCancel={onCancel}
-			title="Create Division"
+			title="Division"
 			footer={
 				<Footer>
 					<Button
@@ -72,18 +82,24 @@ const ModalAddSalesDivision = ({
 						label="Short Description"
 					/>
 					<Spacer size={20} />
-						<DropdownMenuOptionCustome
-							label="Product"
-							isAllowClear
-							required
-							handleChangeValue={(value: string[]) => setItemSelected(value)}
-							valueSelectedItems={itemSelected}
-							noSearch
-							listItems={listProducts?.map(({ name, productId }:
-								{ name: string, productId: string }) => {
-								return { value: productId, label: name }
-							})}
-						/>
+					{
+						isLoading
+							? <p>...Loading</p>
+							: (
+								<DropdownMenuOptionCustome
+									label="Product"
+									isAllowClear
+									required
+									handleChangeValue={(value: string[]) => setItemSelected(value)}
+									valueSelectedItems={itemSelected}
+									noSearch
+									listItems={listProducts?.map(({ name, productId }:
+										{ name: string, productId: string }) => {
+										return { value: productId, label: name }
+									})}
+								/>
+							) 
+					}
 					<Spacer size={30} />
 				</Container>
 			}
@@ -101,4 +117,4 @@ const Footer = styled.div`
 
 const Container = styled.div``;
 
-export default ModalAddSalesDivision;
+export default ModalUpdateSalesDivision;

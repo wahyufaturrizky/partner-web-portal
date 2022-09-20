@@ -16,7 +16,7 @@ import usePagination from '@lucasmogari/react-pagination';
 import { queryClient } from "pages/_app";
 import { mdmDownloadService } from 'lib/client';
 import { ModalDeleteConfirmation } from "components/elements/Modal/ModalConfirmationDelete";
-import { downloadOptions } from 'components/pages/Salesman/constants'
+import { downloadFileSalesDivision, downloadOptions } from 'components/pages/Salesman/constants'
 import ModalAddSalesDivision from 'components/elements/Modal/ModalAddSalesDivision'
 import { useProductList } from 'hooks/mdm/product-list/useProductList';
 import {
@@ -26,16 +26,8 @@ import {
   useFetchSalesmanDivision,
   useUpdateSalesmanDivision
 } from 'hooks/mdm/salesman/useSalesmanDivision'
+import ModalUpdateSalesDivision from 'components/elements/Modal/ModalUpdateSalesDivision';
 
-
-const downloadFileSalesDivision = (params: any) =>
-  mdmDownloadService("/sales-division/template/download", { params }).then((res) => {
-    let dataUrl = window.URL.createObjectURL(new Blob([res.data]));
-    let tempLink = document.createElement("a");
-    tempLink.href = dataUrl;
-    tempLink.setAttribute("download", `sales_division${new Date().getTime()}.xlsx`);
-    tempLink.click();
-  });
 
 export default function ComponentSalesmanDivision() {
   const pagination = usePagination({
@@ -48,11 +40,13 @@ export default function ComponentSalesmanDivision() {
   });
   const [search, setSearch] = useState<string>('')
   const [formsUpdate, setFormsUpdate] = useState<any>({})
+  const [singleTitle, setSingleTitile] = useState('')
   const [selectedItems, setSelectedItems] = useState<string[]>([])
   const [visible, setVisible] = useState({
     delete: false,
     create: false,
     upload: false,
+    update: false,
   });
 
   const columns = [
@@ -78,7 +72,7 @@ export default function ComponentSalesmanDivision() {
           size="small"
           onClick={() => {
             setFormsUpdate({ ...items })
-            setVisible({  ...visible, create: true })
+            setVisible({  ...visible, update: true })
           }}
           variant="tertiary"
         >
@@ -90,8 +84,18 @@ export default function ComponentSalesmanDivision() {
 
   const rowSelection = {
     selectedItems,
-    onChange: (value: any) => {
+    onChange: async (value: any) => {
+      const findName = await data?.rows?.find((el: any) => el.id === value[0])
       setSelectedItems(value)
+      setSingleTitile(findName?.divisiName)
+    }
+  }
+
+  const isLabelConfirmationDelete = (): any => {
+    if (selectedItems.length > 1) {
+      selectedItems?.map((label: string) => label)
+    } else {
+      return singleTitle
     }
   }
 
@@ -113,6 +117,10 @@ export default function ComponentSalesmanDivision() {
       onSuccess: () => {
         setVisible({ ...visible, delete: false })
         refetch()
+      },
+      onError: ({ data }: any) => {
+        alert(`Ups sorry ${data?.data}`)
+        setVisible({ ...visible, delete: false })
       }
     }
   })
@@ -177,7 +185,7 @@ export default function ComponentSalesmanDivision() {
         return downloadFileSalesDivision({ company_id: 'KSNI', with_data: 'n' })
       case '2':
         return setVisible({ ...visible, upload: true })
-      case '1':
+      case '3':
         return downloadFileSalesDivision({ company_id: 'KSNI', with_data: 'y' })
       default:
         return null
@@ -192,7 +200,7 @@ export default function ComponentSalesmanDivision() {
 
   return (
     <div>
-      <Text variant="h4">Salesman List</Text>
+      <Text variant="h4">Sales Division</Text>
       <Spacer size={20} />
       <Card>
         <Row justifyContent="space-between">
@@ -241,7 +249,7 @@ export default function ComponentSalesmanDivision() {
         visible={visible.delete}
         totalSelected={selectedItems?.length}
         isLoading={isLoading}
-        itemTitle={selectedItems?.map((label: string) => label)}
+        itemTitle={isLabelConfirmationDelete()}
         onCancel={() => setVisible({ ...visible, delete: false })}
         onOk={() => handleDeleteDivision({ ids: selectedItems })}
       />
@@ -250,16 +258,17 @@ export default function ComponentSalesmanDivision() {
       <ModalAddSalesDivision
         listProducts={listProducts}
         visible={visible.create}
-        resetFormsUpdate={() => setFormsUpdate(null)}
-        formsUpdate={formsUpdate}
         onCancel={() => setVisible({ ...visible, create: false })}
-        onOk={(items: {
-          name: string,
-          description?: string,
-          itemSelected: string[]
-        }) => visible.create
-          ? _handleCreateSalesDivision(items)
-          : _handleUpdateSalesDivision(items)}
+        onOk={(items: any) => _handleCreateSalesDivision(items)}
+      />
+      
+      {/* modal update sales division */}
+      <ModalUpdateSalesDivision
+        listProducts={listProducts}
+        formsUpdate={formsUpdate}
+        visible={visible.update}
+        onCancel={() => setVisible({ ...visible, update: false })}
+        onOk={(items: any) => _handleUpdateSalesDivision(items)}
       />
 
       {/* modal upload documents */}

@@ -14,7 +14,11 @@ import {
   FileUploadModal,
 } from "pink-lava-ui";
 import usePagination from "@lucasmogari/react-pagination";
-import { useDeletUOMConversion, useUOMConversions, useUploadFileUOMConversion } from "../../hooks/mdm/unit-of-measure-conversion/useUOMConversion";
+import {
+  useProfitCenters,
+  useUploadFileProfitCenter,
+  useDeleteProfitCenter,
+} from "../../hooks/mdm/profit-center/useProfitCenter";
 import useDebounce from "../../lib/useDebounce";
 import { queryClient } from "../_app";
 import { ICDownload, ICUpload } from "../../assets/icons";
@@ -22,11 +26,11 @@ import { mdmDownloadService } from "../../lib/client";
 import { useRouter } from "next/router";
 
 const downloadFile = (params: any) =>
-  mdmDownloadService("/uom-conversion/download", { params }).then((res) => {
+  mdmDownloadService("/profit-center/download", { params }).then((res) => {
     let dataUrl = window.URL.createObjectURL(new Blob([res.data]));
     let tempLink = document.createElement("a");
     tempLink.href = dataUrl;
-    tempLink.setAttribute("download", `uom_${new Date().getTime()}.xlsx`);
+    tempLink.setAttribute("download", `profit_center${new Date().getTime()}.xlsx`);
     tempLink.click();
   });
 
@@ -35,18 +39,18 @@ const renderConfirmationText = (type: any, data: any) => {
     case "selection":
       return data.selectedRowKeys.length > 1
         ? `Are you sure to delete ${data.selectedRowKeys.length} items ?`
-        : `Are you sure to delete Uom Name ${
-            data?.uomData?.find((el: any) => el.id === data.selectedRowKeys[0])?.name
+        : `Are you sure to delete Profit Center ${
+            data?.profitData?.data.find((el: any) => el.key === data.selectedRowKeys[0])?.profCenName
           } ?`;
     case "detail":
-      return `Are you sure to delete Uom Name ${data.uomName} ?`;
+      return `Are you sure to delete Profit Center ${data.profCenName} ?`;
 
     default:
       break;
   }
 };
 
-const UOMConversion = () => {
+const ProfitCenter = () => {
   const router = useRouter();
   const pagination = usePagination({
     page: 1,
@@ -60,19 +64,14 @@ const UOMConversion = () => {
   const [search, setSearch] = useState("");
   const [isShowDelete, setShowDelete] = useState({ open: false, type: "selection", data: {} });
   const [isShowUpload, setShowUpload] = useState(false);
-  const [modalForm, setModalForm] = useState({
-    open: false,
-    data: {},
-    typeForm: "create",
-  });
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const debounceSearch = useDebounce(search, 1000);
 
   const {
-    data: UOMConversionData,
-    isLoading: isLoadingUOM,
-    isFetching: isFetchingUOM,
-  } = useUOMConversions({
+    data: ProfitData,
+    isLoading: isLoadingProfit,
+    isFetching: isFetchingProfit,
+  } = useProfitCenters({
     query: {
       search: debounceSearch,
       page: pagination.page,
@@ -80,21 +79,22 @@ const UOMConversion = () => {
       company_id: "KSNI",
     },
     options: {
-      onSuccess: (data: any) => {
+      onSuccess: (data: any) => {        
         pagination.setTotalItems(data.totalRow);
       },
       select: (data: any) => {
         const mappedData = data?.rows?.map((element: any) => {
           return {
-            key: element.conversionId,
-            id: element.conversionId,
-            name: element.name,
+            key: element.profitCenterId,
+            id: element.profitCenterId,
+            profCenCode: element.code,
+            profCenName: element.name,
             action: (
               <div style={{ display: "flex", justifyContent: "left" }}>
                 <Button
                   size="small"
                   onClick={() => {
-                    router.push(`/unit-of-measure-conversion/${element.conversionId}`);
+                    router.push(`/profit-center/${element.profitCenterId}`);
                   }}
                   variant="tertiary"
                 >
@@ -104,29 +104,26 @@ const UOMConversion = () => {
             ),
           };
         });
+
         return { data: mappedData, totalRow: data.totalRow };
       },
     },
   });
 
-  const { mutate: deleteUom, isLoading: isLoadingDeleteUom } = useDeletUOMConversion({
+  const { mutate: deleteProfit, isLoading: isLoadingDeleteProfit } = useDeleteProfitCenter({
     options: {
       onSuccess: () => {
         setShowDelete({ open: false, data: {}, type: "" });
         setSelectedRowKeys([]);
-        queryClient.invalidateQueries(["uom-conversions"]);
+        queryClient.invalidateQueries(["profit-list"]);
       },
     },
   });
 
-  const { mutate: uploadFileUom, isLoading: isLoadingUploadFileUom } = useUploadFileUOMConversion({
-    query: {
-      with_data: "N",
-      company_id: "KSNI",
-    },
+  const { mutate: uploadFileProfit, isLoading: isLoadingUploadFileTop } = useUploadFileProfitCenter({
     options: {
       onSuccess: () => {
-        queryClient.invalidateQueries(["uom-conversions"]);
+        queryClient.invalidateQueries(["profit-list"]);
         setShowUpload(false);
       },
     },
@@ -134,14 +131,16 @@ const UOMConversion = () => {
 
   const columns = [
     {
-      title: "UoM Conversion ID",
+      title: "Profit Center ID",
       dataIndex: "id",
-      key: 'id',
     },
     {
-      title: "Uom Conversion Name",
-      dataIndex: "name",
-      key: 'name'
+      title: "Profit Center Code",
+      dataIndex: "profCenCode",
+    },
+    {
+      title: "Profit Center Name",
+      dataIndex: "profCenName",
     },
     {
       title: "Action",
@@ -150,35 +149,33 @@ const UOMConversion = () => {
       align: "left",
     },
   ];
-  
 
   const rowSelection = {
     selectedRowKeys,
-    onChange: (selectedRowKeys: any, selectedRows: any) => {
-      if(!selectedRowKeys) {
-      }
+    onChange: (selectedRowKeys: any) => {
       setSelectedRowKeys(selectedRowKeys);
     },
   };
 
   const onSubmitFile = (file: any) => {
-    const formData: any = new FormData();
+    const formData = new FormData();
     formData.append("company_id", "KSNI");
     formData.append("file", file);
-    uploadFileUom(formData);
+
+    uploadFileProfit(formData);
   };
 
   return (
     <>
       <Col>
-        <Text variant={"h4"}>UoM Conversion</Text>
+        <Text variant={"h4"}>Profit Center</Text>
         <Spacer size={20} />
       </Col>
       <Card>
         <Row justifyContent="space-between">
           <Search
             width="340px"
-            placeholder="Search UoM Conversion ID, Name"
+            placeholder="Search Profit Center ID, Term."
             onChange={(e: any) => {
               setSearch(e.target.value);
             }}
@@ -191,7 +188,7 @@ const UOMConversion = () => {
                 setShowDelete({
                   open: true,
                   type: "selection",
-                  data: { uomData: UOMConversionData?.data, selectedRowKeys },
+                  data: { profitData: ProfitData, selectedRowKeys },
                 })
               }
               disabled={rowSelection.selectedRowKeys?.length === 0}
@@ -255,7 +252,7 @@ const UOMConversion = () => {
             <Button
               size="big"
               variant="primary"
-              onClick={() => router.push("/unit-of-measure-conversion/create")}
+              onClick={() => router.push("/profit-center/create")}
             >
               Create
             </Button>
@@ -266,11 +263,10 @@ const UOMConversion = () => {
       <Card style={{ padding: "16px 20px" }}>
         <Col gap={"60px"}>
           <Table
-            loading={isLoadingUOM || isFetchingUOM}
+            loading={isLoadingProfit || isFetchingProfit}
             columns={columns}
-            data={UOMConversionData?.data}
+            data={ProfitData?.data}
             rowSelection={rowSelection}
-            rowKey={"id"}
           />
           <Pagination pagination={pagination} />
         </Col>
@@ -285,11 +281,24 @@ const UOMConversion = () => {
           title={"Confirm Delete"}
           footer={null}
           content={
-            <TopButtonHolder>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
+              }}
+            >
               <Spacer size={4} />
               {renderConfirmationText(isShowDelete.type, isShowDelete.data)}
               <Spacer size={20} />
-              <DeleteCardButtonHolder>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  gap: "10px",
+                  marginBottom: "20px",
+                }}
+              >
                 <Button
                   size="big"
                   variant="tertiary"
@@ -303,17 +312,15 @@ const UOMConversion = () => {
                   variant="primary"
                   size="big"
                   onClick={() => {
-                    if (isShowDelete.type === "selection") {
-                      deleteUom({ ids: selectedRowKeys, company_id: "KSNI" });
-                    } else {
-                      deleteUom({ ids: [modalForm.data.id], company_id: "KSNI" });
-                    }
+                    console.log(selectedRowKeys);
+                    
+                    deleteProfit({ profit_center_ids: selectedRowKeys, company_ids: ["KSNI"] });
                   }}
                 >
-                  {isLoadingDeleteUom ? "loading..." : "Yes"}
+                  {isLoadingDeleteProfit ? "loading..." : "Yes"}
                 </Button>
-              </DeleteCardButtonHolder>
-            </TopButtonHolder>
+              </div>
+            </div>
           }
         />
       )}
@@ -328,23 +335,10 @@ const UOMConversion = () => {
     </>
   );
 };
-
 const Card = styled.div`
   background: #ffffff;
   border-radius: 16px;
   padding: 16px;
 `;
 
-const DeleteCardButtonHolder = styled.div`
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    margin-bottom: 20px;
-`
-
-const TopButtonHolder = styled.div`
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-`
-export default UOMConversion;
+export default ProfitCenter

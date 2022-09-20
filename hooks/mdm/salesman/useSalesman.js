@@ -5,15 +5,15 @@ const fetchListSalesman = async ({ query }) => {
   return mdmService(`/salesman`, {
     params: {
       company: "KSNI",
-      sortOrder: "DESC",
+      sortOrder: "ASC",
       limit: 10,
       page: 1,
       ...query,
     },
-  }).then((data) => data);
+  }).then(data => data);
 };
 
-const fetchCountTabItems = async ({ query }) => {
+const fetchCountTabItems = async () => {
   return mdmService("/salesman/count/stats", {
     params: { company: "KSNI" },
   }).then((data) => data);

@@ -24,7 +24,6 @@ import usePagination from "@lucasmogari/react-pagination";
 import { useCountryTaxInfiniteLists, useCreateTax, useDeletTax, useTaxInfiniteLists, useUpdateTax } from "hooks/mdm/Tax/useTax";
 
 const renderConfirmationText = (type: any, data: any) => {
-  console.log(data, '<<<<delete')
 switch (type) {
   case "selection":
     return data.selectedRowKeys.length > 1
@@ -174,14 +173,11 @@ const TaxDetail = () => {
 
   // belum bisa dari backend
   const deleteTax = (id: any) => {
-    deleteUOM({
-      pph_ids:[...id]
-    })
-    console.log(id, '<<delete prod')
+    deleteUOM({ pph_ids:[...id] })
   }
 
   const handleNewTax = (tax: any) => {
-    const newTax = {
+    const newTax: any = {
             country_id : tax.country_id,
             name : tax.name,
             percentage : tax.percentage,
@@ -194,12 +190,11 @@ const TaxDetail = () => {
   const updateTaxStatus = (rowKey: any) => {
     setStatusId(rowKey.key)
     if(statusId){
-      const data = {
+      const data: any = {
         name: rowKey.name,
         percentage: rowKey.percentage,
         active_status: rowKey?.active_status === "ACTIVE"? "INACTIVE" : "ACTIVE"
       }
-      console.log(data)
       updateTax(data)
     }
   }
@@ -232,8 +227,7 @@ const TaxDetail = () => {
 
   const rowSelection = {
     selectedRowKeys,
-    onChange: (selectedRowKeys: any, selectedRows: any) => {
-      console.log(selectedRowKeys, '<<<<')
+    onChange: (selectedRowKeys: any) => {
       setSelectedRowKeys(selectedRowKeys);
     },
   };
