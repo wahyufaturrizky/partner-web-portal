@@ -16,7 +16,7 @@ import usePagination from '@lucasmogari/react-pagination';
 import { queryClient } from "pages/_app";
 import { mdmDownloadService } from 'lib/client';
 import { ModalDeleteConfirmation } from "components/elements/Modal/ModalConfirmationDelete";
-import { downloadOptions } from 'components/pages/Salesman/constants'
+import { downloadFileSalesDivision, downloadOptions } from 'components/pages/Salesman/constants'
 import ModalAddSalesDivision from 'components/elements/Modal/ModalAddSalesDivision'
 import { useProductList } from 'hooks/mdm/product-list/useProductList';
 import {
@@ -26,17 +26,8 @@ import {
   useFetchSalesmanDivision,
   useUpdateSalesmanDivision
 } from 'hooks/mdm/salesman/useSalesmanDivision'
-import { useForm } from 'react-hook-form';
+import ModalUpdateSalesDivision from 'components/elements/Modal/ModalUpdateSalesDivision';
 
-
-const downloadFileSalesDivision = (params: any) =>
-  mdmDownloadService("/sales-division/template/download", { params }).then((res) => {
-    let dataUrl = window.URL.createObjectURL(new Blob([res.data]));
-    let tempLink = document.createElement("a");
-    tempLink.href = dataUrl;
-    tempLink.setAttribute("download", `sales_division${new Date().getTime()}.xlsx`);
-    tempLink.click();
-  });
 
 export default function ComponentSalesmanDivision() {
   const pagination = usePagination({
@@ -55,14 +46,8 @@ export default function ComponentSalesmanDivision() {
     delete: false,
     create: false,
     upload: false,
+    update: false,
   });
-
-  const {
-    control,
-    getValues
-  } = useForm()
-
-  console.log(getValues())
 
   const columns = [
     {
@@ -87,7 +72,7 @@ export default function ComponentSalesmanDivision() {
           size="small"
           onClick={() => {
             setFormsUpdate({ ...items })
-            setVisible({  ...visible, create: true })
+            setVisible({  ...visible, update: true })
           }}
           variant="tertiary"
         >
@@ -273,16 +258,17 @@ export default function ComponentSalesmanDivision() {
       <ModalAddSalesDivision
         listProducts={listProducts}
         visible={visible.create}
-        formsUpdate={formsUpdate}
-        control={control}
         onCancel={() => setVisible({ ...visible, create: false })}
-        onOk={(items: {
-          name: string,
-          description?: string,
-          itemSelected: string[]
-        }) => visible.create
-          ? _handleCreateSalesDivision(items)
-          : _handleUpdateSalesDivision(items)}
+        onOk={(items: any) => _handleCreateSalesDivision(items)}
+      />
+      
+      {/* modal update sales division */}
+      <ModalUpdateSalesDivision
+        listProducts={listProducts}
+        formsUpdate={formsUpdate}
+        visible={visible.update}
+        onCancel={() => setVisible({ ...visible, update: false })}
+        onOk={(items: any) => _handleUpdateSalesDivision(items)}
       />
 
       {/* modal upload documents */}
