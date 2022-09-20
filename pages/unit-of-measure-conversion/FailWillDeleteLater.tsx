@@ -286,7 +286,6 @@ const UOMConversion = () => {
   const rowSelection = {
     selectedRowKeys,
     getCheckboxProps: (record: any) => {
-      console.log(record.action)
       if(record?.action){
         return {
           disabled: false,
@@ -299,10 +298,8 @@ const UOMConversion = () => {
     },
     
     onChange: (selectedRowKeys: any, selectedRows: any, getCheckboxProps: any) => {
-      console.log(getCheckboxProps, '<<<,')
       if(!selectedRowKeys) {
       }
-      console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows, 'getcheckbox:', getCheckboxProps);
       setSelectedRowKeys(selectedRowKeys);
     },
   };

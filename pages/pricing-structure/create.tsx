@@ -5,6 +5,7 @@ import { useProductList } from "hooks/mdm/product-list/useProductList";
 import {
   useCreatePricingStructureDraftList,
   useCreatePricingStructureList,
+  useGroupBuyingLists,
   usePricingConfigInfiniteLists,
 } from "hooks/pricing-structure/usePricingStructure";
 import { useSalesOrganizationInfiniteLists } from "hooks/sales-organization/useSalesOrganization";
@@ -13,26 +14,39 @@ import { useRouter } from "next/router";
 import {
   Button,
   Col,
+  Dropdown,
   DropdownMenuOptionCustome,
+  DropdownMenuOptionGroup,
   FormSelect,
+  Input,
+  Modal,
+  Pagination,
+  Progress,
   Row,
   Search,
   Spacer,
-  Spin,
-  Text,
-  Modal,
-  DropdownMenuOptionGroup,
+  Switch,
   Table,
-  Pagination,
+  Text,
+  Tooltip,
 } from "pink-lava-ui";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import styled from "styled-components";
 import { colors } from "utils/color";
-import { ICPlus, ICCopy } from "../../assets";
+import { ICCopy, ICInfo, ICPlus } from "../../assets";
 
 const CreatePricingStructure: any = () => {
   const paginationProducts = usePagination({
+    page: 1,
+    itemsPerPage: 10,
+    maxPageItems: Infinity,
+    numbers: true,
+    arrows: true,
+    totalItems: 100,
+  });
+
+  const paginationProductsSelected = usePagination({
     page: 1,
     itemsPerPage: 10,
     maxPageItems: Infinity,
@@ -58,7 +72,7 @@ const CreatePricingStructure: any = () => {
   const { open, data, typeForm } = modal;
 
   const [totalRowsPricingConfigInfiniteList, setTotalRowsPricingConfigInfiniteList] = useState(0);
-  const [pricingConfigInfiniteList, setPricingConfigInfiniteList] = useState<any[]>([]);
+  const [pricingConfigInfiniteList, setPricingConfigInfiniteList] = useState<any>([]);
   const [searchPricingConfigInfinite, setSearchPricingConfigInfinite] = useState("");
 
   const [searchProduct, setSearchProduct] = useState("");
@@ -75,14 +89,24 @@ const CreatePricingStructure: any = () => {
   const [selectedFilter, setSelectedFilter] = useState([]);
 
   const [selectedRowKeysProduct, setSelectedRowKeysProduct] = useState([]);
+  const [selectedRowKeysProductsSelected, setSelectedRowKeysProductsSelected] = useState([]);
   const [selectedRowKeysCopyFromPriceStructure, setSelectedRowKeysCopyFromPriceStructure] =
     useState([]);
+
+  const [selectedRowTableProductSelected, setSelectedRowTableProductSelected] = useState([]);
+
+  const [productsSelected, setProductsSelected] = useState<any[]>([]);
+
+  const [percent, setPercent] = useState(0);
 
   const router = useRouter();
   const {
     handleSubmit,
     control,
     formState: { errors },
+    setValue,
+    getValues,
+    register,
   } = useForm({
     shouldUseNativeValidation: true,
     defaultValues: {
@@ -90,6 +114,7 @@ const CreatePricingStructure: any = () => {
       currency: "",
       manage_by: "",
       distribution_channel: null,
+      product_selected: [],
     },
   });
 
@@ -118,6 +143,19 @@ const CreatePricingStructure: any = () => {
   );
 
   const {
+    data: dataGroupBuying,
+    isLoading: isLoadingGroupBuying,
+    isFetching: isFetchingGroupBuying,
+  } = useGroupBuyingLists({
+    query: {
+      limit: 1000000,
+    },
+    options: {
+      onSuccess: (data: any) => {},
+    },
+  });
+
+  const {
     isFetching: isFetchingPricingConfigInfinite,
     isFetchingNextPage: isFetchingMorePricingConfigInfinite,
     hasNextPage: hasNextPagePricingConfigInfinite,
@@ -134,6 +172,7 @@ const CreatePricingStructure: any = () => {
         const mappedData = data?.pages?.map((group: any) => {
           return group.rows?.map((element: any) => {
             return {
+              ...element,
               value: element.id,
               label: element.name,
             };
@@ -225,12 +264,11 @@ const CreatePricingStructure: any = () => {
     },
     options: {
       onSuccess: (data: any) => {
-        console.log("@data", data);
-
         setTotalRowsSalesOrganizationInfiniteList(data.pages[0].totalRow);
         const mappedData = data?.pages?.map((group: any) => {
           return group.salesOrganizationStructures?.map((element: any) => {
             return {
+              ...element,
               value: element.id,
               label: element.name,
             };
@@ -266,6 +304,7 @@ const CreatePricingStructure: any = () => {
         const mappedData = data?.pages?.map((group: any) => {
           return group.rows?.map((element: any) => {
             return {
+              ...element,
               value: element.id,
               label: `${element.currency} - ${element.currencyName}`,
             };
@@ -292,8 +331,82 @@ const CreatePricingStructure: any = () => {
     pricingStructureDraft(data);
   };
 
-  const handleSelectedField = () => {
+  useEffect(() => {
+    const checkIfError = () => {
+      setModal({ ...modal, open: false });
+    };
+
+    if (Object.keys(errors).length) {
+      checkIfError();
+    }
+  }, [errors]);
+
+  const handleSelectedField = (data: any) => {
+    setModal({ ...modal, open: false });
     if (typeForm === "Add Products") {
+      let tempProductsSelected: any = [];
+
+      productListData?.data?.map((field: any) => {
+        if (rowSelectionProduct.selectedRowKeys.includes(field.key as never)) {
+          tempProductsSelected.push(field);
+
+          const rawValue = tempProductsSelected.map((subDataProdSelected: any) => ({
+            ...subDataProdSelected,
+            distribution_channel: channelsMDMData?.rows
+              ?.filter((filtering: any) =>
+                data.distribution_channel.includes(filtering.salesChannelId)
+              )
+              .map((distribution_channel_mapped: any) => ({
+                ...distribution_channel_mapped,
+                level: pricingConfigInfiniteList
+                  .find((finding: any) => finding.id === data.pricing_config)
+                  .priceStructureLevelings.map((subLevel: any) => ({
+                    ...subLevel,
+                    nameLevel: dataGroupBuying.rows[subLevel.buyingPrice].name,
+                  })),
+                currency: currenciesInfiniteList.find(
+                  (finding: any) => finding.id === data.currency
+                ),
+                manage_by: salesOrganizationInfiniteList.find(
+                  (finding: any) => finding.id === data.manage_by
+                ),
+              })),
+          }));
+
+          setValue("product_selected", rawValue);
+
+          setProductsSelected(rawValue);
+
+          setSearchProduct("");
+        } else {
+          setProductsSelected(
+            selectedRowTableProductSelected.map((subDataProdSelected: any) => ({
+              ...subDataProdSelected,
+              distribution_channel: channelsMDMData?.rows
+                ?.filter((filtering: any) =>
+                  data.distribution_channel.includes(filtering.salesChannelId)
+                )
+                .map((distribution_channel_mapped: any) => ({
+                  ...distribution_channel_mapped,
+                  level: pricingConfigInfiniteList
+                    .find((finding: any) => finding.id === data.pricing_config)
+                    .priceStructureLevelings.map((subLevel: any) => ({
+                      ...subLevel,
+                      nameLevel: dataGroupBuying.rows[subLevel.buyingPrice].name,
+                    })),
+                  currency: currenciesInfiniteList.find(
+                    (finding: any) => finding.id === data.currency
+                  ),
+                  manage_by: salesOrganizationInfiniteList.find(
+                    (finding: any) => finding.id === data.manage_by
+                  ),
+                })),
+            }))
+          );
+
+          setSearchProduct("");
+        }
+      });
     } else {
     }
   };
@@ -352,6 +465,39 @@ const CreatePricingStructure: any = () => {
       title: "Product Category",
       dataIndex: "productCategoryName",
     },
+    {
+      title: "Action",
+      dataIndex: "action",
+      width: "15%",
+      align: "left",
+    },
+  ];
+
+  const columnsProductsSelected = [
+    {
+      title: "id",
+      dataIndex: "id",
+    },
+    {
+      title: "key",
+      dataIndex: "key",
+    },
+    {
+      title: "status",
+      dataIndex: "status",
+    },
+    {
+      title: "hasVariant",
+      dataIndex: "hasVariant",
+    },
+    {
+      title: "Product",
+      dataIndex: "name",
+    },
+    {
+      title: "Product Category",
+      dataIndex: "productCategoryName",
+    },
   ];
 
   const columnsCopyFromPriceStructure = [
@@ -371,8 +517,16 @@ const CreatePricingStructure: any = () => {
 
   const rowSelectionProduct = {
     selectedRowKeys: selectedRowKeysProduct,
-    onChange: (selectedRowKeys: any) => {
+    onChange: (selectedRowKeys: any, rowSelected: any) => {
       setSelectedRowKeysProduct(selectedRowKeys);
+      setSelectedRowTableProductSelected(rowSelected);
+    },
+  };
+
+  const rowSelectionProductsSelected = {
+    selectedRowKeys: selectedRowKeysProductsSelected,
+    onChange: (selectedRowKeys: any) => {
+      setSelectedRowKeysProductsSelected(selectedRowKeys);
     },
   };
 
@@ -383,17 +537,64 @@ const CreatePricingStructure: any = () => {
     },
   };
 
+  const handleRemoveAllSelectedProduct = () => {
+    let tempProductsSelected: any = [];
+
+    tempProductsSelected = productsSelected?.filter(
+      (field) => !rowSelectionProductsSelected.selectedRowKeys.includes(field.key as never)
+    );
+
+    rowSelectionProductsSelected.onChange([]);
+
+    rowSelectionProduct.onChange(
+      tempProductsSelected.map((data: any) => data.key),
+      tempProductsSelected
+    );
+
+    setValue("product_selected", tempProductsSelected);
+
+    setProductsSelected(tempProductsSelected);
+  };
+
+  useEffect(() => {
+    const increaseProgress = () => {
+      let newPercent = percent + 14.285714285714286;
+
+      if (newPercent > 100) {
+        newPercent = 100;
+      }
+
+      setPercent(parseInt(newPercent));
+    };
+    increaseProgress();
+  }, [
+    isLoadingChannelsMDM,
+    isLoadingCurrenciesInfinite,
+    isLoadingGroupBuying,
+    isLoadingPricingConfigInfinite,
+    isLoadingProductList,
+    isLoadingSalesOrganizationInfinite,
+  ]);
+
+  console.log(
+    isLoadingPricingConfigInfinite ||
+      isLoadingCurrenciesInfinite ||
+      isLoadingGroupBuying ||
+      isLoadingChannelsMDM ||
+      isLoadingProductList ||
+      isLoadingSalesOrganizationInfinite
+  );
+
   return (
     <>
       {isLoadingPricingConfigInfinite ||
       isLoadingCurrenciesInfinite ||
+      isLoadingGroupBuying ||
       isLoadingChannelsMDM ||
-      isFetchingChannelsMDM ||
       isLoadingProductList ||
-      isFetchingProductList ||
       isLoadingSalesOrganizationInfinite ? (
         <Center>
-          <Spin tip="Loading data..." />
+          <Progress type="circle" percent={percent} />
         </Center>
       ) : (
         <Col>
@@ -438,14 +639,24 @@ const CreatePricingStructure: any = () => {
                       },
                     }}
                     name="pricing_config"
-                    render={({ field: { onChange }, fieldState: { error } }) => (
+                    render={({ field: { onChange, value }, fieldState: { error } }) => (
                       <>
-                        <Label>
-                          Price Structure Config
-                          <span style={{ color: colors.red.regular }}>*</span>
-                        </Label>
+                        <Row alignItems="center" gap="8px">
+                          <Col>
+                            <Label>
+                              Price Structure Config
+                              <span style={{ color: colors.red.regular }}>*</span>
+                            </Label>
+                          </Col>
+                          <Col>
+                            <Tooltip title="Price Structure Config" color={"#F4FBFC"}>
+                              <ICInfo />
+                            </Tooltip>
+                          </Col>
+                        </Row>
                         <Spacer size={3} />
                         <FormSelect
+                          defaultValue={value}
                           error={error?.message}
                           height="48px"
                           style={{ width: "100%" }}
@@ -489,7 +700,7 @@ const CreatePricingStructure: any = () => {
                       },
                     }}
                     name="currency"
-                    render={({ field: { onChange }, fieldState: { error } }) => (
+                    render={({ field: { onChange, value }, fieldState: { error } }) => (
                       <>
                         <Label>
                           Currency
@@ -497,6 +708,7 @@ const CreatePricingStructure: any = () => {
                         </Label>
                         <Spacer size={3} />
                         <FormSelect
+                          defaultValue={value}
                           error={error?.message}
                           height="48px"
                           style={{ width: "100%" }}
@@ -541,7 +753,7 @@ const CreatePricingStructure: any = () => {
                       },
                     }}
                     name="manage_by"
-                    render={({ field: { onChange }, fieldState: { error } }) => (
+                    render={({ field: { onChange, value }, fieldState: { error } }) => (
                       <>
                         <Label>
                           Manage By
@@ -549,6 +761,7 @@ const CreatePricingStructure: any = () => {
                         </Label>
                         <Spacer size={3} />
                         <FormSelect
+                          defaultValue={value}
                           error={error?.message}
                           height="48px"
                           style={{ width: "100%" }}
@@ -661,6 +874,7 @@ const CreatePricingStructure: any = () => {
                     <Col>
                       <Button
                         size="big"
+                        disabled={Object.keys(errors).length}
                         variant={"tertiary"}
                         onClick={() => setModal({ open: true, typeForm: "Add Products", data: {} })}
                       >
@@ -670,6 +884,291 @@ const CreatePricingStructure: any = () => {
                   </Row>
                 </Col>
               </Row>
+
+              <Table
+                title={
+                  rowSelectionProductsSelected.selectedRowKeys.length
+                    ? () => (
+                        <Row gap="8px" alignItems="center" nowrap>
+                          <Col>
+                            <Text>{`${rowSelectionProductsSelected.selectedRowKeys.length}/${productsSelected.length} Selected Products`}</Text>
+                          </Col>
+                          |
+                          <Col>
+                            <Text
+                              clickable
+                              onClick={() => handleRemoveAllSelectedProduct()}
+                              color="pink.regular"
+                            >
+                              Remove
+                            </Text>
+                          </Col>
+                        </Row>
+                      )
+                    : null
+                }
+                loading={isLoadingProductList || isFetchingProductList}
+                columns={columnsProductsSelected.filter(
+                  (filtering) =>
+                    filtering.dataIndex !== "id" &&
+                    filtering.dataIndex !== "key" &&
+                    filtering.dataIndex !== "hasVariant" &&
+                    filtering.dataIndex !== "status"
+                )}
+                data={productsSelected}
+                rowSelection={rowSelectionProductsSelected}
+                expandable={{
+                  expandedRowRender: (
+                    recordExpandedRowRenderProductSelected: any,
+                    indexExpandedRowRenderProductSelected: any
+                  ) => {
+                    return (
+                      <>
+                        {recordExpandedRowRenderProductSelected.distribution_channel.map(
+                          (dataDistChannel: any, indexDistChannel: any) => {
+                            return (
+                              <Card key={indexDistChannel} margin="20px" padding="20px">
+                                <Text color={"blue.dark"} variant={"headingMedium"}>
+                                  {dataDistChannel.name}
+                                </Text>
+
+                                <Spacer size={8} />
+
+                                <Controller
+                                  control={control}
+                                  name={`product_selected.${indexExpandedRowRenderProductSelected}.distribution_channel.${indexDistChannel}.manage_by_zone`}
+                                  render={({ field: { onChange, value } }) => (
+                                    <Row alignItems="center" gap="12px">
+                                      <Switch
+                                        defaultChecked={value}
+                                        checked={value}
+                                        onChange={onChange}
+                                      />
+                                      <Text>Manage by Zone</Text>
+                                    </Row>
+                                  )}
+                                />
+
+                                <Spacer size={24} />
+
+                                <Divider />
+
+                                <Spacer size={24} />
+
+                                <Text color={"blue.dark"} variant={"headingRegular"}>
+                                  Total Cost
+                                </Text>
+
+                                <Spacer size={8} />
+
+                                <Controller
+                                  control={control}
+                                  name={`product_selected.${indexExpandedRowRenderProductSelected}.distribution_channel.${indexDistChannel}.is_reference`}
+                                  render={({ field: { onChange, value } }) => (
+                                    <Row alignItems="center" gap="12px">
+                                      <Switch
+                                        defaultChecked={value}
+                                        checked={value}
+                                        onChange={onChange}
+                                      />
+                                      <Text>is Reference</Text>
+                                      <Tooltip title="is Reference" color={"#F4FBFC"}>
+                                        <ICInfo />
+                                      </Tooltip>
+                                    </Row>
+                                  )}
+                                />
+
+                                <Spacer size={24} />
+
+                                <Row width="100%" alignItems="center" gap="12px">
+                                  <Col width="40%">
+                                    <Input
+                                      width="100%"
+                                      label="Cost"
+                                      defaultValue={getValues(
+                                        `product_selected.${indexExpandedRowRenderProductSelected}.distribution_channel.${indexDistChannel}.cost`
+                                      )}
+                                      height="48px"
+                                      error={
+                                        errors?.product_selected?.[
+                                          indexExpandedRowRenderProductSelected
+                                        ]?.distribution_channel[indexDistChannel].cost.message
+                                      }
+                                      required
+                                      placeholder={`e.g ${dataDistChannel.currency.currency} 2.000,00`}
+                                      {...register(
+                                        `product_selected.${indexExpandedRowRenderProductSelected}.distribution_channel.${indexDistChannel}.cost`
+                                      )}
+                                    />
+                                  </Col>
+
+                                  <Col width="20%">
+                                    <Controller
+                                      control={control}
+                                      name={`product_selected.${indexExpandedRowRenderProductSelected}.distribution_channel.${indexDistChannel}.margin_type`}
+                                      render={({
+                                        field: { onChange, value },
+                                        fieldState: { error },
+                                      }) => (
+                                        <Dropdown
+                                          error={error?.message}
+                                          defaultValue={value}
+                                          label="Margin Type"
+                                          width="100%"
+                                          noSearch
+                                          items={[
+                                            { id: "Percent", value: "Percent" },
+                                            { id: "Fix Amount", value: "Fix Amount" },
+                                          ]}
+                                          handleChange={(value: any) => {
+                                            onChange(value);
+                                          }}
+                                        />
+                                      )}
+                                    />
+                                  </Col>
+
+                                  <Col width="30%">
+                                    <Input
+                                      width="100%"
+                                      label="Margin Value"
+                                      defaultValue={getValues(
+                                        `product_selected.${indexExpandedRowRenderProductSelected}.distribution_channel.${indexDistChannel}.margin_value`
+                                      )}
+                                      height="48px"
+                                      error={
+                                        errors?.product_selected?.[
+                                          indexExpandedRowRenderProductSelected
+                                        ]?.distribution_channel[indexDistChannel].margin_value
+                                          .message
+                                      }
+                                      required
+                                      placeholder={"e.g 20"}
+                                      {...register(
+                                        `product_selected.${indexExpandedRowRenderProductSelected}.distribution_channel.${indexDistChannel}.margin_value`
+                                      )}
+                                    />
+                                  </Col>
+                                </Row>
+
+                                <Spacer size={24} />
+
+                                {dataDistChannel.level.map((subLevel: any, indexLevel: any) => {
+                                  return (
+                                    <Col key={indexLevel}>
+                                      <Text color={"blue.dark"} variant={"headingRegular"}>
+                                        {`Level ${indexLevel + 1}`}
+                                      </Text>
+
+                                      <Spacer size={16} />
+
+                                      <Controller
+                                        control={control}
+                                        name={`product_selected.${indexExpandedRowRenderProductSelected}.distribution_channel.${indexDistChannel}.level.${indexLevel}.is_reference`}
+                                        render={({ field: { onChange, value } }) => (
+                                          <Row alignItems="center" gap="12px">
+                                            <Switch
+                                              defaultChecked={value}
+                                              checked={value}
+                                              onChange={onChange}
+                                            />
+                                            <Text>is Reference</Text>
+                                            <Tooltip title="is Reference" color={"#F4FBFC"}>
+                                              <ICInfo />
+                                            </Tooltip>
+                                          </Row>
+                                        )}
+                                      />
+
+                                      <Spacer size={16} />
+
+                                      <Row width="100%" alignItems="center" gap="12px">
+                                        <Col width="40%">
+                                          <Input
+                                            width="100%"
+                                            label={subLevel.nameLevel}
+                                            defaultValue={getValues(
+                                              `product_selected.${indexExpandedRowRenderProductSelected}.distribution_channel.${indexDistChannel}.level.${indexLevel}.cost`
+                                            )}
+                                            height="48px"
+                                            error={
+                                              errors?.product_selected?.[
+                                                indexExpandedRowRenderProductSelected
+                                              ]?.distribution_channel[indexDistChannel].level?.[
+                                                indexLevel
+                                              ]?.message
+                                            }
+                                            required
+                                            placeholder={`e.g ${dataDistChannel.currency.currency} 2.000,00`}
+                                            {...register(
+                                              `product_selected.${indexExpandedRowRenderProductSelected}.distribution_channel.${indexDistChannel}.level.${indexLevel}.cost`
+                                            )}
+                                          />
+                                        </Col>
+
+                                        <Col width="20%">
+                                          <Controller
+                                            control={control}
+                                            name={`product_selected.${indexExpandedRowRenderProductSelected}.distribution_channel.${indexDistChannel}.level.${indexLevel}.margin_type`}
+                                            render={({
+                                              field: { onChange, value },
+                                              fieldState: { error },
+                                            }) => (
+                                              <Dropdown
+                                                error={error?.message}
+                                                defaultValue={value}
+                                                label="Margin Type"
+                                                width="100%"
+                                                noSearch
+                                                items={[
+                                                  { id: "Percent", value: "Percent" },
+                                                  { id: "Fix Amount", value: "Fix Amount" },
+                                                ]}
+                                                handleChange={(value: any) => {
+                                                  onChange(value);
+                                                }}
+                                              />
+                                            )}
+                                          />
+                                        </Col>
+
+                                        <Col width="30%">
+                                          <Input
+                                            width="100%"
+                                            label="Margin Value"
+                                            defaultValue={getValues(
+                                              `product_selected.${indexExpandedRowRenderProductSelected}.distribution_channel.${indexDistChannel}.level.${indexLevel}.margin_value`
+                                            )}
+                                            height="48px"
+                                            error={
+                                              errors?.product_selected?.[
+                                                indexExpandedRowRenderProductSelected
+                                              ]?.distribution_channel[indexDistChannel].level?.[
+                                                indexLevel
+                                              ].margin_value.message
+                                            }
+                                            required
+                                            placeholder={"e.g 20"}
+                                            {...register(
+                                              `product_selected.${indexExpandedRowRenderProductSelected}.distribution_channel.${indexDistChannel}.level.${indexLevel}.margin_value`
+                                            )}
+                                          />
+                                        </Col>
+                                      </Row>
+                                    </Col>
+                                  );
+                                })}
+                              </Card>
+                            );
+                          }
+                        )}
+                      </>
+                    );
+                  },
+                }}
+              />
+              <Pagination pagination={paginationProductsSelected} />
             </Col>
           </Card>
         </Col>
@@ -708,7 +1207,7 @@ const CreatePricingStructure: any = () => {
             >
               Cancel
             </Button>
-            <Button onClick={handleSelectedField} variant="primary" size="big">
+            <Button onClick={handleSubmit(handleSelectedField)} variant="primary" size="big">
               {typeForm === "Add Products" ? "Add" : "Copy"}
             </Button>
           </div>
@@ -778,6 +1277,7 @@ const Card = styled.div`
   background: #ffffff;
   border-radius: 16px;
   padding: ${(p) => (p.padding ? p.padding : "16px")};
+  margin: ${(p) => (p.margin ? p.margin : "16px")};
 `;
 
 const Center = styled.div`
@@ -791,6 +1291,10 @@ const Label = styled.div`
   font-size: 16px;
   line-height: 24px;
   color: #000000;
+`;
+
+const Divider = styled.div`
+  border: 1px dashed #dddddd;
 `;
 
 export default CreatePricingStructure;

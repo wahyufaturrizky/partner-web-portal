@@ -200,7 +200,7 @@ const UOMConversionDetail = () => {
   };
 
   const updateStatusUom = (rowKey: any) => {
-    let newData = {
+    let newData: any = {
       name: UomData?.name,
       base_uom_id: UomData?.baseUomId,
       items: UomData?.dataForUpdate
@@ -225,7 +225,7 @@ const UOMConversionDetail = () => {
   }
 
   const onSave = (data: any) => {
-    const newData = {
+    const newData: any = {
       name: data?.name,
       base_uom_id: data?.baseUom,
       items: UomData?.dataForUpdate
@@ -234,7 +234,6 @@ const UOMConversionDetail = () => {
     router.back()
   }
 
-  console.log(UomData?.data, '<<<buat table')
   const columns = [
     {
       title: "Qty",

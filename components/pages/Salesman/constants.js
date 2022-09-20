@@ -1,4 +1,5 @@
 import styled from "styled-components";
+import { mdmDownloadService } from "lib/client";
 
 import DownloadSvg from "assets/icons/ic-download.svg";
 import UploadSvg from "assets/icons/ic-upload.svg";
@@ -71,6 +72,15 @@ export const downloadOptions = () => [
     ),
   },
 ]
+
+export const downloadFileSalesDivision = (params) =>
+  mdmDownloadService("/sales-division/template/download", { params }).then((res) => {
+    let dataUrl = window.URL.createObjectURL(new Blob([res.data]));
+    let tempLink = document.createElement("a");
+    tempLink.href = dataUrl;
+    tempLink.setAttribute("download", `sales_division${new Date().getTime()}.xlsx`);
+    tempLink.click();
+  });
 
 const Notif = styled.div`
 	background: #ffffff;

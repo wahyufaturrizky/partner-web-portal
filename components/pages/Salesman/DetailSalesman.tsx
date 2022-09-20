@@ -44,7 +44,7 @@ export default function ComponentDetailSalesman({
     totalItems: 100,
   });
   const router = useRouter();
-  const { status, salesman_id }: any = router.query || {}
+  const { status, salesman_id, name, idCard, code }: any = router.query || {}
   const [search, setSearch] = useState<string>('')
   const [division, setDivision] = useState('')
   const [remarks, setRemarks] = useState('')
@@ -171,11 +171,10 @@ export default function ComponentDetailSalesman({
   const _handleDraftedSalesman = () => {
     const dataUpdated: any = {
       ...payloads,
-      division,
+      division: division,
       status: 4,
       tobe: -1
     }
-
     handleUpdateSalesman(dataUpdated)
   }
 
@@ -194,7 +193,7 @@ export default function ComponentDetailSalesman({
     const dataUpdated: any = {
       ...payloads,
       division,
-      status: modalActive === 'Active' ? 0 : 1,
+      status: 2,
       tobe: modalActive === 'Active' ? 0 : 1,
       remark: remarks,
     }
@@ -216,7 +215,7 @@ export default function ComponentDetailSalesman({
     <div>
       <Row gap="4px" alignItems="center">
         <ArrowLeft style={{ cursor: "pointer" }} onClick={() => router.back()} />
-        <Text variant="h4">Detail Salesman {salesman_id}</Text>
+        <Text variant="h4">{name} - {idCard}</Text>
       </Row>
       <Spacer size={30} />
       <Card>
@@ -257,6 +256,7 @@ export default function ComponentDetailSalesman({
             <Accordion.Header variant="blue">General</Accordion.Header>
             <Accordion.Body>
               <Forms
+                code={code}
                 forms={data}
                 salesDivision={listSalesDivision?.rows || []}
                 status={status}
@@ -358,7 +358,7 @@ export default function ComponentDetailSalesman({
 
       {/* modal view detail customers */}
       <Modal
-        width={900}
+        width={1100}
         visible={modalCustomer.visible}
         title={modalCustomer?.data?.name}
         onCancel={() => setModalCustomer({ visible: false, data: {}})}
@@ -374,7 +374,7 @@ export default function ComponentDetailSalesman({
             detailCustomer={modalCustomer?.data}
             pagination={pagination}
             checkedDate={defaultChecked}
-            onChecked={(value: any) => setDefaultChecked(!defaultChecked)}
+            onChecked={() => setDefaultChecked(!defaultChecked)}
           />
         }
       />
@@ -389,12 +389,32 @@ const ContentDetailCustomer = ({
 }:any) => {
   const columns: any = [
     {
-      title: 'Permission Name',
-      dataIndex: 'customer'
+      title: 'Branch Name',
+      dataIndex: 'branch'
     },
     {
-      title: 'Module',
-      dataIndex: 'module'
+      title: 'Visit Frequency',
+      dataIndex: 'frequency'
+    },
+    {
+      title: 'Visit Day',
+      dataIndex: 'day'
+    },
+    {
+      title: 'Date',
+      dataIndex: 'date'
+    },
+    {
+      title: 'Start Time',
+      dataIndex: 'startTime'
+    },
+    {
+      title: 'End Time',
+      dataIndex: 'endTime'
+    },
+    {
+      title: 'Duration',
+      dataIndex: 'duration'
     },
   ]
 
@@ -430,10 +450,12 @@ const ContentDetailCustomer = ({
         </FlexElement>
       </Row>
       <Spacer size={20} />
-      <Table columns={columns} data={[
-        { customer: 'Approval Payment', module: 'Finance' },
-        { customer: 'Create Payment', module: 'Finance' },
-        { customer: 'Create Payment', module: 'Finance' },
+      <Table
+        columns={columns}
+        data={[
+          { branch: 'PT. Indomaret Buah Batu', frequency: 'M1', day: 'Monday', date: '02/02/2022', startTime: '08:00:00', endTime: '08:30:00', duration: '0 Days, 0 Hours, 30 minutes, 00 seconds' },
+          { branch: 'PT. Indomaret Buah Batu', frequency: 'M2', day: 'Tuesday', date: '02/02/2022', startTime: '09:00:00', endTime: '08:30:00', duration: '0 Days, 0 Hours, 30 minutes, 00 seconds' },
+          { branch: 'PT. Indomaret Buah Batu', frequency: 'M3', day: 'Wednesday', date: '02/02/2022', startTime: '10:00:00', endTime: '08:30:00', duration: '0 Days, 0 Hours, 30 minutes, 00 seconds' },
         ]}
       />
       <Spacer size={20} />
@@ -474,6 +496,7 @@ const ActionButton = ({
 }
 
 const Forms = ({
+  code,
   status,
   forms,
   setDivision,
@@ -535,7 +558,7 @@ const Forms = ({
             value: item?.divisiName,
           } })}
           handleChange={(value: any) => setDivision(value)}
-          defaultValue={forms?.division || 'sales division not found'}
+          defaultValue={code || 'sales division not found'}
           onSearch={(value: any) => setSearch(value)}
           disabled={status === "Rejected" || status === "Waiting for Approval"}
         />

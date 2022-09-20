@@ -47,15 +47,6 @@ export default function Salesman() {
     arrows: true,
     totalItems: 100,
   });
-  const propsSet = {
-    status: {
-      active: 10,
-      inactive: 3,
-      waiting : 3,
-      reject: 3,
-      draft: 3
-    }
-  }
 
   const columns = [
     {
@@ -97,7 +88,7 @@ export default function Salesman() {
     },
     {
       title: "Action",
-      render: ({ id, statusText }: any) => (
+      render: ({ id, statusText, idCard, name, code }: any) => (
         <Button
           size="small"
           variant="tertiary"
@@ -105,7 +96,10 @@ export default function Salesman() {
             pathname: '/salesman/[salesman_id]',
             query: {
               salesman_id: id,
-              status: statusText
+              status: statusText,
+              idCard,
+              name,
+              code
             },
           })}
         >
