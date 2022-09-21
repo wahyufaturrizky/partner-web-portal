@@ -2,7 +2,7 @@ import { useQuery, useMutation, useInfiniteQuery } from "react-query";
 import { client, mdmService } from "../../lib/client";
 
 const fetchPricingStructureLists = async ({ query = {} }) => {
-  return client(`/price-structure`, {
+  return mdmService(`/price-structure`, {
     params: {
       search: "",
       limit: 10,
@@ -132,7 +132,7 @@ function useCreatePricingConfig({ options }) {
 function useCreatePricingStructureList({ options }) {
   return useMutation(
     (updates) =>
-      client(`/price-structure`, {
+      mdmService(`/price-structure`, {
         method: "POST",
         data: updates,
       }),
@@ -145,7 +145,7 @@ function useCreatePricingStructureList({ options }) {
 function useCreatePricingStructureDraftList({ options }) {
   return useMutation(
     (updates) =>
-      client(`/price-structure/savedraft`, {
+      mdmService(`/price-structure/savedraft`, {
         method: "POST",
         data: updates,
       }),
@@ -156,7 +156,7 @@ function useCreatePricingStructureDraftList({ options }) {
 }
 
 const fetchPricingStructureList = async ({ partner_config_id }) => {
-  return client(`/price-structure/${partner_config_id}`).then((data) => data);
+  return mdmService(`/price-structure/${partner_config_id}`).then((data) => data);
 };
 
 const usePricingStructureList = ({ partner_config_id, options }) => {
@@ -200,7 +200,7 @@ const usePricingConfigList = ({ pricing_config_id, options }) => {
 function useUpdatePricingStructureList({ pricingStructureListId, options }) {
   return useMutation(
     (updates) =>
-      client(`/price-structure/${pricingStructureListId}`, {
+      mdmService(`/price-structure/${pricingStructureListId}`, {
         method: "PUT",
         data: updates,
       }),
@@ -239,7 +239,7 @@ function useUpdatePricingConfigList({ pricingConfigListId, options }) {
 const useDeletePricingStructureList = ({ options }) => {
   return useMutation(
     (ids) =>
-      client("/price-structure", {
+      mdmService("/price-structure", {
         method: "DELETE",
         data: ids,
       }),
@@ -278,7 +278,7 @@ const useDeletePricingConfigList = ({ options }) => {
 function useValidatePricingStructureInput({ options }) {
   return useMutation(
     (updates) =>
-      client(`/price-structure/validate`, {
+      mdmService(`/price-structure/validate`, {
         method: "POST",
         data: updates,
       }),
@@ -291,7 +291,7 @@ function useValidatePricingStructureInput({ options }) {
 function useApprovePricingStructureList({ options, partner_id }) {
   return useMutation(
     (updates) =>
-      client(`/price-structure/approval/${partner_id}`, {
+      mdmService(`/price-structure/approval/${partner_id}`, {
         method: "PUT",
         data: updates,
       }),

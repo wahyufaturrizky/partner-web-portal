@@ -132,7 +132,6 @@ const PricingStructureList: any = () => {
   } = usePricingStructureLists({
     options: {
       onSuccess: (data: any) => {},
-      enabled: false,
     },
     query: {
       status: "ACTIVE",
