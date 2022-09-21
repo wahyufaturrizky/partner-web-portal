@@ -312,8 +312,6 @@ const ProfitCenter = () => {
                   variant="primary"
                   size="big"
                   onClick={() => {
-                    console.log(selectedRowKeys);
-                    
                     deleteProfit({ profit_center_ids: selectedRowKeys, company_ids: ["KSNI"] });
                   }}
                 >

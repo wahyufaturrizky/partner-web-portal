@@ -29,9 +29,10 @@ import {
   Table,
   Text,
   Tooltip,
+  FormInput,
 } from "pink-lava-ui";
 import { useEffect, useState } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import styled from "styled-components";
 import { colors } from "utils/color";
 import { ICCopy, ICInfo, ICPlus } from "../../assets";
@@ -114,7 +115,50 @@ const CreatePricingStructure: any = () => {
       currency: "",
       manage_by: "",
       distribution_channel: null,
-      product_selected: [],
+      product_selected: [
+        {
+          distribution_channel: [
+            {
+              companyId: "",
+              createdAt: "",
+              deletedAt: "",
+              deletedBy: "",
+              modifiedAt: "",
+              modifiedBy: "",
+              name: "",
+              manage_by_zone: false,
+              is_reference: false,
+              margin_type: "",
+              margin_value: "",
+              cost: "",
+              salesChannelId: "",
+              createdBy: 0,
+              currency: null,
+              level: [
+                {
+                  buyingPrice: 0,
+                  priceStructureId: 0,
+                  groupBuyingPrice: null,
+                  id: null,
+                  index: null,
+                  level: null,
+                  nameLevel: "",
+                  cost: "",
+                  margin_value: "",
+                  margin_type: "",
+                  is_reference: false,
+                },
+              ],
+            },
+          ],
+          hasVariant: false,
+          id: "",
+          key: "",
+          name: "",
+          productCategoryName: "",
+          status: "",
+        },
+      ],
     },
   });
 
@@ -331,15 +375,19 @@ const CreatePricingStructure: any = () => {
     pricingStructureDraft(data);
   };
 
-  useEffect(() => {
-    const checkIfError = () => {
-      setModal({ ...modal, open: false });
-    };
+  useEffect(
+    () => {
+      const checkIfError = () => {
+        setModal({ ...modal, open: false });
+      };
 
-    if (Object.keys(errors).length) {
-      checkIfError();
-    }
-  }, [errors]);
+      if (Object.keys(errors).length) {
+        checkIfError();
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [errors]
+  );
 
   const handleSelectedField = (data: any) => {
     setModal({ ...modal, open: false });
@@ -564,9 +612,10 @@ const CreatePricingStructure: any = () => {
         newPercent = 100;
       }
 
-      setPercent(parseInt(newPercent));
+      setPercent(parseInt(String(newPercent)));
     };
     increaseProgress();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     isLoadingChannelsMDM,
     isLoadingCurrenciesInfinite,
@@ -575,15 +624,6 @@ const CreatePricingStructure: any = () => {
     isLoadingProductList,
     isLoadingSalesOrganizationInfinite,
   ]);
-
-  console.log(
-    isLoadingPricingConfigInfinite ||
-      isLoadingCurrenciesInfinite ||
-      isLoadingGroupBuying ||
-      isLoadingChannelsMDM ||
-      isLoadingProductList ||
-      isLoadingSalesOrganizationInfinite
-  );
 
   return (
     <>
@@ -649,7 +689,10 @@ const CreatePricingStructure: any = () => {
                             </Label>
                           </Col>
                           <Col>
-                            <Tooltip title="Price Structure Config" color={"#F4FBFC"}>
+                            <Tooltip
+                              title="Data create from manage price structure config"
+                              color={"#F4FBFC"}
+                            >
                               <ICInfo />
                             </Tooltip>
                           </Col>
@@ -913,6 +956,7 @@ const CreatePricingStructure: any = () => {
                     filtering.dataIndex !== "id" &&
                     filtering.dataIndex !== "key" &&
                     filtering.dataIndex !== "hasVariant" &&
+                    filtering.dataIndex !== "productCategoryName" &&
                     filtering.dataIndex !== "status"
                 )}
                 data={productsSelected}
@@ -937,16 +981,18 @@ const CreatePricingStructure: any = () => {
                                 <Controller
                                   control={control}
                                   name={`product_selected.${indexExpandedRowRenderProductSelected}.distribution_channel.${indexDistChannel}.manage_by_zone`}
-                                  render={({ field: { onChange, value } }) => (
-                                    <Row alignItems="center" gap="12px">
-                                      <Switch
-                                        defaultChecked={value}
-                                        checked={value}
-                                        onChange={onChange}
-                                      />
-                                      <Text>Manage by Zone</Text>
-                                    </Row>
-                                  )}
+                                  render={({ field: { onChange, value } }) => {
+                                    return (
+                                      <Row alignItems="center" gap="12px">
+                                        <Switch
+                                          defaultChecked={value || false}
+                                          checked={value}
+                                          onChange={onChange}
+                                        />
+                                        <Text>Manage by Zone</Text>
+                                      </Row>
+                                    );
+                                  }}
                                 />
 
                                 <Spacer size={24} />
@@ -967,12 +1013,15 @@ const CreatePricingStructure: any = () => {
                                   render={({ field: { onChange, value } }) => (
                                     <Row alignItems="center" gap="12px">
                                       <Switch
-                                        defaultChecked={value}
+                                        defaultChecked={value || false}
                                         checked={value}
                                         onChange={onChange}
                                       />
                                       <Text>is Reference</Text>
-                                      <Tooltip title="is Reference" color={"#F4FBFC"}>
+                                      <Tooltip
+                                        title="Data create from manage price structure config"
+                                        color={"#F4FBFC"}
+                                      >
                                         <ICInfo />
                                       </Tooltip>
                                     </Row>
@@ -984,6 +1033,7 @@ const CreatePricingStructure: any = () => {
                                 <Row width="100%" alignItems="center" gap="12px">
                                   <Col width="40%">
                                     <Input
+                                      type="number"
                                       width="100%"
                                       label="Cost"
                                       defaultValue={getValues(
@@ -993,7 +1043,7 @@ const CreatePricingStructure: any = () => {
                                       error={
                                         errors?.product_selected?.[
                                           indexExpandedRowRenderProductSelected
-                                        ]?.distribution_channel[indexDistChannel].cost.message
+                                        ]?.distribution_channel?.[indexDistChannel].cost?.message
                                       }
                                       required
                                       placeholder={`e.g ${dataDistChannel.currency.currency} 2.000,00`}
@@ -1030,23 +1080,32 @@ const CreatePricingStructure: any = () => {
                                   </Col>
 
                                   <Col width="30%">
-                                    <Input
-                                      width="100%"
-                                      label="Margin Value"
-                                      defaultValue={getValues(
-                                        `product_selected.${indexExpandedRowRenderProductSelected}.distribution_channel.${indexDistChannel}.margin_value`
-                                      )}
-                                      height="48px"
-                                      error={
-                                        errors?.product_selected?.[
-                                          indexExpandedRowRenderProductSelected
-                                        ]?.distribution_channel[indexDistChannel].margin_value
-                                          .message
-                                      }
-                                      required
-                                      placeholder={"e.g 20"}
-                                      {...register(
-                                        `product_selected.${indexExpandedRowRenderProductSelected}.distribution_channel.${indexDistChannel}.margin_value`
+                                    <Controller
+                                      control={control}
+                                      name={`product_selected.${indexExpandedRowRenderProductSelected}.distribution_channel.${indexDistChannel}.margin_value`}
+                                      render={({
+                                        field: { onChange, value },
+                                        fieldState: { error },
+                                      }) => (
+                                        <>
+                                          <Label>Margin Value</Label>
+                                          <Spacer size={3} />
+                                          <ComponentDistributionChannelMarginType
+                                            control={control}
+                                            indexExpandedRowRenderProductSelected={
+                                              indexExpandedRowRenderProductSelected
+                                            }
+                                            indexDistChannel={indexDistChannel}
+                                            onChange={onChange}
+                                            value={value}
+                                            status={
+                                              errors?.product_selected?.[
+                                                indexExpandedRowRenderProductSelected
+                                              ]?.distribution_channel?.[indexDistChannel]
+                                                ?.margin_value && "error"
+                                            }
+                                          />
+                                        </>
                                       )}
                                     />
                                   </Col>
@@ -1069,12 +1128,15 @@ const CreatePricingStructure: any = () => {
                                         render={({ field: { onChange, value } }) => (
                                           <Row alignItems="center" gap="12px">
                                             <Switch
-                                              defaultChecked={value}
+                                              defaultChecked={value || false}
                                               checked={value}
                                               onChange={onChange}
                                             />
                                             <Text>is Reference</Text>
-                                            <Tooltip title="is Reference" color={"#F4FBFC"}>
+                                            <Tooltip
+                                              title="Data create from manage price structure config"
+                                              color={"#F4FBFC"}
+                                            >
                                               <ICInfo />
                                             </Tooltip>
                                           </Row>
@@ -1095,9 +1157,9 @@ const CreatePricingStructure: any = () => {
                                             error={
                                               errors?.product_selected?.[
                                                 indexExpandedRowRenderProductSelected
-                                              ]?.distribution_channel[indexDistChannel].level?.[
+                                              ]?.distribution_channel?.[indexDistChannel]?.level?.[
                                                 indexLevel
-                                              ]?.message
+                                              ]?.cost?.message
                                             }
                                             required
                                             placeholder={`e.g ${dataDistChannel.currency.currency} 2.000,00`}
@@ -1134,24 +1196,34 @@ const CreatePricingStructure: any = () => {
                                         </Col>
 
                                         <Col width="30%">
-                                          <Input
-                                            width="100%"
-                                            label="Margin Value"
-                                            defaultValue={getValues(
-                                              `product_selected.${indexExpandedRowRenderProductSelected}.distribution_channel.${indexDistChannel}.level.${indexLevel}.margin_value`
-                                            )}
-                                            height="48px"
-                                            error={
-                                              errors?.product_selected?.[
-                                                indexExpandedRowRenderProductSelected
-                                              ]?.distribution_channel[indexDistChannel].level?.[
-                                                indexLevel
-                                              ].margin_value.message
-                                            }
-                                            required
-                                            placeholder={"e.g 20"}
-                                            {...register(
-                                              `product_selected.${indexExpandedRowRenderProductSelected}.distribution_channel.${indexDistChannel}.level.${indexLevel}.margin_value`
+                                          <Controller
+                                            control={control}
+                                            name={`product_selected.${indexExpandedRowRenderProductSelected}.distribution_channel.${indexDistChannel}.level.${indexLevel}.margin_value`}
+                                            render={({
+                                              field: { onChange, value },
+                                              fieldState: { error },
+                                            }) => (
+                                              <>
+                                                <Label>Margin Value</Label>
+                                                <Spacer size={3} />
+                                                <ComponentLevelMarginType
+                                                  control={control}
+                                                  indexExpandedRowRenderProductSelected={
+                                                    indexExpandedRowRenderProductSelected
+                                                  }
+                                                  indexDistChannel={indexDistChannel}
+                                                  indexLevel={indexLevel}
+                                                  onChange={onChange}
+                                                  value={value}
+                                                  status={
+                                                    errors?.product_selected?.[
+                                                      indexExpandedRowRenderProductSelected
+                                                    ]?.distribution_channel?.[indexDistChannel]
+                                                      .level?.[indexLevel]?.margin_value?.message &&
+                                                    "error"
+                                                  }
+                                                />
+                                              </>
                                             )}
                                           />
                                         </Col>
@@ -1270,6 +1342,44 @@ const CreatePricingStructure: any = () => {
         }
       />
     </>
+  );
+};
+
+const ComponentLevelMarginType = (props: any) => {
+  const data = useWatch({
+    control: props.control,
+    name: `product_selected.${props.indexExpandedRowRenderProductSelected}.distribution_channel.${props.indexDistChannel}.level.${props.indexLevel}`,
+  });
+
+  return (
+    <FormInput
+      size={"large"}
+      onChange={props.onChange}
+      placeholder={`e.g 20`}
+      suffix={data?.margin_type === "Percent" ? "%" : undefined}
+      defaultValue={props.value}
+      style={{ height: 48 }}
+      status={props.status}
+    />
+  );
+};
+
+const ComponentDistributionChannelMarginType = (props: any) => {
+  const data = useWatch({
+    control: props.control,
+    name: `product_selected.${props.indexExpandedRowRenderProductSelected}.distribution_channel.${props.indexDistChannel}`,
+  });
+
+  return (
+    <FormInput
+      size={"large"}
+      onChange={props.onChange}
+      placeholder={`e.g 20`}
+      suffix={data?.margin_type === "Percent" ? "%" : undefined}
+      defaultValue={props.value}
+      style={{ height: 48 }}
+      status={props.status}
+    />
   );
 };
 

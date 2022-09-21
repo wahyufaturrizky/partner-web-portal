@@ -36,7 +36,7 @@ export default function ComponentDetailSalesman({
     totalItems: 100,
   });
   const router = useRouter();
-  const { status, salesman_id, name, idCard, code }: any = router.query || {}
+  const { status, salesman_id, name, idCard, division: queryDivision }: any = router.query || {}
   const [search, setSearch] = useState<string>('')
   const [division, setDivision] = useState('')
   const [remarks, setRemarks] = useState('')
@@ -126,22 +126,27 @@ export default function ComponentDetailSalesman({
         return <ActionButton
           status={status}
           onSubmit={_handleUpdateSalesman}
+          isDisabled={payloads?.code?.length > 1}
           onCancel={() => router.back()}
         />
       case 'Waiting for Approval':
         return <ActionButton
           status={status}
           onSubmit={_handleUpdateSalesman}
+          isDisabled={payloads?.code?.length > 1}
           onReject={() => setModalConfirmation({ ...modalConfirmation, Rejected: true  })}
         />
       case 'Draft':
         return <ActionButton
+          isDisabled={payloads?.code?.length > 1}
           onSubmit={_handleUpdateSalesman}
           status={status}
+          onCancel={() => router.back()}
           onDraft={_handleDraftedSalesman}
         />
       default:
         return <ActionButton
+          isDisabled={payloads?.code?.length > 1}
           status={status}
           onCancel={() => router.back()} />
     }
@@ -167,6 +172,7 @@ export default function ComponentDetailSalesman({
       status: 4,
       tobe: -1
     }
+
     handleUpdateSalesman(dataUpdated)
   }
 
@@ -248,7 +254,7 @@ export default function ComponentDetailSalesman({
             <Accordion.Header variant="blue">General</Accordion.Header>
             <Accordion.Body>
               <Forms
-                code={code}
+                queryDivision={queryDivision}
                 forms={data}
                 salesDivision={listSalesDivision?.rows || []}
                 status={status}
@@ -373,8 +379,6 @@ export default function ComponentDetailSalesman({
     </div> 
   )
 }
-
-
 
 const Card = styled.div`
   background: #ffff;

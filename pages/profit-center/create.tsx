@@ -85,7 +85,6 @@ function ProfitCenterCreate({isUpdate,detailProfitCenter} :any) {
       payload.external_code = data.external_code,
       payload.description = data.description,
       payload.person_responsible = data.person_responsible
-      console.log(data.valid_from, payload);
     
     if (isUpdate && detailProfitCenter) {
       updateProfitCenter(payload);
