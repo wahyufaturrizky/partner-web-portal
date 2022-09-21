@@ -88,7 +88,7 @@ export default function Salesman() {
     },
     {
       title: "Action",
-      render: ({ id, statusText, idCard, name, code }: any) => (
+      render: ({ id, statusText, idCard, name, division }: any) => (
         <Button
           size="small"
           variant="tertiary"
@@ -99,7 +99,7 @@ export default function Salesman() {
               status: statusText,
               idCard,
               name,
-              code
+              division
             },
           })}
         >
@@ -203,15 +203,21 @@ export default function Salesman() {
               {
                 label: "By Country",
                 list: [
-                  { label: 'filter-1', value: 'filter-1' },
-                  { label: 'filter-2', value: 'filter-2' },
-                  { label: 'filter-3', value: 'filter-3' },
+                  { label: 'PMA Bandung Selatan', value: 'filter-1' },
+                  { label: 'PMA Majalengka', value: 'filter-2' },
+                ]
+              },
+              {
+                label: "By Division",
+                list: [
+                  { label: 'Division 1', value: 'division-1' },
                 ]
               }
             ]}
             label={false}
             width={194}
             roundedSelector
+            isShowClearFilter
             defaultValue="All"
             placeholder="Filter"
             noSearch

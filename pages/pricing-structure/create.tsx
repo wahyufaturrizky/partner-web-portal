@@ -624,7 +624,6 @@ const CreatePricingStructure: any = () => {
     isLoadingProductList,
     isLoadingSalesOrganizationInfinite,
   ]);
-  console.log("@product_selected", getValues("product_selected"));
 
   return (
     <>
