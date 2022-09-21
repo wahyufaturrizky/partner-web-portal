@@ -27,11 +27,11 @@ import usePagination from "@lucasmogari/react-pagination";
 import { useCompanyList, useCurrenciesMDM } from "hooks/company-list/useCompany";
 import { useProfitCenters } from "hooks/mdm/profit-center/useProfitCenter";
 import { useLanguages } from "hooks/languages/useLanguages";
-import { useCreateCostCenter } from "hooks/mdm/cost-center";
+import { useCostCenter, useCreateCostCenter, useUpdateCostCenter } from "hooks/mdm/cost-center";
 import { CompanyList, CostCenterSave, CurrenciesData, LanguagesData, ProfitCenterList, RowCompanyList, RowCurrenciesData, RowLanguagesData, RowProfitCenter } from "./cost_center_interface";
 
 
-const costCenterCategoryTable = [
+const costCenterCategoryDropdown = [
     {
       id: "Development",
       value: "Development",
@@ -72,6 +72,7 @@ const costCenterCategoryTable = [
 
 const CostCenterCreate = () => {
   const router = useRouter();
+  const { cost_center_id } = router.query;
   const pagination = usePagination({
     page: 1,
     itemsPerPage: 10,
@@ -81,11 +82,19 @@ const CostCenterCreate = () => {
     totalItems: 100,
   });
 
-  const [listUomCategory, setListUomCategory] = useState<any[]>([]);
+  const [listCompany, setlistCompany] = useState<any[]>([]);
   const [listProfitCenter, setListProfitCenter] = useState([])
   const [listCurrencies, setListCurrencies] = useState([])
   const [listLanguages, setListLanguages] = useState([])
-
+  const [newCostCenterTable, setNewCostCenterTable] = useState([{
+    actual_primary_cost: false,
+    plant_primary_cost: false,
+    actual_secondary_cost: false,
+    plant_secondary_cost: false,
+    actual_revenues: false,
+    plant_revenues: false,
+    commitment_update: false,
+  }])
   const [searchCompany, setSearchCompany] = useState("");
   const [searchProfitCenter, setSearchProfitCenter] = useState("");
   const [searchLanguage, setSearchLanguage] = useState("");
@@ -96,25 +105,43 @@ const CostCenterCreate = () => {
   const debounceFetchLanguage = useDebounce(searchLanguage, 1000);
   const debounceFetchCurrency = useDebounce(searchCurrency, 1000);
 
-  const [languageStatus, setLanguageStatus] = useState(true)
-  const [currencyStatus, setCurrencyStatus] = useState(true)
+  const [languageStatus, setLanguageStatus] = useState(false)
+  const [currencyStatus, setCurrencyStatus] = useState(false)
   const [checkSelectAll, setCheckSelectAll] = useState(false)
   const [description, setDescription] = useState("")
   const [costCenterCategory, setCostCenterCategory] = useState("")
   
-
-
-  const [newCostCenterTable, setNewCostCenterTable] = useState([{
-    actual_primary_cost: false,
-    plant_primary_cost: false,
-    actual_secondary_cost: false,
-    plant_secondary_cost: false,
-    actual_revenues: false,
-    plant_revenues: false,
-    commitment_update: false,
-  }])
   const { register, control, handleSubmit } = useForm();
   
+
+  const {
+    data: costCenterData,
+    isLoading: isLoadingCostCenter,
+    isFetching: isFetchingCostCenter,
+  } = useCostCenter({
+    id: cost_center_id && cost_center_id[1],
+    companyId: cost_center_id && cost_center_id[0],
+    query: {},
+    options: {
+      onSuccess: (data: any) => {
+        setDescription(data?.description)
+        setCostCenterCategory(data?.costCenterCategory)
+        setNewCostCenterTable([{
+          actual_primary_cost: data?.actualPrimaryCost === 'YES'? true : false,
+          plant_primary_cost: data?.plantPrimaryCost === 'YES'? true : false,
+          actual_secondary_cost: data?.actualSecondaryCost === 'YES'? true : false,
+          plant_secondary_cost: data?.plantSecondaryCost === 'YES'? true : false,
+          actual_revenues: data?.actualRevenues === 'YES'? true : false,
+          plant_revenues: data?.plantRevenues === 'YES'? true : false,
+          commitment_update: data?.commitmentUpdate === 'YES'? true : false,
+          }])
+      },
+      select: (data: any) => {
+        return data
+      },
+    },
+  });
+
   const {
         data: companyData,
         refetch: isFetchingMoreCompanyData,
@@ -129,7 +156,7 @@ const CostCenterCreate = () => {
                     label: element.name,
                 };
             });
-            setListUomCategory(mappedCompanyData);
+            setlistCompany(mappedCompanyData);
         },
         },
         query: {
@@ -211,10 +238,12 @@ const CostCenterCreate = () => {
         },
     });
 
-  const { mutate: createCostCenter, isLoading: isLoadingCreateCostCenter } = useCreateCostCenter({
+  const { mutate: updateCostCenter, isLoading: isLoadingCreateCostCenter } = useUpdateCostCenter({
+    id: cost_center_id && cost_center_id[1],
+    companyId: cost_center_id && cost_center_id[0],
     options: {
       onSuccess: () => {
-        queryClient.invalidateQueries(["uom-list"]);
+        queryClient.invalidateQueries(["cost-center"]);
         router.back();
       },
     },
@@ -223,15 +252,15 @@ const CostCenterCreate = () => {
 
   const onSave = (data: CostCenterSave) => {
     const newCostCenter = {
-        language : data?.language,
-        currency : data?.currency,
-        profit_center_id :data?.profit_center_id, 
-        company_id :data?.company_id?.toString(),
+        language : data?.language ? data?.language : costCenterData?.language,
+        currency : data?.currency ? data?.currency : costCenterData?.currency,
+        profit_center_id :data?.profit_center_id ? data?.profit_center_id : costCenterData?.profitCenterId, 
+        company_id : data?.company_id? data?.company_id?.toString() : costCenterData?.companyId,
         code :data?.code,
         name : data?.name,
         cost_center_category : costCenterCategory,
-        valid_from : data?.valid_from? data?.valid_from : moment().format("DD/MM/YYYY"),
-        valid_to : data?.valid_to? data?.valid_to : moment().format("DD/MM/YYYY"),
+        valid_from : data?.valid_from? data?.valid_from : moment(costCenterData?.validFrom).utc().format('DD/MM/YYYY'),
+        valid_to : data?.valid_to? data?.valid_to : moment(costCenterData?.validTo).utc().format('DD/MM/YYYY'),
         external_code : data?.external_code,
         description : description,
         person_responsible :data?.person_responsible,
@@ -243,7 +272,7 @@ const CostCenterCreate = () => {
         plant_revenues :newCostCenterTable[0].plant_revenues ? "YES" : "NO",
         commitment_update :newCostCenterTable[0].commitment_update ? "YES" : "NO"
     }
-    createCostCenter(newCostCenter)
+    updateCostCenter(newCostCenter)
   }
 
   const columns = [
@@ -391,6 +420,7 @@ const CostCenterCreate = () => {
   const handleDescription = (e: { target: { value: React.SetStateAction<string>; }; }) => {
     setDescription(e.target.value)
   }
+
   const setLanguageFromCompany = () => {
     setLanguageStatus(prev => !prev)
   }
@@ -400,11 +430,16 @@ const CostCenterCreate = () => {
   }
 
   const disabledDate: RangePickerProps['disabledDate'] = (current: number) => {
-    // Can not select days before today and today
     return current <= moment().startOf('day');
   };
 
-  if (isLoadingCompanyData)
+  if (
+    isLoadingCompanyData || 
+    isLoadingCostCenter || 
+    isFetchingCostCenter || 
+    isLoadingProfitCenterData ||
+    isLoadingLanguagesData ||
+    isLoadingCurrenciesData )
   return (
     <Center>
       <Spin tip="Loading data..." />
@@ -447,6 +482,7 @@ const CostCenterCreate = () => {
                         width="100%"
                         label="Cost Center Code"
                         height="48px"
+                        defaultValue={costCenterData?.code}
                         required
                         placeholder={"e.g 0131930111"}
                         {...register("code", { required: "Please enter name." })}
@@ -460,6 +496,7 @@ const CostCenterCreate = () => {
                         width="100%"
                         label="Cost Center Name"
                         height="48px"
+                        defaultValue={costCenterData?.name}
                         required
                         placeholder={"e.g Dept IT"}
                         {...register("name", { required: "Please enter name." })}
@@ -481,7 +518,8 @@ const CostCenterCreate = () => {
                         disabledDate={disabledDate}
                         onChange={(date: any, dateString: any) => onChange(dateString)}
                         label="Valid From"
-                        defaultValue={moment()} format={'DD/MM/YYYY'}
+                        defaultValue={moment(costCenterData?.validFrom)} 
+                        format={'DD/MM/YYYY'}
                         />
                     )}
                     />
@@ -499,7 +537,8 @@ const CostCenterCreate = () => {
                         disabledDate={disabledDate}
                         onChange={(date: any, dateString: any) => onChange(dateString)}
                         label="Valid To"
-                        defaultValue={moment()} format={'DD/MM/YYYY'}
+                        defaultValue={moment(costCenterData?.validTo)} 
+                        format={'DD/MM/YYYY'}
                         />
                     )}
                     />
@@ -526,8 +565,9 @@ const CostCenterCreate = () => {
                         borderColor={"#AAAAAA"}
                         arrowColor={"#000"}
                         withSearch
+                        defaultValue={listCompany.filter((company) => company.value === +costCenterData?.companyId)[0]?.label}
                         isLoading={isFetchingCompanyData}
-                        items={listUomCategory}
+                        items={listCompany}
                         onChange={(value: any) => {
                             onChange(value);
                         }}
@@ -583,6 +623,7 @@ const CostCenterCreate = () => {
                             borderColor={"#AAAAAA"}
                             arrowColor={"#000"}
                             withSearch
+                            defaultValue={costCenterData?.language}
                             isLoading={isFetchingLanguagesData}
                             items={
                                 isFetchingLanguagesData && !isFetchingMoreLanguagesData
@@ -624,6 +665,7 @@ const CostCenterCreate = () => {
                         borderColor={"#AAAAAA"}
                         arrowColor={"#000"}
                         withSearch
+                        defaultValue={listProfitCenter.filter(profitCenter => profitCenter.value === costCenterData?.profitCenterId)[0]?.label}
                         isLoading={isLoadingProfitCenterData}
                         items={
                             isFetchingProfitCenterData && !isFetchingMoreProfitCenterData
@@ -687,6 +729,7 @@ const CostCenterCreate = () => {
                                 borderColor={"#AAAAAA"}
                                 arrowColor={"#000"}
                                 withSearch
+                                defaultValue={costCenterData?.currency}
                                 isLoading={isFetchingCurrenciesData}
                                 items={
                                     isFetchingCurrenciesData && !isFetchingMoreCurrenciesData
@@ -716,8 +759,9 @@ const CostCenterCreate = () => {
                   label="Cost Center Category"
                   height="48px"
                   width={"100%"}
+                  defaultValue={costCenterData?.costCenterCategory}
                   handleChange={handleCostCenterCategory}
-                  items={costCenterCategoryTable}
+                  items={costCenterCategoryDropdown}
                   placeholder={"Select"}
                   noSearch
                 />
@@ -730,6 +774,7 @@ const CostCenterCreate = () => {
                     width="100%"
                     label="Person Responsible"
                     height="48px"
+                    defaultValue={costCenterData?.personResponsible}
                     placeholder={"e.g TBD"}
                     {...register("person_responsible")}
                     />
@@ -757,6 +802,7 @@ const CostCenterCreate = () => {
                     width="100%"
                     label="External Code"
                     height="54px"
+                    defaultValue={costCenterData?.externalCode}
                     placeholder={"e.g 321001112"}
                     {...register("external_code")}
                     />

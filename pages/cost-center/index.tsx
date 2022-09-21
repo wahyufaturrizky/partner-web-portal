@@ -94,7 +94,7 @@ const CostCenter = () => {
                 <Button
                   size="small"
                   onClick={() => {
-                    router.push(`/cost-center/${element.costCenterId}`);
+                    router.push(`/cost-center/${element.companyId}/${element.costCenterId}`);
                   }}
                   variant="tertiary"
                 >
