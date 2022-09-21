@@ -316,7 +316,12 @@ const TaxCreate = () => {
                     name="country_id"
                     render={({ field: { onChange } }) => (
                     <>
-                        <Label>Country</Label>
+                        <div style={{
+                          display: 'flex'
+                        }}>
+                            <Label>Country</Label>
+                            <Span>&#42;</Span>
+                        </div>
                         <Spacer size={3} />
                         <FormSelect
                         style={{ width: "100%" }}
@@ -515,6 +520,12 @@ const Center = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
+`;
+
+const Span = styled.span`
+  color: #ed1c24;
+  margin-left: 1px;
+  font-weight: lighter;
 `;
 
 const Label = styled.div`
