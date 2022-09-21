@@ -10,24 +10,24 @@ import {
   Table,
   Pagination,
   Modal,
+  Spin,
   DropdownMenu,
   FileUploadModal,
 } from "pink-lava-ui";
 import usePagination from "@lucasmogari/react-pagination";
-import { useDeletUOMConversion, useUOMConversions, useUploadFileUOMConversion } from "../../hooks/mdm/unit-of-measure-conversion/useUOMConversion";
 import useDebounce from "../../lib/useDebounce";
 import { queryClient } from "../_app";
 import { ICDownload, ICUpload } from "../../assets/icons";
 import { mdmDownloadService } from "../../lib/client";
 import { useRouter } from "next/router";
-import { useCostCenterInfiniteLists, useCostCenters, useDeletCostCenter } from "hooks/mdm/cost-center";
+import { useCostCenters, useDeletCostCenter, useUploadFileCostCenter } from "hooks/mdm/cost-center/useCostCenter";
 
 const downloadFile = (params: any) =>
   mdmDownloadService("/cost-center/download", { params }).then((res) => {
     let dataUrl = window.URL.createObjectURL(new Blob([res.data]));
     let tempLink = document.createElement("a");
     tempLink.href = dataUrl;
-    tempLink.setAttribute("download", `uom_${new Date().getTime()}.xlsx`);
+    tempLink.setAttribute("download", `cost_center_${new Date().getTime()}.xlsx`);
     tempLink.click();
   });
 
@@ -74,11 +74,9 @@ const CostCenter = () => {
       search: debounceSearch,
       page: pagination.page,
       limit: pagination.itemsPerPage,
-    //   company_id: "KSNI",
     },
     options: {
       onSuccess: (data: any) => {
-        
         pagination.setTotalItems(data.totalRow);
       },
       select: (data: any) => {
@@ -119,10 +117,10 @@ const CostCenter = () => {
     },
   });
 
-  const { mutate: uploadFileCostCenter, isLoading: isLoadingUploadFileCostCenter } = useUploadFileUOMConversion({
+  const { mutate: uploadFileCostCenter, isLoading: isLoadingUploadFileCostCenter } = useUploadFileCostCenter({
     query: {
       with_data: "N",
-      company_id: "KSNI",
+      company_id: "1",
     },
     options: {
       onSuccess: () => {
@@ -168,8 +166,13 @@ const CostCenter = () => {
 
   const onSubmitFile = (file: any) => {
     const formData = new FormData();
-    formData.append("company_id", "KSNI");
+    formData.append("company_id", "1");
     formData.append("file", file);
+    const uploadedData = {
+      file: formData,
+      company_id: "1"
+    }
+    console.log(uploadedData, '<<<<<<<<<<ini fike')
     uploadFileCostCenter(formData);
   };
 
@@ -179,8 +182,8 @@ const CostCenter = () => {
         company_ids :[]
     }
     let filteredCostCenter = {}
-    ids.forEach(id => {
-        rows.forEach(costCenter => {
+    ids.forEach((id: any) => {
+        rows.forEach((costCenter: { id: string | number; companyId: any; }) => {
             if(id === costCenter?.id) {
                 if(!filteredCostCenter[costCenter?.id]) {
                     deletedCostCenter.company_ids.push(costCenter.companyId)
@@ -191,6 +194,13 @@ const CostCenter = () => {
     });
     deleteCostCenter(deletedCostCenter)
   }
+
+  if(isLoadingDeleteCostCenter || isLoadingCostCenter || isLoadingUploadFileCostCenter){
+  return (
+    <Center>
+      <Spin tip="Loading data..." />
+    </Center>
+  )}
 
   return (
     <>
@@ -232,13 +242,13 @@ const CostCenter = () => {
               onClick={(e: any) => {
                 switch (parseInt(e.key)) {
                   case 1:
-                    downloadFile({ with_data: "N", company_id: "KSNI" });
+                    downloadFile({ with_data: "N", company_id: "1" });
                     break;
                   case 2:
                     setShowUpload(true);
                     break;
                   case 3:
-                    downloadFile({ with_data: "Y", company_id: "KSNI" });
+                    downloadFile({ with_data: "Y", company_id: "1" });
                     break;
                   case 4:
                     break;
@@ -370,4 +380,10 @@ const TopButtonHolder = styled.div`
   flex-direction: column;
   justify-content: center;
 `
+const Center = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
+
 export default CostCenter;

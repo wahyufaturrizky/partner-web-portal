@@ -11,10 +11,7 @@ const fetchCostCenters = async ({ query = {} }) => {
       sortOrder: "DESC",
       ...query,
     },
-  }).then((data) => {
-    console.log(data, "<<<di cost center");
-    return data;
-  });
+  }).then((data) => data);
 };
 
 const useCostCenters = ({ query = {}, options }) => {

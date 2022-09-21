@@ -27,7 +27,7 @@ import usePagination from "@lucasmogari/react-pagination";
 import { useCompanyList, useCurrenciesMDM } from "hooks/company-list/useCompany";
 import { useProfitCenters } from "hooks/mdm/profit-center/useProfitCenter";
 import { useLanguages } from "hooks/languages/useLanguages";
-import { useCreateCostCenter } from "hooks/mdm/cost-center";
+import { useCreateCostCenter } from "hooks/mdm/cost-center/useCostCenter";
 import { CompanyList, CostCenterSave, CurrenciesData, LanguagesData, ProfitCenterList, RowCompanyList, RowCurrenciesData, RowLanguagesData, RowProfitCenter } from "./cost_center_interface";
 
 
