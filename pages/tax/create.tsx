@@ -271,14 +271,6 @@ const TaxCreate = () => {
     },
   };
 
-  if(isFetchingCountryList || isFetchingMoreCountryList) {
-    return (
-        <Center>
-            <Spin tip="Loading data..." />
-        </Center>
-    )
-  }
-
   return (
     <>
       <Col>
