@@ -203,7 +203,7 @@ const TaxCreate = () => {
 
   const onSubmit = (taxesData: any) => {
     const savedData: any = []
-    taxData.forEach((tax: any) => {
+    taxData?.forEach((tax: any) => {
       if(taxesData.country_id){
         savedData.push({
           country_id: tax.country_id? tax.country_id : taxesData.country_id,

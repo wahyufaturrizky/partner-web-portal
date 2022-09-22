@@ -45,8 +45,8 @@ const fetchInfiniteTaxLists = async ({ pageParam = 1, queryKey }) => {
       search: searchQuery,
       limit: 10,
       page: pageParam,
-      sortBy: "created_at",
-      sortOrder: "DESC",
+      sortBy: "tax_id",
+      sortOrder: "ASC",
       ...queryKey[1],
     },
   }).then((data) => data);

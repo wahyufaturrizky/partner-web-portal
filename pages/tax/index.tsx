@@ -137,6 +137,7 @@ const Tax = () => {
             })
           }
         });
+
         return { data: mappedData, totalRow: data.totalRow };
       },
     },
