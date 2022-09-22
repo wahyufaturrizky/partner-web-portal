@@ -400,6 +400,12 @@ const menuMdm = [
         content: () => "Currency",
         onClick: () => Router.push("/country-structure/currency"),
       },
+      {
+        key: "exchange-rate",
+        title: "Exchange Rate",
+        content: () => "Exchange Rate",
+        onClick: () => Router.push("/country-structure/exchange-rate"),
+      },
     ],
   },
   {
