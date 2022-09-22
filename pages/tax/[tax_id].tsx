@@ -74,7 +74,7 @@ const TaxDetail = () => {
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [statusId, setStatusId] = useState(null)
   const [updatedTaskData, setUpdatedTaskData] = useState(null)
-  const { register, control, handleSubmit } = useForm();
+  const { register, control, handleSubmit, reset } = useForm();
   
   const {
     isFetching: isFetchingCountryList,
@@ -166,6 +166,7 @@ const TaxDetail = () => {
     options: {
       onSuccess: () => {
         queryClient.invalidateQueries(["tax/infinite"]);
+        reset()
       },
     },
   });

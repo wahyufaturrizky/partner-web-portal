@@ -70,6 +70,7 @@ const TaxCreate = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isShowDelete, setShowDelete] = useState({ open: false, type: "selection", data: {} });
   const [showCreateModal, setShowCreateModal] = useState(false)
+  const [isSafeToReset, setIsSafeToReset] = useState(false);
 
   const debounceSearch = useDebounce(search, 1000);
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
@@ -77,7 +78,7 @@ const TaxCreate = () => {
 
   const [taxData, setTaxData] = useState(null)
 
-  const { register, control, handleSubmit } = useForm();
+  const { register, control, handleSubmit, reset } = useForm();
   
   const {
     isFetching: isFetchingCountryList,
@@ -111,25 +112,13 @@ const TaxCreate = () => {
     },
   });
 
-  // const { mutate: deleteUOM, isLoading: isLoadingDeleteUOM } = useDeletTax({
-  //   options: {
-  //     onSuccess: () => {
-  //       queryClient.invalidateQueries(["tax/infinite"]);
-  //       setShowDeleteModal(false);
-  //       router.back();
-  //     },
-  //   },
-  // });
+  useEffect(() => {
+    if (!isSafeToReset) return;
+ 
+    reset(); // asynchronously reset your form values
+    setIsSafeToReset(false)
+ }, [isSafeToReset])
 
-  // const { mutate: updateTax, isLoading: isLoadingUpdateTax } = useUpdateTax({
-  //   countryId: tax_id,
-  //   id: statusId && statusId,
-  //   options: {
-  //     onSuccess: () => {
-  //       queryClient.invalidateQueries(["tax/infinite"]);
-  //     },
-  //   },
-  // });
 
   const { mutate: createTax, isLoading: isLoadingCreateTax } = useCreateTax({
     options: {
@@ -154,6 +143,7 @@ const TaxCreate = () => {
     })
     setTaxData(newTaxData)
   }
+
 
   const handleNewTax = (tax: any) => {
     // const newTax = {
@@ -180,9 +170,8 @@ const TaxCreate = () => {
       if(!taxData?.find(e => e.name === newTax.name)) {
         setTaxData(prev => [...prev, newTax])
       }
-
     }
-    // createTax(newTax)
+    setIsSafeToReset(true)
     setShowCreateModal(false)
   }
 
@@ -275,7 +264,7 @@ const TaxCreate = () => {
     <>
       <Col>
         <Row gap="4px">
-        <ArrowLeft style={{ cursor: "pointer" }} onClick={() => router.back()} />
+        {/* <ArrowLeft style={{ cursor: "pointer" }} onClick={() => router.back()} /> */}
           <Text variant={"h4"}>{"Create Tax"}</Text>
         </Row>
 
@@ -399,13 +388,13 @@ const TaxCreate = () => {
             <Spacer size={20} />
             <Col width="100%">
               <Input
-                      width="80%"
-                      label="Tax Name"
-                      required
-                      height="40px"
-                      placeholder={"e.g PPh 21"}
-                      {...register("name", { required: "Please enter name." })}
-                    />
+                width="80%"
+                label="Tax Name"
+                required
+                height="40px"
+                placeholder={"e.g PPh 21"}
+                {...register("name", { required: "Please enter name." })}
+              />
             </Col>
               <Spacer size={15} />
 
