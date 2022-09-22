@@ -82,6 +82,42 @@ export const downloadFileSalesDivision = (params) =>
     tempLink.click();
   });
 
+export const dropdownStatus = [
+    { id: "Active", value: "Active" },
+    { id: "Inactive", value: "Inactive" },
+  ]
+
+export const columnsDetailCustomers = [
+  {
+    title: 'Branch Name',
+    dataIndex: 'branch'
+  },
+  {
+    title: 'Visit Frequency',
+    dataIndex: 'frequency'
+  },
+  {
+    title: 'Visit Day',
+    dataIndex: 'day'
+  },
+  {
+    title: 'Date',
+    dataIndex: 'date'
+  },
+  {
+    title: 'Start Time',
+    dataIndex: 'startTime'
+  },
+  {
+    title: 'End Time',
+    dataIndex: 'endTime'
+  },
+  {
+    title: 'Duration',
+    dataIndex: 'duration'
+  },
+]
+
 const Notif = styled.div`
 	background: #ffffff;
 	border: 1px solid #eb008b;

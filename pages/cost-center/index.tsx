@@ -10,27 +10,24 @@ import {
   Table,
   Pagination,
   Modal,
+  Spin,
   DropdownMenu,
   FileUploadModal,
 } from "pink-lava-ui";
 import usePagination from "@lucasmogari/react-pagination";
-import {
-  useProfitCenters,
-  useUploadFileProfitCenter,
-  useDeleteProfitCenter,
-} from "../../hooks/mdm/profit-center/useProfitCenter";
 import useDebounce from "../../lib/useDebounce";
 import { queryClient } from "../_app";
 import { ICDownload, ICUpload } from "../../assets/icons";
 import { mdmDownloadService } from "../../lib/client";
 import { useRouter } from "next/router";
+import { useCostCenters, useDeletCostCenter, useUploadFileCostCenter } from "hooks/mdm/cost-center/useCostCenter";
 
 const downloadFile = (params: any) =>
-  mdmDownloadService("/profit-center/download", { params }).then((res) => {
+  mdmDownloadService("/cost-center/download", { params }).then((res) => {
     let dataUrl = window.URL.createObjectURL(new Blob([res.data]));
     let tempLink = document.createElement("a");
     tempLink.href = dataUrl;
-    tempLink.setAttribute("download", `profit_center${new Date().getTime()}.xlsx`);
+    tempLink.setAttribute("download", `cost_center_${new Date().getTime()}.xlsx`);
     tempLink.click();
   });
 
@@ -39,18 +36,18 @@ const renderConfirmationText = (type: any, data: any) => {
     case "selection":
       return data.selectedRowKeys.length > 1
         ? `Are you sure to delete ${data.selectedRowKeys.length} items ?`
-        : `Are you sure to delete Profit Center ${
-            data?.profitData?.data.find((el: any) => el.key === data.selectedRowKeys[0])?.profCenName
+        : `Are you sure to delete Cost Center - ${
+            data?.uomData?.find((el: any) => el.id === data.selectedRowKeys[0])?.name
           } ?`;
     case "detail":
-      return `Are you sure to delete Profit Center ${data.profCenName} ?`;
+      return `Are you sure to delete Uom Name ${data.uomName} ?`;
 
     default:
       break;
   }
 };
 
-const ProfitCenter = () => {
+const CostCenter = () => {
   const router = useRouter();
   const pagination = usePagination({
     page: 1,
@@ -64,37 +61,38 @@ const ProfitCenter = () => {
   const [search, setSearch] = useState("");
   const [isShowDelete, setShowDelete] = useState({ open: false, type: "selection", data: {} });
   const [isShowUpload, setShowUpload] = useState(false);
+
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const debounceSearch = useDebounce(search, 1000);
 
   const {
-    data: ProfitData,
-    isLoading: isLoadingProfit,
-    isFetching: isFetchingProfit,
-  } = useProfitCenters({
+    data: costCenterData,
+    isLoading: isLoadingCostCenter,
+    isFetching: isFetchingCostCenter,
+  } = useCostCenters({
     query: {
       search: debounceSearch,
       page: pagination.page,
       limit: pagination.itemsPerPage,
-      company_id: "KSNI",
     },
     options: {
-      onSuccess: (data: any) => {        
+      onSuccess: (data: any) => {
         pagination.setTotalItems(data.totalRow);
       },
       select: (data: any) => {
         const mappedData = data?.rows?.map((element: any) => {
           return {
-            key: element.profitCenterId,
-            id: element.profitCenterId,
-            profCenCode: element.code,
-            profCenName: element.name,
+            key: element.costCenterId,
+            id: element.costCenterId,
+            companyId: element.companyId,
+            code: element.code,
+            name: element.name,
             action: (
               <div style={{ display: "flex", justifyContent: "left" }}>
                 <Button
                   size="small"
                   onClick={() => {
-                    router.push(`/profit-center/${element.profitCenterId}`);
+                    router.push(`/cost-center/${element.companyId}/${element.costCenterId}`);
                   }}
                   variant="tertiary"
                 >
@@ -104,26 +102,29 @@ const ProfitCenter = () => {
             ),
           };
         });
-
         return { data: mappedData, totalRow: data.totalRow };
       },
     },
   });
 
-  const { mutate: deleteProfit, isLoading: isLoadingDeleteProfit } = useDeleteProfitCenter({
+  const { mutate: deleteCostCenter, isLoading: isLoadingDeleteCostCenter } = useDeletCostCenter({
     options: {
       onSuccess: () => {
         setShowDelete({ open: false, data: {}, type: "" });
         setSelectedRowKeys([]);
-        queryClient.invalidateQueries(["profit-list"]);
+        queryClient.invalidateQueries(["cost-centers"]);
       },
     },
   });
 
-  const { mutate: uploadFileProfit, isLoading: isLoadingUploadFileTop } = useUploadFileProfitCenter({
+  const { mutate: uploadFileCostCenter, isLoading: isLoadingUploadFileCostCenter } = useUploadFileCostCenter({
+    query: {
+      with_data: "N",
+      company_id: "1",
+    },
     options: {
       onSuccess: () => {
-        queryClient.invalidateQueries(["profit-list"]);
+        queryClient.invalidateQueries(["cost-centers"]);
         setShowUpload(false);
       },
     },
@@ -131,16 +132,19 @@ const ProfitCenter = () => {
 
   const columns = [
     {
-      title: "Profit Center ID",
+      title: "Cost Center ID",
       dataIndex: "id",
+      key: 'id',
     },
     {
-      title: "Profit Center Code",
-      dataIndex: "profCenCode",
+      title: "Cost Center Code",
+      dataIndex: "code",
+      key: 'profitCenterCode'
     },
     {
-      title: "Profit Center Name",
-      dataIndex: "profCenName",
+      title: "Cost Center Name",
+      dataIndex: "name",
+      key: 'profitCenterCode'
     },
     {
       title: "Action",
@@ -149,33 +153,66 @@ const ProfitCenter = () => {
       align: "left",
     },
   ];
+  
 
   const rowSelection = {
     selectedRowKeys,
-    onChange: (selectedRowKeys: any) => {
+    onChange: (selectedRowKeys: any, selectedRows: any) => {
+      if(!selectedRowKeys) {
+      }
       setSelectedRowKeys(selectedRowKeys);
     },
   };
 
   const onSubmitFile = (file: any) => {
     const formData = new FormData();
-    formData.append("company_id", "KSNI");
+    formData.append("company_id", "1");
     formData.append("file", file);
-
-    uploadFileProfit(formData);
+    const uploadedData = {
+      file: formData,
+      company_id: "1"
+    }
+    console.log(uploadedData, '<<<<<<<<<<ini fike')
+    uploadFileCostCenter(formData);
   };
+
+  const handleDelete = (ids, rows) => {
+    const deletedCostCenter = {
+        cost_center_ids :[...ids],
+        company_ids :[]
+    }
+    let filteredCostCenter = {}
+    ids.forEach((id: any) => {
+        rows.forEach((costCenter: { id: string | number; companyId: any; }) => {
+            if(id === costCenter?.id) {
+                if(!filteredCostCenter[costCenter?.id]) {
+                    deletedCostCenter.company_ids.push(costCenter.companyId)
+                    filteredCostCenter[costCenter?.id] = 1
+                }
+            }
+        });
+    });
+    deleteCostCenter(deletedCostCenter)
+  }
+
+  if(isLoadingDeleteCostCenter || isLoadingCostCenter || isLoadingUploadFileCostCenter){
+  return (
+    <Center>
+      <Spin tip="Loading data..." />
+    </Center>
+  )}
 
   return (
     <>
       <Col>
-        <Text variant={"h4"}>Profit Center</Text>
+        <Text variant={"h4"}>Cost Center List</Text>
         <Spacer size={20} />
       </Col>
       <Card>
         <Row justifyContent="space-between">
           <Search
             width="340px"
-            placeholder="Search Profit Center ID, Term."
+            placeholder="Search Cost Center Code, Cost Center Name, etc"
             onChange={(e: any) => {
               setSearch(e.target.value);
             }}
@@ -188,7 +225,7 @@ const ProfitCenter = () => {
                 setShowDelete({
                   open: true,
                   type: "selection",
-                  data: { profitData: ProfitData, selectedRowKeys },
+                  data: { uomData: costCenterData?.data, selectedRowKeys },
                 })
               }
               disabled={rowSelection.selectedRowKeys?.length === 0}
@@ -205,13 +242,13 @@ const ProfitCenter = () => {
               onClick={(e: any) => {
                 switch (parseInt(e.key)) {
                   case 1:
-                    downloadFile({ with_data: "N", company_id: "KSNI" });
+                    downloadFile({ with_data: "N", company_id: "1" });
                     break;
                   case 2:
                     setShowUpload(true);
                     break;
                   case 3:
-                    downloadFile({ with_data: "Y", company_id: "KSNI" });
+                    downloadFile({ with_data: "Y", company_id: "1" });
                     break;
                   case 4:
                     break;
@@ -252,7 +289,7 @@ const ProfitCenter = () => {
             <Button
               size="big"
               variant="primary"
-              onClick={() => router.push("/profit-center/create")}
+              onClick={() => router.push("/cost-center/create")}
             >
               Create
             </Button>
@@ -263,10 +300,11 @@ const ProfitCenter = () => {
       <Card style={{ padding: "16px 20px" }}>
         <Col gap={"60px"}>
           <Table
-            loading={isLoadingProfit || isFetchingProfit}
+            loading={isLoadingCostCenter || isFetchingCostCenter}
             columns={columns}
-            data={ProfitData?.data}
+            data={costCenterData?.data}
             rowSelection={rowSelection}
+            rowKey={"id"}
           />
           <Pagination pagination={pagination} />
         </Col>
@@ -281,24 +319,11 @@ const ProfitCenter = () => {
           title={"Confirm Delete"}
           footer={null}
           content={
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "center",
-              }}
-            >
+            <TopButtonHolder>
               <Spacer size={4} />
               {renderConfirmationText(isShowDelete.type, isShowDelete.data)}
               <Spacer size={20} />
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "center",
-                  gap: "10px",
-                  marginBottom: "20px",
-                }}
-              >
+              <DeleteCardButtonHolder>
                 <Button
                   size="big"
                   variant="tertiary"
@@ -311,14 +336,17 @@ const ProfitCenter = () => {
                 <Button
                   variant="primary"
                   size="big"
-                  onClick={() => {
-                    deleteProfit({ profit_center_ids: selectedRowKeys, company_ids: ["KSNI"] });
-                  }}
+                  onClick={() => handleDelete(selectedRowKeys, costCenterData?.data)}
+                //     () => {
+                //       console.log(selectedRowKeys, '<<<<<')
+                //         console.log(costCenterData?.data.filter(costCenter => costCenter.id === selectedRowKeys[0]))
+                //     //   deleteCostCenter({ ids: selectedRowKeys, company_id: "KSNI" });
+                //   }}
                 >
-                  {isLoadingDeleteProfit ? "loading..." : "Yes"}
+                  {isLoadingDeleteCostCenter ? "loading..." : "Yes"}
                 </Button>
-              </div>
-            </div>
+              </DeleteCardButtonHolder>
+            </TopButtonHolder>
           }
         />
       )}
@@ -333,10 +361,29 @@ const ProfitCenter = () => {
     </>
   );
 };
+
 const Card = styled.div`
   background: #ffffff;
   border-radius: 16px;
   padding: 16px;
 `;
 
-export default ProfitCenter
+const DeleteCardButtonHolder = styled.div`
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 20px;
+`
+
+const TopButtonHolder = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+`
+const Center = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
+
+export default CostCenter;

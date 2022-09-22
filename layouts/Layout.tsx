@@ -327,6 +327,13 @@ const menuMdm = [
     icon: ICDocument,
     onClick: () => Router.push("/tax"),
   },
+  {
+    key: "cost-center",
+    title: "Cost Center",
+    content: () => "Cost Center",
+    icon: ICDocument,
+    onClick: () => Router.push("/cost-center"),
+  },
   { type: "divider" },
   { type: "title", title: "LOGISTIC" },
   {

@@ -85,7 +85,6 @@ const ActivePricingStructure: any = (props: any) => {
       onSuccess: (data: any) => {
         pagination.setTotalItems(data.totalRow);
       },
-      enabled: false,
     },
     query: {
       search,
@@ -293,9 +292,9 @@ const ActivePricingStructure: any = (props: any) => {
             <Spacer size={20} />
             {isEmpty ? (
               <EmptyState
-                image={"/empty-state.svg"}
+                image={"/icons/empty-state.svg"}
                 title={"The Data You Are Looking for Cannot be Found"}
-                description={`Don't worry you can Create a new pricing structure`}
+                subtitle={`Don't worry you can Create a new pricing structure`}
                 height={400}
               />
             ) : (
