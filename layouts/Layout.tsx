@@ -447,6 +447,13 @@ const menuMdm = [
       },
     ],
   },
+  {
+    key: "working-calendar",
+    title: "Working Calendar",
+    content: () => "Working Calendar",
+    icon: ICCalendar,
+    onClick: () => Router.push("/working-calendar"),
+  },
 ];
 
 const itemsMenu = [{ label: "Config" }, { label: "Master Data Management" }];
