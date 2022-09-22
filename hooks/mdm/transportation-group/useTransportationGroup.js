@@ -21,7 +21,7 @@ const useTransportations = ({ query = {}, options }) => {
 };
 
 const fetchTransportation = async ({ id, companyId }) => {
-  return mdmService(`/transportation-group/${companyId}/${id}`).then((data) => data);
+  return mdmService(`/transportation-group/${id}`).then((data) => data);
 };
 
 const useTransportation = ({ id, options }) => {
@@ -54,7 +54,7 @@ const useTransportationInfiniteLists = ({ query = {}, options }) => {
 function useCreateTransportation({ options }) {
   return useMutation(
     (data) =>
-      mdmService(`/transportation`, {
+      mdmService(`/transportation-group`, {
         method: "POST",
         data,
       }),
@@ -64,10 +64,10 @@ function useCreateTransportation({ options }) {
   );
 }
 
-function useUpdateTransportation({ id, companyId, options }) {
+function useUpdateTransportation({ id, options }) {
   return useMutation(
     (data) =>
-      mdmService(`/transportation/${companyId}/${id}`, {
+      mdmService(`/transportation-group/${id}`, {
         method: "PUT",
         data,
       }),
@@ -80,7 +80,7 @@ function useUpdateTransportation({ id, companyId, options }) {
 const useDeleteTransportation = ({ options }) => {
   return useMutation(
     (data) =>
-      mdmService(`/transportation`, {
+      mdmService(`/transportation-group`, {
         method: "DELETE",
         data,
       }),
@@ -93,7 +93,7 @@ const useDeleteTransportation = ({ options }) => {
 const useUploadFileTransportation = ({ options }) => {
   return useMutation(
     (data) =>
-      mdmService(`/transportation/upload`, {
+      mdmService(`/transportation-group/upload`, {
         method: "POST",
         data,
       }),
