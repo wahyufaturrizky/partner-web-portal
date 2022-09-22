@@ -111,30 +111,30 @@ const TaxCreate = () => {
     },
   });
 
-  const { mutate: deleteUOM, isLoading: isLoadingDeleteUOM } = useDeletTax({
-    options: {
-      onSuccess: () => {
-        queryClient.invalidateQueries(["tax/infinite"]);
-        setShowDeleteModal(false);
-        router.back();
-      },
-    },
-  });
+  // const { mutate: deleteUOM, isLoading: isLoadingDeleteUOM } = useDeletTax({
+  //   options: {
+  //     onSuccess: () => {
+  //       queryClient.invalidateQueries(["tax/infinite"]);
+  //       setShowDeleteModal(false);
+  //       router.back();
+  //     },
+  //   },
+  // });
 
-  const { mutate: updateTax, isLoading: isLoadingUpdateTax } = useUpdateTax({
-    countryId: tax_id,
-    id: statusId && statusId,
-    options: {
-      onSuccess: () => {
-        queryClient.invalidateQueries(["tax/infinite"]);
-      },
-    },
-  });
+  // const { mutate: updateTax, isLoading: isLoadingUpdateTax } = useUpdateTax({
+  //   countryId: tax_id,
+  //   id: statusId && statusId,
+  //   options: {
+  //     onSuccess: () => {
+  //       queryClient.invalidateQueries(["tax/infinite"]);
+  //     },
+  //   },
+  // });
 
   const { mutate: createTax, isLoading: isLoadingCreateTax } = useCreateTax({
     options: {
       onSuccess: () => {
-        // queryClient.invalidateQueries(["tax/infinite"]);
+        queryClient.invalidateQueries(["tax-list"]);
       },
     },
   });
@@ -349,7 +349,7 @@ const TaxCreate = () => {
             </Row>
           <Spacer size={20} />
           <Col>
-              <HeaderLabel>Conversion</HeaderLabel>
+              <HeaderLabel>Tax</HeaderLabel>
               <Spacer size={20} />
               <Row gap="16px">
                 <Button size="big" variant={"primary"} onClick={() => setShowCreateModal(true)}>
@@ -450,7 +450,7 @@ const TaxCreate = () => {
       />
       )}
 
-      {showDeleteModal && (
+      {/* {showDeleteModal && (
         <ModalDeleteConfirmation
           totalSelected={1}
           itemTitle={UOMDataFake.name}
@@ -459,7 +459,7 @@ const TaxCreate = () => {
           onCancel={() => setShowDeleteModal(false)}
           onOk={() => deleteUOM({ ids: [tax_id], company_id: "KSNI" })}
         />
-      )}
+      )} */}
 
       {isShowDelete.open && (
         <Modal
