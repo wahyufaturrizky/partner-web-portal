@@ -16,6 +16,7 @@ const fetchCostCenters = async ({ query = {} }) => {
 
 const useCostCenters = ({ query = {}, options }) => {
   return useQuery(["cost-centers", query], () => fetchCostCenters({ query }), {
+    keepPreviousData: true,
     ...options,
   });
 };
@@ -101,13 +102,10 @@ const useDeletCostCenter = ({ options }) => {
 const useUploadFileCostCenter = ({ query = {}, options }) => {
   return useMutation(
     (data) =>
-      mdmService(
-        `/cost-center/upload?with_data=${query.with_data}&company_id=${query.company_id}`,
-        {
-          method: "POST",
-          data,
-        }
-      ),
+      mdmService(`/cost-center/upload?company_id=${query.company_id}`, {
+        method: "POST",
+        data,
+      }),
     {
       ...options,
     }
