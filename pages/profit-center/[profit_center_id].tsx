@@ -6,7 +6,11 @@ import ProfitCenterCreate from './create';
 export default function ProfitCenterDetail() {
   const router = useRouter()
   const { profit_center_id } = router.query;
-  const { data: detailProfitCenter } = useDetailProfitCenter({
+
+  const { 
+    data: detailProfitCenter,      
+    isLoading: isLoadingProfit,
+    isFetching: isFetchingProfit  } = useDetailProfitCenter({
     options: {
       onSuccess: () => {}
     },
@@ -15,7 +19,9 @@ export default function ProfitCenterDetail() {
   }) 
    
   const propsDropdownField = {
-    detailProfitCenter
+    detailProfitCenter,
+    isLoadingProfit,
+    isFetchingProfit
   }
   return (
     <ProfitCenterCreate isUpdate = {true} {...propsDropdownField}/>
