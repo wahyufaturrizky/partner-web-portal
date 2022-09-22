@@ -9,8 +9,11 @@ import moment from "moment";
 import { defaultValuesCreate } from "components/pages/ProfitCenter/contants";
 import _ from 'lodash';
 import { toSnakeCase } from "lib/caseConverter";
+import { queryClient } from "pages/_app";
+import ArrowLeft from "../../assets/icons/arrow-left.svg";
 
-function ProfitCenterCreate({isUpdate,detailProfitCenter} :any) {
+function ProfitCenterCreate({isUpdate,detailProfitCenter,isLoadingProfit,isFetchingProfit} :any) {
+
   const router = useRouter();  
   const [validFromValue, setValidFromValue] = useState<any>(null);
   const [validToValue, setValidToValue] = useState<any>(null);
@@ -29,6 +32,9 @@ function ProfitCenterCreate({isUpdate,detailProfitCenter} :any) {
   useEffect(() => {
     if (isUpdate && detailProfitCenter) {      
         mapDataDetail();
+    }else{
+      setValidFromValue(defaultValuesCreate.valid_from)
+      setValidToValue(defaultValuesCreate.valid_to)
     }
   },[detailProfitCenter,isUpdate]);
 
@@ -44,21 +50,40 @@ function ProfitCenterCreate({isUpdate,detailProfitCenter} :any) {
       })
       return dataDetail
   }
+  const [searchCompany, setSearchCompany] = useState();
+  const { data: companyData, isLoading: isLoadingCompanyList } = useCompanyList({
+    options: {
+      onSuccess: (data :any) => {},
+    },
+    query: {
+      search: searchCompany,
+    },
+  });
+  const companyList = companyData?.rows?.map((company: any) => ({
+    id: company.code,
+    value: company.name,
+  }));
 
-  const productForm = useWatch({
+  const profitForm = useWatch({
     control
   });
   
   // functional react-query
   const { mutate: createProfitCenter } = useCreateProfitCenter({
     options: {
-      onSuccess: () => alert('create success!')
+      onSuccess: () => {
+        router.back();
+        queryClient.invalidateQueries(["profit-list"]);
+      }
     }
   })
 
   const { mutate: updateProfitCenter } = useUpdateProfitCenter({
     options: {
-      onSuccess: () => alert('update success!')
+      onSuccess: () => {
+        router.back();
+        queryClient.invalidateQueries(["profit-list"]);
+      }
     },
     id:detailProfitCenter?.profitCenterId,
     companyId: detailProfitCenter?.companyId
@@ -87,30 +112,25 @@ function ProfitCenterCreate({isUpdate,detailProfitCenter} :any) {
       payload.person_responsible = data.person_responsible
     
     if (isUpdate && detailProfitCenter) {
+      delete payload.company_id;
       updateProfitCenter(payload);
     }else{      
       createProfitCenter(payload);
     }
   };
-  const [searchCompany, setSearchCompany] = useState();
-  const { data: companyData, isLoading: isLoadingCompanyList } = useCompanyList({
-    options: {
-      onSuccess: (data :any) => {},
-    },
-    query: {
-      search: searchCompany,
-    },
-  });
 
-
-
-
-  
+    if (isLoadingProfit || isFetchingProfit)
+    return (
+      <Center>
+        <Spin tip="Loading data..." />
+      </Center>
+    );
   return (
     <>
       <Col>
-        <Row gap="4px">
-          <Text variant={"h4"}>Create Profit Center</Text>
+        <Row gap="4px" alignItems={"center"}>
+          {isUpdate ? <ArrowLeft style={{ cursor: "pointer" }} onClick={() => router.back()} /> : null}
+          <Text variant={"h4"}>{isUpdate ? profitForm?.name : "Create Profit Center"}</Text>
         </Row>
 
         <Spacer size={20} />
@@ -122,7 +142,7 @@ function ProfitCenterCreate({isUpdate,detailProfitCenter} :any) {
                 Cancel
               </Button>
               <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
-                SAVE
+                Save
               </Button>
             </Row>
           </Row>
@@ -139,7 +159,7 @@ function ProfitCenterCreate({isUpdate,detailProfitCenter} :any) {
                   height="48px"
                   required
                   placeholder="e.g D01G011001"
-                  defaultValue={productForm?.code}
+                  defaultValue={profitForm?.code}
                   error={errors?.code?.message}
                   {...register('code', {
                     required: 'Profit center code must be filled'
@@ -154,7 +174,7 @@ function ProfitCenterCreate({isUpdate,detailProfitCenter} :any) {
                   label="Profit Center Name"
                   height="48px"
                   placeholder="e.g Jakarta Barat"
-                  defaultValue={productForm?.name}
+                  defaultValue={profitForm?.name}
                   error={errors?.name?.message}
                   {...register('name', {
                     required: 'Profit center name must be filled'
@@ -179,7 +199,7 @@ function ProfitCenterCreate({isUpdate,detailProfitCenter} :any) {
                           setValue('valid_from',dateString)
                         }}
                         label={`Valid From`}
-                        defaultValue={moment(productForm.valid_from)}
+                        defaultValue={moment(profitForm.valid_from)}
                         value={validFromValue}
                         format={'DD/MM/YYYY'}
                         error={errors?.valid_from?.message}
@@ -203,7 +223,7 @@ function ProfitCenterCreate({isUpdate,detailProfitCenter} :any) {
                         setValue('valid_to',dateString)
                       }}
                       label={`Valid To`}
-                      defaultValue={moment(productForm.valid_to)}
+                      defaultValue={moment(profitForm.valid_to)}
                       format={'DD/MM/YYYY'}
                       value={validToValue}
                       error={errors?.valid_to?.message}
@@ -221,14 +241,13 @@ function ProfitCenterCreate({isUpdate,detailProfitCenter} :any) {
                     <Dropdown2
                       label="Company"
                       width={"100%"}
-                      items={companyData.rows.map((data :any) => ({
-                        id: data.id,
-                        value: data.name,
-                      }))}
+                      items={companyList}
                       placeholder={"Select"}
-                      handleChange={(id : string) => setValue("company_id", `${id}`)}
+                      handleChange={(value :any) => {
+                        setValue("company_id", value);
+                      }}
                       onSearch={(search :any) => setSearchCompany(search)}
-                      defaultValue={productForm?.company_id}
+                      defaultValue={profitForm.company_id}
                       error={errors?.company_id?.message}
                       {...register("company_id",{
                         required: 'Company must be filled'
@@ -245,7 +264,7 @@ function ProfitCenterCreate({isUpdate,detailProfitCenter} :any) {
                   height="48px"
                   required
                   placeholder={"e.g 123456789"}
-                  defaultValue={productForm?.external_code}
+                  defaultValue={profitForm.external_code}
                   error={errors?.external_code?.message}
                   {...register("external_code",{
                     required: 'External Code must be filled'
@@ -262,8 +281,8 @@ function ProfitCenterCreate({isUpdate,detailProfitCenter} :any) {
                   label="Description"
                   height="48px"
                   required
-                  placeholder={"e.g 123456789"}
-                  defaultValue={productForm?.description}
+                  placeholder={"e.g New Profit Center"}
+                  defaultValue={profitForm?.description}
                   error={errors?.description?.message}
                   {...register('description', {
                     required: 'Description must be filled'
@@ -278,8 +297,8 @@ function ProfitCenterCreate({isUpdate,detailProfitCenter} :any) {
                   label="Person Responsible"
                   height="48px"
                   required
-                  placeholder={"e.g 123456789"}
-                  defaultValue={productForm?.person_responsible}
+                  placeholder={"e.g TBD"}
+                  defaultValue={profitForm?.person_responsible}
                   error={errors?.person_responsible?.message}
                   {...register('person_responsible', {
                     required: 'Person Responsible must be filled'
@@ -298,5 +317,10 @@ const Card = styled.div`
   padding: ${(p: any) => (p.padding ? p.padding : "16px")};
 `;
 
+const Center = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
 
 export default ProfitCenterCreate
