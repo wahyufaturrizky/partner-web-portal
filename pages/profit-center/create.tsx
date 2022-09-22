@@ -112,6 +112,7 @@ function ProfitCenterCreate({isUpdate,detailProfitCenter,isLoadingProfit,isFetch
       payload.person_responsible = data.person_responsible
     
     if (isUpdate && detailProfitCenter) {
+      delete payload.company_id;
       updateProfitCenter(payload);
     }else{      
       createProfitCenter(payload);
