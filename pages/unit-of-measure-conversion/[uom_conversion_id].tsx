@@ -179,6 +179,7 @@ const UOMConversionDetail = () => {
       newData.remove_items.push({id: uomId})
     })
     updateUom(newData)
+    setSelectedRowKeys([])
     setShowDelete({ open: false, type: "", data: {} })
   }
 
@@ -266,7 +267,7 @@ const UOMConversionDetail = () => {
     },
   ];
   
-  const rowSelection = {
+  let rowSelection = {
     selectedRowKeys,
     onChange: (selectedRowKeys: any, selectedRows: any) => {
       setSelectedRowKeys(selectedRowKeys);
@@ -332,7 +333,12 @@ const UOMConversionDetail = () => {
                 defaultValue={UomData?.baseUomId}
                 render={({ field: { onChange } }) => (
                   <>
-                    <Label>Base UoM</Label>
+                    <div style={{
+                      display: 'flex'
+                    }}>
+                      <Label>Base UoM</Label>
+                      <Span>&#42;</Span>
+                    </div>
                     <Spacer size={3} />
                     <FormSelect
                       defaultValue={UomData?.baseUomId}
@@ -387,7 +393,7 @@ const UOMConversionDetail = () => {
                       data: { uomData: UomData?.data, selectedRowKeys },
                     })
                   }
-                  disabled={rowSelection.selectedRowKeys?.length === 0}
+                  disabled={selectedRowKeys?.length === 0}
                 >
                   Delete
                 </Button>
@@ -579,6 +585,11 @@ const HeaderLabel = styled.p`
   line-height: 27px;
   color: #1E858E;
 `
+const Span = styled.span`
+  color: #ed1c24;
+  margin-left: 5px;
+  font-weight: bold;
+`;
 
 const DeleteCardButtonHolder = styled.div`
     display: flex;
