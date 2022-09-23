@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from "react";
-import { Text, Col, Row, Spacer, Button, Input, EmptyState, Modal ,Spin,Dropdown2,DatePickerInput} from "pink-lava-ui";
+import { Text, Col, Row, Spacer, Button, Input, EmptyState, Modal ,Spin,Dropdown,DatePickerInput} from "pink-lava-ui";
 import styled from "styled-components";
 import { useRouter } from "next/router";
 import { Controller, useForm, useWatch } from "react-hook-form";
@@ -238,7 +238,7 @@ function ProfitCenterCreate({isUpdate,detailProfitCenter,isLoadingProfit,isFetch
                 {isLoadingCompanyList ? (
                     <Spin tip="Loading data..." />
                   ) : (
-                    <Dropdown2
+                    <Dropdown
                       label="Company"
                       width={"100%"}
                       items={companyList}
