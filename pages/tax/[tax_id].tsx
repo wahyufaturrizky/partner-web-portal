@@ -67,15 +67,14 @@ const TaxDetail = () => {
   const [totalRows, setTotalRows] = useState(0);
   const [search, setSearch] = useState("");
 
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isShowDelete, setShowDelete] = useState({ open: false, type: "selection", data: {} });
   const [showCreateModal, setShowCreateModal] = useState(false)
 
   const debounceSearch = useDebounce(search, 1000);
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [statusId, setStatusId] = useState(null)
-
-  const { register, control, handleSubmit } = useForm();
+  const [updatedTaskData, setUpdatedTaskData] = useState(null)
+  const { register, control, handleSubmit, reset } = useForm();
   
   const {
     isFetching: isFetchingCountryList,
@@ -147,7 +146,7 @@ const TaxDetail = () => {
     options: {
       onSuccess: () => {
         queryClient.invalidateQueries(["tax/infinite"]);
-        setShowDeleteModal(false);
+        setShowDelete({ open: false, type: "selection", data: {} });
         // router.back();
       },
     },
@@ -167,10 +166,17 @@ const TaxDetail = () => {
     options: {
       onSuccess: () => {
         queryClient.invalidateQueries(["tax/infinite"]);
+        reset()
       },
     },
   });
 
+  useEffect(() => {
+    if(updatedTaskData){
+      updateTax(updatedTaskData)
+    }
+  }, [updatedTaskData])
+  
   // belum bisa dari backend
   const deleteTax = (id: any) => {
     deleteUOM({ ids:[...id] })
@@ -188,20 +194,16 @@ const TaxDetail = () => {
   }
 
   const updateTaxStatus = (rowKey: any) => {
-    setStatusId(rowKey.key)
-    if(statusId){
       const data: any = {
         name: rowKey.name,
         percentage: rowKey.percentage,
         active_status: rowKey?.active_status === "ACTIVE"? "INACTIVE" : "ACTIVE"
       }
-      console.log(data, '<<<<<<<update status')
-      updateTax(data)
-    }
+      setStatusId(rowKey.key)
+      setUpdatedTaskData(data)
   }
 
   const checkedStatus = (status: string) => {
-    console.log('check status', status)
     return status === 'ACTIVE' ? true : false
   }
   
@@ -235,7 +237,7 @@ const TaxDetail = () => {
     },
   };
 
-  if(isLoadingTax || isFetchingTax) {
+  if(isLoadingTax || isFetchingTax || isLoadingUpdateTax) {
     return (
         <Center>
             <Spin tip="Loading data..." />
@@ -319,7 +321,7 @@ const TaxDetail = () => {
             </Row>
           <Spacer size={20} />
           <Col>
-              <HeaderLabel>Conversion</HeaderLabel>
+              <HeaderLabel>Tax</HeaderLabel>
               <Spacer size={20} />
               <Row gap="16px">
                 <Button size="big" variant={"primary"} onClick={() => setShowCreateModal(true)}>
@@ -382,7 +384,6 @@ const TaxDetail = () => {
 
             <Col width={"100%"}>
             <CreateInputDiv>
-                {/* {UOMDataFake &&  */}
                 <Input
                     width="80%"
                     label="Percentage"
@@ -392,7 +393,6 @@ const TaxDetail = () => {
                     addonAfter="PCS"
                     {...register("percentage", { required: "Please enter name." })}
                 />
-                {/* } */}
                 <InputAddonBefore>%</InputAddonBefore>
             </CreateInputDiv>
             </Col>
@@ -419,17 +419,6 @@ const TaxDetail = () => {
           </TopButtonHolder>
         }
       />
-      )}
-
-      {showDeleteModal && (
-        <ModalDeleteConfirmation
-          totalSelected={1}
-          itemTitle={UOMDataFake.name}
-          visible={showDeleteModal}
-          isLoading={isLoadingDeleteUOM}
-          onCancel={() => setShowDeleteModal(false)}
-          onOk={() => deleteUOM({ ids: [tax_id], company_id: "KSNI" })}
-        />
       )}
 
       {isShowDelete.open && (
@@ -517,33 +506,10 @@ const CreateInputDiv = styled.div`
   position: relative;
 `
 
-const CreateSelectDiv = styled.div`
-  display: flex;
-  position: relative;
-  justify-content: space-between;
-`
-const Span = styled.span`
-  color: #ed1c24;
-  margin-left: 1px;
-  font-weight: lighter;
-`;
-
 const CreateTitle = styled.div`
   margin-top: 1rem;
   font-weight: 600;
   font-size: 1.5rem;
-`
-const InputAddonAfter = styled.div`
-  z-index: 10;
-  background: #f4f4f4;
-  position: absolute;
-  height: 40px;
-  width: 20%;
-  border-radius: 5px 0 0 5px;
-  margin: 0 auto;
-  text-align: center;
-  padding-top: .5rem;
-  border: 1px solid #aaaaaa;
 `
 
 const InputAddonBefore = styled.div`

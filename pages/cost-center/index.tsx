@@ -120,7 +120,7 @@ const CostCenter = () => {
   const { mutate: uploadFileCostCenter, isLoading: isLoadingUploadFileCostCenter } = useUploadFileCostCenter({
     query: {
       with_data: "N",
-      company_id: "1",
+      company_id: costCenterData?.data[0]?.companyId,
     },
     options: {
       onSuccess: () => {
@@ -166,17 +166,16 @@ const CostCenter = () => {
 
   const onSubmitFile = (file: any) => {
     const formData = new FormData();
-    formData.append("company_id", "1");
+    formData.append("company_id", costCenterData?.data[0]?.companyId);
     formData.append("file", file);
     const uploadedData = {
       file: formData,
-      company_id: "1"
+      company_id: costCenterData?.data[0]?.companyId
     }
-    console.log(uploadedData, '<<<<<<<<<<ini fike')
     uploadFileCostCenter(formData);
   };
 
-  const handleDelete = (ids, rows) => {
+  const handleDelete = (ids: any[], rows: { id: string | number; companyId: any; }[]) => {
     const deletedCostCenter = {
         cost_center_ids :[...ids],
         company_ids :[]
@@ -192,10 +191,12 @@ const CostCenter = () => {
             }
         });
     });
-    deleteCostCenter(deletedCostCenter)
+    if(deletedCostCenter?.company_ids?.length > 0) {
+      deleteCostCenter(deletedCostCenter)
+    }
   }
 
-  if(isLoadingDeleteCostCenter || isLoadingCostCenter || isLoadingUploadFileCostCenter){
+  if(isLoadingCostCenter || isLoadingUploadFileCostCenter){
   return (
     <Center>
       <Spin tip="Loading data..." />
@@ -240,15 +241,16 @@ const CostCenter = () => {
               textColor={"pink.regular"}
               iconStyle={{ fontSize: "12px" }}
               onClick={(e: any) => {
+                const companyId = costCenterData?.data[0]?.companyId
                 switch (parseInt(e.key)) {
                   case 1:
-                    downloadFile({ with_data: "N", company_id: "1" });
+                    downloadFile({ with_data: "N", company_id: companyId });
                     break;
                   case 2:
                     setShowUpload(true);
                     break;
                   case 3:
-                    downloadFile({ with_data: "Y", company_id: "1" });
+                    downloadFile({ with_data: "Y", company_id: companyId });
                     break;
                   case 4:
                     break;
@@ -337,11 +339,6 @@ const CostCenter = () => {
                   variant="primary"
                   size="big"
                   onClick={() => handleDelete(selectedRowKeys, costCenterData?.data)}
-                //     () => {
-                //       console.log(selectedRowKeys, '<<<<<')
-                //         console.log(costCenterData?.data.filter(costCenter => costCenter.id === selectedRowKeys[0]))
-                //     //   deleteCostCenter({ ids: selectedRowKeys, company_id: "KSNI" });
-                //   }}
                 >
                   {isLoadingDeleteCostCenter ? "loading..." : "Yes"}
                 </Button>
