@@ -81,7 +81,7 @@ const CostCenterCreate = () => {
     totalItems: 100,
   });
 
-  const [listUomCategory, setListUomCategory] = useState<any[]>([]);
+  const [listCompany, setListCompany] = useState<any[]>(null);
   const [listProfitCenter, setListProfitCenter] = useState([])
   const [listCurrencies, setListCurrencies] = useState([])
   const [listLanguages, setListLanguages] = useState([])
@@ -123,13 +123,16 @@ const CostCenterCreate = () => {
     } = useCompanyList({
         options: {
         onSuccess: (data: CompanyList) => {
-            const mappedCompanyData = data?.rows?.map((element: RowCompanyList) => {
-                return {
-                    value: element.id,
-                    label: element.name,
-                };
-            });
-            setListUomCategory(mappedCompanyData);
+            // const mappedCompanyData = data?.rows?.map((element: RowCompanyList) => {
+            //   if(element.name === "PT. Kaldu Sari Nabati Indonesia"){
+            //     return {
+            //         value: element.id,
+            //         label: element.name,
+            //     };
+            //   }
+            // });
+            const mappedCompanyData = data?.rows?.filter((company) => company.name === "PT. Kaldu Sari Nabati Indonesia")
+            setListCompany(mappedCompanyData);
         },
         },
         query: {
@@ -214,7 +217,7 @@ const CostCenterCreate = () => {
   const { mutate: createCostCenter, isLoading: isLoadingCreateCostCenter } = useCreateCostCenter({
     options: {
       onSuccess: () => {
-        queryClient.invalidateQueries(["uom-list"]);
+        queryClient.invalidateQueries(["cost-centers"]);
         router.back();
       },
     },
@@ -228,7 +231,8 @@ const CostCenterCreate = () => {
         profit_center_id :data?.profit_center_id, 
         company_id :data?.company_id?.toString(),
         code :data?.code,
-        name : data?.name,
+        // name : data?.name? data?.name : listCompany[0]?.name,
+        name : "2",
         cost_center_category : costCenterCategory,
         valid_from : data?.valid_from? data?.valid_from : moment().format("DD/MM/YYYY"),
         valid_to : data?.valid_to? data?.valid_to : moment().format("DD/MM/YYYY"),
@@ -410,7 +414,6 @@ const CostCenterCreate = () => {
       <Spin tip="Loading data..." />
     </Center>
   );
-
   return (
     <>
       <Col>
@@ -522,12 +525,14 @@ const CostCenterCreate = () => {
                         style={{ width: "100%" }}
                         size={"large"}
                         required
+                        disabled
+                        defaultValue={listCompany[0]?.name}
                         placeholder={"Select"}
                         borderColor={"#AAAAAA"}
                         arrowColor={"#000"}
                         withSearch
                         isLoading={isFetchingCompanyData}
-                        items={listUomCategory}
+                        items={listCompany}
                         onChange={(value: any) => {
                             onChange(value);
                         }}

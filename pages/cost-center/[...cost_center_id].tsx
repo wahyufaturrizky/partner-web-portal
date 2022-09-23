@@ -150,12 +150,13 @@ const CostCenterCreate = () => {
     } = useCompanyList({
         options: {
         onSuccess: (data: CompanyList) => {
-            const mappedCompanyData = data?.rows?.map((element: RowCompanyList) => {
-                return {
-                    value: element.id,
-                    label: element.name,
-                };
-            });
+            // const mappedCompanyData = data?.rows?.map((element: RowCompanyList) => {
+            //     return {
+            //         value: element.id,
+            //         label: element.name,
+            //     };
+            // });
+            const mappedCompanyData = data?.rows?.filter(company => company.name === "PT. Kaldu Sari Nabati Indonesia")
             setlistCompany(mappedCompanyData);
         },
         },
@@ -243,7 +244,7 @@ const CostCenterCreate = () => {
     companyId: cost_center_id && cost_center_id[0],
     options: {
       onSuccess: () => {
-        queryClient.invalidateQueries(["cost-center"]);
+        queryClient.invalidateQueries(["cost-centers"]);
         router.back();
       },
     },
@@ -257,7 +258,8 @@ const CostCenterCreate = () => {
         profit_center_id :data?.profit_center_id ? data?.profit_center_id : costCenterData?.profitCenterId, 
         company_id : data?.company_id? data?.company_id?.toString() : costCenterData?.companyId,
         code :data?.code,
-        name : data?.name,
+        // name : data?.name? data?.name : listCompany[0].name,
+        name : "2",
         cost_center_category : costCenterCategory,
         valid_from : data?.valid_from? data?.valid_from : moment(costCenterData?.validFrom).utc().format('DD/MM/YYYY'),
         valid_to : data?.valid_to? data?.valid_to : moment(costCenterData?.validTo).utc().format('DD/MM/YYYY'),
@@ -565,7 +567,8 @@ const CostCenterCreate = () => {
                         borderColor={"#AAAAAA"}
                         arrowColor={"#000"}
                         withSearch
-                        defaultValue={listCompany.filter((company) => company.value === +costCenterData?.companyId)[0]?.label}
+                        disabled
+                        defaultValue={listCompany[0]?.name}
                         isLoading={isFetchingCompanyData}
                         items={listCompany}
                         onChange={(value: any) => {
