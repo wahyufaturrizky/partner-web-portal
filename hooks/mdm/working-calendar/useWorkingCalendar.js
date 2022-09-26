@@ -7,8 +7,8 @@ const fetchWorkingCalendars = async ({ query = {} }) => {
       search: "",
       page: 1,
       limit: 10,
-      sortBy: "created_at",
-      sortOrder: "DESC",
+      sortBy: "calendar_name",
+      sortOrder: "ASC",
       ...query,
     },
   }).then((data) => data);

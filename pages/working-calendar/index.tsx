@@ -22,9 +22,6 @@ import useDebounce from "../../lib/useDebounce";
 import { queryClient } from "../_app";
 import { useRouter } from "next/router";
 
-
-
-
 const renderConfirmationText = (type: any, data: any) => {
   switch (type) {
     case "selection":
@@ -105,7 +102,7 @@ const WorkingCalendar = () => {
                 defaultChecked={element.active}
                 onChange={() => {
                   setWorkingCalendarId(element.id);
-                  setStatus(!status);
+                  setStatus(!element.active);
                 }}
               />
             ),

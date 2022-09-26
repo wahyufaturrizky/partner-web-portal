@@ -1,26 +1,19 @@
 import React, { useState } from "react";
-import {
-  Text,
-  Col,
-  Row,
-  Spacer,
-  Dropdown,
-  Button,
-  Accordion,
-  Input,
-  FormSelect,
-  Radio,
-} from "pink-lava-ui";
+import { Text, Col, Row, Spacer, Button, Input, Table, DatePickerInput } from "pink-lava-ui";
 import styled from "styled-components";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useForm, useFieldArray } from "react-hook-form";
 import { useRouter } from "next/router";
-import { useCreateUOM } from "../../hooks/mdm/unit-of-measure/useUOM";
 import { queryClient } from "../_app";
-import useDebounce from "../../lib/useDebounce";
-import { useUOMCategoryInfiniteLists } from "../../hooks/mdm/unit-of-measure-category/useUOMCategory";
 import ICCompany from "../../assets/icons/ic-company.svg";
 import ICWorld from "../../assets/icons/ic-world.svg";
-import Icon from "@ant-design/icons";
+import Icon, { DeleteOutlined } from "@ant-design/icons";
+import { useCreateWorkingCalendar } from "hooks/mdm/working-calendar/useWorkingCalendar";
+import WorkingDaysTable from "components/pages/WorkingCalendar/WorkingDaysTable";
+import ConditionalFieldCompany from "components/pages/WorkingCalendar/ConditionalFieldCompany";
+import ConditionalFieldCountry from "components/pages/WorkingCalendar/ConditionalFieldCountry";
+import StartEndWorkingField from "components/pages/WorkingCalendar/StartEndWorkingField";
+import CardSelection from "components/pages/WorkingCalendar/CardSelection";
+import ModalCalendar from "components/elements/Modal/ModalCalendar";
 
 const WorldSvg = () => <ICWorld />;
 
@@ -34,237 +27,259 @@ const WorkingCalendarCreate = () => {
   const router = useRouter();
 
   const [statusCard, setStatusCard] = useState("country");
-  const [radioValue, setRadioValue] = useState("companyInternal");
+  const [workingDaysPayload, setWorkingDaysPayload] = useState([
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+  ]);
+  const [companyPayloads, setCompanyPayload] = useState({});
+  const [show, setShow] = useState(false);
 
-  const [listUomCategory, setListUomCategory] = useState<any[]>([]);
-  const [totalRows, setTotalRows] = useState(0);
-  const [search, setSearch] = useState("");
-  const debounceFetch = useDebounce(search, 1000);
-
-  const { register, control, handleSubmit } = useForm();
-
-  const {
-    isFetching: isFetchingUomCategory,
-    isFetchingNextPage: isFetchingMoreUomCategory,
-    hasNextPage,
-    fetchNextPage,
-  } = useUOMCategoryInfiniteLists({
-    query: {
-      search: debounceFetch,
-      company_id: "KSNI",
-      limit: 10,
-    },
-    options: {
-      onSuccess: (data: any) => {
-        setTotalRows(data.pages[0].totalRow);
-        const mappedData = data?.pages?.map((group: any) => {
-          return group.rows?.map((element: any) => {
-            return {
-              value: element.uomCategoryId,
-              label: element.name,
-            };
-          });
-        });
-        const flattenArray = [].concat(...mappedData);
-        setListUomCategory(flattenArray);
-      },
-      getNextPageParam: (_lastPage: any, pages: any) => {
-        if (listUomCategory.length < totalRows) {
-          return pages.length + 1;
-        } else {
-          return undefined;
-        }
-      },
+  const { register, control, handleSubmit, setValue } = useForm({
+    defaultValues: {
+      public_holidays: [{ holiday_date: "", holiday_name: "" }],
     },
   });
 
-  const { mutate: createUom, isLoading: isLoadingCreateUom } = useCreateUOM({
-    options: {
-      onSuccess: () => {
-        router.back();
-        queryClient.invalidateQueries(["uom-list"]);
-      },
-    },
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: "public_holidays",
   });
+
+  const { mutate: createWorkingCalendar, isLoading: isLoadingCreateWorkingCalendar } =
+    useCreateWorkingCalendar({
+      options: {
+        onSuccess: () => {
+          router.back();
+          queryClient.invalidateQueries(["working-calendars"]);
+        },
+      },
+    });
 
   const onSubmit = (data: any) => {
+    const companyPayload = statusCard === "company" ? companyPayloads : null;
+    const countryPayload = statusCard === "country" ? data.country : null;
+
     const formData = {
-      company_id: "KSNI",
       ...data,
+      company: companyPayload,
+      country: countryPayload,
+      working_days: workingDaysPayload,
     };
-    createUom(formData);
+
+    console.log(formData);
+    createWorkingCalendar(formData);
   };
 
   return (
-    <Col>
-      <Row gap="4px">
-        <Text variant={"h4"}>Create Working Calendar</Text>
-      </Row>
+    <>
+      <Col>
+        <Row gap="4px">
+          <Text variant={"h4"}>Create Working Calendar</Text>
+        </Row>
 
-      <Spacer size={20} />
+        <Spacer size={20} />
 
-      <Card>
-        <Row justifyContent="space-between" alignItems="center" nowrap>
-          <Row gap="16px">
-            <Button size="big" variant={"tertiary"} onClick={() => router.back()}>
-              Cancel
-            </Button>
-            <Button size="big" variant={"secondary"} onClick={() => {}}>
-              Preview Calendar
-            </Button>
-            <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
-              {isLoadingCreateUom ? "Loading..." : "Save"}
-            </Button>
+        <Card>
+          <Row justifyContent="flex-end" alignItems="center" nowrap>
+            <Row gap="16px">
+              <Button size="big" variant={"tertiary"} onClick={() => router.back()}>
+                Cancel
+              </Button>
+              <Button
+                size="big"
+                variant={"secondary"}
+                onClick={() => {
+                  setShow(true);
+                }}
+              >
+                Preview Calendar
+              </Button>
+              <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
+                {isLoadingCreateWorkingCalendar ? "Loading..." : "Save"}
+              </Button>
+            </Row>
           </Row>
-        </Row>
-      </Card>
+        </Card>
 
-      <Spacer size={20} />
+        <Spacer size={20} />
 
-      <Card>
-        <Row width="100%" noWrap>
-          <Col width={"100%"}>
-            <Text variant="headingRegular">
-              Calendar Name<span style={{ color: "#EB008B" }}>*</span>
-            </Text>
-            <Row width={"50%"}>
-              <Input
-                width="50%"
-                height="40px"
-                label=""
-                placeholder={"e.g NBT-ID"}
-                {...register("calendar_name")}
+        <Card>
+          <Row width="100%" noWrap>
+            <Col width={"100%"}>
+              <Text variant="headingRegular">
+                Calendar Name<span style={{ color: "#EB008B" }}>*</span>
+              </Text>
+              <Row width={"50%"}>
+                <Input
+                  width="50%"
+                  height="40px"
+                  label=""
+                  placeholder={"e.g NBT-ID"}
+                  {...register("calendar_name")}
+                />
+              </Row>
+
+              <Spacer size={20} />
+
+              <Separator />
+
+              <Spacer size={20} />
+
+              <Text variant={"headingMedium"}>How do you want this type of calendar ?</Text>
+
+              <Spacer size={10} />
+
+              <Row gap="8px">
+                <CardSelection
+                  onSelect={(type: any) => {
+                    setStatusCard(type);
+                    setValue("country", "");
+                  }}
+                  type={"country"}
+                  selectedType={statusCard}
+                  Icon={WorldIcon}
+                  title={"Use for country only"}
+                />
+
+                <CardSelection
+                  onSelect={(type: any) => {
+                    setStatusCard(type);
+                  }}
+                  type={"company"}
+                  selectedType={statusCard}
+                  Icon={CompanyIcon}
+                  title={"Set custom for company"}
+                />
+              </Row>
+
+              <Spacer size={20} />
+
+              {statusCard === "country" && <ConditionalFieldCountry control={control} />}
+
+              {statusCard === "company" && (
+                <ConditionalFieldCompany
+                  control={control}
+                  onChangePayload={(companyPayload: any) => {
+                    setCompanyPayload(companyPayload);
+                  }}
+                />
+              )}
+
+              <Spacer size={20} />
+
+              <Separator />
+
+              <Spacer size={20} />
+
+              <WorkingDaysTable
+                onChangeValue={(value: any) =>
+                  setWorkingDaysPayload(() => {
+                    const workingDaysObject = value[0];
+                    const workingDaysList = [];
+
+                    // Loop object working days
+                    for (const property in workingDaysObject) {
+                      workingDaysList.push(workingDaysObject[property]);
+                    }
+
+                    return workingDaysList;
+                  })
+                }
               />
-            </Row>
 
-            <Spacer size={20} />
+              <Spacer size={20} />
 
-            <Separator />
+              <StartEndWorkingField control={control} />
 
-            <Spacer size={20} />
+              <Spacer size={20} />
 
-            <Text variant={"headingMedium"}>How do you want this type of calendar ?</Text>
+              <Text variant={"headingMedium"}>Public Holidays</Text>
 
-            <Spacer size={10} />
+              <Spacer size={10} />
 
-            <Row gap="8px">
-              <CardSelection
-                isActive={statusCard === "country"}
-                onClick={() => {
-                  setStatusCard("country");
-                }}
-              >
-                <Col alignItems={"center"} justifyContent={"center"}>
-                  <WorldIcon
-                    style={{
-                      color: statusCard === "country" ? "#EB008B" : "#666666",
-                    }}
-                  />
+              <Row>
+                <Button
+                  variant="primary"
+                  size="big"
+                  onClick={() => {
+                    append({ holiday_date: "", holiday_name: "" });
+                  }}
+                >
+                  + Add New
+                </Button>
+              </Row>
 
-                  <Text
-                    variant={"body2"}
-                    textAlign={"center"}
-                    color={statusCard === "country" ? "pink.regular" : "black.dark"}
-                    hoverColor={statusCard === "country" ? "pink.regular" : "black.dark"}
-                  >
-                    Use for country only
-                  </Text>
-                </Col>
-              </CardSelection>
+              <Spacer size={10} />
 
-              <CardSelection
-                isActive={statusCard === "company"}
-                onClick={() => {
-                  setStatusCard("company");
-                }}
-              >
-                <Col alignItems={"center"} justifyContent={"center"}>
-                  <CompanyIcon
-                    style={{
-                      color: statusCard === "company" ? "#EB008B" : "#666666",
-                    }}
-                  />
+              <Table
+                columns={[
+                  { title: "", dataIndex: "action", width: "80px" },
+                  { title: "Date", dataIndex: "date" },
+                  { title: "Public Holiday Name", dataIndex: "holidayName" },
+                ]}
+                data={fields?.map((el, index) => ({
+                  key: index,
+                  action: (
+                    <DeleteOutlined
+                      style={{
+                        cursor: "pointer",
+                        borderRadius: 3,
+                        backgroundColor: "#D5FAFD",
+                        color: "#EB008B",
+                        padding: 4,
+                        fontSize: "18px",
+                      }}
+                      onClick={() => {
+                        remove(index);
+                      }}
+                    />
+                  ),
+                  date: (
+                    <Controller
+                      control={control}
+                      name={`public_holidays.${index}.holiday_date`}
+                      render={({ field: { onChange } }) => (
+                        <DatePickerInput
+                          label=""
+                          fullWidth
+                          onChange={(date: any, dateString: any) => {
+                            onChange(dateString);
+                          }}
+                          format={"DD/MM/YYYY"}
+                        />
+                      )}
+                    />
+                  ),
+                  holidayName: (
+                    <Input
+                      width="50%"
+                      height="40px"
+                      label=""
+                      placeholder={"e.g Happy New Year"}
+                      {...register(`public_holidays.${index}.holiday_name`)}
+                    />
+                  ),
+                }))}
+              />
+            </Col>
+          </Row>
+        </Card>
+      </Col>
 
-                  <Text
-                    variant={"body2"}
-                    textAlign={"center"}
-                    color={statusCard === "company" ? "pink.regular" : "black.dark"}
-                    hoverColor={statusCard === "company" ? "pink.regular" : "black.dark"}
-                  >
-                    Set custom for company
-                  </Text>
-                </Col>
-              </CardSelection>
-            </Row>
-
-            <Spacer size={20} />
-
-            <Text variant="headingRegular">
-              Country<span style={{ color: "#EB008B" }}>*</span>
-            </Text>
-            <FormSelect
-              defaultValue={""}
-              style={{ width: "50%" }}
-              size={"large"}
-              placeholder={"Select"}
-              borderColor={"#AAAAAA"}
-              arrowColor={"#000"}
-              withSearch
-              isLoading={false}
-              isLoadingMore={false}
-              fetchMore={() => {}}
-              items={[]}
-              onChange={(value: any) => {}}
-              onSearch={(value: any) => {}}
-            />
-
-            <Spacer size={20} />
-
-            <Row gap={"8px"} alignItems={"center"}>
-              <Radio
-                value={"companyInternal"}
-                checked={radioValue === "companyInternal"}
-                onChange={(e: any) => {
-                  setRadioValue(e.target.value);
-                }}
-              >
-                Company Internal Structure
-              </Radio>
-              <Radio
-                value={"branch"}
-                checked={radioValue === "branch"}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                  setRadioValue(e.target.value);
-                }}
-              >
-                Branch
-              </Radio>
-            </Row>
-
-            
-            {/* 
-            <Text variant="headingRegular">
-              Country<span style={{ color: "#EB008B" }}>*</span>
-            </Text>
-            <FormSelect
-              defaultValue={""}
-              style={{ width: "50%" }}
-              size={"large"}
-              placeholder={"Select"}
-              borderColor={"#AAAAAA"}
-              arrowColor={"#000"}
-              withSearch
-              isLoading={false}
-              isLoadingMore={false}
-              fetchMore={() => {}}
-              items={[]}
-              onChange={(value: any) => {}}
-              onSearch={(value: any) => {}}
-            /> */}
-          </Col>
-        </Row>
-      </Card>
-    </Col>
+      {show && (
+        <ModalCalendar
+          show={show}
+          onCancel={() => {
+            setShow(false);
+          }}
+        />
+      )}
+    </>
   );
 };
 
@@ -274,27 +289,10 @@ const Card = styled.div`
   padding: ${(p: any) => (p.padding ? p.padding : "16px")};
 `;
 
-const CardSelection = styled.div`
-  width: 258px;
-  background: #ffffff;
-  border-radius: 16px;
-  border: ${(props) => (props.isActive ? "2px solid #EB008B" : "1px solid #aaaaaa")};
-  box-sizing: border-box;
-  cursor: pointer;
-  padding: 8px;
-`;
-
 const Separator = styled.div`
   display: block;
   height: 0;
   border-bottom: 1px dashed #dddddd;
-`;
-
-const Label = styled.div`
-  font-weight: bold;
-  font-size: 16px;
-  line-height: 24px;
-  color: #000000;
 `;
 
 export default WorkingCalendarCreate;
