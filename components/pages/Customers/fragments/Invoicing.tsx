@@ -16,19 +16,7 @@ import ModalAddBankAccount from '../../../elements/Modal/ModalAddBankAccount'
 import IconAdd from '../../../../assets/icons/ICAdd'
 
 export default function Invoicing(props: any) {
-  const {
-    setValueInvoicing,
-    register,
-    visible,
-    setVisible,
-    onHandleEdit,
-    handleSubmitBankAccount,
-    registerBankAccount,
-    errorsBankAccount,
-    handleAddItemBankAccount,
-    fieldsBankAccount,
-    removeBankAccount,
-  } = props
+  const {} = props
 
   const columns = [
     { title: "", dataIndex: "key" },
@@ -40,10 +28,10 @@ export default function Invoicing(props: any) {
       render: (_: any, record: any) => (
         <Row gap="16px" alignItems="center" nowrap>
           <Col>
-            <ICEdit onClick={() => onHandleEdit(record)}/>
+            <ICEdit onClick={() => {}}/>
           </Col>
           <Col>
-            <ICDelete onClick={() => removeBankAccount(record.key)} />
+            <ICDelete onClick={() => {}} />
           </Col>
         </Row>
       )
@@ -79,9 +67,9 @@ export default function Invoicing(props: any) {
             width="100%"
             height="50px"
             required
-            {...register('invoicing.credit_limit', {
+            // {...register('invoicing.credit_limit', {
               // required: 'credit limit must be filled'
-            })}
+            // })}
           />
           <Spacer size={10} />
           <Input
@@ -89,7 +77,7 @@ export default function Invoicing(props: any) {
             width="100%"
             height="50px"
             disabled
-            {...register('invoicing.credit_used')}
+            // {...register('invoicing.credit_used')}
           />
         </Col>
         <Col width="48%">
@@ -98,8 +86,7 @@ export default function Invoicing(props: any) {
             width="100%"
             height="50px"
             disabled
-            errors={errorsBankAccount}
-            {...register('invoicing.credit_balance')}
+            // {...register('invoicing.credit_balance')}
           />
           <Spacer size={10} />
           <Dropdown2
@@ -109,8 +96,8 @@ export default function Invoicing(props: any) {
             isShowActionLabel
             items={listFakeIncomeAccount}
             handleClickActionLabel={() => { }}
-            handleChange={(value: string) =>
-              setValueInvoicing("invoicing.income_account", value)}
+            // handleChange={(value: string) =>
+            //   setValueInvoicing("invoicing.income_account", value)}
           />
         </Col>
       </Row>
@@ -128,8 +115,8 @@ export default function Invoicing(props: any) {
             isShowActionLabel
             handleClickActionLabel={() => { }}
             items={listFakeIncomeAccount}
-            handleChange={(value: string) =>
-              setValueInvoicing("invoicing.expense_account", value)}
+            // handleChange={(value: string) =>
+            //   setValueInvoicing("invoicing.expense_account", value)}
           />
         </Col>
       </Row>
@@ -141,7 +128,7 @@ export default function Invoicing(props: any) {
       <Button
         size="big"
         variant={"primary"}
-        onClick={() => setVisible(!visible)}
+        // onClick={() => setVisible(!visible)}
       >
         <IconAdd /> Add Bank Account
       </Button>
@@ -150,7 +137,7 @@ export default function Invoicing(props: any) {
         columns={columns.filter(
           (filtering) => filtering?.dataIndex !== "id" && filtering?.dataIndex !== "key"
         )}
-        data={fieldsBankAccount}
+        data={[]}
         width="100%"
       />
 
@@ -165,7 +152,7 @@ export default function Invoicing(props: any) {
             width="100%"
             height="48px"
             placeholder="e.g Tax Items"
-            {...register('invoicing.tax_name')}
+            // {...register('invoicing.tax_name')}
           />
           <Spacer size={20} />
         </Col>
@@ -178,9 +165,9 @@ export default function Invoicing(props: any) {
               isShowActionLabel
               items={listFakeIncomeAccount}
               handleClickActionLabel={() => { }}
-              handleChange={(value: any) => {
-                setValueInvoicing('invoicing.tax_city', value)
-              }}
+              // handleChange={(value: any) => {
+              //   setValueInvoicing('invoicing.tax_city', value)
+              // }}
             />
           </Col>
           <Col width="48%">
@@ -189,7 +176,7 @@ export default function Invoicing(props: any) {
               width="100%"
               placeholder="e.g Jalan Soekarano Hatta No.1"
               height="48px"
-              {...register('invoicing.tax_address')}
+              // {...register('invoicing.tax_address')}
             />
           </Col>
         </Row>
@@ -208,22 +195,15 @@ export default function Invoicing(props: any) {
             isShowActionLabel
             items={listFakeIncomeAccount}
             handleClickActionLabel={() => { }}
-            handleChange={(value: any) => {
-              setValueInvoicing('invoicing.currency', value)
-            }}
+            // handleChange={(value: any) => {
+            //   setValueInvoicing('invoicing.currency', value)
+            // }}
           />
         </Col>
       </Row>
 
       {/* modal create list-bank */}
-      <ModalAddBankAccount
-        errorsBankAccount={errorsBankAccount}
-        handleAddItemBankAccount={handleAddItemBankAccount}
-        handleSubmitBankAccount={handleSubmitBankAccount}
-        registerBankAccount={registerBankAccount}
-        visible={visible}
-        onCancel={() => setVisible(!visible)}
-      />
+      <ModalAddBankAccount />
     </div>
   )
 }

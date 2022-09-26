@@ -2,48 +2,45 @@ import React, { useState } from 'react'
 import {
   Row,
   Col,
-  Dropdown2,
   Spacer,
   Checkbox,
   Text,
   Dropdown
 } from 'pink-lava-ui'
 import styled from 'styled-components'
-import { useTermOfPayments } from '../../../../hooks/mdm/term-of-payment/useTermOfPayment';
+import { Controller } from 'react-hook-form';
+
+import { useTermOfPayments } from 'hooks/mdm/term-of-payment/useTermOfPayment';
+import { useBranchList } from 'hooks/mdm/branch/useBranch';
+import { useFetchListSalesman } from 'hooks/mdm/salesman/useSalesman';
 
 export default function Sales(props: any) {
-  const { setValueSales } = props
+  const { control } = props
   const [orderInformation, setOrderInformation] = useState<any>({
     sales: false,
     invoice: false,
     delivery: false,
   })
-
-  const { data: getDataTermOfPayment } = useTermOfPayments({
-    options: { onSuccess: () => { } },
-    query: { company_id: "KSNI" }
+  const [search, setSearch] = useState({
+    branch: '',
+    termOfPayment: '',
+    salesman: ''
   })
 
-  const listItemsOfPayment = getDataTermOfPayment?.rows?.map
-    (({ topId, name }: any) => { return { value: name, id: topId } })
+  const { data: listSalesman } = useFetchListSalesman({
+    options: { onSuccess: () => {} },
+    query: { status: 0, search: search.salesman }
+  })
 
+  const { data: listTermOfPayment } = useTermOfPayments({
+    options: { onSuccess: () => { } },
+    query: { company_id: "KSNI", search: search.termOfPayment }
+  })
 
-  const listSalesItems = [
-    { id: 'sales', label: 'Sales Order Blocking', value: 'sales_order_blocking' },
-    { id: 'invoice', label: 'Invoice/Billing Blocking', value: 'billing_blocking' },
-    { id: 'delivery', label: 'Delivery Order Blocking', value: 'delivery_order_blocking' },
-  ]
-  const listFakeBranch = [
-    { value: 'example-branch-1', id: 1 },
-    { value: 'example-branch-2', id: 2 },
-    { value: 'example-branch-3', id: 3 },
-    { value: 'example-branch-4', id: 4 },
-  ]
-  const listFakeSalesman = [
-    { value: 'Billa yuvila', id: 1 },
-    { value: 'Gween sticky', id: 2 },
-    { value: 'Lecredec', id: 3 },
-  ]
+  const { data: listBranch } = useBranchList({
+    options: { onSuccess: () => { } },
+    query: { company_id: "KSNI", search: search.branch }
+  })
 
   return (
     <div>
@@ -51,41 +48,73 @@ export default function Sales(props: any) {
       <Spacer size={20} />
       <Row gap="10px" width="100%">
         <Col width="48%">
-          <Dropdown2
-            label="Branch"
-            width="100%"
-            actionLabel="Add New Branch"
-            isShowActionLabel
-            items={listFakeBranch}
-            handleClickActionLabel={() => { }}
-            handleChange={(value: string) => setValueSales("sales.branch", value)}
-            onSearch={(search: string) => {}}
-            required
+          <Controller
+            control={control}
+            name="sales.branch"
+            render={({ field: { onChange } }) => (
+              <>
+                <Dropdown
+                  label="Branch"
+                  width="100%"
+                  actionLabel="Add New Branch"
+                  items={listBranch?.rows?.map((item: any) => {
+                    return {
+                      value: item?.name,
+                      id: item?.branchId
+                    }
+                  })}
+                  handleChange={onChange}
+                  onSearch={(value: string) => setSearch({ ...search, branch: value })}
+                  required
+                />
+              </>
+            )}
           />
         <Spacer size={20} />
-        <Dropdown
-          label="Term of Payment" 
-          width="100%"
-          actionLabel="Add New Term of Payment"
-          isShowActionLabel
-          noSearch
-            items={listItemsOfPayment}
-          handleClickActionLabel={() => window.open('/term-of-payment/create')}
-          handleChange={(value: string) => setValueSales("sales.term_payment", value)}
-          required
-        />
+        <Controller
+          control={control}
+          name="sales.term_payment"
+          render={({ field: { onChange } }) => (
+            <Dropdown
+              label="Term of Payment"
+              width="100%"
+              actionLabel="Add New Term of Payment"
+              isShowActionLabel
+              noSearch
+              items={listTermOfPayment?.rows?.map((item: any) => {
+                return {
+                  value: item?.name,
+                  id: item?.topId
+                }
+              })}
+              handleChange={onChange}
+              onSearch={(value: string) => setSearch({ ...search, termOfPayment: value })}
+              required
+            />
+          )} />
         </Col>
         <Col width="48%">
-          <Dropdown
-            actionLabel="Add New Salesman"
-            label="Salesman"
-            width="100%"
-            isShowActionLabel
-            items={listFakeSalesman}
-            handleClickActionLabel={() => window.open('/salesman/create')}
-            handleChange={(value: string) => setValueSales("sales.salesman", value)}
-            required
-          />
+          <Controller
+            control={control}
+            name="sales.salesman"
+            render={({ field: { onChange } }) => (
+              <Dropdown
+                actionLabel="Add New Salesman"
+                label="Salesman"
+                width="100%"
+                isShowActionLabel
+                items={listSalesman?.rows?.map((items: any) => {
+                  return {
+                    value: items?.division,
+                    id: items?.id
+                  }
+                })}
+                handleChange={onChange}
+                handleClickActionLabel={() => window.open('/salesman/create')}
+                onSearch={(value: string) => setSearch({ ...search, salesman: value })}
+                required
+            />
+          )}/>
         </Col>
       </Row>
       <Spacer size={50} />

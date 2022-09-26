@@ -206,7 +206,6 @@ const TransportationGroup = () => {
   const rowSelection = {
     selectedRowKeys,
     onChange: (selectedRowKeys: any) => {
-      console.log(selectedRowKeys);
       setSelectedRowKeys(selectedRowKeys);
     },
   };

@@ -81,7 +81,6 @@ const UOMConversion = () => {
     },
     options: {
       onSuccess: (data: any) => {
-        console.log(data, '<<<< total row nya')
         pagination.setTotalItems(data.totalRow);
       },
       select: (data: any) => {

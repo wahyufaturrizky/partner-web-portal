@@ -68,10 +68,8 @@ const ProductCategory = () => {
       options: {
         onSuccess: (data: any) => {
           pagination.setTotalItems(data.totalRow);
-          console.log(data, "data");
         },
         select: (data: any) => {
-          console.log(data.rows);
           const mappedData = data?.rows?.map((element: any) => {
             return {
               key: element.productCategoryId,

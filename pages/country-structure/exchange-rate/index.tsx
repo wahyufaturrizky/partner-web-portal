@@ -169,7 +169,6 @@ const ExchangeRate = () => {
 
     uploadFileTop(formData);
   };
-  console.log("LOG",dataAccess);
   
   return (
     <>

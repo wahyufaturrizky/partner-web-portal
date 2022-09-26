@@ -9,6 +9,7 @@ import {
   Accordion,
   Input,
   TextArea,
+  DatePickerInput,
   Dropdown2,
   Switch,
   FileUploaderAllFiles,
@@ -19,7 +20,7 @@ import Router, { useRouter } from "next/router";
 import ArrowLeft from "../../assets/icons/arrow-left.svg";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import usePagination from "@lucasmogari/react-pagination";
 import {
   useCoa,
@@ -33,6 +34,8 @@ import {
   useUploadLogoCompany,
 } from "../../hooks/company-list/useCompany";
 import { useTimezone } from "../../hooks/timezone/useTimezone";
+import { useLanguages } from "hooks/languages/useLanguages";
+import moment from "moment";
 
 const CompanyTypeDataFake = [
   {
@@ -334,6 +337,8 @@ const schema = yup
     email: yup.string().email("Email not validated").required("Email is Required"),
     address: yup.string(),
     taxId: yup.string(),
+    language: yup.string(),
+    source_exchange: yup.string(),
     country: yup.string().required("Country is Required"),
     industry: yup.string().required("Industry is Required"),
     numberOfEmployee: yup.string(),
@@ -359,6 +364,9 @@ const defaultValue = {
   advancePricing: false,
   pricingStructure: false,
   usingApproval: false,
+  chart_of_account: "",
+  external_code: "",
+  fiscal_year: 0
 };
 
 const CreateCompany: any = () => {
@@ -387,6 +395,11 @@ const CreateCompany: any = () => {
   const [sectorList, setSectorList] = useState([]);
 
   const [address, setAddress] = useState("");
+  const [search, setSearch] = useState({
+    language: "",
+    sourceExchange: "",
+  });
+
 
   const [foto, setFoto] = useState("");
 
@@ -462,6 +475,11 @@ const CreateCompany: any = () => {
     },
   });
 
+  const { data: listLanguage } = useLanguages({
+    options: { onSuccess: () => {}},
+    query: {}
+  })
+
   const handleSearchIndustry = (value) => {
     const newIndustry = IndustryDataFake.filter((tz) => tz.value.includes(value));
     setIndustryList(newIndustry);
@@ -499,7 +517,7 @@ const CreateCompany: any = () => {
   };
 
   const onSubmit = (data) => {
-    const payload = {
+    const payload: any = {
       account_id: "0",
       name: data.name,
       code: data.code,
@@ -524,8 +542,13 @@ const CreateCompany: any = () => {
       pricing_structure: data.pricingStructure,
       use_approval: data.usingApproval,
       status: data.activeStatus,
-    };
+      fiscal_year: data.fiscal_year,
+      source_exchange: data.source_exchange || "",
+      language: data.language,
+      chart_of_account: data.chart_of_account,
+      external_code: data.external_code
 
+    };
     createCompany(payload);
   };
 
@@ -751,12 +774,13 @@ const CreateCompany: any = () => {
                   />
                 </Col>
               </Row>
+              <Spacer size={10} />
               <Row width="100%" gap="20px" noWrap>
                 <Col width="50%">
                   {isLoadingCurrencyList ? (
                     <Spin tip="Loading data..." />
                   ) : (
-                    <Dropdown2
+                    <Dropdown
                       label="Currency"
                       width={"100%"}
                       items={currencyData.rows.map((data) => ({
@@ -769,6 +793,40 @@ const CreateCompany: any = () => {
                       required
                       error={errors?.currency?.message}
                       {...register("currency", { required: true })}
+                    />
+                  )}
+                </Col>
+                <Col width="50%">
+                  <Dropdown
+                    label="Source Exchange Rate"
+                    width="100%"
+                    items={[]}
+                    placeholder={"Select"}
+                    handleChange={(value: string) => setValue("source_exchange", value)}
+                    onSearch={(value: string) => setSearch({ ...search, sourceExchange: value })}
+                    {...register("source_exchange", { required: true })}
+                  />
+                </Col>
+              </Row>
+              <Spacer size={10} />
+              <Row width="100%" gap="20px" noWrap>
+                <Col width="50%">
+                  {isLoadingDateFormatList ? (
+                    <Spin tip="Loading data..." />
+                  ) : (
+                    <Dropdown
+                      label="Format Date"
+                      width={"100%"}
+                      items={dateFormatData.rows.map((data) => ({
+                        value: data.format,
+                        id: data.format,
+                      }))}
+                      placeholder={"Select"}
+                      handleChange={(value) => setValue("formatDate", value)}
+                      required
+                      error={errors?.formatDate?.message}
+                      {...register("formatDate", { required: true })}
+                      noSearch
                     />
                   )}
                 </Col>
@@ -793,27 +851,42 @@ const CreateCompany: any = () => {
                   )}
                 </Col>
               </Row>
+              <Spacer size={10} />
               <Row width="100%" gap="20px" noWrap>
                 <Col width="50%">
-                  {isLoadingDateFormatList ? (
+                  {isLoadingTimezoneList ? (
                     <Spin tip="Loading data..." />
                   ) : (
                     <Dropdown
-                      label="Format Date"
+                      label="Timezone"
                       width={"100%"}
-                      items={dateFormatData.rows.map((data) => ({
-                        value: data.format,
-                        id: data.format,
+                      items={timezoneData?.rows.map((data) => ({
+                        value: `${data.utc} ${data.name}`,
+                        id: `${data.utc} ${data.name}`,
                       }))}
                       placeholder={"Select"}
-                      handleChange={(value) => setValue("formatDate", value)}
+                      handleChange={(value) => setValue("timezone", value)}
+                      onSearch={(search) => setSearchTimezone(search)}
                       required
-                      error={errors?.formatDate?.message}
-                      {...register("formatDate", { required: true })}
-                      noSearch
+                      error={errors?.timezone?.message}
+                      {...register("timezone", { required: true })}
                     />
                   )}
+                  <Dropdown
+                    label="Language"
+                    width="100%"
+                    items={listLanguage?.rows.map((data: any) => ({
+                        id: data?.id,
+                        value: data?.name
+                      })
+                    )}
+                    placeholder={"Select"}
+                    handleChange={(value: string) => setValue("language", value)}
+                    onSearch={(search: string) => setSearch(search)}
+                    {...register("language", { required: true })}
+                  />
                 </Col>
+
                 <Col width="50%">
                   {isLoadingNumberFormatList ? (
                     <Spin tip="Loading data..." />
@@ -835,30 +908,8 @@ const CreateCompany: any = () => {
                   )}
                 </Col>
               </Row>
+              <Spacer size={20} />
               <Row width="100%" gap="20px" noWrap>
-                <Col width="50%">
-                  {isLoadingTimezoneList ? (
-                    <Spin tip="Loading data..." />
-                  ) : (
-                    <Dropdown2
-                      label="Timezone"
-                      width={"100%"}
-                      items={timezoneData.rows.map((data) => ({
-                        value: `${data.utc} ${data.name}`,
-                        id: `${data.utc} ${data.name}`,
-                      }))}
-                      placeholder={"Select"}
-                      handleChange={(value) => setValue("timezone", value)}
-                      onSearch={(search) => setSearchTimezone(search)}
-                      required
-                      error={errors?.timezone?.message}
-                      {...register("timezone", { required: true })}
-                    />
-                  )}
-                </Col>
-
-                <Col width="50%">
-                  <Spacer size={20} />
                   <Row width="100%" gap="20px" noWrap>
                     <Text variant="body1">Company Use Advance Pricing</Text>
                     <Switch
@@ -866,29 +917,64 @@ const CreateCompany: any = () => {
                       onChange={(value) => setValue("advancePricing", value)}
                     />
                   </Row>
-                  <Spacer size={20} />
-                  <Row width="100%" gap="20px" noWrap>
+                  <Row justifyContent="center" width="100%" gap="20px" noWrap>
                     <Text variant="body1">Company Use Pricing Structure</Text>
                     <Switch
                       defaultChecked={false}
                       onChange={(value) => setValue("pricingStructure", value)}
                     />
                   </Row>
-                  <Spacer size={20} />
-                  <Row width="100%" gap="20px" noWrap>
+                <Row width="100%" justifyContent="end"  gap="20px" noWrap>
                     <Text variant="body1">Using Approval</Text>
                     <Switch
                       defaultChecked={false}
                       onChange={(value) => setValue("usingApproval", value)}
                     />
                   </Row>
-                </Col>
               </Row>
             </Accordion.Body>
           </Accordion.Item>
         </Accordion>
 
         <Spacer size={20} />
+
+        <Accordion>
+          <Accordion.Item key={1}>
+            <Accordion.Header variant="blue">Finance Setup</Accordion.Header>
+            <Accordion.Body>
+              <Row width="100%" gap="20px" noWrap>
+                <Col width="50%">
+                  <Dropdown
+                    label="Chart of Account"
+                    width="100%"
+                    items={[]}
+                    placeholder={"Select"}
+                    handleChange={(value: any) => setValue("chart_of_account", value)}
+                    {...register("chart_of_account")}
+                    noSearch
+                  />
+                  <Input
+                    width="100%"
+                    label="ExternalCode"
+                    height="48px"
+                    placeholder="e.g 3221114810"
+                    {...register("external_code")}
+                  />
+                </Col>
+                <Col width="48%">
+                  <DatePickerInput
+                    fullWidth
+                    placeholder="YYYY"
+                    onChange={(date: any, dateString: any) => setValue("fiscal_year", Number(dateString))}
+                    label="Expired Date"
+                    picker="year"
+                    defaultValue={moment()} format='YYYY'
+                  />
+                </Col>
+              </Row>
+            </Accordion.Body>
+          </Accordion.Item>
+        </Accordion>
       </Col>
     </>
   );

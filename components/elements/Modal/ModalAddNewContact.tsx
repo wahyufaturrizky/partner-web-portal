@@ -9,19 +9,18 @@ import {
 import styled from 'styled-components';
 
 interface PropsContactModal {
-  visible: true | false
-  onCancel: () => void
-  onSubmit: () => void
-  registerContact: any
-  setValueContact: any
-  contact: any
+  visible?: true | false
+  onCancel?: () => void
+  onSubmit?: () => void
+  registerContact?: any
+  setValueContact?: any
+  contact?: any
 }
 
 export default function ModalAddNewContact({
   visible,
   onCancel,
   onSubmit,
-  registerContact,
   contact,
   setValueContact
 }: PropsContactModal) {
@@ -73,9 +72,9 @@ export default function ModalAddNewContact({
             label="Full Name" 
             required
             error={contact?.name?.message}
-            {...registerContact('contact.name', {
-              required: 'full name must be filled'
-            })}
+            // {...registerContact('contact.name', {
+            //   required: 'full name must be filled'
+            // })}
           />
           <Spacer size={10} />
           <Input
@@ -84,9 +83,9 @@ export default function ModalAddNewContact({
             label="Job Position"
             required
             error={contact?.job_position?.message}
-            {...registerContact('contact.role', {
-              required: 'job position must be filled'
-            })}
+            // {...registerContact('contact.role', {
+            //   required: 'job position must be filled'
+            // })}
           />
           <Spacer size={10} />
           <Input
@@ -96,9 +95,9 @@ export default function ModalAddNewContact({
             required
             type="number"
             error={contact?.mobile?.message}
-            {...registerContact('contact.mobile', {
-              required: 'mobile must be filled'
-            })}
+            // {...registerContact('contact.mobile', {
+            //   required: 'mobile must be filled'
+            // })}
           />
           <Spacer size={10} />
           <Input
@@ -108,9 +107,9 @@ export default function ModalAddNewContact({
             required
             type="email"
             error={contact?.email?.message}
-            {...registerContact('contact.email', {
-              required: 'email must be filled'
-            })}
+            // {...registerContact('contact.email', {
+            //   required: 'email must be filled'
+            // })}
           />
           <Spacer size={10} />
           <Input
@@ -120,9 +119,9 @@ export default function ModalAddNewContact({
             required
             type="number"
             error={contact?.nik?.message}
-            {...registerContact('contact.nik', {
-              required: 'nik must be filled'
-            })}
+            // {...registerContact('contact.nik', {
+            //   required: 'nik must be filled'
+            // })}
           />
           <Spacer size={20} />
         </div>

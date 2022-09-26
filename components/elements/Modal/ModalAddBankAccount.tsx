@@ -3,12 +3,12 @@ import { Modal, Spacer, Input, Button } from "pink-lava-ui";
 import styled from 'styled-components';
 
 interface PropsModalAddBankAccount {
-  handleSubmitBankAccount: any;
-  registerBankAccount: any;
-  visible: true | false;
-  onCancel: () => void,
-  handleAddItemBankAccount: any
-  errorsBankAccount: any
+  handleSubmitBankAccount?: any;
+  registerBankAccount?: any;
+  visible?: true | false;
+  onCancel?: () => void,
+  handleAddItemBankAccount?: any
+  errorsBankAccount?: any
 }
 
 export default function ModalAddBankAccount({
