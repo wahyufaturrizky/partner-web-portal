@@ -2428,7 +2428,13 @@ const ManageZoneComponent = (props: any) => {
 
   if (data.manage_by_zone) {
     return (
-      <Card padding="20px">
+      <Card
+        backgroundColor="#f4fbfc"
+        backgroundRepeat="no-repeat"
+        backgroundImage="/zone-filled-wave.svg"
+        backgroundPosition="bottom"
+        padding="20px"
+      >
         <Text color={"blue.dark"} variant={"headingMedium"}>
           You can manage modern trade pricing structure by zone.
         </Text>
@@ -2463,6 +2469,8 @@ const ManageZoneComponent = (props: any) => {
         >
           Manage by Zone
         </Button>
+
+        <Spacer size={56} />
       </Card>
     );
   } else {
@@ -2677,11 +2685,15 @@ const ManageZoneComponent = (props: any) => {
 };
 
 const Card = styled.div`
-  background: #ffffff;
   border-radius: 16px;
   padding: ${(p: any) => (p.padding ? p.padding : "16px")};
   margin: ${(p: any) => (p.margin ? p.margin : "16px")};
   background-image: ${(p: any) => (p.backgroundImage ? `url(${p.backgroundImage})` : undefined)};
+  background-color: ${(p: any) => (p.backgroundColor ? p.backgroundColor : "#ffffff")};
+  background-repeat: ${(p: any) => (p.backgroundRepeat ? p.backgroundRepeat : undefined)};
+  background-position: ${(p: any) => (p.backgroundPosition ? p.backgroundPosition : undefined)};
+  background-attachment: ${(p: any) =>
+    p.backgroundAttachment ? p.backgroundAttachment : undefined};
 `;
 
 const Center = styled.div`
