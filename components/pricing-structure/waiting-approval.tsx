@@ -129,7 +129,6 @@ const WaitingApprovalPricingStructure: any = (props: any) => {
     data.push({
       key: element.id,
       proposal_number: element.proposalNumber,
-      products: element.elementType.products,
       status: element.status,
       action: (
         <Button

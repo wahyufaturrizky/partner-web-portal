@@ -145,7 +145,7 @@ function useCreatePricingStructureList({ options }) {
 function useCreatePricingStructureDraftList({ options }) {
   return useMutation(
     (updates) =>
-      mdmService(`/price-structure/savedraft`, {
+      mdmService(`/price-structure`, {
         method: "POST",
         data: updates,
       }),
@@ -155,14 +155,14 @@ function useCreatePricingStructureDraftList({ options }) {
   );
 }
 
-const fetchPricingStructureList = async ({ partner_config_id }) => {
-  return mdmService(`/price-structure/${partner_config_id}`).then((data) => data);
+const fetchPricingStructureList = async ({ price_structure_id }) => {
+  return mdmService(`/price-structure/${price_structure_id}`).then((data) => data);
 };
 
-const usePricingStructureList = ({ partner_config_id, options }) => {
+const usePricingStructureList = ({ price_structure_id, options }) => {
   return useQuery(
-    ["price-structure", partner_config_id],
-    () => fetchPricingStructureList({ partner_config_id }),
+    ["price-structure", price_structure_id],
+    () => fetchPricingStructureList({ price_structure_id }),
     {
       ...options,
     }

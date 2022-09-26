@@ -1,12 +1,18 @@
 import usePagination from "@lucasmogari/react-pagination";
+import { ModalDeleteConfirmation } from "components/elements/Modal/ModalConfirmationDelete";
+import { ModalInactiveReason } from "components/elements/Modal/ModalInactiveReason";
+import { ModalRejectPartner } from "components/elements/Modal/ModalRejectPartner";
 import { useCurrenciesInfiniteLists } from "hooks/mdm/country-structure/useCurrencyMDM";
 import { useProductList } from "hooks/mdm/product-list/useProductList";
 import {
   useCreatePricingStructureDraftList,
   useCreatePricingStructureList,
+  useDeletePricingStructureList,
   useGroupBuyingLists,
   usePricingConfigInfiniteLists,
+  usePricingStructureList,
   usePricingStructureLists,
+  useUpdatePricingStructureList,
 } from "hooks/pricing-structure/usePricingStructure";
 import {
   useSalesOrganizationHirarcy,
@@ -41,10 +47,18 @@ import { useEffect, useState } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import styled from "styled-components";
 import { colors } from "utils/color";
+import { STATUS_APPROVAL_TEXT } from "utils/utils";
 import { ICCopy, ICInfo, ICPlus } from "../../assets";
 import ArrowLeft from "../../assets/icons/arrow-left.svg";
 
-const CreatePricingStructure: any = () => {
+const DetailPricingStructure: any = () => {
+  const router = useRouter();
+  const { price_structure_id } = router.query;
+  const activeStatus = [
+    { id: "ACTIVE", value: '<div key="1" style="color:green;">Active</div>' },
+    { id: "INACTIVE", value: '<div key="2" style="color:red;">Inactive</div>' },
+  ];
+
   const paginationProducts = usePagination({
     page: 1,
     itemsPerPage: 10,
@@ -92,6 +106,8 @@ const CreatePricingStructure: any = () => {
   const [pricingConfigInfiniteList, setPricingConfigInfiniteList] = useState<any>([]);
   const [searchPricingConfigInfinite, setSearchPricingConfigInfinite] = useState("");
 
+  const [modalReject, setModalReject] = useState({ open: false });
+
   const [searchProduct, setSearchProduct] = useState("");
   const [searchRegion, setSearchRegion] = useState("");
 
@@ -103,6 +119,8 @@ const CreatePricingStructure: any = () => {
     useState(0);
   const [salesOrganizationInfiniteList, setSalesOrganizationInfiniteList] = useState<any[]>([]);
   const [searchSalesOrganizationInfinite, setSearchSalesOrganizationInfinite] = useState("");
+
+  const [modalInactiveReason, setModalInactiveReason] = useState({ open: false });
 
   const [selectedFilter, setSelectedFilter] = useState([]);
 
@@ -117,6 +135,8 @@ const CreatePricingStructure: any = () => {
   const [productsSelected, setProductsSelected] = useState<any[]>([]);
   const [regionSelected, setRegionSelected] = useState<any[]>([]);
 
+  const [modalDelete, setModalDelete] = useState({ open: false });
+
   const [manageByZone, setManageByZone] = useState<any>({
     isShow: false,
     data: null,
@@ -124,7 +144,6 @@ const CreatePricingStructure: any = () => {
 
   const [percent, setPercent] = useState(0);
 
-  const router = useRouter();
   const {
     handleSubmit,
     control,
@@ -138,6 +157,9 @@ const CreatePricingStructure: any = () => {
       pricing_config: "",
       currency: "",
       manage_by: "",
+      activeDate: "",
+      status: "",
+      inactive_reason: "",
       distribution_channel: null,
       product_selected: [
         {
@@ -254,6 +276,45 @@ const CreatePricingStructure: any = () => {
     name: "manage_by",
   });
 
+  const { mutate: approvePartner } = useUpdatePricingStructureList({
+    options: {
+      onSuccess: () => {
+        router.back();
+      },
+    },
+    pricingStructureListId: price_structure_id,
+  });
+
+  const { mutate: rejectPartner } = useUpdatePricingStructureList({
+    options: {
+      onSuccess: () => {
+        setModalReject({ open: false });
+        router.back();
+      },
+    },
+    pricingStructureListId: price_structure_id,
+  });
+
+  const approve = () => {
+    const payload = {
+      status: "APPROVED",
+    };
+    approvePartner(payload);
+  };
+
+  const reject = (data: any) => {
+    rejectPartner(data);
+  };
+
+  const { mutate: deletePartners } = useDeletePricingStructureList({
+    options: {
+      onSuccess: () => {
+        setModalDelete({ open: false });
+        router.back();
+      },
+    },
+  });
+
   const { mutate: pricingStructure, isLoading: isLoadingPricingStructure } =
     useCreatePricingStructureList({
       options: {
@@ -289,6 +350,35 @@ const CreatePricingStructure: any = () => {
       onSuccess: (data: any) => {},
     },
   });
+
+  const { data: pricingStructureListById, isLoading: isLoadingPricingStructureListById } =
+    usePricingStructureList({
+      price_structure_id: price_structure_id,
+      options: {
+        onSuccess: (data: any) => {
+          const {
+            activeDate,
+            currency,
+            managedBy,
+            priceStructureConfig,
+            priceStructureConfigId,
+            priceStructureCosts,
+            priceStructureDistributions,
+            priceStructureRejection,
+            proposalNumber,
+            salesOrganizationStructure,
+            status,
+          } = data;
+
+          setValue("activeDate", activeDate);
+          setValue("pricing_config", priceStructureConfigId);
+          setValue("currency", currency);
+          setValue("manage_by", managedBy);
+          setValue("distribution_channel", priceStructureDistributions);
+          setValue("status", status);
+        },
+      },
+    });
 
   const {
     isFetching: isFetchingPricingConfigInfinite,
@@ -380,7 +470,7 @@ const CreatePricingStructure: any = () => {
     options: {
       onSuccess: () => {},
       select: (data: any) =>
-        data.map((dataHirarcy: any) => ({
+        data.map((dataHirarcy) => ({
           ...dataHirarcy,
           key: dataHirarcy.id,
         })),
@@ -894,7 +984,7 @@ const CreatePricingStructure: any = () => {
 
   useEffect(() => {
     const increaseProgress = () => {
-      let newPercent = percent + 16.666666666666667;
+      let newPercent = percent + 12.5;
 
       if (newPercent > 100) {
         newPercent = 100;
@@ -910,6 +1000,8 @@ const CreatePricingStructure: any = () => {
     isLoadingPricingConfigInfinite,
     isLoadingProductList,
     isLoadingSalesOrganizationInfinite,
+    isLoadingPricingStructureListById,
+    isLoadingPricingStructureList,
   ]);
 
   const isEmpty = productsSelected.length === 0;
@@ -921,6 +1013,7 @@ const CreatePricingStructure: any = () => {
       <>
         {isLoadingPricingConfigInfinite ||
         isLoadingCurrenciesInfinite ||
+        isLoadingPricingStructureListById ||
         isLoadingPricingStructureList ||
         isLoadingGroupBuying ||
         isLoadingProductList ||
@@ -1629,6 +1722,7 @@ const CreatePricingStructure: any = () => {
         {isLoadingPricingConfigInfinite ||
         isLoadingCurrenciesInfinite ||
         isLoadingGroupBuying ||
+        isLoadingPricingStructureListById ||
         isLoadingPricingStructureList ||
         isLoadingProductList ||
         isLoadingSalesOrganizationInfinite ? (
@@ -1637,33 +1731,86 @@ const CreatePricingStructure: any = () => {
           </Center>
         ) : (
           <Col>
-            <Row gap="4px">
-              <Text variant={"h4"}>Create Pricing Structure Proposal</Text>
+            <Row gap="4px" alignItems="center">
+              <ArrowLeft style={{ cursor: "pointer" }} onClick={() => router.back()} />
+              <Text variant={"h4"}>{pricingStructureListById.priceStructureConfig?.name}</Text>
             </Row>
 
             <Spacer size={12} />
 
             <Card padding="20px">
-              <Row gap="16px" justifyContent="flex-end">
-                <Button size="big" variant={"tertiary"} onClick={() => router.back()}>
-                  Cancel
-                </Button>
-                <Button
-                  disabled={isLoadingPricingStructureDraft}
-                  size="big"
-                  variant={"secondary"}
-                  onClick={handleSubmit(onSubmitDraft)}
-                >
-                  {isLoadingPricingStructureDraft ? "Loading..." : "Save as Draft"}
-                </Button>
-                <Button
-                  disabled={isLoadingPricingStructure}
-                  size="big"
-                  variant={"primary"}
-                  onClick={handleSubmit(onSubmit)}
-                >
-                  {isLoadingPricingStructure ? "Loading..." : "Submit"}
-                </Button>
+              <Row alignItems="center" justifyContent="space-between">
+                {pricingStructureListById.status === "ACTIVE" ? (
+                  <Dropdown
+                    label=""
+                    isHtml
+                    width={"185px"}
+                    items={activeStatus}
+                    placeholder={"Status"}
+                    key={modalInactiveReason.open}
+                    handleChange={(text: any) => {
+                      if (text === "INACTIVE") {
+                        setModalInactiveReason({ open: true });
+                      } else {
+                        setValue("status", text);
+                        setValue("inactive_reason", "");
+                      }
+                    }}
+                    noSearch
+                    defaultValue={getValues("status") || pricingStructureListById.status}
+                  />
+                ) : (
+                  <DisabledDropdown2 status={pricingStructureListById.status}>
+                    {STATUS_APPROVAL_TEXT[pricingStructureListById.status]}
+                  </DisabledDropdown2>
+                )}
+
+                <Row alignItems="center" gap="16px" justifyContent="space-between">
+                  {pricingStructureListById?.status === "DRAFTED" && (
+                    <Button
+                      size="big"
+                      variant={"tertiary"}
+                      onClick={() => setModalDelete({ open: true })}
+                    >
+                      Delete
+                    </Button>
+                  )}
+
+                  {pricingStructureListById?.status === "WAITING" ? (
+                    <>
+                      <Button
+                        size="big"
+                        variant={"tertiary"}
+                        onClick={() => setModalReject({ open: true })}
+                      >
+                        Reject
+                      </Button>
+
+                      <Button size="big" variant={"primary"} onClick={approve}>
+                        Approve
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <Button
+                        disabled={isLoadingPricingStructureDraft}
+                        size="big"
+                        variant={"secondary"}
+                        onClick={handleSubmit(onSubmitDraft)}
+                      >
+                        {isLoadingPricingStructureDraft ? "Loading..." : "Save as Draft"}
+                      </Button>
+                      <Button
+                        disabled={isLoadingPricingStructure}
+                        size="big"
+                        variant={"primary"}
+                        onClick={handleSubmit(onSubmit)}
+                      >
+                        {isLoadingPricingStructure ? "Loading..." : "Submit"}
+                      </Button>
+                    </>
+                  )}
+                </Row>
               </Row>
             </Card>
 
@@ -2159,6 +2306,39 @@ const CreatePricingStructure: any = () => {
             )
           }
         />
+
+        {modalReject.open && (
+          <ModalRejectPartner
+            visible={modalReject.open}
+            onCancel={() => setModalReject({ open: false })}
+            onOk={(data: any) => reject(data)}
+            roleIds={[1]}
+          />
+        )}
+
+        {modalDelete.open && (
+          <ModalDeleteConfirmation
+            visible={modalDelete.open}
+            onCancel={() => setModalDelete({ open: false })}
+            onOk={() => deletePartners({ ids: [price_structure_id] })}
+            itemTitle={pricingStructureListById?.name}
+          />
+        )}
+
+        {modalInactiveReason.open && (
+          <ModalInactiveReason
+            visible={modalInactiveReason.open}
+            onCancel={() => {
+              setValue("status", "ACTIVE");
+              setModalInactiveReason({ open: false });
+            }}
+            onOk={(reason: any) => {
+              setValue("status", "INACTIVE");
+              setValue("inactive_reason", reason);
+              setModalInactiveReason({ open: false });
+            }}
+          />
+        )}
       </>
     );
   }
@@ -2521,4 +2701,23 @@ const Divider = styled.div`
   border: 1px dashed #dddddd;
 `;
 
-export default CreatePricingStructure;
+const DisabledDropdown2 = styled.div`
+  border: 1px solid #f4f4f4;
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 9px 16px;
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 22px;
+  width: 220px;
+  color: ${(p: any) =>
+    p.status === "DRAFTED" || p.status === "INACTIVE"
+      ? "#000000"
+      : p.status === "WAITING"
+      ? "#FFB400"
+      : p.status === "REJECTED"
+      ? "#ED1C24"
+      : "#01A862"};
+`;
+
+export default DetailPricingStructure;

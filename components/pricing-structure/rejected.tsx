@@ -107,11 +107,6 @@ const RejectedPricingStructure: any = (props: any) => {
       width: "28%",
     },
     {
-      title: "Products",
-      dataIndex: "products",
-      width: "28%",
-    },
-    {
       title: "Status",
       dataIndex: "status",
       render: (text: any) => (
@@ -132,7 +127,6 @@ const RejectedPricingStructure: any = (props: any) => {
     data.push({
       key: element.id,
       proposal_number: element.proposalNumber,
-      products: element.elementType.products,
       status: element.status,
       action: (
         <Button

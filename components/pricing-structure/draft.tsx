@@ -77,7 +77,7 @@ const DraftPricingStructure: any = ({
       search,
       page: pagination.page,
       limit: pagination.itemsPerPage,
-      status: "DRAFT",
+      status: "DRAFTED",
     },
   });
 
@@ -108,11 +108,6 @@ const DraftPricingStructure: any = ({
       width: "28%",
     },
     {
-      title: "Products",
-      dataIndex: "products",
-      width: "28%",
-    },
-    {
       title: "Status",
       dataIndex: "status",
       render: (text: any) => (
@@ -133,7 +128,6 @@ const DraftPricingStructure: any = ({
     data.push({
       key: element.id,
       proposal_number: element.proposalNumber,
-      products: element.elementType.products,
       status: element.status,
       action: (
         <Button
@@ -305,7 +299,7 @@ const DraftPricingStructure: any = ({
       {modalDelete.open && (
         <ModalDeleteConfirmation
           totalSelected={selectedRowKeys?.length}
-          itemTitle={paginateField?.find((menu: any) => menu.key === selectedRowKeys[0])?.products}
+          itemTitle={paginateField?.find((menu: any) => menu.key === selectedRowKeys[0])?.key}
           visible={modalDelete.open}
           onCancel={() => setModalDelete({ open: false })}
           onOk={() => deletePricingStructure({ ids: selectedRowKeys })}

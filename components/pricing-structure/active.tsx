@@ -27,6 +27,7 @@ import {
   useUploadFilePricingStructureMDM,
 } from "../../hooks/pricing-structure/usePricingStructure";
 import { queryClient } from "../../pages/_app";
+import moment from "moment";
 
 const renderConfirmationText = (type: any, data: any) => {
   switch (type) {
@@ -110,13 +111,9 @@ const ActivePricingStructure: any = (props: any) => {
       width: "28%",
     },
     {
-      title: "Products",
-      dataIndex: "products",
-      width: "28%",
-    },
-    {
       title: "Active Date",
       dataIndex: "activeDate",
+      render: (e: any) => moment(e).format("DD-MM-YYYY"),
       width: "28%",
     },
     {
@@ -140,7 +137,7 @@ const ActivePricingStructure: any = (props: any) => {
     data.push({
       key: element.id,
       proposal_number: element.proposalNumber,
-      products: element.elementType.products,
+      activeDate: element.activeDate,
       status: element.status,
       action: (
         <Button
