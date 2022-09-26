@@ -1,18 +1,19 @@
 export interface CompanyList {
-  rows: RowCompanyList[];
-  totalRow: number;
-  sortBy: string[];
-}
-
-export interface RowCompanyList {
   id: number;
   name: string;
-  code: string;
-  companyType: string;
-  industry: string;
-  status: string;
-  isActive: boolean;
+  language: string;
+  currency: string;
 }
+
+// export interface RowCompanyList {
+//   id: number;
+//   name: string;
+//   code: string;
+//   companyType: string;
+//   industry: string;
+//   status: string;
+//   isActive: boolean;
+// }
 
 export interface ProfitCenterList {
   rows: RowProfitCenter[];

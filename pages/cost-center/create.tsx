@@ -24,7 +24,7 @@ import useDebounce from "../../lib/useDebounce";
 import ArrowLeft from "../../assets/icons/arrow-left.svg";
 import usePagination from "@lucasmogari/react-pagination";
 
-import { useCompanyList, useCurrenciesMDM } from "hooks/company-list/useCompany";
+import { useCompany, useCompanyList, useCurrenciesMDM } from "hooks/company-list/useCompany";
 import { useProfitCenters } from "hooks/mdm/profit-center/useProfitCenter";
 import { useLanguages } from "hooks/languages/useLanguages";
 import { useCreateCostCenter } from "hooks/mdm/cost-center/useCostCenter";
@@ -81,7 +81,7 @@ const CostCenterCreate = () => {
     totalItems: 100,
   });
 
-  const [listCompany, setListCompany] = useState<any[]>(null);
+  const [listCompany, setListCompany] = useState<any[]>([]);
   const [listProfitCenter, setListProfitCenter] = useState([])
   const [listCurrencies, setListCurrencies] = useState([])
   const [listLanguages, setListLanguages] = useState([])
@@ -115,30 +115,49 @@ const CostCenterCreate = () => {
   }])
   const { register, control, handleSubmit } = useForm();
   
+  // const {
+  //       data: companyData,
+  //       refetch: isFetchingMoreCompanyData,
+  //       isFetching: isFetchingCompanyData,
+  //       isLoading: isLoadingCompanyData,
+  //   } = useCompanyList({
+  //       options: {
+  //       onSuccess: (data: CompanyList) => {
+  //           // const mappedCompanyData = data?.rows?.map((element: RowCompanyList) => {
+  //           //   if(element.name === "PT. Kaldu Sari Nabati Indonesia"){
+  //           //     return {
+  //           //         value: element.id,
+  //           //         label: element.name,
+  //           //     };
+  //           //   }
+  //           // });
+  //           const mappedCompanyData = data?.rows?.filter((company) => company.name === "PT. Kaldu Sari Nabati Indonesia")
+  //           setListCompany(mappedCompanyData);
+  //       },
+  //       },
+  //       query: {
+  //       search: debounceFetchCompany,
+  //       page: pagination.page,
+  //       limit: pagination.itemsPerPage,
+  //       },
+  //   });
+
   const {
         data: companyData,
         refetch: isFetchingMoreCompanyData,
         isFetching: isFetchingCompanyData,
         isLoading: isLoadingCompanyData,
-    } = useCompanyList({
+    } = useCompany({
+        id: 'KSNI',
         options: {
         onSuccess: (data: CompanyList) => {
-            // const mappedCompanyData = data?.rows?.map((element: RowCompanyList) => {
-            //   if(element.name === "PT. Kaldu Sari Nabati Indonesia"){
-            //     return {
-            //         value: element.id,
-            //         label: element.name,
-            //     };
-            //   }
-            // });
-            const mappedCompanyData = data?.rows?.filter((company) => company.name === "PT. Kaldu Sari Nabati Indonesia")
-            setListCompany(mappedCompanyData);
+            setListCompany([{
+              value: data.id,
+              label: data.name,
+              language: data.language,
+              currency: data.currency
+            }])
         },
-        },
-        query: {
-        search: debounceFetchCompany,
-        page: pagination.page,
-        limit: pagination.itemsPerPage,
         },
     });
 
@@ -226,13 +245,12 @@ const CostCenterCreate = () => {
 
   const onSave = (data: CostCenterSave) => {
     const newCostCenter = {
-        language : data?.language,
-        currency : data?.currency,
+        language : languageStatus? listCompany[0]?.language : data?.language,
+        currency : currencyStatus? listCompany[0]?.currency : data?.currency,
         profit_center_id :data?.profit_center_id, 
-        company_id :data?.company_id?.toString(),
+        company_id :listCompany && listCompany[0]?.value?.toString(),
         code :data?.code,
-        // name : data?.name? data?.name : listCompany[0]?.name,
-        name : "2",
+        name : data?.name,
         cost_center_category : costCenterCategory,
         valid_from : data?.valid_from? data?.valid_from : moment().format("DD/MM/YYYY"),
         valid_to : data?.valid_to? data?.valid_to : moment().format("DD/MM/YYYY"),
@@ -247,6 +265,7 @@ const CostCenterCreate = () => {
         plant_revenues :newCostCenterTable[0].plant_revenues ? "YES" : "NO",
         commitment_update :newCostCenterTable[0].commitment_update ? "YES" : "NO"
     }
+    console.log(newCostCenter, '<<<<')
     createCostCenter(newCostCenter)
   }
 
@@ -408,7 +427,8 @@ const CostCenterCreate = () => {
     return current <= moment().startOf('day');
   };
 
-  if (isLoadingCompanyData)
+
+  if (isLoadingCompanyData || isFetchingCompanyData)
   return (
     <Center>
       <Spin tip="Loading data..." />
@@ -526,7 +546,7 @@ const CostCenterCreate = () => {
                         size={"large"}
                         required
                         disabled
-                        defaultValue={listCompany[0]?.name}
+                        defaultValue={listCompany[0]}
                         placeholder={"Select"}
                         borderColor={"#AAAAAA"}
                         arrowColor={"#000"}

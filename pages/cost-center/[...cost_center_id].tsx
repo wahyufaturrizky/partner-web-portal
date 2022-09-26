@@ -24,7 +24,7 @@ import useDebounce from "../../lib/useDebounce";
 import ArrowLeft from "../../assets/icons/arrow-left.svg";
 import usePagination from "@lucasmogari/react-pagination";
 
-import { useCompanyList, useCurrenciesMDM } from "hooks/company-list/useCompany";
+import { useCompany, useCompanyList, useCurrenciesMDM } from "hooks/company-list/useCompany";
 import { useProfitCenters } from "hooks/mdm/profit-center/useProfitCenter";
 import { useLanguages } from "hooks/languages/useLanguages";
 import { useCostCenter, useCreateCostCenter, useUpdateCostCenter } from "hooks/mdm/cost-center/useCostCenter";
@@ -105,8 +105,8 @@ const CostCenterCreate = () => {
   const debounceFetchLanguage = useDebounce(searchLanguage, 1000);
   const debounceFetchCurrency = useDebounce(searchCurrency, 1000);
 
-  const [languageStatus, setLanguageStatus] = useState(false)
-  const [currencyStatus, setCurrencyStatus] = useState(false)
+  const [languageStatus, setLanguageStatus] = useState(true)
+  const [currencyStatus, setCurrencyStatus] = useState(true)
   const [checkSelectAll, setCheckSelectAll] = useState(false)
   const [description, setDescription] = useState("")
   const [costCenterCategory, setCostCenterCategory] = useState("")
@@ -142,30 +142,24 @@ const CostCenterCreate = () => {
     },
   });
 
-  const {
-        data: companyData,
-        refetch: isFetchingMoreCompanyData,
-        isFetching: isFetchingCompanyData,
-        isLoading: isLoadingCompanyData,
-    } = useCompanyList({
-        options: {
-        onSuccess: (data: CompanyList) => {
-            // const mappedCompanyData = data?.rows?.map((element: RowCompanyList) => {
-            //     return {
-            //         value: element.id,
-            //         label: element.name,
-            //     };
-            // });
-            const mappedCompanyData = data?.rows?.filter(company => company.name === "PT. Kaldu Sari Nabati Indonesia")
-            setlistCompany(mappedCompanyData);
-        },
-        },
-        query: {
-        search: debounceFetchCompany,
-        page: pagination.page,
-        limit: pagination.itemsPerPage,
-        },
-    });
+    const {
+      data: companyData,
+      refetch: isFetchingMoreCompanyData,
+      isFetching: isFetchingCompanyData,
+      isLoading: isLoadingCompanyData,
+  } = useCompany({
+      id: 'KSNI',
+      options: {
+      onSuccess: (data: CompanyList) => {
+          setlistCompany([{
+            value: data.id,
+            label: data.name,
+            language: data.language,
+            currency: data.currency
+          }])
+      },
+      },
+  });
 
   const {
         data: profitCenterData,
@@ -199,6 +193,7 @@ const CostCenterCreate = () => {
     } = useLanguages({
         options: {
         onSuccess: (data: LanguagesData) => {
+          console.log(data, '<<<<language')
             const mappedLanguagesData = data?.rows?.map((element: RowLanguagesData) => {
                 return {
                     value: element.id,
@@ -225,7 +220,7 @@ const CostCenterCreate = () => {
         onSuccess: (data: CurrenciesData) => {
             const mappedCurrenciesData = data?.rows?.map((element: RowCurrenciesData) => {
                 return {
-                    value: element.currency + '-' + element.currencyName,
+                    value: element.id,
                     label: element.currency + '-' + element.currencyName,
                 };
             });
@@ -250,16 +245,16 @@ const CostCenterCreate = () => {
     },
   });
 
+  console.log(costCenterData, '<<data detail')
 
   const onSave = (data: CostCenterSave) => {
     const newCostCenter = {
-        language : data?.language ? data?.language : costCenterData?.language,
-        currency : data?.currency ? data?.currency : costCenterData?.currency,
+        language : languageStatus? costCenterData?.language : data?.language ? data?.language : costCenterData?.language,
+        currency : currencyStatus? costCenterData?.currency : data?.currency ? data?.currency : costCenterData?.currency,
         profit_center_id :data?.profit_center_id ? data?.profit_center_id : costCenterData?.profitCenterId, 
         company_id : data?.company_id? data?.company_id?.toString() : costCenterData?.companyId,
         code :data?.code,
-        // name : data?.name? data?.name : listCompany[0].name,
-        name : "2",
+        name : data?.name ? data?.name : costCenterData?.name,
         cost_center_category : costCenterCategory,
         valid_from : data?.valid_from? data?.valid_from : moment(costCenterData?.validFrom).utc().format('DD/MM/YYYY'),
         valid_to : data?.valid_to? data?.valid_to : moment(costCenterData?.validTo).utc().format('DD/MM/YYYY'),
@@ -435,13 +430,7 @@ const CostCenterCreate = () => {
     return current <= moment().startOf('day');
   };
 
-  if (
-    isLoadingCompanyData || 
-    isLoadingCostCenter || 
-    isFetchingCostCenter || 
-    isLoadingProfitCenterData ||
-    isLoadingLanguagesData ||
-    isLoadingCurrenciesData )
+  if ( isLoadingCostCenter || isFetchingCostCenter || isFetchingProfitCenterData )
   return (
     <Center>
       <Spin tip="Loading data..." />
@@ -568,7 +557,7 @@ const CostCenterCreate = () => {
                         arrowColor={"#000"}
                         withSearch
                         disabled
-                        defaultValue={listCompany[0]?.name}
+                        defaultValue={listCompany[0]?.label}
                         isLoading={isFetchingCompanyData}
                         items={listCompany}
                         onChange={(value: any) => {
