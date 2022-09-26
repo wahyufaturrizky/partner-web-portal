@@ -193,7 +193,6 @@ const CostCenterCreate = () => {
     } = useLanguages({
         options: {
         onSuccess: (data: LanguagesData) => {
-          console.log(data, '<<<<language')
             const mappedLanguagesData = data?.rows?.map((element: RowLanguagesData) => {
                 return {
                     value: element.id,
@@ -245,7 +244,6 @@ const CostCenterCreate = () => {
     },
   });
 
-  console.log(costCenterData, '<<data detail')
 
   const onSave = (data: CostCenterSave) => {
     const newCostCenter = {

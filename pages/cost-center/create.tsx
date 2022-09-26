@@ -265,7 +265,6 @@ const CostCenterCreate = () => {
         plant_revenues :newCostCenterTable[0].plant_revenues ? "YES" : "NO",
         commitment_update :newCostCenterTable[0].commitment_update ? "YES" : "NO"
     }
-    console.log(newCostCenter, '<<<<')
     createCostCenter(newCostCenter)
   }
 
