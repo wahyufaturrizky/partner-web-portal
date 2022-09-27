@@ -597,9 +597,15 @@ const DetailPricingStructure: any = () => {
     },
   });
 
-  const onSubmit = (data: any) => {
-    pricingStructure(data);
-  };
+  const onSubmit = (dataSubmit: any) =>
+    pricingStructure({
+      price_structure_config_id: dataSubmit.pricing_config,
+      currency: dataSubmit.currency,
+      managed_by: dataSubmit.manage_by,
+      active_date: moment().format("YYYY-MM-DD"),
+      distributions: dataSubmit.distribution_channel,
+      products: dataSubmit.product_selected.map((mapping: any) => mapping.id),
+    });
 
   const onSubmitDraft = (dataDraft: any) =>
     pricingStructureDraft({
