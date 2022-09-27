@@ -21,11 +21,34 @@ import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useForm } from "react-hook-form";
 import usePagination from "@lucasmogari/react-pagination";
+import {
+  useCoaList,
+  useCreateProductCategory,
+  useProductCategoryList,
+} from "hooks/mdm/product-category/useProductCategory";
+import { useCoa } from "hooks/finance-config/useCoaTemplate";
+
+const costingMethodData = [
+  {
+    id: "Standart Price",
+    value: "Standart Price",
+  },
+  {
+    id: "First in First Out (FIFO)",
+    value: "First in First Out (FIFO)",
+  },
+  {
+    id: "Average Cost (AVCO)",
+    value: "Average Cost (AVCO)",
+  },
+];
 
 const CreateProductCategory: any = () => {
   const router = useRouter();
 
-  const [automate, setAutomate] = useState(false);
+  const [automate, setAutomate] = useState("");
+  const [searchProductCategory, setSearchProductCategory] = useState("");
+  const [searchCoa, setSearchCoa] = useState("");
 
   const pagination = usePagination({
     page: 1,
@@ -45,6 +68,75 @@ const CreateProductCategory: any = () => {
     // resolver: yupResolver(schema),
     // defaultValues: defaultValue,
   });
+
+  const { data: productCategoryList, isLoading: isLoadingProductCategory } = useProductCategoryList(
+    {
+      query: {
+        search: searchProductCategory,
+      },
+      options: {
+        onSuccess: (data: any) => {
+        },
+      },
+    }
+  );
+
+  const { data: coaListPayable, isLoading: isLoadingCoaListPayable } = useCoaList({
+    status: "payable",
+    query: {},
+    options: {
+      onSuccess: (data: any) => {},
+    },
+  });
+
+  const { data: coaListReceivable, isLoading: isLoadingCoaListReceivable } = useCoaList({
+    status: "receivable",
+    query: {},
+    options: {
+      onSuccess: (data: any) => {},
+    },
+  });
+
+  const { data: coaList, isLoading: isLoadingCoaList } = useCoa({
+    options: {
+      onSuccess: (data: any) => {},
+    },
+    query: {
+      search: searchCoa,
+    },
+  });
+
+  const { mutate: createProductCategory } = useCreateProductCategory({
+    options: {
+      onSuccess: (data) => {
+        alert("Create Success!");
+        router.push("/product-category");
+      },
+    },
+  });
+
+  const onSubmit = (data) => {
+    const payload = {
+      company_id: "KSNI",
+      name: data.name,
+      parent: data.parent || "",
+      costing_method: data.costing_method || "",
+      inventory_valuation: data.inventory_valuation != "Automated" ? "Manual" : "Automated",
+      price_difference_account: data.price_different_account || "",
+      expense_account: data.expense_account || "",
+      income_account: data.income_account || "",
+      stock_valuation_account:
+        data.inventory_valuation != "Automated" ? "" : data.stock_valuation_account || "",
+      stock_journal: data.inventory_valuation != "Automated" ? "" : data.stock_jurnal || "",
+      stock_input_account:
+        data.inventory_valuation != "Automated" ? "" : data.stock_input_account || "",
+      stock_output_account:
+        data.inventory_valuation != "Automated" ? "" : data.stock_output_account || "",
+    };
+
+    createProductCategory(payload);
+  };
+
   return (
     <>
       <Col>
@@ -58,11 +150,7 @@ const CreateProductCategory: any = () => {
             <Button size="big" variant={"tertiary"} onClick={() => Router.back()}>
               Cancel
             </Button>
-            <Button
-              size="big"
-              variant={"primary"}
-              // onClick={handleSubmit(onSubmit)}
-            >
+            <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
               Save
             </Button>
           </Row>
@@ -87,10 +175,13 @@ const CreateProductCategory: any = () => {
                 <Dropdown2
                   label="Parent"
                   width={"100%"}
-                  items={[]}
+                  items={productCategoryList?.rows?.map((data) => ({
+                    id: data.name,
+                    value: data.name,
+                  }))}
                   placeholder={"Select"}
-                  //   handleChange={(value) => setValue("country", value)}
-                  //   onSearch={(search) => setSearchCountry(search)}
+                  handleChange={(value) => setValue("parent", value)}
+                  onSearch={(search) => setSearchProductCategory(search)}
                   //   error={errors?.country?.message}
                   //   {...register("country")}
                 />
@@ -109,9 +200,9 @@ const CreateProductCategory: any = () => {
                 <Dropdown2
                   label="Costing Method"
                   width={"100%"}
-                  items={[]}
+                  items={costingMethodData}
                   placeholder={"Select"}
-                  //   handleChange={(value) => setValue("country", value)}
+                  handleChange={(value) => setValue("costing_method", value)}
                   //   onSearch={(search) => setSearchCountry(search)}
                   //   error={errors?.country?.message}
                   //   {...register("country")}
@@ -121,19 +212,23 @@ const CreateProductCategory: any = () => {
                   width={"100%"}
                   items={[
                     {
-                      id: 1,
+                      id: "Automated",
                       value: "Automated",
                     },
                     {
-                      id: 0,
+                      id: "Manual",
                       value: "Manual",
                     },
                   ]}
                   placeholder={"Select"}
-                  handleChange={(value) => setAutomate(value == 1 ? true : false)}
+                  handleChange={(value) => {
+                    setAutomate(value);
+                    setValue("inventory_valuation", value);
+                  }}
                   //   onSearch={(search) => setSearchCountry(search)}
                   //   error={errors?.country?.message}
                   //   {...register("country")}
+                  defaultValue={"Manual"}
                   noSearch
                 />
               </Row>
@@ -161,28 +256,36 @@ const CreateProductCategory: any = () => {
                 <Dropdown2
                   label="Expense Account"
                   width={"100%"}
-                  items={[]}
+                  items={coaListPayable?.rows?.map((data) => ({
+                    id: data.accountName,
+                    value: data.accountName,
+                  }))}
                   placeholder={"Select"}
-                  //   handleChange={(value) => setValue("country", value)}
+                  handleChange={(value) => setValue("expense_account", value)}
                   //   onSearch={(search) => setSearchCountry(search)}
                   //   error={errors?.country?.message}
                   //   {...register("country")}
+                  noSearch
                 />
               </Row>
               <Row width="49%">
                 <Dropdown2
                   label="Income Account"
                   width={"100%"}
-                  items={[]}
+                  items={coaListReceivable?.rows?.map((data) => ({
+                    id: data.accountName,
+                    value: data.accountName,
+                  }))}
                   placeholder={"Select"}
-                  //   handleChange={(value) => setValue("country", value)}
+                  handleChange={(value) => setValue("income_account", value)}
                   //   onSearch={(search) => setSearchCountry(search)}
                   //   error={errors?.country?.message}
                   //   {...register("country")}
+                  noSearch
                 />
               </Row>
               <Spacer size={10} />
-              {automate && (
+              {automate == "Automated" && (
                 <>
                   <Row>
                     <Label>Account Stock Properties</Label>
@@ -215,20 +318,27 @@ const CreateProductCategory: any = () => {
                     <Dropdown2
                       label="Stock Input Account"
                       width={"100%"}
-                      items={[]}
+                      items={coaList?.rows?.map((data) => ({
+                        id: data.name,
+                        value: data.name,
+                      }))}
                       placeholder={"Select"}
-                      //   handleChange={(value) => setValue("country", value)}
-                      //   onSearch={(search) => setSearchCountry(search)}
+                      handleChange={(value) => setValue("stock_input_account", value)}
+                      onSearch={(search) => setSearchCoa(search)}
                       //   error={errors?.country?.message}
                       //   {...register("country")}
+                      noSearch
                     />
                     <Dropdown2
                       label="Stock Output Account"
                       width={"100%"}
-                      items={[]}
+                      items={coaList?.rows?.map((data) => ({
+                        id: data.name,
+                        value: data.name,
+                      }))}
                       placeholder={"Select"}
-                      //   handleChange={(value) => setValue("country", value)}
-                      //   onSearch={(search) => setSearchCountry(search)}
+                      handleChange={(value) => setValue("stock_output_account", value)}
+                      onSearch={(search) => setSearchCoa(search)}
                       //   error={errors?.country?.message}
                       //   {...register("country")}
                     />
