@@ -107,6 +107,12 @@ const RejectedPricingStructure: any = (props: any) => {
       width: "28%",
     },
     {
+      title: "Products",
+      dataIndex: "product",
+      width: "28%",
+      render: (e: any) => `${e?.length || 0} Products`,
+    },
+    {
       title: "Status",
       dataIndex: "status",
       render: (text: any) => (

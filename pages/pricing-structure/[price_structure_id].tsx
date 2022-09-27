@@ -1739,7 +1739,9 @@ const DetailPricingStructure: any = () => {
           <Col>
             <Row gap="4px" alignItems="center">
               <ArrowLeft style={{ cursor: "pointer" }} onClick={() => router.back()} />
-              <Text variant={"h4"}>{pricingStructureListById.priceStructureConfig?.name}</Text>
+              <Text variant={"h4"}>
+                {pricingStructureListById.priceStructureConfig?.name || "N/A"}
+              </Text>
             </Row>
 
             <Spacer size={12} />

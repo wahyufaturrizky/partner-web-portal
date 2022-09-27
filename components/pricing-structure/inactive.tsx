@@ -110,7 +110,7 @@ const InActivePricingStructure: any = (props: any) => {
       title: "Products",
       dataIndex: "product",
       width: "28%",
-      render: (e: any) => `${e?.length} Products`,
+      render: (e: any) => `${e?.length || 0} Products`,
     },
     {
       title: "Status",
