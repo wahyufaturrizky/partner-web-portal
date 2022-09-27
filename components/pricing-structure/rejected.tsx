@@ -126,6 +126,7 @@ const RejectedPricingStructure: any = (props: any) => {
   pricingStructureLists?.rows?.map((element: any) => {
     data.push({
       key: element.id,
+      product: element.product,
       proposal_number: element.proposalNumber,
       status: element.status,
       action: (

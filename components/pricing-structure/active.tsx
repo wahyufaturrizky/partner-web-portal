@@ -111,6 +111,12 @@ const ActivePricingStructure: any = (props: any) => {
       width: "28%",
     },
     {
+      title: "Products",
+      dataIndex: "product",
+      width: "28%",
+      render: (e: any) => `${e?.length} Products`,
+    },
+    {
       title: "Active Date",
       dataIndex: "activeDate",
       render: (e: any) => moment(e).format("DD-MM-YYYY"),
@@ -134,8 +140,11 @@ const ActivePricingStructure: any = (props: any) => {
   const data: any = [];
   const isEmpty = pricingStructureLists?.rows?.length === 0;
   pricingStructureLists?.rows?.map((element: any) => {
+    console.log("@element", element);
+
     data.push({
       key: element.id,
+      product: element.product,
       proposal_number: element.proposalNumber,
       activeDate: element.activeDate,
       status: element.status,
