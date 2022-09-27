@@ -4,7 +4,7 @@ import useDebounce from "lib/useDebounce";
 import { useCountryInfiniteLists } from "hooks/mdm/country-structure/useCountries";
 import { Controller } from "react-hook-form";
 
-const ConditionalFieldCountry = ({ control }: any) => {
+const ConditionalFieldCountry = ({ control, workingCalendarData }: any) => {
   const [countryList, setCountryList] = useState<any[]>([]);
   const [totalRowsCountryList, setTotalRowsCountryList] = useState(0);
   const [searchCountry, setSearchCountry] = useState("");
@@ -52,12 +52,12 @@ const ConditionalFieldCountry = ({ control }: any) => {
       <Controller
         control={control}
         shouldUnregister={true}
-        defaultValue={""}
+        defaultValue={workingCalendarData?.country ?? ""}
         name="country"
         render={({ field: { onChange }, formState: { errors } }) => (
           <>
             <FormSelect
-              defaultValue={""}
+              defaultValue={workingCalendarData?.country ?? ""}
               style={{ width: "50%" }}
               size={"large"}
               placeholder={"Select"}

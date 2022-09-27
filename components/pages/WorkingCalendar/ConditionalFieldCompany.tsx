@@ -7,16 +7,19 @@ import {
   useSalesOrganizationHirarcy,
 } from "hooks/sales-organization/useSalesOrganization";
 import { useCompanyInfiniteLists } from "hooks/company-list/useCompany";
+import { Controller } from "react-hook-form";
 
-const ConditionalFieldCompany = ({ onChangePayload }: any) => {
+const ConditionalFieldCompany = ({ control, onChangePayload, workingCalendarData }: any) => {
   const [companyPayload, setCompanyPayload] = useState({
-    company: "",
-    sales_organization: 0,
-    distribution_channel: [],
-    branch: "",
+    company: workingCalendarData?.company?.company ?? "",
+    sales_organization: workingCalendarData?.company?.salesOrganization ?? 0,
+    distribution_channel: workingCalendarData?.company?.distributionChannel ?? [],
+    branch: workingCalendarData?.company?.branch ?? "",
   });
   const [selectedSalesHierarcy, setSelectedSalesHierarcy] = useState([]);
-  const [radioValue, setRadioValue] = useState("companyInternal");
+  const [radioValue, setRadioValue] = useState(
+    !workingCalendarData?.branch ? "companyInternal" : "branch"
+  );
 
   // Company State
   const [companyList, setCompanyList] = useState<any[]>([]);
@@ -110,26 +113,6 @@ const ConditionalFieldCompany = ({ onChangePayload }: any) => {
     },
   });
 
-  // Sales Organization API
-  const { data: salesOrgData, isLoading: isLoadingSalesOrganization } = useSalesOrganization({
-    company_code: "KSNI",
-    options: {
-      retry: true,
-      onSuccess: (data: any) => {
-        setSalesOrgList(data);
-      },
-      select: (data: any) => {
-        const mappedData = data?.salesOrganizationStructures?.map((element: any) => {
-          return {
-            value: element.id,
-            label: element.name,
-          };
-        });
-        return mappedData;
-      },
-    },
-  });
-
   const {
     data: salesHierarcyData,
     isLoading: isLoadingSalesHierarcy,
@@ -139,7 +122,6 @@ const ConditionalFieldCompany = ({ onChangePayload }: any) => {
     options: {
       enabled: false,
       onSuccess: (data: any) => {
-        console.log("sukses", data);
         setSalesHierarcyList(data);
       },
       select: (data: any) => {
@@ -155,6 +137,26 @@ const ConditionalFieldCompany = ({ onChangePayload }: any) => {
               })
             : [];
 
+        return mappedData;
+      },
+    },
+  });
+
+  // Sales Organization API
+  const { data: salesOrgData, isLoading: isLoadingSalesOrganization } = useSalesOrganization({
+    company_code: "KSNI",
+    options: {
+      retry: true,
+      onSuccess: (data: any) => {
+        setSalesOrgList(data);
+      },
+      select: (data: any) => {
+        const mappedData = data?.salesOrganizationStructures?.map((element: any) => {
+          return {
+            value: element.id,
+            label: element.name,
+          };
+        });
         return mappedData;
       },
     },
@@ -182,33 +184,49 @@ const ConditionalFieldCompany = ({ onChangePayload }: any) => {
       <Text variant="headingRegular">
         Company<span style={{ color: "#EB008B" }}>*</span>
       </Text>
-      <FormSelect
-        defaultValue={""}
-        style={{ width: "50%" }}
-        size={"large"}
-        placeholder={"Select"}
-        borderColor={"#AAAAAA"}
-        arrowColor={"#000"}
-        withSearch
-        isLoading={isFetchingCompany}
-        isLoadingMore={isFetchingMoreCompany}
-        fetchMore={() => {
-          if (hasNextPageCompany) {
-            fetchNextPageCompany();
-          }
-        }}
-        items={isFetchingCompany && isFetchingMoreCompany ? [] : companyList}
-        onChange={(value: any) => {
-          setCompanyPayload((prevState) => {
-            return {
-              ...prevState,
-              company: value,
-            };
-          });
-        }}
-        onSearch={(value: any) => {
-          setSearchCompany(value);
-        }}
+      <Controller
+        control={control}
+        shouldUnregister={true}
+        defaultValue={workingCalendarData?.company?.company}
+        name="company"
+        render={({ field: { onChange }, formState: { errors } }) => (
+          <>
+            <FormSelect
+              defaultValue={workingCalendarData?.company?.company ?? ""}
+              style={{ width: "50%" }}
+              size={"large"}
+              placeholder={"Select"}
+              borderColor={"#AAAAAA"}
+              arrowColor={"#000"}
+              withSearch
+              isLoading={isFetchingCompany}
+              isLoadingMore={isFetchingMoreCompany}
+              fetchMore={() => {
+                if (hasNextPageCompany) {
+                  fetchNextPageCompany();
+                }
+              }}
+              items={isFetchingCompany && isFetchingMoreCompany ? [] : companyList}
+              onChange={(value: any) => {
+                setCompanyPayload((prevState) => {
+                  return {
+                    ...prevState,
+                    company: value,
+                  };
+                });
+              }}
+              onSearch={(value: any) => {
+                setSearchCompany(value);
+              }}
+            />
+
+            {/* {errors?.company_name?.type === "required" && (
+                  <Text variant="alert" color={"red.regular"}>
+                    This field is required
+                  </Text>
+                )} */}
+          </>
+        )}
       />
 
       <Spacer size={20} />
@@ -258,71 +276,99 @@ const ConditionalFieldCompany = ({ onChangePayload }: any) => {
             <Text variant="headingRegular">
               Sales Org<span style={{ color: "#EB008B" }}>*</span>
             </Text>
-            <FormSelect
-              defaultValue={""}
-              style={{ width: "100%" }}
-              size={"large"}
-              placeholder={"Select"}
-              borderColor={"#AAAAAA"}
-              arrowColor={"#000"}
-              withSearch
-              isLoading={isLoadingSalesOrganization}
-              isLoadingMore={false}
-              fetchMore={() => {}}
-              items={isLoadingSalesOrganization ? [] : salesOrgList}
-              onChange={(value: any) => {
-                setCompanyPayload((prevState) => {
-                  return {
-                    ...prevState,
-                    sales_organization: value,
-                  };
-                });
-                setSalesOrgId(value);
-              }}
-              onSearch={(value: any) => {
-                const filterData = salesOrgData?.filter(
-                  (text: any) => text.label.indexOf(value) > -1
-                );
-                setSalesOrgList(filterData);
-              }}
+            <Controller
+              control={control}
+              shouldUnregister={true}
+              defaultValue={workingCalendarData?.company?.salesOrganization}
+              name="sales_organization"
+              render={({ field: { onChange }, formState: { errors } }) => (
+                <>
+                  <FormSelect
+                    defaultValue={workingCalendarData?.company?.salesOrganization}
+                    style={{ width: "100%" }}
+                    size={"large"}
+                    placeholder={"Select"}
+                    borderColor={"#AAAAAA"}
+                    arrowColor={"#000"}
+                    withSearch
+                    isLoading={isLoadingSalesOrganization}
+                    isLoadingMore={false}
+                    fetchMore={() => {}}
+                    items={isLoadingSalesOrganization ? [] : salesOrgList}
+                    onChange={(value: any) => {
+                      setCompanyPayload((prevState) => {
+                        return {
+                          ...prevState,
+                          sales_organization: value,
+                        };
+                      });
+                      setSalesOrgId(value);
+                    }}
+                    onSearch={(value: any) => {
+                      const filterData = salesOrgData?.filter(
+                        (text: any) => text.label.indexOf(value) > -1
+                      );
+                      setSalesOrgList(filterData);
+                    }}
+                  />
+                  {/* {errors?.company_name?.type === "required" && (
+                  <Text variant="alert" color={"red.regular"}>
+                    This field is required
+                  </Text>
+                )} */}
+                </>
+              )}
             />
           </div>
           <div style={{ width: "50%" }}>
             <Text variant="headingRegular">
               Distribution Channel<span style={{ color: "#EB008B" }}>*</span>
             </Text>
-
-            <FormSelectCustom
-              mode="multiple"
-              defaultValue={""}
-              style={{ width: "100%" }}
-              size={"large"}
-              placeholder={"Select"}
-              borderColor={"#AAAAAA"}
-              showArrow
-              arrowColor={"#000"}
-              withSearch
-              maxTagCount={3}
-              isLoading={isLoadingSalesHierarcy}
-              isLoadingMore={false}
-              fetchMore={() => {}}
-              items={isLoadingSalesHierarcy ? [] : salesHierarcyList}
-              value={selectedSalesHierarcy}
-              onChange={(value: any) => {
-                setCompanyPayload((prevState) => {
-                  return {
-                    ...prevState,
-                    distribution_channel: value,
-                  };
-                });
-                setSelectedSalesHierarcy(value);
-              }}
-              onSearch={(value: any) => {
-                const filterData = salesHierarcyData?.filter(
-                  (text: any) => text.label.indexOf(value) > -1
-                );
-                setSalesHierarcyList(filterData);
-              }}
+            <Controller
+              control={control}
+              shouldUnregister={true}
+              defaultValue={workingCalendarData?.company?.distributionChannel}
+              name="distribution_channel"
+              render={({ field: { onChange }, formState: { errors } }) => (
+                <>
+                  <FormSelectCustom
+                    mode="multiple"
+                    style={{ width: "100%" }}
+                    size={"large"}
+                    placeholder={"Select"}
+                    borderColor={"#AAAAAA"}
+                    showArrow
+                    arrowColor={"#000"}
+                    withSearch
+                    maxTagCount={3}
+                    isLoading={isLoadingSalesHierarcy}
+                    isLoadingMore={false}
+                    fetchMore={() => {}}
+                    items={isLoadingSalesHierarcy ? [] : salesHierarcyList}
+                    value={selectedSalesHierarcy}
+                    onChange={(value: any) => {
+                      setCompanyPayload((prevState) => {
+                        return {
+                          ...prevState,
+                          distribution_channel: value,
+                        };
+                      });
+                      setSelectedSalesHierarcy(value);
+                    }}
+                    onSearch={(value: any) => {
+                      const filterData = salesHierarcyData?.filter(
+                        (text: any) => text.label.indexOf(value) > -1
+                      );
+                      setSalesHierarcyList(filterData);
+                    }}
+                  />
+                  {/* {errors?.company_name?.type === "required" && (
+                  <Text variant="alert" color={"red.regular"}>
+                    This field is required
+                  </Text>
+                )} */}
+                </>
+              )}
             />
           </div>
         </Row>
@@ -334,33 +380,48 @@ const ConditionalFieldCompany = ({ onChangePayload }: any) => {
             <Text variant="headingRegular">
               Branch Name<span style={{ color: "#EB008B" }}>*</span>
             </Text>
-            <FormSelect
-              defaultValue={""}
-              style={{ width: "100%" }}
-              size={"large"}
-              placeholder={"Select"}
-              borderColor={"#AAAAAA"}
-              arrowColor={"#000"}
-              withSearch
-              isLoading={isFetchingBranch}
-              isLoadingMore={isFetchingMoreBranch}
-              fetchMore={() => {
-                if (hasNextPageBranch) {
-                  fetchNextPageBranch();
-                }
-              }}
-              items={branchList}
-              onChange={(value: any) => {
-                setCompanyPayload((prevState) => {
-                  return {
-                    ...prevState,
-                    branch: value,
-                  };
-                });
-              }}
-              onSearch={(value: any) => {
-                setSearchBranch(value);
-              }}
+            <Controller
+              control={control}
+              shouldUnregister={true}
+              defaultValue={workingCalendarData?.company?.branch}
+              name="country"
+              render={({ field: { onChange }, formState: { errors } }) => (
+                <>
+                  <FormSelect
+                    defaultValue={workingCalendarData?.company?.branch}
+                    style={{ width: "100%" }}
+                    size={"large"}
+                    placeholder={"Select"}
+                    borderColor={"#AAAAAA"}
+                    arrowColor={"#000"}
+                    withSearch
+                    isLoading={isFetchingBranch}
+                    isLoadingMore={isFetchingMoreBranch}
+                    fetchMore={() => {
+                      if (hasNextPageBranch) {
+                        fetchNextPageBranch();
+                      }
+                    }}
+                    items={branchList}
+                    onChange={(value: any) => {
+                      setCompanyPayload((prevState) => {
+                        return {
+                          ...prevState,
+                          branch: value,
+                        };
+                      });
+                    }}
+                    onSearch={(value: any) => {
+                      setSearchBranch(value);
+                    }}
+                  />
+                  {/* {errors?.company_name?.type === "required" && (
+                  <Text variant="alert" color={"red.regular"}>
+                    This field is required
+                  </Text>
+                )} */}
+                </>
+              )}
             />
           </div>
         </Row>

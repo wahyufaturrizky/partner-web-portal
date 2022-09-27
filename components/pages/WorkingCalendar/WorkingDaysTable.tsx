@@ -1,18 +1,18 @@
 import React, { useEffect, useState, useRef } from "react";
 import { Table, Checkbox, Text, Spacer } from "pink-lava-ui";
 
-const WorkingDaysTable = ({ onChangeValue }: any) => {
+const WorkingDaysTable = ({ onChangeValue, workingCalendarData }: any) => {
   const initialRender = useRef(true);
 
   const [workingDaysStatus, setWorkingDaysStatus] = useState([
     {
-      monday: false,
-      tuesday: false,
-      wednesday: false,
-      thursday: false,
-      friday: false,
-      saturday: false,
-      sunday: false,
+      monday: workingCalendarData?.workingDays[0] ?? false,
+      tuesday: workingCalendarData?.workingDays[1] ?? false,
+      wednesday: workingCalendarData?.workingDays[2] ?? false,
+      thursday: workingCalendarData?.workingDays[3] ?? false,
+      friday: workingCalendarData?.workingDays[4] ?? false,
+      saturday: workingCalendarData?.workingDays[5] ?? false,
+      sunday: workingCalendarData?.workingDays[6] ?? false,
     },
   ]);
 

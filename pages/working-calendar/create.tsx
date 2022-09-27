@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Text, Col, Row, Spacer, Button, Input, Table, DatePickerInput } from "pink-lava-ui";
 import styled from "styled-components";
-import { Controller, useForm, useFieldArray } from "react-hook-form";
+import { Controller, useForm, useFieldArray, useWatch } from "react-hook-form";
 import { useRouter } from "next/router";
 import { queryClient } from "../_app";
 import ICCompany from "../../assets/icons/ic-company.svg";
@@ -38,6 +38,8 @@ const WorkingCalendarCreate = () => {
   ]);
   const [companyPayloads, setCompanyPayload] = useState({});
   const [show, setShow] = useState(false);
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
 
   const { register, control, handleSubmit, setValue } = useForm({
     defaultValues: {
@@ -46,6 +48,11 @@ const WorkingCalendarCreate = () => {
   });
 
   const { fields, append, remove } = useFieldArray({
+    control,
+    name: "public_holidays",
+  });
+
+  const publicHolidayWatch = useWatch({
     control,
     name: "public_holidays",
   });
@@ -71,7 +78,6 @@ const WorkingCalendarCreate = () => {
       working_days: workingDaysPayload,
     };
 
-    console.log(formData);
     createWorkingCalendar(formData);
   };
 
@@ -194,7 +200,11 @@ const WorkingCalendarCreate = () => {
 
               <Spacer size={20} />
 
-              <StartEndWorkingField control={control} />
+              <StartEndWorkingField
+                control={control}
+                setStartDate={setStartDate}
+                setEndDate={setEndDate}
+              />
 
               <Spacer size={20} />
 
@@ -277,6 +287,10 @@ const WorkingCalendarCreate = () => {
           onCancel={() => {
             setShow(false);
           }}
+          startDate={startDate}
+          endDate={endDate}
+          workingDays={workingDaysPayload}
+          publicHoliday={publicHolidayWatch}
         />
       )}
     </>

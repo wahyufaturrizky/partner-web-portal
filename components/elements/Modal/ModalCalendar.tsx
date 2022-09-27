@@ -1,78 +1,63 @@
 import React from "react";
 import { Calendar, Modal, Badge } from "pink-lava-ui";
 import styled from "styled-components";
+import moment from "moment";
 
-const getListData = (value) => {
-  let listData;
-
-  switch (value.date()) {
-    case 8:
-      listData = [
-        {
-          type: "error",
-          content: "Day Off",
-        },
-      ];
-      break;
-
-    case 10:
-      listData = [
-        {
-          type: "warning",
-          content: "This is warning event.",
-        },
-        {
-          type: "success",
-          content: "This is usual event.",
-        },
-        {
-          type: "error",
-          content: "This is error event.",
-        },
-      ];
-      break;
-
-    case 15:
-      listData = [
-        {
-          type: "warning",
-          content: "This is warning event",
-        },
-        {
-          type: "success",
-          content: "This is very long usual event。。....",
-        },
-        {
-          type: "error",
-          content: "This is error event 1.",
-        },
-        {
-          type: "error",
-          content: "This is error event 2.",
-        },
-        {
-          type: "error",
-          content: "This is error event 3.",
-        },
-        {
-          type: "error",
-          content: "This is error event 4.",
-        },
-      ];
-      break;
-
-    default:
-  }
-
-  return listData || [];
+const daysName: any = {
+  1: "Monday",
+  2: "Tuesday",
+  3: "Wednesday",
+  4: "Thursday",
+  5: "Friday",
+  6: "Saturday",
+  0: "Sunday",
 };
 
-const ModalCalendar = ({ show, onCancel }: any) => {
-  const dateCellRender = (value: any) => {
-    const listData = getListData(value);
+const getListData = (
+  value: any,
+  startDate: any,
+  endDate: any,
+  workingDays: any,
+  publicHoliday: any
+) => {
+  let listData: any = [];
+
+  const format = "DD-MM-YYYY";
+
+  const cellValue = moment(value, format);
+
+  const start = moment(startDate, format);
+  const end = moment(endDate, format);
+
+  const inRange = cellValue.isBetween(start, end);
+
+  const getWorkingDays = workingDays?.map((dayValue: any, index: any) => {
+    return {
+      [daysName[index]]: dayValue,
+    };
+  });
+
+  const filterPublicHoliday = publicHoliday?.filter((day: any) => {
+    return day.holiday_date === cellValue.format("DD/MM/YYYY");
+  });
+
+  if (!getWorkingDays[cellValue.day()][daysName[cellValue.day()]] && inRange) {
+    listData?.push({ type: "error", content: "Day off" });
+  }
+
+  if (filterPublicHoliday?.length > 0 && inRange) {
+    listData?.push({ type: "error", content: filterPublicHoliday[0].holiday_name });
+  }
+
+  return listData;
+};
+
+const ModalCalendar = ({ show, onCancel, startDate, endDate, workingDays, publicHoliday }: any) => {
+  const dateCellRender = (dateCellValue: any) => {
+    const listData = getListData(dateCellValue, startDate, endDate, workingDays, publicHoliday);
     return (
       <StyledUl>
-        {listData.map((item) => (
+        {listData.map((item: any) => (
           <Badge status={item.type} text={item.content} />
         ))}
       </StyledUl>

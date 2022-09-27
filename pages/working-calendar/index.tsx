@@ -23,13 +23,14 @@ import { queryClient } from "../_app";
 import { useRouter } from "next/router";
 
 const renderConfirmationText = (type: any, data: any) => {
+  console.log(data);
   switch (type) {
     case "selection":
       return data.selectedRowKeys.length > 1
         ? `Are you sure to delete ${data.selectedRowKeys.length} items ?`
         : `Are you sure to delete ${
             data?.workingCalendarData?.data.find((el: any) => el.key === data.selectedRowKeys[0])
-              ?.workingCalendarName
+              ?.calendarName
           } ?`;
     case "detail":
       return `Are you sure to delete ${data.workingCalendarName} ?`;
