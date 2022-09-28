@@ -34,7 +34,7 @@
     "lodash.snakecase": "^4.1.1",
     "moment": "^2.29.4",
     "next": "12.1.0",
-    "pink-lava-ui": "file:../pink-lava-react/dist",
+    "pink-lava-ui": "file:../pink-lava-design/dist",
     "postcss": "^8.4.8",
     "qs": "^6.10.3",
     "react": "17.0.2",
