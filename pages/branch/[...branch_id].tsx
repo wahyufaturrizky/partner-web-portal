@@ -3,7 +3,7 @@ import { Text, Col, Row, Spacer, Spin, Button, Accordion, FormSelect, FormInput,
 import styled from "styled-components";
 import { Controller, useForm } from "react-hook-form";
 import { useRouter } from "next/router";
-import { useBranchDetail, useBranchParent, useCalendarDetail, useCalendarInfiniteLists, useCreateBranch, useTimezoneInfiniteLists } from "../../hooks/mdm/branch/useBranch";
+import { useBranchDetail, useBranchParent, useCalendarDetail, useCalendarInfiniteLists, useCreateBranch, useTimezoneInfiniteLists, useUpdateBranch } from "../../hooks/mdm/branch/useBranch";
 import { queryClient } from "../_app";
 import { useCountryInfiniteLists, useFetchCountriesStructure, useFetchDetailCountry } from "hooks/mdm/country-structure/useCountries";
 import { useTimezone } from "hooks/timezone/useTimezone";
@@ -41,8 +41,8 @@ const BranchDetail = () => {
   const [calendarDetailId, setCalendarDetailId] = useState(1)
 
   const [listSalesOrganization, setListSalesOrganization] = useState([])
-  const [listTimezone, setListTimezone] = useState([])
-  const [listCalendar, setListCalendar] = useState([])
+  const [listTimezone, setListTimezone] = useState<any[]>([])
+  const [listCalendar, setListCalendar] = useState<any[]>([])
   const [listCountry, setListCountry] = useState([
     { value: 1, label: 'Indonesia' },
     { value: 2, label: 'Japan' },
@@ -189,16 +189,16 @@ const BranchDetail = () => {
       search: debounceFetchTimezone,
     },
     options: {
-      onSuccess: (data) => {
+      onSuccess: (data: any) => {
         setTimezoneRows(data?.pages[0]?.totalRow);
-        setListTimezone(data?.pages[0]?.rows?.map(timezone => {
+        setListTimezone(data?.pages[0]?.rows?.map((timezone: { utc: any; id: any; }) => {
           return {
             label: timezone.utc, value: timezone.id
           }
         }))
       },
       getNextPageParam: (_lastPage: any, pages: any) => {
-        if (listTimezone.length < timezoneRows) {
+        if (timezoneRows && listTimezone.length < timezoneRows) {
           return pages.length + 1;
         } else {
           return undefined;
@@ -219,14 +219,14 @@ const BranchDetail = () => {
       search: debounceFetchCalendar,
     },
     options: {
-      onSuccess: (data) => {
+      onSuccess: (data: any) => {
         setCalendarRows(data?.pages[0]?.totalRow)
-        setListCalendar(data?.pages[0]?.rows?.map(calendar => {
+        setListCalendar(data?.pages[0]?.rows?.map((calendar: { calendarName: any; id: any; }) => {
           return { label: calendar.calendarName, value: calendar.id}
         }))
       },
       getNextPageParam: (_lastPage: any, pages: any) => {
-        if (listCalendar.length < calendarRows) {
+        if (calendarRows && listCalendar.length < calendarRows) {
           return pages.length + 1;
         } else {
           return undefined;
@@ -247,7 +247,24 @@ const BranchDetail = () => {
         console.log(data, '<<< ini data detail calendar')
       },
       select: (data: any) => {
-        return data
+        let start = data?.workingDays.findIndex((e: boolean) => e === true)
+        let end = data?.workingDays.findIndex((e: boolean) => e === false) === 0 ? 6 : data?.workingDays.findIndex((e: boolean) => e === false) - 1
+        const findDays = (data: number) => {
+          switch (data) {
+            case 0: return 'Senin'
+            case 1: return 'Selasa'
+            case 2: return 'Rabu'
+            case 3: return 'Kamis'
+            case 4: return 'Jumat'
+            case 5: return 'Sabtu'
+            case 6: return 'Minggu'            
+              break;
+          } 
+        }
+        return {
+          start: findDays(start),
+          end: findDays(end)
+        }
       },
     },
   });        
@@ -272,7 +289,9 @@ const BranchDetail = () => {
 
 
 
-  const { mutate: createBranch, isLoading: isLoadingCreateBranch } = useCreateBranch({
+  const { mutate: updateBranch, isLoading: isLoadingUpdateBranch } = useUpdateBranch({
+    id: branch_id && branch_id[1],
+    companyId: branch_id && branch_id[0],
     options: {
       onSuccess: () => {
         router.back();
@@ -288,10 +307,10 @@ const BranchDetail = () => {
       company_id: "KSNI",
       ...data,
     };
-    createBranch(formData);
+    updateBranch(formData);
   };
 
-  if(isLoadingBranchDetailData || isLoadingSalesOrganizationData){
+  if(isLoadingBranchDetailData || isLoadingSalesOrganizationData || isLoadingCalendar){
   return (
     <Center>
       <Spin tip="Loading data..." />
@@ -312,7 +331,7 @@ const BranchDetail = () => {
             Cancel
           </Button>
           <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
-            {isLoadingCreateBranch ? "Loading..." : "Save"}
+            {isLoadingUpdateBranch ? "Loading..." : "Save"}
           </Button>
         </Row>
       </Card>
@@ -390,7 +409,7 @@ const BranchDetail = () => {
                         borderColor={"#AAAAAA"}
                         arrowColor={"#000"}
                         withSearch
-                        default_value={salesOrganizationData?.filter(sales => sales.value === branchDetailData?.company_internal_structure_id)[0]?.label}
+                        default_value={salesOrganizationData?.filter((sales: { value: any; }) => sales.value === branchDetailData?.company_internal_structure_id)[0]?.label}
                         isLoading={isLoadingSalesOrganizationData}
                         isLoadingMore={isFetchingSalesOrganizationData}
                         fetchMore={() => {}}
@@ -422,7 +441,7 @@ const BranchDetail = () => {
                         borderColor={"#AAAAAA"}
                         arrowColor={"#000"}
                         withSearch
-                        defaultValue={listTimezone?.filter(timezone => timezone.value === branchDetailData?.timezone)[0]?.label}
+                        defaultValue={listTimezone?.filter((timezone: {value: any, label: any}) => timezone?.value === branchDetailData?.timezone)[0]?.label}
                         isLoading={isFetchingTimezone}
                         isLoadingMore={isFetchingMoreTimezone}
                         fetchMore={() => {
@@ -465,7 +484,7 @@ const BranchDetail = () => {
                         borderColor={"#AAAAAA"}
                         arrowColor={"#000"}
                         withSearch
-                        defaultValue={listCalendar?.filter(calendar => calendar.value === branchDetailData?.calendarId)[0]?.label}
+                        defaultValue={listCalendar?.filter((calendar: any) => calendar?.value === branchDetailData?.calendarId)[0]?.label}
                         isLoading={isFetchingCalendar}
                         isLoadingMore={isFetchingMoreCalendar}
                         fetchMore={() => {
