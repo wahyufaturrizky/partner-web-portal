@@ -165,10 +165,13 @@ const WorkingCalendarCreate = () => {
 
               <Spacer size={20} />
 
-              {statusCard === "country" && <ConditionalFieldCountry control={control} />}
+              {statusCard === "country" && (
+                <ConditionalFieldCountry type="create" control={control} />
+              )}
 
               {statusCard === "company" && (
                 <ConditionalFieldCompany
+                  type="create"
                   control={control}
                   onChangePayload={(companyPayload: any) => {
                     setCompanyPayload(companyPayload);

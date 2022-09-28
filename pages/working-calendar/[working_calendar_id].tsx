@@ -79,10 +79,25 @@ const WorkingCalendarCreate = () => {
       onSuccess: (data: any) => {
         if (!data.country) {
           setStatusCard("company");
+          setCompanyPayload({
+            company: data?.company?.company,
+            sales_organization: data?.company?.salesOrganization,
+            distribution_channel: data?.company?.distributionChannel,
+            branch: data?.company?.branch,
+          });
         }
+
+        const mappedPublicHolidays = data?.publicHolidays?.map((el: any) => {
+          return {
+            ...el,
+            holiday_name: el.holidayName,
+            holiday_date: el.holidayDate,
+          };
+        });
+
         setValue(
           "public_holidays",
-          data?.publicHolidays?.length > 0 ? data?.publicHolidays : publicHolidaysDefaultValue
+          data?.publicHolidays?.length > 0 ? mappedPublicHolidays : publicHolidaysDefaultValue
         );
         setWorkingDaysPayload(data?.workingDays);
       },
@@ -122,8 +137,8 @@ const WorkingCalendarCreate = () => {
       working_days: workingDaysPayload,
     };
 
-    console.log(formData);
-    // updateWorkingCalendar(formData);
+    // console.log(formData);
+    updateWorkingCalendar(formData);
   };
 
   if (isLoadingWorkingCalendar || isFetchingWorkingCalendar)
@@ -221,6 +236,7 @@ const WorkingCalendarCreate = () => {
 
               {statusCard === "country" && (
                 <ConditionalFieldCountry
+                  type="edit"
                   control={control}
                   workingCalendarData={workingCalendarData}
                 />
@@ -228,6 +244,8 @@ const WorkingCalendarCreate = () => {
 
               {statusCard === "company" && (
                 <ConditionalFieldCompany
+                  type="edit"
+                  workingCalendarData={workingCalendarData}
                   control={control}
                   onChangePayload={(companyPayload: any) => {
                     setCompanyPayload(companyPayload);
@@ -319,7 +337,9 @@ const WorkingCalendarCreate = () => {
                         <DatePickerInput
                           label=""
                           fullWidth
-                          defaultValue={moment(el.holiday_date, "DD/MM/YYYY")}
+                          defaultValue={
+                            el.holiday_date ? moment(el.holiday_date, "DD/MM/YYYY") : ""
+                          }
                           onChange={(date: any, dateString: any) => {
                             onChange(dateString);
                           }}
@@ -330,6 +350,7 @@ const WorkingCalendarCreate = () => {
                   ),
                   holidayName: (
                     <Input
+                      defaultValue={el.holiday_name}
                       width="50%"
                       height="40px"
                       label=""

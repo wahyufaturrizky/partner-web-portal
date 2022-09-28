@@ -23,7 +23,6 @@ import { queryClient } from "../_app";
 import { useRouter } from "next/router";
 
 const renderConfirmationText = (type: any, data: any) => {
-  console.log(data);
   switch (type) {
     case "selection":
       return data.selectedRowKeys.length > 1

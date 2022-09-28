@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import { Text, Row, Spacer, FormSelect, FormSelectCustom, Radio } from "pink-lava-ui";
+import { Text, Row, Spacer, FormSelect, FormSelectCustom, Radio, Spin } from "pink-lava-ui";
 import useDebounce from "lib/useDebounce";
 import { useBranchInfiniteLists } from "hooks/mdm/branch/useBranch";
 import {
@@ -8,17 +8,17 @@ import {
 } from "hooks/sales-organization/useSalesOrganization";
 import { useCompanyInfiniteLists } from "hooks/company-list/useCompany";
 import { Controller } from "react-hook-form";
+import styled from "styled-components";
 
-const ConditionalFieldCompany = ({ control, onChangePayload, workingCalendarData }: any) => {
+const ConditionalFieldCompany = ({ control, onChangePayload, workingCalendarData, type }: any) => {
   const [companyPayload, setCompanyPayload] = useState({
     company: workingCalendarData?.company?.company ?? "",
     sales_organization: workingCalendarData?.company?.salesOrganization ?? 0,
     distribution_channel: workingCalendarData?.company?.distributionChannel ?? [],
     branch: workingCalendarData?.company?.branch ?? "",
   });
-  const [selectedSalesHierarcy, setSelectedSalesHierarcy] = useState([]);
   const [radioValue, setRadioValue] = useState(
-    !workingCalendarData?.branch ? "companyInternal" : "branch"
+    workingCalendarData?.branch === null ? "companyInternal" : "branch"
   );
 
   // Company State
@@ -34,16 +34,21 @@ const ConditionalFieldCompany = ({ control, onChangePayload, workingCalendarData
   const debounceFetchBranch = useDebounce(searchBranch, 1000);
 
   //Sales Organization State
-  const [salesOrgId, setSalesOrgId] = useState(0);
+  const [salesOrgId, setSalesOrgId] = useState(
+    workingCalendarData?.company?.salesOrganization ?? 0
+  );
   const [salesOrgList, setSalesOrgList] = useState<any[]>([]);
   const [salesHierarcyList, setSalesHierarcyList] = useState<any[]>([]);
-  const [salesHierarcyTemp, setSalesHierarcyTemp] = useState([]);
+  const [selectedSalesHierarcy, setSelectedSalesHierarcy] = useState(
+    workingCalendarData?.company?.distributionChannel ?? []
+  );
 
   const initialRender = useRef(true);
   const initialRenderSalesOrg = useRef(true);
 
   // Company API
   const {
+    isLoading: isLoadingCompany,
     isFetching: isFetchingCompany,
     isFetchingNextPage: isFetchingMoreCompany,
     hasNextPage: hasNextPageCompany,
@@ -79,6 +84,7 @@ const ConditionalFieldCompany = ({ control, onChangePayload, workingCalendarData
 
   // Branch API
   const {
+    isLoading: isLoadingBranch,
     isFetching: isFetchingBranch,
     isFetchingNextPage: isFetchingMoreBranch,
     hasNextPage: hasNextPageBranch,
@@ -120,7 +126,7 @@ const ConditionalFieldCompany = ({ control, onChangePayload, workingCalendarData
   } = useSalesOrganizationHirarcy({
     structure_id: salesOrgId,
     options: {
-      enabled: false,
+      enabled: type === "edit" && radioValue !== "branch",
       onSuccess: (data: any) => {
         setSalesHierarcyList(data);
       },
@@ -176,8 +182,22 @@ const ConditionalFieldCompany = ({ control, onChangePayload, workingCalendarData
       initialRenderSalesOrg.current = false;
       return;
     }
-    refetch();
+
+    if (type !== "edit") {
+      refetch();
+    }
   }, [salesOrgId]);
+
+  if (
+    type === "edit" &&
+    (isLoadingCompany || isLoadingBranch || isLoadingSalesOrganization || isLoadingSalesHierarcy)
+  ) {
+    return (
+      <Center>
+        <Spin tip="Loading data..." />
+      </Center>
+    );
+  }
 
   return (
     <>
@@ -429,5 +449,11 @@ const ConditionalFieldCompany = ({ control, onChangePayload, workingCalendarData
     </>
   );
 };
+
+const Center = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
 
 export default ConditionalFieldCompany;

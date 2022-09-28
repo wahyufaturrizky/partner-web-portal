@@ -3,14 +3,17 @@ import { Text, FormSelect } from "pink-lava-ui";
 import useDebounce from "lib/useDebounce";
 import { useCountryInfiniteLists } from "hooks/mdm/country-structure/useCountries";
 import { Controller } from "react-hook-form";
+import styled from "styled-components";
+import { Spin } from "pink-lava-ui";
 
-const ConditionalFieldCountry = ({ control, workingCalendarData }: any) => {
+const ConditionalFieldCountry = ({ control, workingCalendarData, type }: any) => {
   const [countryList, setCountryList] = useState<any[]>([]);
   const [totalRowsCountryList, setTotalRowsCountryList] = useState(0);
   const [searchCountry, setSearchCountry] = useState("");
   const debounceFetchCountry = useDebounce(searchCountry, 1000);
 
   const {
+    isLoading: isLoadingCountry,
     isFetching: isFetchingCountry,
     isFetchingNextPage: isFetchingMoreCountry,
     hasNextPage: hasNextPageCountry,
@@ -43,6 +46,13 @@ const ConditionalFieldCountry = ({ control, workingCalendarData }: any) => {
       },
     },
   });
+
+  if (isLoadingCountry && type === "edit")
+    return (
+      <Center>
+        <Spin tip="Loading data..." />
+      </Center>
+    );
 
   return (
     <>
@@ -90,5 +100,11 @@ const ConditionalFieldCountry = ({ control, workingCalendarData }: any) => {
     </>
   );
 };
+
+const Center = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
 
 export default ConditionalFieldCountry;
