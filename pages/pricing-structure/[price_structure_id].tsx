@@ -13,6 +13,7 @@ import {
   usePricingStructureList,
   usePricingStructureLists,
   useUpdatePricingStructureList,
+  usePricingStructureInfiniteLists,
 } from "hooks/pricing-structure/usePricingStructure";
 import {
   useSalesOrganizationHirarcy,
@@ -117,8 +118,13 @@ const DetailPricingStructure: any = () => {
 
   const [totalRowsSalesOrganizationInfiniteList, setTotalRowsSalesOrganizationInfiniteList] =
     useState(0);
+  const [totalRowsPricingStructureInfiniteList, setTotalRowsPricingStructureInfiniteList] =
+    useState(0);
   const [salesOrganizationInfiniteList, setSalesOrganizationInfiniteList] = useState<any[]>([]);
   const [searchSalesOrganizationInfinite, setSearchSalesOrganizationInfinite] = useState("");
+
+  const [pricingStructureInfiniteList, setPricingStructureInfiniteList] = useState<any[]>([]);
+  const [searchPricingStructureInfinite, setSearchPricingStructureInfinite] = useState("");
 
   const [modalInactiveReason, setModalInactiveReason] = useState({ open: false });
 
@@ -157,6 +163,7 @@ const DetailPricingStructure: any = () => {
       pricing_config: "",
       currency: "",
       manage_by: "",
+      product_copy: "",
       activeDate: "",
       status: "",
       inactive_reason: "",
@@ -295,6 +302,15 @@ const DetailPricingStructure: any = () => {
     pricingStructureListId: price_structure_id,
   });
 
+  const { mutate: updatePriceStructure } = useUpdatePricingStructureList({
+    options: {
+      onSuccess: () => {
+        router.back();
+      },
+    },
+    pricingStructureListId: price_structure_id,
+  });
+
   const approve = () => {
     const payload = {
       status: "APPROVED",
@@ -337,6 +353,7 @@ const DetailPricingStructure: any = () => {
     searchPricingConfigInfinite ||
       searchProduct ||
       searchSalesOrganizationInfinite ||
+      searchPricingStructureInfinite ||
       searchRegion ||
       searchCurrenciesInfinite,
     1000
@@ -374,8 +391,20 @@ const DetailPricingStructure: any = () => {
           setValue("pricing_config", priceStructureConfigId);
           setValue("currency", currency);
           setValue("manage_by", managedBy);
-          setValue("distribution_channel", priceStructureDistributions);
+
           setValue("status", status);
+          setValue(
+            "product_selected",
+            priceStructureCosts.map((data: any) => ({
+              hasVariant: false,
+              id: data.productId,
+              key: data.productId,
+              name: data.productId,
+              productCategoryName: data.productVariant,
+              status: "",
+              distribution_channel: [],
+            }))
+          );
         },
       },
     });
@@ -490,7 +519,18 @@ const DetailPricingStructure: any = () => {
   } = useSalesOrganizationHirarcy({
     structure_id: dataWatchManageBy,
     options: {
-      onSuccess: () => {},
+      onSuccess: (data: any) => {
+        setValue(
+          "distribution_channel",
+          data
+            .filter((filtering: any) =>
+              pricingStructureListById.priceStructureDistributions
+                .map((data: any) => data.salesOrganizationHirarcy.name)
+                .includes(filtering.name)
+            )
+            .map((data: any) => data.id)
+        );
+      },
       select: (data: any) =>
         data.map((dataHirarcy: any) => ({
           ...dataHirarcy,
@@ -562,6 +602,43 @@ const DetailPricingStructure: any = () => {
   });
 
   const {
+    isFetching: isFetchingPricingStructureInfinite,
+    isFetchingNextPage: isFetchingMorePricingStructureInfinite,
+    hasNextPage: hasNextPagePricingStructureInfinite,
+    fetchNextPage: fetchNextPagePricingStructureInfinite,
+    isLoading: isLoadingPricingStructureInfinite,
+  } = usePricingStructureInfiniteLists({
+    query: {
+      search: debounceFetch,
+      limit: 10,
+      status: "ACTIVE",
+    },
+    options: {
+      onSuccess: (data: any) => {
+        setTotalRowsPricingStructureInfiniteList(data.pages[0].totalRow);
+        const mappedData = data?.pages?.map((group: any) => {
+          return group.rows?.map((element: any) => {
+            return {
+              ...element,
+              value: element.id,
+              label: element.proposalNumber,
+            };
+          });
+        });
+        const flattenArray = [].concat(...mappedData);
+        setPricingStructureInfiniteList(flattenArray);
+      },
+      getNextPageParam: (_lastPage: any, pages: any) => {
+        if (pricingStructureInfiniteList.length < totalRowsPricingStructureInfiniteList) {
+          return pages.length + 1;
+        } else {
+          return undefined;
+        }
+      },
+    },
+  });
+
+  const {
     isFetching: isFetchingCurrenciesInfinite,
     isFetchingNextPage: isFetchingMoreCurrenciesInfinite,
     hasNextPage: hasNextPageCurrenciesInfinite,
@@ -597,25 +674,171 @@ const DetailPricingStructure: any = () => {
     },
   });
 
-  const onSubmit = (dataSubmit: any) =>
-    pricingStructure({
-      price_structure_config_id: dataSubmit.pricing_config,
-      currency: dataSubmit.currency,
-      managed_by: dataSubmit.manage_by,
-      active_date: moment().format("YYYY-MM-DD"),
-      distributions: dataSubmit.distribution_channel,
-      products: dataSubmit.product_selected.map((mapping: any) => mapping.id),
-    });
+  const onSubmit = (dataSubmit: any) => {
+    window.alert("Under maintenance");
 
-  const onSubmitDraft = (dataDraft: any) =>
-    pricingStructureDraft({
-      price_structure_config_id: dataDraft.pricing_config,
-      currency: dataDraft.currency,
-      managed_by: dataDraft.manage_by,
-      active_date: moment().format("YYYY-MM-DD"),
-      distributions: dataDraft.distribution_channel,
-      products: dataDraft.product_selected.map((mapping: any) => mapping.id),
-    });
+    // switch (pricingStructureListById.status) {
+    //   case "DRAFTED":
+    //     updatePriceStructure({
+    //       price_structure_config_id: dataSubmit.pricing_config,
+    //       currency: dataSubmit.currency,
+    //       managed_by: dataSubmit.manage_by,
+    //       status: "WAITING",
+    //       active_date: moment(dataSubmit.activeDate).format("YYYY-MM-DD"),
+    //       add_distributions: dataSubmit.distribution_channel.map((data: any) => data.id),
+    //       add_products: dataSubmit.product_selected.map((data) => data.id),
+    //       del_distributions: [],
+    //       del_products: [],
+    //       add_total_cost: dataSubmit.product_selected.map((data) => data.distribution_channel.map((subDataDist:any ) => ({
+    //         price_structure_cost_id: 1,
+    //         group_buying_price_id: 1,
+    //         is_reference: true,
+    //         cost: subDataDist.cost,
+    //         margin_type: subDataDist.margin_type,
+    //         margin_value: 1,
+    //         managed_by_zone: true,
+    //       },))),
+    //       // total_cost: [
+    //       //   {
+    //       //     id: 1,
+    //       //     price_structure_cost_id: 1,
+    //       //     group_buying_price_id: 1,
+    //       //     is_reference: true,
+    //       //     cost: "999999",
+    //       //     margin_type: "PERCENT",
+    //       //     margin_value: 1,
+    //       //     managed_by_zone: true,
+    //       //   },
+    //       // ],
+    //       // rejection: {
+    //       //   rejection_details: "haha",
+    //       //   rejection_reason: "hehe",
+    //       // },
+    //       add_total_cost_by_zone: [
+    //         {
+    //           price_structure_cost_id: 4,
+    //           group_buying_price_id: 2,
+    //           price_structure_zone_id: 8,
+    //           is_reference: true,
+    //           cost: "200",
+    //           margin_type: "FIX_AMOUNT",
+    //           margin_value: "200",
+    //         },
+    //       ],
+    //       add_zone: [
+    //         {
+    //           price_structure_cost_id: 4,
+    //           internal_region: 1,
+    //           is_default: false,
+    //         },
+    //       ],
+    //       // total_cost_by_zone: [
+    //       //   {
+    //       //     id: 3,
+    //       //     price_structure_cost_id: 4,
+    //       //     group_buying_price_id: 2,
+    //       //     price_structure_zone_id: 8,
+    //       //     is_reference: true,
+    //       //     cost: "200",
+    //       //     margin_type: "PERCENT",
+    //       //     margin_value: "200",
+    //       //   },
+    //       // ],
+    //       // zone: [
+    //       //   {
+    //       //     id: 8,
+    //       //     price_structure_cost_id: 4,
+    //       //     internal_region: 2,
+    //       //     is_default: true,
+    //       //   },
+    //       // ],
+    //     });
+    //     break;
+
+    //   default:
+    //     break;
+    // }
+  };
+
+  const onSubmitDraft = (dataDraft: any) => {
+    window.alert("Under maintenance");
+    // updatePriceStructure({
+    //   price_structure_config_id: 2,
+    //   currency: "MPC-0000001",
+    //   managed_by: 1,
+    //   status: dataSubmit.status,
+    //   active_date: "2022-03-03",
+    //   add_distributions: [],
+    //   add_products: [],
+    //   del_distributions: [],
+    //   del_products: [],
+    //   add_total_cost: [
+    //     {
+    //       price_structure_cost_id: 1,
+    //       group_buying_price_id: 1,
+    //       is_reference: true,
+    //       cost: "0000000",
+    //       margin_type: "FIX_AMOUNT",
+    //       margin_value: 1,
+    //       managed_by_zone: true,
+    //     },
+    //   ],
+    //   total_cost: [
+    //     {
+    //       id: 1,
+    //       price_structure_cost_id: 1,
+    //       group_buying_price_id: 1,
+    //       is_reference: true,
+    //       cost: "999999",
+    //       margin_type: "PERCENT",
+    //       margin_value: 1,
+    //       managed_by_zone: true,
+    //     },
+    //   ],
+    //   rejection: {
+    //     rejection_details: "haha",
+    //     rejection_reason: "hehe",
+    //   },
+    //   add_total_cost_by_zone: [
+    //     {
+    //       price_structure_cost_id: 4,
+    //       group_buying_price_id: 2,
+    //       price_structure_zone_id: 8,
+    //       is_reference: true,
+    //       cost: "200",
+    //       margin_type: "FIX_AMOUNT",
+    //       margin_value: "200",
+    //     },
+    //   ],
+    //   add_zone: [
+    //     {
+    //       price_structure_cost_id: 4,
+    //       internal_region: 1,
+    //       is_default: false,
+    //     },
+    //   ],
+    //   total_cost_by_zone: [
+    //     {
+    //       id: 3,
+    //       price_structure_cost_id: 4,
+    //       group_buying_price_id: 2,
+    //       price_structure_zone_id: 8,
+    //       is_reference: true,
+    //       cost: "200",
+    //       margin_type: "PERCENT",
+    //       margin_value: "200",
+    //     },
+    //   ],
+    //   zone: [
+    //     {
+    //       id: 8,
+    //       price_structure_cost_id: 4,
+    //       internal_region: 2,
+    //       is_default: true,
+    //     },
+    //   ],
+    // });
+  };
 
   useEffect(
     () => {
@@ -1008,6 +1231,7 @@ const DetailPricingStructure: any = () => {
     isLoadingSalesOrganizationInfinite,
     isLoadingPricingStructureListById,
     isLoadingPricingStructureList,
+    isLoadingPricingStructureInfinite,
   ]);
 
   const isEmpty = productsSelected.length === 0;
@@ -1025,7 +1249,7 @@ const DetailPricingStructure: any = () => {
         isLoadingProductList ||
         isLoadingSalesOrganizationInfinite ? (
           <Center>
-            <Progress type="circle" percent={percent} />
+            <Spin tip="Loading data..." />
           </Center>
         ) : (
           <Col>
@@ -1078,6 +1302,7 @@ const DetailPricingStructure: any = () => {
                     <Tooltip
                       title="Data create from manage price structure config"
                       color={"#F4FBFC"}
+                      overlayInnerStyle={{ width: "fit-content" }}
                     >
                       <ICInfo />
                     </Tooltip>
@@ -1122,8 +1347,8 @@ const DetailPricingStructure: any = () => {
                         width="100%"
                         noSearch
                         items={[
-                          { id: "Percent", value: "Percent" },
-                          { id: "Fix Amount", value: "Fix Amount" },
+                          { id: "PERCENT", value: "Percent" },
+                          { id: "FIX_AMOUNT", value: "Fix Amount" },
                         ]}
                         handleChange={(value: any) => {
                           onChange(value);
@@ -1187,6 +1412,7 @@ const DetailPricingStructure: any = () => {
                           <Tooltip
                             title="Data create from manage price structure config"
                             color={"#F4FBFC"}
+                            overlayInnerStyle={{ width: "fit-content" }}
                           >
                             <ICInfo />
                           </Tooltip>
@@ -1231,8 +1457,8 @@ const DetailPricingStructure: any = () => {
                               width="100%"
                               noSearch
                               items={[
-                                { id: "Percent", value: "Percent" },
-                                { id: "Fix Amount", value: "Fix Amount" },
+                                { id: "PERCENT", value: "Percent" },
+                                { id: "FIX_AMOUNT", value: "Fix Amount" },
                               ]}
                               handleChange={(value: any) => {
                                 onChange(value);
@@ -1301,6 +1527,7 @@ const DetailPricingStructure: any = () => {
                               <Tooltip
                                 title="Data create from manage price structure config"
                                 color={"#F4FBFC"}
+                                overlayInnerStyle={{ width: "fit-content" }}
                               >
                                 <ICInfo />
                               </Tooltip>
@@ -1463,6 +1690,7 @@ const DetailPricingStructure: any = () => {
                                             <Tooltip
                                               title="Data create from manage price structure config"
                                               color={"#F4FBFC"}
+                                              overlayInnerStyle={{ width: "fit-content" }}
                                             >
                                               <ICInfo />
                                             </Tooltip>
@@ -1516,8 +1744,8 @@ const DetailPricingStructure: any = () => {
                                                 width="100%"
                                                 noSearch
                                                 items={[
-                                                  { id: "Percent", value: "Percent" },
-                                                  { id: "Fix Amount", value: "Fix Amount" },
+                                                  { id: "PERCENT", value: "Percent" },
+                                                  { id: "FIX_AMOUNT", value: "Fix Amount" },
                                                 ]}
                                                 handleChange={(value: any) => {
                                                   onChange(value);
@@ -1594,6 +1822,7 @@ const DetailPricingStructure: any = () => {
                                                     <Tooltip
                                                       title="Data create from manage price structure config"
                                                       color={"#F4FBFC"}
+                                                      overlayInnerStyle={{ width: "fit-content" }}
                                                     >
                                                       <ICInfo />
                                                     </Tooltip>
@@ -1646,8 +1875,8 @@ const DetailPricingStructure: any = () => {
                                                         width="100%"
                                                         noSearch
                                                         items={[
-                                                          { id: "Percent", value: "Percent" },
-                                                          { id: "Fix Amount", value: "Fix Amount" },
+                                                          { id: "PERCENT", value: "Percent" },
+                                                          { id: "FIX_AMOUNT", value: "Fix Amount" },
                                                         ]}
                                                         handleChange={(value: any) => {
                                                           onChange(value);
@@ -1730,10 +1959,11 @@ const DetailPricingStructure: any = () => {
         isLoadingGroupBuying ||
         isLoadingPricingStructureListById ||
         isLoadingPricingStructureList ||
+        isLoadingPricingStructureInfinite ||
         isLoadingProductList ||
         isLoadingSalesOrganizationInfinite ? (
           <Center>
-            <Progress type="circle" percent={percent} />
+            <Spin tip="Loading data..." />
           </Center>
         ) : (
           <Col>
@@ -1800,14 +2030,16 @@ const DetailPricingStructure: any = () => {
                     </>
                   ) : (
                     <>
-                      <Button
-                        disabled={isLoadingPricingStructureDraft}
-                        size="big"
-                        variant={"secondary"}
-                        onClick={handleSubmit(onSubmitDraft)}
-                      >
-                        {isLoadingPricingStructureDraft ? "Loading..." : "Save as Draft"}
-                      </Button>
+                      {pricingStructureListById?.status !== "ACTIVE" && (
+                        <Button
+                          disabled={isLoadingPricingStructureDraft}
+                          size="big"
+                          variant={"secondary"}
+                          onClick={handleSubmit(onSubmitDraft)}
+                        >
+                          {isLoadingPricingStructureDraft ? "Loading..." : "Save as Draft"}
+                        </Button>
+                      )}
                       <Button
                         disabled={isLoadingPricingStructure}
                         size="big"
@@ -1856,6 +2088,7 @@ const DetailPricingStructure: any = () => {
                               <Tooltip
                                 title="Data create from manage price structure config"
                                 color={"#F4FBFC"}
+                                overlayInnerStyle={{ width: "fit-content" }}
                               >
                                 <ICInfo />
                               </Tooltip>
@@ -2074,12 +2307,12 @@ const DetailPricingStructure: any = () => {
                           onClick={() =>
                             setModal({
                               open: true,
-                              typeForm: "Copy From Price Structure",
+                              typeForm: "Copy Product",
                               data: {},
                             })
                           }
                         >
-                          <ICCopy /> Copy From Price Stucture Existing
+                          <ICCopy /> Copy Product
                         </Button>
                       </Col>
 
@@ -2249,7 +2482,7 @@ const DetailPricingStructure: any = () => {
                 Cancel
               </Button>
               <Button onClick={handleSubmit(handleSelectedField)} variant="primary" size="big">
-                {typeForm === "Add Products" ? "Add" : "Copy"}
+                {typeForm === "Add Products" ? "Add" : "Apply"}
               </Button>
             </div>
           }
@@ -2289,6 +2522,84 @@ const DetailPricingStructure: any = () => {
             ) : (
               <>
                 <Spacer size={20} />
+
+                <Controller
+                  control={control}
+                  name="product_copy"
+                  render={({ field: { onChange, value }, fieldState: { error } }) => (
+                    <>
+                      <Row alignItems="center" gap="8px">
+                        <Col>
+                          <Label>Product From</Label>
+                        </Col>
+                        <Col>
+                          <Tooltip
+                            title="Select a product that will be used as the pricing structure reference."
+                            color={"#F4FBFC"}
+                            overlayInnerStyle={{ width: "fit-content" }}
+                          >
+                            <ICInfo />
+                          </Tooltip>
+                        </Col>
+                      </Row>
+                      <Spacer size={3} />
+                      <FormSelect
+                        defaultValue={value}
+                        error={error?.message}
+                        height="48px"
+                        style={{ width: "100%" }}
+                        size={"large"}
+                        placeholder={"Select"}
+                        borderColor={error?.message ? "#ED1C24" : "#AAAAAA"}
+                        arrowColor={"#000"}
+                        withSearch
+                        isLoading={isFetchingPricingStructureInfinite}
+                        isLoadingMore={isFetchingMorePricingStructureInfinite}
+                        fetchMore={() => {
+                          if (hasNextPagePricingStructureInfinite) {
+                            fetchNextPagePricingStructureInfinite();
+                          }
+                        }}
+                        items={
+                          isFetchingPricingStructureInfinite && !isFetchingPricingStructureInfinite
+                            ? []
+                            : pricingStructureInfiniteList
+                        }
+                        onChange={(value: any) => {
+                          onChange(value);
+                        }}
+                        onSearch={(value: any) => {
+                          setSearchPricingStructureInfinite(value);
+                        }}
+                      />
+                    </>
+                  )}
+                />
+
+                <Spacer size={20} />
+
+                <Divider />
+
+                <Spacer size={20} />
+
+                <Row alignItems="center" gap="8px">
+                  <Col>
+                    <Text variant={"headingMedium"}>Product To</Text>
+                  </Col>
+                  <Col>
+                    <Tooltip
+                      title="Select one or several products at once to apply the product 
+                      pricing structure."
+                      color={"#F4FBFC"}
+                      overlayInnerStyle={{ width: "fit-content" }}
+                    >
+                      <ICInfo />
+                    </Tooltip>
+                  </Col>
+                </Row>
+
+                <Spacer size={20} />
+
                 <Row alignItems="flex-end" justifyContent="space-between">
                   <Search
                     width="380px"
@@ -2298,17 +2609,30 @@ const DetailPricingStructure: any = () => {
                 </Row>
                 <Spacer size={10} />
                 <Table
-                  columns={columnsCopyFromPriceStructure.filter(
+                  title={
+                    rowSelectionProductsSelected.selectedRowKeys.length
+                      ? () => (
+                          <Row gap="8px" alignItems="center" nowrap>
+                            <Col>
+                              <Text>{`${rowSelectionProductsSelected.selectedRowKeys.length}/${productsSelected.length} Selected Products`}</Text>
+                            </Col>
+                          </Row>
+                        )
+                      : null
+                  }
+                  loading={isLoadingProductList || isFetchingProductList}
+                  columns={columnsProductsSelected.filter(
                     (filtering) =>
                       filtering.dataIndex !== "id" &&
                       filtering.dataIndex !== "key" &&
-                      filtering.dataIndex !== "activeDate" &&
+                      filtering.dataIndex !== "hasVariant" &&
+                      filtering.dataIndex !== "productCategoryName" &&
                       filtering.dataIndex !== "status"
                   )}
-                  data={pricingStructureLists}
-                  rowSelection={rowSelectionCopyFromPriceStructure}
+                  data={productsSelected}
+                  rowSelection={rowSelectionProductsSelected}
                 />
-                <Pagination pagination={paginateCopyFromPriceStructure} />
+                <Pagination pagination={paginationProductsSelected} />
                 <Spacer size={14} />
               </>
             )
@@ -2329,7 +2653,7 @@ const DetailPricingStructure: any = () => {
             visible={modalDelete.open}
             onCancel={() => setModalDelete({ open: false })}
             onOk={() => deletePartners({ ids: [price_structure_id] })}
-            itemTitle={pricingStructureListById?.name}
+            itemTitle={pricingStructureListById?.priceStructureConfig?.name}
           />
         )}
 
@@ -2454,7 +2778,11 @@ const ManageZoneComponent = (props: any) => {
             <Label>Zone Filled</Label>
           </Col>
           <Col>
-            <Tooltip title="Data create from manage price structure config" color={"#F4FBFC"}>
+            <Tooltip
+              title="Data create from manage price structure config"
+              color={"#F4FBFC"}
+              overlayInnerStyle={{ width: "fit-content" }}
+            >
               <ICInfo />
             </Tooltip>
           </Col>
@@ -2499,7 +2827,11 @@ const ManageZoneComponent = (props: any) => {
             <Row alignItems="center" gap="12px">
               <Switch defaultChecked={value || false} checked={value} onChange={onChange} />
               <Text>is Reference</Text>
-              <Tooltip title="Data create from manage price structure config" color={"#F4FBFC"}>
+              <Tooltip
+                title="Data create from manage price structure config"
+                color={"#F4FBFC"}
+                overlayInnerStyle={{ width: "fit-content" }}
+              >
                 <ICInfo />
               </Tooltip>
             </Row>
@@ -2542,8 +2874,8 @@ const ManageZoneComponent = (props: any) => {
                   width="100%"
                   noSearch
                   items={[
-                    { id: "Percent", value: "Percent" },
-                    { id: "Fix Amount", value: "Fix Amount" },
+                    { id: "PERCENT", value: "Percent" },
+                    { id: "FIX_AMOUNT", value: "Fix Amount" },
                   ]}
                   handleChange={(value: any) => {
                     onChange(value);
@@ -2601,6 +2933,7 @@ const ManageZoneComponent = (props: any) => {
                     <Tooltip
                       title="Data create from manage price structure config"
                       color={"#F4FBFC"}
+                      overlayInnerStyle={{ width: "fit-content" }}
                     >
                       <ICInfo />
                     </Tooltip>
@@ -2644,8 +2977,8 @@ const ManageZoneComponent = (props: any) => {
                         width="100%"
                         noSearch
                         items={[
-                          { id: "Percent", value: "Percent" },
-                          { id: "Fix Amount", value: "Fix Amount" },
+                          { id: "PERCENT", value: "Percent" },
+                          { id: "FIX_AMOUNT", value: "Fix Amount" },
                         ]}
                         handleChange={(value: any) => {
                           onChange(value);

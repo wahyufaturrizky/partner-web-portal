@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useInfiniteQuery } from "react-query";
-import { client, mdmService } from "../../lib/client";
+import { mdmService } from "../../lib/client";
 
 const fetchPricingStructureLists = async ({ query = {} }) => {
   return mdmService(`/price-structure`, {
@@ -16,6 +16,27 @@ const fetchPricingStructureLists = async ({ query = {} }) => {
 
 const usePricingStructureLists = ({ query = {}, options } = {}) => {
   return useQuery(["price-structure", query], () => fetchPricingStructureLists({ query }), {
+    keepPreviousData: true,
+    ...options,
+  });
+};
+
+const fetchInfinitePricingStructureLists = async ({ pageParam = 1, queryKey }) => {
+  const searchQuery = queryKey[1].search;
+  return mdmService(`/price-structure`, {
+    params: {
+      search: searchQuery,
+      limit: 10,
+      page: pageParam,
+      sortBy: "created_at",
+      sortOrder: "DESC",
+      ...queryKey[1],
+    },
+  }).then((data) => data);
+};
+
+const usePricingStructureInfiniteLists = ({ query = {}, options }) => {
+  return useInfiniteQuery(["price-structure/infinite", query], fetchInfinitePricingStructureLists, {
     keepPreviousData: true,
     ...options,
   });
@@ -336,4 +357,5 @@ export {
   useUpdatePricingConfigList,
   useGroupBuyingInfiniteLists,
   usePricingConfigInfiniteLists,
+  usePricingStructureInfiniteLists,
 };

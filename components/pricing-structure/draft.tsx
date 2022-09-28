@@ -109,9 +109,9 @@ const DraftPricingStructure: any = ({
     },
     {
       title: "Products",
-      dataIndex: "product",
+      dataIndex: "priceStructureCosts",
       width: "28%",
-      render: (e: any) => `${e?.length || 0} Products`,
+      render: (e: any) => `${e?.length} Products`,
     },
     {
       title: "Status",
@@ -133,7 +133,7 @@ const DraftPricingStructure: any = ({
   pricingStructureLists?.rows?.map((element: any) => {
     data.push({
       key: element.id,
-      product: element.product,
+      priceStructureCosts: element.priceStructureCosts,
       proposal_number: element.proposalNumber,
       status: element.status,
       action: (
@@ -150,10 +150,6 @@ const DraftPricingStructure: any = ({
     });
   });
   const paginateField = data;
-
-  const onSelectChange = (selectedRowKeys: any) => {
-    setSelectedRowKeys(selectedRowKeys);
-  };
 
   const rowSelection = {
     selectedRowKeys,
