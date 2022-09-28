@@ -1,5 +1,6 @@
 import styled from "styled-components";
 import { mdmDownloadService } from "lib/client";
+import { Button } from 'pink-lava-ui'
 
 import DownloadSvg from "assets/icons/ic-download.svg";
 import UploadSvg from "assets/icons/ic-upload.svg";
@@ -115,6 +116,39 @@ export const columnsDetailCustomers = [
   {
     title: 'Duration',
     dataIndex: 'duration'
+  },
+]
+
+export const columnsSalesDivision = [
+  {
+    title: "Division ID",
+    dataIndex: "code",
+    width: "30%"
+  },
+  {
+    title: "Division Name",
+    dataIndex: "divisiName",
+    width: "30%"
+  },
+  {
+    title: "Product",
+    dataIndex: "product",
+    width: "20%"
+  },
+  {
+    title: "Action",
+    render: (items) => (
+      <Button
+        size="small"
+        onClick={() => {
+          setFormsUpdate({ ...items })
+          setVisible({ ...visible, update: true })
+        }}
+        variant="tertiary"
+      >
+        View Detail
+      </Button>
+    )
   },
 ]
 

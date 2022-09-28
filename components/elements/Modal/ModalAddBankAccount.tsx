@@ -12,13 +12,10 @@ interface PropsModalAddBankAccount {
 }
 
 export default function ModalAddBankAccount({
-  handleAddItemBankAccount,
-  handleSubmitBankAccount,
-  registerBankAccount,
   visible,
   onCancel,
   errorsBankAccount
-}: PropsModalAddBankAccount) {
+}: any) {
   const {
     account_name,
     account_number,
@@ -33,7 +30,7 @@ export default function ModalAddBankAccount({
       footer={
         <Footer>
           <Button
-            onClick={onCancel}
+            // onClick={onCancel}
             variant="tertiary"
             size="big"
             full
@@ -42,7 +39,7 @@ export default function ModalAddBankAccount({
           </Button>
           <Button
             full
-            onClick={handleSubmitBankAccount(handleAddItemBankAccount)}
+            // onClick={handleSubmitBankAccount(handleAddItemBankAccount)}
             variant="primary"
             size="big">
             Add
@@ -58,9 +55,9 @@ export default function ModalAddBankAccount({
             label="Bank Name"
             required
             error={bank_name?.message}
-            {...registerBankAccount('bank_name', {
-              required: 'bank name name must be filled'
-            })}
+            // {...registerBankAccount('bank_name', {
+            //   required: 'bank name name must be filled'
+            // })}
           />
           <Spacer size={10} />
           <Input
@@ -70,9 +67,9 @@ export default function ModalAddBankAccount({
             required
             type="number"
             error={account_number?.message}
-            {...registerBankAccount('account_number', {
-              required: 'account number name must be filled'
-            })}
+            // {...registerBankAccount('account_number', {
+            //   required: 'account number name must be filled'
+            // })}
           />
           <Spacer size={10} />
           <Input
@@ -81,9 +78,9 @@ export default function ModalAddBankAccount({
             label="Account Name"
             required
             error={account_name?.message}
-            {...registerBankAccount('account_name', {
-              required: 'account name must be filled'
-            })}  
+            // {...registerBankAccount('account_name', {
+            //   required: 'account name must be filled'
+            // })}  
           />
           <Spacer size={20} />
         </div>
