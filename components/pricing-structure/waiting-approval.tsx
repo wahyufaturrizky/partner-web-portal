@@ -104,6 +104,12 @@ const WaitingApprovalPricingStructure: any = (props: any) => {
       width: "28%",
     },
     {
+      title: "Products",
+      dataIndex: "product",
+      width: "28%",
+      render: (e: any) => `${e?.length || 0} Products`,
+    },
+    {
       title: "Company Type",
       dataIndex: "company_type",
       width: "28%",
@@ -128,6 +134,7 @@ const WaitingApprovalPricingStructure: any = (props: any) => {
   pricingStructureLists?.rows?.map((element: any) => {
     data.push({
       key: element.id,
+      product: element.product,
       proposal_number: element.proposalNumber,
       status: element.status,
       action: (

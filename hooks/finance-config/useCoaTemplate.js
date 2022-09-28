@@ -32,7 +32,7 @@ const fetchDetailCoa = async ({ coa_id, query }) => {
 
 const fetchInfiniteCoaLists = async ({ pageParam = 1, queryKey }) => {
   const searchQuery = queryKey[1].search;
-  return client(`/coa`, {
+  return client(`/coa-list`, {
     params: {
       search: searchQuery,
       limit: 10,

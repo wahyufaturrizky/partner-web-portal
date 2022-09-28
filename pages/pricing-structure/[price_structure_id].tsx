@@ -597,9 +597,15 @@ const DetailPricingStructure: any = () => {
     },
   });
 
-  const onSubmit = (data: any) => {
-    pricingStructure(data);
-  };
+  const onSubmit = (dataSubmit: any) =>
+    pricingStructure({
+      price_structure_config_id: dataSubmit.pricing_config,
+      currency: dataSubmit.currency,
+      managed_by: dataSubmit.manage_by,
+      active_date: moment().format("YYYY-MM-DD"),
+      distributions: dataSubmit.distribution_channel,
+      products: dataSubmit.product_selected.map((mapping: any) => mapping.id),
+    });
 
   const onSubmitDraft = (dataDraft: any) =>
     pricingStructureDraft({
@@ -644,7 +650,7 @@ const DetailPricingStructure: any = () => {
                   .find((finding: any) => finding.id === data.pricing_config)
                   .priceStructureLevelings.map((subLevel: any) => ({
                     ...subLevel,
-                    nameLevel: dataGroupBuying.rows[subLevel.buyingPrice].name,
+                    nameLevel: dataGroupBuying.rows[subLevel.buyingPrice]?.name,
                   })),
                 currency: currenciesInfiniteList.find(
                   (finding: any) => finding.id === data.currency
@@ -671,7 +677,7 @@ const DetailPricingStructure: any = () => {
                   .find((finding: any) => finding.id === data.pricing_config)
                   .priceStructureLevelings.map((subLevel: any) => ({
                     ...subLevel,
-                    nameLevel: dataGroupBuying.rows[subLevel.buyingPrice].name,
+                    nameLevel: dataGroupBuying.rows[subLevel.buyingPrice]?.name,
                   })),
                 currency: currenciesInfiniteList.find(
                   (finding: any) => finding.id === data.currency
@@ -706,7 +712,7 @@ const DetailPricingStructure: any = () => {
                   .find((finding: any) => finding.id === data.pricing_config)
                   .priceStructureLevelings.map((subLevel: any) => ({
                     ...subLevel,
-                    nameLevel: dataGroupBuying.rows[subLevel.buyingPrice].name,
+                    nameLevel: dataGroupBuying.rows[subLevel.buyingPrice]?.name,
                   })),
                 currency: currenciesInfiniteList.find(
                   (finding: any) => finding.id === data.currency
@@ -733,7 +739,7 @@ const DetailPricingStructure: any = () => {
                   .find((finding: any) => finding.id === data.pricing_config)
                   .priceStructureLevelings.map((subLevel: any) => ({
                     ...subLevel,
-                    nameLevel: dataGroupBuying.rows[subLevel.buyingPrice].name,
+                    nameLevel: dataGroupBuying.rows[subLevel.buyingPrice]?.name,
                   })),
                 currency: currenciesInfiniteList.find(
                   (finding: any) => finding.id === data.currency
@@ -1733,7 +1739,9 @@ const DetailPricingStructure: any = () => {
           <Col>
             <Row gap="4px" alignItems="center">
               <ArrowLeft style={{ cursor: "pointer" }} onClick={() => router.back()} />
-              <Text variant={"h4"}>{pricingStructureListById.priceStructureConfig?.name}</Text>
+              <Text variant={"h4"}>
+                {pricingStructureListById.priceStructureConfig?.name || "N/A"}
+              </Text>
             </Row>
 
             <Spacer size={12} />

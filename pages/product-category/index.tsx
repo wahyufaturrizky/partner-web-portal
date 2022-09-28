@@ -75,7 +75,7 @@ const ProductCategory = () => {
               key: element.productCategoryId,
               id: element.productCategoryId,
               name: element.name,
-              parent: element.parent,
+              parent: element.parent || '-',
               action: (
                 <div style={{ display: "flex", justifyContent: "left" }}>
                   <Button

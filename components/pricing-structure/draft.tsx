@@ -108,6 +108,12 @@ const DraftPricingStructure: any = ({
       width: "28%",
     },
     {
+      title: "Products",
+      dataIndex: "product",
+      width: "28%",
+      render: (e: any) => `${e?.length || 0} Products`,
+    },
+    {
       title: "Status",
       dataIndex: "status",
       render: (text: any) => (
@@ -127,6 +133,7 @@ const DraftPricingStructure: any = ({
   pricingStructureLists?.rows?.map((element: any) => {
     data.push({
       key: element.id,
+      product: element.product,
       proposal_number: element.proposalNumber,
       status: element.status,
       action: (

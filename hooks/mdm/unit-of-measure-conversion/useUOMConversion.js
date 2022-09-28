@@ -57,10 +57,63 @@ const useUOMConversionInfiniteLists = ({ query = {}, options }) => {
   });
 };
 
+const fetchUOMConversionsLevel = async ({ query = {} }) => {
+  return mdmService(`/uom-conversion-level`, {
+    params: {
+      search: "",
+      page: 1,
+      limit: 10,
+      sortBy: "created_at",
+      sortOrder: "DESC",
+      ...query,
+    },
+  }).then((data) => data);
+};
+
+const useUOMConversionsLevel = ({ query = {}, options }) => {
+  return useQuery(["uom-conversions-level", query], () => fetchUOMConversionsLevel({ query }), {
+    ...options,
+  });
+};
+
+const fetchInfiniteUOMLevelConversionLists = async ({ pageParam = 1, queryKey }) => {
+  const searchQuery = queryKey[1].search;
+  return mdmService(`/uom-conversion-level`, {
+    params: {
+      search: searchQuery,
+      limit: 10,
+      page: pageParam,
+      sortBy: "created_at",
+      sortOrder: "DESC",
+      ...queryKey[1],
+    },
+  }).then((data) => data);
+};
+
+const useUOMConversionLevelInfiniteLists = ({ query = {}, options }) => {
+  return useInfiniteQuery(["uom-conversion-level/infinite", query], fetchInfiniteUOMLevelConversionLists, {
+    keepPreviousData: true,
+    ...options,
+  });
+};
+
 function useCreateUOMConversion({ options }) {
   return useMutation(
     (data) =>
       mdmService(`/uom-conversion`, {
+        method: "POST",
+        data,
+      }),
+    {
+      ...options,
+    }
+  );
+}
+
+function useCreateUOMLevelConversion({ options }) {
+  return useMutation(
+    (data) =>
+      mdmService(`/uom-conversion-level`, {
         method: "POST",
         data,
       }),
@@ -96,6 +149,19 @@ const useDeletUOMConversion = ({ options }) => {
   );
 };
 
+const useDeletUOMLevelConversion = ({ options }) => {
+  return useMutation(
+    (data) =>
+      mdmService(`/uom-conversion-level`, {
+        method: "DELETE",
+        data,
+      }),
+    {
+      ...options,
+    }
+  );
+};
+
 const useUploadFileUOMConversion = ({ query = {}, options }) => {
   return useMutation(
     (data) =>
@@ -120,4 +186,8 @@ export {
   useUpdateUOMConversion,
   useDeletUOMConversion,
   useUploadFileUOMConversion,
+  useUOMConversionLevelInfiniteLists,
+  useUOMConversionsLevel,
+  useCreateUOMLevelConversion,
+  useDeletUOMLevelConversion
 };

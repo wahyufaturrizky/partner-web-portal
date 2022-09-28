@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import styled from 'styled-components'
 import {
   Table,
@@ -14,6 +14,7 @@ import {
   Input
 } from 'pink-lava-ui'
 
+import { arrayMove } from "@dnd-kit/sortable";
 import { useUOMInfiniteLists } from '../../../../hooks/mdm/unit-of-measure/useUOM';
 import useDebounce from '../../../../lib/useDebounce';
 import { Controller, useWatch } from 'react-hook-form';
@@ -22,6 +23,9 @@ import usePagination from '@lucasmogari/react-pagination';
 import ProductOptionsCreate from './ProductOptionsCreate';
 import ProductOptions from './ProductOptions'
 import { useRouter } from 'next/router';
+import { useUpdateProductVariantStatus } from 'hooks/mdm/product-list/useProductList';
+import { useUOMConversion, useUOMConversionInfiniteLists } from 'hooks/mdm/unit-of-measure-conversion/useUOMConversion';
+import DraggableTable from 'components/pages/Products/fragments/DraggableTable';
 
 export default function Detail(props: any) {
   const {
@@ -32,7 +36,8 @@ export default function Detail(props: any) {
     register,
     isUpdate,
     fieldsProductVariants,
-    isCreateProductVariant
+    isCreateProductVariant,
+    updateProductVariants,
   } = props
 
   const columsVariant = [
@@ -57,6 +62,10 @@ export default function Detail(props: any) {
       dataIndex: "barcode",
     },
     {
+      title: "Active",
+      dataIndex: 'active'
+    },
+    {
       title: "Action",
       dataIndex: "action",
     },
@@ -66,7 +75,7 @@ export default function Detail(props: any) {
   const [searchUomTemplate, setSearchUomTemplate] = useState("");
   const debounceFetchUomTemplate = useDebounce(searchUomTemplate, 1000);
   const [listUomTemplate, setListUomTemplate] = useState<any[]>([]);
-  
+
   const {
     isFetching: isFetchingUomTemplate,
     isFetchingNextPage: isFetchingMoreUomTemplate,
@@ -102,13 +111,77 @@ export default function Detail(props: any) {
     },
   });
 
+  const [totalRowsUomConversion, setTotalRowsUomConversion] = useState(0);
+  const [searchUomConversion, setSearchUomConversion] = useState("");
+  const debounceFetchUomConversion = useDebounce(searchUomConversion, 1000);
+  const [listUomConversion, setListUomConversion] = useState<any[]>([]);
+
+  const {
+    isFetching: isFetchingUomConversion,
+    isFetchingNextPage: isFetchingMoreUomConversion,
+    hasNextPage: hasNextUomConversion,
+    fetchNextPage: fetchNextPageUomConversion,
+  } = useUOMConversionInfiniteLists({
+    query: {
+      search: debounceFetchUomConversion,
+      limit: 10,
+      company_id: 'KSNI'
+    },
+    options: {
+      onSuccess: (data: any) => {
+        setTotalRowsUomConversion(data.pages[0].totalRow);
+        const mappedData = data?.pages?.map((group: any) => {
+          return group.rows?.map((element: any) => {
+            return {
+              label: element.name,
+              value: element.conversionId,
+            };
+          });
+        });
+        const flattenArray = [].concat(...mappedData);
+        setListUomConversion(flattenArray);
+      },
+      getNextPageParam: (_lastPage: any, pages: any) => {
+        if (listUomConversion.length < totalRowsUomConversion) {
+          return pages.length + 1;
+        } else {
+          return undefined;
+        }
+      },
+    },
+  });
+
+  const { mutate: deleteProductList } =
+  useUpdateProductVariantStatus({ options: {} });
+
   const [searchVariant, setSearchVariant] = useState('')
-  let variantsData = fieldsProductVariants.map((variant:any) => ({
+  let variantsData = fieldsProductVariants.map((variant:any, index: number) => {
+    return {
         name: variant.name,
         cost: variant.cost,
         price: variant.price,
         sku: variant.sku,
         barcode: variant.barcode,
+        active: isUpdate ?
+          <Switch
+            defaultChecked={variant.status === 'active'}
+            checked={variant.status === 'active'}
+            onChange={(value: any) => {
+              deleteProductList(
+                { status: value ? 'active' : 'inactive' }, variant.id
+              )
+              updateProductVariants(index, {...variant, status: value ? 'active' : 'inacitve'})
+            }}
+          />
+        :
+          <Switch
+            defaultChecked={variant.status === 'active'}
+            checked={variant.status === 'active'}
+            onChange={(value: any) => {
+              updateProductVariants(index, {...variant, status: value ? 'active' : 'inacitve'})
+            }}
+          />
+        ,
         action: (
             <Button
               size="small"
@@ -121,7 +194,8 @@ export default function Detail(props: any) {
               View Detail
             </Button>
         )
-  }))
+     }
+  })
 
   const paginationVariant = usePagination({
 		page: 1,
@@ -139,6 +213,84 @@ export default function Detail(props: any) {
     control
   });
 
+  const {
+    data: UomData,
+    isLoading: isLoadingUom,
+    isFetching: isFetchingUom,
+  } = useUOMConversion({
+    id: detailForm.base_uom?.uom_id,
+    companyId: "KSNI",
+    query: {
+      page: 1,
+      limit: 10000
+    },
+    options: {
+      enabled: !!detailForm.base_uom?.uom_id,
+      onSuccess: (data: any) => {
+        setValue('uom', data?.mappedData)
+      },
+      select: (data: any) => {
+        const listUom: any = []
+        const mappedUomConversion: any = [];
+        const mappedData: any = [];
+
+        data?.uomConversionItem?.rows?.map((uomConversion: any, index: any) => {
+          mappedData.push({
+            id: uomConversion.id,
+            key: uomConversion.id,
+            conversionNumber: uomConversion.conversionNumber,
+            baseUom: data?.baseUom?.name,
+            qty: uomConversion.qty,
+            index: index,
+            uomConversionItemId: uomConversion.uom?.uomId,
+          })
+
+          listUom.push({
+            value: uomConversion.uom?.name,
+            id: uomConversion.uom?.uomId,
+          })
+
+          mappedUomConversion.push({
+            uomId: uomConversion.uom?.uomId,
+            id: uomConversion.id,
+            qty: uomConversion.qty,
+            conversion_number: uomConversion.conversionNumber,
+            baseUom: data?.baseUom?.name,
+          })
+        });
+        return { baseUom:data?.baseUom, mappedData: mappedData, listUom: listUom, mappedUomConversion: mappedUomConversion }
+      },
+    },
+  });
+
+  const onHandleDrag = (activeId: any, overId: any) => {
+    const uom = detailForm?.uom;
+    const uomIds = uom.map(({key}: {key: any}) => key);
+    const oldIndex = uomIds?.indexOf(activeId);
+    const newIndex = uomIds?.indexOf(overId);
+    const changeSequenceTermList: any = arrayMove(uom, oldIndex, newIndex).map((el: any, index) => {
+      return {
+        ...el,
+        index,
+      }
+    })
+
+    setValue('uom', changeSequenceTermList);
+  };
+
+  const onHandleAdd = () => {
+    const uom = detailForm?.uom?.map(uom => uom);
+    uom.push({
+      id: self?.crypto?.randomUUID(),
+      key: self?.crypto?.randomUUID(),
+      conversionNumber: '',
+      baseUom: UomData?.baseUom?.name,
+      qty: '',
+      index: uom?.length,
+    })
+    setValue('uom', uom);
+  };
+
   return (
     <div>
       <Row gap="20px" width="100%" noWrap>
@@ -149,7 +301,7 @@ export default function Detail(props: any) {
             render={({ field: { onChange } }) => (
               <Col width="100%">
                 <span>
-                  <Label style={{ display: "inline" }}>Base of Unit Measure</Label>{" "}
+                  <Label style={{ display: "inline" }}>UOM Conversion Name</Label>{" "}
                   <span></span>
                 </span>
 
@@ -162,23 +314,23 @@ export default function Detail(props: any) {
                   borderColor={"#AAAAAA"}
                   arrowColor={"#000"}
                   withSearch
-                  isLoading={isFetchingUomTemplate}
-                  isLoadingMore={isFetchingMoreUomTemplate}
+                  isLoading={isFetchingUomConversion}
+                  isLoadingMore={isFetchingMoreUomConversion}
                   fetchMore={() => {
-                    if (hasNextUomTemplate) {
-                      fetchNextPageUomTemplate();
+                    if (hasNextUomConversion) {
+                      fetchNextPageUomConversion();
                     }
                   }}
                   items={
-                    isFetchingUomTemplate || isFetchingMoreUomTemplate
+                    isFetchingUomConversion || isFetchingMoreUomConversion
                       ? []
-                      : listUomTemplate
+                      : listUomConversion
                   }
                   onChange={(value: any) => {
                     onChange(value);
                   }}
                   onSearch={(value: any) => {
-                    setSearchUomTemplate(value);
+                    setSearchUomConversion(value);
                   }}
                 />
               </Col>
@@ -238,8 +390,8 @@ export default function Detail(props: any) {
           defaultValue={detailForm?.use_unit_leveling}
           render={({ field: { onChange } }) => (
             <Switch
-              defaultChecked={product?.use_unit_leveling}
-              checked={product?.use_unit_leveling}
+              defaultChecked={detailForm?.use_unit_leveling}
+              checked={detailForm?.use_unit_leveling}
               onChange={(value: any) => {
                 onChange(value)
               }}
@@ -247,6 +399,65 @@ export default function Detail(props: any) {
           )}
         />
       </Col>
+
+      {detailForm?.use_unit_leveling && 
+        <>
+          <Spacer size={20} />
+          <Button variant="primary" size="big" disabled={!detailForm.base_uom?.uom_id} onClick={onHandleAdd}>
+            +
+            Add New
+          </Button>
+          <Spacer size={20} />
+          <DraggableTable 
+            control={control}
+            conversionList={detailForm?.uom || []}
+            uom={UomData?.listUom || []}
+            onDrag={onHandleDrag}
+            onSelectUom={(data: any, newUom: any, indexData: any) => {
+              const uomConversation = UomData?.mappedUomConversion;
+              const uomData = uomConversation.find(uom => uom.uomId === newUom);
+              const newData= {
+                id: data.id,
+                key: data.key,
+                conversionNumber: uomData.conversion_number,
+                baseUom: data.baseUom,
+                qty: uomData.qty,
+                index: data?.index,
+                levelId: data?.levelId,
+              }
+
+              const uom = detailForm?.uom;
+              const changeUom: any = uom.map((el: any, index) => {
+                if(index === indexData) {
+                  return newData
+                } else {
+                  return {
+                    ...el,
+                    index,
+                  }
+                }
+              })
+
+              setValue('uom', changeUom);
+            }}
+            onDelete={(data: any) => {
+              const filterUomList = detailForm?.uom?.filter(
+                (uom: any) => uom.id !== data.id
+              );
+
+              const mappedUomList = filterUomList.map((el, index) => {
+                return {
+                  ...el,
+                  index,
+                };
+              });
+
+              setValue('uom', mappedUomList);
+            }}
+            isLoading={false}
+          />
+        </>
+      }
 
       <Spacer size={20} />
       
@@ -320,9 +531,13 @@ export default function Detail(props: any) {
         </>
         )
       }
+
+      {/* <ModalManageDataEdit /> */}
     </div>
   )
 }
+
+
 
 const Label = styled.div`
   font-weight: bold;

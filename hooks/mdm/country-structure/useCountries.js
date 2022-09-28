@@ -45,31 +45,52 @@ const useCountryInfiniteLists = ({ query = {}, options }) => {
   });
 };
 
-const fetchDetailCountry = async ({ country_id }) => {
-  return mdmService(`/country/${country_id}`).then((data) => data);
-};
-
-const fetchCountryStructure = async ({ structure_id, query }) => {
+const fetchInfiniteeCountryStructureLists = async ({ pageParam = 1, queryKey, structure_id }) => {
+  const searchQuery = queryKey[1].search;
   return mdmService(`/country/structure/${structure_id}`, {
     params: {
-      search: "",
+      search: searchQuery,
       limit: 10,
-      page: 1,
-      sortBy: "created_at",
+      page: pageParam,
+      sortBy: "id",
       sortOrder: "DESC",
-      ...query,
+      ...queryKey[1],
     },
   }).then((data) => data);
 };
 
-const useFetchCountriesStructure = ({ structure_id, query, options }) => {
-  return useQuery(["countries-structure-mdm", structure_id, query], () => {
-    fetchCountryStructure({ structure_id, query }), { ...options };
+const useCountryStructureInfiniteLists = ({ structure_id, query = {}, options }) => {
+  return useInfiniteQuery(["countries-structure-mdm/infinite", structure_id, query], (rest) => {
+      fetchInfiniteeCountryStructureLists({...rest, structure_id})
+    }, {
+    keepPreviousData: true,
+    ...options,
   });
+}
+
+
+const fetchDetailCountry = async ({ country_id }) => {
+  return mdmService(`/country/${country_id}`).then((data) => data);
+};
+
+const fetchCountryStructure = async ({ queryKey}) => {
+  return mdmService(`/country/structure/${queryKey[1]}`, {
+    params: {
+      search: queryKey[2]?.search || "",
+      limit: 10,
+      page: 1,
+      sortBy: "created_at",
+      sortOrder: "DESC",
+    }
+  }).then(data => data)
+};
+
+const useFetchCountriesStructure = ({ structure_id, query, options }) => {
+  return useQuery(["countries-structure-mdm", structure_id, query], fetchCountryStructure, { ...options });
 };
 
 const useFetchDetailCountry = ({ country_id, options }) => {
-  return useQuery(["country-structure"], () => fetchDetailCountry({ country_id }), {
+  return useQuery(["country-structure", country_id], () => fetchDetailCountry({ country_id }), {
     ...options,
   });
 };
@@ -123,4 +144,5 @@ export {
   useUpdateCountry,
   useFetchCountriesStructure,
   useCountryInfiniteLists,
+  useCountryStructureInfiniteLists
 };

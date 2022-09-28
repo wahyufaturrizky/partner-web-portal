@@ -5,7 +5,6 @@ import {
   Col,
   DropdownMenu,
   FileUploadModal,
-  Lozenge,
   Modal,
   Pagination,
   Row,
@@ -13,27 +12,25 @@ import {
   Spacer,
   Table,
   Text,
-  FormSelect,
 } from "pink-lava-ui";
 import { useState } from "react";
 import styled from "styled-components";
 import { ICDownload, ICUpload } from "../../assets/icons";
 import {
-  useDeleteProduct,
-  useProductList,
-  useUploadFileProduct,
-} from "../../hooks/mdm/product-list/useProductList";
+  useDeleteRetailPricing,
+  useRetailPricingList,
+  useUploadFileRetailPricing,
+} from "../../hooks/mdm/retail-pricing/useRetailPricingList";
 import { mdmDownloadService } from "../../lib/client";
 import useDebounce from "../../lib/useDebounce";
 import { queryClient } from "../_app";
-import { useProductCategoryInfiniteLists } from 'hooks/mdm/product-category/useProductCategory';
 
 const downloadFile = (params: any) =>
-  mdmDownloadService("/product/download", { params }).then((res) => {
+  mdmDownloadService("/retail-pricing/download", { params }).then((res) => {
     let dataUrl = window.URL.createObjectURL(new Blob([res.data]));
     let tempLink = document.createElement("a");
     tempLink.href = dataUrl;
-    tempLink.setAttribute("download", `product_list_${new Date().getTime()}.xlsx`);
+    tempLink.setAttribute("download", `retail_pricing_list_${new Date().getTime()}.xlsx`);
     tempLink.click();
   });
 
@@ -42,19 +39,19 @@ const renderConfirmationText = (type: any, data: any) => {
     case "selection":
       return data.selectedRowKeys.length > 1
         ? `Are you sure to delete ${data.selectedRowKeys.length} items ?`
-        : `Are you sure to delete Product Name ${
-            data?.productListData?.data.find((el: any) => el.key === data.selectedRowKeys[0])
+        : `Are you sure to delete Retail Pricing Name ${
+            data?.retailPricingListData?.data.find((el: any) => el.key === data.selectedRowKeys[0])
               ?.name
           } ?`;
     case "detail":
-      return `Are you sure to delete Product Name ${data.productName} ?`;
+      return `Are you sure to delete Retail Pricing Name ${data.retailPricingName} ?`;
 
     default:
       break;
   }
 };
 
-const Product = () => {
+const RetailPricing = () => {
   const router = useRouter();
   const pagination = usePagination({
     page: 1,
@@ -65,7 +62,6 @@ const Product = () => {
     totalItems: 100,
   });
 
-  const [productCategory, setProductCategory] = useState("")
   const [search, setSearch] = useState("");
   const [isShowDelete, setShowDelete] = useState({ open: false, type: "selection", data: {} });
   const [isShowUpload, setShowUpload] = useState(false);
@@ -78,16 +74,15 @@ const Product = () => {
   const debounceSearch = useDebounce(search, 1000);
 
   const {
-    data: productListData,
-    isLoading: isLoadingProductList,
-    isFetching: isFetchingProductList,
-  } = useProductList({
+    data: retailPricingListData,
+    isLoading: isLoadingRetailPricingList,
+    isFetching: isFetchingRetailPricingList,
+  } = useRetailPricingList({
     query: {
       search: debounceSearch,
       page: pagination.page,
       limit: pagination.itemsPerPage,
       company_id: "KSNI",
-      category_id: productCategory
     },
     options: {
       onSuccess: (data: any) => {
@@ -96,19 +91,16 @@ const Product = () => {
       select: (data: any) => {
         const mappedData = data?.rows?.map((element: any) => {
           return {
-            key: element.productId,
-            id: element.productId,
+            key: element.retail_pricing_id,
+            retail_pricing_id: element.retail_pricing_id,
             name: element.name,
-            status: element.status,
-            productCategoryName: element.productCategoryName,
-            hasVariant: element.hasVariant,
-            variant: element?.productVariants?.length ?? '-',
+            based_on: element.basedOn,
             action: (
               <div style={{ display: "flex", justifyContent: "left" }}>
                 <Button
                   size="small"
                   onClick={() => {
-                    router.push(`/product-list/${element.productId}`);
+                    router.push(`/retail-pricing/${element.retailPricingId}`);
                   }}
                   variant="tertiary"
                 >
@@ -124,22 +116,22 @@ const Product = () => {
     },
   });
 
-  const { mutate: deleteProductList, isLoading: isLoadingDeleteProductList } =
-    useDeleteProduct({
+  const { mutate: deleteRetailPricingList, isLoading: isLoadingDeleteRetailPricingList } =
+    useDeleteRetailPricing({
       options: {
         onSuccess: () => {
           setShowDelete({ open: false, data: {}, type: "" });
           setSelectedRowKeys([]);
-          queryClient.invalidateQueries(["product-list"]);
+          queryClient.invalidateQueries(["retail-pricing-list"]);
         },
       },
     });
 
-  const { mutate: uploadFileProduct, isLoading: isLoadingUploadFileProduct} = useUploadFileProduct(
+  const { mutate: uploadFileRetailPricing, isLoading: isLoadingUploadFileRetailPricing} = useUploadFileRetailPricing(
     {
       options: {
         onSuccess: () => {
-          queryClient.invalidateQueries(["product-list"]);
+          queryClient.invalidateQueries(["retail-pricing-list"]);
           setShowUpload(false);
         },
       },
@@ -148,30 +140,17 @@ const Product = () => {
 
   const columns = [
     {
-      title: "Product ID",
-      dataIndex: "id",
+      title: "Retail Price ID",
+      dataIndex: "retail_pricing_id",
     },
     {
-      title: "Product Name",
+      title: "Name",
       dataIndex: "name",
     },
     {
-      title: "Product Variant",
-      dataIndex: "variant",
+      title: "Based on",
+      dataIndex: "based_on",
     },
-    {
-      title: "Product Category Name",
-      dataIndex: "productCategoryName",
-    },
-    {
-      title: "Status",
-      dataIndex: "status",
-      render: (status: any) => (
-        <Lozenge variant={status === "active" ? "green" : "black"}>
-          {status === "active" ? "Active" : "Inactive"}
-        </Lozenge>
-      ),
-    },  
     {
       title: "Action",
       dataIndex: "action",
@@ -196,95 +175,39 @@ const Product = () => {
     formData.append("company_code", "KSNI");
     formData.append("file", file);
 
-    uploadFileProduct(formData);
+    uploadFileRetailPricing(formData);
   };
-
-  const [listProductCategory , setListProductCategory] = useState<any[]>([]);
-  const [totalRowsProductCategory, setTotalRowsProductCategory] = useState(0);
-  const [searchProductCategory, setSearchProductCategory] = useState("");
-  const debounceFetchProductCategory = useDebounce(searchProductCategory, 1000);
-
-  const {
-    isFetching: isFetchingProductCategory,
-    isFetchingNextPage: isFetchingMoreProductCategory,
-    hasNextPage: hasNextProductCategory,
-    fetchNextPage: fetchNextPageProductCategory,
-  } = useProductCategoryInfiniteLists({
-    query: {
-      search: debounceFetchProductCategory,
-      company_id: "KSNI",
-      limit: 10,
-    },
-    options: {
-      onSuccess: (data: any) => {
-        setTotalRowsProductCategory(data?.pages[0].totalRow);
-        const mappedData = data?.pages?.map((group: any) => {
-          return group.rows?.map((element: any) => {
-            return {
-              label: element.name, 
-              value: element.productCategoryId,
-            };
-          });
-        });
-        const flattenArray = [].concat(...mappedData);
-        setListProductCategory(flattenArray);
-      },
-      getNextPageParam: (_lastPage: any, pages: any) => {
-        if (listProductCategory.length < totalRowsProductCategory) {
-          return pages.length + 1;
-        } else {
-          return undefined;
-        }
-      },
-    },
-  });
 
   return (
     <>
       <Col>
-        <Text variant={"h4"}>Product List</Text>
+        <Text variant={"h4"}>Retail Pricing</Text>
         <Spacer size={20} />
       </Col>
       <Card>
         <Row justifyContent="space-between">
-          <Row Row gap="16px">
-            <Search
-              width="340px"
-              placeholder="Search Product ID, Name, Category, Status"
-              onChange={(e: any) => {
-                setSearch(e.target.value);
-              }}
-            />
-            <Col width="250px">
-              <CustomFormSelect
-                style={{ width: "100%", height: '48px' }}
-                size={"large"}
-                placeholder={"Select"}
-                borderColor={"#AAAAAA"}
-                arrowColor={"#000"}
-                withSearch
-                isLoading={isFetchingProductCategory}
-                isLoadingMore={isFetchingMoreProductCategory}
-                fetchMore={() => {
-                  if (hasNextProductCategory) {
-                    fetchNextPageProductCategory();
-                  }
-                }}
-                items={
-                  isFetchingProductCategory || isFetchingMoreProductCategory
-                    ? []
-                    : listProductCategory
-                }
-                onChange={(value: any) => {
-                  setProductCategory(value)
-                }}
-                onSearch={(value: any) => {
-                  setSearchProductCategory(value);
-                }}
-              />
-            </Col>
-          </Row>
+          <Search
+            width="340px"
+            placeholder="Search Retail Pricing ID, Name, Category, Status"
+            onChange={(e: any) => {
+              setSearch(e.target.value);
+            }}
+          />
           <Row gap="16px">
+            <Button
+              size="big"
+              variant={"tertiary"}
+              onClick={() =>
+                setShowDelete({
+                  open: true,
+                  type: "selection",
+                  data: { retailPricingListData: retailPricingListData, selectedRowKeys },
+                })
+              }
+              disabled={rowSelection.selectedRowKeys?.length === 0}
+            >
+              Delete
+            </Button>
             <DropdownMenu
               title={"More"}
               buttonVariant={"secondary"}
@@ -342,7 +265,7 @@ const Product = () => {
             <Button
               size="big"
               variant="primary"
-              onClick={() => router.push("/product-list/create")}
+              onClick={() => router.push("/retail-pricing/create")}
             >
               Create
             </Button>
@@ -353,9 +276,10 @@ const Product = () => {
       <Card style={{ padding: "16px 20px" }}>
         <Col gap={"60px"}>
           <Table
-            loading={isLoadingProductList || isFetchingProductList}
+            loading={isLoadingRetailPricingList || isFetchingRetailPricingList}
             columns={columns}
-            data={productListData?.data}
+            data={retailPricingListData?.data}
+            rowSelection={rowSelection}
           />
           <Pagination pagination={pagination} />
         </Col>
@@ -402,13 +326,13 @@ const Product = () => {
                   size="big"
                   onClick={() => {
                     if (isShowDelete.type === "selection") {
-                      deleteProductList({ ids: selectedRowKeys });
+                      deleteRetailPricingList({ ids: selectedRowKeys });
                     } else {
-                      deleteProductList({ ids: [modalForm.data.id] });
+                      deleteRetailPricingList({ ids: [modalForm.data.id] });
                     }
                   }}
                 >
-                  {isLoadingDeleteProductList ? "loading..." : "Yes"}
+                  {isLoadingDeleteRetailPricingList ? "loading..." : "Yes"}
                 </Button>
               </div>
             </div>
@@ -427,38 +351,10 @@ const Product = () => {
   );
 };
 
-const CustomFormSelect = styled(FormSelect)`
-  
-  .ant-select-selection-placeholder {
-    line-height: 48px !important;
-  }
-
-  .ant-select-selection-search-input {
-    height: 48px !important;
-  }
-
-  .ant-select-selector {
-    height: 48px !important;
-    border-radius: 64px !important;
-  }
-
-  .ant-select-selection-item {
-    display: flex;
-    align-items: center;
-  }
-`
-
-const Label = styled.div`
-  font-weight: bold;
-  font-size: 16px;
-  line-height: 24px;
-  color: #000000;
-`;
-
 const Card = styled.div`
   background: #ffffff;
   border-radius: 16px;
   padding: 16px;
 `;
 
-export default Product;
+export default RetailPricing;
