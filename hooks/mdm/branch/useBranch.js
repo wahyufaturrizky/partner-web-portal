@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useInfiniteQuery } from "react-query";
-import { mdmService } from "../../../lib/client";
+import { client, client3, mdmService } from "../../../lib/client";
 
 const fetchBranchList = async ({ query = {} }) => {
   return mdmService(`/branch`, {
@@ -7,15 +7,40 @@ const fetchBranchList = async ({ query = {} }) => {
       search: "",
       page: 1,
       limit: 10,
-      sortBy: "created_at",
+      sortBy: "branch_id",
       sortOrder: "DESC",
       ...query,
     },
-  }).then((data) => data);
+  }).then((data) => {
+    console.log(data, "<<<hooks");
+    return data;
+  });
 };
 
 const useBranchList = ({ query = {}, options }) => {
   return useQuery(["branch-list", query], () => fetchBranchList({ query }), {
+    ...options,
+  });
+};
+
+const fetchBranchParent = async ({ query = {} }) => {
+  return mdmService(`/branch/parent`, {
+    params: {
+      search: "",
+      page: 1,
+      limit: 10,
+      sortBy: "branch_id",
+      sortOrder: "DESC",
+      ...query,
+    },
+  }).then((data) => {
+    console.log(data, "<<<hooks");
+    return data;
+  });
+};
+
+const useBranchParent = ({ query = {}, options }) => {
+  return useQuery(["branch-parent", query], () => fetchBranchParent({ query }), {
     ...options,
   });
 };
@@ -103,12 +128,74 @@ const useUploadFileBranch = ({ options }) => {
   );
 };
 
+// before working calendar hooks made, it will be used from here so it will not conflict with others
+// this needs to be readjust later
+
+// calendar
+const fetchInfiniteCalendarList = async ({ pageParam = 1, queryKey }) => {
+  const searchQuery = queryKey[1].search;
+  return mdmService(`/working-calendar`, {
+    params: {
+      search: searchQuery,
+      limit: 10,
+      page: pageParam,
+      sortBy: "calendar_name",
+      sortOrder: "ASC",
+      ...queryKey[1],
+    },
+  }).then((data) => data);
+};
+
+const useCalendarInfiniteLists = ({ query = {}, options }) => {
+  return useInfiniteQuery(["Calendar/infinite", query], fetchInfiniteCalendarList, {
+    keepPreviousData: true,
+    ...options,
+  });
+};
+
+const fetchCalendarDetail = async ({ id }) => {
+  return mdmService(`/working-calendar/${id}`).then((data) => data);
+};
+
+const useCalendarDetail = ({ id, options }) => {
+  return useQuery(["calendar-detail", id], () => fetchCalendarDetail({ id }), {
+    ...options,
+  });
+};
+
+// timezone
+const fetchInfiniteTimezoneList = async ({ pageParam = 1, queryKey }) => {
+  const searchQuery = queryKey[1].search;
+  return client3(`/master/timezone`, {
+    params: {
+      search: searchQuery,
+      limit: 10,
+      page: pageParam,
+      sortBy: "created_at",
+      sortOrder: "DESC",
+      ...queryKey[1],
+    },
+  }).then((data) => data);
+};
+
+const useTimezoneInfiniteLists = ({ query = {}, options }) => {
+  return useInfiniteQuery(["timezone/infinite", query], fetchInfiniteTimezoneList, {
+    keepPreviousData: true,
+    ...options,
+  });
+};
+
 export {
   useBranchList,
+  useBranchParent,
   useBranchInfiniteLists,
   useBranchDetail,
   useCreateBranch,
   useUpdateBranch,
   useDeleteBranch,
   useUploadFileBranch,
+  // calendar needs to delete later
+  useCalendarDetail,
+  useCalendarInfiniteLists,
+  useTimezoneInfiniteLists,
 };
