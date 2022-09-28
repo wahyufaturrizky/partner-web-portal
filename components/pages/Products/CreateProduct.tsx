@@ -339,7 +339,7 @@ export default function CreateProduct({ isCreateProductVariant = true}) {
     data?.expired_date?.includes('/') ? moment(data.expired_date, 'DD/MM/YYYY').utc().toString() : moment(data.expired_date).utc().toString();
     payload.purchase_uom_id = data.purchase_uom.uom_id || "";
     payload.product_brand_id = data.brand.id || "";
-    payload.base_uom_id = "";
+    payload.base_uom_id = data.base_uom.id || "";
     payload.purchase_uom_id = data?.purchase_uom?.uom_id || "";
     payload.options = data?.options?.map((data:any) => ({
       options_id: data?.option.id,
@@ -365,7 +365,7 @@ export default function CreateProduct({ isCreateProductVariant = true}) {
       },
       storage_management:  {
         ...data?.inventory?.storage_management,
-       transportation_group: 'ROAD',
+        transportation_group: data?.inventory?.storage_management?.transportation_group,
        transportation_type: data?.inventory?.storage_management?.transportation_type?.id
       }
     }
@@ -376,7 +376,7 @@ export default function CreateProduct({ isCreateProductVariant = true}) {
       valid_to: data.valid_to?.includes('/') ? moment(data.valid_to, 'DD/MM/YYYY').utc().toString() : moment(data.valid_to).utc().toString(),
     }))
 
-    payload.variants = data?.variants?.filter(variant => variant.status === 'active').map(({id, status, ...rest}) => rest)
+    payload.variants = data?.variants,
     payload.product_category_id = data?.category?.id
     if(isUpdate){
       delete payload.company_id;
