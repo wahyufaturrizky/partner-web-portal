@@ -540,10 +540,17 @@ const AdminLayout = (props: any) => {
                     <TextRole>Super User</TextRole>
                   </div>
                 </WrapeprProfile>
-                <div style={flexStyles}>
-                  <ICAccountSetting />
-                  <p>Account Settings</p>
-                </div>
+                <a
+                  style={{ color: "#000" }}
+                  target="_blank"
+                  href="https://accounts.edot.id/infopribadi"
+                  rel="noopener noreferrer"
+                >
+                  <div style={flexStyles}>
+                    <ICAccountSetting />
+                    <p>Account Settings</p>
+                  </div>
+                </a>
                 <div style={flexStyles}>
                   <ICCompany />
                   <p>Company List</p>
