@@ -95,6 +95,19 @@ const useUploadImageProduct = ({ options }) => {
   );
 };
 
+const useUpdateProductVariantStatus = ({ options }) => {
+  return useMutation(
+    (data, id) =>
+      mdmService(`/product-variant/status/${id}`, {
+        method: "PUT",
+        data,
+      }),
+    {
+      ...options,
+    }
+  );
+};
+
 export {
   useUploadImageProduct,
   useProductList,
@@ -102,5 +115,6 @@ export {
   useCreateProduct,
   useUpdateProduct,
   useDeleteProduct,
-  useUploadFileProduct
+  useUploadFileProduct,
+  useUpdateProductVariantStatus
 };

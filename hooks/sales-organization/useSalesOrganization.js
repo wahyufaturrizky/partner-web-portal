@@ -9,14 +9,13 @@ if (typeof window !== "undefined") {
   token = localStorage.getItem("token");
 }
 
-const fetchSalesOrganization = async ({ company_code }) => {
-  return mdmService(`/sales-org/${company_code}`, {}).then((data) => data);
+const fetchSalesOrganization = async ({ queryKey }) => {
+  return mdmService(`/sales-org/${queryKey[1]}`, {}).then((data) => data);
 };
 
 const useSalesOrganization = ({ options, company_code } = {}) => {
   return useQuery(
-    ["sales-organization", company_code],
-    () => fetchSalesOrganization({ company_code }),
+    ["sales-organization", company_code], fetchSalesOrganization,
     {
       keepPreviousData: true,
       refetchOnWindowFocus: false,
@@ -116,11 +115,11 @@ const useSalesOrganizationHirarcy = ({ options, structure_id } = {}) => {
 };
 
 export {
+  useSalesOrganizationInfiniteLists,
   useCreateSalesOrganizationHirarcy,
   useCreateSalesOrganization,
   useSalesOrganizationHirarcy,
   useSalesOrganization,
   useUpdateSalesOrganization,
   useGenerateTemplate,
-  useSalesOrganizationInfiniteLists,
 };

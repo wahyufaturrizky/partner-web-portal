@@ -258,6 +258,12 @@ const menuMdm = [
         content: () => "Pricing Structure",
         onClick: () => Router.push("/pricing-structure"),
       },
+      {
+        key: "retail-pricing",
+        title: "Retail Pricing",
+        content: () => "Retail Pricing",
+        onClick: () => Router.push("/retail-pricing"),
+      },
     ],
   },
   {

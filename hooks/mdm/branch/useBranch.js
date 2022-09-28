@@ -14,14 +14,29 @@ const fetchBranchList = async ({ query = {} }) => {
   }).then((data) => data);
 };
 
-const useBranchList = ({ query = {}, options }) => {
+const useBranchList = ({ query = {}, options = {} }) => {
   return useQuery(["branch-list", query], () => fetchBranchList({ query }), {
     ...options,
   });
 };
 
+const fetchBranchGroupList = async ({ query = {} }) => {
+  return mdmService(`/branch/parent`, {
+    params: {
+      is_group: true,
+      ...query,
+    },
+  }).then((data) => data);
+};
+
+const useBranchGroupList = ({ query = {}, options = {} }) => {
+  return useQuery(["branch-list-parent", query], () => fetchBranchGroupList({ query }), {
+    ...options,
+  });
+};
+
 const fetchInfiniteBranchList = async ({ pageParam = 1, queryKey }) => {
-  const searchQuery = queryKey[1].search;
+  const searchQuery = queryKey[1]?.search || '';
   return mdmService(`/branch`, {
     params: {
       search: searchQuery,
@@ -34,7 +49,7 @@ const fetchInfiniteBranchList = async ({ pageParam = 1, queryKey }) => {
   }).then((data) => data);
 };
 
-const useBranchInfiniteLists = ({ query = {}, options }) => {
+const useBranchInfiniteLists = ({ query = {}, options={} }) => {
   return useInfiniteQuery(["branch/infinite", query], fetchInfiniteBranchList, {
     keepPreviousData: true,
     ...options,
@@ -105,6 +120,7 @@ const useUploadFileBranch = ({ options }) => {
 
 export {
   useBranchList,
+  useBranchGroupList,
   useBranchInfiniteLists,
   useBranchDetail,
   useCreateBranch,
