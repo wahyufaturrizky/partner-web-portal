@@ -679,7 +679,6 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
                             : listProductCategory
                         }
                         onChange={(value: any) => {
-                          console.log('value', value)
                           onChange(value);
                         }}
                         onSearch={(value: any) => {

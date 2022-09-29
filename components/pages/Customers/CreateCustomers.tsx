@@ -12,7 +12,7 @@ import {
   Radio,
   Switch
 } from "pink-lava-ui";
-import { useForm, Controller } from 'react-hook-form'
+import { useForm, Controller, useFieldArray } from 'react-hook-form'
 import { ExclamationCircleOutlined } from "@ant-design/icons";
 import { useRouter } from 'next/router';
 import styled from 'styled-components'
@@ -36,6 +36,11 @@ export default function CreateCustomers({
   const [formType, setFormType] = useState<string>('Company')
   const [imageLogo, setImageLogo] = useState<string>('')
   const [isPKP, setIsPKP] = useState<boolean>(false)
+  const [checked, setChecked] = useState<any>({
+    sales_order_blocking: false,
+    billing_blocking: false,
+    delivery_order_blocking: false
+  })
 
   const listItemsCustomerGruop = getDataCustomerGroup?.rows?.map
     (({ id, name }: any) => { return { value: name, id }})
@@ -46,15 +51,35 @@ export default function CreateCustomers({
   const isCompany: boolean = formType === 'Company'
   const _formType: string[] = ['Company', 'Individu']
 
-  //use-forms customers / global
   const {
     control,
+    reset,
     handleSubmit,
     register,
     formState: { errors },
     setValue
   } = useForm({
     shouldUseNativeValidation: true,
+    defaultValues: {
+      bank: []
+    }
+  });
+
+  const {
+    register: bankRegister,
+    handleSubmit: handleBankSubmit,
+    formState: { errors: errorsFormBank, isSubmitSuccessful }
+  } = useForm({
+    shouldUseNativeValidation: true,
+  });
+
+  const {
+    fields: fieldsBank,
+    append: appendBank,
+    remove: removeBank,
+  } = useFieldArray<any>({
+    control,
+    name: "bank"
   });
 
   const { mutate: createCustomer } = useCreateCustomers({
@@ -79,22 +104,42 @@ export default function CreateCustomers({
   }
 
   const onSubmit = (data: any) => {
-    // const payloads = {
-    //   customer: {
-    //     ...data.customer,
-    //     company_logo: imageLogo,
-    //     is_company: isCompany,
-    //     ppkp: isPKP,
-    //   },
-    //   sales: {
-    //     ...data.sales,
-    //   },
-    //   purchasing: { ...data.purchasing },
-    //   invoicing: { ...data.invoicing }
-    // }
-
-    console.log(data)
+    const { customer, invoicing, purchasing, sales } = data || {}
+    const payloads = {
+      ...data,
+      customer: {
+        ...customer,
+        company_logo: imageLogo,
+        is_company: isCompany,
+        ppkp: isPKP,
+      },
+      purchasing: {
+        term_of_payment: purchasing?.term_of_payment || ""
+      },
+      invoicing: {
+        ...data.invoicing,
+        credit_limit: Number(invoicing?.credit_limit) || 1,
+        credit_balance: Number(invoicing?.credit_balance) || 1,
+        credit_used: Number(invoicing?.credit_used) || 1,
+        income_account: invoicing?.income_account || "",
+        expense_account: invoicing?.expense_account || "",
+        tax_name: invoicing?.income_account || "",
+        tax_city: invoicing?.tax_city || "",
+        tax_address: invoicing?.tax_address || "",
+        currency: invoicing?.currency || ""
+      },
+      sales: {
+        ...sales,
+        branch: sales?.branch || "",
+        salesman: sales?.salesman || "",
+        term_payment: sales?.term_payment || ""
+      }
+    }
   };
+
+  const onHandleBankSubmit = (data: any) => {
+    appendBank({ ...data })
+  }
 
   const propsGeneralForm = {
     detailCustomer,
@@ -122,13 +167,38 @@ export default function CreateCustomers({
       case formType === 'Company' && 'Contact':
       case 'Addresses':
       case 'Sales':
-        return <Sales register={register} control={control} setValue={setValue} />
-      case 'Purchasing':
-        return <Purchasing errors={errors} control={control} />
+        return (
+          <Sales
+            checked={checked}
+            setChecked={setChecked}
+            register={register}
+            control={control}
+            setValue={setValue}
+          />
+        )
       case 'Invoicing':
-        return <Invoicing errors={errors} register={register} control={control} />
+        return (
+          <Invoicing
+            fieldsBank={fieldsBank}
+            errorsFormBank={errorsFormBank}
+            handleBankSubmit={handleBankSubmit}
+            isSubmitSuccessful={isSubmitSuccessful}
+            onHandleBankSubmit={onHandleBankSubmit}
+            bankRegister={bankRegister}
+            removeBank={removeBank}
+
+            register={register}
+            control={control}
+            />
+          )
+      case 'Purchasing':
+        return (
+          <Purchasing errors={errors} control={control} />
+        )
       default:
-        return <Sales control={control} setValue={setValue} />
+        return (
+          <Sales control={control} setValue={setValue} />
+        )
     }
   }
 

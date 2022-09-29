@@ -1,3 +1,6 @@
+import React from 'react'
+import { Row, Col } from 'pink-lava-ui'
+import { ICDelete, ICEdit } from "assets";
 
   const addressBodyField = {
     is_primary: false,
@@ -73,7 +76,40 @@
     { label: 'Delivery Order Blocking', value: 'delivery_order_blocking' }
   ]
 
+  const columnsInvoicingTableBank = (removeBank) => [
+    { title: "", dataIndex: "key" },
+    { title: "", dataIndex: "id" },
+    {
+      title: "",
+      dataIndex: "action",
+      width: "15%",
+      render: (_, { id }) => (
+        <Row gap="16px" alignItems="center" nowrap>
+          <Col>
+            <ICEdit onClick={() => { }} />
+          </Col>
+          <Col>
+            <ICDelete onClick={() => removeBank(id)} />
+          </Col>
+        </Row>
+      )
+    },
+    {
+      title: "Bank Name",
+      dataIndex: "bank_name",
+    },
+    {
+      title: "Account Number",
+      dataIndex: "account_number",
+    },
+    {
+      title: "Account Name",
+      dataIndex: "account_name",
+    },
+  ]
+
 export {
+  columnsInvoicingTableBank,
   listSalesItems,
   listTabItems,
   status,

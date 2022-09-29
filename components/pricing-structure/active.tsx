@@ -140,8 +140,6 @@ const ActivePricingStructure: any = (props: any) => {
   const data: any = [];
   const isEmpty = pricingStructureLists?.rows?.length === 0;
   pricingStructureLists?.rows?.map((element: any) => {
-    console.log("@element", element);
-
     data.push({
       key: element.id,
       product: element.product,

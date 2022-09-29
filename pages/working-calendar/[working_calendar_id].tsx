@@ -137,7 +137,6 @@ const WorkingCalendarCreate = () => {
       working_days: workingDaysPayload,
     };
 
-    // console.log(formData);
     updateWorkingCalendar(formData);
   };
 

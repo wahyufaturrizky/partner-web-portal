@@ -89,7 +89,6 @@ const Branch = () => {
         pagination.setTotalItems(data.totalRow);
       },
       select: (data: any) => {
-        console.log(data, '<<<ga masuk lagi kah?')
         const mappedData = data?.rows?.map((element: any) => {
             return {
               key: element.branchId,

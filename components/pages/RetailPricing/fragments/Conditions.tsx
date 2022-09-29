@@ -363,7 +363,6 @@ const SalesOrganizationCondition = ({ control, index, setValue, salesOrganizatio
     company_code: 'KSNI',
     options: {
       onSuccess: (data: any) => {
-        console.log("selectedStructure", data)
         setListStructure(
           data.salesOrganizationStructures.map((data: any, index: string) => ({
             value: data.name,
@@ -386,14 +385,12 @@ const SalesOrganizationCondition = ({ control, index, setValue, salesOrganizatio
               label: element.name,
             };
         });
-        console.log("mappedData", mappedData)
         const flattenArray = [].concat(...mappedData);
         setHirarchy(flattenArray)
       },
       enabled: !!selectedStructure
     },
   });
-  console.log("listStructure", selectedStructure, listStructure)
 
   const selectedNameStructure = listStructure?.find(s => s?.id === selectedStructure)
 
