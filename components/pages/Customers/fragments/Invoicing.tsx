@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import styled from 'styled-components'
 import {
   Table,
@@ -10,17 +10,27 @@ import {
   Row,
   Col,
 } from 'pink-lava-ui'
-import { ICDelete, ICEdit } from "../../../../assets";
+import { Controller } from 'react-hook-form';
+import { ICDelete, ICEdit } from "assets";
+import IconAdd from 'assets/icons/ICAdd'
 
-import ModalAddBankAccount from '../../../elements/Modal/ModalAddBankAccount'
-import IconAdd from '../../../../assets/icons/ICAdd'
+import ModalAddBankAccount from 'components/elements/Modal/ModalAddBankAccount'
+import { useCurrencyMDM } from 'hooks/mdm/country-structure/useCurrencyMDM';
+import { useCurrenciesMDM } from 'hooks/company-list/useCompany';
 
 export default function Invoicing(props: any) {
-  const {} = props
+  const { control, register } = props
+  const [search, setSearch] = useState({
+    currency: '',
+    taxAddress: '',
+    taxCity: '',
+    expanse: '',
+    income: ''
+  })
 
   const columns = [
-    { title: "", dataIndex: "key" },
-    { title: "", dataIndex: "id" },
+    // { title: "", dataIndex: "key" },
+    // { title: "", dataIndex: "id" },
     {
       title: "",
       dataIndex: "action",
@@ -56,6 +66,16 @@ export default function Invoicing(props: any) {
     { value: 'RP. 10.000.000 - Bonus', id: 'bonus' },
   ]
 
+  const { data: listCurrencies } = useCurrenciesMDM({
+    options: { onSuccess: () => {} },
+    query: { search: search.currency }
+  })
+
+  const _listCurrencies = listCurrencies?.rows?.map((items: any) => ({
+      id: items?.currency,
+      value: items?.currencyName
+    }))
+
   return (
     <div>
       <Label>Account Receivable</Label>
@@ -67,9 +87,6 @@ export default function Invoicing(props: any) {
             width="100%"
             height="50px"
             required
-            // {...register('invoicing.credit_limit', {
-              // required: 'credit limit must be filled'
-            // })}
           />
           <Spacer size={10} />
           <Input
@@ -77,7 +94,6 @@ export default function Invoicing(props: any) {
             width="100%"
             height="50px"
             disabled
-            // {...register('invoicing.credit_used')}
           />
         </Col>
         <Col width="48%">
@@ -86,7 +102,6 @@ export default function Invoicing(props: any) {
             width="100%"
             height="50px"
             disabled
-            // {...register('invoicing.credit_balance')}
           />
           <Spacer size={10} />
           <Dropdown2
@@ -96,8 +111,6 @@ export default function Invoicing(props: any) {
             isShowActionLabel
             items={listFakeIncomeAccount}
             handleClickActionLabel={() => { }}
-            // handleChange={(value: string) =>
-            //   setValueInvoicing("invoicing.income_account", value)}
           />
         </Col>
       </Row>
@@ -115,8 +128,6 @@ export default function Invoicing(props: any) {
             isShowActionLabel
             handleClickActionLabel={() => { }}
             items={listFakeIncomeAccount}
-            // handleChange={(value: string) =>
-            //   setValueInvoicing("invoicing.expense_account", value)}
           />
         </Col>
       </Row>
@@ -128,7 +139,6 @@ export default function Invoicing(props: any) {
       <Button
         size="big"
         variant={"primary"}
-        // onClick={() => setVisible(!visible)}
       >
         <IconAdd /> Add Bank Account
       </Button>
@@ -152,23 +162,27 @@ export default function Invoicing(props: any) {
             width="100%"
             height="48px"
             placeholder="e.g Tax Items"
-            // {...register('invoicing.tax_name')}
+            {...register('invoicing.tax_name')}
           />
           <Spacer size={20} />
         </Col>
         <Row gap="16px" width="100%">
           <Col width="48%">
-            <Dropdown2
-              label="Tax City"
-              width="100%"
-              actionLabel="Add New Tax City"
-              isShowActionLabel
-              items={listFakeIncomeAccount}
-              handleClickActionLabel={() => { }}
-              // handleChange={(value: any) => {
-              //   setValueInvoicing('invoicing.tax_city', value)
-              // }}
-            />
+            <Controller
+              control={control}
+              name="invoicing.tax_city"
+              render={({ field: { onChange } }) => (
+                <Dropdown
+                  label="Tax City"
+                  width="100%"
+                  actionLabel="Add New Tax City"
+                  isShowActionLabel
+                  items={listFakeIncomeAccount}
+                  handleClickActionLabel={() => { }}
+                  handleChange={onChange}
+                />
+              )} />
+            
           </Col>
           <Col width="48%">
             <Input
@@ -176,7 +190,7 @@ export default function Invoicing(props: any) {
               width="100%"
               placeholder="e.g Jalan Soekarano Hatta No.1"
               height="48px"
-              // {...register('invoicing.tax_address')}
+              {...register('invoicing.tax_address')}
             />
           </Col>
         </Row>
@@ -188,16 +202,22 @@ export default function Invoicing(props: any) {
       <Spacer size={10} />
       <Row gap="16px" width="100%">
         <Col width="48%">
-          <Dropdown
-            label="Currency Code"
-            width="100%"
-            actionLabel="Add New Currency Code"
-            isShowActionLabel
-            items={listFakeIncomeAccount}
-            handleClickActionLabel={() => { }}
-            // handleChange={(value: any) => {
-            //   setValueInvoicing('invoicing.currency', value)
-            // }}
+          <Controller
+            control={control}
+            name="invoicing.currency"
+            render={({ field: { onChange } }) => (
+              <>
+                <Dropdown
+                  label="Currency Code"
+                  width="100%"
+                  actionLabel="Add New Currency Code"
+                  isShowActionLabel
+                  items={_listCurrencies}
+                  handleClickActionLabel={() => window.open('/')}
+                  handleChange={onChange}
+                />
+              </>
+            )}
           />
         </Col>
       </Row>

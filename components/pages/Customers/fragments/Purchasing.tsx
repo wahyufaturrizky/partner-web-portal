@@ -3,9 +3,10 @@ import styled from 'styled-components'
 import { Spacer, Dropdown } from 'pink-lava-ui'
 
 import { useTermOfPayments } from '../../../../hooks/mdm/term-of-payment/useTermOfPayment';
+import { Controller } from 'react-hook-form';
 
 export default function Purchasing(props: any) {
-  const { setValuePurchasing } = props
+  const { control } = props
 
   const { data: getDataTermOfPayment } = useTermOfPayments({
     options: {
@@ -23,17 +24,23 @@ export default function Purchasing(props: any) {
     <div>
       <Label>Payment</Label>
       <Spacer size={20} />
-      <Dropdown
-        label="Term of Payment"
-        width="70%"
-        actionLabel="Add New Term of Payment"
-        isShowActionLabel
-        handleClickActionLabel={() => window.open('/term-of-payment/create')}
-        items={listItemsOfPayment}
-        handleChange={(value: string) => {
-          setValuePurchasing("purchasing.term_of_payment", value)
-        }}
-        noSearch
+      <Controller
+        control={control}
+        name="purchasing.term_of_payment"
+        render={({ field: { onChange } }) => (
+          <>
+            <Dropdown
+              label="Term of Payment"
+              width="70%"
+              actionLabel="Add New Term of Payment"
+              isShowActionLabel
+              handleClickActionLabel={() => window.open('/term-of-payment/create')}
+              items={listItemsOfPayment}
+              handleChange={onChange}
+              noSearch
+            />
+          </>
+        )}
       />
     </div>
   )

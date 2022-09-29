@@ -14,9 +14,8 @@ import styled from 'styled-components'
 import usePagination from '@lucasmogari/react-pagination';
 
 import { queryClient } from "pages/_app";
-import { mdmDownloadService } from 'lib/client';
 import { ModalDeleteConfirmation } from "components/elements/Modal/ModalConfirmationDelete";
-import { downloadFileSalesDivision, downloadOptions } from 'components/pages/Salesman/constants'
+import { columnsSalesDivision, downloadFileSalesDivision, downloadOptions } from 'components/pages/Salesman/constants'
 import ModalAddSalesDivision from 'components/elements/Modal/ModalAddSalesDivision'
 import { useProductList } from 'hooks/mdm/product-list/useProductList';
 import {
@@ -48,39 +47,6 @@ export default function ComponentSalesmanDivision() {
     upload: false,
     update: false,
   });
-
-  const columns = [
-    {
-      title: "Division ID",
-      dataIndex: "code",
-      width: "30%"
-    },
-    {
-      title: "Division Name",
-      dataIndex: "divisiName",
-      width: "30%"
-    },
-    {
-      title: "Product",
-      dataIndex: "product",
-      width: "20%"
-    },
-    {
-      title: "Action",
-      render: (items: any) => (
-        <Button
-          size="small"
-          onClick={() => {
-            setFormsUpdate({ ...items })
-            setVisible({  ...visible, update: true })
-          }}
-          variant="tertiary"
-        >
-          View Detail
-        </Button>
-      )
-    },
-  ]
 
   const rowSelection = {
     selectedItems,
@@ -237,7 +203,7 @@ export default function ComponentSalesmanDivision() {
         <Table
           rowSelection={rowSelection}
           loading={isLoading}
-          columns={columns}
+          columns={columnsSalesDivision}
           data={data?.rows?.map((item: any) => ({ ...item, key: item?.id }))}
           />
         <Spacer size={50} />

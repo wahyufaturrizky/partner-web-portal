@@ -67,4 +67,16 @@
     { id: "INACTIVE", value: "Inactive" },
   ]
 
-  export { listTabItems, status, defaultValuesCreate, addressBodyField }
+  const listSalesItems = [
+    { label: 'Sales Order Blocking', value: 'sales_order_blocking' },
+    { label: 'Invoice/Billing Blocking', value: 'billing_blocking' },
+    { label: 'Delivery Order Blocking', value: 'delivery_order_blocking' }
+  ]
+
+export {
+  listSalesItems,
+  listTabItems,
+  status,
+  defaultValuesCreate,
+  addressBodyField
+}
