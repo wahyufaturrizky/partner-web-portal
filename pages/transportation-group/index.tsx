@@ -486,7 +486,7 @@ const TransportationGroup = () => {
                           defaultValue={modalForm.data?.weight}
                           size={"large"}
                           placeholder={"e.g 55"}
-                          addonAfter="m3"
+                          addonAfter="kg"
                           onChange={(e: any) => {
                             onChange(e.target.value);
                           }}
@@ -529,7 +529,7 @@ const TransportationGroup = () => {
                           defaultValue={modalForm.data?.length}
                           size={"large"}
                           placeholder={"e.g 55"}
-                          addonAfter="m3"
+                          addonAfter="cm"
                           onChange={(e: any) => {
                             onChange(e.target.value);
                           }}
@@ -561,7 +561,7 @@ const TransportationGroup = () => {
                           defaultValue={modalForm.data?.width}
                           size={"large"}
                           placeholder={"e.g 55"}
-                          addonAfter="m3"
+                          addonAfter="cm"
                           onChange={(e: any) => {
                             onChange(e.target.value);
                           }}
@@ -593,7 +593,7 @@ const TransportationGroup = () => {
                           defaultValue={modalForm.data?.height}
                           size={"large"}
                           placeholder={"e.g 55"}
-                          addonAfter="m3"
+                          addonAfter="cm"
                           onChange={(e: any) => {
                             onChange(e.target.value);
                           }}
