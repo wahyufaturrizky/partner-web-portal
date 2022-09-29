@@ -107,7 +107,6 @@ const Conditions = ({
               control={control}
               name={`availability.${index}.based_on`}
               defaultValue={retailPricing?.availability[index].based_on}
-              rules={{ required: true }}
               render={({ field: { onChange }, formState: { errors } }) => (
                 <Col width={"100%"}>
                   <Label>Based On</Label>
@@ -154,7 +153,7 @@ const Conditions = ({
 
           <Row width="100%">
             {(availabilityWatch[index]?.based_on === "BRANCH" ) && (
-              <BranchCondition branch={retailPricing?.availability[index].branch} control={control} index={index} />
+              <BranchCondition branch={retailPricing?.availability[index].branch} control={control} index={index} setValue={setValue} />
             )}
           </Row>
 
@@ -394,6 +393,10 @@ const SalesOrganizationCondition = ({ control, index, setValue, salesOrganizatio
 
   const selectedNameStructure = listStructure?.find(s => s?.id === selectedStructure)
 
+  useEffect(() => {
+    setValue(`availability.${index}.sales_organization.select_all`, false)
+  }, [])
+  
   return (
     <>
       <Row width="100%" noWrap>
@@ -458,7 +461,7 @@ const SalesOrganizationCondition = ({ control, index, setValue, salesOrganizatio
   )
 }
 
-const BranchCondition = ({ control, index, branch }: any) => {
+const BranchCondition = ({ control, index, branch, setValue }: any) => {
   const [branchList, setBranchList] = useState<any[]>([]);
   const [totalRowsBranchList, setTotalRowsBranchList] = useState(0);
   const [searchBranch, setSearchBranch] = useState("");
@@ -499,6 +502,10 @@ const BranchCondition = ({ control, index, branch }: any) => {
       },
     },
   });
+
+  useEffect(() => {
+    setValue(`availability.${index}.branch.select_all`, false)
+  }, [])
 
   return (
     <Col width="100%">

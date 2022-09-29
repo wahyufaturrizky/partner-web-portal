@@ -188,7 +188,7 @@ export default function ModalAddRetailPricing({
       apply_on: data.apply_on,
       price_computation: data.price_computation,
       min_qty: data.min_qty,
-      valid_date: data.valid_date.map((date: any) => moment(date).utc().toString())
+      valid_date: data.valid_date.map((date: any) => moment(date, 'DD/MM/YYYY').utc().toString())
     }
 
     if(data.apply_on === 'PRODUCT VARIANT'){

@@ -2,7 +2,7 @@ import { useQuery, useMutation } from "react-query";
 import { mdmService } from "../../../lib/client";
 
 const fetchRetailPricing = async ({ query = {} }) => {
-  return mdmService(`/retail-pricing`, {
+  return mdmService(`/retail-pricings`, {
     params: {
       search: "",
       page: 1,
@@ -33,7 +33,7 @@ const useRetailPricingDetail = ({ id, options }) => {
 function useCreateRetailPricing({ options }) {
   return useMutation(
     (data) =>
-      mdmService(`/product`, {
+      mdmService(`/retail-pricing`, {
         method: "POST",
         data,
       }),
