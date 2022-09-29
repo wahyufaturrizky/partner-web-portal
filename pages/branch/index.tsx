@@ -85,6 +85,7 @@ const Branch = () => {
     },
     options: {
       onSuccess: (data: any) => {
+        console.log(data, '<<< abis tembak')
         pagination.setTotalItems(data.totalRow);
       },
       select: (data: any) => {

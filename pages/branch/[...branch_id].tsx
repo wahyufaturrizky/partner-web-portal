@@ -3,7 +3,7 @@ import { Text, Col, Row, Spacer, Spin, Button, Accordion, FormSelect, FormInput,
 import styled from "styled-components";
 import { Controller, useForm } from "react-hook-form";
 import { useRouter } from "next/router";
-import { useBranchDetail, useBranchParent, useCalendarDetail, useCalendarInfiniteLists, useCreateBranch, useTimezoneInfiniteLists } from "../../hooks/mdm/branch/useBranch";
+import { useBranchDetail, useBranchParent, useCalendarDetail, useCalendarInfiniteLists, useCreateBranch, useTimezoneInfiniteLists, useUpdateBranch } from "../../hooks/mdm/branch/useBranch";
 import { queryClient } from "../_app";
 import { useCountryInfiniteLists, useFetchCountriesStructure, useFetchDetailCountry } from "hooks/mdm/country-structure/useCountries";
 import { useTimezone } from "hooks/timezone/useTimezone";
@@ -29,26 +29,25 @@ const BranchDetail = () => {
   const [searchSalesOrganization, setSearchSalesOrganization] = useState("");
   const [searchTimezone, setSearchTimezone] = useState("");
   const [searchCalendar, setSearchCalendar] = useState("");
+  const [searchCountry, setSearchCountry] = useState("");
 
   const debounceFetchBranchParent = useDebounce(searchBranchParent, 1000)
   const debounceFetchSalesOrganization = useDebounce(searchSalesOrganization, 1000);
   const debounceFetchTimezone = useDebounce(searchTimezone, 1000);
   const debounceFetchCalendar = useDebounce(searchCalendar, 1000);
+  const debounceFetchCountry = useDebounce(searchCountry, 1000);
 
   const [salesOrganizationRows, setSalesOrganizationRows] = useState(null)
   const [timezoneRows, setTimezoneRows] = useState(null)
   const [calendarRows, setCalendarRows] = useState(null)
-  const [calendarDetailId, setCalendarDetailId] = useState(1)
+  const [calendarDetailId, setCalendarDetailId] = useState(null)
+  const [countryRows, setCountryRows] = useState(null)
 
   const [listSalesOrganization, setListSalesOrganization] = useState([])
-  const [listTimezone, setListTimezone] = useState([])
-  const [listCalendar, setListCalendar] = useState([])
-  const [listCountry, setListCountry] = useState([
-    { value: 1, label: 'Indonesia' },
-    { value: 2, label: 'Japan' },
-    { value: 3, label: 'Malaysia' },
-    { value: 4, label: 'Singepore' },
-  ])
+  const [listTimezone, setListTimezone] = useState<any[]>([])
+  const [listCalendar, setListCalendar] = useState<any[]>([])
+  const [listCountry, setListCountry] = useState<any[]>([])
+
   const [listProvince, setListProvince] = useState([
     { value: 1, label: 'DKI Jakarta' },
     { value: 2, label: 'Jawa Barat' },
@@ -87,7 +86,6 @@ const BranchDetail = () => {
     companyId: branch_id && branch_id[0],
     options: {
       onSuccess: (data: any) => {
-        console.log(data, '<<< ini data detail')
       },
       select: (data: any) => {
         return data
@@ -109,6 +107,7 @@ const BranchDetail = () => {
       onSuccess: (data: any) => {
       },
       select: (data: any) => {
+
         return data?.rows?.map((parent: { parentName: string; parentId: string; }) => {
           return {
             label: parent.parentName,
@@ -137,7 +136,6 @@ const BranchDetail = () => {
   //   options: {
   //     onSuccess: (data: any) => {
   //       setSalesOrganizationRows(data?.pages[0]?.totalRow);
-  //       console.log(data, '<<<<<<data salesOrg')
   //       // setListSalesOrganization(data?.pages[0]?.rows?.map(organization: any => {
   //       //   return {
   //       //     label: organization.utc, value: organization.id
@@ -165,7 +163,6 @@ const BranchDetail = () => {
       // },
       options: {
         onSuccess: (data: any) => {
-          console.log(data, '<<< ini data sales org hirarki')
         },
         select: (data: any) => {
           return data?.map((salesOrganization: { name: string; id: number; }) => {
@@ -189,16 +186,16 @@ const BranchDetail = () => {
       search: debounceFetchTimezone,
     },
     options: {
-      onSuccess: (data) => {
+      onSuccess: (data: any) => {
         setTimezoneRows(data?.pages[0]?.totalRow);
-        setListTimezone(data?.pages[0]?.rows?.map(timezone => {
+        setListTimezone(data?.pages[0]?.rows?.map((timezone: { utc: any; id: any; }) => {
           return {
             label: timezone.utc, value: timezone.id
           }
         }))
       },
       getNextPageParam: (_lastPage: any, pages: any) => {
-        if (listTimezone.length < timezoneRows) {
+        if (timezoneRows && listTimezone.length < timezoneRows) {
           return pages.length + 1;
         } else {
           return undefined;
@@ -219,14 +216,15 @@ const BranchDetail = () => {
       search: debounceFetchCalendar,
     },
     options: {
-      onSuccess: (data) => {
+      onSuccess: (data: any) => {
         setCalendarRows(data?.pages[0]?.totalRow)
-        setListCalendar(data?.pages[0]?.rows?.map(calendar => {
+        setListCalendar(data?.pages[0]?.rows?.map((calendar: { calendarName: any; id: any; }) => {
           return { label: calendar.calendarName, value: calendar.id}
         }))
+        setCalendarDetailId(listCalendar?.filter((calendar: any) => calendar?.value === +branchDetailData?.calendarId)[0]?.value)
       },
       getNextPageParam: (_lastPage: any, pages: any) => {
-        if (listCalendar.length < calendarRows) {
+        if (calendarRows && listCalendar.length < calendarRows) {
           return pages.length + 1;
         } else {
           return undefined;
@@ -241,20 +239,62 @@ const BranchDetail = () => {
     isLoading: isLoadingCalendarDetailData,
     isFetching: isFetchingCalendarDetailData,
   } = useCalendarDetail({
+    enabled: calendarDetailId? true : false,
     id: calendarDetailId,
     options: {
       onSuccess: (data: any) => {
-        console.log(data, '<<< ini data detail calendar')
       },
       select: (data: any) => {
-        return data
+        let start = data?.workingDays.findIndex((e: boolean) => e === true)
+        let end = data?.workingDays.findIndex((e: boolean) => e === false) === 0 ? 6 : data?.workingDays.findIndex((e: boolean) => e === false) - 1
+        const findDays = (data: number) => {
+          switch (data) {
+            case 0: return 'Senin'
+            case 1: return 'Selasa'
+            case 2: return 'Rabu'
+            case 3: return 'Kamis'
+            case 4: return 'Jumat'
+            case 5: return 'Sabtu'
+            case 6: return 'Minggu'            
+              break;
+          } 
+        }
+        return {
+          start: findDays(start),
+          end: findDays(end)
+        }
       },
     },
   });        
 
 
   // Country
-
+  const { 
+    isFetching: isFetchingCountry,
+    isFetchingNextPage: isFetchingMoreCountry,
+    isLoading: isLoadingCountry,
+    hasNextPage: countryHasNextPage,
+    fetchNextPage: countryFetchNextPage, 
+  } = useCalendarInfiniteLists({
+    query: {
+      search: debounceFetchCountry,
+    },
+    options: {
+      onSuccess: (data: any) => {
+        setCountryRows(data?.pages[0]?.totalRow)
+        setListCountry(data?.pages[0]?.rows?.map((country: { country: any; id: any; }) => {
+          return { label: country.country, value: country.id}
+        }))
+      },
+      getNextPageParam: (_lastPage: any, pages: any) => {
+        if (countryRows && listCountry.length < countryRows) {
+          return pages.length + 1;
+        } else {
+          return undefined;
+        }
+      },
+    },
+  });
   // country detail
 
 
@@ -272,7 +312,9 @@ const BranchDetail = () => {
 
 
 
-  const { mutate: createBranch, isLoading: isLoadingCreateBranch } = useCreateBranch({
+  const { mutate: updateBranch, isLoading: isLoadingUpdateBranch } = useUpdateBranch({
+    id: branch_id && branch_id[1],
+    companyId: branch_id && branch_id[0],
     options: {
       onSuccess: () => {
         router.back();
@@ -287,11 +329,14 @@ const BranchDetail = () => {
     const formData = {
       company_id: "KSNI",
       ...data,
+      start_working_day: calendarDetailData?.start? calendarDetailData?.start : branchDetailData?.startWorkingDay,
+      end_working_day: calendarDetailData?.end ? calendarDetailData?.end : branchDetailData?.endWorkingDay,
     };
-    createBranch(formData);
+    console.log(formData, '<<<data yang udah di olah mau di update')
+    updateBranch(formData);
   };
 
-  if(isLoadingBranchDetailData || isLoadingSalesOrganizationData){
+  if(isLoadingBranchDetailData ||isLoadingCountry || isLoadingSalesOrganizationData || isLoadingCalendar || isLoadingTimezone){
   return (
     <Center>
       <Spin tip="Loading data..." />
@@ -312,7 +357,7 @@ const BranchDetail = () => {
             Cancel
           </Button>
           <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
-            {isLoadingCreateBranch ? "Loading..." : "Save"}
+            {isLoadingUpdateBranch ? "Loading..." : "Save"}
           </Button>
         </Row>
       </Card>
@@ -390,7 +435,7 @@ const BranchDetail = () => {
                         borderColor={"#AAAAAA"}
                         arrowColor={"#000"}
                         withSearch
-                        default_value={salesOrganizationData?.filter(sales => sales.value === branchDetailData?.company_internal_structure_id)[0]?.label}
+                        defaultValue={salesOrganizationData?.filter((sales: { value: any; }) => sales.value === +branchDetailData?.companyInternalStructureId)[0]?.label}
                         isLoading={isLoadingSalesOrganizationData}
                         isLoadingMore={isFetchingSalesOrganizationData}
                         fetchMore={() => {}}
@@ -422,7 +467,7 @@ const BranchDetail = () => {
                         borderColor={"#AAAAAA"}
                         arrowColor={"#000"}
                         withSearch
-                        defaultValue={listTimezone?.filter(timezone => timezone.value === branchDetailData?.timezone)[0]?.label}
+                        defaultValue={listTimezone?.filter((timezone: {value: any, label: any}) => timezone?.value === +branchDetailData?.timezone)[0]?.label}
                         isLoading={isFetchingTimezone}
                         isLoadingMore={isFetchingMoreTimezone}
                         fetchMore={() => {
@@ -454,10 +499,11 @@ const BranchDetail = () => {
               <Col width={"100%"}>
                 <Controller
                   control={control}
-                  name="calendar"
+                  name="calendar_id"
                   render={({ field: { onChange } }) => (
                     <>
                       <Label>Calendar</Label>
+                      <Spacer size={4}/>
                       <FormSelect
                         style={{ width: "100%" }}
                         size={"large"}
@@ -465,7 +511,7 @@ const BranchDetail = () => {
                         borderColor={"#AAAAAA"}
                         arrowColor={"#000"}
                         withSearch
-                        defaultValue={listCalendar?.filter(calendar => calendar.value === branchDetailData?.calendarId)[0]?.label}
+                        defaultValue={listCalendar?.filter((calendar: any) => calendar?.value === +branchDetailData?.calendarId)[0]?.label}
                         isLoading={isFetchingCalendar}
                         isLoadingMore={isFetchingMoreCalendar}
                         fetchMore={() => {
@@ -480,7 +526,6 @@ const BranchDetail = () => {
                         }
                         onChange={(value: any) => {
                           onChange(value);
-                          console.log(value, 'id')
                           setCalendarDetailId(value)
                         }}
                         onSearch={(value: any) => {
@@ -498,8 +543,7 @@ const BranchDetail = () => {
                   width="100%"
                   label="External Code"
                   height="40px"
-                  defaultValue={branchDetailData?.external_code}
-                  required
+                  defaultValue={branchDetailData?.externalCode}
                   placeholder={"e.g 12345"}
                   {...register("external_code", { required: "Please enter external code." })}
                 />
@@ -523,7 +567,7 @@ const BranchDetail = () => {
                         borderColor={"#AAAAAA"}
                         arrowColor={"#000"}
                         withSearch
-                        value={calendarDetailData?.start}
+                        value={calendarDetailData?.start? calendarDetailData?.start : branchDetailData?.startWorkingDay}
                         disabled
                         isLoading={false}
                         isLoadingMore={false}
@@ -557,7 +601,7 @@ const BranchDetail = () => {
                           arrowColor={"#000"}
                           withSearch
                           disabled
-                          value={calendarDetailData?.end}
+                          value={calendarDetailData?.end ? calendarDetailData?.end : branchDetailData?.endWorkingDay}
                           isLoading={isLoadingCalendarDetailData}
                           isLoadingMore={isFetchingCalendarDetailData}
                           fetchMore={() => {}}
@@ -584,21 +628,14 @@ const BranchDetail = () => {
           <Accordion.Body>
             <Row width="100%" noWrap>
               <Col width="100%">
-                <Controller
-                  control={control}
-                  name="address"
-                  render={({ field: { onChange } }) => (
-                    <>
-                      <Text variant="headingRegular">
-                        Address<span style={{ color: "#EB008B" }}>*</span>
-                      </Text>
-                      <FormInput
-                      defaultValue={branchDetailData?.description} 
-                      size={"large"} 
-                      placeholder={"e.g 12345"} 
-                      />
-                    </>
-                  )}
+              <Input
+                    width="100%"
+                    label="Address"
+                    height="40px"
+                    defaultValue={branchDetailData?.address}
+                    required
+                    placeholder={"e.g Jl.Soekarno Hatta"}
+                    {...register("address", { required: "Please enter name." })}
                 />
               </Col>
 
@@ -619,26 +656,24 @@ const BranchDetail = () => {
                         borderColor={"#AAAAAA"}
                         arrowColor={"#000"}
                         withSearch
-                        defaultValue={listCountry?.filter(country => country.value === 1)[0]?.label}
-                        isLoading={false}
-                        isLoadingMore={false}
-                        fetchMore={() => {}}
-                        items={listCountry}
+                        defaultValue={listCountry?.filter((country: {value: number, label: string}) => country.value === +branchDetailData?.countryId)[0]?.label}
+                        isLoading={isFetchingCountry}
+                        isLoadingMore={isFetchingMoreCountry}
+                        fetchMore={() => {
+                          if (countryHasNextPage) {
+                            countryFetchNextPage();
+                          }
+                        }}
+                        items={
+                          isFetchingCountry && !isFetchingMoreCountry
+                            ? []
+                            : listCountry
+                        }
                         onChange={(value: any) => {
                           onChange(value);
                         }}
                         onSearch={(value: any) => {
-                          if(value === '') {
-                            setListCountry([
-                              { value: 1, label: 'Indonesia' },
-                              { value: 2, label: 'Japan' },
-                              { value: 3, label: 'Malaysia' },
-                              { value: 4, label: 'Singepore' },
-                            ])
-                          } else {
-                            const search = new RegExp(value, 'i')
-                            setListCountry(listCountry.filter(country => search.test(country.label.toLowerCase())))
-                          }
+                          setSearchCountry(value);
                         }}
                       />
                     </>                    
@@ -870,10 +905,9 @@ const BranchDetail = () => {
                     width="100%"
                     label="Longitude"
                     height="40px"
-                    defaultValue={branchDetailData?.longitude}
-                    required
+                    defaultValue={branchDetailData?.longtitude}
                     placeholder={"e.g 110.41677"}
-                    {...register("longitude", { required: "Please enter longitude." })}
+                    {...register("longtitude", { required: "Please enter longitude." })}
                 />
               </Col>
             </Row>
@@ -887,7 +921,6 @@ const BranchDetail = () => {
                     label="Latitude"
                     height="40px"
                     defaultValue={branchDetailData?.latitude}
-                    required
                     placeholder={"e.g -6.9967"}
                     {...register("latitude", { required: "Please enter name." })}
                 />
