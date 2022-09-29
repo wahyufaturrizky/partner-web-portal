@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Text, Col, Row, Spacer, Button, Accordion, FormSelect, FormInput, Input } from "pink-lava-ui";
+import { Text, Col, Row, Spacer, Button, Accordion, FormSelect, Input, Spin } from "pink-lava-ui";
 // import { Text, Col, Row, Spacer, Spin, Button, Accordion, FormSelect, FormInput, Input } from "pink-lava-ui";
 import styled from "styled-components";
 import { Controller, useForm } from "react-hook-form";
@@ -49,6 +49,7 @@ const BranchCreate = () => {
     },
     options: {
       onSuccess: (data: any) => {
+        console.log(data, '<<< parent')
       },
       select: (data: any) => {
         return data?.rows?.map((parent: { parentName: string; parentId: string; }) => {
@@ -148,7 +149,8 @@ const BranchCreate = () => {
     isLoading: isLoadingCalendarDetailData,
     isFetching: isFetchingCalendarDetailData,
   } = useCalendarDetail({
-    id: calendarDetailId && calendarDetailId,
+    enabled: calendarDetailId? true : false,
+    id: calendarDetailId,
     options: {
       onSuccess: (data: any) => {
       },
@@ -212,8 +214,12 @@ const BranchCreate = () => {
     },
   });
 
-  if( isLoadingCalendar || isLoadingSalesOrganizationData || isLoadingTimezone || isLoadingCountry){
-    return <>loading...</>
+  if( isLoadingCalendar || isLoadingSalesOrganizationData || isLoadingTimezone || isLoadingCountry || isLoadingBranchParentData){
+    return (
+      <Center>
+      <Spin tip="Loading data..." />
+    </Center>
+    )
   }
   const onSubmit = (data: any) => {
     console.log(data, '<<<<datanya')
@@ -221,6 +227,7 @@ const BranchCreate = () => {
       company_id: "KSNI",
       ...data,
       // external_code: +data?.external_code,
+      parent_id: '1',
       start_working_day: data?.start_working_day? data?.start_working_day : calendarDetailData?.start,
       end_working_day: data?.end_working_day? data?.end_working_day : calendarDetailData?.end,
       province_id: 1,
@@ -431,8 +438,7 @@ const BranchCreate = () => {
                     width="100%"
                     label="External Code"
                     height="40px"
-                    required
-                    placeholder={"e.g PMA Bandung Selatan GT"}
+                    placeholder={"e.g 12345"}
                     {...register("external_code", { required: "Please enter name." })}
                 />
               </Col>
@@ -522,7 +528,7 @@ const BranchCreate = () => {
                   label="Address"
                   height="40px"
                   required
-                  placeholder={"e.g PMA Bandung Selatan GT"}
+                  placeholder={"e.g Jl. Soekarno Hatta"}
                   {...register("address", { required: "Please enter name." })}
               />
               </Col>
@@ -587,6 +593,12 @@ const Label = styled.div`
   font-size: 16px;
   line-height: 24px;
   color: #000000;
+`;
+
+const Center = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
 `;
 
 export default BranchCreate;

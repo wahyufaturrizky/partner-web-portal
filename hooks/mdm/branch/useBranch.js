@@ -11,10 +11,7 @@ const fetchBranchList = async ({ query = {} }) => {
       sortOrder: "DESC",
       ...query,
     },
-  }).then((data) => {
-    console.log(data, "<<<hooks");
-    return data;
-  });
+  }).then((data) => data);
 };
 
 const useBranchList = ({ query = {}, options = {} }) => {
@@ -33,10 +30,7 @@ const fetchBranchParent = async ({ query = {} }) => {
       sortOrder: "DESC",
       ...query,
     },
-  }).then((data) => {
-    console.log(data, "<<<hooks");
-    return data;
-  });
+  }).then((data) => data);
 };
 
 const useBranchParent = ({ query = {}, options }) => {
@@ -158,7 +152,7 @@ const fetchInfiniteCalendarList = async ({ pageParam = 1, queryKey }) => {
       sortOrder: "ASC",
       ...queryKey[1],
     },
-  }).then((data) => data);
+  }).then(async (data) => data);
 };
 
 const useCalendarInfiniteLists = ({ query = {}, options }) => {
@@ -172,8 +166,10 @@ const fetchCalendarDetail = async ({ id }) => {
   return mdmService(`/working-calendar/${id}`).then((data) => data);
 };
 
-const useCalendarDetail = ({ id, options }) => {
+const useCalendarDetail = ({ id, options, enabled }) => {
   return useQuery(["calendar-detail", id], () => fetchCalendarDetail({ id }), {
+    keepPreviousData: true,
+    enabled,
     ...options,
   });
 };
