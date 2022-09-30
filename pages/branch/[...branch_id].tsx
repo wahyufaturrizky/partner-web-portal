@@ -85,16 +85,11 @@ const BranchDetail = () => {
     id: branch_id && branch_id[1],
     companyId: branch_id && branch_id[0],
     options: {
-<<<<<<< HEAD
       onSuccess: (data: any) => {
       },
       select: (data: any) => {
         return data
       },
-=======
-      onSuccess: (data: any) => {},
-      select: (data: any) => data ,
->>>>>>> a10dade (add bank account in create customer)
     },
   });
 
@@ -167,12 +162,8 @@ const BranchDetail = () => {
       //   search: debounceFetchSalesOrganization
       // },
       options: {
-<<<<<<< HEAD
         onSuccess: (data: any) => {
         },
-=======
-        onSuccess: (data: any) => {},
->>>>>>> a10dade (add bank account in create customer)
         select: (data: any) => {
           return data?.map((salesOrganization: { name: string; id: number; }) => {
             return {

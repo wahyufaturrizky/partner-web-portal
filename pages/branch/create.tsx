@@ -72,12 +72,8 @@ const BranchCreate = () => {
       //   search: debounceFetchSalesOrganization
       // },
       options: {
-<<<<<<< HEAD
         onSuccess: (data: any) => {
         },
-=======
-        onSuccess: (data: any) => {},
->>>>>>> a10dade (add bank account in create customer)
         select: (data: any) => {
           return data?.map((salesOrganization: { name: string; id: number; }) => {
             return {
@@ -225,10 +221,7 @@ const BranchCreate = () => {
     )
   }
   const onSubmit = (data: any) => {
-<<<<<<< HEAD
     console.log(data, '<<<<datanya')
-=======
->>>>>>> a10dade (add bank account in create customer)
     const formData = {
       company_id: "KSNI",
       ...data,
@@ -516,9 +509,6 @@ const BranchCreate = () => {
               </Col>
             </Row>
 
-<<<<<<< HEAD
-            
-=======
             <Spacer size={15} />
 
             <Row width="100%" noWrap>
@@ -575,7 +565,6 @@ const BranchCreate = () => {
                 />
               </Col>
             </Row>
->>>>>>> a10dade (add bank account in create customer)
 
             <Spacer size={15} />
           </Accordion.Body>
