@@ -31,7 +31,7 @@ import ModalUpdateSalesDivision from 'components/elements/Modal/ModalUpdateSales
 export default function ComponentSalesmanDivision() {
   const pagination = usePagination({
     page: 1,
-    itemsPerPage: 10,
+    itemsPerPage: 20,
     maxPageItems: Infinity,
     numbers: true,
     arrows: true,

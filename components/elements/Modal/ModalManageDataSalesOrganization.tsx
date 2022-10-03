@@ -36,7 +36,7 @@ export const ModalManageDataEdit = ({onCancel, visible} : {onCancel: any, visibl
 
 	const pagination = usePagination({
     page: 1,
-    itemsPerPage: 5,
+    itemsPerPage: 20,
     maxPageItems: Infinity,
     numbers: true,
     arrows: true,

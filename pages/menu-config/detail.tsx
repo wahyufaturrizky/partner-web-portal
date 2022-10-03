@@ -66,7 +66,7 @@ const DetailMenuList: any = () => {
 	const [selectedFilter, setSelectedFilter] = useState([]);
 	const paginationTableField = usePagination({
 		page: 1,
-		itemsPerPage: 10,
+		itemsPerPage: 20,
 		maxPageItems: Infinity,
 		numbers: true,
 		arrows: true,
@@ -74,7 +74,7 @@ const DetailMenuList: any = () => {
 	});
 	const paginationAllowedField = usePagination({
 		page: 1,
-		itemsPerPage: 10,
+		itemsPerPage: 20,
 		maxPageItems: Infinity,
 		numbers: true,
 		arrows: true,
@@ -82,7 +82,7 @@ const DetailMenuList: any = () => {
 	});
 	const paginationTablePermission = usePagination({
 		page: 1,
-		itemsPerPage: 10,
+		itemsPerPage: 20,
 		maxPageItems: Infinity,
 		numbers: true,
 		arrows: true,

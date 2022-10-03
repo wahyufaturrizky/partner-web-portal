@@ -8,7 +8,7 @@ import { useNumberFormatLists } from "../../../hooks/formating/useNumber";
 export default function FormatingNumber() {
 	const pagination = usePagination({
 		page: 1,
-		itemsPerPage: 10,
+		itemsPerPage: 20,
 		maxPageItems: Infinity,
 		numbers: true,
 		arrows: true,

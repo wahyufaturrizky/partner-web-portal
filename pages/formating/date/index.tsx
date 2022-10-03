@@ -9,7 +9,7 @@ import { useDateFormatLists } from "../../../hooks/formating/useDate";
 export default function FormatingDate() {
   const pagination = usePagination({
 		page: 1,
-		itemsPerPage: 10,
+		itemsPerPage: 20,
 		maxPageItems: Infinity,
 		numbers: true,
 		arrows: true,
