@@ -98,7 +98,7 @@ const useFetchDetailCountry = ({ country_id, options }) => {
 const useUpdateCountry = ({ country_id, options }) => {
   return useMutation(
     (payload) =>
-      mdmService(`country/${country_id}`, {
+      mdmService(`/country/${country_id}`, {
         method: "PUT",
         data: payload,
       }),
