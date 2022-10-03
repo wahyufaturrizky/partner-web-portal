@@ -226,7 +226,7 @@ const BranchCreate = () => {
       company_id: "KSNI",
       ...data,
       // external_code: +data?.external_code,
-      parent_id: '1',
+      // parent_id: '1',
       start_working_day: data?.start_working_day? data?.start_working_day : calendarDetailData?.start,
       end_working_day: data?.end_working_day? data?.end_working_day : calendarDetailData?.end,
       province_id: 1,
