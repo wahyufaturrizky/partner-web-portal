@@ -114,7 +114,7 @@ const Branch = () => {
     },
   });
 
-  const { mutate: deleteUom, isLoading: isLoadingDeleteUom } = useDeleteBranch({
+  const { mutate: deleteBranch, isLoading: isLoadingDeleteBranch } = useDeleteBranch({
     options: {
       onSuccess: () => {
         setShowDelete({ open: false, data: {}, type: "" });
@@ -309,13 +309,13 @@ const Branch = () => {
                   size="big"
                   onClick={() => {
                     if (isShowDelete.type === "selection") {
-                      deleteUom({ ids: selectedRowKeys, company_id: "KSNI" });
+                      deleteBranch({ ids: selectedRowKeys, company_id: "KSNI" });
                     } else {
-                      deleteUom({ ids: [modalForm.data.id], company_id: "KSNI" });
+                      deleteBranch({ ids: [modalForm.data.id], company_id: "KSNI" });
                     }
                   }}
                 >
-                  {isLoadingDeleteUom ? "loading..." : "Yes"}
+                  {isLoadingDeleteBranch ? "loading..." : "Yes"}
                 </Button>
               </div>
             </div>
