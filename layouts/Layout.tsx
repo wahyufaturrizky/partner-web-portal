@@ -522,13 +522,18 @@ const AdminLayout = (props: any) => {
   };
 
   return (
-    <Layout style={{ minHeight: "100vh" }}>
+    <Layout style={{ height: "100vh" }}>
       <Sidebar
         logo="/icons/logo-nabati.svg"
         menu={current === "0" ? menuConfig : menuMdm}
         defaultMenu={"dashboard"}
       />
-      <Layout className="site-layout">
+      <Layout className="site-layout"
+        style={{
+          height: '100vh',
+          overflow: 'auto',
+        }}
+      >
         <Header
           mode="horizontal"
           onClick={handleCLickTabNav}
