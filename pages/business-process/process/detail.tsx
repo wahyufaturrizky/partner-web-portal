@@ -118,13 +118,13 @@ const DetailProcessList: any = () => {
 					<Row justifyContent="flex-end" alignItems="center" nowrap>
 						<Row>
 							<Row gap="16px">
-								<Button
+								{/* <Button
 									size="big"
 									variant={"tertiary"}
 									onClick={() => setModalDelete({ open: true })}
 								>
 									Delete
-								</Button>
+								</Button> */}
 								<Button size="big" variant={"primary"} onClick={handleUpdateProcessList}>
 									{isLoading ? "loading..." : "Save"}
 								</Button>
