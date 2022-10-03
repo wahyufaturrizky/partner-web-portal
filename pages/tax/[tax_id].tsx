@@ -12,9 +12,10 @@ import {
   FormSelect,
   Switch,
   Spin,
+  Tabs
 } from "pink-lava-ui";
 import styled from "styled-components";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { useRouter } from "next/router";
 import { queryClient } from "../_app";
 import useDebounce from "../../lib/useDebounce";
@@ -22,6 +23,12 @@ import { ModalDeleteConfirmation } from "../../components/elements/Modal/ModalCo
 import ArrowLeft from "../../assets/icons/arrow-left.svg";
 import usePagination from "@lucasmogari/react-pagination";
 import { useCountryTaxInfiniteLists, useCreateTax, useDeletTax, useTaxInfiniteLists, useUpdateTax } from "hooks/mdm/Tax/useTax";
+import { columnsTaxType, dataTaxType, listTabItems, TaxBodyFields } from "components/pages/Tax/constants";
+import TaxList from "components/pages/Tax/fragments/TaxList";
+import VatList from "components/pages/Tax/fragments/VatList";
+import { ICDelete, ICEdit } from "assets";
+import WithholdingForm from "components/pages/Tax/fragments/WithholdingForm";
+import TaxTypeForm from "components/pages/Tax/fragments/TaxTypeForm";
 
 const renderConfirmationText = (type: any, data: any) => {
 switch (type) {
@@ -69,12 +76,17 @@ const TaxDetail = () => {
 
   const [isShowDelete, setShowDelete] = useState({ open: false, type: "selection", data: {} });
   const [showCreateModal, setShowCreateModal] = useState(false)
+  const [showTaxTypeModal, setShowTaxTypeModal] = useState(false)
 
   const debounceSearch = useDebounce(search, 1000);
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [statusId, setStatusId] = useState(null)
   const [updatedTaskData, setUpdatedTaskData] = useState(null)
-  const { register, control, handleSubmit, reset } = useForm();
+  const [tabAktived, setTabAktived] = useState<string>('Withholding Tax')
+  const [formType, setFormType] = useState<string>('Withholding Tax')
+  const [arrayTax,setArrayTax] = useState<{data:string}[]>([])
+
+  const { register, control, handleSubmit, reset, getValues} = useForm();
   
   const {
     isFetching: isFetchingCountryList,
@@ -107,6 +119,27 @@ const TaxDetail = () => {
       },
     },
   });
+  // switch elements detail information
+  const switchTabItem = () => {
+    switch (tabAktived) {
+      case 'Withholding Tax':
+        return <TaxList {...propsTaxList}/>
+      case 'VAT':
+        return <VatList/>
+      default:
+        return null
+    }
+  }
+  //useFieldArray ADDRESSES
+  const {
+    fields: fieldsTax,
+    append: appendTax,
+    replace: replaceTax,
+    remove: removeTax,
+  } = useFieldArray({
+    control,
+    name: "item_details",
+  });
 
   const {
     data: TaxData,
@@ -122,12 +155,13 @@ const TaxDetail = () => {
     options: {
       onSuccess: (data: any) => {
         pagination.setTotalItems(data?.totalRow);
+        setArrayTax(data.data);
       },
       select: (data: any) => {
-        const mappedData = data?.pages[0]?.rows?.map((taxDetail: TaxDetail) => {
+        const mappedData = data?.pages[0]?.rows?.map((taxDetail: TaxDetail,_index : any) => {          
             return {
+                key: _index,
                 id: taxDetail.taxId,
-                key: taxDetail.taxId,
                 country_name: taxDetail.country.name,
                 country_id: taxDetail.countryId,
                 name: taxDetail.name,
@@ -140,7 +174,6 @@ const TaxDetail = () => {
       }
     },
   });
-
 
   const { mutate: deleteUOM, isLoading: isLoadingDeleteUOM } = useDeletTax({
     options: {
@@ -176,20 +209,40 @@ const TaxDetail = () => {
       updateTax(updatedTaskData)
     }
   }, [updatedTaskData])
+
   
   // belum bisa dari backend
   const deleteTax = (id: any) => {
     deleteUOM({ ids:[...id] })
   }
 
-  const handleNewTax = (tax: any) => {
+  const handleNewTax = (data: any) => {
+    
     const newTax: any = {
-            country_id : tax.country_id,
-            name : tax.name,
-            percentage : tax.percentage,
-            active_status:"ACTIVE"
+      //item dummy
+      name: data.tax_name,
+      percentage: data.gl_account,
+      //
+        tax_id : null,
+        tax_name : data.tax_name,
+        tax_item_type : "VAT",
+        gl_account : data.gl_account,
+        tax_type : data.tax_type,
+        tax_code : data.tax_code,
+        status : "ACTIVE",
+        item_details : data.item_details?.map((item: any) => {
+          return {
+            percentage: item.percentage,
+            period_from: item.period_from,
+            period_to: item.period_to,
+            percentage_subject_to_tax: item.percentage_subject_to_tax,
+            withholding_tax_rate: item.withholding_tax_rate
+          }
+        })
     }
-    createTax(newTax)
+    console.log("LOG",newTax);
+    setArrayTax(oldArray => [...oldArray,newTax] );
+    // createTax(newTax)
     setShowCreateModal(false)
   }
 
@@ -208,6 +261,23 @@ const TaxDetail = () => {
   }
   
   const columns = [
+    { title: "", dataIndex: "key" },
+    { title: "", dataIndex: "id" },
+    {
+      title: "",
+      dataIndex: "action",
+      width: "15%",
+      render: (_: any, record: any) => (
+        <Row gap="16px" alignItems="center" nowrap>
+          <Col>
+            <ICEdit onClick={() => onHandleEdit(record)}/>
+          </Col>
+          <Col>
+            <ICDelete onClick={() => removeBankAccount(record.key)} />
+          </Col>
+        </Row>
+      )
+    },
     {
       title: "Tax Name",
       dataIndex: "name",
@@ -243,6 +313,49 @@ const TaxDetail = () => {
             <Spin tip="Loading data..." />
         </Center>
     )
+  }
+    const onHandleEdit = (render: any) => {
+        console.log(render);
+        
+    };
+    const removeBankAccount = (param :any) => {
+        const columns= arrayTax.filter(
+          (filtering :any) => filtering?.key !== param 
+        )
+        setArrayTax(columns);
+    }
+    const propsTaxList = {
+      onHandleEdit,
+      isLoadingTax:isLoadingTax,
+      isFetchingTax:isFetchingTax,
+      columns:columns,
+      data:arrayTax,
+      rowSelection:rowSelection,
+      pagination:pagination,
+      removeBankAccount,
+      setShowCreateModal
+  }
+    const propsWithHolding = {
+    control,
+    register,
+    fieldsTax,
+    appendTax,
+    replaceTax,
+    removeTax,
+    TaxBodyFields,
+    getValues,
+    reset,
+    setShowTaxTypeModal
+  }
+
+  const propsTaxType = {
+    control,
+    register,
+    getValues,
+    reset,
+    setShowTaxTypeModal,
+    columns : columnsTaxType,
+    data : dataTaxType[0].data.rows
   }
 
   return (
@@ -321,7 +434,7 @@ const TaxDetail = () => {
             </Row>
           <Spacer size={20} />
           <Col>
-              <HeaderLabel>Tax</HeaderLabel>
+              {/* <HeaderLabel>Tax</HeaderLabel>
               <Spacer size={20} />
               <Row gap="16px">
                 <Button size="big" variant={"primary"} onClick={() => setShowCreateModal(true)}>
@@ -342,16 +455,15 @@ const TaxDetail = () => {
                   Delete
                 </Button>
               </Row>
+              <Spacer size={20} /> */}
+              <Tabs
+                defaultActiveKey={tabAktived}
+                listTabPane={listTabItems.slice(0, listTabItems.length)}
+                onChange={(e: any) => setTabAktived(e)}
+              />
               <Spacer size={20} />
-                <Col gap={"60px"}>
-                  <Table
-                    loading={isLoadingTax || isFetchingTax}
-                    columns={columns}
-                    data={TaxData?.data}
-                    rowSelection={rowSelection}
-                  />
-                  <Pagination pagination={pagination} />
-                </Col>
+              {switchTabItem()}
+              <Spacer size={100} />
           </Col>
         </Card>
       </Col>
@@ -360,7 +472,7 @@ const TaxDetail = () => {
         <Modal
         // style={{fontSize: '20px'}}
         centered
-        width={'400px'}
+        width={'60%'}
         visible={showCreateModal}
         onCancel={() => setShowCreateModal(false)}
         footer={null}
@@ -370,33 +482,7 @@ const TaxDetail = () => {
               Add New Tax
             </CreateTitle>
             <Spacer size={20} />
-            <Col width="100%">
-              <Input
-                      width="80%"
-                      label="Tax Name"
-                      required
-                      height="40px"
-                      placeholder={"e.g PPh 21"}
-                      {...register("name", { required: "Please enter name." })}
-                    />
-            </Col>
-              <Spacer size={15} />
-
-            <Col width={"100%"}>
-            <CreateInputDiv>
-                <Input
-                    width="80%"
-                    label="Percentage"
-                    height="40px"
-                    required
-                    placeholder={"e.g 10"}
-                    addonAfter="PCS"
-                    {...register("percentage", { required: "Please enter name." })}
-                />
-                <InputAddonBefore>%</InputAddonBefore>
-            </CreateInputDiv>
-            </Col>
-              
+            <WithholdingForm {...propsWithHolding}/>
             <Spacer size={100} />
             <DeleteCardButtonHolder>
               <Button
@@ -457,6 +543,45 @@ const TaxDetail = () => {
             </TopButtonHolder>
           }
         />
+      )}
+
+      {showTaxTypeModal && (
+        <Modal
+        // style={{fontSize: '20px'}}
+        centered
+        width={'60%'}
+        visible={showTaxTypeModal}
+        onCancel={() => setShowTaxTypeModal(false)}
+        footer={null}
+        content={
+          <TopButtonHolder>
+            <CreateTitle>
+              Add New Tax Type Modal
+            </CreateTitle>
+            <Spacer size={20} />
+            <TaxTypeForm {...propsTaxType} />
+            <Spacer size={100} />
+            <DeleteCardButtonHolder>
+              <Button
+                // size="medium"
+                variant="tertiary"
+                key="submit"
+                type="primary"
+                onClick={() => setShowTaxTypeModal(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="primary"
+                // size="small"
+                onClick={handleSubmit(handleNewTax)}
+              >
+                save
+              </Button>
+            </DeleteCardButtonHolder>
+          </TopButtonHolder>
+        }
+      />
       )}
     </>
   );
