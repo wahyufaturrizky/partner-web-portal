@@ -48,7 +48,7 @@ import ArrowLeft from "../../assets/icons/arrow-left.svg";
 const CreatePricingStructure: any = () => {
   const paginationProducts = usePagination({
     page: 1,
-    itemsPerPage: 10,
+    itemsPerPage: 20,
     maxPageItems: Infinity,
     numbers: true,
     arrows: true,
@@ -57,7 +57,7 @@ const CreatePricingStructure: any = () => {
 
   const paginationProductsSelected = usePagination({
     page: 1,
-    itemsPerPage: 10,
+    itemsPerPage: 20,
     maxPageItems: Infinity,
     numbers: true,
     arrows: true,
@@ -66,7 +66,7 @@ const CreatePricingStructure: any = () => {
 
   const paginationProductActive = usePagination({
     page: 1,
-    itemsPerPage: 10,
+    itemsPerPage: 20,
     maxPageItems: Infinity,
     numbers: true,
     arrows: true,
@@ -75,7 +75,7 @@ const CreatePricingStructure: any = () => {
 
   const paginateCopyFromPriceStructure = usePagination({
     page: 1,
-    itemsPerPage: 10,
+    itemsPerPage: 20,
     maxPageItems: Infinity,
     numbers: true,
     arrows: true,

@@ -62,7 +62,7 @@ const DetailPricingStructure: any = () => {
 
   const paginationProducts = usePagination({
     page: 1,
-    itemsPerPage: 10,
+    itemsPerPage: 20,
     maxPageItems: Infinity,
     numbers: true,
     arrows: true,
@@ -71,7 +71,7 @@ const DetailPricingStructure: any = () => {
 
   const paginationProductsSelected = usePagination({
     page: 1,
-    itemsPerPage: 10,
+    itemsPerPage: 20,
     maxPageItems: Infinity,
     numbers: true,
     arrows: true,
@@ -80,7 +80,7 @@ const DetailPricingStructure: any = () => {
 
   const paginationProductActive = usePagination({
     page: 1,
-    itemsPerPage: 10,
+    itemsPerPage: 20,
     maxPageItems: Infinity,
     numbers: true,
     arrows: true,
@@ -89,7 +89,7 @@ const DetailPricingStructure: any = () => {
 
   const paginateCopyFromPriceStructure = usePagination({
     page: 1,
-    itemsPerPage: 10,
+    itemsPerPage: 20,
     maxPageItems: Infinity,
     numbers: true,
     arrows: true,

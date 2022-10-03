@@ -100,7 +100,7 @@ const DetailMenuDesignList: any = () => {
 	const { isShowModal, titleModal, widthModal } = stateModal;
 	const paginationModuleConfig = usePagination({
 		page: 1,
-		itemsPerPage: 10,
+		itemsPerPage: 20,
 		maxPageItems: Infinity,
 		numbers: true,
 		arrows: true,
@@ -108,7 +108,7 @@ const DetailMenuDesignList: any = () => {
 	});
 	const paginationMenuLists = usePagination({
 		page: 1,
-		itemsPerPage: 10,
+		itemsPerPage: 20,
 		maxPageItems: Infinity,
 		numbers: true,
 		arrows: true,
