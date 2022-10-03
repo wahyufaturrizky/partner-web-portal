@@ -152,6 +152,7 @@ const UOMConversionDetail = () => {
     options: {
       onSuccess: () => {
         queryClient.invalidateQueries(["uom-conversion"]);
+        router.back()
       },
     },
   });
@@ -232,7 +233,7 @@ const UOMConversionDetail = () => {
       items: UomData?.dataForUpdate
     }
     updateUom(newData)
-    router.back()
+  
   }
 
   const columns = [
