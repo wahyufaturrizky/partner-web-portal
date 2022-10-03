@@ -12,16 +12,15 @@ interface PropsModalAddBankAccount {
 }
 
 export default function ModalAddBankAccount({
-  visible,
   onCancel,
-  errorsBankAccount
-}: any) {
-  const {
-    account_name,
-    account_number,
-    bank_name
-  } = errorsBankAccount || {}
+  visible,
 
+  fieldsBank,
+  handleBankSubmit,
+  errorsFormBank: { bank },
+  onHandleBankSubmit,
+  bankRegister,
+}: any) {
   return (
     <Modal
       visible={visible}
@@ -30,7 +29,7 @@ export default function ModalAddBankAccount({
       footer={
         <Footer>
           <Button
-            // onClick={onCancel}
+            onClick={onCancel}
             variant="tertiary"
             size="big"
             full
@@ -39,7 +38,7 @@ export default function ModalAddBankAccount({
           </Button>
           <Button
             full
-            // onClick={handleSubmitBankAccount(handleAddItemBankAccount)}
+            onClick={handleBankSubmit(onHandleBankSubmit)}
             variant="primary"
             size="big">
             Add
@@ -50,44 +49,43 @@ export default function ModalAddBankAccount({
         <div key={1}>
           <Spacer size={20} />
           <Input
+            required
             width="100%"
-            placeholder="e.g BCA"
             label="Bank Name"
-            required
-            error={bank_name?.message}
-            // {...registerBankAccount('bank_name', {
-            //   required: 'bank name name must be filled'
-            // })}
+            placeholder="e.g BCA"
+            error={bank?.bank_name?.message}
+            {...bankRegister(`bank_name`, {
+              required: 'bank name name must be filled'
+            })}
           />
           <Spacer size={10} />
           <Input
-            width="100%"
-            placeholder="e.g 12317912"
-            label="Account Number"
             required
+            width="100%"
             type="number"
-            error={account_number?.message}
-            // {...registerBankAccount('account_number', {
-            //   required: 'account number name must be filled'
-            // })}
+            label="Account Number"
+            placeholder="e.g 12317912"
+            error={bank?.account_number?.message}
+            {...bankRegister(`account_number`, {
+              required: 'account number name must be filled'
+            })}
           />
           <Spacer size={10} />
           <Input
-            width="100%"
-            placeholder="e.g Jhone Doe"
-            label="Account Name"
             required
-            error={account_name?.message}
-            // {...registerBankAccount('account_name', {
-            //   required: 'account name must be filled'
-            // })}  
+            width="100%"
+            label="Account Name"
+            placeholder="e.g Jhone Doe"
+            error={bank?.account_name?.message}
+            {...bankRegister(`account_name`, {
+              required: 'account name must be filled'
+            })}
           />
           <Spacer size={20} />
         </div>
-      }
+      }  
     />
-  )
-}
+  )}
 
 
 const Footer = styled.div`

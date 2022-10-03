@@ -6,6 +6,7 @@ import {
   useCreatePricingStructureList,
   useGroupBuyingLists,
   usePricingConfigInfiniteLists,
+  usePricingStructureInfiniteLists,
   usePricingStructureLists,
 } from "hooks/pricing-structure/usePricingStructure";
 import {
@@ -101,8 +102,13 @@ const CreatePricingStructure: any = () => {
 
   const [totalRowsSalesOrganizationInfiniteList, setTotalRowsSalesOrganizationInfiniteList] =
     useState(0);
+  const [totalRowsPricingStructureInfiniteList, setTotalRowsPricingStructureInfiniteList] =
+    useState(0);
   const [salesOrganizationInfiniteList, setSalesOrganizationInfiniteList] = useState<any[]>([]);
   const [searchSalesOrganizationInfinite, setSearchSalesOrganizationInfinite] = useState("");
+
+  const [pricingStructureInfiniteList, setPricingStructureInfiniteList] = useState<any[]>([]);
+  const [searchPricingStructureInfinite, setSearchPricingStructureInfinite] = useState("");
 
   const [selectedFilter, setSelectedFilter] = useState([]);
 
@@ -138,6 +144,7 @@ const CreatePricingStructure: any = () => {
       pricing_config: "",
       currency: "",
       manage_by: "",
+      product_copy: "",
       distribution_channel: null,
       product_selected: [
         {
@@ -276,6 +283,7 @@ const CreatePricingStructure: any = () => {
     searchPricingConfigInfinite ||
       searchProduct ||
       searchSalesOrganizationInfinite ||
+      searchPricingStructureInfinite ||
       searchRegion ||
       searchCurrenciesInfinite,
     1000
@@ -463,6 +471,43 @@ const CreatePricingStructure: any = () => {
       },
       getNextPageParam: (_lastPage: any, pages: any) => {
         if (salesOrganizationInfiniteList.length < totalRowsSalesOrganizationInfiniteList) {
+          return pages.length + 1;
+        } else {
+          return undefined;
+        }
+      },
+    },
+  });
+
+  const {
+    isFetching: isFetchingPricingStructureInfinite,
+    isFetchingNextPage: isFetchingMorePricingStructureInfinite,
+    hasNextPage: hasNextPagePricingStructureInfinite,
+    fetchNextPage: fetchNextPagePricingStructureInfinite,
+    isLoading: isLoadingPricingStructureInfinite,
+  } = usePricingStructureInfiniteLists({
+    query: {
+      search: debounceFetch,
+      limit: 10,
+      status: "ACTIVE",
+    },
+    options: {
+      onSuccess: (data: any) => {
+        setTotalRowsPricingStructureInfiniteList(data.pages[0].totalRow);
+        const mappedData = data?.pages?.map((group: any) => {
+          return group.rows?.map((element: any) => {
+            return {
+              ...element,
+              value: element.id,
+              label: element.proposalNumber,
+            };
+          });
+        });
+        const flattenArray = [].concat(...mappedData);
+        setPricingStructureInfiniteList(flattenArray);
+      },
+      getNextPageParam: (_lastPage: any, pages: any) => {
+        if (pricingStructureInfiniteList.length < totalRowsPricingStructureInfiniteList) {
           return pages.length + 1;
         } else {
           return undefined;
@@ -916,6 +961,7 @@ const CreatePricingStructure: any = () => {
     isLoadingPricingConfigInfinite,
     isLoadingProductList,
     isLoadingSalesOrganizationInfinite,
+    isLoadingPricingStructureInfinite,
   ]);
 
   const isEmpty = productsSelected.length === 0;
@@ -932,7 +978,7 @@ const CreatePricingStructure: any = () => {
         isLoadingProductList ||
         isLoadingSalesOrganizationInfinite ? (
           <Center>
-            <Progress type="circle" percent={percent} />
+            <Spin tip="Loading data..." />
           </Center>
         ) : (
           <Col>
@@ -985,6 +1031,7 @@ const CreatePricingStructure: any = () => {
                     <Tooltip
                       title="Data create from manage price structure config"
                       color={"#F4FBFC"}
+                      overlayInnerStyle={{ width: "fit-content" }}
                     >
                       <ICInfo />
                     </Tooltip>
@@ -1094,6 +1141,7 @@ const CreatePricingStructure: any = () => {
                           <Tooltip
                             title="Data create from manage price structure config"
                             color={"#F4FBFC"}
+                            overlayInnerStyle={{ width: "fit-content" }}
                           >
                             <ICInfo />
                           </Tooltip>
@@ -1208,6 +1256,7 @@ const CreatePricingStructure: any = () => {
                               <Tooltip
                                 title="Data create from manage price structure config"
                                 color={"#F4FBFC"}
+                                overlayInnerStyle={{ width: "fit-content" }}
                               >
                                 <ICInfo />
                               </Tooltip>
@@ -1370,6 +1419,7 @@ const CreatePricingStructure: any = () => {
                                             <Tooltip
                                               title="Data create from manage price structure config"
                                               color={"#F4FBFC"}
+                                              overlayInnerStyle={{ width: "fit-content" }}
                                             >
                                               <ICInfo />
                                             </Tooltip>
@@ -1501,6 +1551,7 @@ const CreatePricingStructure: any = () => {
                                                     <Tooltip
                                                       title="Data create from manage price structure config"
                                                       color={"#F4FBFC"}
+                                                      overlayInnerStyle={{ width: "fit-content" }}
                                                     >
                                                       <ICInfo />
                                                     </Tooltip>
@@ -1636,10 +1687,11 @@ const CreatePricingStructure: any = () => {
         isLoadingCurrenciesInfinite ||
         isLoadingGroupBuying ||
         isLoadingPricingStructureList ||
+        isLoadingPricingStructureInfinite ||
         isLoadingProductList ||
         isLoadingSalesOrganizationInfinite ? (
           <Center>
-            <Progress type="circle" percent={percent} />
+            <Spin tip="Loading data..." />
           </Center>
         ) : (
           <Col>
@@ -1707,6 +1759,7 @@ const CreatePricingStructure: any = () => {
                               <Tooltip
                                 title="Data create from manage price structure config"
                                 color={"#F4FBFC"}
+                                overlayInnerStyle={{ width: "fit-content" }}
                               >
                                 <ICInfo />
                               </Tooltip>
@@ -1925,12 +1978,12 @@ const CreatePricingStructure: any = () => {
                           onClick={() =>
                             setModal({
                               open: true,
-                              typeForm: "Copy From Price Structure",
+                              typeForm: "Copy Product",
                               data: {},
                             })
                           }
                         >
-                          <ICCopy /> Copy From Price Stucture Existing
+                          <ICCopy /> Copy Product
                         </Button>
                       </Col>
 
@@ -2100,7 +2153,7 @@ const CreatePricingStructure: any = () => {
                 Cancel
               </Button>
               <Button onClick={handleSubmit(handleSelectedField)} variant="primary" size="big">
-                {typeForm === "Add Products" ? "Add" : "Copy"}
+                {typeForm === "Add Products" ? "Add" : "Apply"}
               </Button>
             </div>
           }
@@ -2140,6 +2193,84 @@ const CreatePricingStructure: any = () => {
             ) : (
               <>
                 <Spacer size={20} />
+
+                <Controller
+                  control={control}
+                  name="product_copy"
+                  render={({ field: { onChange, value }, fieldState: { error } }) => (
+                    <>
+                      <Row alignItems="center" gap="8px">
+                        <Col>
+                          <Label>Product From</Label>
+                        </Col>
+                        <Col>
+                          <Tooltip
+                            title="Select a product that will be used as the pricing structure reference."
+                            color={"#F4FBFC"}
+                            overlayInnerStyle={{ width: "fit-content" }}
+                          >
+                            <ICInfo />
+                          </Tooltip>
+                        </Col>
+                      </Row>
+                      <Spacer size={3} />
+                      <FormSelect
+                        defaultValue={value}
+                        error={error?.message}
+                        height="48px"
+                        style={{ width: "100%" }}
+                        size={"large"}
+                        placeholder={"Select"}
+                        borderColor={error?.message ? "#ED1C24" : "#AAAAAA"}
+                        arrowColor={"#000"}
+                        withSearch
+                        isLoading={isFetchingPricingStructureInfinite}
+                        isLoadingMore={isFetchingMorePricingStructureInfinite}
+                        fetchMore={() => {
+                          if (hasNextPagePricingStructureInfinite) {
+                            fetchNextPagePricingStructureInfinite();
+                          }
+                        }}
+                        items={
+                          isFetchingPricingStructureInfinite && !isFetchingPricingStructureInfinite
+                            ? []
+                            : pricingStructureInfiniteList
+                        }
+                        onChange={(value: any) => {
+                          onChange(value);
+                        }}
+                        onSearch={(value: any) => {
+                          setSearchPricingStructureInfinite(value);
+                        }}
+                      />
+                    </>
+                  )}
+                />
+
+                <Spacer size={20} />
+
+                <Divider />
+
+                <Spacer size={20} />
+
+                <Row alignItems="center" gap="8px">
+                  <Col>
+                    <Text variant={"headingMedium"}>Product To</Text>
+                  </Col>
+                  <Col>
+                    <Tooltip
+                      title="Select one or several products at once to apply the product 
+                      pricing structure."
+                      color={"#F4FBFC"}
+                      overlayInnerStyle={{ width: "fit-content" }}
+                    >
+                      <ICInfo />
+                    </Tooltip>
+                  </Col>
+                </Row>
+
+                <Spacer size={20} />
+
                 <Row alignItems="flex-end" justifyContent="space-between">
                   <Search
                     width="380px"
@@ -2149,17 +2280,30 @@ const CreatePricingStructure: any = () => {
                 </Row>
                 <Spacer size={10} />
                 <Table
-                  columns={columnsCopyFromPriceStructure.filter(
+                  title={
+                    rowSelectionProductsSelected.selectedRowKeys.length
+                      ? () => (
+                          <Row gap="8px" alignItems="center" nowrap>
+                            <Col>
+                              <Text>{`${rowSelectionProductsSelected.selectedRowKeys.length}/${productsSelected.length} Selected Products`}</Text>
+                            </Col>
+                          </Row>
+                        )
+                      : null
+                  }
+                  loading={isLoadingProductList || isFetchingProductList}
+                  columns={columnsProductsSelected.filter(
                     (filtering) =>
                       filtering.dataIndex !== "id" &&
                       filtering.dataIndex !== "key" &&
-                      filtering.dataIndex !== "activeDate" &&
+                      filtering.dataIndex !== "hasVariant" &&
+                      filtering.dataIndex !== "productCategoryName" &&
                       filtering.dataIndex !== "status"
                   )}
-                  data={pricingStructureLists}
-                  rowSelection={rowSelectionCopyFromPriceStructure}
+                  data={productsSelected}
+                  rowSelection={rowSelectionProductsSelected}
                 />
-                <Pagination pagination={paginateCopyFromPriceStructure} />
+                <Pagination pagination={paginationProductsSelected} />
                 <Spacer size={14} />
               </>
             )
@@ -2272,7 +2416,11 @@ const ManageZoneComponent = (props: any) => {
             <Label>Zone Filled</Label>
           </Col>
           <Col>
-            <Tooltip title="Data create from manage price structure config" color={"#F4FBFC"}>
+            <Tooltip
+              title="Data create from manage price structure config"
+              color={"#F4FBFC"}
+              overlayInnerStyle={{ width: "fit-content" }}
+            >
               <ICInfo />
             </Tooltip>
           </Col>
@@ -2317,7 +2465,11 @@ const ManageZoneComponent = (props: any) => {
             <Row alignItems="center" gap="12px">
               <Switch defaultChecked={value || false} checked={value} onChange={onChange} />
               <Text>is Reference</Text>
-              <Tooltip title="Data create from manage price structure config" color={"#F4FBFC"}>
+              <Tooltip
+                title="Data create from manage price structure config"
+                color={"#F4FBFC"}
+                overlayInnerStyle={{ width: "fit-content" }}
+              >
                 <ICInfo />
               </Tooltip>
             </Row>
@@ -2419,6 +2571,7 @@ const ManageZoneComponent = (props: any) => {
                     <Tooltip
                       title="Data create from manage price structure config"
                       color={"#F4FBFC"}
+                      overlayInnerStyle={{ width: "fit-content" }}
                     >
                       <ICInfo />
                     </Tooltip>

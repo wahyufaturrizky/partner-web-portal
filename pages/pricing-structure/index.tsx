@@ -575,6 +575,7 @@ const PricingStructureList: any = () => {
             <InActivePricingStructure
               modalPricingStructureForm={modalPricingStructureForm}
               setModalPricingStructureForm={setModalPricingStructureForm}
+              refetchCount={refetch}
             />
           ) : tab === "draft" ? (
             <DraftPricingStructure
@@ -586,11 +587,13 @@ const PricingStructureList: any = () => {
             <RejectedPricingStructure
               modalPricingStructureForm={modalPricingStructureForm}
               setModalPricingStructureForm={setModalPricingStructureForm}
+              refetchCount={refetch}
             />
           ) : (
             <WaitingApprovalPricingStructure
               modalPricingStructureForm={modalPricingStructureForm}
               setModalPricingStructureForm={setModalPricingStructureForm}
+              refetchCount={refetch}
             />
           )}
         </Col>

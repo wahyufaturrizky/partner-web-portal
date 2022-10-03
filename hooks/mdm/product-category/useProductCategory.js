@@ -91,7 +91,6 @@ const useUpdateProductCategory = ({ id, options }) => {
 };
 
 const fetchCoaList = async ({ query = {}, status }) => {
-  console.log(status, 'status on fetch')
   return client(`/coa-list?company_code=KSNI&account_type=${status}`, {
     params: {
       // search: "",

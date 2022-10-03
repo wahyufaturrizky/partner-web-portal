@@ -152,8 +152,7 @@ const BranchCreate = () => {
     enabled: calendarDetailId? true : false,
     id: calendarDetailId,
     options: {
-      onSuccess: (data: any) => {
-      },
+      onSuccess: (data: any) => {},
       select: (data: any) => {
         let start = data?.workingDays.findIndex((e: boolean) => e === true)
         let end = data?.workingDays.findIndex((e: boolean) => e === false) === 0 ? 6 : data?.workingDays.findIndex((e: boolean) => e === false) - 1
@@ -510,7 +509,62 @@ const BranchCreate = () => {
               </Col>
             </Row>
 
-            
+            <Spacer size={15} />
+
+            <Row width="100%" noWrap>
+              <Col width={"100%"}>
+                <Controller
+                  control={control}
+                  name="uom_category_id"
+                  render={({ field: { onChange } }) => (
+                    <>
+                      <Label>Calendar</Label>
+                      <FormSelect
+                        style={{ width: "100%" }}
+                        size={"large"}
+                        placeholder={"Select"}
+                        borderColor={"#AAAAAA"}
+                        arrowColor={"#000"}
+                        withSearch
+                        isLoading={isFetchingCalendar}
+                        isLoadingMore={isFetchingMoreCalendar}
+                        fetchMore={() => {
+                          if (calendarHasNextPage) {
+                            calendarFetchNextPage();
+                          }
+                        }}
+                        items={
+                          isFetchingCalendar && !isFetchingMoreCalendar
+                            ? []
+                            : listCalendar
+                        }
+                        onChange={(value: any) => {
+                          onChange(value);
+                          setCalendarDetailId(value)
+                        }}
+                        onSearch={(value: any) => {
+                          setSearchCalendar(value);
+                        }}
+                      />
+                    </>
+                  )}
+                />
+              </Col>
+              <Spacer size={10} />
+
+              <Col width="100%">
+                <Controller
+                  control={control}
+                  name="external_code"
+                  render={({ field: { onChange } }) => (
+                    <>
+                      <Text variant="headingRegular">External Code</Text>
+                      <FormInput size={"large"} placeholder={"e.g 12345"} />
+                    </>
+                  )}
+                />
+              </Col>
+            </Row>
 
             <Spacer size={15} />
           </Accordion.Body>

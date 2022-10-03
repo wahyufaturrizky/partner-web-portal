@@ -242,8 +242,7 @@ const BranchDetail = () => {
     enabled: calendarDetailId? true : false,
     id: calendarDetailId,
     options: {
-      onSuccess: (data: any) => {
-      },
+      onSuccess: (data: any) => {},
       select: (data: any) => {
         let start = data?.workingDays.findIndex((e: boolean) => e === true)
         let end = data?.workingDays.findIndex((e: boolean) => e === false) === 0 ? 6 : data?.workingDays.findIndex((e: boolean) => e === false) - 1
@@ -325,7 +324,6 @@ const BranchDetail = () => {
 
 
   const onSubmit = (data: any) => {
-    console.log(data, '<<<<data hasil submit')
     const formData = {
       company_id: "KSNI",
       ...data,

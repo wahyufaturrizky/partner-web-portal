@@ -435,6 +435,11 @@ export default function CreateProduct({ isCreateProductVariant = true}) {
     control,
   });
 
+  const variantsForm = useWatch({
+    name: 'variants',
+    control
+  })
+
   // useFieldArray Product Variants
   const {
     fields: fieldsProductVariants,
@@ -535,6 +540,7 @@ export default function CreateProduct({ isCreateProductVariant = true}) {
     fieldsProductVariants,
     replaceProductVariants,
     updateProductVariants,
+    variantsForm: productData?.variants
   }
   
   return (
@@ -708,7 +714,6 @@ export default function CreateProduct({ isCreateProductVariant = true}) {
                             : listProductCategory
                         }
                         onChange={(value: any) => {
-                          console.log('value', value)
                           onChange(value);
                         }}
                         onSearch={(value: any) => {

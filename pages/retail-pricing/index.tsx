@@ -91,8 +91,8 @@ const RetailPricing = () => {
       select: (data: any) => {
         const mappedData = data?.rows?.map((element: any) => {
           return {
-            key: element.retail_pricing_id,
-            retail_pricing_id: element.retail_pricing_id,
+            key: element.retailPriceId,
+            retail_pricing_id: element.retailPriceId,
             name: element.name,
             based_on: element.basedOn,
             action: (
@@ -100,7 +100,7 @@ const RetailPricing = () => {
                 <Button
                   size="small"
                   onClick={() => {
-                    router.push(`/retail-pricing/${element.retailPricingId}`);
+                    router.push(`/retail-pricing/${element.retailPriceId}`);
                   }}
                   variant="tertiary"
                 >

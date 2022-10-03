@@ -7,7 +7,8 @@ import {
   Button,
   Accordion,
   Input,
-  Table
+  Table,
+  FileUploaderExcel
 } from "pink-lava-ui";
 import styled from "styled-components";
 import ArrowLeft from "../../assets/icons/arrow-left.svg";
@@ -115,6 +116,7 @@ const CreateRetailPricing: any = () => {
     control,
   });
 
+  const [showUploadStructure, setShowUploadStructure] = useState<any>(false);
   const [showModalRules, setShowModalRules] = useState({
     visibility: false,
     tempRule: null,
@@ -146,7 +148,46 @@ const CreateRetailPricing: any = () => {
 	});
 
   const onSubmit = (data:any) => {
+    data.company_id = 'KSNI'
     createRetailPricing(data);
+  }
+
+  const onUploadStructure = (data: any) => {
+    let newRule: any = {
+      apply_on: data.applyOn,
+      price_computation: data.priceComputation,
+      min_qty: data.minimumQuantity,
+      //valid_date: data.valid_date.map((date: any) => moment(date, 'DD/MM/YYYY').utc().toString())
+    }
+
+    // if(data.apply_on === 'PRODUCT VARIANT'){
+    //   newRule.product_variant_id = data.product_variant_id
+    // }
+    // if(data.apply_on === 'PRODUCT CATEGORY'){
+    //   newRule.product_category_id = data.product_category_id
+    // }
+    // if(data.apply_on === 'PRODUCT GROUP'){
+    //   newRule.product_group_id = data.product_group_id
+    // }
+
+    if(data.priceComputation === 'DISCOUNT'){
+      newRule.value = data.discount;
+    }
+
+    if(data.priceComputation === 'FIXED PRICE'){
+      newRule.value = data.fixPrice;
+    }
+    
+    if(data.price_computation === 'FORMULA') {
+      newRule.based_on = data.basedOn
+
+      if(data.based_on === 'COST'){
+        newRule.margin_min = data.marginMinimum
+        newRule.margin_max = data.marginMaximum
+        newRule.extra_fee = data.extraFee
+        newRule.rounding_method = data.roundingMethod
+      }
+    }
   }
 
   return (
@@ -236,7 +277,7 @@ const CreateRetailPricing: any = () => {
                   <Button
                     variant="tertiary"
                     size="big"
-                    onClick={() => {}}
+                    onClick={() => setShowUploadStructure(true)}
                   >
                     Upload Template
                   </Button>
@@ -299,6 +340,12 @@ const CreateRetailPricing: any = () => {
           />
         }
       </Col>
+
+      <FileUploaderExcel
+				setVisible={setShowUploadStructure}
+				visible={showUploadStructure}
+				onSubmit={onUploadStructure}
+			/>
     </>
   );
 };

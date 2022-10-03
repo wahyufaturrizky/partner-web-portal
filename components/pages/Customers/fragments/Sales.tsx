@@ -16,18 +16,12 @@ import { useFetchListSalesman } from 'hooks/mdm/salesman/useSalesman';
 import { listSalesItems } from '../constants';
 
 export default function Sales(props: any) {
-  const { register, setValue, control } = props
+  const { register, setValue, control, checked, setChecked } = props
   const [search, setSearch] = useState({
     branch: '',
     termOfPayment: '',
     salesman: ''
   })
-  const [checked, setChecked] = useState<any>({
-    sales_order_blocking: false,
-    billing_blocking: false,
-    delivery_order_blocking: false
-  })
-
   
   const { data: listSalesman } = useFetchListSalesman({
     options: { onSuccess: () => {} },
@@ -131,8 +125,11 @@ export default function Sales(props: any) {
             <Row key={index} alignItems="center">
               <Checkbox
                 checked={checked[value]}
-                onChange={(status: any) =>
+                onChange={(status: any) => {
                   setChecked({ ...checked, [value]: status })
+                  register(`sales.${value}`, checked[value])
+                  setValue(`sales.${value}`, checked[value])
+                }
                 }/>
               <Text>{label}</Text>
             </Row>

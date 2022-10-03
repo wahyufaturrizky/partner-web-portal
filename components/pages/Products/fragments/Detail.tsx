@@ -29,6 +29,7 @@ import DraggableTable from 'components/pages/Products/fragments/DraggableTable';
 
 export default function Detail(props: any) {
   const {
+    variantsForm,
     control,
     watch,
     setValue,
@@ -155,7 +156,8 @@ export default function Detail(props: any) {
   useUpdateProductVariantStatus({ options: {} });
 
   const [searchVariant, setSearchVariant] = useState('')
-  let variantsData = fieldsProductVariants.map((variant:any, index: number) => {
+  let variantsData = variantsForm.map((variant:any, index: number) => {
+    console.log("id", variant)
     return {
         name: variant.name,
         cost: variant.cost,
