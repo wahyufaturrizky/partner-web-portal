@@ -159,7 +159,7 @@ const ProcessList: any = () => {
 								rounded
 							/>
 						</Row>
-						<Row gap="16px">
+						{/* <Row gap="16px">
 							<Button
 								size="big"
 								variant={"tertiary"}
@@ -171,7 +171,7 @@ const ProcessList: any = () => {
 							<Button size="big" variant={"primary"} onClick={() => Router.push("/business-process/process/create")}>
 								Create
 							</Button>
-						</Row>
+						</Row> */}
 					</Row>
 				</Card>
 				<Spacer size={10} />
@@ -190,7 +190,7 @@ const ProcessList: any = () => {
 									filtering.dataIndex !== "created_by"
 							)}
 							data={paginateField}
-							rowSelection={rowSelection}
+							// rowSelection={rowSelection}
 						/>
 						<Pagination pagination={pagination} />
 					</Col>
