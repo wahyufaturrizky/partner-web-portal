@@ -513,6 +513,7 @@ const AdminLayout = (props: any) => {
 
   const handleCLickTabNav = (e: any) => {
     setCurrent(e.key);
+    Router.push('/dashboard')
   };
 
   const handleLogout = (e: any) => {
