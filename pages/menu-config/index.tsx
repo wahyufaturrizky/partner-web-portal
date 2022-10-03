@@ -136,7 +136,7 @@ const MenuConfigList: any = () => {
 							colorIcon={colors.grey.regular}
 							onChange={(e: any) => setSearch(e.target.value)}
 						/>
-						<Row gap="16px">
+						{/* <Row gap="16px">
 							<Button
 								size="big"
 								variant={"tertiary"}
@@ -152,7 +152,7 @@ const MenuConfigList: any = () => {
 							>
 								Create
 							</Button>
-						</Row>
+						</Row> */}
 					</Row>
 				</Card>
 				<Spacer size={10} />
@@ -178,7 +178,7 @@ const MenuConfigList: any = () => {
 									filtering.dataIndex !== "created_by"
 							)}
 							data={paginateField}
-							rowSelection={rowSelection}
+							// rowSelection={rowSelection}
 						/>
 						<Pagination pagination={pagination} />
 					</Col>
