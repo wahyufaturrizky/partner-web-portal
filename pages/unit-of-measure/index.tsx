@@ -51,7 +51,7 @@ const UOM = () => {
   const router = useRouter();
   const pagination = usePagination({
     page: 1,
-    itemsPerPage: 10,
+    itemsPerPage: 20,
     maxPageItems: Infinity,
     numbers: true,
     arrows: true,
