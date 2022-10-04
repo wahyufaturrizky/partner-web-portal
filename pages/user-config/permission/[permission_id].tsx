@@ -139,6 +139,7 @@ const DetailPartnerConfigPermissionList: any = () => {
               <Row gap="16px">
                 <Button
                   size="big"
+                  hidden
                   variant={"tertiary"}
                   onClick={() => setModalDelete({ open: true })}
                 >
