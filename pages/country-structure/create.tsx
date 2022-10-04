@@ -289,7 +289,7 @@ const CreateCountries = () => {
 					<Card>
 						<Row justifyContent="flex-end" alignItems="center" nowrap>
 							<Row gap="10px">
-								<Button size="big" variant={"tertiary"} onClick={() => router.push("/country")}>
+								<Button size="big" variant={"tertiary"} onClick={() => router.push("/country-structure")}>
 									Cancel
 								</Button>
 								<Button size="big" variant={"primary"} onClick={onSubmit}>
