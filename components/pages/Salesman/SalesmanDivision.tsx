@@ -176,13 +176,13 @@ export default function ComponentSalesmanDivision() {
             onChange={({ target }: any) => setSearch(target.value)}
           />
           <FlexElement>
-            <Button
+            {/* <Button
               disabled={selectedItems.length < 1}
               onClick={() => setVisible({ ...visible, delete: true })}
               variant="tertiary"
             >
               Delete
-            </Button>
+            </Button> */}
             <DropdownMenu
               title="More"
               buttonVariant="secondary"
@@ -201,7 +201,7 @@ export default function ComponentSalesmanDivision() {
       <Spacer size={10} />
       <Card>
         <Table
-          rowSelection={rowSelection}
+          // rowSelection={rowSelection}
           loading={isLoading}
           columns={columnsSalesDivision}
           data={data?.rows?.map((item: any) => ({ ...item, key: item?.id }))}
