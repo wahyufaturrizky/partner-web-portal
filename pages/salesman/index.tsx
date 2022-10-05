@@ -41,7 +41,7 @@ export default function Salesman() {
   const router = useRouter()
   const pagination = usePagination({
     page: 1,
-    itemsPerPage: 10,
+    itemsPerPage: 20,
     maxPageItems: Infinity,
     numbers: true,
     arrows: true,
@@ -51,7 +51,7 @@ export default function Salesman() {
   const columns = [
     {
       title: "Salesman ID",
-      dataIndex: "idCard",
+      dataIndex: "code",
     },
     {
       title: "Salesman Name",
@@ -172,7 +172,7 @@ export default function Salesman() {
 
   return (
     <div>
-      <Text variant="h4">Salesman List</Text>
+      <Text variant="h4">Salesman</Text>
       <Spacer size={20} />
       <ContentSwitcher
         options={options({

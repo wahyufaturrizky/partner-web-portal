@@ -1,5 +1,4 @@
 import usePagination from "@lucasmogari/react-pagination";
-import { useChannelsMDM } from "hooks/mdm/channel/useChannelMDM";
 import { useCurrenciesInfiniteLists } from "hooks/mdm/country-structure/useCurrencyMDM";
 import { useProductList } from "hooks/mdm/product-list/useProductList";
 import {
@@ -7,9 +6,15 @@ import {
   useCreatePricingStructureList,
   useGroupBuyingLists,
   usePricingConfigInfiniteLists,
+  usePricingStructureInfiniteLists,
+  usePricingStructureLists,
 } from "hooks/pricing-structure/usePricingStructure";
-import { useSalesOrganizationInfiniteLists } from "hooks/sales-organization/useSalesOrganization";
+import {
+  useSalesOrganizationHirarcy,
+  useSalesOrganizationInfiniteLists,
+} from "hooks/sales-organization/useSalesOrganization";
 import useDebounce from "lib/useDebounce";
+import moment from "moment";
 import { useRouter } from "next/router";
 import {
   Button,
@@ -31,6 +36,7 @@ import {
   Table,
   Text,
   Tooltip,
+  Spin,
 } from "pink-lava-ui";
 import { useEffect, useState } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
@@ -42,7 +48,7 @@ import ArrowLeft from "../../assets/icons/arrow-left.svg";
 const CreatePricingStructure: any = () => {
   const paginationProducts = usePagination({
     page: 1,
-    itemsPerPage: 10,
+    itemsPerPage: 20,
     maxPageItems: Infinity,
     numbers: true,
     arrows: true,
@@ -51,7 +57,16 @@ const CreatePricingStructure: any = () => {
 
   const paginationProductsSelected = usePagination({
     page: 1,
-    itemsPerPage: 10,
+    itemsPerPage: 20,
+    maxPageItems: Infinity,
+    numbers: true,
+    arrows: true,
+    totalItems: 100,
+  });
+
+  const paginationProductActive = usePagination({
+    page: 1,
+    itemsPerPage: 20,
     maxPageItems: Infinity,
     numbers: true,
     arrows: true,
@@ -60,7 +75,7 @@ const CreatePricingStructure: any = () => {
 
   const paginateCopyFromPriceStructure = usePagination({
     page: 1,
-    itemsPerPage: 10,
+    itemsPerPage: 20,
     maxPageItems: Infinity,
     numbers: true,
     arrows: true,
@@ -87,8 +102,13 @@ const CreatePricingStructure: any = () => {
 
   const [totalRowsSalesOrganizationInfiniteList, setTotalRowsSalesOrganizationInfiniteList] =
     useState(0);
+  const [totalRowsPricingStructureInfiniteList, setTotalRowsPricingStructureInfiniteList] =
+    useState(0);
   const [salesOrganizationInfiniteList, setSalesOrganizationInfiniteList] = useState<any[]>([]);
   const [searchSalesOrganizationInfinite, setSearchSalesOrganizationInfinite] = useState("");
+
+  const [pricingStructureInfiniteList, setPricingStructureInfiniteList] = useState<any[]>([]);
+  const [searchPricingStructureInfinite, setSearchPricingStructureInfinite] = useState("");
 
   const [selectedFilter, setSelectedFilter] = useState([]);
 
@@ -124,6 +144,7 @@ const CreatePricingStructure: any = () => {
       pricing_config: "",
       currency: "",
       manage_by: "",
+      product_copy: "",
       distribution_channel: null,
       product_selected: [
         {
@@ -139,7 +160,56 @@ const CreatePricingStructure: any = () => {
               manage_by_zone: false,
               manage_by_zone_detail: {
                 zone_type: "",
-                internal_reqgion: "",
+                internal_region: "",
+                region_selected: [
+                  {
+                    distribution_channel: [
+                      {
+                        companyId: "",
+                        createdAt: "",
+                        deletedAt: "",
+                        deletedBy: "",
+                        modifiedAt: "",
+                        modifiedBy: "",
+                        name: "",
+                        manage_by_zone: false,
+                        manage_by_zone_detail: {
+                          zone_type: "",
+                          internal_region: "",
+                          region_selected: [],
+                        },
+                        is_reference: false,
+                        margin_type: "",
+                        margin_value: "",
+                        cost: "",
+                        salesChannelId: "",
+                        createdBy: 0,
+                        currency: null,
+                        level: [
+                          {
+                            buyingPrice: 0,
+                            priceStructureId: 0,
+                            groupBuyingPrice: null,
+                            id: null,
+                            index: null,
+                            level: null,
+                            nameLevel: "",
+                            cost: "",
+                            margin_value: "",
+                            margin_type: "",
+                            is_reference: false,
+                          },
+                        ],
+                      },
+                    ],
+                    hasVariant: false,
+                    id: "",
+                    key: "",
+                    name: "",
+                    productCategoryName: "",
+                    status: "",
+                  },
+                ],
               },
               is_reference: false,
               margin_type: "",
@@ -176,36 +246,50 @@ const CreatePricingStructure: any = () => {
     },
   });
 
-  const { mutate: pricingStructure } = useCreatePricingStructureList({
-    options: {
-      onSuccess: () => {
-        router.back();
-      },
-    },
+  const dataWatchManageByZone = useWatch({
+    control: control,
+    name: `product_selected.${manageByZone?.data?.indexExpandedRowRenderProductSelected}.distribution_channel.${manageByZone?.data?.indexDistChannel}`,
   });
 
-  const { mutate: pricingStructureDraft } = useCreatePricingStructureDraftList({
-    options: {
-      onSuccess: () => {
-        router.back();
-      },
-    },
+  const dataWatchManageByZoneForProductSelected = useWatch({
+    control: control,
+    name: `product_selected.${manageByZone?.data?.indexExpandedRowRenderProductSelected}`,
   });
+
+  const dataWatchManageBy = useWatch({
+    control: control,
+    name: "manage_by",
+  });
+
+  const { mutate: pricingStructure, isLoading: isLoadingPricingStructure } =
+    useCreatePricingStructureList({
+      options: {
+        onSuccess: () => {
+          router.back();
+        },
+      },
+    });
+
+  const { mutate: pricingStructureDraft, isLoading: isLoadingPricingStructureDraft } =
+    useCreatePricingStructureDraftList({
+      options: {
+        onSuccess: () => {
+          router.back();
+        },
+      },
+    });
 
   const debounceFetch = useDebounce(
     searchPricingConfigInfinite ||
       searchProduct ||
       searchSalesOrganizationInfinite ||
+      searchPricingStructureInfinite ||
       searchRegion ||
       searchCurrenciesInfinite,
     1000
   );
 
-  const {
-    data: dataGroupBuying,
-    isLoading: isLoadingGroupBuying,
-    isFetching: isFetchingGroupBuying,
-  } = useGroupBuyingLists({
+  const { data: dataGroupBuying, isLoading: isLoadingGroupBuying } = useGroupBuyingLists({
     query: {
       limit: 1000000,
     },
@@ -296,18 +380,67 @@ const CreatePricingStructure: any = () => {
   });
 
   const {
-    data: channelsMDMData,
-    isLoading: isLoadingChannelsMDM,
-    isFetching: isFetchingChannelsMDM,
-  } = useChannelsMDM({
+    isLoading: isLoadingSalesOrganizationHirarcy,
+    data: dataSalesOrganizationHirarcy,
+    isFetching: isFetchingSalesOrganizationHirarcy,
+  } = useSalesOrganizationHirarcy({
+    structure_id: dataWatchManageByZone?.manage_by_zone_detail?.zone_type,
+    options: {
+      onSuccess: () => {},
+      select: (data: any) =>
+        data.map((dataHirarcy: any) => ({
+          ...dataHirarcy,
+          key: dataHirarcy.id,
+        })),
+      enabled:
+        !!dataWatchManageByZone?.manage_by_zone &&
+        !!dataWatchManageByZone?.manage_by_zone_detail?.zone_type,
+    },
     query: {
-      search: debounceFetch,
       limit: 10000,
     },
+  });
+
+  const {
+    isLoading: isLoadingSalesOrganizationHirarcyFromManageBy,
+    data: dataSalesOrganizationHirarcyFromManageBy,
+    isFetching: isFetchingSalesOrganizationHirarcyFromManageBy,
+  } = useSalesOrganizationHirarcy({
+    structure_id: dataWatchManageBy,
     options: {
-      onSuccess: (data: any) => {},
+      onSuccess: () => {},
+      select: (data: any) =>
+        data.map((dataHirarcy: any) => ({
+          ...dataHirarcy,
+          key: dataHirarcy.id,
+        })),
+      enabled: !!dataWatchManageBy,
+    },
+    query: {
+      limit: 10000,
     },
   });
+
+  const { data: pricingStructureLists, isLoading: isLoadingPricingStructureList } =
+    usePricingStructureLists({
+      options: {
+        onSuccess: (data: any) => {
+          paginationProductActive.setTotalItems(data.totalRow);
+        },
+        select: (data: any) =>
+          data.rows.map((subData: any) => ({
+            ...subData,
+            key: subData.id,
+            name: subData.proposalNumber,
+          })),
+      },
+      query: {
+        search: debounceFetch,
+        page: paginationProductActive.page,
+        limit: paginationProductActive.itemsPerPage,
+        status: "ACTIVE",
+      },
+    });
 
   const {
     isFetching: isFetchingSalesOrganizationInfinite,
@@ -338,6 +471,43 @@ const CreatePricingStructure: any = () => {
       },
       getNextPageParam: (_lastPage: any, pages: any) => {
         if (salesOrganizationInfiniteList.length < totalRowsSalesOrganizationInfiniteList) {
+          return pages.length + 1;
+        } else {
+          return undefined;
+        }
+      },
+    },
+  });
+
+  const {
+    isFetching: isFetchingPricingStructureInfinite,
+    isFetchingNextPage: isFetchingMorePricingStructureInfinite,
+    hasNextPage: hasNextPagePricingStructureInfinite,
+    fetchNextPage: fetchNextPagePricingStructureInfinite,
+    isLoading: isLoadingPricingStructureInfinite,
+  } = usePricingStructureInfiniteLists({
+    query: {
+      search: debounceFetch,
+      limit: 10,
+      status: "ACTIVE",
+    },
+    options: {
+      onSuccess: (data: any) => {
+        setTotalRowsPricingStructureInfiniteList(data.pages[0].totalRow);
+        const mappedData = data?.pages?.map((group: any) => {
+          return group.rows?.map((element: any) => {
+            return {
+              ...element,
+              value: element.id,
+              label: element.proposalNumber,
+            };
+          });
+        });
+        const flattenArray = [].concat(...mappedData);
+        setPricingStructureInfiniteList(flattenArray);
+      },
+      getNextPageParam: (_lastPage: any, pages: any) => {
+        if (pricingStructureInfiniteList.length < totalRowsPricingStructureInfiniteList) {
           return pages.length + 1;
         } else {
           return undefined;
@@ -382,13 +552,25 @@ const CreatePricingStructure: any = () => {
     },
   });
 
-  const onSubmit = (data: any) => {
-    pricingStructure(data);
-  };
+  const onSubmit = (dataSubmit: any) =>
+    pricingStructure({
+      price_structure_config_id: dataSubmit.pricing_config,
+      currency: dataSubmit.currency,
+      managed_by: dataSubmit.manage_by,
+      active_date: moment().format("YYYY-MM-DD"),
+      distributions: dataSubmit.distribution_channel,
+      products: dataSubmit.product_selected.map((mapping: any) => mapping.id),
+    });
 
-  const onSubmitDraft = (data: any) => {
-    pricingStructureDraft(data);
-  };
+  const onSubmitDraft = (dataDraft: any) =>
+    pricingStructureDraft({
+      price_structure_config_id: dataDraft.pricing_config,
+      currency: dataDraft.currency,
+      managed_by: dataDraft.manage_by,
+      active_date: moment().format("YYYY-MM-DD"),
+      distributions: dataDraft.distribution_channel,
+      products: dataDraft.product_selected.map((mapping: any) => mapping.id),
+    });
 
   useEffect(
     () => {
@@ -415,17 +597,15 @@ const CreatePricingStructure: any = () => {
 
           const rawValue = tempProductsSelected.map((subDataProdSelected: any) => ({
             ...subDataProdSelected,
-            distribution_channel: channelsMDMData?.rows
-              ?.filter((filtering: any) =>
-                data.distribution_channel.includes(filtering.salesChannelId)
-              )
+            distribution_channel: dataSalesOrganizationHirarcyFromManageBy
+              ?.filter((filtering: any) => data.distribution_channel.includes(filtering.id))
               .map((distribution_channel_mapped: any) => ({
                 ...distribution_channel_mapped,
                 level: pricingConfigInfiniteList
                   .find((finding: any) => finding.id === data.pricing_config)
                   .priceStructureLevelings.map((subLevel: any) => ({
                     ...subLevel,
-                    nameLevel: dataGroupBuying.rows[subLevel.buyingPrice].name,
+                    nameLevel: dataGroupBuying.rows[subLevel.buyingPrice]?.name,
                   })),
                 currency: currenciesInfiniteList.find(
                   (finding: any) => finding.id === data.currency
@@ -442,86 +622,17 @@ const CreatePricingStructure: any = () => {
 
           setSearchProduct("");
         } else {
-          setProductsSelected(
-            selectedRowTableProductSelected.map((subDataProdSelected: any) => ({
-              ...subDataProdSelected,
-              distribution_channel: channelsMDMData?.rows
-                ?.filter((filtering: any) =>
-                  data.distribution_channel.includes(filtering.salesChannelId)
-                )
-                .map((distribution_channel_mapped: any) => ({
-                  ...distribution_channel_mapped,
-                  level: pricingConfigInfiniteList
-                    .find((finding: any) => finding.id === data.pricing_config)
-                    .priceStructureLevelings.map((subLevel: any) => ({
-                      ...subLevel,
-                      nameLevel: dataGroupBuying.rows[subLevel.buyingPrice].name,
-                    })),
-                  currency: currenciesInfiniteList.find(
-                    (finding: any) => finding.id === data.currency
-                  ),
-                  manage_by: salesOrganizationInfiniteList.find(
-                    (finding: any) => finding.id === data.manage_by
-                  ),
-                })),
-            }))
-          );
-
-          setSearchProduct("");
-        }
-      });
-    } else {
-    }
-  };
-
-  const handleSelectedRegionField = (data: any) => {
-    let tempRegionSelected: any = [];
-
-    productListData?.data?.map((field: any) => {
-      if (rowSelectionProduct.selectedRowKeys.includes(field.key as never)) {
-        tempRegionSelected.push(field);
-
-        const rawValue = tempRegionSelected.map((subDataProdSelected: any) => ({
-          ...subDataProdSelected,
-          distribution_channel: channelsMDMData?.rows
-            ?.filter((filtering: any) =>
-              data.distribution_channel.includes(filtering.salesChannelId)
-            )
-            .map((distribution_channel_mapped: any) => ({
-              ...distribution_channel_mapped,
-              level: pricingConfigInfiniteList
-                .find((finding: any) => finding.id === data.pricing_config)
-                .priceStructureLevelings.map((subLevel: any) => ({
-                  ...subLevel,
-                  nameLevel: dataGroupBuying.rows[subLevel.buyingPrice].name,
-                })),
-              currency: currenciesInfiniteList.find((finding: any) => finding.id === data.currency),
-              manage_by: salesOrganizationInfiniteList.find(
-                (finding: any) => finding.id === data.manage_by
-              ),
-            })),
-        }));
-
-        setValue("product_selected", rawValue);
-
-        setProductsSelected(rawValue);
-
-        setSearchProduct("");
-      } else {
-        setProductsSelected(
-          selectedRowTableProductSelected.map((subDataProdSelected: any) => ({
+          const tempRawValue = selectedRowTableProductSelected.map((subDataProdSelected: any) => ({
             ...subDataProdSelected,
-            distribution_channel: channelsMDMData?.rows
-              ?.filter((filtering: any) =>
-                data.distribution_channel.includes(filtering.salesChannelId)
-              )
+            distribution_channel: dataSalesOrganizationHirarcyFromManageBy
+              ?.filter((filtering: any) => data.distribution_channel.includes(filtering.id))
               .map((distribution_channel_mapped: any) => ({
                 ...distribution_channel_mapped,
                 level: pricingConfigInfiniteList
                   .find((finding: any) => finding.id === data.pricing_config)
                   .priceStructureLevelings.map((subLevel: any) => ({
                     ...subLevel,
-                    nameLevel: dataGroupBuying.rows[subLevel.buyingPrice].name,
+                    nameLevel: dataGroupBuying.rows[subLevel.buyingPrice]?.name,
                   })),
                 currency: currenciesInfiniteList.find(
                   (finding: any) => finding.id === data.currency
@@ -530,13 +641,115 @@ const CreatePricingStructure: any = () => {
                   (finding: any) => finding.id === data.manage_by
                 ),
               })),
-          }))
-        );
+          }));
 
-        setSearchProduct("");
-      }
-    });
+          setValue("product_selected", tempRawValue);
+
+          setProductsSelected(tempRawValue);
+
+          setSearchProduct("");
+        }
+      });
+    } else {
+      let tempProductsSelected: any = [];
+
+      pricingStructureLists?.map((field: any) => {
+        if (rowSelectionCopyFromPriceStructure.selectedRowKeys.includes(field.key as never)) {
+          tempProductsSelected.push(field);
+
+          const rawValue = tempProductsSelected.map((subDataProdSelected: any) => ({
+            ...subDataProdSelected,
+            distribution_channel: dataSalesOrganizationHirarcyFromManageBy
+              ?.filter((filtering: any) => data.distribution_channel.includes(filtering.id))
+              .map((distribution_channel_mapped: any) => ({
+                ...distribution_channel_mapped,
+                level: pricingConfigInfiniteList
+                  .find((finding: any) => finding.id === data.pricing_config)
+                  .priceStructureLevelings.map((subLevel: any) => ({
+                    ...subLevel,
+                    nameLevel: dataGroupBuying.rows[subLevel.buyingPrice]?.name,
+                  })),
+                currency: currenciesInfiniteList.find(
+                  (finding: any) => finding.id === data.currency
+                ),
+                manage_by: salesOrganizationInfiniteList.find(
+                  (finding: any) => finding.id === data.manage_by
+                ),
+              })),
+          }));
+
+          setValue("product_selected", rawValue);
+
+          setProductsSelected(rawValue);
+
+          setSearchProduct("");
+        } else {
+          const tempRawValue = selectedRowTableProductSelected.map((subDataProdSelected: any) => ({
+            ...subDataProdSelected,
+            distribution_channel: dataSalesOrganizationHirarcyFromManageBy
+              ?.filter((filtering: any) => data.distribution_channel.includes(filtering.id))
+              .map((distribution_channel_mapped: any) => ({
+                ...distribution_channel_mapped,
+                level: pricingConfigInfiniteList
+                  .find((finding: any) => finding.id === data.pricing_config)
+                  .priceStructureLevelings.map((subLevel: any) => ({
+                    ...subLevel,
+                    nameLevel: dataGroupBuying.rows[subLevel.buyingPrice]?.name,
+                  })),
+                currency: currenciesInfiniteList.find(
+                  (finding: any) => finding.id === data.currency
+                ),
+                manage_by: salesOrganizationInfiniteList.find(
+                  (finding: any) => finding.id === data.manage_by
+                ),
+              })),
+          }));
+
+          setValue("product_selected", tempRawValue);
+
+          setProductsSelected(tempRawValue);
+
+          setSearchProduct("");
+        }
+      });
+    }
   };
+
+  useEffect(() => {
+    const handleSelectedRegionField = () => {
+      let tempRegionSelected: any = [];
+
+      dataSalesOrganizationHirarcy?.map((field: any) => {
+        if (
+          dataWatchManageByZone?.manage_by_zone_detail?.internal_region.includes(field.id as never)
+        ) {
+          tempRegionSelected.push(field);
+
+          const rawValue = tempRegionSelected.map((subDataRegionSelected: any) => ({
+            ...subDataRegionSelected,
+            distribution_channel: dataWatchManageByZoneForProductSelected?.distribution_channel,
+          }));
+
+          setValue(
+            `product_selected.${manageByZone?.data?.indexExpandedRowRenderProductSelected}.distribution_channel.${manageByZone?.data?.indexDistChannel}.manage_by_zone_detail.region_selected`,
+            rawValue as never
+          );
+
+          setRegionSelected(rawValue);
+
+          setSearchRegion("");
+        }
+      });
+    };
+
+    if (dataWatchManageByZone?.manage_by_zone && dataWatchManageByZone?.manage_by_zone_detail) {
+      handleSelectedRegionField();
+    }
+  }, [
+    dataWatchManageByZone?.manage_by_zone,
+    dataSalesOrganizationHirarcy,
+    dataWatchManageByZone?.manage_by_zone_detail.internal_region,
+  ]);
 
   const listFilterProducts = [
     {
@@ -652,8 +865,16 @@ const CreatePricingStructure: any = () => {
       dataIndex: "key",
     },
     {
+      title: "activeDate",
+      dataIndex: "activeDate",
+    },
+    {
+      title: "status",
+      dataIndex: "status",
+    },
+    {
       title: "name",
-      dataIndex: "name",
+      dataIndex: "proposalNumber",
     },
   ];
 
@@ -706,27 +927,25 @@ const CreatePricingStructure: any = () => {
   };
 
   const handleRemoveAllSelectedRegion = () => {
-    let tempProductsSelected: any = [];
+    let tempRegionSelected: any = [];
 
-    tempProductsSelected = productsSelected?.filter(
-      (field) => !rowSelectionProductsSelected.selectedRowKeys.includes(field.key as never)
+    tempRegionSelected = regionSelected?.filter(
+      (field) => !rowSelectionRegionSelected.selectedRowKeys.includes(field.key as never)
     );
 
-    rowSelectionProductsSelected.onChange([]);
+    rowSelectionRegionSelected.onChange([]);
 
-    rowSelectionProduct.onChange(
-      tempProductsSelected.map((data: any) => data.key),
-      tempProductsSelected
+    setValue(
+      `product_selected.${manageByZone?.data?.indexExpandedRowRenderProductSelected}.distribution_channel.${manageByZone?.data?.indexDistChannel}.manage_by_zone_detail.region_selected`,
+      tempRegionSelected as never
     );
 
-    setValue("product_selected", tempProductsSelected);
-
-    setProductsSelected(tempProductsSelected);
+    setRegionSelected(tempRegionSelected);
   };
 
   useEffect(() => {
     const increaseProgress = () => {
-      let newPercent = percent + 14.285714285714286;
+      let newPercent = percent + 16.666666666666667;
 
       if (newPercent > 100) {
         newPercent = 100;
@@ -737,12 +956,12 @@ const CreatePricingStructure: any = () => {
     increaseProgress();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
-    isLoadingChannelsMDM,
     isLoadingCurrenciesInfinite,
     isLoadingGroupBuying,
     isLoadingPricingConfigInfinite,
     isLoadingProductList,
     isLoadingSalesOrganizationInfinite,
+    isLoadingPricingStructureInfinite,
   ]);
 
   const isEmpty = productsSelected.length === 0;
@@ -754,12 +973,12 @@ const CreatePricingStructure: any = () => {
       <>
         {isLoadingPricingConfigInfinite ||
         isLoadingCurrenciesInfinite ||
+        isLoadingPricingStructureList ||
         isLoadingGroupBuying ||
-        isLoadingChannelsMDM ||
         isLoadingProductList ||
         isLoadingSalesOrganizationInfinite ? (
           <Center>
-            <Progress type="circle" percent={percent} />
+            <Spin tip="Loading data..." />
           </Center>
         ) : (
           <Col>
@@ -776,8 +995,13 @@ const CreatePricingStructure: any = () => {
             <Card padding="20px">
               <Row gap="16px" alignItems="center" justifyContent="space-between">
                 <Text>{manageByZone?.data?.recordExpandedRowRenderProductSelected?.name}</Text>
-                <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmitDraft)}>
-                  Save
+                <Button
+                  disabled={isLoadingPricingStructureDraft}
+                  size="big"
+                  variant={"primary"}
+                  onClick={handleSubmit(onSubmitDraft)}
+                >
+                  {isLoadingPricingStructureDraft ? "Loading..." : "Save"}
                 </Button>
               </Row>
             </Card>
@@ -807,6 +1031,7 @@ const CreatePricingStructure: any = () => {
                     <Tooltip
                       title="Data create from manage price structure config"
                       color={"#F4FBFC"}
+                      overlayInnerStyle={{ width: "fit-content" }}
                     >
                       <ICInfo />
                     </Tooltip>
@@ -916,6 +1141,7 @@ const CreatePricingStructure: any = () => {
                           <Tooltip
                             title="Data create from manage price structure config"
                             color={"#F4FBFC"}
+                            overlayInnerStyle={{ width: "fit-content" }}
                           >
                             <ICInfo />
                           </Tooltip>
@@ -1030,6 +1256,7 @@ const CreatePricingStructure: any = () => {
                               <Tooltip
                                 title="Data create from manage price structure config"
                                 color={"#F4FBFC"}
+                                overlayInnerStyle={{ width: "fit-content" }}
                               >
                                 <ICInfo />
                               </Tooltip>
@@ -1073,23 +1300,30 @@ const CreatePricingStructure: any = () => {
                   <Spacer size={10} />
 
                   <Col width="100%">
-                    <Controller
-                      control={control}
-                      name={`product_selected.${manageByZone?.data?.indexExpandedRowRenderProductSelected}.distribution_channel.${manageByZone?.data?.indexDistChannel}.manage_by_zone_detail.internal_reqgion`}
-                      render={({ field: { onChange, value }, fieldState: { error } }) => {
-                        return (
-                          <DropdownMenuOptionCustome
-                            label="Internal Region"
-                            isAllowClear
-                            required
-                            error={error?.message}
-                            handleChangeValue={(value: string[]) => onChange(value)}
-                            valueSelectedItems={value || []}
-                            listItems={[]}
-                          />
-                        );
-                      }}
-                    />
+                    {isLoadingSalesOrganizationHirarcy || isFetchingSalesOrganizationHirarcy ? (
+                      <Spin tip="Loading data..." />
+                    ) : (
+                      <Controller
+                        control={control}
+                        name={`product_selected.${manageByZone?.data?.indexExpandedRowRenderProductSelected}.distribution_channel.${manageByZone?.data?.indexDistChannel}.manage_by_zone_detail.internal_region`}
+                        render={({ field: { onChange, value }, fieldState: { error } }) => {
+                          return (
+                            <DropdownMenuOptionCustome
+                              label="Internal Region"
+                              isAllowClear
+                              required
+                              error={error?.message}
+                              handleChangeValue={(value: string[]) => onChange(value)}
+                              valueSelectedItems={value || []}
+                              listItems={dataSalesOrganizationHirarcy?.map((data: any) => ({
+                                value: data.id,
+                                label: data.name,
+                              }))}
+                            />
+                          );
+                        }}
+                      />
+                    )}
                   </Col>
                 </Row>
               </Col>
@@ -1162,25 +1396,6 @@ const CreatePricingStructure: any = () => {
 
                                       <Spacer size={8} />
 
-                                      <Controller
-                                        control={control}
-                                        name={`product_selected.${indexExpandedRowRenderRegionSelected}.distribution_channel.${indexDistChannel}.manage_by_zone`}
-                                        render={({ field: { onChange, value } }) => {
-                                          return (
-                                            <Row alignItems="center" gap="12px">
-                                              <Switch
-                                                defaultChecked={value || false}
-                                                checked={value}
-                                                onChange={onChange}
-                                              />
-                                              <Text>Manage by Zone</Text>
-                                            </Row>
-                                          );
-                                        }}
-                                      />
-
-                                      <Spacer size={24} />
-
                                       <Divider />
                                       <Spacer size={24} />
 
@@ -1191,8 +1406,8 @@ const CreatePricingStructure: any = () => {
                                       <Spacer size={8} />
 
                                       <Controller
-                                        control={props.control}
-                                        name={`product_selected.${props.indexExpandedRowRenderProductSelected}.distribution_channel.${props.indexDistChannel}.is_reference`}
+                                        control={control}
+                                        name={`product_selected.${manageByZone?.data?.indexExpandedRowRenderProductSelected}.distribution_channel.${manageByZone?.data?.indexDistChannel}.manage_by_zone_detail.region_selected.${indexExpandedRowRenderRegionSelected}.distribution_channel.${indexDistChannel}.is_reference`}
                                         render={({ field: { onChange, value } }) => (
                                           <Row alignItems="center" gap="12px">
                                             <Switch
@@ -1204,6 +1419,7 @@ const CreatePricingStructure: any = () => {
                                             <Tooltip
                                               title="Data create from manage price structure config"
                                               color={"#F4FBFC"}
+                                              overlayInnerStyle={{ width: "fit-content" }}
                                             >
                                               <ICInfo />
                                             </Tooltip>
@@ -1219,28 +1435,33 @@ const CreatePricingStructure: any = () => {
                                             type="number"
                                             width="100%"
                                             label="Cost"
-                                            defaultValue={props.getValues(
-                                              `product_selected.${props.indexExpandedRowRenderProductSelected}.distribution_channel.${props.indexDistChannel}.cost`
+                                            defaultValue={getValues(
+                                              `product_selected.${manageByZone?.data?.indexExpandedRowRenderProductSelected}.distribution_channel.${manageByZone?.data?.indexDistChannel}.manage_by_zone_detail.region_selected.${indexExpandedRowRenderRegionSelected}.distribution_channel.${indexDistChannel}.cost`
                                             )}
                                             height="48px"
                                             error={
-                                              props.errors?.product_selected?.[
-                                                props.indexExpandedRowRenderProductSelected
-                                              ]?.distribution_channel?.[props.indexDistChannel].cost
+                                              errors?.product_selected?.[
+                                                manageByZone.data
+                                                  .indexExpandedRowRenderProductSelected
+                                              ]?.distribution_channel?.[
+                                                manageByZone.data.indexDistChannel
+                                              ]?.manage_by_zone_detail?.region_selected?.[
+                                                indexExpandedRowRenderRegionSelected
+                                              ].distribution_channel?.[indexDistChannel].cost
                                                 ?.message
                                             }
                                             required
-                                            placeholder={`e.g ${props.dataDistChannel.currency.currency} 2.000,00`}
-                                            {...props.register(
-                                              `product_selected.${props.indexExpandedRowRenderProductSelected}.distribution_channel.${props.indexDistChannel}.cost`
+                                            placeholder={`e.g ${dataDistChannel.currency.currency} 2.000,00`}
+                                            {...register(
+                                              `product_selected.${manageByZone?.data?.indexExpandedRowRenderProductSelected}.distribution_channel.${manageByZone?.data?.indexDistChannel}.manage_by_zone_detail.region_selected.${indexExpandedRowRenderRegionSelected}.distribution_channel.${indexDistChannel}.cost`
                                             )}
                                           />
                                         </Col>
 
                                         <Col width="20%">
                                           <Controller
-                                            control={props.control}
-                                            name={`product_selected.${props.indexExpandedRowRenderProductSelected}.distribution_channel.${props.indexDistChannel}.margin_type`}
+                                            control={control}
+                                            name={`product_selected.${manageByZone?.data?.indexExpandedRowRenderProductSelected}.distribution_channel.${manageByZone?.data?.indexDistChannel}.manage_by_zone_detail.region_selected.${indexExpandedRowRenderRegionSelected}.distribution_channel.${indexDistChannel}.margin_type`}
                                             render={({
                                               field: { onChange, value },
                                               fieldState: { error },
@@ -1265,26 +1486,37 @@ const CreatePricingStructure: any = () => {
 
                                         <Col width="30%">
                                           <Controller
-                                            control={props.control}
-                                            name={`product_selected.${props.indexExpandedRowRenderProductSelected}.distribution_channel.${props.indexDistChannel}.margin_value`}
+                                            control={control}
+                                            name={`product_selected.${manageByZone?.data?.indexExpandedRowRenderProductSelected}.distribution_channel.${manageByZone?.data?.indexDistChannel}.manage_by_zone_detail.region_selected.${indexExpandedRowRenderRegionSelected}.distribution_channel.${indexDistChannel}.margin_value`}
                                             render={({ field: { onChange, value } }) => (
                                               <>
                                                 <Label>Margin Value</Label>
                                                 <Spacer size={3} />
-                                                <ComponentDistributionChannelMarginType
-                                                  control={props.control}
+                                                <ComponentDistributionChannelMarginTypeManageByZone
+                                                  control={control}
                                                   indexExpandedRowRenderProductSelected={
-                                                    props.indexExpandedRowRenderProductSelected
+                                                    manageByZone.data
+                                                      .indexExpandedRowRenderProductSelected
                                                   }
-                                                  indexDistChannel={props.indexDistChannel}
+                                                  indexExpandedRowRenderRegionSelected={
+                                                    indexExpandedRowRenderRegionSelected
+                                                  }
+                                                  indexDistChannelProduct={
+                                                    manageByZone?.data?.indexDistChannel
+                                                  }
+                                                  indexDistChannel={indexDistChannel}
                                                   onChange={onChange}
                                                   value={value}
                                                   status={
-                                                    props.errors?.product_selected?.[
-                                                      props.indexExpandedRowRenderProductSelected
+                                                    errors?.product_selected?.[
+                                                      manageByZone.data
+                                                        .indexExpandedRowRenderProductSelected
                                                     ]?.distribution_channel?.[
-                                                      props.indexDistChannel
-                                                    ]?.margin_value && "error"
+                                                      manageByZone.data.indexDistChannel
+                                                    ]?.manage_by_zone_detail?.region_selected?.[
+                                                      indexExpandedRowRenderRegionSelected
+                                                    ].distribution_channel?.[indexDistChannel]
+                                                      .margin_value && "error"
                                                   }
                                                 />
                                               </>
@@ -1295,7 +1527,7 @@ const CreatePricingStructure: any = () => {
 
                                       <Spacer size={24} />
 
-                                      {props.dataDistChannel.level.map(
+                                      {dataDistChannel.level.map(
                                         (subLevel: any, indexLevel: any) => {
                                           return (
                                             <Col key={indexLevel}>
@@ -1306,8 +1538,8 @@ const CreatePricingStructure: any = () => {
                                               <Spacer size={16} />
 
                                               <Controller
-                                                control={props.control}
-                                                name={`product_selected.${props.indexExpandedRowRenderProductSelected}.distribution_channel.${props.indexDistChannel}.level.${indexLevel}.is_reference`}
+                                                control={control}
+                                                name={`product_selected.${manageByZone?.data?.indexExpandedRowRenderProductSelected}.distribution_channel.${manageByZone?.data?.indexDistChannel}.manage_by_zone_detail.region_selected.${indexExpandedRowRenderRegionSelected}.distribution_channel.${indexDistChannel}.level.${indexLevel}.is_reference`}
                                                 render={({ field: { onChange, value } }) => (
                                                   <Row alignItems="center" gap="12px">
                                                     <Switch
@@ -1319,6 +1551,7 @@ const CreatePricingStructure: any = () => {
                                                     <Tooltip
                                                       title="Data create from manage price structure config"
                                                       color={"#F4FBFC"}
+                                                      overlayInnerStyle={{ width: "fit-content" }}
                                                     >
                                                       <ICInfo />
                                                     </Tooltip>
@@ -1333,29 +1566,33 @@ const CreatePricingStructure: any = () => {
                                                   <Input
                                                     width="100%"
                                                     label={subLevel.nameLevel}
-                                                    defaultValue={props.getValues(
-                                                      `product_selected.${props.indexExpandedRowRenderProductSelected}.distribution_channel.${props.indexDistChannel}.level.${indexLevel}.cost`
+                                                    defaultValue={getValues(
+                                                      `product_selected.${manageByZone?.data?.indexExpandedRowRenderProductSelected}.distribution_channel.${manageByZone?.data?.indexDistChannel}.manage_by_zone_detail.region_selected.${indexExpandedRowRenderRegionSelected}.distribution_channel.${indexDistChannel}.level.${indexLevel}.cost`
                                                     )}
                                                     height="48px"
                                                     error={
-                                                      props.errors?.product_selected?.[
-                                                        props.indexExpandedRowRenderProductSelected
+                                                      errors?.product_selected?.[
+                                                        manageByZone.data
+                                                          .indexExpandedRowRenderProductSelected
                                                       ]?.distribution_channel?.[
-                                                        props.indexDistChannel
-                                                      ]?.level?.[indexLevel]?.cost?.message
+                                                        manageByZone.data.indexDistChannel
+                                                      ]?.manage_by_zone_detail?.region_selected?.[
+                                                        indexExpandedRowRenderRegionSelected
+                                                      ].distribution_channel?.[indexDistChannel]
+                                                        .cost?.message
                                                     }
                                                     required
-                                                    placeholder={`e.g ${props.dataDistChannel.currency.currency} 2.000,00`}
-                                                    {...props.register(
-                                                      `product_selected.${props.indexExpandedRowRenderProductSelected}.distribution_channel.${props.indexDistChannel}.level.${indexLevel}.cost`
+                                                    placeholder={`e.g ${dataDistChannel.currency.currency} 2.000,00`}
+                                                    {...register(
+                                                      `product_selected.${manageByZone?.data?.indexExpandedRowRenderProductSelected}.distribution_channel.${manageByZone?.data?.indexDistChannel}.manage_by_zone_detail.region_selected.${indexExpandedRowRenderRegionSelected}.distribution_channel.${indexDistChannel}.level.${indexLevel}.cost`
                                                     )}
                                                   />
                                                 </Col>
 
                                                 <Col width="20%">
                                                   <Controller
-                                                    control={props.control}
-                                                    name={`product_selected.${props.indexExpandedRowRenderProductSelected}.distribution_channel.${props.indexDistChannel}.level.${indexLevel}.margin_type`}
+                                                    control={control}
+                                                    name={`product_selected.${manageByZone?.data?.indexExpandedRowRenderProductSelected}.distribution_channel.${manageByZone?.data?.indexDistChannel}.manage_by_zone_detail.region_selected.${indexExpandedRowRenderRegionSelected}.distribution_channel.${indexDistChannel}.level.${indexLevel}.margin_type`}
                                                     render={({
                                                       field: { onChange, value },
                                                       fieldState: { error },
@@ -1380,29 +1617,40 @@ const CreatePricingStructure: any = () => {
 
                                                 <Col width="30%">
                                                   <Controller
-                                                    control={props.control}
-                                                    name={`product_selected.${props.indexExpandedRowRenderProductSelected}.distribution_channel.${props.indexDistChannel}.level.${indexLevel}.margin_value`}
+                                                    control={control}
+                                                    name={`product_selected.${manageByZone?.data?.indexExpandedRowRenderProductSelected}.distribution_channel.${manageByZone?.data?.indexDistChannel}.manage_by_zone_detail.region_selected.${indexExpandedRowRenderRegionSelected}.distribution_channel.${indexDistChannel}.level.${indexLevel}.margin_value`}
                                                     render={({ field: { onChange, value } }) => (
                                                       <>
                                                         <Label>Margin Value</Label>
                                                         <Spacer size={3} />
-                                                        <ComponentLevelMarginType
-                                                          control={props.control}
+                                                        <ComponentLevelMarginTypeManageByZone
+                                                          control={control}
                                                           indexExpandedRowRenderProductSelected={
-                                                            props.indexExpandedRowRenderProductSelected
+                                                            manageByZone?.data
+                                                              .indexExpandedRowRenderProductSelected
                                                           }
-                                                          indexDistChannel={props.indexDistChannel}
+                                                          indexExpandedRowRenderRegionSelected={
+                                                            indexExpandedRowRenderRegionSelected
+                                                          }
+                                                          indexDistChannelProduct={
+                                                            manageByZone?.data.indexDistChannel
+                                                          }
+                                                          indexDistChannel={indexDistChannel}
                                                           indexLevel={indexLevel}
                                                           onChange={onChange}
                                                           value={value}
                                                           status={
-                                                            props.errors?.product_selected?.[
-                                                              props
+                                                            errors?.product_selected?.[
+                                                              manageByZone.data
                                                                 .indexExpandedRowRenderProductSelected
                                                             ]?.distribution_channel?.[
-                                                              props.indexDistChannel
-                                                            ].level?.[indexLevel]?.margin_value
-                                                              ?.message && "error"
+                                                              manageByZone.data.indexDistChannel
+                                                            ]?.manage_by_zone_detail
+                                                              ?.region_selected?.[
+                                                              indexExpandedRowRenderRegionSelected
+                                                            ].distribution_channel?.[
+                                                              indexDistChannel
+                                                            ]?.margin_value?.message && "error"
                                                           }
                                                         />
                                                       </>
@@ -1438,11 +1686,12 @@ const CreatePricingStructure: any = () => {
         {isLoadingPricingConfigInfinite ||
         isLoadingCurrenciesInfinite ||
         isLoadingGroupBuying ||
-        isLoadingChannelsMDM ||
+        isLoadingPricingStructureList ||
+        isLoadingPricingStructureInfinite ||
         isLoadingProductList ||
         isLoadingSalesOrganizationInfinite ? (
           <Center>
-            <Progress type="circle" percent={percent} />
+            <Spin tip="Loading data..." />
           </Center>
         ) : (
           <Col>
@@ -1457,11 +1706,21 @@ const CreatePricingStructure: any = () => {
                 <Button size="big" variant={"tertiary"} onClick={() => router.back()}>
                   Cancel
                 </Button>
-                <Button size="big" variant={"secondary"} onClick={handleSubmit(onSubmitDraft)}>
-                  Save as Draft
+                <Button
+                  disabled={isLoadingPricingStructureDraft}
+                  size="big"
+                  variant={"secondary"}
+                  onClick={handleSubmit(onSubmitDraft)}
+                >
+                  {isLoadingPricingStructureDraft ? "Loading..." : "Save as Draft"}
                 </Button>
-                <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
-                  Submit
+                <Button
+                  disabled={isLoadingPricingStructure}
+                  size="big"
+                  variant={"primary"}
+                  onClick={handleSubmit(onSubmit)}
+                >
+                  {isLoadingPricingStructure ? "Loading..." : "Submit"}
                 </Button>
               </Row>
             </Card>
@@ -1500,6 +1759,7 @@ const CreatePricingStructure: any = () => {
                               <Tooltip
                                 title="Data create from manage price structure config"
                                 color={"#F4FBFC"}
+                                overlayInnerStyle={{ width: "fit-content" }}
                               >
                                 <ICInfo />
                               </Tooltip>
@@ -1649,42 +1909,42 @@ const CreatePricingStructure: any = () => {
                   <Spacer size={10} />
 
                   <Col width="100%">
-                    <Controller
-                      control={control}
-                      name="distribution_channel"
-                      rules={{
-                        required: {
-                          value: true,
-                          message: "Please enter Distribution Channel.",
-                        },
-                      }}
-                      render={({ field: { onChange, value }, fieldState: { error } }) => {
-                        return (
-                          <DropdownMenuOptionCustome
-                            label="Distribution Channel"
-                            actionLabel="Add New Distribution Channel"
-                            isShowActionLabel
-                            handleClickActionLabel={() => window.open("/channel")}
-                            isAllowClear
-                            required
-                            error={error?.message}
-                            handleChangeValue={(value: string[]) => onChange(value)}
-                            valueSelectedItems={value || []}
-                            listItems={channelsMDMData?.rows?.map(
-                              ({
-                                name,
-                                salesChannelId,
-                              }: {
-                                name: string;
-                                salesChannelId: string;
-                              }) => {
-                                return { value: salesChannelId, label: name };
-                              }
-                            )}
-                          />
-                        );
-                      }}
-                    />
+                    {isLoadingSalesOrganizationHirarcyFromManageBy ||
+                    isFetchingSalesOrganizationHirarcyFromManageBy ? (
+                      <Spin tip="Loading data..." />
+                    ) : (
+                      <Controller
+                        control={control}
+                        name="distribution_channel"
+                        rules={{
+                          required: {
+                            value: true,
+                            message: "Please enter Distribution Channel.",
+                          },
+                        }}
+                        render={({ field: { onChange, value }, fieldState: { error } }) => {
+                          return (
+                            <DropdownMenuOptionCustome
+                              label="Distribution Channel"
+                              actionLabel="Add New Distribution Channel"
+                              isShowActionLabel
+                              handleClickActionLabel={() => window.open("/sales-organization")}
+                              isAllowClear
+                              required
+                              error={error?.message}
+                              handleChangeValue={(value: string[]) => onChange(value)}
+                              valueSelectedItems={value || []}
+                              listItems={dataSalesOrganizationHirarcyFromManageBy?.map(
+                                (data: any) => ({
+                                  value: data.id,
+                                  label: data.name,
+                                })
+                              )}
+                            />
+                          );
+                        }}
+                      />
+                    )}
                   </Col>
                 </Row>
               </Col>
@@ -1718,12 +1978,12 @@ const CreatePricingStructure: any = () => {
                           onClick={() =>
                             setModal({
                               open: true,
-                              typeForm: "Copy From Price Structure",
+                              typeForm: "Copy Product",
                               data: {},
                             })
                           }
                         >
-                          <ICCopy /> Copy From Price Stucture Existing
+                          <ICCopy /> Copy Product
                         </Button>
                       </Col>
 
@@ -1826,6 +2086,7 @@ const CreatePricingStructure: any = () => {
                                       {
                                         <ManageZoneComponent
                                           control={control}
+                                          regionSelected={regionSelected}
                                           indexExpandedRowRenderProductSelected={
                                             indexExpandedRowRenderProductSelected
                                           }
@@ -1892,7 +2153,7 @@ const CreatePricingStructure: any = () => {
                 Cancel
               </Button>
               <Button onClick={handleSubmit(handleSelectedField)} variant="primary" size="big">
-                {typeForm === "Add Products" ? "Add" : "Copy"}
+                {typeForm === "Add Products" ? "Add" : "Apply"}
               </Button>
             </div>
           }
@@ -1932,6 +2193,84 @@ const CreatePricingStructure: any = () => {
             ) : (
               <>
                 <Spacer size={20} />
+
+                <Controller
+                  control={control}
+                  name="product_copy"
+                  render={({ field: { onChange, value }, fieldState: { error } }) => (
+                    <>
+                      <Row alignItems="center" gap="8px">
+                        <Col>
+                          <Label>Product From</Label>
+                        </Col>
+                        <Col>
+                          <Tooltip
+                            title="Select a product that will be used as the pricing structure reference."
+                            color={"#F4FBFC"}
+                            overlayInnerStyle={{ width: "fit-content" }}
+                          >
+                            <ICInfo />
+                          </Tooltip>
+                        </Col>
+                      </Row>
+                      <Spacer size={3} />
+                      <FormSelect
+                        defaultValue={value}
+                        error={error?.message}
+                        height="48px"
+                        style={{ width: "100%" }}
+                        size={"large"}
+                        placeholder={"Select"}
+                        borderColor={error?.message ? "#ED1C24" : "#AAAAAA"}
+                        arrowColor={"#000"}
+                        withSearch
+                        isLoading={isFetchingPricingStructureInfinite}
+                        isLoadingMore={isFetchingMorePricingStructureInfinite}
+                        fetchMore={() => {
+                          if (hasNextPagePricingStructureInfinite) {
+                            fetchNextPagePricingStructureInfinite();
+                          }
+                        }}
+                        items={
+                          isFetchingPricingStructureInfinite && !isFetchingPricingStructureInfinite
+                            ? []
+                            : pricingStructureInfiniteList
+                        }
+                        onChange={(value: any) => {
+                          onChange(value);
+                        }}
+                        onSearch={(value: any) => {
+                          setSearchPricingStructureInfinite(value);
+                        }}
+                      />
+                    </>
+                  )}
+                />
+
+                <Spacer size={20} />
+
+                <Divider />
+
+                <Spacer size={20} />
+
+                <Row alignItems="center" gap="8px">
+                  <Col>
+                    <Text variant={"headingMedium"}>Product To</Text>
+                  </Col>
+                  <Col>
+                    <Tooltip
+                      title="Select one or several products at once to apply the product 
+                      pricing structure."
+                      color={"#F4FBFC"}
+                      overlayInnerStyle={{ width: "fit-content" }}
+                    >
+                      <ICInfo />
+                    </Tooltip>
+                  </Col>
+                </Row>
+
+                <Spacer size={20} />
+
                 <Row alignItems="flex-end" justifyContent="space-between">
                   <Search
                     width="380px"
@@ -1941,13 +2280,30 @@ const CreatePricingStructure: any = () => {
                 </Row>
                 <Spacer size={10} />
                 <Table
-                  columns={columnsCopyFromPriceStructure.filter(
-                    (filtering) => filtering.dataIndex !== "id" && filtering.dataIndex !== "key"
+                  title={
+                    rowSelectionProductsSelected.selectedRowKeys.length
+                      ? () => (
+                          <Row gap="8px" alignItems="center" nowrap>
+                            <Col>
+                              <Text>{`${rowSelectionProductsSelected.selectedRowKeys.length}/${productsSelected.length} Selected Products`}</Text>
+                            </Col>
+                          </Row>
+                        )
+                      : null
+                  }
+                  loading={isLoadingProductList || isFetchingProductList}
+                  columns={columnsProductsSelected.filter(
+                    (filtering) =>
+                      filtering.dataIndex !== "id" &&
+                      filtering.dataIndex !== "key" &&
+                      filtering.dataIndex !== "hasVariant" &&
+                      filtering.dataIndex !== "productCategoryName" &&
+                      filtering.dataIndex !== "status"
                   )}
-                  data={[]}
-                  rowSelection={rowSelectionCopyFromPriceStructure}
+                  data={productsSelected}
+                  rowSelection={rowSelectionProductsSelected}
                 />
-                <Pagination pagination={paginateCopyFromPriceStructure} />
+                <Pagination pagination={paginationProductsSelected} />
                 <Spacer size={14} />
               </>
             )
@@ -1962,6 +2318,25 @@ const ComponentLevelMarginType = (props: any) => {
   const data = useWatch({
     control: props.control,
     name: `product_selected.${props.indexExpandedRowRenderProductSelected}.distribution_channel.${props.indexDistChannel}.level.${props.indexLevel}`,
+  });
+
+  return (
+    <FormInput
+      size={"large"}
+      onChange={props.onChange}
+      placeholder={`e.g 20`}
+      suffix={data?.margin_type === "Percent" ? "%" : undefined}
+      defaultValue={props.value}
+      style={{ height: 48 }}
+      status={props.status}
+    />
+  );
+};
+
+const ComponentLevelMarginTypeManageByZone = (props: any) => {
+  const data = useWatch({
+    control: props.control,
+    name: `product_selected.${props.indexExpandedRowRenderProductSelected}.distribution_channel.${props.indexDistChannelProduct}.manage_by_zone_detail.region_selected.${props.indexExpandedRowRenderRegionSelected}.distribution_channel.${props.indexDistChannel}.level.${props.indexLevel}`,
   });
 
   return (
@@ -1996,6 +2371,25 @@ const ComponentDistributionChannelMarginType = (props: any) => {
   );
 };
 
+const ComponentDistributionChannelMarginTypeManageByZone = (props: any) => {
+  const data = useWatch({
+    control: props.control,
+    name: `product_selected.${props.indexExpandedRowRenderProductSelected}.distribution_channel.${props.indexDistChannelProduct}.manage_by_zone_detail.region_selected.${props.indexExpandedRowRenderRegionSelected}.distribution_channel.${props.indexDistChannel}`,
+  });
+
+  return (
+    <FormInput
+      size={"large"}
+      onChange={props.onChange}
+      placeholder={`e.g 20`}
+      suffix={data?.margin_type === "Percent" ? "%" : undefined}
+      defaultValue={props.value}
+      style={{ height: 48 }}
+      status={props.status}
+    />
+  );
+};
+
 const ManageZoneComponent = (props: any) => {
   const data = useWatch({
     control: props.control,
@@ -2004,7 +2398,13 @@ const ManageZoneComponent = (props: any) => {
 
   if (data.manage_by_zone) {
     return (
-      <Card padding="20px">
+      <Card
+        backgroundColor="#f4fbfc"
+        backgroundRepeat="no-repeat"
+        backgroundImage="/zone-filled-wave.svg"
+        backgroundPosition="bottom"
+        padding="20px"
+      >
         <Text color={"blue.dark"} variant={"headingMedium"}>
           You can manage modern trade pricing structure by zone.
         </Text>
@@ -2016,7 +2416,11 @@ const ManageZoneComponent = (props: any) => {
             <Label>Zone Filled</Label>
           </Col>
           <Col>
-            <Tooltip title="Data create from manage price structure config" color={"#F4FBFC"}>
+            <Tooltip
+              title="Data create from manage price structure config"
+              color={"#F4FBFC"}
+              overlayInnerStyle={{ width: "fit-content" }}
+            >
               <ICInfo />
             </Tooltip>
           </Col>
@@ -2024,7 +2428,10 @@ const ManageZoneComponent = (props: any) => {
 
         <Spacer size={24} />
 
-        <Progress style={{ height: 16 }} percent={70} />
+        <Progress
+          style={{ height: 16 }}
+          percent={parseInt(String(100 / props.regionSelected.length))}
+        />
 
         <Spacer size={24} />
 
@@ -2036,6 +2443,8 @@ const ManageZoneComponent = (props: any) => {
         >
           Manage by Zone
         </Button>
+
+        <Spacer size={56} />
       </Card>
     );
   } else {
@@ -2056,7 +2465,11 @@ const ManageZoneComponent = (props: any) => {
             <Row alignItems="center" gap="12px">
               <Switch defaultChecked={value || false} checked={value} onChange={onChange} />
               <Text>is Reference</Text>
-              <Tooltip title="Data create from manage price structure config" color={"#F4FBFC"}>
+              <Tooltip
+                title="Data create from manage price structure config"
+                color={"#F4FBFC"}
+                overlayInnerStyle={{ width: "fit-content" }}
+              >
                 <ICInfo />
               </Tooltip>
             </Row>
@@ -2158,6 +2571,7 @@ const ManageZoneComponent = (props: any) => {
                     <Tooltip
                       title="Data create from manage price structure config"
                       color={"#F4FBFC"}
+                      overlayInnerStyle={{ width: "fit-content" }}
                     >
                       <ICInfo />
                     </Tooltip>
@@ -2250,11 +2664,15 @@ const ManageZoneComponent = (props: any) => {
 };
 
 const Card = styled.div`
-  background: #ffffff;
   border-radius: 16px;
   padding: ${(p: any) => (p.padding ? p.padding : "16px")};
   margin: ${(p: any) => (p.margin ? p.margin : "16px")};
   background-image: ${(p: any) => (p.backgroundImage ? `url(${p.backgroundImage})` : undefined)};
+  background-color: ${(p: any) => (p.backgroundColor ? p.backgroundColor : "#ffffff")};
+  background-repeat: ${(p: any) => (p.backgroundRepeat ? p.backgroundRepeat : undefined)};
+  background-position: ${(p: any) => (p.backgroundPosition ? p.backgroundPosition : undefined)};
+  background-attachment: ${(p: any) =>
+    p.backgroundAttachment ? p.backgroundAttachment : undefined};
 `;
 
 const Center = styled.div`

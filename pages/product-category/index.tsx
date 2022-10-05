@@ -25,7 +25,7 @@ import useDebounce from "../../lib/useDebounce";
 const ProductCategory = () => {
   const pagination = usePagination({
     page: 1,
-    itemsPerPage: 10,
+    itemsPerPage: 20,
     maxPageItems: Infinity,
     numbers: true,
     arrows: true,
@@ -68,16 +68,14 @@ const ProductCategory = () => {
       options: {
         onSuccess: (data: any) => {
           pagination.setTotalItems(data.totalRow);
-          console.log(data, "data");
         },
         select: (data: any) => {
-          console.log(data.rows);
           const mappedData = data?.rows?.map((element: any) => {
             return {
               key: element.productCategoryId,
               id: element.productCategoryId,
               name: element.name,
-              parent: element.parent,
+              parent: element.parent || '-',
               action: (
                 <div style={{ display: "flex", justifyContent: "left" }}>
                   <Button

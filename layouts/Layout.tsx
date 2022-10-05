@@ -258,6 +258,12 @@ const menuMdm = [
         content: () => "Pricing Structure",
         onClick: () => Router.push("/pricing-structure"),
       },
+      {
+        key: "retail-pricing",
+        title: "Retail Pricing",
+        content: () => "Retail Pricing",
+        onClick: () => Router.push("/retail-pricing"),
+      },
     ],
   },
   {
@@ -447,6 +453,13 @@ const menuMdm = [
       },
     ],
   },
+  {
+    key: "working-calendar",
+    title: "Working Calendar",
+    content: () => "Working Calendar",
+    icon: ICCalendar,
+    onClick: () => Router.push("/working-calendar"),
+  },
 ];
 
 const itemsMenu = [{ label: "Config" }, { label: "Master Data Management" }];
@@ -492,6 +505,7 @@ const AdminLayout = (props: any) => {
 
   const handleCLickTabNav = (e: any) => {
     setCurrent(e.key);
+    Router.push('/dashboard')
   };
 
   const handleLogout = (e: any) => {
@@ -500,13 +514,18 @@ const AdminLayout = (props: any) => {
   };
 
   return (
-    <Layout style={{ minHeight: "100vh" }}>
+    <Layout style={{ height: "100vh" }}>
       <Sidebar
         logo="/icons/logo-nabati.svg"
         menu={current === "0" ? menuConfig : menuMdm}
         defaultMenu={"dashboard"}
       />
-      <Layout className="site-layout">
+      <Layout className="site-layout"
+        style={{
+          height: '100vh',
+          overflow: 'auto',
+        }}
+      >
         <Header
           mode="horizontal"
           onClick={handleCLickTabNav}
@@ -527,10 +546,17 @@ const AdminLayout = (props: any) => {
                     <TextRole>Super User</TextRole>
                   </div>
                 </WrapeprProfile>
-                <div style={flexStyles}>
-                  <ICAccountSetting />
-                  <p>Account Settings</p>
-                </div>
+                <a
+                  style={{ color: "#000" }}
+                  target="_blank"
+                  href="https://accounts.edot.id/infopribadi"
+                  rel="noopener noreferrer"
+                >
+                  <div style={flexStyles}>
+                    <ICAccountSetting />
+                    <p>Account Settings</p>
+                  </div>
+                </a>
                 <div style={flexStyles}>
                   <ICCompany />
                   <p>Company List</p>

@@ -13,37 +13,80 @@ import { useCoaInfiniteLists } from '../../../../hooks/finance-config/useCoaTemp
 
 export default function Accounting({ control, accounting }: any) {
 
-  const [totalRowsCoaTemplate, setTotalRowsCoaTemplate] = useState(0);
-  const [searchCoaTemplate, setSearchCoaTemplate] = useState("");
-  const debounceFetchCoaTemplate = useDebounce(searchCoaTemplate, 1000);
-  const [listCoaTemplate, setListCoaTemplate] = useState<any[]>([]);
+  const [totalRowsCoaTemplateReceivable, setTotalRowsCoaTemplateReceivable] = useState(0);
+  const [searchCoaTemplateReceivable, setSearchCoaTemplateReceivable] = useState("");
+  const debounceFetchCoaTemplateReceivable = useDebounce(searchCoaTemplateReceivable, 1000);
+  const [listCoaTemplateReceivable, setListCoaTemplateReceivable] = useState<any[]>([]);
   
   const {
-    isFetching: isFetchingCoaTemplate,
-    isFetchingNextPage: isFetchingMoreCoaTemplate,
-    hasNextPage: hasNextCoaTemplate,
-    fetchNextPage: fetchNextPageCoaTemplate,
+    isFetching: isFetchingCoaTemplateReceivable,
+    isFetchingNextPage: isFetchingMoreCoaTemplateReceivable,
+    hasNextPage: hasNextCoaTemplateReceivable,
+    fetchNextPage: fetchNextPageCoaTemplateReceivable,
   } = useCoaInfiniteLists({
     query: {
-      search: debounceFetchCoaTemplate,
+      search: debounceFetchCoaTemplateReceivable,
       limit: 10,
+      account_type: 'PAYABLE',
+      company_code: 'KSNI',
     },
     options: {
       onSuccess: (data: any) => {
-        setTotalRowsCoaTemplate(data.pages[0].totalRow);
+        setTotalRowsCoaTemplateReceivable(data.pages[0].totalRow);
         const mappedData = data?.pages?.map((group: any) => {
           return group.rows?.map((element: any) => {
             return {
-              value: element.id,
-              label: element.name,
+              value: element.accountCode,
+              label: element.accountName,
             };
           });
         });
         const flattenArray = [].concat(...mappedData);
-        setListCoaTemplate(flattenArray);
+        setListCoaTemplateReceivable(flattenArray);
       },
       getNextPageParam: (_lastPage: any, pages: any) => {
-        if (listCoaTemplate.length < totalRowsCoaTemplate) {
+        if (listCoaTemplateReceivable.length < totalRowsCoaTemplateReceivable) {
+          return pages.length + 1;
+        } else {
+          return undefined;
+        }
+      },
+    },
+  });
+
+  const [totalRowsCoaTemplatePayable, setTotalRowsCoaTemplatePayable] = useState(0);
+  const [searchCoaTemplatePayable, setSearchCoaTemplatePayable] = useState("");
+  const debounceFetchCoaTemplatePayable = useDebounce(searchCoaTemplatePayable, 1000);
+  const [listCoaTemplatePayable, setListCoaTemplatePayable] = useState<any[]>([]);
+  
+  const {
+    isFetching: isFetchingCoaTemplatePayable,
+    isFetchingNextPage: isFetchingMoreCoaTemplatePayable,
+    hasNextPage: hasNextCoaTemplatePayable,
+    fetchNextPage: fetchNextPageCoaTemplatePayable,
+  } = useCoaInfiniteLists({
+    query: {
+      search: debounceFetchCoaTemplatePayable,
+      limit: 10,
+      account_type: 'RECEIVABLE',
+      company_code: 'KSNI',
+    },
+    options: {
+      onSuccess: (data: any) => {
+        setTotalRowsCoaTemplatePayable(data.pages[0].totalRow);
+        const mappedData = data?.pages?.map((group: any) => {
+          return group.rows?.map((element: any) => {
+            return {
+              value: element.accountCode,
+              label: element.accountName,
+            };
+          });
+        });
+        const flattenArray = [].concat(...mappedData);
+        setListCoaTemplatePayable(flattenArray);
+      },
+      getNextPageParam: (_lastPage: any, pages: any) => {
+        if (listCoaTemplatePayable.length < totalRowsCoaTemplatePayable) {
           return pages.length + 1;
         } else {
           return undefined;
@@ -66,7 +109,7 @@ export default function Accounting({ control, accounting }: any) {
         <Controller
             control={control}
             name="accounting.income_account.id"
-            defaultValue={accountingForm?.income_account?.value}
+            defaultValue={accountingForm?.income_account?.name}
             render={({ field: { onChange } }) => (
               <>
                 <span>
@@ -76,30 +119,30 @@ export default function Accounting({ control, accounting }: any) {
 
                 <Spacer size={3} />
                 <CustomFormSelect
-                  defaultValue={accountingForm?.income_account?.value}
+                  defaultValue={accountingForm?.income_account?.name}
                   style={{ width: "100%", height: '48px' }}
                   size={"large"}
                   placeholder={"Select"}
                   borderColor={"#AAAAAA"}
                   arrowColor={"#000"}
                   withSearch
-                  isLoading={isFetchingCoaTemplate}
-                  isLoadingMore={isFetchingMoreCoaTemplate}
+                  isLoading={isFetchingCoaTemplateReceivable}
+                  isLoadingMore={isFetchingMoreCoaTemplateReceivable}
                   fetchMore={() => {
-                    if (hasNextCoaTemplate) {
-                      fetchNextPageCoaTemplate();
+                    if (hasNextCoaTemplateReceivable) {
+                      fetchNextPageCoaTemplateReceivable();
                     }
                   }}
                   items={
-                    isFetchingCoaTemplate || isFetchingMoreCoaTemplate
+                    isFetchingCoaTemplateReceivable || isFetchingMoreCoaTemplateReceivable
                       ? []
-                      : listCoaTemplate
+                      : listCoaTemplateReceivable
                   }
                   onChange={(value: any) => {
                     onChange(value);
                   }}
                   onSearch={(value: any) => {
-                    setSearchCoaTemplate(value);
+                    setSearchCoaTemplateReceivable(value);
                   }}
                 />
               </>
@@ -111,7 +154,7 @@ export default function Accounting({ control, accounting }: any) {
         <Controller
             control={control}
             name="accounting.expense_account.id"
-            defaultValue={accountingForm?.expense_account?.value}
+            defaultValue={accountingForm?.expense_account?.name}
             render={({ field: { onChange } }) => (
               <>
                 <span>
@@ -121,30 +164,30 @@ export default function Accounting({ control, accounting }: any) {
 
                 <Spacer size={3} />
                 <CustomFormSelect
-                  defaultValue={accountingForm?.expense_account?.value}
+                  defaultValue={accountingForm?.expense_account?.name}
                   style={{ width: "100%", height: '48px' }}
                   size={"large"}
                   placeholder={"Select"}
                   borderColor={"#AAAAAA"}
                   arrowColor={"#000"}
                   withSearch
-                  isLoading={isFetchingCoaTemplate}
-                  isLoadingMore={isFetchingMoreCoaTemplate}
+                  isLoading={isFetchingCoaTemplatePayable}
+                  isLoadingMore={isFetchingMoreCoaTemplatePayable}
                   fetchMore={() => {
-                    if (hasNextCoaTemplate) {
-                      fetchNextPageCoaTemplate();
+                    if (hasNextCoaTemplatePayable) {
+                      fetchNextPageCoaTemplatePayable();
                     }
                   }}
                   items={
-                    isFetchingCoaTemplate || isFetchingMoreCoaTemplate
+                    isFetchingCoaTemplatePayable || isFetchingMoreCoaTemplatePayable
                       ? []
-                      : listCoaTemplate
+                      : listCoaTemplatePayable
                   }
                   onChange={(value: any) => {
                     onChange(value);
                   }}
                   onSearch={(value: any) => {
-                    setSearchCoaTemplate(value);
+                    setSearchCoaTemplatePayable(value);
                   }}
                 />
               </>

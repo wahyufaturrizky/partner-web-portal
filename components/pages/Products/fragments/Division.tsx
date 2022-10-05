@@ -4,7 +4,7 @@ import { Spacer, Text, Button } from 'pink-lava-ui'
 export default function Division() {
   return (
     <div>
-      <Text variant="headingMedium" color="blue.darker">Division</Text>
+      <Text variant="headingMedium" color="blue.darker">Sales Division</Text>
       <Spacer size={14} />
       <Button
         size="big"

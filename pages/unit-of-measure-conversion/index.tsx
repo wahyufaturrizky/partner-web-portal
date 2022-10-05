@@ -50,7 +50,7 @@ const UOMConversion = () => {
   const router = useRouter();
   const pagination = usePagination({
     page: 1,
-    itemsPerPage: 10,
+    itemsPerPage: 20,
     maxPageItems: Infinity,
     numbers: true,
     arrows: true,
@@ -81,7 +81,6 @@ const UOMConversion = () => {
     },
     options: {
       onSuccess: (data: any) => {
-        console.log(data, '<<<< total row nya')
         pagination.setTotalItems(data.totalRow);
       },
       select: (data: any) => {

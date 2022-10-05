@@ -45,7 +45,7 @@ const UOMConversionDetail = () => {
   const router = useRouter();
   const pagination = usePagination({
     page: 1,
-    itemsPerPage: 10,
+    itemsPerPage: 20,
     maxPageItems: Infinity,
     numbers: true,
     arrows: true,
@@ -69,7 +69,7 @@ const UOMConversionDetail = () => {
   const {
     isFetching: isFetchingUomCategory,
     isFetchingNextPage: isFetchingMoreUomCategory,
-    isLoading: isLoadingUOM,
+    isLoading: isLoadingUOMCategory,
     hasNextPage,
     fetchNextPage,
   } = useUOMInfiniteLists({
@@ -152,6 +152,7 @@ const UOMConversionDetail = () => {
     options: {
       onSuccess: () => {
         queryClient.invalidateQueries(["uom-conversion"]);
+        router.back()
       },
     },
   });
@@ -232,7 +233,7 @@ const UOMConversionDetail = () => {
       items: UomData?.dataForUpdate
     }
     updateUom(newData)
-    router.back()
+  
   }
 
   const columns = [
@@ -274,7 +275,7 @@ const UOMConversionDetail = () => {
     },
   };
 
-  if (isLoadingUom || isFetchingUom || isFetchingUomCategory)
+  if (isLoadingUom || isFetchingUom || isLoadingUOMCategory)
   return (
     <Center>
       <Spin tip="Loading data..." />
@@ -401,7 +402,7 @@ const UOMConversionDetail = () => {
               <Spacer size={20} />
                 <Col gap={"60px"}>
                   <Table
-                    loading={isLoadingUOM || isFetchingUom}
+                    loading={isLoadingUOMCategory || isFetchingUom}
                     columns={columns}
                     data={UomData?.data}
                     rowSelection={rowSelection}

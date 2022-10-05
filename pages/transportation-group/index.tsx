@@ -62,7 +62,7 @@ const renderConfirmationText = (type: any, data: any) => {
 const TransportationGroup = () => {
   const pagination = usePagination({
     page: 1,
-    itemsPerPage: 10,
+    itemsPerPage: 20,
     maxPageItems: Infinity,
     numbers: true,
     arrows: true,
@@ -104,8 +104,8 @@ const TransportationGroup = () => {
             id: element.transportationGroupId,
             transportationGroup: element.transportationGroup,
             transportationType: element.transportationType,
-            transportationVolume: element.volume,
-            transportationWeight: element.weight,
+            transportationVolume: `${element.volume ? element.volume + " mm3" : "-"}`,
+            transportationWeight: `${element.weight ? element.weight + " kg" : "-"}`,
             transportationLength: element.length,
             transportationWidth: element.width,
             transportationHeight: element.height,
@@ -206,7 +206,6 @@ const TransportationGroup = () => {
   const rowSelection = {
     selectedRowKeys,
     onChange: (selectedRowKeys: any) => {
-      console.log(selectedRowKeys);
       setSelectedRowKeys(selectedRowKeys);
     },
   };
@@ -445,7 +444,7 @@ const TransportationGroup = () => {
                     defaultValue={modalForm.data?.volume}
                     rules={{
                       validate: {
-                        isNumber: (value) => !isNaN(value),
+                        isNumber: (value) => !isNaN(value) || value !== "",
                       },
                     }}
                     name="volume"
@@ -477,7 +476,7 @@ const TransportationGroup = () => {
                     defaultValue={modalForm.data?.weight}
                     rules={{
                       validate: {
-                        isNumber: (value) => !isNaN(value),
+                        isNumber: (value) => !isNaN(value) || value !== "",
                       },
                     }}
                     name="weight"
@@ -487,7 +486,7 @@ const TransportationGroup = () => {
                           defaultValue={modalForm.data?.weight}
                           size={"large"}
                           placeholder={"e.g 55"}
-                          addonAfter="m3"
+                          addonAfter="kg"
                           onChange={(e: any) => {
                             onChange(e.target.value);
                           }}
@@ -520,7 +519,7 @@ const TransportationGroup = () => {
                     defaultValue={modalForm.data?.length}
                     rules={{
                       validate: {
-                        isNumber: (value) => !isNaN(value),
+                        isNumber: (value) => !isNaN(value) || value !== "",
                       },
                     }}
                     name="length"
@@ -530,7 +529,7 @@ const TransportationGroup = () => {
                           defaultValue={modalForm.data?.length}
                           size={"large"}
                           placeholder={"e.g 55"}
-                          addonAfter="m3"
+                          addonAfter="cm"
                           onChange={(e: any) => {
                             onChange(e.target.value);
                           }}
@@ -552,7 +551,7 @@ const TransportationGroup = () => {
                     defaultValue={modalForm.data?.width}
                     rules={{
                       validate: {
-                        isNumber: (value) => !isNaN(value),
+                        isNumber: (value) => !isNaN(value) || value !== "",
                       },
                     }}
                     name="width"
@@ -562,7 +561,7 @@ const TransportationGroup = () => {
                           defaultValue={modalForm.data?.width}
                           size={"large"}
                           placeholder={"e.g 55"}
-                          addonAfter="m3"
+                          addonAfter="cm"
                           onChange={(e: any) => {
                             onChange(e.target.value);
                           }}
@@ -584,7 +583,7 @@ const TransportationGroup = () => {
                     defaultValue={modalForm.data?.height}
                     rules={{
                       validate: {
-                        isNumber: (value) => !isNaN(value),
+                        isNumber: (value) => !isNaN(value) || value !== "",
                       },
                     }}
                     name="height"
@@ -594,7 +593,7 @@ const TransportationGroup = () => {
                           defaultValue={modalForm.data?.height}
                           size={"large"}
                           placeholder={"e.g 55"}
-                          addonAfter="m3"
+                          addonAfter="cm"
                           onChange={(e: any) => {
                             onChange(e.target.value);
                           }}
@@ -619,29 +618,15 @@ const TransportationGroup = () => {
                   marginBottom: "20px",
                 }}
               >
-                {modalForm.typeForm === "create" ? (
-                  <Button
-                    size="big"
-                    variant={"tertiary"}
-                    key="submit"
-                    type="primary"
-                    onClick={() => setModalForm({ open: false, data: {}, typeForm: "" })}
-                  >
-                    Cancel
-                  </Button>
-                ) : (
-                  <Button
-                    size="big"
-                    variant={"tertiary"}
-                    key="submit"
-                    type="primary"
-                    onClick={() => {
-                      setShowDelete({ open: true, type: "detail", data: modalForm.data });
-                    }}
-                  >
-                    Delete
-                  </Button>
-                )}
+                <Button
+                  size="big"
+                  variant={"tertiary"}
+                  key="submit"
+                  type="primary"
+                  onClick={() => setModalForm({ open: false, data: {}, typeForm: "" })}
+                >
+                  Cancel
+                </Button>
 
                 <Button onClick={handleSubmit(onSubmit)} variant="primary" size="big">
                   {isLoadingCreateTransportation || isLoadingUpdateTransportation

@@ -104,7 +104,7 @@ const PricingStructureList: any = () => {
 
   const paginationGroupBuying = usePagination({
     page: 1,
-    itemsPerPage: 10,
+    itemsPerPage: 20,
     maxPageItems: Infinity,
     numbers: true,
     arrows: true,
@@ -113,7 +113,7 @@ const PricingStructureList: any = () => {
 
   const paginationPricingConfig = usePagination({
     page: 1,
-    itemsPerPage: 10,
+    itemsPerPage: 20,
     maxPageItems: Infinity,
     numbers: true,
     arrows: true,
@@ -575,6 +575,7 @@ const PricingStructureList: any = () => {
             <InActivePricingStructure
               modalPricingStructureForm={modalPricingStructureForm}
               setModalPricingStructureForm={setModalPricingStructureForm}
+              refetchCount={refetch}
             />
           ) : tab === "draft" ? (
             <DraftPricingStructure
@@ -586,11 +587,13 @@ const PricingStructureList: any = () => {
             <RejectedPricingStructure
               modalPricingStructureForm={modalPricingStructureForm}
               setModalPricingStructureForm={setModalPricingStructureForm}
+              refetchCount={refetch}
             />
           ) : (
             <WaitingApprovalPricingStructure
               modalPricingStructureForm={modalPricingStructureForm}
               setModalPricingStructureForm={setModalPricingStructureForm}
+              refetchCount={refetch}
             />
           )}
         </Col>

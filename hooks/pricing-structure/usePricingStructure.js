@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useInfiniteQuery } from "react-query";
-import { client, mdmService } from "../../lib/client";
+import { mdmService } from "../../lib/client";
 
 const fetchPricingStructureLists = async ({ query = {} }) => {
   return mdmService(`/price-structure`, {
@@ -16,6 +16,27 @@ const fetchPricingStructureLists = async ({ query = {} }) => {
 
 const usePricingStructureLists = ({ query = {}, options } = {}) => {
   return useQuery(["price-structure", query], () => fetchPricingStructureLists({ query }), {
+    keepPreviousData: true,
+    ...options,
+  });
+};
+
+const fetchInfinitePricingStructureLists = async ({ pageParam = 1, queryKey }) => {
+  const searchQuery = queryKey[1].search;
+  return mdmService(`/price-structure`, {
+    params: {
+      search: searchQuery,
+      limit: 10,
+      page: pageParam,
+      sortBy: "created_at",
+      sortOrder: "DESC",
+      ...queryKey[1],
+    },
+  }).then((data) => data);
+};
+
+const usePricingStructureInfiniteLists = ({ query = {}, options }) => {
+  return useInfiniteQuery(["price-structure/infinite", query], fetchInfinitePricingStructureLists, {
     keepPreviousData: true,
     ...options,
   });
@@ -145,7 +166,7 @@ function useCreatePricingStructureList({ options }) {
 function useCreatePricingStructureDraftList({ options }) {
   return useMutation(
     (updates) =>
-      mdmService(`/price-structure/savedraft`, {
+      mdmService(`/price-structure`, {
         method: "POST",
         data: updates,
       }),
@@ -155,14 +176,14 @@ function useCreatePricingStructureDraftList({ options }) {
   );
 }
 
-const fetchPricingStructureList = async ({ partner_config_id }) => {
-  return mdmService(`/price-structure/${partner_config_id}`).then((data) => data);
+const fetchPricingStructureList = async ({ price_structure_id }) => {
+  return mdmService(`/price-structure/${price_structure_id}`).then((data) => data);
 };
 
-const usePricingStructureList = ({ partner_config_id, options }) => {
+const usePricingStructureList = ({ price_structure_id, options }) => {
   return useQuery(
-    ["price-structure", partner_config_id],
-    () => fetchPricingStructureList({ partner_config_id }),
+    ["price-structure", price_structure_id],
+    () => fetchPricingStructureList({ price_structure_id }),
     {
       ...options,
     }
@@ -336,4 +357,5 @@ export {
   useUpdatePricingConfigList,
   useGroupBuyingInfiniteLists,
   usePricingConfigInfiniteLists,
+  usePricingStructureInfiniteLists,
 };

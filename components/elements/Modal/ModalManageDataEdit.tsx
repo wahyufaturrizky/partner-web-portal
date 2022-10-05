@@ -18,8 +18,9 @@ import usePagination from "@lucasmogari/react-pagination";
 import UploadFile from "../../../assets/icons/upload-file.svg";
 import DownloadFile from "../../../assets/icons/download-file.svg";
 import { useFetchCountriesStructure } from "../../../hooks/mdm/country-structure/useCountries";
-
+import * as ExcelJS from "exceljs/dist/exceljs.min.js";
 import axios from "axios";
+import { saveAs } from "file-saver";
 
 let token: any;
 let apiURL = process.env.NEXT_PUBLIC_API_BASE3;
@@ -60,6 +61,98 @@ function stringifyNumber(n: any) {
 	return special[n];
 }
 
+async function downloadStructureExcel(structure: any, level: any) {
+	const wb = new ExcelJS.Workbook();
+	const ws = wb.addWorksheet("country_structure");
+	let columns = [];
+
+	if (level >= 1) columns.push({ header: "1st_level", key: "1", width: 30 });
+	if (level >= 2) columns.push({ header: "2nd_level", key: "2", width: 30 });
+	if (level >= 3) columns.push({ header: "3rd_level", key: "3", width: 30 });
+	if (level >= 4) columns.push({ header: "4th_level", key: "4", width: 30 });
+	if (level >= 5) columns.push({ header: "5th_level", key: "5", width: 30 });
+	if (level >= 6) columns.push({ header: "6th_level", key: "6", width: 30 });
+	if (level >= 7) columns.push({ header: "7th_level", key: "7", width: 30 });
+	if (level >= 8) columns.push({ header: "8th_level", key: "8", width: 30 });
+	if (level >= 9) columns.push({ header: "9th_level", key: "9", width: 30 });
+	if (level >= 10) columns.push({ header: "10th_level", key: "10", width: 30 });
+
+	ws.columns = columns;
+	structure.map((structure: any) => {
+		if (level === 1) ws.addRow({ 1: structure["1"] });
+		if (level === 2) ws.addRow({ 1: structure["2"], 2: structure["1"] });
+		if (level === 3) ws.addRow({ 1: structure["3"], 2: structure["2"], 3: structure["1"] });
+		if (level === 4)
+			ws.addRow({ 1: structure["4"], 2: structure["3"], 3: structure["2"], 4: structure["1"] });
+		if (level === 5)
+			ws.addRow({
+				1: structure["5"],
+				2: structure["4"],
+				3: structure["3"],
+				4: structure["2"],
+				5: structure["1"],
+			});
+		if (level === 6)
+			ws.addRow({
+				1: structure["6"],
+				2: structure["5"],
+				3: structure["4"],
+				4: structure["3"],
+				5: structure["2"],
+				6: structure["1"],
+			});
+		if (level === 7)
+			ws.addRow({
+				1: structure["7"],
+				2: structure["6"],
+				3: structure["5"],
+				4: structure["4"],
+				5: structure["3"],
+				6: structure["2"],
+				7: structure["1"],
+			});
+		if (level === 8)
+			ws.addRow({
+				1: structure["8"],
+				2: structure["7"],
+				3: structure["6"],
+				4: structure["5"],
+				5: structure["4"],
+				6: structure["3"],
+				7: structure["2"],
+				8: structure["1"],
+			});
+		if (level === 9)
+			ws.addRow({
+				1: structure["9"],
+				2: structure["8"],
+				3: structure["7"],
+				4: structure["6"],
+				5: structure["5"],
+				6: structure["4"],
+				7: structure["3"],
+				8: structure["2"],
+				9: structure["1"],
+			});
+		if (level === 10)
+			ws.addRow({
+				1: structure["10"],
+				2: structure["9"],
+				3: structure["8"],
+				4: structure["7"],
+				5: structure["6"],
+				6: structure["5"],
+				7: structure["4"],
+				8: structure["3"],
+				9: structure["2"],
+				10: structure["1"],
+			});
+	});
+
+	const buf = await wb.xlsx.writeBuffer();
+	saveAs(new Blob([buf]), `manage_${stringifyNumberSpecial(level-1)}_level.xlsx`);
+}
+
 export const ModalManageDataEdit = ({
 	visible,
 	onCancel,
@@ -85,7 +178,7 @@ export const ModalManageDataEdit = ({
 	})
 	const pagination = usePagination({
 		page: 1,
-		itemsPerPage: 5,
+		itemsPerPage: 20,
 		maxPageItems: Infinity,
 		numbers: true,
 		arrows: true,
@@ -383,7 +476,11 @@ export const ModalManageDataEdit = ({
 			name: "Download Template",
 			icon: DownloadFile,
 			onClick: () => {
-				donwloadStructure();
+				if(structure?.id){
+					donwloadStructure();
+				} else {
+					downloadStructureExcel(dataTable, level)
+				}
 			},
 		},
 		{

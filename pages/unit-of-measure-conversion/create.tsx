@@ -48,7 +48,7 @@ const UOMConversionCreate = () => {
   const router = useRouter();
   const pagination = usePagination({
     page: 1,
-    itemsPerPage: 10,
+    itemsPerPage: 20,
     maxPageItems: Infinity,
     numbers: true,
     arrows: true,
@@ -166,14 +166,17 @@ const UOMConversionCreate = () => {
   const updateStatusUom = (rowKey: any) => {}
 
   const onSave = (data: any) => {
-    const tempTable = [...newUomTable]
-    const savedTable = tempTable.map(uom => {
-      return {
-        qty: uom.qty,
-        uom_id: listUomCategory.find(e => e.label === uom.uom).value,
-        conversion_number: uom.conversionNumber
-      }
-    })
+    const savedTable: { qty: any; uom_id: any; conversion_number: any; }[] = [] 
+    if(newUomTable){
+      const tempTable = [...newUomTable]
+      tempTable.forEach(uom => {
+        savedTable?.push({
+          qty: uom.qty,
+          uom_id: listUomCategory.find(e => e.label === uom.uom).value,
+          conversion_number: uom.conversionNumber
+        })
+      })
+    }
     const saveData = {
     company_id: "KSNI",
     name: data.name,

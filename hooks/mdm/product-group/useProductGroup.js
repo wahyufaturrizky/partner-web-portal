@@ -30,6 +30,27 @@ const useProductGroup = ({ id, companyId, options }) => {
   });
 };
 
+const fetchInfiniteProductGroupList = async ({ pageParam = 1, queryKey }) => {
+  const searchQuery = queryKey[1].search;
+  return mdmService(`/product-group`, {
+    params: {
+      search: searchQuery,
+      limit: 10,
+      page: pageParam,
+      sortBy: "created_at",
+      sortOrder: "DESC",
+      ...queryKey[1],
+    },
+  }).then((data) => data);
+};
+
+const useProductGroupInfiniteLists = ({ query = {}, options }) => {
+  return useInfiniteQuery(["product-group/infinite", query], fetchInfiniteProductGroupList, {
+    keepPreviousData: true,
+    ...options,
+  });
+};
+
 function useFilterProductGroup({ pagingationParam: { page = 1, limit = 10 }, options }) {
   return useMutation(
     (data) =>
@@ -103,4 +124,5 @@ export {
   useUpdateProductGroup,
   useDeleteProductGroup,
   useUploadFileProductGroup,
+  useProductGroupInfiniteLists
 };

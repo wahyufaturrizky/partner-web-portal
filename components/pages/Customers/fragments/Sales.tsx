@@ -1,111 +1,139 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   Row,
   Col,
-  Dropdown2,
   Spacer,
   Checkbox,
   Text,
   Dropdown
 } from 'pink-lava-ui'
 import styled from 'styled-components'
-import { useTermOfPayments } from '../../../../hooks/mdm/term-of-payment/useTermOfPayment';
+import { Controller } from 'react-hook-form';
+
+import { useTermOfPayments } from 'hooks/mdm/term-of-payment/useTermOfPayment';
+import { useBranchList } from 'hooks/mdm/branch/useBranch';
+import { useFetchListSalesman } from 'hooks/mdm/salesman/useSalesman';
+import { listSalesItems } from '../constants';
 
 export default function Sales(props: any) {
-  const { setValueSales } = props
-  const [orderInformation, setOrderInformation] = useState<any>({
-    sales: false,
-    invoice: false,
-    delivery: false,
+  const { register, setValue, control, checked, setChecked } = props
+  const [search, setSearch] = useState({
+    branch: '',
+    termOfPayment: '',
+    salesman: ''
   })
-
-  const { data: getDataTermOfPayment } = useTermOfPayments({
+  
+  const { data: listSalesman } = useFetchListSalesman({
+    options: { onSuccess: () => {} },
+    query: { status: 0, search: search.salesman }
+  })
+  
+  const { data: listTermOfPayment } = useTermOfPayments({
     options: { onSuccess: () => { } },
-    query: { company_id: "KSNI" }
+    query: { company_id: "KSNI", search: search.termOfPayment }
   })
-
-  const listItemsOfPayment = getDataTermOfPayment?.rows?.map
-    (({ topId, name }: any) => { return { value: name, id: topId } })
-
-
-  const listSalesItems = [
-    { id: 'sales', label: 'Sales Order Blocking', value: 'sales_order_blocking' },
-    { id: 'invoice', label: 'Invoice/Billing Blocking', value: 'billing_blocking' },
-    { id: 'delivery', label: 'Delivery Order Blocking', value: 'delivery_order_blocking' },
-  ]
-  const listFakeBranch = [
-    { value: 'example-branch-1', id: 1 },
-    { value: 'example-branch-2', id: 2 },
-    { value: 'example-branch-3', id: 3 },
-    { value: 'example-branch-4', id: 4 },
-  ]
-  const listFakeSalesman = [
-    { value: 'Billa yuvila', id: 1 },
-    { value: 'Gween sticky', id: 2 },
-    { value: 'Lecredec', id: 3 },
-  ]
-
+  
+  const { data: listBranch } = useBranchList({
+    options: { onSuccess: () => { } },
+    query: { company_id: "KSNI", search: search.branch }
+  })
+  
+  const _listSalesman = listSalesman?.rows?.map((items: any) => ({
+    value: items?.division,
+    id: items?.id
+  }))
+  
+  const _listTermOfPayment = listTermOfPayment?.rows?.map((item: any) => ({
+    value: item?.name,
+    id: item?.topId
+  }))
+  
+  const _listBranch = listBranch?.rows?.map((item: any) => ({
+    value: item?.name,
+    id: item?.branchId
+  }))
+  
+  useEffect(() => {
+    listSalesItems.map(({ value }) => {
+      register(`sales.${value}`, checked[value])
+      setValue(`sales.${value}`, checked[value])
+    })
+  }, [checked, setValue, register])
+  
   return (
     <div>
       <Label>Sales</Label>
       <Spacer size={20} />
       <Row gap="10px" width="100%">
         <Col width="48%">
-          <Dropdown2
-            label="Branch"
-            width="100%"
-            actionLabel="Add New Branch"
-            isShowActionLabel
-            items={listFakeBranch}
-            handleClickActionLabel={() => { }}
-            handleChange={(value: string) => setValueSales("sales.branch", value)}
-            onSearch={(search: string) => {}}
-            required
+          <Controller
+            control={control}
+            name="sales.branch"
+            render={({ field: { onChange } }) => (
+              <Dropdown
+                width="100%"
+                label="Branch"
+                actionLabel="Add New Branch"
+                items={_listBranch}
+                handleChange={onChange}
+                onSearch={(value: string) => setSearch({ ...search, branch: value })}
+              />
+            )}
           />
         <Spacer size={20} />
-        <Dropdown
-          label="Term of Payment" 
-          width="100%"
-          actionLabel="Add New Term of Payment"
-          isShowActionLabel
-          noSearch
-            items={listItemsOfPayment}
-          handleClickActionLabel={() => window.open('/term-of-payment/create')}
-          handleChange={(value: string) => setValueSales("sales.term_payment", value)}
-          required
+        <Controller
+          control={control}
+          name="sales.term_payment"
+          render={({ field: { onChange } }) => (
+            <Dropdown
+              noSearch
+              isShowActionLabel
+              width="100%"
+              label="Term of Payment"
+              actionLabel="Add New Term of Payment"
+              handleChange={onChange}
+              items={_listTermOfPayment}
+              onSearch={(value: string) => setSearch({ ...search, termOfPayment: value })}
+            />
+          )}
         />
         </Col>
         <Col width="48%">
-          <Dropdown
-            actionLabel="Add New Salesman"
-            label="Salesman"
-            width="100%"
-            isShowActionLabel
-            items={listFakeSalesman}
-            handleClickActionLabel={() => window.open('/salesman/create')}
-            handleChange={(value: string) => setValueSales("sales.salesman", value)}
-            required
-          />
+          <Controller
+            control={control}
+            name="sales.salesman"
+            render={({ field: { onChange } }) => (
+              <Dropdown
+                actionLabel="Add New Salesman"
+                label="Salesman"
+                width="100%"
+                isShowActionLabel
+                handleChange={onChange}
+                handleClickActionLabel={() => window.open('/salesman/create')}
+                onSearch={(value: string) => setSearch({ ...search, salesman: value })}
+                items={_listSalesman}
+            />
+          )}/>
         </Col>
       </Row>
       <Spacer size={50} />
-
       <Label>Sales Order Information</Label>
       <Spacer size={20} />
       {
-        listSalesItems?.map(({ label, value, id }, index) => (
+        listSalesItems.map(({ value, label }, index) => (
           <>
             <Row key={index} alignItems="center">
               <Checkbox
-                checked={orderInformation[id]}
-                onChange={(checked: any) => {
-                  setOrderInformation({ ...orderInformation, [id]: checked })
-                  setValueSales(`sales.${value}`, checked)
-                }}
-              />
+                checked={checked[value]}
+                onChange={(status: any) => {
+                  setChecked({ ...checked, [value]: status })
+                  register(`sales.${value}`, checked[value])
+                  setValue(`sales.${value}`, checked[value])
+                }
+                }/>
               <Text>{label}</Text>
             </Row>
-            <Spacer size={10} />
+            <Spacer size={20} />
           </>
         ))
       }

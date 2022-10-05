@@ -10,17 +10,7 @@ import IconEdit from 'assets/icons/ic-more.svg'
 import styles from '../styles.module.css'
 
 export default function Contact(props: any) {
-  const {
-    onCreate,
-    setVisible,
-    visible,
-    registerContact,
-    contact,
-    setValueContact,
-    fieldsContact,
-    removeContact,
-    handleEditContact
-    } = props 
+  const {} = props 
 
   return (
     <div>
@@ -32,30 +22,17 @@ export default function Contact(props: any) {
       <Spacer size={20} />
       <Row gap="12px" width="100%"> 
         <Col width="32%">
-          <CardAddContact onClick={setVisible} />
+          <CardAddContact/>
         </Col>
-        {
-          fieldsContact.map((items: any, index: number) => (
-            <Col key={index} width="32%">
-              <CardContact
-                key={items.id}
-                onRemove={() => removeContact(index)}
-                onEdit={handleEditContact}
-                {...items}
-              />
-            </Col>
-          ))
-        }
+        <Col width="32%">
+          <CardContact
+            onRemove={() => {}}
+            onEdit={() => {}}
+          />
+        </Col>
       </Row>
 
-      <ModalAddNewContact
-        setValueContact={setValueContact}
-        contact={contact}
-        visible={visible}
-        onSubmit={onCreate}
-        onCancel={setVisible}
-        registerContact={registerContact}
-      />
+      <ModalAddNewContact />
     </div>
   )
 }

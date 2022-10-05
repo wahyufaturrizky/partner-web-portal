@@ -87,7 +87,6 @@ function useUpdateCostCenter({ id, companyId, options }) {
 const useDeletCostCenter = ({ options }) => {
   return useMutation(
     (data) => {
-      console.log(data, "<<<di delete");
       mdmService(`/cost-center`, {
         method: "DELETE",
         data,

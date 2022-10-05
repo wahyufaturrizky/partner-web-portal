@@ -6,7 +6,7 @@ export default function UploadImage({ control, handleUpload }: any) {
   return (
     <Controller
       control={control}
-      name="company_logo"
+      name="customer.company_logo"
       render={({ field: { onChange } }) => (
         <FileUploaderAllFiles
           label="Company Logo"

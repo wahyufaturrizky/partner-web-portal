@@ -1,4 +1,4 @@
-import { useQuery, useMutation } from "react-query";
+import { useQuery, useMutation, useInfiniteQuery } from "react-query";
 import { client, client3 } from "../../lib/client";
 import { mdmService } from "../../lib/client";
 
@@ -20,6 +20,28 @@ const fetchCompanyList = async ({ query = {} }) => {
 
 const useCompanyList = ({ query = {}, options } = {}) => {
   return useQuery(["company-list", query], () => fetchCompanyList({ query }), {
+    keepPreviousData: true,
+    ...options,
+  });
+};
+
+const fetchInfiniteCompanyLists = async ({ pageParam = 1, queryKey }) => {
+  const searchQuery = queryKey[1].search;
+  return client(`/hermes/company`, {
+    params: {
+      account_id: 0,
+      search: searchQuery,
+      limit: 10,
+      page: pageParam,
+      sortBy: "id",
+      sortOrder: "DESC",
+      ...queryKey[1],
+    },
+  }).then((data) => data);
+};
+
+const useCompanyInfiniteLists = ({ query = {}, options }) => {
+  return useInfiniteQuery(["company/infinite", query], fetchInfiniteCompanyLists, {
     keepPreviousData: true,
     ...options,
   });
@@ -52,29 +74,29 @@ function useStatusCompany({ companyId, status, options }) {
 }
 
 function useCreateCompany({ options }) {
-	return useMutation(
-		(updates) =>
-			client(`/hermes/company`, {
-				method: "POST",
-				data: updates,
-			}),
-		{
-			...options,
-		}
-	);
+  return useMutation(
+    (updates) =>
+      client(`/hermes/company`, {
+        method: "POST",
+        data: updates,
+      }),
+    {
+      ...options,
+    }
+  );
 }
 
 function useUpdateCompany({ id, options }) {
-	return useMutation(
-		(updates) =>
-			client(`/hermes/company/${id}`, {
-				method: "PUT",
-				data: updates,
-			}),
-		{
-			...options,
-		}
-	);
+  return useMutation(
+    (updates) =>
+      client(`/hermes/company/${id}`, {
+        method: "PUT",
+        data: updates,
+      }),
+    {
+      ...options,
+    }
+  );
 }
 
 const useUploadLogoCompany = ({ options }) => {
@@ -91,16 +113,16 @@ const useUploadLogoCompany = ({ options }) => {
 };
 
 const useDeleteCompany = ({ options }) => {
-	return useMutation(
-		(ids) =>
-			client(`/hermes/company`, {
-				method: "DELETE",
-				data: ids,
-			}),
-		{
-			...options,
-		}
-	);
+  return useMutation(
+    (ids) =>
+      client(`/hermes/company`, {
+        method: "DELETE",
+        data: ids,
+      }),
+    {
+      ...options,
+    }
+  );
 };
 
 // End Company
@@ -174,22 +196,22 @@ const useCoa = ({ query = {}, options } = {}) => {
 // List Currency
 
 const fetchCurrenciesMDM = async ({ query = {} }) => {
-	return mdmService(`/currency`, {
-		params: {
-			search: "",
-			// page: 1,
-			// limit: 10,
-			sortBy: "created_at",
-			sortOrder: "DESC",
-			...query,
-		},
-	}).then((data) => data);
+  return mdmService(`/currency`, {
+    params: {
+      search: "",
+      // page: 1,
+      // limit: 10,
+      sortBy: "created_at",
+      sortOrder: "DESC",
+      ...query,
+    },
+  }).then((data) => data);
 };
 
 const useCurrenciesMDM = ({ query = {}, options }) => {
-	return useQuery(["currencies", query], () => fetchCurrenciesMDM({ query }), {
-		...options,
-	});
+  return useQuery(["currencies", query], () => fetchCurrenciesMDM({ query }), {
+    ...options,
+  });
 };
 
 // List Menu Design
@@ -197,9 +219,9 @@ const useCurrenciesMDM = ({ query = {}, options }) => {
 const fetchMenuDesignLists = async ({ query = {} }) => {
   return client(`/menu/design`, {
     params: {
-    //   search: "",
-    //   limit: 10,
-    //   page: 1,
+      //   search: "",
+      //   limit: 10,
+      //   page: 1,
       sortBy: "created_at",
       sortOrder: "DESC",
       ...query,
@@ -217,47 +239,48 @@ const useMenuDesignLists = ({ query = {}, options } = {}) => {
 // List Country
 
 const fetchCountries = async ({ query = {} }) => {
-	return mdmService(`/country`, {
-		params: {
-			search: "",
-			// limit: 10,
-			// page: 1,
-			sortBy: "id",
-			sortOrder: "ASC",
-			...query,
-		},
-	}).then((data) => data);
+  return mdmService(`/country`, {
+    params: {
+      search: "",
+      // limit: 10,
+      // page: 1,
+      sortBy: "id",
+      sortOrder: "ASC",
+      ...query,
+    },
+  }).then((data) => data);
 };
 
 const useCountries = ({ query = {}, options } = {}) => {
-	return useQuery(["country", query], () => fetchCountries({ query }), {
-		keepPreviousData: true,
-		...options,
-	});
+  return useQuery(["country", query], () => fetchCountries({ query }), {
+    keepPreviousData: true,
+    ...options,
+  });
 };
 
 const fetchTimezone = async ({ query = {} }) => {
-	return client3(`/master/timezone`, {
-		params: {
-			search: "",
-			limit: 10000,
-			page: 1,
-			sortBy: "id",
-			sortOrder: "asc",
-			...query,
-		},
-	}).then((data) => data);
+  return client3(`/master/timezone`, {
+    params: {
+      search: "",
+      limit: 10000,
+      page: 1,
+      sortBy: "id",
+      sortOrder: "asc",
+      ...query,
+    },
+  }).then((data) => data);
 };
 
 const useTimezones = ({ query = {}, options } = {}) => {
-	return useQuery(["timezone", query], () => fetchTimezone({ query }), {
-		keepPreviousData: true,
-		...options,
-	});
+  return useQuery(["timezone", query], () => fetchTimezone({ query }), {
+    keepPreviousData: true,
+    ...options,
+  });
 };
 
 export {
   useCompanyList,
+  useCompanyInfiniteLists,
   useCompany,
   useStatusCompany,
   useCreateCompany,
@@ -270,5 +293,5 @@ export {
   useCurrenciesMDM,
   useMenuDesignLists,
   useCountries,
-  useTimezones
+  useTimezones,
 };

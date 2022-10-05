@@ -1,32 +1,30 @@
-import React, { useState } from "react";
-import styled from "styled-components";
+import usePagination from "@lucasmogari/react-pagination";
+import { useRouter } from "next/router";
 import {
-  Text,
+  Button,
+  Col,
+  DropdownMenu,
+  EmptyState,
+  FileUploadModal,
+  Lozenge,
+  Pagination,
   Row,
   Search,
   Spacer,
-  Button,
-  Col,
-  Table,
-  Pagination,
-  Lozenge,
   Spin,
-  EmptyState,
-  DropdownMenu,
-  FileUploadModal,
-  Modal,
+  Table,
+  Text,
 } from "pink-lava-ui";
-import usePagination from "@lucasmogari/react-pagination";
-import { useRouter } from "next/router";
-import { STATUS_APPROVAL_VARIANT, STATUS_APPROVAL_TEXT } from "../../utils/utils";
+import { useState } from "react";
+import styled from "styled-components";
+import { ICDollarBlack, ICDownload, ICManageCustGroupBuyingPrice, ICUpload } from "../../assets";
 import {
-  useDeletePricingStructureList,
   usePricingStructureLists,
   useUploadFilePricingStructureMDM,
 } from "../../hooks/pricing-structure/usePricingStructure";
-import { ICDollarBlack, ICDownload, ICManageCustGroupBuyingPrice, ICUpload } from "../../assets";
-import { queryClient } from "../../pages/_app";
 import { mdmDownloadService } from "../../lib/client";
+import { queryClient } from "../../pages/_app";
+import { STATUS_APPROVAL_TEXT, STATUS_APPROVAL_VARIANT } from "../../utils/utils";
 
 const downloadFile = (params: any) =>
   mdmDownloadService("/pricing-structure/template/download", { params }).then((res) => {
@@ -37,59 +35,38 @@ const downloadFile = (params: any) =>
     tempLink.click();
   });
 
-const renderConfirmationText = (type: any, data: any) => {
-  switch (type) {
-    case "selection":
-      return data.selectedRowKeys.length > 1
-        ? `Are you sure to delete ${data.selectedRowKeys.length} items ?`
-        : `Are you sure to delete name ${
-            data?.data?.data.find((el: any) => el.key === data.selectedRowKeys[0])?.name
-          } ?`;
-    case "detail":
-      return `Are you sure to delete name ${data.name} ?`;
-
-    default:
-      break;
-  }
-};
-
 const RejectedPricingStructure: any = (props: any) => {
   const router = useRouter();
   const pagination = usePagination({
     page: 1,
-    itemsPerPage: 10,
+    itemsPerPage: 20,
     maxPageItems: Infinity,
     numbers: true,
     arrows: true,
     totalItems: 100,
   });
 
-  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
-
   const [search, setSearch] = useState("");
 
   const [isShowUpload, setShowUpload] = useState(false);
 
-  const [isShowDelete, setShowDelete] = useState({
-    open: false,
-    type: "selection",
-    data: {},
+  const {
+    data: pricingStructureLists,
+    refetch: refetchPricingStructure,
+    isLoading: isLoadingPricingStructureList,
+  } = usePricingStructureLists({
+    options: {
+      onSuccess: (data: any) => {
+        pagination.setTotalItems(data.totalRow);
+      },
+    },
+    query: {
+      search,
+      page: pagination.page,
+      limit: pagination.itemsPerPage,
+      status: "REJECTED",
+    },
   });
-
-  const { data: pricingStructureLists, isLoading: isLoadingPricingStructureList } =
-    usePricingStructureLists({
-      options: {
-        onSuccess: (data: any) => {
-          pagination.setTotalItems(data.totalRow);
-        },
-      },
-      query: {
-        search,
-        page: pagination.page,
-        limit: pagination.itemsPerPage,
-        status: "REJECTED",
-      },
-    });
 
   const { mutate: uploadFileProductBrandMDM } = useUploadFilePricingStructureMDM({
     options: {
@@ -108,8 +85,9 @@ const RejectedPricingStructure: any = (props: any) => {
     },
     {
       title: "Products",
-      dataIndex: "products",
+      dataIndex: "priceStructureCosts",
       width: "28%",
+      render: (e: any) => `${e?.length || 0} Products`,
     },
     {
       title: "Status",
@@ -131,8 +109,8 @@ const RejectedPricingStructure: any = (props: any) => {
   pricingStructureLists?.rows?.map((element: any) => {
     data.push({
       key: element.id,
+      priceStructureCosts: element.priceStructureCosts,
       proposal_number: element.proposalNumber,
-      products: element.elementType.products,
       status: element.status,
       action: (
         <Button
@@ -155,24 +133,6 @@ const RejectedPricingStructure: any = (props: any) => {
 
     uploadFileProductBrandMDM(formData);
   };
-
-  const rowSelection = {
-    selectedRowKeys,
-    onChange: (selectedRowKeys: any) => {
-      setSelectedRowKeys(selectedRowKeys);
-    },
-  };
-
-  const { mutate: deletePricingStructure, isLoading: isLoadingDeletePricingStructure }: any =
-    useDeletePricingStructureList({
-      options: {
-        onSuccess: () => {
-          setShowDelete({ open: false, data: {}, type: "" });
-          setSelectedRowKeys([]);
-          queryClient.invalidateQueries(["price-structure"]);
-        },
-      },
-    });
 
   return (
     <>
@@ -291,7 +251,7 @@ const RejectedPricingStructure: any = (props: any) => {
               />
             ) : (
               <Col gap="60px">
-                <Table columns={columns} data={paginateField} rowSelection={rowSelection} />
+                <Table columns={columns} data={paginateField} />
                 <Pagination pagination={pagination} />
               </Col>
             )}
@@ -305,59 +265,6 @@ const RejectedPricingStructure: any = (props: any) => {
           visible={isShowUpload}
           setVisible={setShowUpload}
           onSubmit={onSubmitFile}
-        />
-      )}
-
-      {isShowDelete.open && (
-        <Modal
-          closable={false}
-          centered
-          visible={isShowDelete.open}
-          onCancel={() => setShowDelete({ open: false, type: "", data: {} })}
-          title={"Confirm Delete"}
-          footer={null}
-          content={
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "center",
-              }}
-            >
-              <Spacer size={4} />
-              {renderConfirmationText(isShowDelete.type, isShowDelete.data)}
-              <Spacer size={20} />
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "center",
-                  gap: "10px",
-                  marginBottom: "20px",
-                }}
-              >
-                <Button
-                  size="big"
-                  variant="tertiary"
-                  key="submit"
-                  type="primary"
-                  onClick={() => setShowDelete({ open: false, type: "", data: {} })}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  variant="primary"
-                  size="big"
-                  onClick={() => {
-                    if (isShowDelete.type === "selection") {
-                      deletePricingStructure({ ids: selectedRowKeys });
-                    }
-                  }}
-                >
-                  {isLoadingDeletePricingStructure ? "loading..." : "Yes"}
-                </Button>
-              </div>
-            </div>
-          }
         />
       )}
     </>

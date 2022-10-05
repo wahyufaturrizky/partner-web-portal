@@ -15,32 +15,9 @@ import {
 import { ICCheckPrimary, IconAdd } from "assets";
 
 export default function Addresses(props: any) {
-  const {
-    getValues,
-    fieldsAddress,
-    appendAddress,
-    replaceAddress,
-    removeAddress,
-    control,
-    register,
-    addressBodyField,
-  } = props
+  const {} = props
 
-  const propsFieldForm = {
-    getValues,
-    control,
-    fieldsAddress,
-    replaceAddress,
-    removeAddress,
-    register,
-  }
-
-  const handleAddMoreAddresss = () => {
-    appendAddress({
-      ...addressBodyField,
-      key: fieldsAddress?.length
-    })
-  }
+  const handleAddMoreAddresss = () => {}
 
   return (
     <div>
@@ -53,50 +30,19 @@ export default function Addresses(props: any) {
         Add More Address
       </Button>
       <Spacer size={20} />
-      {
-        fieldsAddress.map((field: any, index: number | string) =>
-        <div key={index}>
-          <FormContact index={index} {...propsFieldForm} />
-          <Spacer size={30} />
-          <hr />
-          <Spacer size={30} />
-        </div>
-        )
-      }
+      <div>
+        <FormContact />
+        <Spacer size={30} />
+        <hr />
+        <Spacer size={30} />
+      </div>
     </div>
   )
 }
 
-const FormContact = ({
-  control,
-  index,
-  getValues,
-  fieldsAddress,
-  replaceAddress,
-  removeAddress,
-  register,
-}: any) => {
+const FormContact = ({}: any) => {
 
-  const setAsPrimary = () => {
-    let editAsPrimary = fieldsAddress?.map((items: any) => {
-      if (items?.key === index) {
-        items.is_primary = true;
-        return { ...items };
-      } else {
-        items.is_primary = false;
-        return { ...items };
-      }
-    });
-    replaceAddress(editAsPrimary);
-  }
-
-  const propsButtonSetPrimary = {
-    getValues,
-    index,
-    removeAddress,
-    fieldsAddress,
-    setAsPrimary: () => setAsPrimary()
-  }
+  const setAsPrimary = () => {}
   
   const listFakeCountres = [
     { id: 1, value: 'Indonesia' },
@@ -130,16 +76,14 @@ const FormContact = ({
   return (
     <>
       <Controller
-        control={control}
-        name={`address.${index}.is_primary`}
-        render={() => <ButtonSetFormsPrimary {...propsButtonSetPrimary} />}
+        name={`address.is_primary`}
+        render={() => <ButtonSetFormsPrimary />}
       />
       <Spacer size={30} />
       <Row gap="20px" width="100%">
         <Col width="48%">
           <Controller
-            control={control}
-            name={`address.${index}.address_type`}
+            name={`address.address_type`}
             rules={{ required: "Please enter address type." }}
             render={({ field: { onChange }, fieldState: { error } }) => (
               <Dropdown
@@ -155,8 +99,7 @@ const FormContact = ({
 
           <Spacer size={10} />
           <Controller
-            control={control}
-            name={`address.${index}.country`}
+            name={`address.country`}
             rules={{ required: "Please enter country." }}
             render={({ field: { onChange }, fieldState: { error } }) => (
               <Dropdown
@@ -170,8 +113,7 @@ const FormContact = ({
             )} />
           <Spacer size={10} />
           <Controller
-            control={control}
-            name={`address.${index}.city`}
+            name={`address.city`}
             rules={{ required: "Please enter city." }}
             render={({ field: { onChange }, fieldState: { error } }) => (
               <Dropdown
@@ -185,8 +127,7 @@ const FormContact = ({
             )} />
           <Spacer size={10} />
           <Controller
-            control={control}
-            name={`address.${index}.zone`}
+            name={`address.zone`}
             rules={{ required: "Please enter zone." }}
             render={({ field: { onChange }, fieldState: { error } }) => (
               <Dropdown
@@ -206,12 +147,12 @@ const FormContact = ({
             width="100%"
             noSearch
             required
-            {...register(`address.${index}.longtitude`, {
-              required: 'longtitude must be filled'
-            })}
+            // {...register(`address.${index}.longtitude`, {
+            //   required: 'longtitude must be filled'
+            // })}
           />
           <Spacer size={30} />
-          <UploadImage control={control} index={index} />
+          {/* <UploadImage control={control} index={index} /> */}
         </Col>
         <Col width="48%">
           <Input
@@ -220,14 +161,13 @@ const FormContact = ({
             placeholder="e.g Front Groceries No. 5"
             label="Street"
             required
-            {...register(`address.${index}.street`, {
-              required: 'street must be filled'
-            })}
+            // {...register(`address.${index}.street`, {
+            //   required: 'street must be filled'
+            // })}
           />
           <Spacer size={10} />
           <Controller
-            control={control}
-            name={`address.${index}.province`}
+            name={`address.province`}
             rules={{ required: "Please enter province." }}
             render={({ field: { onChange }, fieldState: { error } }) => (
               <Dropdown
@@ -242,8 +182,7 @@ const FormContact = ({
           <Spacer size={10} />
           <Controller
             rules={{ required: "Please enter district" }}
-            control={control}
-            name={`address.${index}.district`}
+            name={`address.district`}
             render={({ field: { onChange }, fieldState: { error } }) => (
               <Dropdown
                 label="District"
@@ -257,8 +196,7 @@ const FormContact = ({
           <Spacer size={10} />
           <Controller
             rules={{ required: "Please enter postal code." }}
-            control={control}
-            name={`address.${index}.postal_code`}
+            name={`address.postal_code`}
             render={({ field: { onChange }, fieldState: { error } }) => (
               <Dropdown
                 label="Postal Code"
@@ -275,9 +213,9 @@ const FormContact = ({
             placeholder="e.g 1421.31231.1231"
             label="Latitude"
             width="100%"
-            {...register(`address.${index}.latitude`, {
-              required: 'latitude must be filled'
-            })}
+            // {...register(`address.${index}.latitude`, {
+            //   required: 'latitude must be filled'
+            // })}
           />
         </Col>
       </Row>
@@ -286,22 +224,17 @@ const FormContact = ({
 }
 
 const ButtonSetFormsPrimary = ({
-  getValues,
-  index,
-  setAsPrimary,
-  removeAddress,
-  fieldsAddress,
 }: any) => {
-  const isDeleteAktifed: boolean = fieldsAddress?.length > 1
+  // const isDeleteAktifed: boolean = fieldsAddress?.length > 1
   return (
     <>
       <Text color="blue.dark" variant="headingMedium">
-        {getValues(`address.${index}.is_primary`)
+        {/* {getValues(`address.${index}.is_primary`)
           ? "Home"
-          : "New Address"}
+          : "New Address"} */}
       </Text>
       <Row gap="12px" alignItems="center">
-        {(index === 0 && fieldsAddress.length < 2) || getValues(`address.${index}.is_primary`)
+        {/* {(index === 0 && fieldsAddress.length < 2) || getValues(`address.${index}.is_primary`)
           ? (
             <Lozenge variant="blue">
               <Row alignItems="center">
@@ -329,7 +262,7 @@ const ButtonSetFormsPrimary = ({
               </div>
             </>
           )
-        }
+        } */}
       </Row>
     </>
   )

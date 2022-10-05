@@ -54,7 +54,7 @@ const Branch = () => {
   const router = useRouter();
   const pagination = usePagination({
     page: 1,
-    itemsPerPage: 10,
+    itemsPerPage: 20,
     maxPageItems: Infinity,
     numbers: true,
     arrows: true,
@@ -81,41 +81,40 @@ const Branch = () => {
       search: debounceSearch,
       page: pagination.page,
       limit: pagination.itemsPerPage,
-      company_id: "KSNI",
+      company_id: "KSNI"
     },
     options: {
-      initialData: [],
       onSuccess: (data: any) => {
+        console.log(data, '<<< abis tembak')
         pagination.setTotalItems(data.totalRow);
       },
       select: (data: any) => {
         const mappedData = data?.rows?.map((element: any) => {
-          return {
-            key: element.branchId,
-            id: element.branchId,
-            branchName: element.name,
-            action: (
-              <div style={{ display: "flex", justifyContent: "left" }}>
-                <Button
-                  size="small"
-                  onClick={() => {
-                    router.push(`/branch/${element.branchId}`);
-                  }}
-                  variant="tertiary"
-                >
-                  View Detail
-                </Button>
-              </div>
-            ),
-          };
-        });
-
+            return {
+              key: element.branchId,
+              id: element.branchId,
+              branchName: element.name,
+              action: (
+                <div style={{ display: "flex", justifyContent: "left" }}>
+                  <Button
+                    size="small"
+                    onClick={() => {
+                      router.push(`/branch/${element.companyId}/${element.branchId}`);
+                    }}
+                    variant="tertiary"
+                  >
+                    View Detail
+                  </Button>
+                </div>
+              ),
+            };
+          });
         return { data: mappedData, totalRow: data.totalRow };
       },
     },
   });
 
-  const { mutate: deleteUom, isLoading: isLoadingDeleteUom } = useDeleteBranch({
+  const { mutate: deleteBranch, isLoading: isLoadingDeleteBranch } = useDeleteBranch({
     options: {
       onSuccess: () => {
         setShowDelete({ open: false, data: {}, type: "" });
@@ -310,13 +309,13 @@ const Branch = () => {
                   size="big"
                   onClick={() => {
                     if (isShowDelete.type === "selection") {
-                      deleteUom({ ids: selectedRowKeys, company_id: "KSNI" });
+                      deleteBranch({ ids: selectedRowKeys, company_id: "KSNI" });
                     } else {
-                      deleteUom({ ids: [modalForm.data.id], company_id: "KSNI" });
+                      deleteBranch({ ids: [modalForm.data.id], company_id: "KSNI" });
                     }
                   }}
                 >
-                  {isLoadingDeleteUom ? "loading..." : "Yes"}
+                  {isLoadingDeleteBranch ? "loading..." : "Yes"}
                 </Button>
               </div>
             </div>
