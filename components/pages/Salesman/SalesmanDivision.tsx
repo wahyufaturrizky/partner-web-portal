@@ -102,7 +102,7 @@ export default function ComponentSalesmanDivision() {
     options: {
       onSuccess: () => {
         refetch()
-        setVisible({ ...visible, create: false })
+        setVisible({ ...visible, update: false })
       }
     },
     id: formsUpdate?.id
@@ -163,6 +163,39 @@ export default function ComponentSalesmanDivision() {
     formData.append("upload_file", file);
     handleUploadDocuments(formData)
   }
+
+  const columnsSalesDivision = [
+    {
+      title: "Division ID",
+      dataIndex: "code",
+      width: "30%"
+    },
+    {
+      title: "Division Name",
+      dataIndex: "divisiName",
+      width: "30%"
+    },
+    {
+      title: "Product",
+      dataIndex: "product",
+      width: "20%"
+    },
+    {
+      title: "Action",
+      render: (items: any) => (
+        <Button
+          size="small"
+          onClick={() => {
+            setFormsUpdate({ ...items })
+            setVisible({ ...visible, update: true })
+          }}
+          variant="tertiary"
+        >
+          View Detail
+        </Button>
+      )
+    },
+  ]
 
   return (
     <div>
