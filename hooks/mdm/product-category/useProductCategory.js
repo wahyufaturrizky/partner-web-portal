@@ -109,6 +109,17 @@ const useCoaList = ({ query = {}, options, status }) => {
   });
 };
 
+const useUploadFileProductCategory = ({ options }) => {
+  return useMutation(
+    (data) =>
+      mdmService("/product-category/upload?company_id=KSNI", {
+        method: "POST",
+        data,
+      }),
+    { ...options }
+  );
+};
+
 export {
   useProductCategoryList,
   useDeleteProductCategory,
@@ -116,5 +127,6 @@ export {
   useProductCategory,
   useUpdateProductCategory,
   useCoaList,
-  useProductCategoryInfiniteLists
+  useProductCategoryInfiniteLists,
+  useUploadFileProductCategory,
 };
