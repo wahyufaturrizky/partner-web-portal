@@ -42,6 +42,13 @@ const downloadFile = (params: any) =>
   });
 
 const WaitingApprovalPricingStructure: any = (props: any) => {
+  const status = {
+    DRAFTED: "Draft",
+    ACTIVE: "Active",
+    INACTIVE: "Inactive",
+    REJECTED: "Rejected",
+    WAITING: "Waiting",
+  };
   const router = useRouter();
   const pagination = usePagination({
     page: 1,
@@ -92,19 +99,20 @@ const WaitingApprovalPricingStructure: any = (props: any) => {
     {
       title: "Information",
       dataIndex: "changesHistory",
-      render: (e: any) => (
-        <Row gap="12px" alignItems="center">
-          <Col>
-            <Text>{e?.form}</Text>
-          </Col>
-          <Col>
-            <ICArrowRight />
-          </Col>
-          <Col>
-            <Text>{e?.to}</Text>
-          </Col>
-        </Row>
-      ),
+      render: (e: any) =>
+        e !== null && (
+          <Row gap="12px" alignItems="center">
+            <Col>
+              <Text>{status[e?.from]}</Text>
+            </Col>
+            <Col>
+              <ICArrowRight />
+            </Col>
+            <Col>
+              <Text>{status[e?.to]}</Text>
+            </Col>
+          </Row>
+        ),
     },
     {
       title: "Status",

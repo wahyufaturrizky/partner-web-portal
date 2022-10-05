@@ -50,15 +50,6 @@ const CreateProductCategory: any = () => {
   const [searchProductCategory, setSearchProductCategory] = useState("");
   const [searchCoa, setSearchCoa] = useState("");
 
-  const pagination = usePagination({
-    page: 1,
-    itemsPerPage: 20,
-    maxPageItems: Infinity,
-    numbers: true,
-    arrows: true,
-    totalItems: 100,
-  });
-
   const {
     register,
     handleSubmit,
@@ -75,8 +66,7 @@ const CreateProductCategory: any = () => {
         search: searchProductCategory,
       },
       options: {
-        onSuccess: (data: any) => {
-        },
+        onSuccess: (data: any) => {},
       },
     }
   );
@@ -168,11 +158,11 @@ const CreateProductCategory: any = () => {
                   label="Name"
                   height="48px"
                   placeholder={"e.g Water Flat"}
+                  {...register("name", { required: "Name is Required" })}
                   error={errors?.name?.message}
-                  {...register("name", { required: true })}
                   required
                 />
-                <Dropdown2
+                <Dropdown
                   label="Parent"
                   width={"100%"}
                   items={productCategoryList?.rows?.map((data) => ({
@@ -182,7 +172,7 @@ const CreateProductCategory: any = () => {
                   placeholder={"Select"}
                   handleChange={(value) => setValue("parent", value)}
                   onSearch={(search) => setSearchProductCategory(search)}
-                  //   error={errors?.country?.message}
+                  // error={errors?.country?.message}
                   //   {...register("country")}
                 />
               </Row>
@@ -197,7 +187,7 @@ const CreateProductCategory: any = () => {
             <Accordion.Header variant="blue">Inventory Valuation</Accordion.Header>
             <Accordion.Body>
               <Row width="100%" gap="20px" noWrap>
-                <Dropdown2
+                <Dropdown
                   label="Costing Method"
                   width={"100%"}
                   items={costingMethodData}
@@ -206,8 +196,9 @@ const CreateProductCategory: any = () => {
                   //   onSearch={(search) => setSearchCountry(search)}
                   //   error={errors?.country?.message}
                   //   {...register("country")}
+                  noSearch
                 />
-                <Dropdown2
+                <Dropdown
                   label="Inventory Valuation"
                   width={"100%"}
                   items={[
@@ -242,34 +233,22 @@ const CreateProductCategory: any = () => {
           <Accordion.Item key={3}>
             <Accordion.Header variant="blue">Account Properties</Accordion.Header>
             <Accordion.Body>
-              <Row width="100%" gap="20px" noWrap>
-                <Dropdown2
-                  label="Price Difference Account"
-                  width={"100%"}
-                  items={[]}
-                  placeholder={"Select"}
-                  //   handleChange={(value) => setValue("country", value)}
-                  //   onSearch={(search) => setSearchCountry(search)}
-                  //   error={errors?.country?.message}
-                  //   {...register("country")}
-                />
-                <Dropdown2
-                  label="Expense Account"
-                  width={"100%"}
-                  items={coaListPayable?.rows?.map((data) => ({
-                    id: data.accountName,
-                    value: data.accountName,
-                  }))}
-                  placeholder={"Select"}
-                  handleChange={(value) => setValue("expense_account", value)}
-                  //   onSearch={(search) => setSearchCountry(search)}
-                  //   error={errors?.country?.message}
-                  //   {...register("country")}
-                  noSearch
-                />
+              <Row width="49%" gap="20px" noWrap>
+              {automate == "Automated" && (
+                  <Dropdown
+                    label="Price Difference Account"
+                    width={"100%"}
+                    items={[]}
+                    placeholder={"Select"}
+                    //   handleChange={(value) => setValue("country", value)}
+                    //   onSearch={(search) => setSearchCountry(search)}
+                    //   error={errors?.country?.message}
+                    //   {...register("country")}
+                  />
+                  )}
               </Row>
-              <Row width="49%">
-                <Dropdown2
+              <Row width="100%" gap="20px" noWrap>
+                <Dropdown
                   label="Income Account"
                   width={"100%"}
                   items={coaListReceivable?.rows?.map((data) => ({
@@ -278,6 +257,20 @@ const CreateProductCategory: any = () => {
                   }))}
                   placeholder={"Select"}
                   handleChange={(value) => setValue("income_account", value)}
+                  //   onSearch={(search) => setSearchCountry(search)}
+                  //   error={errors?.country?.message}
+                  //   {...register("country")}
+                  noSearch
+                />
+                <Dropdown
+                  label="Expense Account"
+                  width={"100%"}
+                  items={coaListPayable?.rows?.map((data) => ({
+                    id: data.accountName,
+                    value: data.accountName,
+                  }))}
+                  placeholder={"Select"}
+                  handleChange={(value) => setValue("expense_account", value)}
                   //   onSearch={(search) => setSearchCountry(search)}
                   //   error={errors?.country?.message}
                   //   {...register("country")}
@@ -293,7 +286,7 @@ const CreateProductCategory: any = () => {
                   <Spacer size={10} />
 
                   <Row width="100%" gap="20px" noWrap>
-                    <Dropdown2
+                    <Dropdown
                       label="Stock Valuation Account"
                       width={"100%"}
                       items={[]}
@@ -303,7 +296,7 @@ const CreateProductCategory: any = () => {
                       //   error={errors?.country?.message}
                       //   {...register("country")}
                     />
-                    <Dropdown2
+                    <Dropdown
                       label="Stock Journal"
                       width={"100%"}
                       items={[]}
@@ -315,7 +308,7 @@ const CreateProductCategory: any = () => {
                     />
                   </Row>
                   <Row width="100%" gap="20px" noWrap>
-                    <Dropdown2
+                    <Dropdown
                       label="Stock Input Account"
                       width={"100%"}
                       items={coaList?.rows?.map((data) => ({
@@ -327,9 +320,8 @@ const CreateProductCategory: any = () => {
                       onSearch={(search) => setSearchCoa(search)}
                       //   error={errors?.country?.message}
                       //   {...register("country")}
-                      noSearch
                     />
-                    <Dropdown2
+                    <Dropdown
                       label="Stock Output Account"
                       width={"100%"}
                       items={coaList?.rows?.map((data) => ({
