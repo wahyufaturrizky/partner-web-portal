@@ -11,6 +11,7 @@ import {
   Spacer,
   Table,
   Text,
+  FileUploadModal,
 } from "pink-lava-ui";
 import usePagination from "@lucasmogari/react-pagination";
 import { ICDownload, ICUpload } from "../../assets";
@@ -19,6 +20,7 @@ import { mdmDownloadService } from "../../lib/client";
 import {
   useDeleteProductCategory,
   useProductCategoryList,
+  useUploadFileProductCategory,
 } from "hooks/mdm/product-category/useProductCategory";
 import useDebounce from "../../lib/useDebounce";
 
@@ -34,7 +36,10 @@ const ProductCategory = () => {
   const router = useRouter();
   const [search, setSearch] = useState("");
   const [itemsSelected, setItemsSelected] = useState([]);
-  const [visible, setVisible] = useState(false);
+  const [visible, setVisible] = useState({
+    delete: false,
+    upload: false,
+  });
 
   const debounceSearch = useDebounce(search, 1000);
 
@@ -58,52 +63,55 @@ const ProductCategory = () => {
     },
   ];
 
-  const { data: productCategoryData, isLoading: isLoadingProductCategory } = useProductCategoryList(
-    {
-      query: {
-        search: debounceSearch,
-        page: pagination.page,
-        limit: pagination.itemsPerPage,
+  const {
+    data: productCategoryData,
+    isLoading: isLoadingProductCategory,
+    refetch: refetchProductCategory,
+  } = useProductCategoryList({
+    query: {
+      search: debounceSearch,
+      page: pagination.page,
+      limit: pagination.itemsPerPage,
+    },
+    options: {
+      onSuccess: (data: any) => {
+        pagination.setTotalItems(data.totalRow);
       },
-      options: {
-        onSuccess: (data: any) => {
-          pagination.setTotalItems(data.totalRow);
-        },
-        select: (data: any) => {
-          const mappedData = data?.rows?.map((element: any) => {
-            return {
-              key: element.productCategoryId,
-              id: element.productCategoryId,
-              name: element.name,
-              parent: element.parent || '-',
-              action: (
-                <div style={{ display: "flex", justifyContent: "left" }}>
-                  <Button
-                    size="small"
-                    onClick={() => {
-                      router.push(`/product-category/${element.productCategoryId}`);
-                    }}
-                    variant="tertiary"
-                  >
-                    View Detail
-                  </Button>
-                </div>
-              ),
-            };
-          });
+      select: (data: any) => {
+        const mappedData = data?.rows?.map((element: any) => {
+          return {
+            key: element.productCategoryId,
+            id: element.productCategoryId,
+            name: element.name,
+            parent: element.parent || "-",
+            action: (
+              <div style={{ display: "flex", justifyContent: "left" }}>
+                <Button
+                  size="small"
+                  onClick={() => {
+                    router.push(`/product-category/${element.productCategoryId}`);
+                  }}
+                  variant="tertiary"
+                >
+                  View Detail
+                </Button>
+              </div>
+            ),
+          };
+        });
 
-          return { data: mappedData, totalRow: data.totalRow };
-        },
+        return { data: mappedData, totalRow: data.totalRow };
       },
-    }
-  );
+    },
+  });
 
   const { mutate: deleteProductCategory, isLoading: loadingDelete }: any = useDeleteProductCategory(
     {
       options: {
         onSuccess: () => {
           setItemsSelected([]);
-          setVisible(false);
+          setVisible({ upload: false, delete: false });
+          refetchProductCategory();
         },
       },
     }
@@ -113,7 +121,7 @@ const ProductCategory = () => {
     {
       key: 1,
       value: (
-        <ButtonAction>
+        <ButtonAction onClick={() => handleDownloadFile({ with_data: "N" })}>
           <ICDownload />
           <p style={{ margin: "0" }}>Download Template</p>
         </ButtonAction>
@@ -122,7 +130,7 @@ const ProductCategory = () => {
     {
       key: 2,
       value: (
-        <ButtonAction disabled>
+        <ButtonAction onClick={() => setVisible({ upload: true, delete: false })} >
           <ICUpload />
           <p style={{ margin: "0" }}>Upload Template</p>
         </ButtonAction>
@@ -131,7 +139,7 @@ const ProductCategory = () => {
     {
       key: 3,
       value: (
-        <ButtonAction>
+        <ButtonAction onClick={() => handleDownloadFile({ with_data: "Y" })}>
           <ICDownload />
           <p style={{ margin: "0" }}>Download Data</p>
         </ButtonAction>
@@ -146,16 +154,32 @@ const ProductCategory = () => {
     },
   };
 
-  const handleDownloadFile = (id: any) => {
-    mdmDownloadService(`/customer/download/MCS-0000012`, { params: {} }).then((res) => {
+  const handleDownloadFile = (params) => {
+    mdmDownloadService(`/product-category/download?company_id=KSNI`, { params }).then((res) => {
       let dataUrl = window.URL.createObjectURL(new Blob([res?.data]));
       let tempLink = document.createElement("a");
       tempLink.href = dataUrl;
-      tempLink.setAttribute("download", `customers_${id} ${new Date().getTime()}.xlsx`);
+      tempLink.setAttribute("download", `product-category ${new Date().getTime()}.xlsx`);
       tempLink.click();
     });
   };
 
+  const { mutate: uploadFileProductCategory } = useUploadFileProductCategory({
+    options: {
+      onSuccess: () => {
+        refetchProductCategory();
+        setVisible({ delete: false, upload: false });
+      },
+    },
+  });
+
+  const submitUploadFile = (file: any) => {
+    const formData: any = new FormData();
+    formData.append("file", file);
+
+    uploadFileProductCategory(formData);
+  };
+  
   return (
     <div>
       <Col>
@@ -173,7 +197,7 @@ const ProductCategory = () => {
             <Button
               size="big"
               variant={"tertiary"}
-              onClick={() => setVisible(true)}
+              onClick={() => setVisible({ upload: false, delete: true })}
               disabled={itemsSelected?.length < 1}
             >
               Delete
@@ -211,15 +235,21 @@ const ProductCategory = () => {
         </Col>
       </Card>
 
+      <FileUploadModal
+        visible={visible.upload}
+        setVisible={() => setVisible({ upload: false, delete: false })}
+        onSubmit={submitUploadFile}
+      />
+
       <ModalDeleteConfirmation
         totalSelected={itemsSelected.length}
-        visible={visible}
+        visible={visible.delete}
         itemTitle={
           productCategoryData?.data?.find((item: any) => item.key === itemsSelected[0])?.name
         }
         isLoading={loadingDelete}
-        onCancel={() => setVisible(false)}
-        onOk={() => deleteProductCategory({ delete: itemsSelected })}
+        onCancel={() => setVisible({ delete: false, upload: false })}
+        onOk={() => deleteProductCategory({ product_category_ids: itemsSelected, company_id: ["KSNI"] })}
       />
     </div>
   );

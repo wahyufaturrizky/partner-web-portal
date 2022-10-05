@@ -22,6 +22,7 @@ import IconAdd from "./ICAdd";
 import ICDollarBlack from "./ic-dollar-black.svg";
 import ICInfo from "./ic-info.svg";
 import ICCopy from "./ic-copy.svg";
+import ICArrowRight from "./ic-arrow-right.svg";
 
 export {
   IconAdd,
@@ -48,4 +49,5 @@ export {
   ICDollarBlack,
   ICInfo,
   ICCopy,
+  ICArrowRight,
 };
