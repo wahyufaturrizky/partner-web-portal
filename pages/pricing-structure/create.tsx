@@ -2083,25 +2083,23 @@ const CreatePricingStructure: any = () => {
 
                                       <Divider />
 
-                                      {
-                                        <ManageZoneComponent
-                                          control={control}
-                                          regionSelected={regionSelected}
-                                          indexExpandedRowRenderProductSelected={
-                                            indexExpandedRowRenderProductSelected
-                                          }
-                                          recordExpandedRowRenderProductSelected={
-                                            recordExpandedRowRenderProductSelected
-                                          }
-                                          indexDistChannel={indexDistChannel}
-                                          errors={errors}
-                                          dataDistChannel={dataDistChannel}
-                                          getValues={getValues}
-                                          register={register}
-                                          setManageByZone={setManageByZone}
-                                          manageByZone={manageByZone}
-                                        />
-                                      }
+                                      <ManageZoneComponent
+                                        control={control}
+                                        regionSelected={regionSelected}
+                                        indexExpandedRowRenderProductSelected={
+                                          indexExpandedRowRenderProductSelected
+                                        }
+                                        recordExpandedRowRenderProductSelected={
+                                          recordExpandedRowRenderProductSelected
+                                        }
+                                        indexDistChannel={indexDistChannel}
+                                        errors={errors}
+                                        dataDistChannel={dataDistChannel}
+                                        getValues={getValues}
+                                        register={register}
+                                        setManageByZone={setManageByZone}
+                                        manageByZone={manageByZone}
+                                      />
                                     </Card>
                                   );
                                 }
