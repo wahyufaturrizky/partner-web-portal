@@ -91,7 +91,6 @@ export default function ComponentSalesmanDivision() {
     }
   })
 
-  console.log(visible, '<<<< ko enak banget ya')
   const { mutate: handleCreateSalesDivision }: { mutate: any } = useCreateSalesmanDivision({
     options: { onSuccess: () => {
       refetch()
