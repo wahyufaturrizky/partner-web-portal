@@ -17,7 +17,13 @@ import {
 } from "pink-lava-ui";
 import { useState } from "react";
 import styled from "styled-components";
-import { ICDollarBlack, ICDownload, ICManageCustGroupBuyingPrice, ICUpload } from "../../assets";
+import {
+  ICDollarBlack,
+  ICDownload,
+  ICManageCustGroupBuyingPrice,
+  ICUpload,
+  ICArrowRight,
+} from "../../assets";
 import {
   usePricingStructureLists,
   useUploadFilePricingStructureMDM,
@@ -75,20 +81,30 @@ const WaitingApprovalPricingStructure: any = (props: any) => {
 
   const columns = [
     {
-      title: "Partner Name",
-      dataIndex: "partner_name",
-      width: "28%",
+      title: "Proposal Number",
+      dataIndex: "proposalNumber",
     },
     {
       title: "Products",
       dataIndex: "priceStructureCosts",
-      width: "28%",
       render: (e: any) => `${e?.length || 0} Products`,
     },
     {
-      title: "Company Type",
-      dataIndex: "company_type",
-      width: "28%",
+      title: "Information",
+      dataIndex: "changesHistory",
+      render: (e: any) => (
+        <Row gap="12px" alignItems="center">
+          <Col>
+            <Text>{e?.form}</Text>
+          </Col>
+          <Col>
+            <ICArrowRight />
+          </Col>
+          <Col>
+            <Text>{e?.to}</Text>
+          </Col>
+        </Row>
+      ),
     },
     {
       title: "Status",
@@ -111,7 +127,8 @@ const WaitingApprovalPricingStructure: any = (props: any) => {
     data.push({
       key: element.id,
       priceStructureCosts: element.priceStructureCosts,
-      proposal_number: element.proposalNumber,
+      proposalNumber: element.proposalNumber,
+      changesHistory: element.changesHistory,
       status: element.status,
       action: (
         <Button
