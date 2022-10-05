@@ -1,7 +1,7 @@
 import usePagination from "@lucasmogari/react-pagination";
 import { ModalDeleteConfirmation } from "components/elements/Modal/ModalConfirmationDelete";
 import { ModalInactiveReason } from "components/elements/Modal/ModalInactiveReason";
-import { ModalRejectPartner } from "components/elements/Modal/ModalRejectPartner";
+import { ModalRejectPriceStructure } from "components/elements/Modal/ModalRejectPriceStructure";
 import { useCurrenciesInfiniteLists } from "hooks/mdm/country-structure/useCurrencyMDM";
 import { useProductList } from "hooks/mdm/product-list/useProductList";
 import {
@@ -43,6 +43,7 @@ import {
   Text,
   Tooltip,
   Spin,
+  Alert
 } from "pink-lava-ui";
 import { useEffect, useState } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
@@ -51,6 +52,23 @@ import { colors } from "utils/color";
 import { STATUS_APPROVAL_TEXT } from "utils/utils";
 import { ICCopy, ICInfo, ICPlus } from "../../assets";
 import ArrowLeft from "../../assets/icons/arrow-left.svg";
+
+export const emptyPayloadPriceStructure = {
+  add_distributions: [],
+    add_products: [],
+    del_distributions: [],
+    del_products: [],
+    add_total_cost: [],
+    total_cost: [],
+    add_zone: [],
+    add_total_cost_by_zone: [],
+    zone: [],
+    total_cost_by_zone: [],
+    add_cost_by_distribution: [],
+    add_cost_by_region: [],
+    cost_by_distribution: [],
+    cost_by_region: [],
+}
 
 const DetailPricingStructure: any = () => {
   const router = useRouter();
@@ -149,6 +167,8 @@ const DetailPricingStructure: any = () => {
   });
 
   const [percent, setPercent] = useState(0);
+
+  
 
   const {
     handleSubmit,
@@ -283,7 +303,7 @@ const DetailPricingStructure: any = () => {
     name: "manage_by",
   });
 
-  const { mutate: approvePartner } = useUpdatePricingStructureList({
+  const { mutate: approvePartner, isLoading: isLoadingApprovePriceStructure } = useUpdatePricingStructureList({
     options: {
       onSuccess: () => {
         router.back();
@@ -292,7 +312,7 @@ const DetailPricingStructure: any = () => {
     pricingStructureListId: price_structure_id,
   });
 
-  const { mutate: rejectPartner } = useUpdatePricingStructureList({
+  const { mutate: rejectPartner, isLoading: isLoadingRejectPriceStructure } = useUpdatePricingStructureList({
     options: {
       onSuccess: () => {
         setModalReject({ open: false });
@@ -314,6 +334,7 @@ const DetailPricingStructure: any = () => {
   const approve = () => {
     const payload = {
       status: "APPROVED",
+      ...emptyPayloadPriceStructure
     };
     approvePartner(payload);
   };
@@ -727,6 +748,55 @@ const DetailPricingStructure: any = () => {
           cost_by_region: [],
         });
         break;
+      case "REJECTED":
+        updatePriceStructure({
+          status: "WAITING",
+          add_distributions: dataSubmit.distribution_channel,
+          add_products: dataSubmit.product_selected.map((data: any) => data.id),
+          add_total_cost: dataSubmit.product_selected.map((data: any, index: any) => ({
+            price_structure_cost_by_distribution_id: data.distribution_channel[index]?.id || 0,
+            group_buying_price_id: data.distribution_channel[index]?.level[index].buyingPrice,
+            is_reference: data.distribution_channel[index]?.is_reference || false,
+            level: data.distribution_channel[index]?.level[index].id,
+            cost: data.distribution_channel[index]?.cost || '',
+            margin_type: data.distribution_channel[index]?.margin_type || '',
+            margin_value: parseFloat(data.distribution_channel[index]?.margin_value) || 0,
+          })
+          ),
+          add_cost_by_distribution:
+          dataSubmit.product_selected.map((data: any, index: any) => (
+            {
+              price_structure_cost_id: data.distribution_channel[index]?.structureId,
+              distribution_channel: data.distribution_channel[index]?.id,
+              managed_by_zone: data.distribution_channel[index]?.manage_by_zone,
+            },
+          )),
+          add_total_cost_by_zone: dataSubmit.product_selected.map((data: any, index: any) => ({
+            price_structure_cost_id: data.distribution_channel[index]?.manage_by_zone_detail.region_selected[index].distribution_channel[index].structureId,
+              group_buying_price_id: data.distribution_channel[index]?.manage_by_zone_detail.region_selected[index].distribution_channel[index].level[index].buyingPrice,
+              price_structure_zone_id: data.distribution_channel[index]?.manage_by_zone_detail.region_selected[index].distribution_channel[index].id,
+              is_reference: data.distribution_channel[index]?.manage_by_zone_detail.region_selected[index].distribution_channel[index].is_reference,
+              level: data.distribution_channel[index]?.manage_by_zone_detail.region_selected[index].distribution_channel[index].level[index].id,
+              cost: data.distribution_channel[index]?.manage_by_zone_detail.region_selected[index].distribution_channel[index].cost,
+              margin_type: data.distribution_channel[index]?.manage_by_zone_detail.region_selected[index].distribution_channel[index].margin_type,
+              margin_value: parseFloat(data.distribution_channel[index]?.manage_by_zone_detail.region_selected[index].distribution_channel[index].margin_value),
+          })),
+          add_zone: dataSubmit.product_selected.map((data: any, index: any) => data.distribution_channel[index]?.manage_by_zone_detail.zone_type),
+          add_cost_by_region:
+          dataSubmit.product_selected.map((data: any, index: any) => ({
+            price_structure_cost_id: data.distribution_channel[index]?.manage_by_zone_detail.region_selected[index].distribution_channel[index].structureId,
+            region: data.distribution_channel[index]?.manage_by_zone_detail.region_selected[index].distribution_channel[index].id,
+          })),
+          del_distributions:[],
+          del_products: [],
+          total_cost: [],
+          add_zone: [],
+          total_cost_by_zone: [],
+          zone: [],
+          cost_by_distribution: [],
+          cost_by_region: [],
+        });
+        break;
     
       default:
         break;
@@ -888,7 +958,7 @@ const DetailPricingStructure: any = () => {
 
       dataSalesOrganizationHirarcy?.map((field: any) => {
         if (
-          dataWatchManageByZone?.manage_by_zone_detail?.internal_region.includes(field.id as never)
+          dataWatchManageByZone?.manage_by_zone_detail?.internal_region?.includes(field.id as never)
         ) {
           tempRegionSelected.push(field);
 
@@ -1916,20 +1986,21 @@ const DetailPricingStructure: any = () => {
                   {pricingStructureListById?.status === "WAITING" ? (
                     <>
                       <Button
+                        disabled={isLoadingRejectPriceStructure}
                         size="big"
                         variant={"tertiary"}
                         onClick={() => setModalReject({ open: true })}
                       >
-                        Reject
+                        {isLoadingRejectPriceStructure ? 'Loading' : 'Reject'}
                       </Button>
 
-                      <Button size="big" variant={"primary"} onClick={approve}>
-                        Approve
+                      <Button disabled={isLoadingApprovePriceStructure} size="big" variant={"primary"} onClick={approve}>
+                        {isLoadingApprovePriceStructure ? 'Loading...' : 'Approve'}
                       </Button>
                     </>
                   ) : (
                     <>
-                      {pricingStructureListById?.status !== "ACTIVE" && (
+                      {pricingStructureListById?.status !== "ACTIVE" && pricingStructureListById?.status !== "REJECTED" && (
                         <Button
                           disabled={isLoadingPricingStructureDraft}
                           size="big"
@@ -1954,6 +2025,28 @@ const DetailPricingStructure: any = () => {
             </Card>
 
             <Spacer size={12} />
+
+            {pricingStructureListById?.priceStructureRejection?.rejectionReason && pricingStructureListById?.status === "REJECTED" && (
+						<Card  backgroundColor='transparent' margin="0px 16px 0px 16px" padding='0px'>
+							<Alert>
+								<Text variant="subtitle2" color="white">
+									{pricingStructureListById?.priceStructureRejection?.rejectionReason}
+								</Text>
+							</Alert>
+							<Spacer size={20} />
+						</Card>
+					)}
+
+					{pricingStructureListById?.status === "WAITING"  && pricingStructureListById?.inactiveReason && (
+						<Card backgroundColor='transparent' padding='0px' margin="0px 16px 0px 16px">
+							<Alert variant="warning">
+								<Text variant="subtitle2" color="cheese.darkest">
+									{pricingStructureListById?.inactiveReason}
+								</Text>
+							</Alert>
+							<Spacer size={20} />
+						</Card>
+					)}
 
             <Card padding="20px">
               <Text color={"blue.dark"} variant={"headingMedium"}>
@@ -2202,12 +2295,11 @@ const DetailPricingStructure: any = () => {
                     />
                   </Col>
 
-                  <Col>
+                  {getValues('status') !== 'WAITING' && (<Col>
                     <Row gap="14px" justifyContent="space-between" alignItems="center">
                       <Col>
                         <Button
                           size="big"
-                          disabled={getValues('status') === 'WAITING'}
                           variant={"tertiary"}
                           onClick={() =>
                             setModal({
@@ -2224,7 +2316,6 @@ const DetailPricingStructure: any = () => {
                       <Col>
                         <Button
                           size="big"
-                          disabled={getValues('status') === 'WAITING' || Object.keys(errors).length}
                           variant={"tertiary"}
                           onClick={() =>
                             setModal({ open: true, typeForm: "Add Products", data: {} })
@@ -2234,7 +2325,7 @@ const DetailPricingStructure: any = () => {
                         </Button>
                       </Col>
                     </Row>
-                  </Col>
+                  </Col>)}
                 </Row>
 
                 {isEmpty ? (
@@ -2545,7 +2636,7 @@ const DetailPricingStructure: any = () => {
         />
 
         {modalReject.open && (
-          <ModalRejectPartner
+          <ModalRejectPriceStructure
             visible={modalReject.open}
             onCancel={() => setModalReject({ open: false })}
             onOk={(data: any) => reject(data)}
