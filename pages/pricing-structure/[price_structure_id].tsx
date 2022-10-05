@@ -524,7 +524,7 @@ const DetailPricingStructure: any = () => {
           "distribution_channel",
           data
             .filter((filtering: any) =>
-              pricingStructureListById.priceStructureDistributions
+              pricingStructureListById?.priceStructureDistributions
                 .map((data: any) => data.salesOrganizationHirarcy.name)
                 .includes(filtering.name)
             )
@@ -675,169 +675,53 @@ const DetailPricingStructure: any = () => {
   });
 
   const onSubmit = (dataSubmit: any) => {
-    window.alert("Under maintenance");
+    console.log("@dataSubmit", dataSubmit);
 
-    // switch (pricingStructureListById.status) {
-    //   case "DRAFTED":
-    //     updatePriceStructure({
-    //       price_structure_config_id: dataSubmit.pricing_config,
-    //       currency: dataSubmit.currency,
-    //       managed_by: dataSubmit.manage_by,
-    //       status: "WAITING",
-    //       active_date: moment(dataSubmit.activeDate).format("YYYY-MM-DD"),
-    //       add_distributions: dataSubmit.distribution_channel.map((data: any) => data.id),
-    //       add_products: dataSubmit.product_selected.map((data) => data.id),
-    //       del_distributions: [],
-    //       del_products: [],
-    //       add_total_cost: dataSubmit.product_selected.map((data) => data.distribution_channel.map((subDataDist:any ) => ({
-    //         price_structure_cost_id: 1,
-    //         group_buying_price_id: 1,
-    //         is_reference: true,
-    //         cost: subDataDist.cost,
-    //         margin_type: subDataDist.margin_type,
-    //         margin_value: 1,
-    //         managed_by_zone: true,
-    //       },))),
-    //       // total_cost: [
-    //       //   {
-    //       //     id: 1,
-    //       //     price_structure_cost_id: 1,
-    //       //     group_buying_price_id: 1,
-    //       //     is_reference: true,
-    //       //     cost: "999999",
-    //       //     margin_type: "PERCENT",
-    //       //     margin_value: 1,
-    //       //     managed_by_zone: true,
-    //       //   },
-    //       // ],
-    //       // rejection: {
-    //       //   rejection_details: "haha",
-    //       //   rejection_reason: "hehe",
-    //       // },
-    //       add_total_cost_by_zone: [
-    //         {
-    //           price_structure_cost_id: 4,
-    //           group_buying_price_id: 2,
-    //           price_structure_zone_id: 8,
-    //           is_reference: true,
-    //           cost: "200",
-    //           margin_type: "FIX_AMOUNT",
-    //           margin_value: "200",
-    //         },
-    //       ],
-    //       add_zone: [
-    //         {
-    //           price_structure_cost_id: 4,
-    //           internal_region: 1,
-    //           is_default: false,
-    //         },
-    //       ],
-    //       // total_cost_by_zone: [
-    //       //   {
-    //       //     id: 3,
-    //       //     price_structure_cost_id: 4,
-    //       //     group_buying_price_id: 2,
-    //       //     price_structure_zone_id: 8,
-    //       //     is_reference: true,
-    //       //     cost: "200",
-    //       //     margin_type: "PERCENT",
-    //       //     margin_value: "200",
-    //       //   },
-    //       // ],
-    //       // zone: [
-    //       //   {
-    //       //     id: 8,
-    //       //     price_structure_cost_id: 4,
-    //       //     internal_region: 2,
-    //       //     is_default: true,
-    //       //   },
-    //       // ],
-    //     });
-    //     break;
-
-    //   default:
-    //     break;
-    // }
+    updatePriceStructure({
+      status: dataSubmit.status === "DRAFTED" ? "WAITING" : "ACTIVE",
+      add_distributions: dataSubmit.distribution_channel,
+      add_products: dataSubmit.product_selected.map((data: any) => data.id),
+      add_total_cost: dataSubmit.product_selected.map((data: any, index: any) => ({
+        price_structure_cost_by_distribution_id: data.distribution_channel[index]?.id || 0,
+        group_buying_price_id: 1,
+        is_reference: data.distribution_channel[index]?.is_reference || false,
+        level: 1,
+        cost: data.distribution_channel[index]?.cost || '',
+        margin_type: data.distribution_channel[index]?.margin_type || '',
+        margin_value: parseFloat(data.distribution_channel[index]?.margin_value) || 0,
+        managed_by_zone: data.distribution_channel[index]?.manage_by_zone || false,
+      })
+      ),
+      add_cost_by_distribution:
+      dataSubmit.product_selected.map((data: any, index: any) => (
+        {
+          price_structure_cost_id: data.distribution_channel[index]?.structureId,
+          distribution_channel: data.distribution_channel[index]?.id,
+        },
+      )),
+      add_total_cost_by_zone: dataSubmit.product_selected.map((data: any, index: any) => ({
+        price_structure_cost_id: data.distribution_channel[index]?.manage_by_zone_detail.region_selected[index].distribution_channel[index].structureId,
+          group_buying_price_id: 2,
+          price_structure_zone_id: data.distribution_channel[index]?.manage_by_zone_detail.region_selected[index].distribution_channel[index].id,
+          is_reference: data.distribution_channel[index]?.manage_by_zone_detail.region_selected[index].distribution_channel[index].is_reference,
+          level: 1,
+          cost: data.distribution_channel[index]?.manage_by_zone_detail.region_selected[index].distribution_channel[index].cost,
+          margin_type: data.distribution_channel[index]?.manage_by_zone_detail.region_selected[index].distribution_channel[index].margin_type,
+          margin_value: parseFloat(data.distribution_channel[index]?.manage_by_zone_detail.region_selected[index].distribution_channel[index].margin_value),
+      })),
+      add_zone: dataSubmit.product_selected.map((data: any, index: any) => data.distribution_channel[index]?.manage_by_zone_detail.zone_type),
+      add_cost_by_region:
+      dataSubmit.product_selected.map((data: any, index: any) => ({
+        price_structure_cost_id: data.distribution_channel[index]?.manage_by_zone_detail.region_selected[index].distribution_channel[index].structureId,
+        region: data.distribution_channel[index]?.manage_by_zone_detail.region_selected[index].distribution_channel[index].id,
+      })),
+      del_distributions:[],
+      del_products: []
+    });
   };
 
   const onSubmitDraft = (dataDraft: any) => {
     window.alert("Under maintenance");
-    // updatePriceStructure({
-    //   price_structure_config_id: 2,
-    //   currency: "MPC-0000001",
-    //   managed_by: 1,
-    //   status: dataSubmit.status,
-    //   active_date: "2022-03-03",
-    //   add_distributions: [],
-    //   add_products: [],
-    //   del_distributions: [],
-    //   del_products: [],
-    //   add_total_cost: [
-    //     {
-    //       price_structure_cost_id: 1,
-    //       group_buying_price_id: 1,
-    //       is_reference: true,
-    //       cost: "0000000",
-    //       margin_type: "FIX_AMOUNT",
-    //       margin_value: 1,
-    //       managed_by_zone: true,
-    //     },
-    //   ],
-    //   total_cost: [
-    //     {
-    //       id: 1,
-    //       price_structure_cost_id: 1,
-    //       group_buying_price_id: 1,
-    //       is_reference: true,
-    //       cost: "999999",
-    //       margin_type: "PERCENT",
-    //       margin_value: 1,
-    //       managed_by_zone: true,
-    //     },
-    //   ],
-    //   rejection: {
-    //     rejection_details: "haha",
-    //     rejection_reason: "hehe",
-    //   },
-    //   add_total_cost_by_zone: [
-    //     {
-    //       price_structure_cost_id: 4,
-    //       group_buying_price_id: 2,
-    //       price_structure_zone_id: 8,
-    //       is_reference: true,
-    //       cost: "200",
-    //       margin_type: "FIX_AMOUNT",
-    //       margin_value: "200",
-    //     },
-    //   ],
-    //   add_zone: [
-    //     {
-    //       price_structure_cost_id: 4,
-    //       internal_region: 1,
-    //       is_default: false,
-    //     },
-    //   ],
-    //   total_cost_by_zone: [
-    //     {
-    //       id: 3,
-    //       price_structure_cost_id: 4,
-    //       group_buying_price_id: 2,
-    //       price_structure_zone_id: 8,
-    //       is_reference: true,
-    //       cost: "200",
-    //       margin_type: "PERCENT",
-    //       margin_value: "200",
-    //     },
-    //   ],
-    //   zone: [
-    //     {
-    //       id: 8,
-    //       price_structure_cost_id: 4,
-    //       internal_region: 2,
-    //       is_default: true,
-    //     },
-    //   ],
-    // });
   };
 
   useEffect(
@@ -1970,7 +1854,7 @@ const DetailPricingStructure: any = () => {
             <Row gap="4px" alignItems="center">
               <ArrowLeft style={{ cursor: "pointer" }} onClick={() => router.back()} />
               <Text variant={"h4"}>
-                {pricingStructureListById.priceStructureConfig?.name || "N/A"}
+                {pricingStructureListById?.priceStructureConfig?.name || "N/A"}
               </Text>
             </Row>
 
