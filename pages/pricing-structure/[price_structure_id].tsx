@@ -1474,7 +1474,7 @@ const DetailPricingStructure: any = () => {
 
               <Spacer size={24} />
 
-              {manageByZone?.data?.dataDistChannel.level.map((subLevel: any, indexLevel: any) => {
+              {manageByZone?.data?.dataDistChannel.level?.map((subLevel: any, indexLevel: any) => {
                 return (
                   <Col key={indexLevel}>
                     <Text color={"blue.dark"} variant={"headingRegular"}>
