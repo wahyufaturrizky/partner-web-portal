@@ -821,6 +821,55 @@ const DetailPricingStructure: any = () => {
           add_products: dataSubmit.product_selected.map((data: any) => data.id),
           add_total_cost: dataSubmit.product_selected.map((data: any, index: any) => ({
             price_structure_cost_by_distribution_id: data.distribution_channel[index]?.id || 0,
+            group_buying_price_id: data.distribution_channel[index]?.level?.[index].buyingPrice,
+            is_reference: data.distribution_channel[index]?.is_reference || false,
+            level: data.distribution_channel[index]?.level?.[index].id,
+            cost: data.distribution_channel[index]?.cost || '',
+            margin_type: data.distribution_channel[index]?.margin_type || '',
+            margin_value: parseFloat(data.distribution_channel[index]?.margin_value) || 0,
+          })
+          ),
+          add_cost_by_distribution:
+          dataSubmit.product_selected.map((data: any, index: any) => (
+            {
+              price_structure_cost_id: data.distribution_channel[index]?.structureId,
+              distribution_channel: data.distribution_channel[index]?.id,
+              managed_by_zone: data.distribution_channel[index]?.manage_by_zone,
+            },
+          )),
+          add_total_cost_by_zone: dataSubmit.product_selected.map((data: any, index: any) => ({
+            price_structure_cost_id: data.distribution_channel[index]?.manage_by_zone_detail?.region_selected[index].distribution_channel[index].structureId,
+              group_buying_price_id: data.distribution_channel[index]?.manage_by_zone_detail?.region_selected[index].distribution_channel[index].level?.[index].buyingPrice,
+              price_structure_zone_id: data.distribution_channel[index]?.manage_by_zone_detail?.region_selected[index].distribution_channel[index].id,
+              is_reference: data.distribution_channel[index]?.manage_by_zone_detail?.region_selected[index].distribution_channel[index].is_reference,
+              level: data.distribution_channel[index]?.manage_by_zone_detail?.region_selected[index].distribution_channel[index].level?.[index].id,
+              cost: data.distribution_channel[index]?.manage_by_zone_detail?.region_selected[index].distribution_channel[index].cost,
+              margin_type: data.distribution_channel[index]?.manage_by_zone_detail?.region_selected[index].distribution_channel[index].margin_type,
+              margin_value: parseFloat(data.distribution_channel[index]?.manage_by_zone_detail?.region_selected[index].distribution_channel[index].margin_value),
+          })),
+          add_zone: dataSubmit.product_selected.map((data: any, index: any) => data.distribution_channel[index]?.manage_by_zone_detail?.zone_type),
+          add_cost_by_region:
+          dataSubmit.product_selected.map((data: any, index: any) => ({
+            price_structure_cost_id: data.distribution_channel[index]?.manage_by_zone_detail?.region_selected[index].distribution_channel[index].structureId,
+            region: data.distribution_channel[index]?.manage_by_zone_detail?.region_selected[index].distribution_channel[index].id,
+          })),
+          del_distributions:[],
+          del_products: [],
+          total_cost: [],
+          add_zone: [],
+          total_cost_by_zone: [],
+          zone: [],
+          cost_by_distribution: [],
+          cost_by_region: [],
+        });
+        break;
+      case "ACTIVE":
+        updatePriceStructure({
+          status: "ACTIVE",
+          add_distributions: dataSubmit.distribution_channel,
+          add_products: dataSubmit.product_selected.map((data: any) => data.id),
+          add_total_cost: dataSubmit.product_selected.map((data: any, index: any) => ({
+            price_structure_cost_by_distribution_id: data.distribution_channel[index]?.id || 0,
             group_buying_price_id: data.distribution_channel[index]?.level[index].buyingPrice,
             is_reference: data.distribution_channel[index]?.is_reference || false,
             level: data.distribution_channel[index]?.level[index].id,
@@ -1514,6 +1563,7 @@ const DetailPricingStructure: any = () => {
                               <Spacer size={3} />
                               <ComponentLevelMarginType
                                 control={control}
+                                getValues={getValues}
                                 indexExpandedRowRenderProductSelected={
                                   manageByZone?.data?.indexExpandedRowRenderProductSelected
                                 }
