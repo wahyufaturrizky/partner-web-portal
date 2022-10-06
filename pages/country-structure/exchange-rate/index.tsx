@@ -14,13 +14,26 @@ import {
   DatePickerInput,
 } from "pink-lava-ui";
 import usePagination from "@lucasmogari/react-pagination";
-import { useExchangeRates } from "../../../hooks/mdm/exchange-rate/useExchangeRate";
+import {
+  useExchangeRates,
+  useUploadFileExchangeRate,
+} from "../../../hooks/mdm/exchange-rate/useExchangeRate";
 import useDebounce from "../../../lib/useDebounce";
 import { queryClient } from "../../_app";
 import { ICDownload, ICUpload } from "../../../assets/icons";
 import { useRouter } from "next/router";
 import { Controller, useForm } from "react-hook-form";
 import moment from "moment";
+import { mdmDownloadService } from "lib/client";
+
+const downloadFile = (params: any) =>
+  mdmDownloadService("/exchange-rate/download", { params }).then((res) => {
+    let dataUrl = window.URL.createObjectURL(new Blob([res.data]));
+    let tempLink = document.createElement("a");
+    tempLink.href = dataUrl;
+    tempLink.setAttribute("download", `exchange-rate${new Date().getTime()}.xlsx`);
+    tempLink.click();
+  });
 
 const ExchangeRate = () => {
   const router = useRouter();
@@ -51,8 +64,8 @@ const ExchangeRate = () => {
 
   const {
     data: ExchangeData,
-    isLoading: isLoadingTop,
-    isFetching: isFetchingTop,
+    isLoading: isLoadingExchange,
+    isFetching: isFetchingExchange,
   } = useExchangeRates({
     query: {
       search: debounceSearch,
@@ -67,27 +80,14 @@ const ExchangeRate = () => {
       select: (data: any) => {
         const mappedData = data?.rows?.map((element: any) => {
           return {
-            key: element.code,
-            id: element.code,
-            exchangeCode: element.code,
-            exchangeName: element.name,
+            key: element.exchangeRateId,
+            id: element.exchangeRateId,
+            exchangeCode: element.currencyCode,
+            exchangeName: element.currencyName,
             exchangeValue: element.value,
             exchangeSell: element.sell,
             exchangeBuy: element.buy,
-            exchangeLastUpdated: element.last_updated,
-            action: (
-              <div style={{ display: "flex", justifyContent: "left" }}>
-                <Button
-                  size="small"
-                  onClick={() => {
-                    router.push(`/profit-center/${element.profitId}`);
-                  }}
-                  variant="tertiary"
-                >
-                  View Detail
-                </Button>
-              </div>
-            ),
+            exchangeLastUpdated: moment(element.modifiedAt).format("DD/MM/YYYY"),
           };
         });
 
@@ -95,6 +95,16 @@ const ExchangeRate = () => {
       },
     },
   });
+
+  const { mutate: uploadFileExchange, isLoading: isLoadingUploadFileExchange } =
+    useUploadFileExchangeRate({
+      options: {
+        onSuccess: () => {
+          queryClient.invalidateQueries(["exchange-rate-list"]);
+          setShowUpload(false);
+        },
+      },
+    });
 
   const columns = [
     {
@@ -167,9 +177,9 @@ const ExchangeRate = () => {
     formData.append("company_id", "KSNI");
     formData.append("file", file);
 
-    uploadFileTop(formData);
+    uploadFileExchange(formData);
   };
-  
+
   return (
     <>
       <Col>
@@ -206,13 +216,13 @@ const ExchangeRate = () => {
               onClick={(e: any) => {
                 switch (parseInt(e.key)) {
                   case 1:
-                    // downloadFile({ with_data: "N", company_id: "KSNI" });
+                    downloadFile({ with_data: "N", company_id: "KSNI" });
                     break;
                   case 2:
                     setShowUpload(true);
                     break;
                   case 3:
-                    // downloadFile({ with_data: "Y", company_id: "KSNI" });
+                    downloadFile({ with_data: "Y", company_id: "KSNI" });
                     break;
                   case 4:
                     break;
@@ -344,7 +354,7 @@ const ExchangeRate = () => {
         <Spacer size={20} />
         <Col gap={"60px"}>
           <Table
-            loading={isLoadingTop || isFetchingTop}
+            loading={isLoadingExchange || isFetchingExchange}
             columns={columns}
             data={ExchangeData?.data}
           />
@@ -355,7 +365,7 @@ const ExchangeRate = () => {
         <FileUploadModal
           visible={isShowUpload}
           setVisible={setShowUpload}
-          // onSubmit={onSubmitFile}
+          onSubmit={onSubmitFile}
         />
       )}
     </>
