@@ -21,6 +21,9 @@ import ICBadge from "../assets/icons/ic-badge.svg";
 import ICSalesman from "../assets/icons/ic-salesman.svg";
 import ICDocument from "../assets/icons/ic-document.svg";
 import ICTransportation from "../assets/icons/ic-transportation.svg";
+import ICGlobe from "../assets/icons/ic-globe-lang.svg"
+import ICPercent from "../assets/icons/ic-percent.svg"
+import ICPaperMoney from "../assets/icons/ic-paper-money.svg"
 import styled from "styled-components";
 
 const menuConfig = [
@@ -323,21 +326,21 @@ const menuMdm = [
     key: "profit-center",
     title: "Profit Center",
     content: () => "Profit Center",
-    icon: ICDollar,
+    icon: ICPaperMoney,
     onClick: () => Router.push("/profit-center"),
   },
   {
     key: "tax",
     title: "Tax",
     content: () => "Tax",
-    icon: ICDocument,
+    icon: ICPercent,
     onClick: () => Router.push("/tax"),
   },
   {
     key: "cost-center",
     title: "Cost Center",
     content: () => "Cost Center",
-    icon: ICDocument,
+    icon: ICDollar,
     onClick: () => Router.push("/cost-center"),
   },
   { type: "divider" },
@@ -452,6 +455,13 @@ const menuMdm = [
         onClick: () => Router.push("/purchase-organization"),
       },
     ],
+  },
+  {
+    key: "library-language",
+    title: "Library Language",
+    content: () => "Library Language",
+    icon: ICGlobe,
+    onClick: () => Router.push("/library-language"),
   },
   {
     key: "working-calendar",
