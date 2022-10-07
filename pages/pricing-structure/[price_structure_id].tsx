@@ -2641,7 +2641,7 @@ const DetailPricingStructure: any = () => {
               setModalInactiveReason({ open: false });
             }}
             onOk={(reason: any) => {
-              setValue("status", "WAITING");
+              setValue("status", "INACTIVE");
               setValue("inactive_reason", reason);
               setModalInactiveReason({ open: false });
             }}
