@@ -13,6 +13,7 @@ import {
   Pagination,
   Input,
   Spin,
+  FormInput
 } from "pink-lava-ui";
 
 import { arrayMove } from "@dnd-kit/sortable";
@@ -37,7 +38,7 @@ export default function Detail(props: any) {
     control,
     watch,
     setValue,
-    product,
+    productForm,
     register,
     isUpdate,
     fieldsProductVariants,
@@ -161,7 +162,6 @@ export default function Detail(props: any) {
 
   const [searchVariant, setSearchVariant] = useState("");
   let variantsData = variantsForm?.map((variant: any, index: number) => {
-    console.log("id", variant);
     return {
       name: variant.name,
       cost: variant.cost,
@@ -173,7 +173,7 @@ export default function Detail(props: any) {
           defaultChecked={variant.status === "active"}
           checked={variant.status === "active"}
           onChange={(value: any) => {
-            deleteProductList({ status: value ? "active" : "inactive" }, variant.id);
+            deleteProductList({ status: value ? "active" : "inactive", id: variant.id });
             updateProductVariants(index, { ...variant, status: value ? "active" : "inacitve" });
           }}
         />
@@ -258,6 +258,7 @@ export default function Detail(props: any) {
           listUom.push({
             value: uomConversion.uom?.name,
             id: uomConversion.uom?.uomId,
+            conversionNumber: uomConversion.conversionNumber,
           });
 
           mappedUomConversion.push({
@@ -313,7 +314,7 @@ export default function Detail(props: any) {
   return (
     <div>
       <Row gap="20px" width="100%" noWrap>
-        <Controller
+      <Controller
           control={control}
           name="base_uom.uom_id"
           defaultValue={detailForm.base_uom?.uom_id}
@@ -411,13 +412,11 @@ export default function Detail(props: any) {
         />
       </Col>
 
-      {detailForm?.use_unit_leveling && (
-        <>
+        <div style={{display: detailForm?.use_unit_leveling ? 'block' : 'none'}}>
           <Spacer size={20} />
           <Button
             variant="primary"
             size="big"
-            disabled={!detailForm.base_uom?.uom_id}
             onClick={onHandleAdd}
           >
             + Add New
@@ -428,6 +427,7 @@ export default function Detail(props: any) {
             conversionList={detailForm?.uom || []}
             uom={UomData?.listUom || []}
             onDrag={onHandleDrag}
+            setValue={setValue}
             onSelectUom={(data: any, newUom: any, indexData: any) => {
               const uomConversation = UomData?.mappedUomConversion;
               const uomData = uomConversation.find((uom) => uom.uomId === newUom);
@@ -469,37 +469,89 @@ export default function Detail(props: any) {
             }}
             isLoading={false}
           />
-        </>
-      )}
+        </div>
 
       <Spacer size={20} />
 
       <Row gap="20px">
         <Col width="48%">
-          <Input
-            width="100%%"
-            label="Packaging size"
-            height="48px"
-            placeholder={"e.g 12 x 8 ib"}
-            {...register("packaging_size")}
-          />
+          <Col width={"100%"}>
+            <Text variant="headingRegular">
+              Packaging size
+            </Text>
+            <Spacer size={3} />
+            <Controller
+              control={control}
+              shouldUnregister={true}
+              name="packaging_size"
+              render={({ field: { onChange, value }, formState: { errors } }) => (
+                <>
+                  <CustomFormInput
+                    size={"large"}
+                    label="Packaging size"
+                    placeholder={"e.g 12 x 8 ib"}
+                    value={value}
+                    onChange={(e: any) => {
+                      onChange(e.target.value);
+                    }}
+                  />
+                </>
+              )}
+            />
+          </Col>
           <Spacer size={20} />
-          <Input
-            width="100%"
-            label="Cost of Product"
-            height="48px"
-            placeholder={"e.g 5000"}
-            {...register("cost_of_product")}
-          />
+          <Col width={"100%"}>
+            <Text variant="headingRegular">
+              Cost of Product
+            </Text>
+            <Spacer size={3} />
+            <Controller
+              control={control}
+              shouldUnregister={true}
+              name="cost_of_product"
+              render={({ field: { onChange, value }, formState: { errors } }) => (
+                <>
+                  <CustomFormInput
+                    size={"large"}
+                    label="Cost of Product"
+                    placeholder={"e.g 5000"}
+                    value={value}
+                    prefix={"Rp"}
+                    onChange={(e: any) => {
+                      onChange(e.target.value);
+                    }}
+                  />
+                </>
+              )}
+            />
+          </Col>
         </Col>
         <Col width="48%" justifyContent="flex-end">
-          <Input
-            width="100%"
-            label="Sales Price"
-            height="48px"
-            placeholder={"e.g Rp 50.000"}
-            {...register("sales_price")}
-          />
+          <Col width={"100%"}>
+            <Text variant="headingRegular">
+              Sales Price
+            </Text>
+            <Spacer size={3} />
+            <Controller
+              control={control}
+              shouldUnregister={true}
+              name="sales_price"
+              render={({ field: { onChange, value }, formState: { errors } }) => (
+                <>
+                  <CustomFormInput
+                    size={"large"}
+                    label="Sales Price"
+                    placeholder={"e.g Rp 50.000"}
+                    prefix={"Rp"}
+                    value={value}
+                    onChange={(e: any) => {
+                      onChange(e.target.value);
+                    }}
+                  />
+                </>
+              )}
+            />
+          </Col>
         </Col>
       </Row>
 
@@ -569,3 +621,11 @@ const CustomFormSelect = styled(FormSelect)`
 const Divider = styled.div`
   border: 1px dashed #dddddd;
 `;
+
+const CustomFormInput = styled(FormInput)`
+
+  && {
+    height: 48px !important;
+    border: 1px solid #AAAAAA;
+  }
+`

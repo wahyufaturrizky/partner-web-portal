@@ -15,7 +15,7 @@ import { Controller, useWatch } from 'react-hook-form'
 import { useTransportationInfiniteLists } from 'hooks/mdm/transportation-group/useTransportationGroup'
 
 export default function Inventory(props: any) {
-  const { setValue, register, control } = props
+  const { setValue, register, control, errors } = props
 
   const inventoryForm = useWatch({
     control: control,
@@ -144,10 +144,11 @@ export default function Inventory(props: any) {
               width="100%"
               label="Net Weight"
               height="48px"
-              placeholder={"e.g Nabati Cheese"}
+              placeholder={"e.g 100"}
               {...register("inventory.weight.net", {
                 required: 'Net Weight must be filled'
               })}
+              error={errors?.inventory?.weight?.net?.message}
             />
           <Spacer size={20} />
             <Controller
@@ -198,7 +199,7 @@ export default function Inventory(props: any) {
               width="100%"
               label="Gross Weight"
               height="48px"
-              placeholder={"e.g Nabati Cheese"}
+              placeholder={"e.g 200"}
               {...register("inventory.weight.gross")}
             />
           </Col>
@@ -210,7 +211,7 @@ export default function Inventory(props: any) {
         <Spacer size={20} />
         <Row gap="20px" width="100%" noWrap>
           <Col gap="4px" width="100%" noWrap>
-            <Text style={{ position: 'absolute', fontWeight: 'bold' }} variant="subtitle1" color="black.regular">Dimension (Length x Width x Height)</Text>
+            <LabelDimension>Dimension (Length x Width x Height)</LabelDimension>
             <Row gap="4px" width="100%" noWrap>
               <CustomInput
                 label=""
@@ -448,6 +449,11 @@ export default function Inventory(props: any) {
   )
 }
 
+const LabelDimension = styled.div`
+  font-weight: bold;
+  font-size: 16px;
+  line-height: 24px;
+`
 const Label = styled.div`
   font-weight: bold;
   font-size: 16px;

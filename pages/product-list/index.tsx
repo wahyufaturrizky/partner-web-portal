@@ -249,17 +249,17 @@ const Product = () => {
         <Row justifyContent="space-between">
           <Row Row gap="16px">
             <Search
-              width="340px"
+              width="360px"
               placeholder="Search Product ID, Name, Category, Status"
               onChange={(e: any) => {
                 setSearch(e.target.value);
               }}
             />
-            <Col width="250px">
+            <Col width="200px">
               <CustomFormSelect
                 style={{ width: "100%", height: '48px' }}
                 size={"large"}
-                placeholder={"Select"}
+                placeholder={"Product Category"}
                 borderColor={"#AAAAAA"}
                 arrowColor={"#000"}
                 withSearch
