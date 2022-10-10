@@ -99,6 +99,7 @@ export default function CreateProduct({ isCreateProductVariant = true }) {
     register,
     setValue,
     getValues,
+    setError,
     watch,
     getFieldState,
     formState: { errors },
@@ -160,8 +161,32 @@ export default function CreateProduct({ isCreateProductVariant = true }) {
       onSuccess: (data: any) => {
         data = toSnakeCase(data);
         Object.keys(data).forEach((key) => {
-          setValue(key, data[key]);
-          setCanBePurchased(data?.canBePurchased);
+          if(key === 'uom_conversion'){
+            setValue('uom', data[key]?.map((data:any, index:any) => ({
+              baseUom: data.base_uom_name,
+              conversionNumber: data.conversion_number,
+              id: data.id,
+              index,
+              key: data.id,
+              levelId: data?.level?.id,
+              qty: data?.qty,
+              uomConversionItemId: data.conversion_id
+            })))
+          } else if(key === 'registrations') {
+            setValue('registration', data[key])
+          } else if(key === 'branch') {
+              let branchIds:any = []
+              data[key].forEach((branch:any) => {
+                branchIds.push(...branch.branchs.map((branch:any) => branch.id))
+              })
+              let branch = {
+                ids: branchIds
+              }
+              setValue(key, branch)
+          } else {
+            setValue(key, data[key]);
+          }
+          setCanExpensed(data?.can_be_expensed);
           setCanBePurchased(data.can_be_purchased);
           setCanBeSold(data.can_be_sold);
           setCanManufacture(data.can_be_manufactured);
@@ -263,6 +288,11 @@ export default function CreateProduct({ isCreateProductVariant = true }) {
           router.push("/product-list");
         }
       },
+      onError: (e: any) => {
+        if(e?.data?.message?.includes('already exist')){
+          setError('name', {message:  e.data.message, type: "focus" }, { shouldFocus: true })
+        }
+      }
     },
   });
 
@@ -312,17 +342,18 @@ export default function CreateProduct({ isCreateProductVariant = true }) {
       "variants",
       "registration",
       "accounting",
-      "branch",
     ]);
 
     payload.uom_conversion = [];
 
-    if (data?.uom?.length > 0) {
+    if (data?.uom?.length > 0 && payload.use_unit_leveling) {
       payload.uom_conversion = data?.uom?.map((data) => ({
         level_id: data?.levelId,
         uom_conversion_item_id: 39,
         conversion_id: "MCM-0000017",
       }));
+    } else {
+      payload.uom_conversion = [];
     }
 
     payload.branch = data.branch;
@@ -331,12 +362,12 @@ export default function CreateProduct({ isCreateProductVariant = true }) {
     payload.can_be_expensed = canBeExpensed;
     payload.can_be_manufactured = canBeManufacture;
 
-    data?.expired_date?.includes("/")
+    payload.expired_date = data?.expired_date?.includes("/")
       ? moment(data.expired_date, "DD/MM/YYYY").utc().toString()
       : moment(data.expired_date).utc().toString();
     payload.purchase_uom_id = data.purchase_uom.uom_id || "";
     payload.product_brand_id = data.brand.id || "";
-    payload.base_uom_id = data.base_uom.id || "";
+    payload.base_uom_id = data.base_uom.uom_id;
     payload.purchase_uom_id = data?.purchase_uom?.uom_id || "";
     payload.options = data?.options?.map((data: any) => ({
       options_id: data?.option.id,
@@ -344,7 +375,6 @@ export default function CreateProduct({ isCreateProductVariant = true }) {
     }));
 
     payload.company_code = "KSNI";
-
     payload.inventory = {
       weight: {
         net: data?.inventory?.weight?.net,
@@ -375,9 +405,13 @@ export default function CreateProduct({ isCreateProductVariant = true }) {
       valid_to: data.valid_to?.includes("/")
         ? moment(data.valid_to, "DD/MM/YYYY").utc().toString()
         : moment(data.valid_to).utc().toString(),
-    }));
+    })) || [];
 
-    (payload.variants = data?.variants), (payload.product_category_id = data?.category?.id);
+    payload.variants = data?.variants.map(({id, ...rest}: any) => ({
+      ...rest
+    }))
+
+    payload.product_category_id = data?.category?.id;
     if (isUpdate) {
       delete payload.company_id;
       delete payload.company_code;
@@ -391,6 +425,7 @@ export default function CreateProduct({ isCreateProductVariant = true }) {
     getValues,
     register,
     control,
+    errors
   };
 
   const propsRegistrations = {
@@ -405,6 +440,7 @@ export default function CreateProduct({ isCreateProductVariant = true }) {
   const propsAccounting = {
     control,
     accounting: {},
+    setValue
   };
 
   const branchForm = useWatch({
@@ -413,30 +449,31 @@ export default function CreateProduct({ isCreateProductVariant = true }) {
   });
 
   const switchTabItem = () => {
-    switch (tabAktived) {
-      case "Registration":
-        return <Registration {...propsRegistrations} />;
-      case "Branch":
-        return <Branch setValue={setValue} branch={branchForm} />;
-      case "Purchasing":
-        return <Purchasing />;
-      case "Accounting":
-        return <Accounting {...propsAccounting} />;
-      case "Inventory":
-        return <Inventory {...propsInventory} />;
-      case "Detail":
-        return <Detail {...propsDetail} />;
-      default:
-        return null;
-    }
-  };
+      return (
+      <>
+        <div style={{display: tabAktived === 'Registration' ? 'block': 'none'}}>
+          <Registration {...propsRegistrations} />
+          </div>
+        <div style={{display: tabAktived === 'Branch' ? 'block': 'none'}}>
+          <Branch setValue={setValue} branch={branchForm} isUpdate={isUpdate} />
+        </div>
+        <div style={{display: tabAktived === 'Purchasing' ? 'block': 'none'}}>
+          <Purchasing />
+        </div>
+        <div style={{display: tabAktived === 'Accounting' ? 'block': 'none'}}>
+          <Accounting {...propsAccounting} />
+        </div>
+        <div style={{display: tabAktived === 'Inventory' ? 'block': 'none'}}>
+          <Inventory {...propsInventory} />
+        </div>
+        <div style={{display: tabAktived === 'Detail' ? 'block': 'none'}}>
+          <Detail {...propsDetail} />
+        </div>
+      </>
+      )
+  }
 
   const productForm = useWatch({
-    control,
-  });
-
-  const variantsForm = useWatch({
-    name: "variants",
     control,
   });
 
@@ -450,6 +487,11 @@ export default function CreateProduct({ isCreateProductVariant = true }) {
     name: "variants",
   });
 
+  const variantsForm = useWatch({
+    control,
+    name: "variants",
+  });
+
   const optionsForm = useWatch({
     control,
     name: "options",
@@ -458,6 +500,12 @@ export default function CreateProduct({ isCreateProductVariant = true }) {
   const nameForm = useWatch({
     control,
     name: "name",
+  });
+
+
+  const inventoryWatch = useWatch({
+    control,
+    name: "inventory",
   });
 
   const costOfProductForm = useWatch({
@@ -488,7 +536,7 @@ export default function CreateProduct({ isCreateProductVariant = true }) {
       return false;
     });
 
-    if (options.map((data) => data?.option_items.map((data) => data?.id))?.length > 0) {
+    if (options?.length > 0 && options.map((data) => data?.option_items.map((data) => data?.id))?.length > 0) {
       let allValues = options.map((data) =>
         data?.option_items.map((data) => data?.name || data?.label)
       );
@@ -504,12 +552,15 @@ export default function CreateProduct({ isCreateProductVariant = true }) {
         status: "inactive",
       }));
       replaceProductVariants(finalVariants);
+    } else {
+      replaceProductVariants([])
     }
   };
 
   const generateVariantInDetail = () => {
     let finalVariants = getValues("variants").map((variant: any) => {
       return {
+        id: variant.id,
         name: variant.name,
         cost: variant.cost,
         price: variant.price,
@@ -545,14 +596,14 @@ export default function CreateProduct({ isCreateProductVariant = true }) {
     fieldsProductVariants,
     replaceProductVariants,
     updateProductVariants,
-    variantsForm: productData?.variants,
+    variantsForm,
     isLoadingProduct,
   };
 
   return (
     <Col>
       {isLoadingProduct ? (
-        <Spin tip="Loading data?..." />
+        <Spin tip="Loading..." />
       ) : (
         <>
           {!isUpdate ? (
@@ -654,7 +705,14 @@ export default function CreateProduct({ isCreateProductVariant = true }) {
                     Cancel
                   </Button>
                 )}
-                <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
+                <Button size="big" variant={"primary"} onClick={(e: any) => {
+                  if(!inventoryWatch?.weight?.net){
+                    setTabAktived('Inventory')
+                    handleSubmit(onSubmit)(e)
+                  } else {
+                    handleSubmit(onSubmit)(e)
+                  }
+                }}>
                   {isLoadingCreateProduct || isLoadingUploadImage || isLoadingUpdateProduct
                     ? "Loading..."
                     : "Save"}
@@ -681,6 +739,7 @@ export default function CreateProduct({ isCreateProductVariant = true }) {
                       {...register("name", {
                         required: "Product Name must be filled",
                       })}
+                      error={errors.name?.message}
                       required
                     />
                   </Col>
@@ -825,7 +884,7 @@ export default function CreateProduct({ isCreateProductVariant = true }) {
                         <DatePickerInput
                           fullWidth
                           onChange={(date: any, dateString: any) => onChange(dateString)}
-                          label="Expired Date"
+                          label="Discontinue Date"
                           defaultValue={moment(productForm.expired_date)}
                           format={"DD/MM/YYYY"}
                         />
@@ -842,10 +901,10 @@ export default function CreateProduct({ isCreateProductVariant = true }) {
 
           <Accordion>
             <Accordion.Item key={1}>
-              <Accordion.Header variant="blue">Detail Information</Accordion.Header>
+              <Accordion.Header variant="blue">Product Information</Accordion.Header>
               <Accordion.Body>
                 <Tabs
-                  defaultActiveKey={tabAktived}
+                  activeKey={tabAktived}
                   listTabPane={listTabItems}
                   onChange={(e: any) => setTabAktived(e)}
                 />
@@ -901,7 +960,7 @@ export default function CreateProduct({ isCreateProductVariant = true }) {
                     deleteProductList({ ids: [id] });
                   }}
                 >
-                  {isLoadingDeleteProductList ? "loading..." : "Yes"}
+                  {isLoadingDeleteProductList ? "Loading..." : "Yes"}
                 </Button>
               </div>
             </div>

@@ -3,7 +3,7 @@ import { Spacer, Text, Button, Col, Row, AccordionCheckbox, Checkbox, Search } f
 import { useBranchGroupList } from 'hooks/mdm/branch/useBranch';
 import { useRouter } from 'next/router';
 
-export default function Branch({ setValue, branch }: { setValue: any, branch: any}) {
+export default function Branch({ setValue, branch=[], isUpdate}: { setValue: any, branch: any, isUpdate: any}) {
 
   const router = useRouter();
   const [searchBranch, setSearchBranch] = useState("")
@@ -26,7 +26,9 @@ export default function Branch({ setValue, branch }: { setValue: any, branch: an
           <Button
             size="big"
             variant="primary"
-            onClick={() => router.push('/branch/create')}
+            onClick={() => {
+              window.open(`/branch/create`, "_blank")
+            }}
           >
             Create New Branch
           </Button>
