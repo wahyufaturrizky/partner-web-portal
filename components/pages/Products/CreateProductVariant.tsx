@@ -818,6 +818,7 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
                     {...register("sku", {
                       required: 'Sku Number is required'
                     })}
+                    error={errors.sku?.message}
                   />
               </Col>
 

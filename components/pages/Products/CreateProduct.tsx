@@ -349,7 +349,7 @@ export default function CreateProduct({ isCreateProductVariant = true }) {
 
     if (data?.uom?.length > 0 && payload.use_unit_leveling) {
       payload.uom_conversion = data?.uom?.map((data) => ({
-        level_id: data?.levelId,
+        level_id: data?.levelId || null,
         uom_conversion_item_id: 39,
         conversion_id: "MCM-0000017",
       }));
