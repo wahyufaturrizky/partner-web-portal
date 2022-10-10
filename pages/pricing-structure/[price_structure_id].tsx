@@ -5,9 +5,7 @@ import { ModalRejectPriceStructure } from "components/elements/Modal/ModalReject
 import { useCurrenciesInfiniteLists } from "hooks/mdm/country-structure/useCurrencyMDM";
 import { useProductList } from "hooks/mdm/product-list/useProductList";
 import {
-  useCreatePricingStructureDraftList,
-  useCreatePricingStructureList,
-  useDeletePricingStructureList,
+  useCreatePricingStructureDraftList, useDeletePricingStructureList,
   useGroupBuyingLists,
   usePricingConfigInfiniteLists, usePricingStructureInfiniteLists, usePricingStructureList,
   usePricingStructureLists,
@@ -317,7 +315,7 @@ const DetailPricingStructure: any = () => {
     pricingStructureListId: price_structure_id,
   });
 
-  const { mutate: updatePriceStructure } = useUpdatePricingStructureList({
+  const { mutate: updatePriceStructure, isLoading: isLoadingUpdatePriceStructure } = useUpdatePricingStructureList({
     options: {
       onSuccess: () => {
         router.back();
@@ -327,11 +325,21 @@ const DetailPricingStructure: any = () => {
   });
 
   const approve = () => {
-    const payload = {
-      status: "ACTIVE",
-      ...emptyPayloadPriceStructure
-    };
-    approvePartner(payload);
+    if (pricingStructureListById?.changesHistory?.from === "ACTIVE" && pricingStructureListById?.changesHistory?.to === "WAITING") {
+      const payload = {
+        status: "INACTIVE",
+        inactive_reason: pricingStructureListById?.inactiveReason || "empty reason",
+        ...emptyPayloadPriceStructure
+      };
+      approvePartner(payload);
+    } else {
+      const payload = {
+        status: "ACTIVE",
+        ...emptyPayloadPriceStructure
+      };
+      approvePartner(payload);
+    }
+   
   };
 
   const reject = (data: any) => {
@@ -346,15 +354,6 @@ const DetailPricingStructure: any = () => {
       },
     },
   });
-
-  const { mutate: pricingStructure, isLoading: isLoadingPricingStructure } =
-    useCreatePricingStructureList({
-      options: {
-        onSuccess: () => {
-          router.back();
-        },
-      },
-    });
 
   const { mutate: pricingStructureDraft, isLoading: isLoadingPricingStructureDraft } =
     useCreatePricingStructureDraftList({
@@ -398,12 +397,17 @@ const DetailPricingStructure: any = () => {
             priceStructureCosts,
             priceStructureDistributions,
             status,
+            inactiveReason,
           } = data;
 
           setValue("activeDate", activeDate);
           setValue("pricing_config", priceStructureConfigId);
           setValue("currency", currency);
           setValue("manage_by", managedBy);
+
+          if(inactiveReason) {
+            setValue("inactive_reason", inactiveReason)
+          }
           
 
           setValue("status", status);
@@ -715,209 +719,55 @@ const DetailPricingStructure: any = () => {
 
   const onSubmit = (dataSubmit: any) => {
 
-    switch (dataSubmit.status) {
-      case "DRAFTED":
-        updatePriceStructure({
-          status: "WAITING",
-          add_distributions: dataSubmit.distribution_channel,
-          add_products: dataSubmit.product_selected.map((data: any) => data.id),
-          add_total_cost: dataSubmit.product_selected.map((data: any, index: any) => ({
-            price_structure_cost_by_distribution_id: data.distribution_channel[index]?.id || 0,
-            group_buying_price_id: data.distribution_channel[index]?.level[index].buyingPrice,
-            is_reference: data.distribution_channel[index]?.is_reference || false,
-            level: data.distribution_channel[index]?.level[index].id,
-            cost: data.distribution_channel[index]?.cost || '',
-            margin_type: data.distribution_channel[index]?.margin_type || '',
-            margin_value: parseFloat(data.distribution_channel[index]?.margin_value) || 0,
-          })
-          ),
-          add_cost_by_distribution:
-          dataSubmit.product_selected.map((data: any, index: any) => (
-            {
-              price_structure_cost_id: data.distribution_channel[index]?.structureId,
-              distribution_channel: data.distribution_channel[index]?.id,
-              managed_by_zone: data.distribution_channel[index]?.manage_by_zone,
-            },
-          )),
-          add_total_cost_by_zone: dataSubmit.product_selected.map((data: any, index: any) => ({
-            price_structure_cost_id: data.distribution_channel[index]?.manage_by_zone_detail.region_selected[index].distribution_channel[index].structureId,
-              group_buying_price_id: data.distribution_channel[index]?.manage_by_zone_detail.region_selected[index].distribution_channel[index].level[index].buyingPrice,
-              price_structure_zone_id: data.distribution_channel[index]?.manage_by_zone_detail.region_selected[index].distribution_channel[index].id,
-              is_reference: data.distribution_channel[index]?.manage_by_zone_detail.region_selected[index].distribution_channel[index].is_reference,
-              level: data.distribution_channel[index]?.manage_by_zone_detail.region_selected[index].distribution_channel[index].level[index].id,
-              cost: data.distribution_channel[index]?.manage_by_zone_detail.region_selected[index].distribution_channel[index].cost,
-              margin_type: data.distribution_channel[index]?.manage_by_zone_detail.region_selected[index].distribution_channel[index].margin_type,
-              margin_value: parseFloat(data.distribution_channel[index]?.manage_by_zone_detail.region_selected[index].distribution_channel[index].margin_value),
-          })),
-          add_zone: dataSubmit.product_selected.map((data: any, index: any) => data.distribution_channel[index]?.manage_by_zone_detail.zone_type),
-          add_cost_by_region:
-          dataSubmit.product_selected.map((data: any, index: any) => ({
-            price_structure_cost_id: data.distribution_channel[index]?.manage_by_zone_detail.region_selected[index].distribution_channel[index].structureId,
-            region: data.distribution_channel[index]?.manage_by_zone_detail.region_selected[index].distribution_channel[index].id,
-          })),
-          del_distributions:[],
-          del_products: [],
-          total_cost: [],
-          add_zone: [],
-          total_cost_by_zone: [],
-          zone: [],
-          cost_by_distribution: [],
-          cost_by_region: [],
-        });
-        break;
-      case "REJECTED":
-        updatePriceStructure({
-          status: "WAITING",
-          add_distributions: dataSubmit.distribution_channel,
-          add_products: dataSubmit.product_selected.map((data: any) => data.id),
-          add_total_cost: dataSubmit.product_selected.map((data: any, index: any) => ({
-            price_structure_cost_by_distribution_id: data.distribution_channel[index]?.id || 0,
-            group_buying_price_id: data.distribution_channel[index]?.level[index].buyingPrice,
-            is_reference: data.distribution_channel[index]?.is_reference || false,
-            level: data.distribution_channel[index]?.level[index].id,
-            cost: data.distribution_channel[index]?.cost || '',
-            margin_type: data.distribution_channel[index]?.margin_type || '',
-            margin_value: parseFloat(data.distribution_channel[index]?.margin_value) || 0,
-          })
-          ),
-          add_cost_by_distribution:
-          dataSubmit.product_selected.map((data: any, index: any) => (
-            {
-              price_structure_cost_id: data.distribution_channel[index]?.structureId,
-              distribution_channel: data.distribution_channel[index]?.id,
-              managed_by_zone: data.distribution_channel[index]?.manage_by_zone,
-            },
-          )),
-          add_total_cost_by_zone: dataSubmit.product_selected.map((data: any, index: any) => ({
-            price_structure_cost_id: data.distribution_channel[index]?.manage_by_zone_detail.region_selected[index].distribution_channel[index].structureId,
-              group_buying_price_id: data.distribution_channel[index]?.manage_by_zone_detail.region_selected[index].distribution_channel[index].level[index].buyingPrice,
-              price_structure_zone_id: data.distribution_channel[index]?.manage_by_zone_detail.region_selected[index].distribution_channel[index].id,
-              is_reference: data.distribution_channel[index]?.manage_by_zone_detail.region_selected[index].distribution_channel[index].is_reference,
-              level: data.distribution_channel[index]?.manage_by_zone_detail.region_selected[index].distribution_channel[index].level[index].id,
-              cost: data.distribution_channel[index]?.manage_by_zone_detail.region_selected[index].distribution_channel[index].cost,
-              margin_type: data.distribution_channel[index]?.manage_by_zone_detail.region_selected[index].distribution_channel[index].margin_type,
-              margin_value: parseFloat(data.distribution_channel[index]?.manage_by_zone_detail.region_selected[index].distribution_channel[index].margin_value),
-          })),
-          add_zone: dataSubmit.product_selected.map((data: any, index: any) => data.distribution_channel[index]?.manage_by_zone_detail.zone_type),
-          add_cost_by_region:
-          dataSubmit.product_selected.map((data: any, index: any) => ({
-            price_structure_cost_id: data.distribution_channel[index]?.manage_by_zone_detail.region_selected[index].distribution_channel[index].structureId,
-            region: data.distribution_channel[index]?.manage_by_zone_detail.region_selected[index].distribution_channel[index].id,
-          })),
-          del_distributions:[],
-          del_products: [],
-          total_cost: [],
-          add_zone: [],
-          total_cost_by_zone: [],
-          zone: [],
-          cost_by_distribution: [],
-          cost_by_region: [],
-        });
-        break;
-      case "INACTIVE":
-        updatePriceStructure({
-          status: "INACTIVE",
-          add_distributions: dataSubmit.distribution_channel,
-          add_products: dataSubmit.product_selected.map((data: any) => data.id),
-          add_total_cost: dataSubmit.product_selected.map((data: any, index: any) => ({
-            price_structure_cost_by_distribution_id: data.distribution_channel[index]?.id || 0,
-            group_buying_price_id: data.distribution_channel[index]?.level?.[index].buyingPrice,
-            is_reference: data.distribution_channel[index]?.is_reference || false,
-            level: data.distribution_channel[index]?.level?.[index].id,
-            cost: data.distribution_channel[index]?.cost || '',
-            margin_type: data.distribution_channel[index]?.margin_type || '',
-            margin_value: parseFloat(data.distribution_channel[index]?.margin_value) || 0,
-          })
-          ),
-          add_cost_by_distribution:
-          dataSubmit.product_selected.map((data: any, index: any) => (
-            {
-              price_structure_cost_id: data.distribution_channel[index]?.structureId,
-              distribution_channel: data.distribution_channel[index]?.id,
-              managed_by_zone: data.distribution_channel[index]?.manage_by_zone,
-            },
-          )),
-          add_total_cost_by_zone: dataSubmit.product_selected.map((data: any, index: any) => ({
-            price_structure_cost_id: data.distribution_channel[index]?.manage_by_zone_detail?.region_selected[index].distribution_channel[index].structureId,
-              group_buying_price_id: data.distribution_channel[index]?.manage_by_zone_detail?.region_selected[index].distribution_channel[index].level?.[index].buyingPrice,
-              price_structure_zone_id: data.distribution_channel[index]?.manage_by_zone_detail?.region_selected[index].distribution_channel[index].id,
-              is_reference: data.distribution_channel[index]?.manage_by_zone_detail?.region_selected[index].distribution_channel[index].is_reference,
-              level: data.distribution_channel[index]?.manage_by_zone_detail?.region_selected[index].distribution_channel[index].level?.[index].id,
-              cost: data.distribution_channel[index]?.manage_by_zone_detail?.region_selected[index].distribution_channel[index].cost,
-              margin_type: data.distribution_channel[index]?.manage_by_zone_detail?.region_selected[index].distribution_channel[index].margin_type,
-              margin_value: parseFloat(data.distribution_channel[index]?.manage_by_zone_detail?.region_selected[index].distribution_channel[index].margin_value),
-          })),
-          add_zone: dataSubmit.product_selected.map((data: any, index: any) => data.distribution_channel[index]?.manage_by_zone_detail?.zone_type),
-          add_cost_by_region:
-          dataSubmit.product_selected.map((data: any, index: any) => ({
-            price_structure_cost_id: data.distribution_channel[index]?.manage_by_zone_detail?.region_selected[index].distribution_channel[index].structureId,
-            region: data.distribution_channel[index]?.manage_by_zone_detail?.region_selected[index].distribution_channel[index].id,
-          })),
-          del_distributions:[],
-          del_products: [],
-          total_cost: [],
-          add_zone: [],
-          total_cost_by_zone: [],
-          zone: [],
-          cost_by_distribution: [],
-          cost_by_region: [],
-        });
-        break;
-      case "ACTIVE":
-        updatePriceStructure({
-          status: "ACTIVE",
-          add_distributions: dataSubmit.distribution_channel,
-          add_products: dataSubmit.product_selected.map((data: any) => data.id),
-          add_total_cost: dataSubmit.product_selected.map((data: any, index: any) => ({
-            price_structure_cost_by_distribution_id: data.distribution_channel[index]?.id || 0,
-            group_buying_price_id: data.distribution_channel[index]?.level[index].buyingPrice,
-            is_reference: data.distribution_channel[index]?.is_reference || false,
-            level: data.distribution_channel[index]?.level[index].id,
-            cost: data.distribution_channel[index]?.cost || '',
-            margin_type: data.distribution_channel[index]?.margin_type || '',
-            margin_value: parseFloat(data.distribution_channel[index]?.margin_value) || 0,
-          })
-          ),
-          add_cost_by_distribution:
-          dataSubmit.product_selected.map((data: any, index: any) => (
-            {
-              price_structure_cost_id: data.distribution_channel[index]?.structureId,
-              distribution_channel: data.distribution_channel[index]?.id,
-              managed_by_zone: data.distribution_channel[index]?.manage_by_zone,
-            },
-          )),
-          add_total_cost_by_zone: dataSubmit.product_selected.map((data: any, index: any) => ({
-            price_structure_cost_id: data.distribution_channel[index]?.manage_by_zone_detail.region_selected[index].distribution_channel[index].structureId,
-              group_buying_price_id: data.distribution_channel[index]?.manage_by_zone_detail.region_selected[index].distribution_channel[index].level[index].buyingPrice,
-              price_structure_zone_id: data.distribution_channel[index]?.manage_by_zone_detail.region_selected[index].distribution_channel[index].id,
-              is_reference: data.distribution_channel[index]?.manage_by_zone_detail.region_selected[index].distribution_channel[index].is_reference,
-              level: data.distribution_channel[index]?.manage_by_zone_detail.region_selected[index].distribution_channel[index].level[index].id,
-              cost: data.distribution_channel[index]?.manage_by_zone_detail.region_selected[index].distribution_channel[index].cost,
-              margin_type: data.distribution_channel[index]?.manage_by_zone_detail.region_selected[index].distribution_channel[index].margin_type,
-              margin_value: parseFloat(data.distribution_channel[index]?.manage_by_zone_detail.region_selected[index].distribution_channel[index].margin_value),
-          })),
-          add_zone: dataSubmit.product_selected.map((data: any, index: any) => data.distribution_channel[index]?.manage_by_zone_detail.zone_type),
-          add_cost_by_region:
-          dataSubmit.product_selected.map((data: any, index: any) => ({
-            price_structure_cost_id: data.distribution_channel[index]?.manage_by_zone_detail.region_selected[index].distribution_channel[index].structureId,
-            region: data.distribution_channel[index]?.manage_by_zone_detail.region_selected[index].distribution_channel[index].id,
-          })),
-          del_distributions:[],
-          del_products: [],
-          total_cost: [],
-          add_zone: [],
-          total_cost_by_zone: [],
-          zone: [],
-          cost_by_distribution: [],
-          cost_by_region: [],
-        });
-        break;
-    
-      default:
-        break;
-    }
+    updatePriceStructure({
+      status: pricingStructureListById?.changesHistory?.from === "ACTIVE" && pricingStructureListById?.changesHistory?.to === "WAITING" ? "ACTIVE" : pricingStructureListById?.changesHistory?.from === "REJECTED" && pricingStructureListById?.changesHistory?.to === "WAITING" ? "REJECTED" : pricingStructureListById?.changesHistory?.from === "INACTIVE" && pricingStructureListById?.changesHistory?.to === "WAITING" ? "INACTIVE" : (dataSubmit.status === "DRAFTED" || dataSubmit.status === "REJECTED" || dataSubmit.status === "INACTIVE") ? "WAITING" : "ACTIVE",
+      add_distributions: dataSubmit.distribution_channel,
+      add_products: dataSubmit.product_selected.map((data: any) => data.id),
+      add_total_cost: dataSubmit.product_selected?.[0]?.distribution_channel?.[0]?.cost ? dataSubmit.product_selected.map((data: any, index: any) => ({
+        price_structure_cost_by_distribution_id: data.distribution_channel[index]?.id,
+        group_buying_price_id: data.distribution_channel[index]?.level?.[index].buyingPrice,
+        is_reference: data.distribution_channel[index]?.is_reference,
+        level: data.distribution_channel[index]?.level?.[index].id,
+        cost: data.distribution_channel[index]?.cost,
+        margin_type: data.distribution_channel[index]?.margin_type,
+        margin_value: parseFloat(data.distribution_channel[index]?.margin_value),
+      })
+      ) : [],
+      add_cost_by_distribution:
+      dataSubmit.product_selected?.[0]?.distribution_channel?.[0]?.manage_by_zone ? dataSubmit.product_selected.map((data: any, index: any) => (
+        {
+          price_structure_cost_id: data.distribution_channel[index]?.structureId,
+          distribution_channel: data.distribution_channel[index]?.id,
+          managed_by_zone: data.distribution_channel[index]?.manage_by_zone,
+        },
+      )) : [],
+      add_total_cost_by_zone: dataSubmit.product_selected?.[0]?.distribution_channel?.[0]?.manage_by_zone_detail?.region_selected?.[0]?.distribution_channel?.[0]?.cost ? dataSubmit.product_selected.map((data: any, index: any) => ({
+        price_structure_cost_id: data.distribution_channel[index]?.manage_by_zone_detail?.region_selected[index].distribution_channel[index].structureId,
+          group_buying_price_id: data.distribution_channel[index]?.manage_by_zone_detail?.region_selected[index].distribution_channel[index].level?.[index].buyingPrice,
+          price_structure_zone_id: data.distribution_channel[index]?.manage_by_zone_detail?.region_selected[index].distribution_channel[index].id,
+          is_reference: data.distribution_channel[index]?.manage_by_zone_detail?.region_selected[index].distribution_channel[index].is_reference || false,
+          level: data.distribution_channel[index]?.manage_by_zone_detail?.region_selected[index].distribution_channel[index].level?.[index].id,
+          cost: data.distribution_channel[index]?.manage_by_zone_detail?.region_selected[index].distribution_channel[index].cost || "0",
+          margin_type: data.distribution_channel[index]?.manage_by_zone_detail?.region_selected[index].distribution_channel[index].margin_type || "FIX_AMOUNT",
+          margin_value: parseFloat(data.distribution_channel[index]?.manage_by_zone_detail?.region_selected[index].distribution_channel[index].margin_value),
+      })) : [],
+      add_zone: dataSubmit.product_selected?.[0]?.distribution_channel?.[0]?.manage_by_zone_detail?.zone_type ? dataSubmit.product_selected.map((data: any, index: any) => data.distribution_channel[index]?.manage_by_zone_detail?.zone_type) : [],
+      add_cost_by_region: dataSubmit.product_selected?.[0]?.distribution_channel?.[0]?.manage_by_zone_detail?.region_selected?.[0]?.distribution_channel?.[0]?.id ?
+      dataSubmit.product_selected.map((data: any, index: any) => ({
+        price_structure_cost_id: data.distribution_channel[index]?.manage_by_zone_detail?.region_selected[index].distribution_channel[index].structureId,
+        region: data.distribution_channel[index]?.manage_by_zone_detail?.region_selected[index].distribution_channel[index].id,
+      })) : [],
+      del_distributions:[],
+      del_products: [],
+      total_cost: [],
+      add_zone: [],
+      total_cost_by_zone: [],
+      zone: [],
+      cost_by_distribution: [],
+      cost_by_region: [],
+      inactive_reason: dataSubmit?.inactive_reason,
+    });
 
-    
   };
 
   const onSubmitDraft = (dataDraft: any) => {
@@ -2102,14 +1952,28 @@ const DetailPricingStructure: any = () => {
 
                   {pricingStructureListById?.status === "WAITING" ? (
                     <>
-                      <Button
+                    {
+                      pricingStructureListById?.changesHistory?.from === "ACTIVE" && pricingStructureListById?.changesHistory?.to === "WAITING" || pricingStructureListById?.changesHistory?.from === "REJECTED" && pricingStructureListById?.changesHistory?.to === "WAITING" || pricingStructureListById?.changesHistory?.from === "INACTIVE" && pricingStructureListById?.changesHistory?.to === "WAITING"  ? (
+                        <Button
                         disabled={isLoadingRejectPriceStructure}
                         size="big"
                         variant={"tertiary"}
-                        onClick={() => setModalReject({ open: true })}
+                        onClick={handleSubmit(onSubmit)}
                       >
-                        {isLoadingRejectPriceStructure ? 'Loading' : 'Reject'}
+                        {isLoadingRejectPriceStructure || isLoadingUpdatePriceStructure ? 'Loading' : 'Reject'}
                       </Button>
+                      ) : (
+                        <Button
+                        disabled={isLoadingRejectPriceStructure}
+                        size="big"
+                        variant={"tertiary"}
+                        onClick={() => setModalReject({open: true})}
+                      >
+                        {isLoadingRejectPriceStructure || isLoadingUpdatePriceStructure ? 'Loading' : 'Reject'}
+                      </Button>
+                      )
+                    }
+                      
 
                       <Button disabled={isLoadingApprovePriceStructure} size="big" variant={"primary"} onClick={approve}>
                         {isLoadingApprovePriceStructure ? 'Loading...' : 'Approve'}
@@ -2117,7 +1981,7 @@ const DetailPricingStructure: any = () => {
                     </>
                   ) : (
                     <>
-                      {pricingStructureListById?.status !== "ACTIVE" && pricingStructureListById?.status !== "REJECTED" && (
+                      {pricingStructureListById?.status !== "ACTIVE" && pricingStructureListById?.status !== "REJECTED" && pricingStructureListById?.status !== "INACTIVE" && (
                         <Button
                           disabled={isLoadingPricingStructureDraft}
                           size="big"
@@ -2128,12 +1992,12 @@ const DetailPricingStructure: any = () => {
                         </Button>
                       )}
                       <Button
-                        disabled={isLoadingPricingStructure}
+                        disabled={isLoadingUpdatePriceStructure}
                         size="big"
                         variant={"primary"}
                         onClick={handleSubmit(onSubmit)}
                       >
-                        {isLoadingPricingStructure ? "Loading..." : "Submit"}
+                        {isLoadingUpdatePriceStructure ? "Loading..." : "Submit"}
                       </Button>
                     </>
                   )}

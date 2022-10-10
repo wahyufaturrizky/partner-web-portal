@@ -84,7 +84,7 @@ const DraggableTable = ({ control, conversionList, uom, isLoading, onDrag, onDel
     if (!activeId) {
       return null;
     }
-    const row = conversionList.find((item: any) => item.key === activeId);
+    const row = conversionList.find((item: any) => item.key  || item.id === activeId);
 
     return row;
   }, [activeId, conversionList]);
@@ -284,7 +284,7 @@ const DraggableTable = ({ control, conversionList, uom, isLoading, onDrag, onDel
                 name={`uom.${props.data.index}.levelId`}
                 render={({ field: { onChange } }) => (
                   <CustomFormSelect
-                    defaultValue={props.data.levelId}
+                    defaultValue={props.data.name}
                     style={{ width: "100%", height: '48px' }}
                     size={"large"}
                     placeholder={"Select"}
@@ -322,10 +322,13 @@ const DraggableTable = ({ control, conversionList, uom, isLoading, onDrag, onDel
                 render={({ field: { onChange }}) => (
                   <Dropdown2
                     label=""
-                    defaultValue={props.data.uomConversionItemId}
+                    defaultValue={props.data.baseUom}
                     width="100%"
                     noSearch
-                    items={uom}
+                    items={uom?.map((uom:any) => ({
+                      value: `${uom.value} (${uom.conversionNumber} PCS)`,
+                      id: uom.id
+                    }))}
                     handleChange={(value: string) => {
                       onSelectUom(props.data, value, props.data.index)
                       onChange(value)

@@ -143,7 +143,10 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
         ids: []
       },
       category : {},
-      uom: []
+      uom: [],
+      sales_division: {
+        ids: []
+      }
     }
   });
 
@@ -166,12 +169,41 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
       enabled: isUpdate,
       onSuccess: (data: any) => {
         data = toSnakeCase(data);
-        Object.keys(data).forEach(key => {
-          setValue(key, data[key]);
-          setCanBePurchased(data.can_be_purchased);
-          setCanBeSold(data.can_be_sold);
-          setCanManufacture(data.can_be_manufactured);
-        })
+          Object.keys(data).forEach(key => {
+            if(key === 'uom_conversion'){
+              setValue('uom', data[key]?.map((data:any, index:any) => ({
+                baseUom: data.base_uom_name,
+                conversionNumber: data.conversion_number,
+                id: data.id,
+                index,
+                key: data.id,
+                levelId: data?.level?.id,
+                qty: data?.qty,
+                uomConversionItemId: data.conversion_id
+              })))
+            } else if(key === 'registrations') {
+              setValue('registration', data[key])
+            } else if(key === 'branch') {
+                let branchIds:any = []
+                data[key].forEach((branch:any) => {
+                  branchIds.push(...branch.branchs.map((branch:any) => branch.id))
+                })
+                let branch = {
+                  ids: branchIds
+                }
+                setValue(key, branch)
+            } else if(key === 'sales_division') {
+                let branch = {
+                  ids:  data[key]?.map((data:any) => data?.id) || []
+                }
+                setValue(key, branch)
+            } else {
+              setValue(key, data[key]);
+            }
+            setCanBePurchased(data.can_be_purchased);
+            setCanBeSold(data.can_be_sold);
+            setCanManufacture(data.can_be_manufactured);
+          })
       return data;
     }
   }})
@@ -319,17 +351,19 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
       'barcode',
       'sku',
       'accounting',
-      "branch"
+      'sales_division'
     ])
 
     payload.uom_conversion = [];
 
-    if(data?.uom?.length > 0){
+    if (data?.uom?.length > 0 && payload.use_unit_leveling) {
       payload.uom_conversion = data?.uom?.map(data => ({
         level_id: data?.levelId,
         uom_conversion_item_id: 39,
         conversion_id: "MCM-0000017"
       }))
+    } else {
+      payload.uom_conversion = [];
     }
 
     payload.branch = data.branch;
@@ -337,9 +371,10 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
     payload.can_be_purchased = canBePurchased;
     payload.can_be_manufactured = canBeManufacture;
 
+    payload.expired_date = data?.expired_date?.includes("/")
     payload.expired_date = data?.expired_date?.includes('/') ? moment(data.expired_date, 'DD/MM/YYYY').utc().toString() : moment(data.expired_date).utc().toString();
     payload.product_brand_id = data.brand.id;
-    payload.base_uom_id = data.base_uom.id || "";
+    payload.base_uom_id = data.base_uom.uom_id;
     payload.purchase_uom_id = data.purchase_uom.uom_id;
     payload.company_code = 'KSNI'
     payload.inventory = {
@@ -368,9 +403,8 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
       number: data.number,
       valid_from: data.valid_from?.includes('/') ? moment(data.valid_from, 'DD/MM/YYYY').utc().toString() : moment(data.valid_from).utc().toString(),
       valid_to: data.valid_to?.includes('/') ? moment(data.valid_to, 'DD/MM/YYYY').utc().toString() : moment(data.valid_to).utc().toString(),
-    }))
+    })) || [];
 
-    payload.variants = data?.variants,
     payload.product_category_id = data?.category?.id
     if(isUpdate){
       delete payload.company_id
@@ -386,6 +420,7 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
     getValues,
     register,
     control,
+    errors
   }
 
   const propsRegistrations = {
@@ -400,6 +435,17 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
   const propsAccounting = {
     control,
     accounting: {},
+    setValue
+  }
+
+  const salesDivisionForm = useWatch({
+    control,
+    name: 'sales_division'
+  })
+
+  const propsDivision = {
+    setValue,
+    salesDivision: salesDivisionForm
   }
 
   const branchForm = useWatch({
@@ -408,24 +454,31 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
   })
 
   const switchTabItem = () => {
-    switch (tabAktived) {
-      case 'Registration':
-        return <Registration {...propsRegistrations} />
-      case 'Branch':
-        return <Branch setValue={setValue} branch={branchForm} />
-      case 'Purchasing':
-        return <Purchasing />
-      case 'Accounting':
-        return <Accounting {...propsAccounting} />
-      case 'Inventory':
-        return <Inventory {...propsInventory} />
-      case 'Detail':
-        return <Detail {...propsDetail} />
-      case 'Sales':
-        return <Division />
-      default:
-        return null
-    }
+    return (
+      <>
+        <div style={{display: tabAktived === 'Registration' ? 'block': 'none'}}>
+          <Registration {...propsRegistrations} />
+          </div>
+        <div style={{display: tabAktived === 'Branch' ? 'block': 'none'}}>
+          <Branch setValue={setValue} branch={branchForm} isUpdate={isUpdate} />
+        </div>
+        <div style={{display: tabAktived === 'Purchasing' ? 'block': 'none'}}>
+          <Purchasing />
+        </div>
+        <div style={{display: tabAktived === 'Accounting' ? 'block': 'none'}}>
+          <Accounting {...propsAccounting} />
+        </div>
+        <div style={{display: tabAktived === 'Inventory' ? 'block': 'none'}}>
+          <Inventory {...propsInventory} />
+        </div>
+        <div style={{display: tabAktived === 'Detail' ? 'block': 'none'}}>
+          <Detail {...propsDetail} />
+        </div>
+        <div style={{display: tabAktived === 'Sales' ? 'block': 'none'}}>
+          <Division {...propsDivision} />
+        </div>
+      </>
+    )
   }
 
   const productForm = useWatch({
@@ -453,6 +506,10 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
     name: 'name'
   })
 
+  const inventoryWatch = useWatch({
+    control,
+    name: "inventory",
+  });
 
   const combinationVariant = (list:string[][] = [[]], n = 0, result:any=[], current:any = []) => {
     if (n === list.length) result.push(current)
@@ -466,7 +523,7 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
       return false
     })
 
-    if(options.map(data => data.option_items.map(data => data.id))?.length > 0){
+    if (options?.length > 0 && options.map((data) => data?.option_items.map((data) => data?.id))?.length > 0) {
       let allValues = options.map(data => data.option_items.map(data => data.name || data.label));
       allValues.unshift([productForm.name])
       const variants = combinationVariant(allValues)?.map(data => data.join(" "));
@@ -479,6 +536,8 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
         barcode: '-',
       }))
       replaceProductVariants(finalVariants)
+    } else {
+      replaceProductVariants([])
     }
 
   }, [optionsForm, nameForm])
@@ -502,7 +561,7 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
     <Col>
       {
        isLoadingProduct ?
-          <Spin tip="Loading data..." />
+          <Spin tip="Loading..." />
        : 
       <>
 
@@ -579,7 +638,14 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
                 Cancel
               </Button>
             }
-            <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
+             <Button size="big" variant={"primary"} onClick={(e: any) => {
+                  if(!inventoryWatch?.weight?.net){
+                    setTabAktived('Inventory')
+                    handleSubmit(onSubmit)(e)
+                  } else {
+                    handleSubmit(onSubmit)(e)
+                  }
+                }}>
               {isLoadingCreateProduct || isLoadingUploadImage || isLoadingUpdateProduct? "Loading..." : "Save"}
             </Button>
           </Row>
@@ -616,6 +682,7 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
                   {...register("name", {
                     required: 'Product Name must be filled'
                   })}
+                  error={errors.name?.message}
                   required
                 />
               </Col>
@@ -790,7 +857,7 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
                     <DatePickerInput
                       fullWidth
                       onChange={(date: any, dateString: any) => onChange(dateString)}
-                      label="Expired Date"
+                      label="Discontinue Date"
                       defaultValue={moment(productForm.expired_date)} format={'DD/MM/YYYY'}
                     />
                   )}
@@ -806,10 +873,10 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
       
       <Accordion>
         <Accordion.Item key={1}>
-          <Accordion.Header variant="blue">Detail Information</Accordion.Header>
+          <Accordion.Header variant="blue">Product Information</Accordion.Header>
           <Accordion.Body>
             <Tabs
-              defaultActiveKey={tabAktived}
+              activeKey={tabAktived}
               listTabPane={listTabItems}
               onChange={(e: any) => setTabAktived(e)}
             />
@@ -865,7 +932,7 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
                       deleteProductList({ ids: [id] });
                   }}
                 >
-                  {isLoadingDeleteProductList ? "loading..." : "Yes"}
+                  {isLoadingDeleteProductList ? "Loading..." : "Yes"}
                 </Button>
               </div>
             </div>
