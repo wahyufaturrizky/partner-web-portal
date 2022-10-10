@@ -21,7 +21,7 @@ import { ICDownload, ICUpload } from "../../assets/icons";
 
 import { mdmDownloadService } from "../../lib/client";
 import { useRouter } from "next/router";
-import { useCostCenters, useDeletCostCenter, useUploadFileCostCenter } from "hooks/mdm/cost-center/useCostCenter";
+import { useCostCenters, useUploadFileCostCenter } from "hooks/mdm/cost-center/useCostCenter";
 import ModalManageLanguage from "components/elements/Modal/ModalManageLanguage";
 
 const downloadFile = (params: any) =>
