@@ -146,7 +146,7 @@ const RetailPricing = () => {
                   value: (
                     <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
                       <ICDownload />
-                      <p style={{ margin: "0" }}>Download Template</p>
+                      <p style={{ margin: "0" }}>Download Data</p>
                     </div>
                   ),
                 },

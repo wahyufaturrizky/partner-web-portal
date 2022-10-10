@@ -49,7 +49,7 @@ export default function ModalAddRetailPricing({
     )
   }
 
-  const { control, handleSubmit, watch } = useForm({
+  const { control, handleSubmit, watch, setValue } = useForm({
     defaultValues: defaultValues ? defaultValues : defaultCreateValue
   });
 
@@ -199,13 +199,13 @@ export default function ModalAddRetailPricing({
     }
 
     if(data.apply_on === 'PRODUCT VARIANT'){
-      newRule.product_variant_id = data.product_variant_id
+      newRule.product_variant = data.product_variant
     }
     if(data.apply_on === 'PRODUCT CATEGORY'){
-      newRule.product_category_id = data.product_category_id
+      newRule.product_category = data.product_category
     }
     if(data.apply_on === 'PRODUCT GROUP'){
-      newRule.product_group_id = data.product_group_id
+      newRule.product_group = data.product_group
     }
 
     if(data.price_computation !== 'FORMULA') {
@@ -338,13 +338,13 @@ export default function ModalAddRetailPricing({
                         Discount Price
                       </Text>
                       <Spacer size={3} />
-                      <CustomFormInput
+                      <FormInput
                         size={"large"}
                         defaultValue={retailPricing?.value}
-                        onChange={(value:any) => onChange(value/100)}
+                        onChange={(value:any) => onChange(value)}
                         placeholder={`e.g 0.1`}
                         style={{ height: 48, width: '100%' }}
-                        type="number"
+                        suffix="%"
                       />
                     </Col>
                   )}
@@ -576,142 +576,127 @@ export default function ModalAddRetailPricing({
 
           {applyOnWatch === "PRODUCT CATEGORY" && 
             <Row width="100%" noWrap>
-              <Controller
-                control={control}
-                name="product_category_id"
-                defaultValue={retailPricing?.product_category?.name}
-                render={({ field: { onChange } }) => (
-                  <Col width="100%">
-                    <span>
-                      <Label style={{ display: "inline" }}>Category </Label>{" "}
-                      <span></span>
-                    </span>
+              <Col width="100%">
+                <span>
+                  <Label style={{ display: "inline" }}>Category </Label>{" "}
+                  <span></span>
+                </span>
 
-                    <Spacer size={3} />
-                    <CustomFormSelect
-                      defaultValue={retailPricing?.product_category?.name}
-                      style={{ width: "100%", height: '48px' }}
-                      size={"large"}
-                      placeholder={"Select"}
-                      borderColor={"#AAAAAA"}
-                      arrowColor={"#000"}
-                      withSearch
-                      isLoading={isFetchingProductCategory}
-                      isLoadingMore={isFetchingMoreProductCategory}
-                      fetchMore={() => {
-                        if (hasNextProductCategory) {
-                          fetchNextPageProductCategory();
-                        }
-                      }}
-                      items={
-                        isFetchingProductCategory || isFetchingMoreProductCategory
-                          ? []
-                          : listProductCategory
-                      }
-                      onChange={(value: any) => {
-                        onChange(value);
-                      }}
-                      onSearch={(value: any) => {
-                        setSearchProductCategory(value);
-                      }}
-                    />
-                  </Col>
-                )}
-              />
+                <Spacer size={3} />
+                <CustomFormSelect
+                  labelInValue
+                  defaultValue={retailPricing?.product_category?.name}
+                  style={{ width: "100%", height: '48px' }}
+                  size={"large"}
+                  placeholder={"Select"}
+                  borderColor={"#AAAAAA"}
+                  arrowColor={"#000"}
+                  withSearch
+                  isLoading={isFetchingProductCategory}
+                  isLoadingMore={isFetchingMoreProductCategory}
+                  fetchMore={() => {
+                    if (hasNextProductCategory) {
+                      fetchNextPageProductCategory();
+                    }
+                  }}
+                  items={
+                    isFetchingProductCategory || isFetchingMoreProductCategory
+                      ? []
+                      : listProductCategory
+                  }
+                  onChange={(value: any) => {
+                    setValue('product_category.name', value.label)
+                    setValue('product_category.id', value.key)
+                  }}
+                  onSearch={(value: any) => {
+                    setSearchProductCategory(value);
+                  }}
+                />
+              </Col>
             </Row>
           }
 
           {applyOnWatch === "PRODUCT VARIANT" && 
             <Row width="100%">
-              <Controller
-                control={control}
-                name="product_variant_id"
-                defaultValue={retailPricing?.product_variant?.name}
-                render={({ field: { onChange } }) => (
-                  <Col width="100%">
-                    <span>
-                      <Label style={{ display: "inline" }}>Product Variant Name</Label>{" "}
-                      <span></span>
-                    </span>
+              <Col width="100%">
+                <span>
+                  <Label style={{ display: "inline" }}>Product Variant Name</Label>{" "}
+                  <span></span>
+                </span>
 
-                    <Spacer size={3} />
-                    <CustomFormSelect
-                      defaultValue={retailPricing?.product_variant?.name}
-                      style={{ width: "100%", height: '48px' }}
-                      size={"large"}
-                      placeholder={"Select"}
-                      borderColor={"#AAAAAA"}
-                      arrowColor={"#000"}
-                      withSearch
-                      isLoading={isFetchingProductVariant}
-                      isLoadingMore={isFetchingMoreProductVariant}
-                      fetchMore={() => {
-                        if (hasNextProductVariant) {
-                          fetchNextPageProductVariant();
-                        }
-                      }}
-                      items={
-                        isFetchingProductVariant || isFetchingMoreProductVariant
-                          ? []
-                          : listProductVariant
-                      }
-                      onChange={(value: any) => {
-                        onChange(value);
-                      }}
-                      onSearch={(value: any) => {
-                        setSearchProductVariant(value);
-                      }}
-                    />
-                  </Col>
-                )}
-              />
+                <Spacer size={3} />
+                <CustomFormSelect
+                  labelInValue
+                  defaultValue={retailPricing?.product_variant?.name}
+                  style={{ width: "100%", height: '48px' }}
+                  size={"large"}
+                  placeholder={"Select"}
+                  borderColor={"#AAAAAA"}
+                  arrowColor={"#000"}
+                  withSearch
+                  isLoading={isFetchingProductVariant}
+                  isLoadingMore={isFetchingMoreProductVariant}
+                  fetchMore={() => {
+                    if (hasNextProductVariant) {
+                      fetchNextPageProductVariant();
+                    }
+                  }}
+                  items={
+                    isFetchingProductVariant || isFetchingMoreProductVariant
+                      ? []
+                      : listProductVariant
+                  }
+                  onChange={(value: any) => {
+                    setValue('product_variant.name', value.label)
+                    setValue('product_variant.id', value.key)
+                  }}
+                  onSearch={(value: any) => {
+                    setSearchProductVariant(value);
+                  }}
+                />
+              </Col>
             </Row>
           }
 
           {applyOnWatch === "PRODUCT GROUP" && 
            <Row width="100%">
-            <Controller
-              control={control}
-              name="product_group_id"
-              defaultValue={retailPricing?.product_group?.name}
-              render={({ field: { onChange } }) => (
-                <Col width="100%">
-                  <span>
-                    <Label style={{ display: "inline" }}>Product Group Name</Label>{" "}
-                    <span></span>
-                  </span>
+              <Col width="100%">
+                <span>
+                  <Label style={{ display: "inline" }}>Product Group Name</Label>{" "}
+                  <span></span>
+                </span>
 
-                  <Spacer size={3} />
-                  <CustomFormSelect
-                    defaultValue={retailPricing?.product_group?.name}
-                    style={{ width: "100%", height: '48px' }}
-                    size={"large"}
-                    placeholder={"Select"}
-                    borderColor={"#AAAAAA"}
-                    arrowColor={"#000"}
-                    withSearch
-                    isLoading={isFetchingProductGroup}
-                    isLoadingMore={isFetchingMoreProductGroup}
-                    fetchMore={() => {
-                      if (hasNextProductGroup) {
-                        fetchNextPageProductGroup();
-                      }
-                    }}
-                    items={
-                      isFetchingProductGroup || isFetchingMoreProductGroup
-                        ? []
-                        : listProductGroup
+                <Spacer size={3} />
+                <CustomFormSelect
+                  labelInValue
+                  defaultValue={retailPricing?.product_group?.name}
+                  style={{ width: "100%", height: '48px' }}
+                  size={"large"}
+                  placeholder={"Select"}
+                  borderColor={"#AAAAAA"}
+                  arrowColor={"#000"}
+                  withSearch
+                  isLoading={isFetchingProductGroup}
+                  isLoadingMore={isFetchingMoreProductGroup}
+                  fetchMore={() => {
+                    if (hasNextProductGroup) {
+                      fetchNextPageProductGroup();
                     }
-                    onChange={(value: any) => {
-                      onChange(value);
-                    }}
-                    onSearch={(value: any) => {
-                      setSearchProductGroup(value);
-                    }}
-                  />
-                </Col>
-              )}
-            />
+                  }}
+                  items={
+                    isFetchingProductGroup || isFetchingMoreProductGroup
+                      ? []
+                      : listProductGroup
+                  }
+                  onChange={(value: any) => {
+                    setValue('product_group.name', value.label)
+                    setValue('product_group.id', value.key)
+                  }}
+                  onSearch={(value: any) => {
+                    setSearchProductGroup(value);
+                  }}
+                />
+              </Col>
            </Row>
           }
         </Row>

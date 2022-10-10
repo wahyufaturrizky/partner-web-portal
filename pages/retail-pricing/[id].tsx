@@ -8,7 +8,8 @@ import {
   Accordion,
   Input,
   Table,
-  Spin
+  Spin,
+  FileUploaderExcel
 } from "pink-lava-ui";
 import styled from "styled-components";
 import ArrowLeft from "../../assets/icons/arrow-left.svg";
@@ -19,7 +20,6 @@ import { useRouter } from "next/router";
 import _ from "lodash";
 import moment from "moment";
 import { useRetailPricingDetail, useUpdateRetailPricing } from "hooks/mdm/retail-pricing/useRetailPricingList";
-import { queryClient } from "pages/_app";
 import Conditions from "components/pages/RetailPricing/fragments/Conditions";
 import { toSnakeCase } from "lib/caseConverter";
 import { mdmDownloadService } from "lib/client";
@@ -42,12 +42,12 @@ const DetailRetailPricing: any = () => {
     control,
     handleSubmit,
     setValue,
-    watch
+    formState: { errors }
   } = useForm({
     defaultValues: {
       rules: [],
       name: "",
-      availability: []
+      availability: [{ based_on: "BRANCH" }],
     }
   });
 
@@ -71,6 +71,13 @@ const DetailRetailPricing: any = () => {
     name: "rules"
   });
 
+
+
+  const [showModalRules, setShowModalRules] = useState({
+    visibility: false,
+    tempRule: null,
+    index: null
+  })
   const columns = [
     {
       title: "key",
@@ -81,7 +88,7 @@ const DetailRetailPricing: any = () => {
       dataIndex: "action",
       width: "15%",
       align: "left",
-      render: (_, record, index) => {
+      render: (_, __, index) => {
         return (
           <Row gap="16px" alignItems="center" nowrap>
             <Col>
@@ -135,23 +142,21 @@ const DetailRetailPricing: any = () => {
     control,
   });
 
-  const [showModalRules, setShowModalRules] = useState({
-    visibility: false,
-    tempRule: null,
-    index: null
-  })
+  const [showUploadStructure, setShowUploadStructure] = useState<any>(false);
 
   const getValue = (data:any) => {
     if (data.price_computation.toLowerCase().replace("- ", " ") === 'discount'){
-      return `Discount ${data.value}`;
+      return data.value ? `Discount ${data.value} %` : "";
     }
 
     if (data.price_computation.toLowerCase().replace("- ", " ") === 'fixed price'){
-      return `Rp. ${data.value}`;
+      return data.value ? `Rp. ${data.value}` : "";
     }
 
     if(data.price_computation.toLowerCase().replace("_", " ") === 'formula'){
-      if(data.based_on.toLowerCase().replace("_", " ") === 'pricing structure'){
+      if(!data.based_on) {
+        return ""
+      } else if(data.based_on.toLowerCase().replace("_", " ") === 'pricing structure'){
         return 'Pricing Structure'
       } else {
         return `Min Margin ${data.margin_max} and Max Margin ${data.margin_min}`
@@ -164,7 +169,13 @@ const DetailRetailPricing: any = () => {
     apply_on:  _.startCase(_.toLower(data.apply_on)),
     min_qty: data.min_qty,
     value: getValue(data),
-    valid_date: data?.valid_date?.map((date:any) => moment(date).format('DD/MM/YYYY')) || ''
+    valid_date: data?.valid_date?.map((date:any) => {
+      if(moment.isMoment(date)) {
+        return moment(date, "DD/MM/YYYY").format('DD/MM/YYYY')
+      } else {
+        return  moment(date).format('DD/MM/YYYY')
+      }
+    })?.join(" - ")
   }))
 
   const { mutate: updateRetailPricing } = useUpdateRetailPricing({
@@ -177,6 +188,49 @@ const DetailRetailPricing: any = () => {
 	});
 
   const onSubmit = (data:any) => {
+    data.availability = data.availability.map((data:any) => {
+      let newData:any = {
+        based_on: data.based_on
+      }
+      if(data.based_on === 'BRANCH'){
+        newData.branch = {
+          ids: data.value?.map((data:any) => data.id) || [],
+          select_all: !!data.select_all
+        }
+      } else if( data.based_on === 'SALES ORGANIZATION') {
+        newData.sales_organization = {
+          level: data.id,
+          select_all: !!data.select_all,
+          ids: data.value?.map((data:any) => data.id) || []
+        }
+      } else if(data.based_on === 'COUNTRY'){
+        newData.country = {
+          id: data?.country.id,
+          level: data?.country.value.map((data:any) => ({
+            id: data.id,
+            values: data?.levels?.map((data:any) => data?.id) || []
+          }))
+        }
+      }
+      return newData
+    })
+
+    data.rules = data.rules.map((data:any) => {
+      if(data.product_category){
+        data.product_category_id = data.product_category.id
+        delete data.product_category;
+      }
+      if(data.product_group){
+        data.product_group_id = data.product_group.id
+        delete data.product_group
+      }
+      if(data.product_variant){
+        data.product_variant_id = data.product_variant.id
+        delete data.product_variant;
+      }
+      return data;
+    })
+
     updateRetailPricing(data);
   }
 
@@ -196,13 +250,13 @@ const DetailRetailPricing: any = () => {
                 valid_date: [moment(data.valid_start_date).format('DD/MM/YYYY'), moment(data.valid_end_date).format('DD/MM/YYYY')]
               }
               if(newRule.apply_on === 'PRODUCT VARIANT'){
-                newRule.product_variant_id = data.product_variant.id
+                newRule.product_variant = data.product_variant
               }
               if(newRule.apply_on === 'PRODUCT CATEGORY'){
-                newRule.product_category_id = data.product_category.id
+                newRule.product_category = data.product_category
               }
               if(newRule.apply_on === 'PRODUCT GROUP'){
-                newRule.product_group_id = data.product_group.id
+                newRule.product_group = data.product_group
               }
           
               if(newRule.price_computation === 'FIXED PRICE') {
@@ -231,44 +285,7 @@ const DetailRetailPricing: any = () => {
           } else {
 
             if(key === 'availability'){
-              let availability = data[key];
-              let newAvailability = availability.map(availability => {
-                if(availability.based_on === 'BRANCH'){
-                  let branch = {
-                    based_on: availability.based_on,
-                    branch: {
-                      ids: availability.value.map(({id}: any) => id),
-                      select_all: availability.select_all
-                    }
-                  }
-                  return branch
-                }
-
-                if(availability.based_on === 'SALES ORGANIZATION'){
-                  let sales_organization = {
-                    based_on: availability.based_on,
-                    sales_organization: {
-                      ids: availability.value.map(({id}: any) => id),
-                      select_all: availability.select_all,
-                      level: availability.id
-                    }
-                  }
-                  return sales_organization
-                }
-
-                // if(availability.based_on === 'COUNTRY'){
-                //   let sales_organization = {
-                //     based_on: availability.based_on,
-                //     sales_organization: {
-                //       ids: availability.value.map(({id}: any) => id),
-                //       select_all: availability.select_all,
-                //       level: availability.id
-                //     }
-                //   }
-                //   return sales_organization
-                // }
-              })
-              setValue('availability', newAvailability)
+              setValue('availability', data[key])
             }
 
             if(key === 'name'){
@@ -285,6 +302,43 @@ const DetailRetailPricing: any = () => {
     id
   });
 
+  const onUploadStructure = (data: any) => {
+
+    data.forEach((data:any) => {
+      let valid_date_split = data.validateDate ? data.validateDate.split(' ') : null;
+
+      let newRule: any = {
+        apply_on: data.applyOn.toUpperCase(),
+        price_computation: data.priceComputation.toUpperCase(),
+        min_qty: data.minimumQuantity,
+      }
+
+      if(valid_date_split){
+        newRule.valid_date = [moment(valid_date_split[0], 'DD/MM/YYYY').utc().toString(), moment(valid_date_split[2], 'DD/MM/YYYY').utc().toString()];
+      }
+
+      if(newRule.apply_on === 'PRODUCT CATEGORY') {
+        newRule.product_category = {
+          id: data.productCategory
+        }
+      }
+
+      if(newRule.apply_on === 'PRODUCT VARIANT') {
+        newRule.product_variant = {
+          id: data.productVariant
+        }
+      }
+
+      if(newRule.apply_on === 'PRODUCT GROUP') {
+        newRule.product_group = {
+          id: data.productGroup
+        }
+      }
+
+      appendRules(newRule)
+    })
+  }
+
   return (
     <>
     {isLoading ?
@@ -298,6 +352,9 @@ const DetailRetailPricing: any = () => {
         <Spacer size={12} />
         <Card padding="20px">
           <Row justifyContent="end" alignItems="center" nowrap gap="12px">
+            <Button size="big" variant={"tertiary"} onClick={() => router.back()}>
+              Cancel
+            </Button>
             <Button
               size="big"
               variant={"primary"}
@@ -320,8 +377,11 @@ const DetailRetailPricing: any = () => {
                   label="Name"
                   height="48px"
                   placeholder={"e.g Public Pricelist"}
+                  error={errors.name?.message}
                   required
-                  {...register('name')}
+                  {...register('name', {
+                    required: "Name must be filled"
+                  })}
                 />
               </Row>
               <Spacer size={20} />
@@ -368,7 +428,7 @@ const DetailRetailPricing: any = () => {
                   <Button
                     variant="tertiary"
                     size="big"
-                    onClick={() => {}}
+                    onClick={() => setShowUploadStructure(true)}
                   >
                     Upload Template
                   </Button>
@@ -432,6 +492,12 @@ const DetailRetailPricing: any = () => {
         }
       </Col>
     }
+    
+      <FileUploaderExcel
+				setVisible={setShowUploadStructure}
+				visible={showUploadStructure}
+				onSubmit={onUploadStructure}
+			/>
     </>
   );
 };
