@@ -23,21 +23,25 @@ const getFilterOption = (group: any) => {
   }
 };
 
+const defaultGroup = [
+  { label: "Country", value: "COUNTRY" },
+  { label: "Sales Organization", value: "SALES ORGANIZATION" },
+  { label: "Branch", value: "BRANCH" },
+]
+
 const Conditions = ({
   register,
   control,
   setValue,
   availabilityWatch,
-  retailPricing
+  retailPricing=[]
 }: any) => {
 
-  const [groupingOption, setGroupingOption] = useState([
-    { label: "Country", value: "COUNTRY" },
-    { label: "Sales Organization", value: "SALES ORGANIZATION" },
-    { label: "Branch", value: "BRANCH" },
-  ]);
+  const basedOn = retailPricing?.availability?.map(({based_on}:any) => based_on);
 
-  const { fields, append, remove } = useFieldArray({
+  const [groupingOption, setGroupingOption] = useState(defaultGroup?.filter(({value}) => !basedOn?.includes(value)));
+
+  const { fields, append, remove, replace} = useFieldArray({
     name: "availability",
     control,
   });
@@ -57,15 +61,16 @@ const Conditions = ({
 
   const handleGroupChange = (value: any, onChange: any, index: any) => {
     let tempAvailabilityWatch = _.cloneDeep(availabilityWatch);
+    tempAvailabilityWatch[index] = {}
     tempAvailabilityWatch[index].based_on = value;
 
     let allBasedOn = tempAvailabilityWatch.map((el: any) => el.based_on);
 
-    const filterGroupingOption = groupingOption.filter(
+    const filterGroupingOption = defaultGroup.filter(
       (item: any) => !allBasedOn.includes(item.value)
     );
 
-    onChange(value);
+    replace(tempAvailabilityWatch);
     setGroupingOption(filterGroupingOption);
   };
 
@@ -106,14 +111,14 @@ const Conditions = ({
             <Controller
               control={control}
               name={`availability.${index}.based_on`}
-              defaultValue={retailPricing?.availability[index].based_on}
+              defaultValue={defaultGroup.find(group => group.value === retailPricing?.availability?.[index]?.based_on)}
               render={({ field: { onChange }, formState: { errors } }) => (
                 <Col width={"100%"}>
                   <Label>Based On</Label>
                   <Spacer size={3} />
                   <CustomFormSelect
                     style={{ width: "100%" }}
-                    defaultValue={retailPricing?.availability[index].based_on}
+                    defaultValue={defaultGroup.find(group => group.value === retailPricing?.availability?.[index]?.based_on)}
                     size={"large"}
                     placeholder={"Select"}
                     borderColor={"#AAAAAA"}
@@ -147,19 +152,19 @@ const Conditions = ({
 
           <Row width="100%">
             {(availabilityWatch[index]?.based_on === "COUNTRY") && (
-              <CountryCondition country={retailPricing?.availability[index].country} control={control} index={index} />
+              <CountryCondition country={retailPricing?.availability?.[index].country} control={control} index={index} />
             )}
           </Row>
 
           <Row width="100%">
             {(availabilityWatch[index]?.based_on === "BRANCH" ) && (
-              <BranchCondition branch={retailPricing?.availability[index].branch} control={control} index={index} setValue={setValue} />
+              <BranchCondition branch={retailPricing?.availability?.[index]} control={control} index={index} setValue={setValue} />
             )}
           </Row>
 
           <Row width="100%">
             {(availabilityWatch[index]?.based_on === "SALES ORGANIZATION") && (
-              <SalesOrganizationCondition salesOrganization={retailPricing?.availability[index].sales_organization} setValue={setValue} control={control} index={index} />
+              <SalesOrganizationCondition salesOrganization={retailPricing?.availability?.[index]} setValue={setValue} control={control} index={index} />
             )}
           </Row>
 
@@ -403,12 +408,12 @@ const SalesOrganizationCondition = ({ control, index, setValue, salesOrganizatio
         <Controller
             control={control}
             name={`availability.${index}.sales_organization.level`}
-            defaultValue={salesOrganization?.level}
+            defaultValue={salesOrganization?.name}
             render={({ field: { onChange } }) => (
               <Dropdown2
                 label="Sales Organization Level"
                 labelBold={true}
-                defaultValue={salesOrganization?.level}
+                defaultValue={salesOrganization?.name}
                 width="100%"
                 noSearch
                 items={listStructure}
@@ -438,7 +443,7 @@ const SalesOrganizationCondition = ({ control, index, setValue, salesOrganizatio
                 render={({ field: { onChange, value }, fieldState: { error } }) => {
                   return (
                     <DropdownMenuOptionCustome
-                      label={`${selectedNameStructure?.value}`}
+                      label={`${selectedNameStructure?.value}` || salesOrganization?.name}
                       isAllowClear
                       required
                       placeholder="Select"
