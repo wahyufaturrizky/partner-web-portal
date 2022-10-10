@@ -168,9 +168,10 @@ export default function CreateProduct({ isCreateProductVariant = true }) {
               id: data.id,
               index,
               key: data.id,
-              levelId: data?.level?.id,
+              levelId: data?.level_id,
               qty: data?.qty,
-              uomConversionItemId: data.conversion_id
+              uomConversionItemId: data.conversion_id,
+              name: data.name
             })))
           } else if(key === 'registrations') {
             setValue('registration', data[key])

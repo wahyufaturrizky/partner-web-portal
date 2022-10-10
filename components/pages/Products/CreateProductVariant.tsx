@@ -641,6 +641,7 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
              <Button size="big" variant={"primary"} onClick={(e: any) => {
                   if(!inventoryWatch?.weight?.net){
                     setTabAktived('Inventory')
+                    handleSubmit(onSubmit)(e)
                   } else {
                     handleSubmit(onSubmit)(e)
                   }

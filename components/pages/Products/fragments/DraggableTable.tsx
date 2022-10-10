@@ -284,7 +284,7 @@ const DraggableTable = ({ control, conversionList, uom, isLoading, onDrag, onDel
                 name={`uom.${props.data.index}.levelId`}
                 render={({ field: { onChange } }) => (
                   <CustomFormSelect
-                    defaultValue={props.data.levelId}
+                    defaultValue={props.data.name}
                     style={{ width: "100%", height: '48px' }}
                     size={"large"}
                     placeholder={"Select"}
