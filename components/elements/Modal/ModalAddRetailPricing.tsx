@@ -41,6 +41,13 @@ export default function ModalAddRetailPricing({
     apply_on: 'ALL PRODUCT',
     valid_date: [moment(), moment()]
   }
+  
+  if(defaultValues?.valid_date){
+    defaultValues.valid_date = defaultValues.valid_date.map((date:any) => {
+        return moment(date)
+      }
+    )
+  }
 
   const { control, handleSubmit, watch } = useForm({
     defaultValues: defaultValues ? defaultValues : defaultCreateValue
@@ -219,7 +226,7 @@ export default function ModalAddRetailPricing({
     onCancel()
 
   }
-
+  const validDateDefault = retailPricing?.valid_date
   return (
     <Modal
       width={880}
@@ -572,7 +579,7 @@ export default function ModalAddRetailPricing({
               <Controller
                 control={control}
                 name="product_category_id"
-                defaultValue={retailPricing?.product_category_id}
+                defaultValue={retailPricing?.product_category?.name}
                 render={({ field: { onChange } }) => (
                   <Col width="100%">
                     <span>
@@ -582,7 +589,7 @@ export default function ModalAddRetailPricing({
 
                     <Spacer size={3} />
                     <CustomFormSelect
-                      defaultValue={retailPricing?.product_category_id}
+                      defaultValue={retailPricing?.product_category?.name}
                       style={{ width: "100%", height: '48px' }}
                       size={"large"}
                       placeholder={"Select"}
@@ -619,7 +626,7 @@ export default function ModalAddRetailPricing({
               <Controller
                 control={control}
                 name="product_variant_id"
-                defaultValue={retailPricing?.product_variant_id}
+                defaultValue={retailPricing?.product_variant?.name}
                 render={({ field: { onChange } }) => (
                   <Col width="100%">
                     <span>
@@ -629,7 +636,7 @@ export default function ModalAddRetailPricing({
 
                     <Spacer size={3} />
                     <CustomFormSelect
-                      defaultValue={retailPricing?.product_variant_id}
+                      defaultValue={retailPricing?.product_variant?.name}
                       style={{ width: "100%", height: '48px' }}
                       size={"large"}
                       placeholder={"Select"}
@@ -666,7 +673,7 @@ export default function ModalAddRetailPricing({
             <Controller
               control={control}
               name="product_group_id"
-              defaultValue={retailPricing?.product_group_id}
+              defaultValue={retailPricing?.product_group?.name}
               render={({ field: { onChange } }) => (
                 <Col width="100%">
                   <span>
@@ -676,7 +683,7 @@ export default function ModalAddRetailPricing({
 
                   <Spacer size={3} />
                   <CustomFormSelect
-                    defaultValue={retailPricing?.product_group_id}
+                    defaultValue={retailPricing?.product_group?.name}
                     style={{ width: "100%", height: '48px' }}
                     size={"large"}
                     placeholder={"Select"}
@@ -741,13 +748,13 @@ export default function ModalAddRetailPricing({
           <Row width="100%">
             <Controller
               control={control}
-              //defaultValue={retailPricing?.valid_date?.map((date:any) => moment(date))}
+              defaultValue={validDateDefault}
               name={`valid_date`}
               render={({ field: { onChange } }) => (
                 <Col width="100%">
                   <RangeDatePicker
                     fullWidth
-                    //defaultValue={retailPricing?.valid_date?.map((date:any) => moment(date))}
+                    defaultValue={validDateDefault}
                     onChange={(date: any, dateString: any) => onChange(dateString)}
                     label="Validity Date"
                     format={'DD/MM/YYYY'}
