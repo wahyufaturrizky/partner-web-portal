@@ -37,7 +37,7 @@ const Conditions = ({
   retailPricing=[]
 }: any) => {
 
-  const basedOn = retailPricing?.availability?.map(({based_on}:any) => based_on);
+  const basedOn = retailPricing?.availability?.map(({based_on}:any) => based_on) || availabilityWatch?.map(({based_on}:any) => based_on) || []
 
   const [groupingOption, setGroupingOption] = useState(defaultGroup?.filter(({value}) => !basedOn?.includes(value)));
 
@@ -127,7 +127,7 @@ const Conditions = ({
                     <Spacer size={3} />
                     <CustomFormSelect
                       height="48px"
-                      defaultValue={value === "" ? undefined: value}
+                      defaultValue={value === "" ? undefined: _.startCase(_.toLower(value))}
                       style={{ width: "100%" }}
                       placeholder={"Select"}
                       borderColor={error?.message ? "#ED1C24" : "#AAAAAA"}
