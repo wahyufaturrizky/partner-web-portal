@@ -349,13 +349,12 @@ const PricingStructureList: any = () => {
     typeForm: "",
   });
 
-  const totalRowByStatus = pricingStructureLists?.totalRowByStatus;
-
   const options = [
     {
       label: (
         <Flex>
-          Active {totalRowByStatus?.active > 0 && <Notif>{totalRowByStatus?.active}</Notif>}
+          Active{" "}
+          {pricingStructureLists?.active > 0 && <Notif>{pricingStructureLists?.active}</Notif>}
         </Flex>
       ),
       value: "active",
@@ -363,7 +362,8 @@ const PricingStructureList: any = () => {
     {
       label: (
         <Flex>
-          Inactive {totalRowByStatus?.inactive > 0 && <Notif>{totalRowByStatus?.inactive}</Notif>}
+          Inactive{" "}
+          {pricingStructureLists?.inactive > 0 && <Notif>{pricingStructureLists?.inactive}</Notif>}
         </Flex>
       ),
       value: "inactive",
@@ -372,7 +372,7 @@ const PricingStructureList: any = () => {
       label: (
         <Flex>
           Waiting for Approval{" "}
-          {totalRowByStatus?.waiting > 0 && <Notif>{totalRowByStatus?.waiting}</Notif>}
+          {pricingStructureLists?.waiting > 0 && <Notif>{pricingStructureLists?.waiting}</Notif>}
         </Flex>
       ),
       value: "waiting-approval",
@@ -380,14 +380,18 @@ const PricingStructureList: any = () => {
     {
       label: (
         <Flex>
-          Rejected {totalRowByStatus?.reject > 0 && <Notif>{totalRowByStatus?.reject}</Notif>}
+          Rejected{" "}
+          {pricingStructureLists?.rejected > 0 && <Notif>{pricingStructureLists?.rejected}</Notif>}
         </Flex>
       ),
       value: "rejected",
     },
     {
       label: (
-        <Flex>Draft {totalRowByStatus?.draft > 0 && <Notif>{totalRowByStatus?.draft}</Notif>}</Flex>
+        <Flex>
+          Draft{" "}
+          {pricingStructureLists?.drafted > 0 && <Notif>{pricingStructureLists?.drafted}</Notif>}
+        </Flex>
       ),
       value: "draft",
     },
@@ -604,7 +608,7 @@ const PricingStructureList: any = () => {
           centered
           width={
             modalPricingStructureForm.typeForm === "Manage Customer Group Buying Price" ||
-            modalPricingStructureForm.typeForm === "Manage Price Structure Config"
+            modalPricingStructureForm.typeForm === "Manage Price Structure Configuration"
               ? "90%"
               : "50%"
           }
@@ -913,7 +917,7 @@ const PricingStructureList: any = () => {
                   </Col>
                 </Card>
               </>
-            ) : modalPricingStructureForm.typeForm === "Manage Price Structure Config" ? (
+            ) : modalPricingStructureForm.typeForm === "Manage Price Structure Configuration" ? (
               <>
                 <Card>
                   <Row justifyContent="space-between">
