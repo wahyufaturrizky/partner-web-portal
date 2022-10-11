@@ -277,9 +277,9 @@ const DetailRetailPricing: any = () => {
               }
               
               if(newRule.price_computation === 'FORMULA') {
-                newRule.based_on = data.based_on.toUpperCase().replace('_', " ")
+                newRule.based_on = data?.based_on?.toUpperCase()?.replace('_', " ")
           
-                if(data.based_on.toUpperCase() === 'COST'){
+                if(data?.based_on?.toUpperCase() === 'COST'){
                   newRule.margin_min = data.margin_min
                   newRule.margin_max = data.margin_max
                   newRule.extra_fee = data.extra_fee

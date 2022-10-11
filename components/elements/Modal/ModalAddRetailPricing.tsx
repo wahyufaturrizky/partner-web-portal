@@ -46,7 +46,6 @@ export default function ModalAddRetailPricing({
   
   if(defaultValues?.valid_date){
     defaultValues.valid_date = defaultValues.valid_date.map((date:any) => {
-        console.log('date', date)
         if(moment(date, 'DD/MM/YYYY', true).isValid()){
           return moment(date, 'DD/MM/YYYY')
         }  else {
@@ -264,7 +263,6 @@ export default function ModalAddRetailPricing({
         <Row width="100%" noWrap>
           <Controller
             control={control}
-            rules={{ required: true }}
             shouldUnregister={true}
             name="price_computation"
             defaultValue={retailPricing?.price_computation}
@@ -374,7 +372,6 @@ export default function ModalAddRetailPricing({
             <Row width="100%">
               <Controller
                   control={control}
-                  rules={{ required: true }}
                   shouldUnregister={true}
                   name="based_on"
                   defaultValue={retailPricing?.based_on}
@@ -569,7 +566,6 @@ export default function ModalAddRetailPricing({
           <Row width="100%">
             <Controller
               control={control}
-              rules={{ required: true }}
               shouldUnregister={true}
               defaultValue={retailPricing?.apply_on}
               name="apply_on"
