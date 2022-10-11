@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Text, Col, Row, Spacer, Spin, Input, FormSelectCustom, FormSelect, DropdownMenuOptionCustom, DropdownMenuOptionCustome, Dropdown2 } from "pink-lava-ui";
+import { Text, Col, Row, Spacer, Spin, Input, FormSelectCustom, FormSelect, DropdownMenuOptionCustom, Tooltip } from "pink-lava-ui";
+import { ExclamationCircleOutlined } from "@ant-design/icons";
 import { Controller, useFieldArray, useWatch } from "react-hook-form";
 import styled from "styled-components";
 import { useBranchInfiniteLists } from "hooks/mdm/branch/useBranch";
@@ -122,7 +123,14 @@ const Conditions = ({
                   <Col width={"100%"}>
                     <Label>
                       Based On
-                      <span style={{ color: colors.red.regular }}>*</span>
+                      <Spacer size={5} display="inline-block" />
+                      <Tooltip
+                        overlayInnerStyle={{ width: "fit-content" }}
+                        title={`Based On`}
+                        color={"#F4FBFC"}
+                      >
+                        <ExclamationCircleOutlined />
+                      </Tooltip>
                     </Label>
                     <Spacer size={3} />
                     <CustomFormSelect
@@ -311,6 +319,7 @@ const CountryCondition = ({ control, index, country, setValue } : any) => {
                   style={{
                     height: "48px",
                   }}
+                  placeholder={"Select"}
                   size={"large"}
                   showArrow
                   items={countryStructure}

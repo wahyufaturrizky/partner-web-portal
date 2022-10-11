@@ -47,7 +47,7 @@ const DetailRetailPricing: any = () => {
     defaultValues: {
       rules: [],
       name: "",
-      availability: [{ based_on: "BRANCH" }],
+      availability: [{ based_on: "COUNTRY" }],
     }
   });
 
@@ -159,7 +159,16 @@ const DetailRetailPricing: any = () => {
       } else if(data.based_on.toLowerCase().replace("_", " ") === 'pricing structure'){
         return 'Pricing Structure'
       } else {
-        return `Min Margin ${data.margin_max} and Max Margin ${data.margin_min}`
+        if(data.margin_max && data.margin_min){
+          return `Min Margin ${data.margin_min} and Max Margin ${data.margin_max}`
+        } else if(data.margin_max){
+          return `Max Margin ${data.margin_max}`
+        } else if (data.margin_min){
+          return `Min Margin ${data.margin_min}`
+        } else {
+          return ''
+        }
+
       }
     }
   }
@@ -170,10 +179,10 @@ const DetailRetailPricing: any = () => {
     min_qty: data.min_qty,
     value: getValue(data),
     valid_date: data?.valid_date?.map((date:any) => {
-      if(moment.isMoment(date)) {
-        return moment(date, "DD/MM/YYYY").format('DD/MM/YYYY')
-      } else {
-        return  moment(date).format('DD/MM/YYYY')
+      if(moment(date, 'DD/MM/YYYY', true).isValid()){
+        return moment(date, 'DD/MM/YYYY').format('DD/MM/YYYY')
+      }  else {
+        return moment(date).format('DD/MM/YYYY');
       }
     })?.join(" - ")
   }))
@@ -403,7 +412,7 @@ const DetailRetailPricing: any = () => {
 
         <Accordion>
           <Accordion.Item key={2}>
-            <Accordion.Header variant="blue">Inventory Valuation</Accordion.Header>
+            <Accordion.Header variant="blue">Price Rules</Accordion.Header>
             <Accordion.Body>
               <Row width="100%" gap="20px" noWrap>
                 <DownloadUploadContainer>
@@ -475,7 +484,7 @@ const DetailRetailPricing: any = () => {
               })
             }}
             onSubmit={(index, data:any) => {
-              if(index){
+              if(index || index === 0){
                 updateRules(index, data)
               } else {
                 appendRules(data)
@@ -486,7 +495,7 @@ const DetailRetailPricing: any = () => {
                 index:null
               })
             }}
-            defaultValues={showModalRules?.tempRule}
+            defaultValues={JSON?.parse(JSON?.stringify(showModalRules?.tempRule))}
             index={showModalRules?.index}
           />
         }

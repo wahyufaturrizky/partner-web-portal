@@ -44,7 +44,7 @@ const CreateRetailPricing: any = () => {
   } = useForm({
     defaultValues: {
       name: '',
-      availability: [{ based_on: "BRANCH" }],
+      availability: [{ based_on: "COUNTRY" }],
       rules: []
     },
   });
@@ -180,26 +180,26 @@ const CreateRetailPricing: any = () => {
 
   const onSubmit = (data:any) => {
     data.company_id = 'KSNI'
-    data.availability = data.availability.map((data) => {
+    data.availability = data?.availability?.map((data) => {
       let newData:any = {
-        based_on: data.based_on
+        based_on: data?.based_on
       }
       if(data.based_on === 'BRANCH'){
         newData.branch = {
-          ids: data.value?.map((data:any) => data.id) || [],
-          select_all: !!data.select_all
+          ids: data?.value?.map((data:any) => data?.id) || [],
+          select_all: !!data?.select_all
         }
       } else if( data.based_on === 'SALES ORGANIZATION') {
         newData.sales_organization = {
-          level: data.id,
-          select_all: !!data.select_all,
-          ids: data.value?.map((data:any) => data.id) || []
+          level: data?.id,
+          select_all: !!data?.select_all,
+          ids: data?.value?.map((data:any) => data?.id) || []
         }
       } else if(data.based_on === 'COUNTRY'){
         newData.country = {
-          id: data?.country.id,
-          level: data?.country.value.map((data:any) => ({
-            id: data.id,
+          id: data?.country?.id,
+          level: data?.country?.value?.map((data:any) => ({
+            id: data?.id,
             values: data?.levels?.map((data:any) => data?.id) || []
           }))
         }
@@ -323,7 +323,7 @@ const CreateRetailPricing: any = () => {
 
         <Accordion>
           <Accordion.Item key={2}>
-            <Accordion.Header variant="blue">Inventory Valuation</Accordion.Header>
+            <Accordion.Header variant="blue">Price Rules</Accordion.Header>
             <Accordion.Body>
               <Row width="100%" gap="20px" noWrap>
                 <DownloadUploadContainer>
@@ -395,7 +395,7 @@ const CreateRetailPricing: any = () => {
               })
             }}
             onSubmit={(index, data:any) => {
-              if(index){
+              if(index || index === 0){
                 updateRules(index, data)
               } else {
                 appendRules(data)

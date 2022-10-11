@@ -9,8 +9,10 @@ import {
   Spacer,
   Row,
   Text,
-  FormInput
+  FormInput,
+  Tooltip
 } from "pink-lava-ui";
+import { ExclamationCircleOutlined } from "@ant-design/icons";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import moment from 'moment';
 import { useProductCategoryInfiniteLists } from 'hooks/mdm/product-category/useProductCategory';
@@ -44,10 +46,17 @@ export default function ModalAddRetailPricing({
   
   if(defaultValues?.valid_date){
     defaultValues.valid_date = defaultValues.valid_date.map((date:any) => {
-        return moment(date)
+        console.log('date', date)
+        if(moment(date, 'DD/MM/YYYY', true).isValid()){
+          return moment(date, 'DD/MM/YYYY')
+        }  else {
+          return moment(date);
+        }
       }
     )
   }
+
+  console.log("defaultValues", defaultValues)
 
   const { control, handleSubmit, watch, setValue } = useForm({
     defaultValues: defaultValues ? defaultValues : defaultCreateValue
@@ -265,6 +274,13 @@ export default function ModalAddRetailPricing({
               <Col width="100%">
                 <span>
                   <Label style={{ display: "inline" }}>Price Computation </Label>{" "}
+                  <Tooltip
+                    overlayInnerStyle={{ width: "fit-content" }}
+                    title={`Price Computation`}
+                    color={"#F4FBFC"}
+                  >
+                    <ExclamationCircleOutlined />
+                  </Tooltip>
                   <span></span>
                 </span>
 
@@ -306,9 +322,9 @@ export default function ModalAddRetailPricing({
                   defaultValue={retailPricing?.value}
                   render={({ field: { onChange } }) => (
                     <Col width="100%">
-                      <Text variant="headingRegular">
+                      <Label>
                         Fixed Price
-                      </Text>
+                      </Label>
                       <Spacer size={3} />
                       <CustomFormInput
                         size={"large"}
@@ -334,9 +350,9 @@ export default function ModalAddRetailPricing({
                   defaultValue={retailPricing?.value}
                   render={({ field: { onChange } }) => (
                     <Col width="100%">
-                      <Text variant="headingRegular">
+                      <Label>
                         Discount Price
-                      </Text>
+                      </Label>
                       <Spacer size={3} />
                       <FormInput
                         size={"large"}
@@ -368,7 +384,13 @@ export default function ModalAddRetailPricing({
                     <Col width="100%">
                       <span>
                         <Label style={{ display: "inline" }}>Based On </Label>{" "}
-                        <span></span>
+                        <Tooltip
+                          overlayInnerStyle={{ width: "fit-content" }}
+                          title={`Based On`}
+                          color={"#F4FBFC"}
+                        >
+                          <ExclamationCircleOutlined />
+                        </Tooltip>
                       </span>
 
                       <Spacer size={3} />
@@ -397,9 +419,19 @@ export default function ModalAddRetailPricing({
                   defaultValue={retailPricing?.rounding_method}
                   render={({ field: { onChange } }) => (
                     <Col width="100%">
-                      <Text variant="headingRegular">
-                        Rounding Method
-                      </Text>
+                      <Row width="100%" alignItems="center">
+                        <Label>
+                          Rounding Method
+                        </Label>
+                        <Spacer size={5} display="inline" />
+                        <Tooltip
+                            overlayInnerStyle={{ width: "fit-content" }}
+                            title={`Rounding Method`}
+                            color={"#F4FBFC"}
+                          >
+                            <ExclamationCircleOutlined />
+                        </Tooltip>
+                      </Row>
                       <Spacer size={3} />
                       <CustomFormInput
                         size={"large"}
@@ -435,9 +467,9 @@ export default function ModalAddRetailPricing({
                     defaultValue={retailPricing?.margin_min}
                     render={({ field: { onChange } }) => (
                       <Col width="100%">
-                        <Text variant="headingRegular">
+                        <Label>
                           Margin Minimum
-                        </Text>
+                        </Label>
                         <Spacer size={3} />
                         <CustomFormInput
                           size={"large"}
@@ -461,9 +493,9 @@ export default function ModalAddRetailPricing({
                     defaultValue={retailPricing?.margin_max}
                     render={({ field: { onChange } }) => (
                       <Col width="100%">
-                        <Text variant="headingRegular">
+                        <Label>
                           Margin Maximum
-                        </Text>
+                        </Label>
                         <Spacer size={3} />
                         <CustomFormInput
                           size={"large"}
@@ -489,9 +521,9 @@ export default function ModalAddRetailPricing({
                     defaultValue={retailPricing?.extra_fee}
                     render={({ field: { onChange } }) => (
                       <Col width="100%">
-                        <Text variant="headingRegular">
+                        <Label>
                           Extra Fee
-                        </Text>
+                        </Label>
                         <Spacer size={3} />
                         <CustomFormInput
                           size={"large"}
@@ -509,12 +541,18 @@ export default function ModalAddRetailPricing({
                 <Spacer size={20} />
 
                 <Row width="100%">
+                  <Col width="100%">
+                    <Label>
+                      Hint
+                    </Label>
+                    <Spacer size={3} />
                     <CustomForm>
                       <Span>
                         Sales Price with a 10.0% discount and $500.00 Extra fee
                         Example : $ 100.00*0.9 + $500.00 = $ 590.00
                       </Span>
                     </CustomForm>
+                  </Col>
                 </Row>
               </Row>
             </Row>
@@ -541,7 +579,13 @@ export default function ModalAddRetailPricing({
                 <Col width="100%">
                   <span>
                     <Label style={{ display: "inline" }}>Apply on </Label>{" "}
-                    <span></span>
+                    <Tooltip
+                      overlayInnerStyle={{ width: "fit-content" }}
+                      title={`Apply On`}
+                      color={"#F4FBFC"}
+                    >
+                        <ExclamationCircleOutlined />
+                    </Tooltip>
                   </span>
                   <Spacer size={4} />
                   <CustomFormSelect
@@ -579,7 +623,13 @@ export default function ModalAddRetailPricing({
               <Col width="100%">
                 <span>
                   <Label style={{ display: "inline" }}>Category </Label>{" "}
-                  <span></span>
+                  <Tooltip
+                    overlayInnerStyle={{ width: "fit-content" }}
+                    title={`Product Category`}
+                    color={"#F4FBFC"}
+                  >
+                    <ExclamationCircleOutlined />
+                  </Tooltip>
                 </span>
 
                 <Spacer size={3} />
@@ -621,7 +671,13 @@ export default function ModalAddRetailPricing({
               <Col width="100%">
                 <span>
                   <Label style={{ display: "inline" }}>Product Variant Name</Label>{" "}
-                  <span></span>
+                  <Tooltip
+                    overlayInnerStyle={{ width: "fit-content" }}
+                    title={`Product Variant Name`}
+                    color={"#F4FBFC"}
+                  >
+                    <ExclamationCircleOutlined />
+                  </Tooltip>
                 </span>
 
                 <Spacer size={3} />
@@ -663,7 +719,13 @@ export default function ModalAddRetailPricing({
               <Col width="100%">
                 <span>
                   <Label style={{ display: "inline" }}>Product Group Name</Label>{" "}
-                  <span></span>
+                  <Tooltip
+                    overlayInnerStyle={{ width: "fit-content" }}
+                    title={`Product Group Name`}
+                    color={"#F4FBFC"}
+                  >
+                    <ExclamationCircleOutlined />
+                  </Tooltip>
                 </span>
 
                 <Spacer size={3} />
@@ -703,7 +765,7 @@ export default function ModalAddRetailPricing({
 
         <Spacer size={20} />
 
-        <Row size="100%" noWrap>
+        <Row size="100%" noWrap justifyContent="center">
           <Row width="100%">
             <Controller
               control={control}
@@ -711,9 +773,9 @@ export default function ModalAddRetailPricing({
               defaultValue={retailPricing?.min_qty}
               render={({ field: { onChange } }) => (
                 <Col width="100%">
-                  <Text variant="headingRegular">
+                  <Label>
                     Minimum Quantity
-                  </Text>
+                  </Label>
                   <Spacer size={3} />
                   <CustomFormInput
                     size={"large"}
@@ -738,6 +800,7 @@ export default function ModalAddRetailPricing({
               render={({ field: { onChange } }) => (
                 <Col width="100%">
                   <RangeDatePicker
+                    separator={<span>-</span>}
                     fullWidth
                     defaultValue={validDateDefault}
                     onChange={(date: any, dateString: any) => onChange(dateString)}

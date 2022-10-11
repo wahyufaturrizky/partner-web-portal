@@ -116,7 +116,7 @@ const RetailPricing = () => {
         <Row justifyContent="space-between">
           <Search
             width="340px"
-            placeholder="Search Retail Pricing ID, Name, Category, Status"
+            placeholder="Search Retail Price ID, Name, Based On"
             onChange={(e: any) => {
               setSearch(e.target.value);
             }}
