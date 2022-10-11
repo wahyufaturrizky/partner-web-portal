@@ -10,6 +10,7 @@ import {
   ICInventory,
   ICPurchasOrg,
   ICDollar,
+  ICPackage,
 } from "../assets";
 import ICAccount from "../assets/icons/ic-avatar-default.svg";
 import ICAccountSetting from "../assets/icons/ic-setting.svg";
@@ -244,6 +245,13 @@ const menuMdm = [
         onClick: () => Router.push("/unit-of-measure-conversion"),
       },
     ],
+  },
+  {
+    key: "vendor",
+    title: "Vendor",
+    content: () => "Vendor",
+    icon: ICPackage,
+    onClick: () => Router.push("/vendor"),
   },
   { type: "divider" },
   { type: "title", title: "SALES" },
