@@ -5,6 +5,7 @@ import {
 import { useFetchCountriesStructure } from 'hooks/mdm/country-structure/useCountries';
 import useDebounce from 'lib/useDebounce';
 import { Controller } from "react-hook-form";
+import styled from 'styled-components';
 
 export default function CountryStructureForm(props: any) {
 
@@ -55,7 +56,7 @@ export default function CountryStructureForm(props: any) {
         value = value?.map((value:any) => parseInt(value.id)) || []
         return (
           <DropdownMenuOptionCustom
-            label={props.label}
+            label={<Label>{props.label}</Label>}
             mode="multiple"
             placeholder="Select Process"
             labelInValue
@@ -87,3 +88,10 @@ export default function CountryStructureForm(props: any) {
     />
   )
 }
+
+const Label = styled.div`
+  font-weight: bold;
+  font-size: 16px;
+  line-height: 24px;
+  color: #000000;
+`;

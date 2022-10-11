@@ -455,7 +455,7 @@ const SalesOrganizationCondition = ({ control, index, setValue, salesOrganizatio
                   value = value?.map((value:any) => parseInt(value.id)) || []
                   return (
                     <DropdownMenuOptionCustom
-                      label={`${salesOrganization?.name}`}
+                      label={<Label>{salesOrganization?.name}`</Label>}
                       isAllowClear
                       required
                       mode="multiple"
@@ -553,7 +553,7 @@ const BranchCondition = ({ control, index, setValue, selectAll }: any) => {
           }))
           return (       
             <DropdownMenuOptionCustom
-              label="Branch"
+              label={<Label>Branch</Label>}
               mode="multiple"
               placeholder="Select"
               labelInValue
@@ -600,7 +600,7 @@ const Separator = styled.div`
 `;
 
 const Label = styled.div`
-  font-weight: 600;
+  font-weight: bold;
   font-size: 16px;
   line-height: 24px;
   color: #000000;
