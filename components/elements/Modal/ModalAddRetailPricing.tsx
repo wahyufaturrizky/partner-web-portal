@@ -56,8 +56,6 @@ export default function ModalAddRetailPricing({
     )
   }
 
-  console.log("defaultValues", defaultValues)
-
   const { control, handleSubmit, watch, setValue } = useForm({
     defaultValues: defaultValues ? defaultValues : defaultCreateValue
   });
