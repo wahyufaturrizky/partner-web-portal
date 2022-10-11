@@ -13,7 +13,7 @@ const Addresses = () => {
 
   const { fields, append, remove, update }: any = useFieldArray({
     control,
-    name: "address",
+    name: "addresses",
   });
 
   // Country State
@@ -220,7 +220,7 @@ const Addresses = () => {
                   label="Street"
                   height="40px"
                   defaultValue={""}
-                  placeholder={"e.g 1000"}
+                  placeholder={"e.g Front Groceries No. 5"}
                   {...register(`addresses.${addressIndex}.street`)}
                 />
               </Col>
@@ -423,7 +423,7 @@ const Addresses = () => {
                   label="Longitude"
                   height="40px"
                   defaultValue={""}
-                  placeholder={"e.g 1000"}
+                  placeholder={"e.g 38.8951"}
                   {...register(`addresses.${addressIndex}.lon`)}
                 />
               </Col>
@@ -434,7 +434,7 @@ const Addresses = () => {
                   label="Latitude"
                   height="40px"
                   defaultValue={""}
-                  placeholder={"e.g 1000"}
+                  placeholder={"e.g -77.0364"}
                   {...register(`addresses.${addressIndex}.lat`)}
                 />
               </Col>

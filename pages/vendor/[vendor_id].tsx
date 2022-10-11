@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import {
   Text,
   Col,
@@ -13,14 +13,22 @@ import {
 } from "pink-lava-ui";
 import styled from "styled-components";
 import { useRouter } from "next/router";
-import { useForm, Controller, FormProvider } from "react-hook-form";
+import { useForm, Controller, FormProvider, useWatch } from "react-hook-form";
 import General from "components/pages/Vendor/General/General";
 import Contacts from "components/pages/Vendor/Contacts/Contacts";
 import Addresses from "components/pages/Vendor/Addresess/Addresses";
 import Purchasing from "components/pages/Vendor/Purchasing/Purchasing";
 import Invoicing from "components/pages/Vendor/Invoicing/Invoicing";
-import { useUpdateVendor, useVendor, useDeleteVendor } from "hooks/mdm/vendor/useVendor";
+import {
+  useUpdateVendor,
+  useVendor,
+  useConvertToCustomer,
+  useDeleteVendor,
+} from "hooks/mdm/vendor/useVendor";
 import { queryClient } from "pages/_app";
+import ArrowLeft from "assets/icons/arrow-left.svg";
+import { VendorContext } from "context/VendorContext";
+import { ModalDeleteConfirmation } from "components/elements/Modal/ModalConfirmationDelete";
 
 const listTabItems = [
   { title: "Contacts" },
@@ -50,18 +58,33 @@ export default function VendorDetail() {
       email: "",
       external_code: "",
       is_pkp: false,
-      company: {},
-      individu: {},
+      company: {
+        website: "",
+        logo: "",
+      },
+      individu: {
+        job: 0,
+        company: "",
+        title: "",
+      },
       contacts: [],
       addresses: [],
       purchasing: {},
       invoicing: {},
     },
   });
-  const { control, handleSubmit } = methods;
+  const { control, handleSubmit, setValue } = methods;
 
   const [activeTab, SetActiveTab] = useState("Contacts");
   const [radioValue, setRadioValue] = useState("company");
+  const [companyLogo, setCompanyLogo] = useState("/placeholder-employee-photo.svg");
+  const [selectFromForm, setSelectFromForm] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+
+  const watchCustomerId = useWatch({
+    control,
+    name: "customer_id",
+  });
 
   const renderTabItem = (activeTab: any) => {
     switch (activeTab) {
@@ -88,6 +111,27 @@ export default function VendorDetail() {
     },
   });
 
+  const { mutate: updateConvertCustomer, isLoading: isLoadingConvertCustomer } =
+    useConvertToCustomer({
+      id: vendor_id,
+      options: {
+        onSuccess: (data: any) => {
+          setValue("customer_id", data);
+          setSelectFromForm(false);
+        },
+      },
+    });
+
+  const { mutate: deleteVendor, isLoading: isLoadingDeleteVendor }: any = useDeleteVendor({
+    options: {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["vendors"]);
+        setShowDeleteModal(false);
+        router.back();
+      },
+    },
+  });
+
   const {
     data: vendorData,
     isLoading: isLoadingVendor,
@@ -95,7 +139,28 @@ export default function VendorDetail() {
   } = useVendor({
     id: vendor_id,
     options: {
-      onSuccess: (data: any) => {},
+      onSuccess: (data: any) => {
+        setValue("customer_id", data.customerId);
+        setSelectFromForm(data?.customerId === "");
+        setRadioValue(data?.type?.toLowerCase());
+
+        setValue("status", data?.status);
+        setValue("name", data?.name);
+        setValue("group", data?.group);
+        setValue("company.website", data?.companyWebsite);
+
+        setCompanyLogo(data?.companyLogo);
+        setValue("individu.job", data?.personalJob);
+        setValue("individu.title", data?.personalTitle);
+        setValue("individu.company", data?.personalCompany);
+        setValue("mobile", data?.mobile);
+        setValue("language", data?.language);
+        setValue("phone", data?.phone);
+        setValue("tax", data?.tax);
+        setValue("email", data?.email);
+        setValue("is_pkp", data?.isPkp);
+        setValue("external_code", data?.externalCode);
+      },
     },
   });
 
@@ -166,105 +231,136 @@ export default function VendorDetail() {
     );
 
   return (
-    <Col>
-      <Row alignItems={"center"}>
-        <Text variant={"h4"}>Update Vendor</Text>
-        <Spacer size={10} />
-        <Radio
-          value={"company"}
-          checked={radioValue === "company"}
-          onChange={(e: any) => {
-            setRadioValue(e.target.value);
-            SetActiveTab("Contacts");
-          }}
-        />
-        Company
-        <Spacer size={10} />
-        <Radio
-          value={"individu"}
-          checked={radioValue === "individu"}
-          onChange={(e: any) => {
-            setRadioValue(e.target.value);
-            SetActiveTab("Addresses");
-          }}
-        />
-        Individu
-      </Row>
-
-      <Spacer size={10} />
-
-      <Card>
-        <Row justifyContent="space-between" alignItems="center" nowrap>
-          <Controller
-            control={control}
-            name={"status"}
-            defaultValue={"inactive"}
-            render={({ field: { onChange } }) => (
-              <Dropdown
-                label=""
-                width="185px"
-                noSearch
-                items={[
-                  { id: "active", value: "Active" },
-                  { id: "inactive", value: "Inactive" },
-                ]}
-                defaultValue="inactive"
-                handleChange={(value: any) => {
-                  onChange(value);
-                }}
-              />
-            )}
+    <>
+      <Col>
+        <Row alignItems={"center"}>
+          <ArrowLeft style={{ cursor: "pointer" }} onClick={() => router.back()} />
+          <Text variant={"h4"}>{vendorData?.name}</Text>
+          <Spacer size={10} />
+          <Radio
+            value={"company"}
+            checked={radioValue === "company"}
+            onChange={(e: any) => {
+              setRadioValue(e.target.value);
+              SetActiveTab("Contacts");
+            }}
           />
-
-          <Row gap="16px">
-            <Button size="big" variant={"tertiary"} onClick={() => {}}>
-              Delete
-            </Button>
-            <Button size="big" variant={"secondary"} onClick={() => {}}>
-              Convert to Customer
-            </Button>
-            <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
-              {isLoadingUpdateVendor ? "Loading..." : "Save"}
-            </Button>
-          </Row>
+          Company
+          <Spacer size={10} />
+          <Radio
+            value={"individu"}
+            checked={radioValue === "individu"}
+            onChange={(e: any) => {
+              setRadioValue(e.target.value);
+              SetActiveTab("Addresses");
+            }}
+          />
+          Individu
         </Row>
-      </Card>
 
-      <Spacer size={20} />
+        <Spacer size={10} />
 
-      <FormProvider {...methods}>
-        <Accordion>
-          <Accordion.Item key={1}>
-            <Accordion.Header variant="blue">General</Accordion.Header>
-            <Accordion.Body>
-              <General type={radioValue} />
-            </Accordion.Body>
-          </Accordion.Item>
-        </Accordion>
+        <Card>
+          <Row justifyContent="space-between" alignItems="center" nowrap>
+            <Controller
+              control={control}
+              name={"status"}
+              defaultValue={"inactive"}
+              render={({ field: { onChange } }) => (
+                <Dropdown
+                  label=""
+                  width="185px"
+                  noSearch
+                  items={[
+                    { id: "active", value: "Active" },
+                    { id: "inactive", value: "Inactive" },
+                  ]}
+                  defaultValue="inactive"
+                  handleChange={(value: any) => {
+                    onChange(value);
+                  }}
+                />
+              )}
+            />
+
+            <Row gap="16px">
+              <Button
+                size="big"
+                variant={"tertiary"}
+                onClick={() => {
+                  setShowDeleteModal(true);
+                }}
+              >
+                Delete
+              </Button>
+              <Button
+                size="big"
+                variant={"secondary"}
+                disabled={watchCustomerId !== ""}
+                onClick={() => {
+                  updateConvertCustomer();
+                }}
+              >
+                {isLoadingConvertCustomer ? "Loading..." : " Convert to Customer"}
+              </Button>
+              <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
+                {isLoadingUpdateVendor ? "Loading..." : "Save"}
+              </Button>
+            </Row>
+          </Row>
+        </Card>
 
         <Spacer size={20} />
 
-        <Accordion>
-          <Accordion.Item key={1}>
-            <Accordion.Header variant="blue">Detail Information</Accordion.Header>
-            <Accordion.Body>
-              <Tabs
-                activeKey={activeTab}
-                defaultActiveKey={activeTab}
-                listTabPane={
-                  radioValue === "company"
-                    ? listTabItems
-                    : listTabItems.slice(1, listTabItems.length)
-                }
-                onChange={(e: any) => SetActiveTab(e)}
-              />
-              <Spacer size={20} />
-              {renderTabItem(activeTab)}
-            </Accordion.Body>
-          </Accordion.Item>
-        </Accordion>
-      </FormProvider>
-    </Col>
+        <VendorContext.Provider
+          value={{ companyLogo, setCompanyLogo, selectFromForm, setSelectFromForm }}
+        >
+          <FormProvider {...methods}>
+            <Accordion>
+              <Accordion.Item key={1}>
+                <Accordion.Header variant="blue">General</Accordion.Header>
+                <Accordion.Body>
+                  <General type={radioValue} formType={"edit"} />
+                </Accordion.Body>
+              </Accordion.Item>
+            </Accordion>
+
+            <Spacer size={20} />
+
+            <Accordion>
+              <Accordion.Item key={1}>
+                <Accordion.Header variant="blue">Detail Information</Accordion.Header>
+                <Accordion.Body>
+                  <Tabs
+                    activeKey={activeTab}
+                    defaultActiveKey={activeTab}
+                    listTabPane={
+                      radioValue === "company"
+                        ? listTabItems
+                        : listTabItems.slice(1, listTabItems.length)
+                    }
+                    onChange={(e: any) => SetActiveTab(e)}
+                  />
+                  <Spacer size={20} />
+                  {renderTabItem(activeTab)}
+                </Accordion.Body>
+              </Accordion.Item>
+            </Accordion>
+          </FormProvider>
+        </VendorContext.Provider>
+      </Col>
+
+      {showDeleteModal && (
+        <ModalDeleteConfirmation
+          totalSelected={1}
+          itemTitle={vendorData.name}
+          visible={showDeleteModal}
+          isLoading={isLoadingDeleteVendor}
+          onCancel={() => setShowDeleteModal(false)}
+          onOk={() => deleteVendor({ ids: [vendor_id] })}
+        />
+      )}
+    </>
   );
 }
 

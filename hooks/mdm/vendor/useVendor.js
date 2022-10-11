@@ -34,8 +34,8 @@ const fetchInfiniteVendor = async ({ pageParam = 1, queryKey }) => {
   }).then((data) => data);
 };
 
-const useVendorInfiniteLists = ({ options }) => {
-  return useInfiniteQuery(["vendor/infinite"], fetchInfiniteVendor, {
+const useVendorInfiniteLists = ({ query = {}, options }) => {
+  return useInfiniteQuery(["vendor/infinite", query], fetchInfiniteVendor, {
     keepPreviousData: true,
     ...options,
   });
@@ -111,6 +111,19 @@ function useUpdateVendor({ id, options }) {
   );
 }
 
+function useConvertToCustomer({ id, options }) {
+  return useMutation(
+    (data) =>
+      mdmService(`/vendor/convert/${id}`, {
+        method: "POST",
+        data,
+      }),
+    {
+      ...options,
+    }
+  );
+}
+
 const useDeleteVendor = ({ options }) => {
   return useMutation(
     (data) =>
@@ -127,7 +140,7 @@ const useDeleteVendor = ({ options }) => {
 const useUploadFileVendor = ({ options }) => {
   return useMutation(
     (data) =>
-      mdmService(`/vendor/upload`, {
+      mdmService(`/vendor/file/upload`, {
         method: "POST",
         data,
       }),
@@ -146,6 +159,7 @@ export {
   useVendor,
   useCreateVendor,
   useUpdateVendor,
+  useConvertToCustomer,
   useDeleteVendor,
   useUploadFileVendor,
 };

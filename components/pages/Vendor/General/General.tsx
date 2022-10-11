@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import {
   Text,
   Col,
@@ -11,18 +11,27 @@ import {
   Tooltip,
 } from "pink-lava-ui";
 import { ExclamationCircleOutlined } from "@ant-design/icons";
-import { useFormContext, Controller } from "react-hook-form";
+import { useFormContext, Controller, useWatch } from "react-hook-form";
 import { useVendorGroupInfiniteLists, useUploadLogo } from "hooks/mdm/vendor/useVendorGroup";
 import { useJobPositionInfiniteLists } from "hooks/mdm/job-position/useJobPositon";
 import { useLanguagesInfiniteLists } from "hooks/languages/useLanguages";
 import { useCompanyInfiniteLists } from "hooks/company-list/useCompany";
+import { useCustomerInfiniteLists } from "hooks/mdm/customers/useCustomersMDM";
 import useDebounce from "lib/useDebounce";
+import { VendorContext } from "context/VendorContext";
+import styled from "styled-components";
 
-const General = ({ type }: any) => {
+const General = ({ type, formType }: any) => {
   const { register, control } = useFormContext();
 
   const [isPKP, setIsPKP] = useState(false);
-  const [imageLogo, setImageLogo] = useState<string>("");
+
+  const { setCompanyLogo, selectFromForm, companyLogo } = useContext(VendorContext);
+
+  const watchCustomerId = useWatch({
+    control,
+    name: "customer_id",
+  });
 
   // Vendor Group State
   const [totalRowsVendorGroup, setTotalRowsVendorGroup] = useState(0);
@@ -47,6 +56,12 @@ const General = ({ type }: any) => {
   const [totalRowsCompanyList, setTotalRowsCompanyList] = useState(0);
   const [searchCompany, setSearchCompany] = useState("");
   const debounceFetchCompany = useDebounce(searchCompany, 1000);
+
+  // Customer State
+  const [customerList, setCustomerList] = useState<any[]>([]);
+  const [totalRowsCustomerList, setTotalRowsCustomerList] = useState(0);
+  const [searchCustomer, setSearchCustomer] = useState("");
+  const debounceFetchCustomer = useDebounce(searchCustomer, 1000);
 
   // Vendor Group API
   const {
@@ -190,87 +205,238 @@ const General = ({ type }: any) => {
     },
   });
 
+  // Customer API
+  const {
+    isLoading: isLoadingCustomer,
+    isFetching: isFetchingCustomer,
+    isFetchingNextPage: isFetchingMoreCustomer,
+    hasNextPage: hasNextPageCustomer,
+    fetchNextPage: fetchNextPageCustomer,
+  } = useCustomerInfiniteLists({
+    query: {
+      search: debounceFetchCustomer,
+      limit: 10,
+    },
+    options: {
+      enabled: formType === "edit",
+      onSuccess: (data: any) => {
+        setTotalRowsCustomerList(data.pages[0].totalRow);
+        const mappedData = data?.pages?.map((group: any) => {
+          return group.rows?.map((element: any) => {
+            return {
+              value: element.id,
+              label: `${element.id} - ${element.name}`,
+            };
+          });
+        });
+        const flattenArray = [].concat(...mappedData);
+        setCustomerList(flattenArray);
+      },
+      getNextPageParam: (_lastPage: any, pages: any) => {
+        if (customerList.length < totalRowsCustomerList) {
+          return pages.length + 1;
+        } else {
+          return undefined;
+        }
+      },
+    },
+  });
+
   const { mutate: uploadLogoVendor } = useUploadLogo({
     options: {
-      onSuccess: ({ imageUrl }: { imageUrl: string }) => {
-        setImageLogo(imageUrl);
+      onSuccess: (data: any) => {
+        setCompanyLogo(data);
       },
     },
   });
 
   return (
-    <>
+    <div style={{ height: "620px" }}>
       <Row width="100%" noWrap>
         {type === "company" && (
-          <FileUploaderAllFiles
-            label="Company Logo"
-            onSubmit={async (files: any) => {
-              // onChange(file);
-              // const formData: any = new FormData();
-              // await formData.append("upload_file", files);
-              // return uploadLogoVendor(formData);
-            }}
-            defaultFile="/placeholder-employee-photo.svg"
-            withCrop
-            sizeImagePhoto="125px"
-            removeable
-            textPhoto={["Dimension Minimum 72 x 72, Optimal size 300 x 300", "File Size Max. 1MB"]}
-          />
-          // <Controller
-          //   control={control}
-          //   shouldUnregister={true}
-          //   name="upload_file"
-          //   render={({ field: { onChange } }) => (
+          <>
+            <div style={{ width: "50%" }}>
+              <FileUploaderAllFiles
+                label="Company Logo"
+                onSubmit={(files: any) => {
+                  const formData: any = new FormData();
+                  formData.append("upload_file", files);
+                  uploadLogoVendor(formData);
+                }}
+                defaultFile={companyLogo}
+                withCrop
+                sizeImagePhoto="125px"
+                removeable
+                textPhoto={[
+                  "Dimension Minimum 72 x 72, Optimal size 300 x 300",
+                  "File Size Max. 1MB",
+                ]}
+              />
+            </div>
 
-          //   )}
-          // />
+            {formType === "edit" && (
+              <Col width="50%" justifyContent={"center"}>
+                {watchCustomerId === "" || selectFromForm ? (
+                  <Controller
+                    control={control}
+                    defaultValue={""}
+                    name="customer_id"
+                    render={({ field: { onChange }, formState: { errors } }) => (
+                      <>
+                        <Text variant="headingRegular">Customer ID</Text>
+                        <Spacer size={6} />
+                        <FormSelect
+                          style={{ width: "100%" }}
+                          size={"large"}
+                          placeholder={"Select"}
+                          borderColor={"#AAAAAA"}
+                          arrowColor={"#000"}
+                          withSearch
+                          isLoading={isFetchingCustomer}
+                          isLoadingMore={isFetchingMoreCompany}
+                          fetchMore={() => {
+                            if (hasNextPageCustomer) {
+                              fetchNextPageCustomer();
+                            }
+                          }}
+                          items={isFetchingCustomer && !isFetchingMoreCustomer ? [] : customerList}
+                          onChange={(value: any) => {
+                            onChange(value);
+                          }}
+                          onSearch={(value: any) => {
+                            setSearchCustomer(value);
+                          }}
+                        />
+                      </>
+                    )}
+                  />
+                ) : (
+                  <CustomerContainer>
+                    <Text variant="headingSmall" color={"blue.dark"} hoverColor={"blue.dark"}>
+                      {watchCustomerId}{" "}
+                      <span
+                        style={{ color: "#EB008B", cursor: "pointer" }}
+                        onClick={() => {
+                          window.open(`/customers/${watchCustomerId}`, "_blank");
+                        }}
+                      >
+                        View Detail
+                      </span>
+                    </Text>
+                  </CustomerContainer>
+                )}
+              </Col>
+            )}
+          </>
         )}
+
         {type === "individu" && (
           <>
-            <Controller
-              control={control}
-              name="individu.title"
-              defaultValue={""}
-              shouldUnregister={true}
-              rules={{
-                required: true,
-              }}
-              render={({ field: { onChange }, fieldState: { error } }) => (
-                <Col width={"10%"}>
-                  <Text variant="headingRegular">
-                    Title<span style={{ color: "#EB008B" }}>*</span>
-                  </Text>
-                  <Spacer size={6} />
-                  <FormSelect
-                    width="100%"
-                    items={[
-                      { id: "mr", value: "Mr." },
-                      { id: "ms", value: "Ms." },
-                    ]}
-                    handleChange={(value: any) => {
-                      onChange(value);
-                    }}
-                  />
-                </Col>
-              )}
-            />
+            <Row width={"50%"} noWrap>
+              <Controller
+                control={control}
+                name="individu.title"
+                defaultValue={"mr"}
+                rules={{
+                  required: true,
+                }}
+                render={({ field: { onChange, value }, fieldState: { error } }) => (
+                  <Col width={"10%"}>
+                    <Text variant="headingRegular">
+                      Title<span style={{ color: "#EB008B" }}>*</span>
+                    </Text>
+                    <Spacer size={6} />
+                    <FormSelect
+                      width="100%"
+                      size="large"
+                      defaultValue={value}
+                      items={[
+                        { id: "mr", value: "Mr." },
+                        { id: "ms", value: "Ms." },
+                      ]}
+                      handleChange={(value: any) => {
+                        onChange(value);
+                      }}
+                    />
+                  </Col>
+                )}
+              />
+
+              <Spacer size={10} />
+
+              <Col width="90%">
+                <Input
+                  width="100%"
+                  label="Name"
+                  height="40px"
+                  required
+                  defaultValue={""}
+                  placeholder={"e.g Jane Doe"}
+                  {...register("name", {
+                    required: true,
+                  })}
+                />
+              </Col>
+            </Row>
 
             <Spacer size={10} />
 
-            <Col width="90%">
-              <Input
-                width="100%"
-                label="Name"
-                height="40px"
-                required
-                defaultValue={""}
-                placeholder={"e.g Jane Doe"}
-                {...register("name", {
-                  required: true,
-                  shouldUnregister: true,
-                })}
-              />
-            </Col>
+            {formType === "edit" && (
+              <Row width="50%" justifyContent={"center"} alignItems={"center"} noWrap>
+                {watchCustomerId === "" || selectFromForm ? (
+                  <Controller
+                    control={control}
+                    defaultValue={""}
+                    name="customer_id"
+                    render={({ field: { onChange }, formState: { errors } }) => (
+                      <Col width="100%" justifyContent={"center"}>
+                        <Text variant="headingRegular">Customer ID</Text>
+                        <Spacer size={6} />
+                        <FormSelect
+                          style={{ width: "100%" }}
+                          size={"large"}
+                          placeholder={"Select"}
+                          borderColor={"#AAAAAA"}
+                          arrowColor={"#000"}
+                          withSearch
+                          isLoading={isFetchingCustomer}
+                          isLoadingMore={isFetchingMoreCompany}
+                          fetchMore={() => {
+                            if (hasNextPageCustomer) {
+                              fetchNextPageCustomer();
+                            }
+                          }}
+                          items={isFetchingCustomer && !isFetchingMoreCustomer ? [] : customerList}
+                          onChange={(value: any) => {
+                            onChange(value);
+                          }}
+                          onSearch={(value: any) => {
+                            setSearchCustomer(value);
+                          }}
+                        />
+                      </Col>
+                    )}
+                  />
+                ) : (
+                  <Col width={"100%"}>
+                    <Spacer size={15} />
+                    <CustomerContainer>
+                      <Text variant="headingSmall" color={"blue.dark"} hoverColor={"blue.dark"}>
+                        {watchCustomerId}{" "}
+                        <span
+                          style={{ color: "#EB008B", cursor: "pointer" }}
+                          onClick={() => {
+                            window.open(`/customers/${watchCustomerId}`, "_blank");
+                          }}
+                        >
+                          View Detail
+                        </span>
+                      </Text>
+                    </CustomerContainer>
+                  </Col>
+                )}
+              </Row>
+            )}
           </>
         )}
       </Row>
@@ -286,7 +452,7 @@ const General = ({ type }: any) => {
               height="40px"
               defaultValue={""}
               placeholder={"e.g PT Indo Log"}
-              {...register("name", { shouldUnregister: true })}
+              {...register("name")}
             />
           </Col>
         )}
@@ -294,14 +460,14 @@ const General = ({ type }: any) => {
           <Col width={"100%"}>
             <Controller
               control={control}
-              shouldUnregister={true}
               defaultValue={""}
               name="individu.job"
-              render={({ field: { onChange }, formState: { errors } }) => (
+              render={({ field: { onChange, value }, formState: { errors } }) => (
                 <>
                   <Text variant="headingRegular">Job Position</Text>
                   <Spacer size={6} />
                   <FormSelect
+                    defaultValue={value}
                     style={{ width: "100%" }}
                     size={"large"}
                     placeholder={"Select"}
@@ -333,14 +499,14 @@ const General = ({ type }: any) => {
 
         <Controller
           control={control}
-          shouldUnregister={true}
           defaultValue={""}
           name="group"
-          render={({ field: { onChange }, formState: { errors } }) => (
+          render={({ field: { onChange, value }, formState: { errors } }) => (
             <Col width={"100%"}>
               <Text variant="headingRegular">Vendor Group</Text>
               <Spacer size={6} />
               <FormSelect
+                defaultValue={value}
                 style={{ width: "100%" }}
                 size={"large"}
                 placeholder={"Select"}
@@ -385,14 +551,14 @@ const General = ({ type }: any) => {
         {type === "individu" && (
           <Controller
             control={control}
-            shouldUnregister={true}
             defaultValue={""}
             name="individu.company"
-            render={({ field: { onChange }, formState: { errors } }) => (
+            render={({ field: { onChange, value }, formState: { errors } }) => (
               <Col width={"100%"}>
                 <Text variant="headingRegular">Company</Text>
                 <Spacer size={6} />
                 <FormSelect
+                  defaultValue={value}
                   style={{ width: "100%" }}
                   size={"large"}
                   placeholder={"Select"}
@@ -437,14 +603,14 @@ const General = ({ type }: any) => {
         <Col width={"100%"}>
           <Controller
             control={control}
-            shouldUnregister={true}
             defaultValue={""}
             name="language"
-            render={({ field: { onChange }, formState: { errors } }) => (
+            render={({ field: { onChange, value }, formState: { errors } }) => (
               <>
                 <Text variant="headingRegular">Language</Text>
                 <Spacer size={6} />
                 <FormSelect
+                  defaultValue={value}
                   style={{ width: "100%" }}
                   size={"large"}
                   placeholder={"Select"}
@@ -498,10 +664,9 @@ const General = ({ type }: any) => {
           <Row alignItems={"center"} gap={"5px"}>
             <Controller
               control={control}
-              shouldUnregister={true}
               defaultValue={isPKP}
               name="is_pkp"
-              render={({ field: { onChange }, formState: { errors } }) => (
+              render={({ field: { onChange, value }, formState: { errors } }) => (
                 <>
                   <Text>PKP?</Text>
                   <Tooltip
@@ -512,11 +677,11 @@ const General = ({ type }: any) => {
                     <ExclamationCircleOutlined />
                   </Tooltip>
                   <Switch
-                    checked={isPKP}
-                    defaultChecked={isPKP}
-                    onChange={(value: boolean) => {
-                      setIsPKP(value);
-                      onChange(value);
+                    checked={value}
+                    defaultChecked={value}
+                    onChange={(isPkp: boolean) => {
+                      setIsPKP(isPkp);
+                      onChange(isPkp);
                     }}
                   />
                 </>
@@ -551,8 +716,20 @@ const General = ({ type }: any) => {
           />
         </Col>
       </Row>
-    </>
+    </div>
   );
 };
+
+const CustomerContainer = styled.div`
+  background: #d5fafd;
+  border-radius: 8px;
+  height: 50px;
+  justify-content: flex-start;
+  align-items: center;
+  padding: 15px;
+  display: flex;
+  gap: 8px;
+  width: 100%;
+`;
 
 export default General;

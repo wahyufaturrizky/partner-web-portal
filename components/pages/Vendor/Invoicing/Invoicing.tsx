@@ -88,7 +88,7 @@ const Invoicing = () => {
         const mappedData = data?.pages?.map((group: any) => {
           return group.rows?.map((element: any) => {
             return {
-              label: element.name,
+              label: `${element.currency} - ${element.currencyName}`,
               value: element.id,
             };
           });
@@ -181,7 +181,7 @@ const Invoicing = () => {
     },
     {
       title: "Bank Name",
-      dataIndex: "name",
+      dataIndex: "bank",
     },
     {
       title: "Account Number",

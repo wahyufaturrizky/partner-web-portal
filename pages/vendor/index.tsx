@@ -30,7 +30,7 @@ const PackageSvg = () => <ICPackage />;
 const PackageIcon = (props: any) => <Icon component={PackageSvg} {...props} />;
 
 const downloadFile = (params: any) =>
-  mdmDownloadService("/vendor/download", { params }).then((res) => {
+  mdmDownloadService("/vendor/template/download", { params }).then((res) => {
     let dataUrl = window.URL.createObjectURL(new Blob([res.data]));
     let tempLink = document.createElement("a");
     tempLink.href = dataUrl;
@@ -165,8 +165,7 @@ export default function Vendor() {
 
   const onSubmitFile = (file: any) => {
     const formData = new FormData();
-    formData.append("company_id", "KSNI");
-    formData.append("file", file);
+    formData.append("upload_file", file);
 
     uploadVendor(formData);
   };
@@ -205,13 +204,13 @@ export default function Vendor() {
               onClick={(e: any) => {
                 switch (parseInt(e.key)) {
                   case 1:
-                    downloadFile({ with_data: "N", company_id: "KSNI" });
+                    downloadFile({ with_data: "N" });
                     break;
                   case 2:
                     setShowUpload(true);
                     break;
                   case 3:
-                    downloadFile({ with_data: "Y", company_id: "KSNI" });
+                    downloadFile({ with_data: "Y" });
                     break;
                   case 4:
                     setShowVendorGroup(true);

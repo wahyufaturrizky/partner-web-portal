@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, createContext, useContext } from "react";
 import { Text, Col, Row, Spacer, Dropdown, Button, Accordion, Radio, Tabs } from "pink-lava-ui";
 import styled from "styled-components";
 import { useRouter } from "next/router";
@@ -10,6 +10,7 @@ import Purchasing from "components/pages/Vendor/Purchasing/Purchasing";
 import Invoicing from "components/pages/Vendor/Invoicing/Invoicing";
 import { useCreateVendor } from "hooks/mdm/vendor/useVendor";
 import { queryClient } from "pages/_app";
+import { VendorContext } from "context/VendorContext";
 
 const listTabItems = [
   { title: "Contacts" },
@@ -24,11 +25,15 @@ const objectIsEmpty = (object: any) =>
 export default function VendorCreate() {
   const router = useRouter();
 
-  const methods = useForm({ defaultValues: { status: "inactive", purchasing: {}, invoicing: {} } });
+  const methods = useForm({
+    defaultValues: { status: "active", purchasing: {}, invoicing: {}, customer_id: "" },
+  });
   const { control, handleSubmit } = methods;
 
   const [activeTab, SetActiveTab] = useState("Contacts");
   const [radioValue, setRadioValue] = useState("company");
+  const [companyLogo, setCompanyLogo] = useState("");
+  const [selectFromForm, setSelectFromForm] = useState(false);
 
   const renderTabItem = (activeTab: any) => {
     switch (activeTab) {
@@ -56,7 +61,9 @@ export default function VendorCreate() {
 
   const onSubmit = (data: any) => {
     const companyPayload =
-      radioValue === "company" ? { logo: "", website: data?.company?.website ?? "" } : null;
+      radioValue === "company"
+        ? { logo: companyLogo, website: data?.company?.website ?? "" }
+        : null;
 
     const individuPayload =
       radioValue === "individu"
@@ -75,7 +82,27 @@ export default function VendorCreate() {
 
     const addressPayload =
       data?.addresses?.map((address: any) => {
-        return address;
+        let mappCountrylevel = [];
+
+        mappCountrylevel[0] = address.province === "" ? 0 : address.province;
+        mappCountrylevel[1] = address.city === "" ? 0 : address.city;
+        mappCountrylevel[2] = address.district === "" ? 0 : address.district;
+        mappCountrylevel[3] = address.zone === "" ? 0 : address.zone;
+
+        // cek apakah array isinya semuanya 0
+        const allEqual = mappCountrylevel.every((value) => value === 0);
+
+        return {
+          is_primary: address.is_primary,
+          type: address.type,
+          street: address.street,
+          country: address.country,
+          country_levels: allEqual ? [] : mappCountrylevel,
+          postal_code: address.postal_code,
+          lon: address.lon,
+          lat: address.lat,
+          photo: "",
+        };
       }) ?? [];
 
     const purchasingPayload = objectIsEmpty(data?.purchasing) ? null : data?.purchasing;
@@ -109,8 +136,7 @@ export default function VendorCreate() {
       invoicing: mappingInvoicing,
     };
 
-    console.log("data", formData);
-    // createVendor(formData);
+    createVendor(formData);
   };
 
   return (
@@ -147,7 +173,7 @@ export default function VendorCreate() {
             control={control}
             name={"status"}
             defaultValue={"inactive"}
-            render={({ field: { onChange } }) => (
+            render={({ field: { onChange, value } }) => (
               <Dropdown
                 label=""
                 width="185px"
@@ -156,7 +182,7 @@ export default function VendorCreate() {
                   { id: "active", value: "Active" },
                   { id: "inactive", value: "Inactive" },
                 ]}
-                defaultValue="inactive"
+                defaultValue={value}
                 handleChange={(value: any) => {
                   onChange(value);
                 }}
@@ -177,38 +203,42 @@ export default function VendorCreate() {
 
       <Spacer size={20} />
 
-      <FormProvider {...methods}>
-        <Accordion>
-          <Accordion.Item key={1}>
-            <Accordion.Header variant="blue">General</Accordion.Header>
-            <Accordion.Body>
-              <General type={radioValue} />
-            </Accordion.Body>
-          </Accordion.Item>
-        </Accordion>
+      <VendorContext.Provider
+        value={{ companyLogo, setCompanyLogo, selectFromForm, setSelectFromForm }}
+      >
+        <FormProvider {...methods}>
+          <Accordion>
+            <Accordion.Item key={1}>
+              <Accordion.Header variant="blue">General</Accordion.Header>
+              <Accordion.Body>
+                <General type={radioValue} />
+              </Accordion.Body>
+            </Accordion.Item>
+          </Accordion>
 
-        <Spacer size={20} />
+          <Spacer size={20} />
 
-        <Accordion>
-          <Accordion.Item key={1}>
-            <Accordion.Header variant="blue">Detail Information</Accordion.Header>
-            <Accordion.Body>
-              <Tabs
-                activeKey={activeTab}
-                defaultActiveKey={activeTab}
-                listTabPane={
-                  radioValue === "company"
-                    ? listTabItems
-                    : listTabItems.slice(1, listTabItems.length)
-                }
-                onChange={(e: any) => SetActiveTab(e)}
-              />
-              <Spacer size={20} />
-              {renderTabItem(activeTab)}
-            </Accordion.Body>
-          </Accordion.Item>
-        </Accordion>
-      </FormProvider>
+          <Accordion>
+            <Accordion.Item key={1}>
+              <Accordion.Header variant="blue">Detail Information</Accordion.Header>
+              <Accordion.Body>
+                <Tabs
+                  activeKey={activeTab}
+                  defaultActiveKey={activeTab}
+                  listTabPane={
+                    radioValue === "company"
+                      ? listTabItems
+                      : listTabItems.slice(1, listTabItems.length)
+                  }
+                  onChange={(e: any) => SetActiveTab(e)}
+                />
+                <Spacer size={20} />
+                {renderTabItem(activeTab)}
+              </Accordion.Body>
+            </Accordion.Item>
+          </Accordion>
+        </FormProvider>
+      </VendorContext.Provider>
     </Col>
   );
 }

@@ -1,8 +1,8 @@
-import { useMutation, useQuery } from 'react-query'
+import { useMutation, useQuery, useInfiniteQuery } from "react-query";
 import { mdmService } from "../../../lib/client";
 
 const fetchListCustomers = async ({ query = {} }) => {
-  return mdmService('/customer', {
+  return mdmService("/customer", {
     params: {
       page: 1,
       limit: 10,
@@ -10,77 +10,99 @@ const fetchListCustomers = async ({ query = {} }) => {
       sortOrder: "DESC",
       ...query,
     },
-  }).then((response) => response)
-}
+  }).then((response) => response);
+};
 
 const fetchDetailCustomer = async ({ id }) => {
-  return mdmService(`/customer/${id}`).then(data => data)
-}
+  return mdmService(`/customer/${id}`).then((data) => data);
+};
 
 const useUploadLogo = ({ options }) => {
   return useMutation(
     (data) =>
-      mdmService('/customer/upload', {
-        method: 'POST',
-        data
+      mdmService("/customer/upload", {
+        method: "POST",
+        data,
       }),
-      { ...options }
-  )
-}
+    { ...options }
+  );
+};
 
 const useDetailCustomer = ({ id, options }) => {
-  return useQuery(['customer-detail', id], () => fetchDetailCustomer({ id }), {
-    ...options
-  })
-}
+  return useQuery(["customer-detail", id], () => fetchDetailCustomer({ id }), {
+    ...options,
+  });
+};
 
 const useListCustomers = ({ options, query = {} }) => {
   return useQuery(["customer-list", query], () => fetchListCustomers({ query }), {
     keepPreviousData: true,
     ...options,
   });
-}
+};
+
+const fetchInfiniteCustomer = async ({ pageParam = 1, queryKey }) => {
+  const searchQuery = queryKey[1].search;
+  return mdmService(`/customer`, {
+    params: {
+      search: searchQuery,
+      limit: 10,
+      page: pageParam,
+      sortBy: "created_at",
+      sortOrder: "DESC",
+      ...queryKey[1],
+    },
+  }).then((data) => data);
+};
+
+const useCustomerInfiniteLists = ({ query = {}, options }) => {
+  return useInfiniteQuery(["customer/infinite", query], fetchInfiniteCustomer, {
+    keepPreviousData: true,
+    ...options,
+  });
+};
 
 const useCreateCustomers = ({ options }) => {
-  return useMutation(
-    (data) => {
-      return mdmService('/customer', {
-        method: 'POST',
-        data
+  return useMutation((data) => {
+    return (
+      mdmService("/customer", {
+        method: "POST",
+        data,
       }),
-        { ...options }
-    }
-  )
-}
+      { ...options }
+    );
+  });
+};
 
 const useDeleteCustomers = ({ options }) => {
-  return useMutation((ids) =>
-    mdmService('/customer', {
-      method: 'DELETE',
-      data: ids
-    }),
+  return useMutation(
+    (ids) =>
+      mdmService("/customer", {
+        method: "DELETE",
+        data: ids,
+      }),
     { ...options }
-  )
-}
-
+  );
+};
 
 const useUpdateCustomer = ({ id, options }) => {
-  return useMutation(
-    (data) => {
-      return mdmService(`/customer/${id}`, {
-        method: 'PUT',
-        data
+  return useMutation((data) => {
+    return (
+      mdmService(`/customer/${id}`, {
+        method: "PUT",
+        data,
       }),
-        { ...options }
-    }
-  )
-}
+      { ...options }
+    );
+  });
+};
 
 export {
   useListCustomers,
+  useCustomerInfiniteLists,
   useCreateCustomers,
   useUpdateCustomer,
   useDeleteCustomers,
   useDetailCustomer,
-  useUploadLogo
-}
+  useUploadLogo,
+};
