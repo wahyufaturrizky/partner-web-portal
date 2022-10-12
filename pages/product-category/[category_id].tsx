@@ -28,22 +28,6 @@ import {
   useUpdateProductCategory,
 } from "hooks/mdm/product-category/useProductCategory";
 import { useCoa } from "hooks/finance-config/useCoaTemplate";
-import { data } from "autoprefixer";
-
-// {
-//   "company_id": "KSNI",
-//   "name": "WAFER COKLAT KEJU oke",
-//   "parent": "PC-00000004",
-//   "costing_method": "OKE",
-//   "inventory_valuation": "OKE",
-//   "price_difference_account": "OKE",
-//   "expense_account":"OKE",
-//   "income_account":"OKE",
-//   "stock_valuation_account": "OKE",
-//   "stock_journal": "OKE",
-//   "stock_input_account": "OKE",
-//   "stock_output_account": "OKE"
-// }
 
 const costingMethodData = [
   {
@@ -68,15 +52,6 @@ const UpdateProductCategory: any = () => {
   const [searchProductCategory, setSearchProductCategory] = useState("");
   const [searchCoa, setSearchCoa] = useState("");
   const [catList, setCatList] = useState([]);
-
-  const pagination = usePagination({
-    page: 1,
-    itemsPerPage: 20,
-    maxPageItems: Infinity,
-    numbers: true,
-    arrows: true,
-    totalItems: 100,
-  });
 
   const {
     register,
@@ -117,13 +92,13 @@ const UpdateProductCategory: any = () => {
       },
       options: {
         onSuccess: (data: any) => {
-          const newCatList = data?.rows?.filter((name) => data.productCategoryId == category_id)
-          setCatList(newCatList)
+          const newCatList = data?.rows?.filter((item) => item.productCategoryId != category_id);
+          setCatList(newCatList);
         },
       },
     }
   );
-
+    // console.log(catList)
   const { data: coaListPayable, isLoading: isLoadingCoaListPayable } = useCoaList({
     status: "payable",
     query: {},
@@ -214,12 +189,12 @@ const UpdateProductCategory: any = () => {
                     label="Name"
                     height="48px"
                     // placeholder={"e.g Water Flat"}
+                    {...register("name", { required: "Name is Required" })}
                     error={errors?.name?.message}
-                    {...register("name", { required: true })}
                     defaultValue={categoryData.name}
                     required
                   />
-                  <Dropdown2
+                  <Dropdown
                     label="Parent"
                     width={"100%"}
                     items={catList?.map((data) => ({
@@ -245,7 +220,7 @@ const UpdateProductCategory: any = () => {
               <Accordion.Header variant="blue">Inventory Valuation</Accordion.Header>
               <Accordion.Body>
                 <Row width="100%" gap="20px" noWrap>
-                  <Dropdown2
+                  <Dropdown
                     label="Costing Method"
                     width={"100%"}
                     items={costingMethodData}
@@ -255,8 +230,9 @@ const UpdateProductCategory: any = () => {
                     //   error={errors?.country?.message}
                     //   {...register("country")}
                     defaultValue={categoryData.costingMethod}
+                    noSearch
                   />
-                  <Dropdown2
+                  <Dropdown
                     label="Inventory Valuation"
                     width={"100%"}
                     items={[
@@ -291,18 +267,37 @@ const UpdateProductCategory: any = () => {
             <Accordion.Item key={3}>
               <Accordion.Header variant="blue">Account Properties</Accordion.Header>
               <Accordion.Body>
+              <Row width="49%" gap="20px" noWrap>
+                  {automate == "Automated" && (
+                    <Dropdown
+                      label="Price Difference Account"
+                      width={"100%"}
+                      items={[]}
+                      placeholder={"Select"}
+                      //   handleChange={(value) => setValue("country", value)}
+                      //   onSearch={(search) => setSearchCountry(search)}
+                      //   error={errors?.country?.message}
+                      //   {...register("country")}
+                    />
+                  )}
+                </Row>
                 <Row width="100%" gap="20px" noWrap>
-                  <Dropdown2
-                    label="Price Difference Account"
+                  <Dropdown
+                    label="Income Account"
                     width={"100%"}
-                    items={[]}
+                    items={coaListReceivable?.rows?.map((data) => ({
+                      id: data.accountName,
+                      value: data.accountName,
+                    }))}
                     placeholder={"Select"}
-                    //   handleChange={(value) => setValue("country", value)}
+                    handleChange={(value) => setValue("income_account", value)}
                     //   onSearch={(search) => setSearchCountry(search)}
                     //   error={errors?.country?.message}
                     //   {...register("country")}
+                    defaultValue={categoryData.incomeAccount}
+                    noSearch
                   />
-                  <Dropdown2
+                  <Dropdown
                     label="Expense Account"
                     width={"100%"}
                     items={coaListPayable?.rows?.map((data) => ({
@@ -318,23 +313,6 @@ const UpdateProductCategory: any = () => {
                     noSearch
                   />
                 </Row>
-                <Row width="49%">
-                  <Dropdown2
-                    label="Income Account"
-                    width={"100%"}
-                    items={coaListReceivable?.rows?.map((data) => ({
-                      id: data.accountName,
-                      value: data.accountName,
-                    }))}
-                    placeholder={"Select"}
-                    handleChange={(value) => setValue("income_account", value)}
-                    //   onSearch={(search) => setSearchCountry(search)}
-                    //   error={errors?.country?.message}
-                    //   {...register("country")}
-                    defaultValue={categoryData.incomeAccount}
-                    noSearch
-                  />
-                </Row>
                 <Spacer size={10} />
                 {automate == "Automated" && (
                   <>
@@ -344,7 +322,7 @@ const UpdateProductCategory: any = () => {
                     <Spacer size={10} />
 
                     <Row width="100%" gap="20px" noWrap>
-                      <Dropdown2
+                      <Dropdown
                         label="Stock Valuation Account"
                         width={"100%"}
                         items={[]}
@@ -354,7 +332,7 @@ const UpdateProductCategory: any = () => {
                         //   error={errors?.country?.message}
                         //   {...register("country")}
                       />
-                      <Dropdown2
+                      <Dropdown
                         label="Stock Journal"
                         width={"100%"}
                         items={[]}
@@ -366,7 +344,7 @@ const UpdateProductCategory: any = () => {
                       />
                     </Row>
                     <Row width="100%" gap="20px" noWrap>
-                      <Dropdown2
+                      <Dropdown
                         label="Stock Input Account"
                         width={"100%"}
                         items={coaList?.rows?.map((data) => ({
@@ -379,9 +357,8 @@ const UpdateProductCategory: any = () => {
                         //   error={errors?.country?.message}
                         //   {...register("country")}
                         defaultValue={categoryData.stockInputAccount}
-                        noSearch
                       />
-                      <Dropdown2
+                      <Dropdown
                         label="Stock Output Account"
                         width={"100%"}
                         items={coaList?.rows?.map((data) => ({

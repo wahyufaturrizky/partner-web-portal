@@ -7,7 +7,9 @@ import {
   Button,
   Accordion,
   Input,
-  Table
+  Table,
+  Spin,
+  FileUploaderExcel
 } from "pink-lava-ui";
 import styled from "styled-components";
 import ArrowLeft from "../../assets/icons/arrow-left.svg";
@@ -17,92 +19,36 @@ import { ICDelete, ICEdit } from "../../assets";
 import { useRouter } from "next/router";
 import _ from "lodash";
 import moment from "moment";
-import { useDeleteRetailPricing, useUpdateRetailPricing } from "hooks/mdm/retail-pricing/useRetailPricingList";
-import { ModalDeleteConfirmation } from "components/elements/Modal/ModalConfirmationDelete";
-import { queryClient } from "pages/_app";
+import { useRetailPricingDetail, useUpdateRetailPricing } from "hooks/mdm/retail-pricing/useRetailPricingList";
 import Conditions from "components/pages/RetailPricing/fragments/Conditions";
+import { toSnakeCase } from "lib/caseConverter";
+import { mdmDownloadService } from "lib/client";
+
+const downloadFile = (params: any) =>
+  mdmDownloadService("/retail-pricing/download", { params }).then((res) => {
+    let dataUrl = window.URL.createObjectURL(new Blob([res.data]));
+    let tempLink = document.createElement("a");
+    tempLink.href = dataUrl;
+    tempLink.setAttribute("download", `retail_pricing_list_${new Date().getTime()}.xlsx`);
+    tempLink.click();
+  });
 
 const DetailRetailPricing: any = () => {
   const router = useRouter();
   const { id } = router.query;
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const {
     register,
     control,
     handleSubmit,
     setValue,
-    watch
+    formState: { errors }
   } = useForm({
     defaultValues: {
-      "company_id": "KSNI",
-      "name": "nama",
-      "availability": [
-        {
-            "based_on": "COUNTRY",
-             "country": {
-                    "id": "1",
-                    "name": "konoha",
-                    "level": [ 
-                        {
-                            "id": "1",
-                            "name": "konoha II",
-                            "values": [
-                              {"id": "1", "name": "kkkk"}  
-                            ]
-                              
-                        }
-                    ]
-           }
-        },
-        {
-            "based_on": "SALES ORGANIZATION",
-            "sales_organization" : {
-                "level": "aaa",
-                "value": [
-                  { "id": "1", "name" : "konoha" }  
-                ],
-                "select_all": true
-            }
-        },
-            {
-              "based_on": "BRANCH",
-              "branch" : {
-              "value": [
-                  { "id": "1", "name" : "konoha" }  
-                ],
-              "select_all": true
-              }
-        }],
-        "rules" : [
-            {
-            "apply_on": "ALL PRODUCT",
-            "based_on" : "COST",
-            "min_qty": 1,
-            "valid_date": ['01/02/21', '01/02/21'],
-            "price_computation": "FORMULA",
-            "rounding_method": 0.11,
-            "margin_min": 0,
-            "margin_max": 0,
-            "extra_fee": 500
-        },
-        {
-            "based_on" : "COST",
-            "product_group": {
-              "id": "1",
-              "name": "naama"
-            },
-            "apply_on": "product group",
-            "min_qty": 1,
-            "valid_date": ['01/02/21', '01/02/21'],
-            "price_computation": "FORMULA",
-            "rounding_method": 0.11,
-            "margin_min": 0,
-            "margin_max": 0,
-            "extra_fee": 500
-        }
-        ]
-    },
+      rules: [],
+      name: "",
+      availability: [{ based_on: "COUNTRY" }],
+    }
   });
 
   const nameWatch = useWatch({
@@ -125,6 +71,13 @@ const DetailRetailPricing: any = () => {
     name: "rules"
   });
 
+
+
+  const [showModalRules, setShowModalRules] = useState({
+    visibility: false,
+    tempRule: null,
+    index: null
+  })
   const columns = [
     {
       title: "key",
@@ -135,7 +88,7 @@ const DetailRetailPricing: any = () => {
       dataIndex: "action",
       width: "15%",
       align: "left",
-      render: (_, record, index) => {
+      render: (_, __, index) => {
         return (
           <Row gap="16px" alignItems="center" nowrap>
             <Col>
@@ -189,17 +142,34 @@ const DetailRetailPricing: any = () => {
     control,
   });
 
-  const [showModalRules, setShowModalRules] = useState({
-    visibility: false,
-    tempRule: null,
-    index: null
-  })
+  const [showUploadStructure, setShowUploadStructure] = useState<any>(false);
 
   const getValue = (data:any) => {
-    if (data.price_computation !== 'FORMULA'){
-      return data.value;
-    } else {
-      return `Min Margin ${data.margin_max} and Max Margin ${data.margin_min}`
+    if (data.price_computation.toLowerCase().replace("- ", " ") === 'discount'){
+      return data.value ? `Discount ${data.value} %` : "";
+    }
+
+    if (data.price_computation.toLowerCase().replace("- ", " ") === 'fixed price'){
+      return data.value ? `Rp. ${data.value}` : "";
+    }
+
+    if(data.price_computation.toLowerCase().replace("_", " ") === 'formula'){
+      if(!data.based_on) {
+        return ""
+      } else if(data.based_on.toLowerCase().replace("_", " ") === 'pricing structure'){
+        return 'Pricing Structure'
+      } else {
+        if(data.margin_max && data.margin_min){
+          return `Min Margin ${data.margin_min} and Max Margin ${data.margin_max}`
+        } else if(data.margin_max){
+          return `Max Margin ${data.margin_max}`
+        } else if (data.margin_min){
+          return `Min Margin ${data.margin_min}`
+        } else {
+          return ''
+        }
+
+      }
     }
   }
 
@@ -208,7 +178,13 @@ const DetailRetailPricing: any = () => {
     apply_on:  _.startCase(_.toLower(data.apply_on)),
     min_qty: data.min_qty,
     value: getValue(data),
-    valid_date: data?.valid_date?.map((date:any) => moment(date).format('DD/MM/YYYY'))?.join(" - ") || ''
+    valid_date: data?.valid_date?.map((date:any) => {
+      if(moment(date, 'DD/MM/YYYY', true).isValid()){
+        return moment(date, 'DD/MM/YYYY').format('DD/MM/YYYY')
+      }  else {
+        return moment(date).format('DD/MM/YYYY');
+      }
+    })?.join(" - ")
   }))
 
   const { mutate: updateRetailPricing } = useUpdateRetailPricing({
@@ -221,104 +197,162 @@ const DetailRetailPricing: any = () => {
 	});
 
   const onSubmit = (data:any) => {
+    data.availability = data.availability.map((data:any) => {
+      let newData:any = {
+        based_on: data.based_on
+      }
+      if(data.based_on === 'BRANCH'){
+        newData.branch = {
+          ids: data.value?.map((data:any) => data.id) || [],
+          select_all: !!data.select_all
+        }
+      } else if( data.based_on === 'SALES ORGANIZATION') {
+        newData.sales_organization = {
+          level: data.id,
+          select_all: !!data.select_all,
+          ids: data.value?.map((data:any) => data.id) || []
+        }
+      } else if(data.based_on === 'COUNTRY'){
+        newData.country = {
+          id: data?.country.id,
+          level: data?.country.value.map((data:any) => ({
+            id: data.id,
+            values: data?.levels?.map((data:any) => data?.id) || []
+          }))
+        }
+      }
+      return newData
+    })
+
+    data.rules = data.rules.map((data:any) => {
+      if(data.product_category){
+        data.product_category_id = data.product_category.id
+        delete data.product_category;
+      }
+      if(data.product_group){
+        data.product_group_id = data.product_group.id
+        delete data.product_group
+      }
+      if(data.product_variant){
+        data.product_variant_id = data.product_variant.id
+        delete data.product_variant;
+      }
+      return data;
+    })
+
     updateRetailPricing(data);
   }
 
-  const retailPricing = {
-    "company_id": "KSNI",
-    "name": "nama",
-    "availability": [
-      {
-          "based_on": "COUNTRY",
-           "country": {
-                  "id": "MCS-1026602",
-                  "name": "konoha",
-                  "level": [ 
-                      {
-                          "id": "170",
-                          "name": "konoha II",
-                          "values": [
-                            {"id": "1", "name": "kkkk"}  
-                          ]
-                            
-                      }
-                  ]
-         }
-      },
-      {
-          "based_on": "SALES ORGANIZATION",
-          "sales_organization" : {
-              "level": "aaa",
-              "id": 99,
-              "value": [
-                { "id": "17", "name" : "konoha" },
-                { "id": "18", "name" : "konoha" }  
-              ],
-              "select_all": true
-          }
-      },
-          {
-            "based_on": "BRANCH",
-            "branch" : {
-            "value": [
-                { "id": "BRA-0000007", "name" : "konoha" }  
-              ],
-            "select_all": true
-            }
-      }],
-      "rules" : [
-          {
-          "apply_on": "ALL PRODUCT",
-          "based_on" : "COST",
-          "min_qty": 1,
-          "valid_date": ['01/02/21', '01/02/21'],
-          "price_computation": "FORMULA",
-          "rounding_method": 0.11,
-          "margin_min": 0,
-          "margin_max": 0,
-          "extra_fee": 500
-      },
-      {
-          "based_on" : "COST",
-          "product_group": {
-            "id": "1",
-            "name": "naama"
-          },
-          "apply_on": "product group",
-          "min_qty": 1,
-          "valid_date": ['01/02/21', '01/02/21'],
-          "price_computation": "FORMULA",
-          "rounding_method": 0.11,
-          "margin_min": 0,
-          "margin_max": 0,
-          "extra_fee": 500
-      }
-      ]
-  }
-  // useRetailPricingDetail({
-  //   options: {
-  //     onSuccess: (data:any) => {
-  //       Object.keys(data).forEach((key:any) => {
-  //         setValue(key, data[key]);
-  //       })
-  //     }
-  //   },
-  //   id
-  // });
-
-
-  const { mutate: deleteRetailPricingList, isLoading: isLoadingDeleteRetailPricingList } =
-  useDeleteRetailPricing({
+  const { data: retailPricing, isLoading } = useRetailPricingDetail({
     options: {
-      onSuccess: () => {
-        router.back();
-        queryClient.invalidateQueries(["retail-pricing-list"]);
+      onSuccess: (data:any) => {
+        data = toSnakeCase(data);
+        Object.keys(data).forEach((key:any) => {
+          if(key === 'rules'){
+            let rules = data[key];
+
+            let newRules = rules.map((data : any) => {
+              let newRule: any = {
+                apply_on: data.apply_on.toUpperCase(),
+                price_computation: data.price_computation.toUpperCase().replace('_', " "),
+                min_qty: data.min_qty,
+                valid_date: [moment(data.valid_start_date).format('DD/MM/YYYY'), moment(data.valid_end_date).format('DD/MM/YYYY')]
+              }
+              if(newRule.apply_on === 'PRODUCT VARIANT'){
+                newRule.product_variant = data.product_variant
+              }
+              if(newRule.apply_on === 'PRODUCT CATEGORY'){
+                newRule.product_category = data.product_category
+              }
+              if(newRule.apply_on === 'PRODUCT GROUP'){
+                newRule.product_group = data.product_group
+              }
+          
+              if(newRule.price_computation === 'FIXED PRICE') {
+                newRule.value = data.fixed_price
+              }
+
+              if(newRule.price_computation === 'DISCOUNT') {
+                newRule.value = data.discount_percentage
+              }
+              
+              if(newRule.price_computation === 'FORMULA') {
+                newRule.based_on = data?.based_on?.toUpperCase()?.replace('_', " ")
+          
+                if(data?.based_on?.toUpperCase() === 'COST'){
+                  newRule.margin_min = data.margin_min
+                  newRule.margin_max = data.margin_max
+                  newRule.extra_fee = data.extra_fee
+                  newRule.rounding_method = data.rounding_method
+                }
+              }
+
+              return newRule;
+            })
+
+            setValue('rules', newRules)
+          } else {
+
+            if(key === 'availability'){
+              setValue('availability', data[key])
+            }
+
+            if(key === 'name'){
+              setValue('name', data[key])
+            }
+          }
+        })
       },
+      select: (data) => {
+        data = toSnakeCase(data);
+        return data;
+      }
     },
+    id
   });
+
+  const onUploadStructure = (data: any) => {
+
+    data.forEach((data:any) => {
+      let valid_date_split = data.validateDate ? data.validateDate.split(' ') : null;
+
+      let newRule: any = {
+        apply_on: data.applyOn.toUpperCase(),
+        price_computation: data.priceComputation.toUpperCase(),
+        min_qty: data.minimumQuantity,
+      }
+
+      if(valid_date_split){
+        newRule.valid_date = [moment(valid_date_split[0], 'DD/MM/YYYY').utc().toString(), moment(valid_date_split[2], 'DD/MM/YYYY').utc().toString()];
+      }
+
+      if(newRule.apply_on === 'PRODUCT CATEGORY') {
+        newRule.product_category = {
+          id: data.productCategory
+        }
+      }
+
+      if(newRule.apply_on === 'PRODUCT VARIANT') {
+        newRule.product_variant = {
+          id: data.productVariant
+        }
+      }
+
+      if(newRule.apply_on === 'PRODUCT GROUP') {
+        newRule.product_group = {
+          id: data.productGroup
+        }
+      }
+
+      appendRules(newRule)
+    })
+  }
 
   return (
     <>
+    {isLoading ?
+      <Spin tip="Loading data..." />
+      :
       <Col>
         <Row gap="4px" alignItems="center">
           <ArrowLeft style={{ cursor: "pointer" }} onClick={() => router.back()} />
@@ -327,8 +361,8 @@ const DetailRetailPricing: any = () => {
         <Spacer size={12} />
         <Card padding="20px">
           <Row justifyContent="end" alignItems="center" nowrap gap="12px">
-            <Button size="big" variant={"tertiary"} onClick={() => setShowDeleteModal(true)}>
-              Delete
+            <Button size="big" variant={"tertiary"} onClick={() => router.back()}>
+              Cancel
             </Button>
             <Button
               size="big"
@@ -352,8 +386,11 @@ const DetailRetailPricing: any = () => {
                   label="Name"
                   height="48px"
                   placeholder={"e.g Public Pricelist"}
+                  error={errors.name?.message}
                   required
-                  {...register('name')}
+                  {...register('name', {
+                    required: "Name must be filled"
+                  })}
                 />
               </Row>
               <Spacer size={20} />
@@ -375,7 +412,7 @@ const DetailRetailPricing: any = () => {
 
         <Accordion>
           <Accordion.Item key={2}>
-            <Accordion.Header variant="blue">Inventory Valuation</Accordion.Header>
+            <Accordion.Header variant="blue">Price Rules</Accordion.Header>
             <Accordion.Body>
               <Row width="100%" gap="20px" noWrap>
                 <DownloadUploadContainer>
@@ -385,13 +422,8 @@ const DetailRetailPricing: any = () => {
                     Use this template to add rules structure
                   </Text>
                   <Spacer size={10} />
-                  <Button variant="tertiary" size="big">
-                    <Link
-                      href="https://mdm-portal.nabatisnack.co.id:3001/public/template/Template-Country-Structure.xlsx"
-                      target="_blank"
-                    >
-                      Download Template
-                    </Link>
+                  <Button variant="tertiary" size="big" onClick={() => downloadFile({ with_data: "N", type: 'rule', company_id: "KSNI" })}>
+                    Download Template
                   </Button>
                 </DownloadUploadContainer>
 
@@ -405,7 +437,7 @@ const DetailRetailPricing: any = () => {
                   <Button
                     variant="tertiary"
                     size="big"
-                    onClick={() => {}}
+                    onClick={() => setShowUploadStructure(true)}
                   >
                     Upload Template
                   </Button>
@@ -452,7 +484,7 @@ const DetailRetailPricing: any = () => {
               })
             }}
             onSubmit={(index, data:any) => {
-              if(index){
+              if(index || index === 0){
                 updateRules(index, data)
               } else {
                 appendRules(data)
@@ -463,21 +495,18 @@ const DetailRetailPricing: any = () => {
                 index:null
               })
             }}
-            defaultValues={showModalRules?.tempRule}
+            defaultValues={JSON?.parse(JSON?.stringify(showModalRules?.tempRule))}
             index={showModalRules?.index}
           />
         }
-        {showDeleteModal && (
-          <ModalDeleteConfirmation
-            totalSelected={1}
-            itemTitle={nameWatch}
-            visible={showDeleteModal}
-            isLoading={isLoadingDeleteRetailPricingList}
-            onCancel={() => setShowDeleteModal(false)}
-            onOk={() => deleteRetailPricingList({ ids: [id], company_id: "KSNI" })}
-          />
-        )}
       </Col>
+    }
+    
+      <FileUploaderExcel
+				setVisible={setShowUploadStructure}
+				visible={showUploadStructure}
+				onSubmit={onUploadStructure}
+			/>
     </>
   );
 };

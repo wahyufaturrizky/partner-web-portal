@@ -12,7 +12,7 @@ import {
 } from "pink-lava-ui";
 import styled from "styled-components";
 import ArrowLeft from "../../assets/icons/arrow-left.svg";
-import { useFieldArray, useForm, useWatch } from "react-hook-form";
+import { useFieldArray, useForm, useWatch, Controller } from "react-hook-form";
 import ModalAddRetailPricing from "components/elements/Modal/ModalAddRetailPricing";
 import { ICDelete, ICEdit } from "../../assets";
 import { useRouter } from "next/router";
@@ -20,6 +20,17 @@ import _ from "lodash";
 import moment from "moment";
 import { useCreateRetailPricing } from "hooks/mdm/retail-pricing/useRetailPricingList";
 import Conditions from "components/pages/RetailPricing/fragments/Conditions";
+import { mdmDownloadService } from "lib/client";
+
+const downloadFile = (params: any) =>
+  mdmDownloadService("/retail-pricing/download", { params }).then((res) => {
+    let dataUrl = window.URL.createObjectURL(new Blob([res.data]));
+    let tempLink = document.createElement("a");
+    tempLink.href = dataUrl;
+    tempLink.setAttribute("download", `retail_pricing_list_${new Date().getTime()}.xlsx`);
+    tempLink.click();
+  });
+
 
 const CreateRetailPricing: any = () => {
   const router = useRouter();
@@ -29,10 +40,11 @@ const CreateRetailPricing: any = () => {
     control,
     handleSubmit,
     setValue,
+    formState: { errors }
   } = useForm({
     defaultValues: {
       name: '',
-      availability: [{ based_on: "" }],
+      availability: [{ based_on: "COUNTRY" }],
       rules: []
     },
   });
@@ -52,6 +64,12 @@ const CreateRetailPricing: any = () => {
     name: "rules"
   });
 
+  const [showModalRules, setShowModalRules] = useState({
+    visibility: false,
+    tempRule: null,
+    index: null
+  })
+
   const columns = [
     {
       title: "key",
@@ -62,7 +80,7 @@ const CreateRetailPricing: any = () => {
       dataIndex: "action",
       width: "15%",
       align: "left",
-      render: (_, record, index) => {
+      render: (_, __, index) => {
         return (
           <Row gap="16px" alignItems="center" nowrap>
             <Col>
@@ -117,17 +135,24 @@ const CreateRetailPricing: any = () => {
   });
 
   const [showUploadStructure, setShowUploadStructure] = useState<any>(false);
-  const [showModalRules, setShowModalRules] = useState({
-    visibility: false,
-    tempRule: null,
-    index: null
-  })
 
   const getValue = (data:any) => {
-    if (data.price_computation !== 'FORMULA'){
-      return data.value;
-    } else {
-      return `Min Margin ${data.margin_max} and Max Margin ${data.margin_min}`
+    if (data.price_computation.toLowerCase().replace("- ", " ") === 'discount'){
+      return data.value ? `Discount ${data.value} %` : "";
+    }
+
+    if (data.price_computation.toLowerCase().replace("- ", " ") === 'fixed price'){
+      return data.value ? `Rp. ${data.value}` : "";
+    }
+
+    if(data.price_computation.toLowerCase().replace("_", " ") === 'formula'){
+      if(!data.based_on) {
+        return ""
+      } else if(data.based_on.toLowerCase().replace("_", " ") === 'pricing structure'){
+        return 'Pricing Structure'
+      } else {
+        return `Min Margin ${data.margin_max} and Max Margin ${data.margin_min}`
+      }
     }
   }
 
@@ -136,7 +161,13 @@ const CreateRetailPricing: any = () => {
     apply_on:  _.startCase(_.toLower(data.apply_on)),
     min_qty: data.min_qty,
     value: getValue(data),
-    valid_date: data?.valid_date?.map((date:any) => moment(date).format('DD/MM/YYYY'))?.join(" - ") || ''
+    valid_date: data?.valid_date?.map((date:any) => {
+        if(moment.isMoment(date)) {
+          return moment(date, "DD/MM/YYYY").format('DD/MM/YYYY')
+        } else {
+          return  moment(date).format('DD/MM/YYYY')
+        }
+      })?.join(" - ")
   }))
 
   const { mutate: createRetailPricing } = useCreateRetailPricing({
@@ -149,45 +180,87 @@ const CreateRetailPricing: any = () => {
 
   const onSubmit = (data:any) => {
     data.company_id = 'KSNI'
+    data.availability = data?.availability?.map((data) => {
+      let newData:any = {
+        based_on: data?.based_on
+      }
+      if(data.based_on === 'BRANCH'){
+        newData.branch = {
+          ids: data?.value?.map((data:any) => data?.id) || [],
+          select_all: !!data?.select_all
+        }
+      } else if( data.based_on === 'SALES ORGANIZATION') {
+        newData.sales_organization = {
+          level: data?.id,
+          select_all: !!data?.select_all,
+          ids: data?.value?.map((data:any) => data?.id) || []
+        }
+      } else if(data.based_on === 'COUNTRY'){
+        newData.country = {
+          id: data?.country?.id,
+          level: data?.country?.value?.map((data:any) => ({
+            id: data?.id,
+            values: data?.levels?.map((data:any) => data?.id) || []
+          }))
+        }
+      }
+      return newData
+    })
+
+    data.rules = data.rules.map((data:any) => {
+      if(data.product_category){
+        data.product_category_id = data.product_category.id
+        delete data.product_category;
+      }
+      if(data.product_group){
+        data.product_group_id = data.product_group.id
+        delete data.product_group
+      }
+      if(data.product_variant){
+        data.product_variant_id = data.product_variant.id
+        delete data.product_variant;
+      }
+      return data;
+    })
+    
     createRetailPricing(data);
   }
 
   const onUploadStructure = (data: any) => {
-    let newRule: any = {
-      apply_on: data.applyOn,
-      price_computation: data.priceComputation,
-      min_qty: data.minimumQuantity,
-      //valid_date: data.valid_date.map((date: any) => moment(date, 'DD/MM/YYYY').utc().toString())
-    }
 
-    // if(data.apply_on === 'PRODUCT VARIANT'){
-    //   newRule.product_variant_id = data.product_variant_id
-    // }
-    // if(data.apply_on === 'PRODUCT CATEGORY'){
-    //   newRule.product_category_id = data.product_category_id
-    // }
-    // if(data.apply_on === 'PRODUCT GROUP'){
-    //   newRule.product_group_id = data.product_group_id
-    // }
+    data.forEach((data:any) => {
+      let valid_date_split = data.validateDate ? data.validateDate.split(' ') : null;
 
-    if(data.priceComputation === 'DISCOUNT'){
-      newRule.value = data.discount;
-    }
-
-    if(data.priceComputation === 'FIXED PRICE'){
-      newRule.value = data.fixPrice;
-    }
-    
-    if(data.price_computation === 'FORMULA') {
-      newRule.based_on = data.basedOn
-
-      if(data.based_on === 'COST'){
-        newRule.margin_min = data.marginMinimum
-        newRule.margin_max = data.marginMaximum
-        newRule.extra_fee = data.extraFee
-        newRule.rounding_method = data.roundingMethod
+      let newRule: any = {
+        apply_on: data.applyOn.toUpperCase(),
+        price_computation: data.priceComputation.toUpperCase(),
+        min_qty: data.minimumQuantity,
       }
-    }
+
+      if(valid_date_split){
+        newRule.valid_date = [moment(valid_date_split[0], 'DD/MM/YYYY').utc().toString(), moment(valid_date_split[2], 'DD/MM/YYYY').utc().toString()];
+      }
+
+      if(newRule.apply_on === 'PRODUCT CATEGORY') {
+        newRule.product_category = {
+          id: data.productCategory
+        }
+      }
+
+      if(newRule.apply_on === 'PRODUCT VARIANT') {
+        newRule.product_variant = {
+          id: data.productVariant
+        }
+      }
+
+      if(newRule.apply_on === 'PRODUCT GROUP') {
+        newRule.product_group = {
+          id: data.productGroup
+        }
+      }
+
+      appendRules(newRule)
+    })
   }
 
   return (
@@ -220,13 +293,16 @@ const CreateRetailPricing: any = () => {
             <Accordion.Header variant="blue">General</Accordion.Header>
             <Accordion.Body>
               <Row width="100%" gap="20px" noWrap>
-                <Input
+               <Input
                   width="100%"
                   label="Name"
                   height="48px"
                   placeholder={"e.g Public Pricelist"}
+                  error={errors.name?.message}
                   required
-                  {...register('name')}
+                  {...register('name', {
+                    required: "Name must be filled"
+                  })}
                 />
               </Row>
               <Spacer size={20} />
@@ -247,7 +323,7 @@ const CreateRetailPricing: any = () => {
 
         <Accordion>
           <Accordion.Item key={2}>
-            <Accordion.Header variant="blue">Inventory Valuation</Accordion.Header>
+            <Accordion.Header variant="blue">Price Rules</Accordion.Header>
             <Accordion.Body>
               <Row width="100%" gap="20px" noWrap>
                 <DownloadUploadContainer>
@@ -257,13 +333,8 @@ const CreateRetailPricing: any = () => {
                     Use this template to add rules structure
                   </Text>
                   <Spacer size={10} />
-                  <Button variant="tertiary" size="big">
-                    <Link
-                      href="https://mdm-portal.nabatisnack.co.id:3001/public/template/Template-Country-Structure.xlsx"
-                      target="_blank"
-                    >
-                      Download Template
-                    </Link>
+                  <Button variant="tertiary" size="big" onClick={() => downloadFile({ with_data: "N", type: 'rule', company_id: "KSNI" })}>
+                    Download Template
                   </Button>
                 </DownloadUploadContainer>
 
@@ -324,7 +395,7 @@ const CreateRetailPricing: any = () => {
               })
             }}
             onSubmit={(index, data:any) => {
-              if(index){
+              if(index || index === 0){
                 updateRules(index, data)
               } else {
                 appendRules(data)
@@ -335,7 +406,7 @@ const CreateRetailPricing: any = () => {
                 index:null
               })
             }}
-            defaultValues={showModalRules?.tempRule}
+            defaultValues={JSON?.parse(JSON?.stringify(showModalRules?.tempRule))}
             index={showModalRules?.index}
           />
         }

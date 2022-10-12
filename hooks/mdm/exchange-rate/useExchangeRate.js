@@ -1,10 +1,8 @@
-import { useQuery } from "react-query";
+import { useMutation, useQuery } from "react-query";
 import { mdmService } from "../../../lib/client";
-import dummyExchange from "./dummy";
 
 const fetchExchangeRates = async ({ query = {} }) => {
-  // base url is will change if already yet
-  return mdmService(`/profit-center`, {
+  return mdmService(`/exchange-rate`, {
     params: {
       search: "",
       page: 1,
@@ -13,14 +11,25 @@ const fetchExchangeRates = async ({ query = {} }) => {
       sortOrder: "DESC",
       ...query,
     },
-  }).then((data) => dummyExchange[0].data);
+  }).then((data) => data);
 };
 
 const useExchangeRates = ({ query = {}, options }) => {
-  // base url is will change if already yet
-  return useQuery(["profit-list", query], () => fetchExchangeRates({ query }), {
+  return useQuery(["exchange-rate-list", query], () => fetchExchangeRates({ query }), {
     ...options,
   });
 };
 
-export { useExchangeRates };
+const useUploadFileExchangeRate = ({ options }) => {
+  return useMutation(
+    (data) =>
+      mdmService(`/exchange-rate/upload`, {
+        method: "POST",
+        data,
+      }),
+    {
+      ...options,
+    }
+  );
+};
+export { useExchangeRates, useUploadFileExchangeRate };

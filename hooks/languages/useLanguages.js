@@ -1,5 +1,5 @@
-import { useQuery } from "react-query";
-import { client } from "../../lib/client";
+import { useQuery, useInfiniteQuery } from "react-query";
+import { client, mdmService } from "../../lib/client";
 
 const fetchLanguages = async ({ query = {} }) => {
   return client(`/master/language`, {
@@ -21,4 +21,25 @@ const useLanguages = ({ query = {}, options } = {}) => {
   });
 };
 
-export { useLanguages };
+const fetchInfinityLanguage = async ({ pageParam = 1, queryKey }) => {
+  const searchQuery = queryKey[1].search;
+  return client(`/master/language`, {
+    params: {
+      search: searchQuery,
+      limit: 10,
+      page: pageParam,
+      sortBy: "created_at",
+      sortOrder: "DESC",
+      ...queryKey[1],
+    },
+  }).then((data) => data);
+};
+
+const useLanguagesInfiniteLists = ({ query = {}, options }) => {
+  return useInfiniteQuery(["languages/infinity", query], fetchInfinityLanguage, {
+    keepPreviousData: true,
+    ...options,
+  });
+};
+
+export { useLanguages, useLanguagesInfiniteLists };

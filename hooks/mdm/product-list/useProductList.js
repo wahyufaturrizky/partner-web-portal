@@ -97,10 +97,12 @@ const useUploadImageProduct = ({ options }) => {
 
 const useUpdateProductVariantStatus = ({ options }) => {
   return useMutation(
-    (data, id) =>
-      mdmService(`/product-variant/status/${id}`, {
+    (data) => 
+      mdmService(`/product-variant/status/${data.id}`, {
         method: "PUT",
-        data,
+        data: {
+          status: data.status,
+        },
       }),
     {
       ...options,

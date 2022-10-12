@@ -102,7 +102,7 @@ export default function ComponentSalesmanDivision() {
     options: {
       onSuccess: () => {
         refetch()
-        setVisible({ ...visible, create: false })
+        setVisible({ ...visible, update: false })
       }
     },
     id: formsUpdate?.id
@@ -164,6 +164,39 @@ export default function ComponentSalesmanDivision() {
     handleUploadDocuments(formData)
   }
 
+  const columnsSalesDivision = [
+    {
+      title: "Division ID",
+      dataIndex: "code",
+      width: "30%"
+    },
+    {
+      title: "Division Name",
+      dataIndex: "divisiName",
+      width: "30%"
+    },
+    {
+      title: "Product",
+      dataIndex: "product",
+      width: "20%"
+    },
+    {
+      title: "Action",
+      render: (items: any) => (
+        <Button
+          size="small"
+          onClick={() => {
+            setFormsUpdate({ ...items })
+            setVisible({ ...visible, update: true })
+          }}
+          variant="tertiary"
+        >
+          View Detail
+        </Button>
+      )
+    },
+  ]
+
   return (
     <div>
       <Text variant="h4">Sales Division</Text>
@@ -176,13 +209,13 @@ export default function ComponentSalesmanDivision() {
             onChange={({ target }: any) => setSearch(target.value)}
           />
           <FlexElement>
-            <Button
+            {/* <Button
               disabled={selectedItems.length < 1}
               onClick={() => setVisible({ ...visible, delete: true })}
               variant="tertiary"
             >
               Delete
-            </Button>
+            </Button> */}
             <DropdownMenu
               title="More"
               buttonVariant="secondary"
@@ -201,7 +234,7 @@ export default function ComponentSalesmanDivision() {
       <Spacer size={10} />
       <Card>
         <Table
-          rowSelection={rowSelection}
+          // rowSelection={rowSelection}
           loading={isLoading}
           columns={columnsSalesDivision}
           data={data?.rows?.map((item: any) => ({ ...item, key: item?.id }))}

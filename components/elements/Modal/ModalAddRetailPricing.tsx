@@ -9,8 +9,10 @@ import {
   Spacer,
   Row,
   Text,
-  FormInput
+  FormInput,
+  Tooltip
 } from "pink-lava-ui";
+import { ExclamationCircleOutlined } from "@ant-design/icons";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import moment from 'moment';
 import { useProductCategoryInfiniteLists } from 'hooks/mdm/product-category/useProductCategory';
@@ -41,8 +43,19 @@ export default function ModalAddRetailPricing({
     apply_on: 'ALL PRODUCT',
     valid_date: [moment(), moment()]
   }
+  
+  if(defaultValues?.valid_date){
+    defaultValues.valid_date = defaultValues.valid_date.map((date:any) => {
+        if(moment(date, 'DD/MM/YYYY', true).isValid()){
+          return moment(date, 'DD/MM/YYYY')
+        }  else {
+          return moment(date);
+        }
+      }
+    )
+  }
 
-  const { control, handleSubmit, watch } = useForm({
+  const { control, handleSubmit, watch, setValue } = useForm({
     defaultValues: defaultValues ? defaultValues : defaultCreateValue
   });
 
@@ -192,13 +205,13 @@ export default function ModalAddRetailPricing({
     }
 
     if(data.apply_on === 'PRODUCT VARIANT'){
-      newRule.product_variant_id = data.product_variant_id
+      newRule.product_variant = data.product_variant
     }
     if(data.apply_on === 'PRODUCT CATEGORY'){
-      newRule.product_category_id = data.product_category_id
+      newRule.product_category = data.product_category
     }
     if(data.apply_on === 'PRODUCT GROUP'){
-      newRule.product_group_id = data.product_group_id
+      newRule.product_group = data.product_group
     }
 
     if(data.price_computation !== 'FORMULA') {
@@ -219,7 +232,7 @@ export default function ModalAddRetailPricing({
     onCancel()
 
   }
-
+  const validDateDefault = retailPricing?.valid_date
   return (
     <Modal
       width={880}
@@ -250,7 +263,6 @@ export default function ModalAddRetailPricing({
         <Row width="100%" noWrap>
           <Controller
             control={control}
-            rules={{ required: true }}
             shouldUnregister={true}
             name="price_computation"
             defaultValue={retailPricing?.price_computation}
@@ -258,6 +270,13 @@ export default function ModalAddRetailPricing({
               <Col width="100%">
                 <span>
                   <Label style={{ display: "inline" }}>Price Computation </Label>{" "}
+                  <Tooltip
+                    overlayInnerStyle={{ width: "fit-content" }}
+                    title={`Price Computation`}
+                    color={"#F4FBFC"}
+                  >
+                    <ExclamationCircleOutlined />
+                  </Tooltip>
                   <span></span>
                 </span>
 
@@ -299,9 +318,9 @@ export default function ModalAddRetailPricing({
                   defaultValue={retailPricing?.value}
                   render={({ field: { onChange } }) => (
                     <Col width="100%">
-                      <Text variant="headingRegular">
+                      <Label>
                         Fixed Price
-                      </Text>
+                      </Label>
                       <Spacer size={3} />
                       <CustomFormInput
                         size={"large"}
@@ -327,17 +346,17 @@ export default function ModalAddRetailPricing({
                   defaultValue={retailPricing?.value}
                   render={({ field: { onChange } }) => (
                     <Col width="100%">
-                      <Text variant="headingRegular">
+                      <Label>
                         Discount Price
-                      </Text>
+                      </Label>
                       <Spacer size={3} />
-                      <CustomFormInput
+                      <FormInput
                         size={"large"}
                         defaultValue={retailPricing?.value}
-                        onChange={(value:any) => onChange(value/100)}
+                        onChange={(value:any) => onChange(value)}
                         placeholder={`e.g 0.1`}
                         style={{ height: 48, width: '100%' }}
-                        type="number"
+                        suffix="%"
                       />
                     </Col>
                   )}
@@ -353,7 +372,6 @@ export default function ModalAddRetailPricing({
             <Row width="100%">
               <Controller
                   control={control}
-                  rules={{ required: true }}
                   shouldUnregister={true}
                   name="based_on"
                   defaultValue={retailPricing?.based_on}
@@ -361,7 +379,13 @@ export default function ModalAddRetailPricing({
                     <Col width="100%">
                       <span>
                         <Label style={{ display: "inline" }}>Based On </Label>{" "}
-                        <span></span>
+                        <Tooltip
+                          overlayInnerStyle={{ width: "fit-content" }}
+                          title={`Based On`}
+                          color={"#F4FBFC"}
+                        >
+                          <ExclamationCircleOutlined />
+                        </Tooltip>
                       </span>
 
                       <Spacer size={3} />
@@ -390,9 +414,19 @@ export default function ModalAddRetailPricing({
                   defaultValue={retailPricing?.rounding_method}
                   render={({ field: { onChange } }) => (
                     <Col width="100%">
-                      <Text variant="headingRegular">
-                        Rounding Method
-                      </Text>
+                      <Row width="100%" alignItems="center">
+                        <Label>
+                          Rounding Method
+                        </Label>
+                        <Spacer size={5} display="inline" />
+                        <Tooltip
+                            overlayInnerStyle={{ width: "fit-content" }}
+                            title={`Rounding Method`}
+                            color={"#F4FBFC"}
+                          >
+                            <ExclamationCircleOutlined />
+                        </Tooltip>
+                      </Row>
                       <Spacer size={3} />
                       <CustomFormInput
                         size={"large"}
@@ -428,9 +462,9 @@ export default function ModalAddRetailPricing({
                     defaultValue={retailPricing?.margin_min}
                     render={({ field: { onChange } }) => (
                       <Col width="100%">
-                        <Text variant="headingRegular">
+                        <Label>
                           Margin Minimum
-                        </Text>
+                        </Label>
                         <Spacer size={3} />
                         <CustomFormInput
                           size={"large"}
@@ -454,9 +488,9 @@ export default function ModalAddRetailPricing({
                     defaultValue={retailPricing?.margin_max}
                     render={({ field: { onChange } }) => (
                       <Col width="100%">
-                        <Text variant="headingRegular">
+                        <Label>
                           Margin Maximum
-                        </Text>
+                        </Label>
                         <Spacer size={3} />
                         <CustomFormInput
                           size={"large"}
@@ -482,9 +516,9 @@ export default function ModalAddRetailPricing({
                     defaultValue={retailPricing?.extra_fee}
                     render={({ field: { onChange } }) => (
                       <Col width="100%">
-                        <Text variant="headingRegular">
+                        <Label>
                           Extra Fee
-                        </Text>
+                        </Label>
                         <Spacer size={3} />
                         <CustomFormInput
                           size={"large"}
@@ -502,12 +536,18 @@ export default function ModalAddRetailPricing({
                 <Spacer size={20} />
 
                 <Row width="100%">
+                  <Col width="100%">
+                    <Label>
+                      Hint
+                    </Label>
+                    <Spacer size={3} />
                     <CustomForm>
                       <Span>
                         Sales Price with a 10.0% discount and $500.00 Extra fee
                         Example : $ 100.00*0.9 + $500.00 = $ 590.00
                       </Span>
                     </CustomForm>
+                  </Col>
                 </Row>
               </Row>
             </Row>
@@ -526,7 +566,6 @@ export default function ModalAddRetailPricing({
           <Row width="100%">
             <Controller
               control={control}
-              rules={{ required: true }}
               shouldUnregister={true}
               defaultValue={retailPricing?.apply_on}
               name="apply_on"
@@ -534,7 +573,13 @@ export default function ModalAddRetailPricing({
                 <Col width="100%">
                   <span>
                     <Label style={{ display: "inline" }}>Apply on </Label>{" "}
-                    <span></span>
+                    <Tooltip
+                      overlayInnerStyle={{ width: "fit-content" }}
+                      title={`Apply On`}
+                      color={"#F4FBFC"}
+                    >
+                        <ExclamationCircleOutlined />
+                    </Tooltip>
                   </span>
                   <Spacer size={4} />
                   <CustomFormSelect
@@ -569,149 +614,152 @@ export default function ModalAddRetailPricing({
 
           {applyOnWatch === "PRODUCT CATEGORY" && 
             <Row width="100%" noWrap>
-              <Controller
-                control={control}
-                name="product_category_id"
-                defaultValue={retailPricing?.product_category_id}
-                render={({ field: { onChange } }) => (
-                  <Col width="100%">
-                    <span>
-                      <Label style={{ display: "inline" }}>Category </Label>{" "}
-                      <span></span>
-                    </span>
+              <Col width="100%">
+                <span>
+                  <Label style={{ display: "inline" }}>Category </Label>{" "}
+                  <Tooltip
+                    overlayInnerStyle={{ width: "fit-content" }}
+                    title={`Product Category`}
+                    color={"#F4FBFC"}
+                  >
+                    <ExclamationCircleOutlined />
+                  </Tooltip>
+                </span>
 
-                    <Spacer size={3} />
-                    <CustomFormSelect
-                      defaultValue={retailPricing?.product_category_id}
-                      style={{ width: "100%", height: '48px' }}
-                      size={"large"}
-                      placeholder={"Select"}
-                      borderColor={"#AAAAAA"}
-                      arrowColor={"#000"}
-                      withSearch
-                      isLoading={isFetchingProductCategory}
-                      isLoadingMore={isFetchingMoreProductCategory}
-                      fetchMore={() => {
-                        if (hasNextProductCategory) {
-                          fetchNextPageProductCategory();
-                        }
-                      }}
-                      items={
-                        isFetchingProductCategory || isFetchingMoreProductCategory
-                          ? []
-                          : listProductCategory
-                      }
-                      onChange={(value: any) => {
-                        onChange(value);
-                      }}
-                      onSearch={(value: any) => {
-                        setSearchProductCategory(value);
-                      }}
-                    />
-                  </Col>
-                )}
-              />
+                <Spacer size={3} />
+                <CustomFormSelect
+                  labelInValue
+                  defaultValue={retailPricing?.product_category?.name}
+                  style={{ width: "100%", height: '48px' }}
+                  size={"large"}
+                  placeholder={"Select"}
+                  borderColor={"#AAAAAA"}
+                  arrowColor={"#000"}
+                  withSearch
+                  isLoading={isFetchingProductCategory}
+                  isLoadingMore={isFetchingMoreProductCategory}
+                  fetchMore={() => {
+                    if (hasNextProductCategory) {
+                      fetchNextPageProductCategory();
+                    }
+                  }}
+                  items={
+                    isFetchingProductCategory || isFetchingMoreProductCategory
+                      ? []
+                      : listProductCategory
+                  }
+                  onChange={(value: any) => {
+                    setValue('product_category.name', value.label)
+                    setValue('product_category.id', value.key)
+                  }}
+                  onSearch={(value: any) => {
+                    setSearchProductCategory(value);
+                  }}
+                />
+              </Col>
             </Row>
           }
 
           {applyOnWatch === "PRODUCT VARIANT" && 
             <Row width="100%">
-              <Controller
-                control={control}
-                name="product_variant_id"
-                defaultValue={retailPricing?.product_variant_id}
-                render={({ field: { onChange } }) => (
-                  <Col width="100%">
-                    <span>
-                      <Label style={{ display: "inline" }}>Product Variant Name</Label>{" "}
-                      <span></span>
-                    </span>
+              <Col width="100%">
+                <span>
+                  <Label style={{ display: "inline" }}>Product Variant Name</Label>{" "}
+                  <Tooltip
+                    overlayInnerStyle={{ width: "fit-content" }}
+                    title={`Product Variant Name`}
+                    color={"#F4FBFC"}
+                  >
+                    <ExclamationCircleOutlined />
+                  </Tooltip>
+                </span>
 
-                    <Spacer size={3} />
-                    <CustomFormSelect
-                      defaultValue={retailPricing?.product_variant_id}
-                      style={{ width: "100%", height: '48px' }}
-                      size={"large"}
-                      placeholder={"Select"}
-                      borderColor={"#AAAAAA"}
-                      arrowColor={"#000"}
-                      withSearch
-                      isLoading={isFetchingProductVariant}
-                      isLoadingMore={isFetchingMoreProductVariant}
-                      fetchMore={() => {
-                        if (hasNextProductVariant) {
-                          fetchNextPageProductVariant();
-                        }
-                      }}
-                      items={
-                        isFetchingProductVariant || isFetchingMoreProductVariant
-                          ? []
-                          : listProductVariant
-                      }
-                      onChange={(value: any) => {
-                        onChange(value);
-                      }}
-                      onSearch={(value: any) => {
-                        setSearchProductVariant(value);
-                      }}
-                    />
-                  </Col>
-                )}
-              />
+                <Spacer size={3} />
+                <CustomFormSelect
+                  labelInValue
+                  defaultValue={retailPricing?.product_variant?.name}
+                  style={{ width: "100%", height: '48px' }}
+                  size={"large"}
+                  placeholder={"Select"}
+                  borderColor={"#AAAAAA"}
+                  arrowColor={"#000"}
+                  withSearch
+                  isLoading={isFetchingProductVariant}
+                  isLoadingMore={isFetchingMoreProductVariant}
+                  fetchMore={() => {
+                    if (hasNextProductVariant) {
+                      fetchNextPageProductVariant();
+                    }
+                  }}
+                  items={
+                    isFetchingProductVariant || isFetchingMoreProductVariant
+                      ? []
+                      : listProductVariant
+                  }
+                  onChange={(value: any) => {
+                    setValue('product_variant.name', value.label)
+                    setValue('product_variant.id', value.key)
+                  }}
+                  onSearch={(value: any) => {
+                    setSearchProductVariant(value);
+                  }}
+                />
+              </Col>
             </Row>
           }
 
           {applyOnWatch === "PRODUCT GROUP" && 
            <Row width="100%">
-            <Controller
-              control={control}
-              name="product_group_id"
-              defaultValue={retailPricing?.product_group_id}
-              render={({ field: { onChange } }) => (
-                <Col width="100%">
-                  <span>
-                    <Label style={{ display: "inline" }}>Product Group Name</Label>{" "}
-                    <span></span>
-                  </span>
+              <Col width="100%">
+                <span>
+                  <Label style={{ display: "inline" }}>Product Group Name</Label>{" "}
+                  <Tooltip
+                    overlayInnerStyle={{ width: "fit-content" }}
+                    title={`Product Group Name`}
+                    color={"#F4FBFC"}
+                  >
+                    <ExclamationCircleOutlined />
+                  </Tooltip>
+                </span>
 
-                  <Spacer size={3} />
-                  <CustomFormSelect
-                    defaultValue={retailPricing?.product_group_id}
-                    style={{ width: "100%", height: '48px' }}
-                    size={"large"}
-                    placeholder={"Select"}
-                    borderColor={"#AAAAAA"}
-                    arrowColor={"#000"}
-                    withSearch
-                    isLoading={isFetchingProductGroup}
-                    isLoadingMore={isFetchingMoreProductGroup}
-                    fetchMore={() => {
-                      if (hasNextProductGroup) {
-                        fetchNextPageProductGroup();
-                      }
-                    }}
-                    items={
-                      isFetchingProductGroup || isFetchingMoreProductGroup
-                        ? []
-                        : listProductGroup
+                <Spacer size={3} />
+                <CustomFormSelect
+                  labelInValue
+                  defaultValue={retailPricing?.product_group?.name}
+                  style={{ width: "100%", height: '48px' }}
+                  size={"large"}
+                  placeholder={"Select"}
+                  borderColor={"#AAAAAA"}
+                  arrowColor={"#000"}
+                  withSearch
+                  isLoading={isFetchingProductGroup}
+                  isLoadingMore={isFetchingMoreProductGroup}
+                  fetchMore={() => {
+                    if (hasNextProductGroup) {
+                      fetchNextPageProductGroup();
                     }
-                    onChange={(value: any) => {
-                      onChange(value);
-                    }}
-                    onSearch={(value: any) => {
-                      setSearchProductGroup(value);
-                    }}
-                  />
-                </Col>
-              )}
-            />
+                  }}
+                  items={
+                    isFetchingProductGroup || isFetchingMoreProductGroup
+                      ? []
+                      : listProductGroup
+                  }
+                  onChange={(value: any) => {
+                    setValue('product_group.name', value.label)
+                    setValue('product_group.id', value.key)
+                  }}
+                  onSearch={(value: any) => {
+                    setSearchProductGroup(value);
+                  }}
+                />
+              </Col>
            </Row>
           }
         </Row>
 
         <Spacer size={20} />
 
-        <Row size="100%" noWrap>
+        <Row size="100%" noWrap justifyContent="center">
           <Row width="100%">
             <Controller
               control={control}
@@ -719,9 +767,9 @@ export default function ModalAddRetailPricing({
               defaultValue={retailPricing?.min_qty}
               render={({ field: { onChange } }) => (
                 <Col width="100%">
-                  <Text variant="headingRegular">
+                  <Label>
                     Minimum Quantity
-                  </Text>
+                  </Label>
                   <Spacer size={3} />
                   <CustomFormInput
                     size={"large"}
@@ -741,13 +789,14 @@ export default function ModalAddRetailPricing({
           <Row width="100%">
             <Controller
               control={control}
-              //defaultValue={retailPricing?.valid_date?.map((date:any) => moment(date))}
+              defaultValue={validDateDefault}
               name={`valid_date`}
               render={({ field: { onChange } }) => (
                 <Col width="100%">
                   <RangeDatePicker
+                    separator={<span>-</span>}
                     fullWidth
-                    //defaultValue={retailPricing?.valid_date?.map((date:any) => moment(date))}
+                    defaultValue={validDateDefault}
                     onChange={(date: any, dateString: any) => onChange(dateString)}
                     label="Validity Date"
                     format={'DD/MM/YYYY'}

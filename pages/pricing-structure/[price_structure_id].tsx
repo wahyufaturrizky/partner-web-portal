@@ -1,29 +1,24 @@
 import usePagination from "@lucasmogari/react-pagination";
 import { ModalDeleteConfirmation } from "components/elements/Modal/ModalConfirmationDelete";
 import { ModalInactiveReason } from "components/elements/Modal/ModalInactiveReason";
-import { ModalRejectPartner } from "components/elements/Modal/ModalRejectPartner";
+import { ModalRejectPriceStructure } from "components/elements/Modal/ModalRejectPriceStructure";
 import { useCurrenciesInfiniteLists } from "hooks/mdm/country-structure/useCurrencyMDM";
 import { useProductList } from "hooks/mdm/product-list/useProductList";
 import {
-  useCreatePricingStructureDraftList,
-  useCreatePricingStructureList,
-  useDeletePricingStructureList,
+  useCreatePricingStructureDraftList, useDeletePricingStructureList,
   useGroupBuyingLists,
-  usePricingConfigInfiniteLists,
-  usePricingStructureList,
+  usePricingConfigInfiniteLists, usePricingStructureInfiniteLists, usePricingStructureList,
   usePricingStructureLists,
-  useUpdatePricingStructureList,
-  usePricingStructureInfiniteLists,
+  useUpdatePricingStructureList
 } from "hooks/pricing-structure/usePricingStructure";
 import {
   useSalesOrganizationHirarcy,
-  useSalesOrganizationInfiniteLists,
+  useSalesOrganizationInfiniteLists
 } from "hooks/sales-organization/useSalesOrganization";
 import useDebounce from "lib/useDebounce";
-import moment from "moment";
 import { useRouter } from "next/router";
 import {
-  Button,
+  Alert, Button,
   Col,
   Dropdown,
   DropdownMenuOptionCustome,
@@ -37,12 +32,10 @@ import {
   Progress,
   Row,
   Search,
-  Spacer,
-  Switch,
+  Spacer, Spin, Switch,
   Table,
   Text,
-  Tooltip,
-  Spin,
+  Tooltip
 } from "pink-lava-ui";
 import { useEffect, useState } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
@@ -51,6 +44,23 @@ import { colors } from "utils/color";
 import { STATUS_APPROVAL_TEXT } from "utils/utils";
 import { ICCopy, ICInfo, ICPlus } from "../../assets";
 import ArrowLeft from "../../assets/icons/arrow-left.svg";
+
+export const emptyPayloadPriceStructure = {
+  add_distributions: [],
+    add_products: [],
+    del_distributions: [],
+    del_products: [],
+    add_total_cost: [],
+    total_cost: [],
+    add_zone: [],
+    add_total_cost_by_zone: [],
+    zone: [],
+    total_cost_by_zone: [],
+    add_cost_by_distribution: [],
+    add_cost_by_region: [],
+    cost_by_distribution: [],
+    cost_by_region: [],
+}
 
 const DetailPricingStructure: any = () => {
   const router = useRouter();
@@ -149,6 +159,8 @@ const DetailPricingStructure: any = () => {
   });
 
   const [percent, setPercent] = useState(0);
+
+  
 
   const {
     handleSubmit,
@@ -267,6 +279,7 @@ const DetailPricingStructure: any = () => {
       ],
     },
   });
+  
 
   const dataWatchManageByZone = useWatch({
     control: control,
@@ -283,7 +296,7 @@ const DetailPricingStructure: any = () => {
     name: "manage_by",
   });
 
-  const { mutate: approvePartner } = useUpdatePricingStructureList({
+  const { mutate: approvePartner, isLoading: isLoadingApprovePriceStructure } = useUpdatePricingStructureList({
     options: {
       onSuccess: () => {
         router.back();
@@ -292,7 +305,7 @@ const DetailPricingStructure: any = () => {
     pricingStructureListId: price_structure_id,
   });
 
-  const { mutate: rejectPartner } = useUpdatePricingStructureList({
+  const { mutate: rejectPartner, isLoading: isLoadingRejectPriceStructure } = useUpdatePricingStructureList({
     options: {
       onSuccess: () => {
         setModalReject({ open: false });
@@ -302,7 +315,7 @@ const DetailPricingStructure: any = () => {
     pricingStructureListId: price_structure_id,
   });
 
-  const { mutate: updatePriceStructure } = useUpdatePricingStructureList({
+  const { mutate: updatePriceStructure, isLoading: isLoadingUpdatePriceStructure } = useUpdatePricingStructureList({
     options: {
       onSuccess: () => {
         router.back();
@@ -312,10 +325,21 @@ const DetailPricingStructure: any = () => {
   });
 
   const approve = () => {
-    const payload = {
-      status: "APPROVED",
-    };
-    approvePartner(payload);
+    if (pricingStructureListById?.changesHistory?.from === "ACTIVE" && pricingStructureListById?.changesHistory?.to === "WAITING") {
+      const payload = {
+        status: "INACTIVE",
+        inactive_reason: pricingStructureListById?.inactiveReason || "empty reason",
+        ...emptyPayloadPriceStructure
+      };
+      approvePartner(payload);
+    } else {
+      const payload = {
+        status: "ACTIVE",
+        ...emptyPayloadPriceStructure
+      };
+      approvePartner(payload);
+    }
+   
   };
 
   const reject = (data: any) => {
@@ -330,15 +354,6 @@ const DetailPricingStructure: any = () => {
       },
     },
   });
-
-  const { mutate: pricingStructure, isLoading: isLoadingPricingStructure } =
-    useCreatePricingStructureList({
-      options: {
-        onSuccess: () => {
-          router.back();
-        },
-      },
-    });
 
   const { mutate: pricingStructureDraft, isLoading: isLoadingPricingStructureDraft } =
     useCreatePricingStructureDraftList({
@@ -381,10 +396,8 @@ const DetailPricingStructure: any = () => {
             priceStructureConfigId,
             priceStructureCosts,
             priceStructureDistributions,
-            priceStructureRejection,
-            proposalNumber,
-            salesOrganizationStructure,
             status,
+            inactiveReason,
           } = data;
 
           setValue("activeDate", activeDate);
@@ -392,19 +405,13 @@ const DetailPricingStructure: any = () => {
           setValue("currency", currency);
           setValue("manage_by", managedBy);
 
+          if(inactiveReason) {
+            setValue("inactive_reason", inactiveReason)
+          }
+          
+
           setValue("status", status);
-          setValue(
-            "product_selected",
-            priceStructureCosts.map((data: any) => ({
-              hasVariant: false,
-              id: data.productId,
-              key: data.productId,
-              name: data.productId,
-              productCategoryName: data.productVariant,
-              status: "",
-              distribution_channel: [],
-            }))
-          );
+          
         },
       },
     });
@@ -519,24 +526,60 @@ const DetailPricingStructure: any = () => {
   } = useSalesOrganizationHirarcy({
     structure_id: dataWatchManageBy,
     options: {
-      onSuccess: (data: any) => {
+      onSuccess: (dataSalesOrganizationHirarcy: any) => {
         setValue(
           "distribution_channel",
-          data
+          dataSalesOrganizationHirarcy
             .filter((filtering: any) =>
-              pricingStructureListById.priceStructureDistributions
+              pricingStructureListById?.priceStructureDistributions
                 .map((data: any) => data.salesOrganizationHirarcy.name)
                 .includes(filtering.name)
             )
             .map((data: any) => data.id)
         );
+        
+
+        const rawProductSelectedById = pricingStructureListById?.priceStructureCosts.map((data: any) => ({
+          hasVariant: false,
+          id: data.productId,
+          key: data.productId,
+          name: data.productId,
+          productCategoryName: data.productVariant,
+          status: "",
+          distribution_channel: dataSalesOrganizationHirarcy
+          ?.filter((filtering: any) => pricingStructureListById?.priceStructureDistributions.map((data: any) => data.salesOrganizationHirarcy.name).includes(filtering.name))
+          .map((distribution_channel_mapped: any) => ({
+            ...distribution_channel_mapped,
+            level: pricingConfigInfiniteList
+              .find((finding: any) => finding.id === pricingStructureListById?.priceStructureConfig.id)
+              ?.priceStructureLevelings.map((subLevel: any) => ({
+                ...subLevel,
+                nameLevel: dataGroupBuying.rows[subLevel.buyingPrice]?.name,
+              })),
+            currency: currenciesInfiniteList.find(
+              (finding: any) => finding.id === pricingStructureListById?.currency
+            ),
+            manage_by: salesOrganizationInfiniteList.find(
+              (finding: any) => finding.id === pricingStructureListById?.managedBy
+            ),
+          })),
+        }));
+        
+        
+
+        setValue(
+          "product_selected",
+          rawProductSelectedById
+        );
+
+        setProductsSelected(rawProductSelectedById);
       },
       select: (data: any) =>
         data.map((dataHirarcy: any) => ({
           ...dataHirarcy,
           key: dataHirarcy.id,
         })),
-      enabled: !!dataWatchManageBy,
+      enabled: !!dataWatchManageBy && !!pricingConfigInfiniteList && !!dataGroupBuying && !!pricingStructureListById && !!currenciesInfiniteList && !!salesOrganizationInfiniteList,
     },
     query: {
       limit: 10000,
@@ -675,169 +718,107 @@ const DetailPricingStructure: any = () => {
   });
 
   const onSubmit = (dataSubmit: any) => {
-    window.alert("Under maintenance");
 
-    // switch (pricingStructureListById.status) {
-    //   case "DRAFTED":
-    //     updatePriceStructure({
-    //       price_structure_config_id: dataSubmit.pricing_config,
-    //       currency: dataSubmit.currency,
-    //       managed_by: dataSubmit.manage_by,
-    //       status: "WAITING",
-    //       active_date: moment(dataSubmit.activeDate).format("YYYY-MM-DD"),
-    //       add_distributions: dataSubmit.distribution_channel.map((data: any) => data.id),
-    //       add_products: dataSubmit.product_selected.map((data) => data.id),
-    //       del_distributions: [],
-    //       del_products: [],
-    //       add_total_cost: dataSubmit.product_selected.map((data) => data.distribution_channel.map((subDataDist:any ) => ({
-    //         price_structure_cost_id: 1,
-    //         group_buying_price_id: 1,
-    //         is_reference: true,
-    //         cost: subDataDist.cost,
-    //         margin_type: subDataDist.margin_type,
-    //         margin_value: 1,
-    //         managed_by_zone: true,
-    //       },))),
-    //       // total_cost: [
-    //       //   {
-    //       //     id: 1,
-    //       //     price_structure_cost_id: 1,
-    //       //     group_buying_price_id: 1,
-    //       //     is_reference: true,
-    //       //     cost: "999999",
-    //       //     margin_type: "PERCENT",
-    //       //     margin_value: 1,
-    //       //     managed_by_zone: true,
-    //       //   },
-    //       // ],
-    //       // rejection: {
-    //       //   rejection_details: "haha",
-    //       //   rejection_reason: "hehe",
-    //       // },
-    //       add_total_cost_by_zone: [
-    //         {
-    //           price_structure_cost_id: 4,
-    //           group_buying_price_id: 2,
-    //           price_structure_zone_id: 8,
-    //           is_reference: true,
-    //           cost: "200",
-    //           margin_type: "FIX_AMOUNT",
-    //           margin_value: "200",
-    //         },
-    //       ],
-    //       add_zone: [
-    //         {
-    //           price_structure_cost_id: 4,
-    //           internal_region: 1,
-    //           is_default: false,
-    //         },
-    //       ],
-    //       // total_cost_by_zone: [
-    //       //   {
-    //       //     id: 3,
-    //       //     price_structure_cost_id: 4,
-    //       //     group_buying_price_id: 2,
-    //       //     price_structure_zone_id: 8,
-    //       //     is_reference: true,
-    //       //     cost: "200",
-    //       //     margin_type: "PERCENT",
-    //       //     margin_value: "200",
-    //       //   },
-    //       // ],
-    //       // zone: [
-    //       //   {
-    //       //     id: 8,
-    //       //     price_structure_cost_id: 4,
-    //       //     internal_region: 2,
-    //       //     is_default: true,
-    //       //   },
-    //       // ],
-    //     });
-    //     break;
+    updatePriceStructure({
+      status: pricingStructureListById?.changesHistory?.from === "ACTIVE" && pricingStructureListById?.changesHistory?.to === "WAITING" ? "ACTIVE" : pricingStructureListById?.changesHistory?.from === "REJECTED" && pricingStructureListById?.changesHistory?.to === "WAITING" ? "REJECTED" : pricingStructureListById?.changesHistory?.from === "INACTIVE" && pricingStructureListById?.changesHistory?.to === "WAITING" ? "INACTIVE" : (dataSubmit.status === "DRAFTED" || dataSubmit.status === "REJECTED" || dataSubmit.status === "INACTIVE") ? "WAITING" : "ACTIVE",
+      add_distributions: dataSubmit.distribution_channel,
+      add_products: dataSubmit.product_selected.map((data: any) => data.id),
+      add_total_cost: dataSubmit.product_selected?.[0]?.distribution_channel?.[0]?.cost ? dataSubmit.product_selected.map((data: any, index: any) => ({
+        price_structure_cost_by_distribution_id: data.distribution_channel[index]?.id,
+        group_buying_price_id: data.distribution_channel[index]?.level?.[index].buyingPrice,
+        is_reference: data.distribution_channel[index]?.is_reference,
+        level: data.distribution_channel[index]?.level?.[index].id,
+        cost: data.distribution_channel[index]?.cost,
+        margin_type: data.distribution_channel[index]?.margin_type,
+        margin_value: parseFloat(data.distribution_channel[index]?.margin_value),
+      })
+      ) : [],
+      add_cost_by_distribution:
+      dataSubmit.product_selected?.[0]?.distribution_channel?.[0]?.manage_by_zone ? dataSubmit.product_selected.map((data: any, index: any) => (
+        {
+          price_structure_cost_id: data.distribution_channel[index]?.structureId,
+          distribution_channel: data.distribution_channel[index]?.id,
+          managed_by_zone: data.distribution_channel[index]?.manage_by_zone,
+        },
+      )) : [],
+      add_total_cost_by_zone: dataSubmit.product_selected?.[0]?.distribution_channel?.[0]?.manage_by_zone_detail?.region_selected?.[0]?.distribution_channel?.[0]?.cost ? dataSubmit.product_selected.map((data: any, index: any) => ({
+        price_structure_cost_id: data.distribution_channel[index]?.manage_by_zone_detail?.region_selected[index].distribution_channel[index].structureId,
+          group_buying_price_id: data.distribution_channel[index]?.manage_by_zone_detail?.region_selected[index].distribution_channel[index].level?.[index].buyingPrice,
+          price_structure_zone_id: data.distribution_channel[index]?.manage_by_zone_detail?.region_selected[index].distribution_channel[index].id,
+          is_reference: data.distribution_channel[index]?.manage_by_zone_detail?.region_selected[index].distribution_channel[index].is_reference || false,
+          level: data.distribution_channel[index]?.manage_by_zone_detail?.region_selected[index].distribution_channel[index].level?.[index].id,
+          cost: data.distribution_channel[index]?.manage_by_zone_detail?.region_selected[index].distribution_channel[index].cost || "0",
+          margin_type: data.distribution_channel[index]?.manage_by_zone_detail?.region_selected[index].distribution_channel[index].margin_type || "FIX_AMOUNT",
+          margin_value: parseFloat(data.distribution_channel[index]?.manage_by_zone_detail?.region_selected[index].distribution_channel[index].margin_value),
+      })) : [],
+      add_zone: dataSubmit.product_selected?.[0]?.distribution_channel?.[0]?.manage_by_zone_detail?.zone_type ? dataSubmit.product_selected.map((data: any, index: any) => data.distribution_channel[index]?.manage_by_zone_detail?.zone_type) : [],
+      add_cost_by_region: dataSubmit.product_selected?.[0]?.distribution_channel?.[0]?.manage_by_zone_detail?.region_selected?.[0]?.distribution_channel?.[0]?.id ?
+      dataSubmit.product_selected.map((data: any, index: any) => ({
+        price_structure_cost_id: data.distribution_channel[index]?.manage_by_zone_detail?.region_selected[index].distribution_channel[index].structureId,
+        region: data.distribution_channel[index]?.manage_by_zone_detail?.region_selected[index].distribution_channel[index].id,
+      })) : [],
+      del_distributions:[],
+      del_products: [],
+      total_cost: [],
+      add_zone: [],
+      total_cost_by_zone: [],
+      zone: [],
+      cost_by_distribution: [],
+      cost_by_region: [],
+      inactive_reason: dataSubmit?.inactive_reason,
+    });
 
-    //   default:
-    //     break;
-    // }
   };
 
   const onSubmitDraft = (dataDraft: any) => {
-    window.alert("Under maintenance");
-    // updatePriceStructure({
-    //   price_structure_config_id: 2,
-    //   currency: "MPC-0000001",
-    //   managed_by: 1,
-    //   status: dataSubmit.status,
-    //   active_date: "2022-03-03",
-    //   add_distributions: [],
-    //   add_products: [],
-    //   del_distributions: [],
-    //   del_products: [],
-    //   add_total_cost: [
-    //     {
-    //       price_structure_cost_id: 1,
-    //       group_buying_price_id: 1,
-    //       is_reference: true,
-    //       cost: "0000000",
-    //       margin_type: "FIX_AMOUNT",
-    //       margin_value: 1,
-    //       managed_by_zone: true,
-    //     },
-    //   ],
-    //   total_cost: [
-    //     {
-    //       id: 1,
-    //       price_structure_cost_id: 1,
-    //       group_buying_price_id: 1,
-    //       is_reference: true,
-    //       cost: "999999",
-    //       margin_type: "PERCENT",
-    //       margin_value: 1,
-    //       managed_by_zone: true,
-    //     },
-    //   ],
-    //   rejection: {
-    //     rejection_details: "haha",
-    //     rejection_reason: "hehe",
-    //   },
-    //   add_total_cost_by_zone: [
-    //     {
-    //       price_structure_cost_id: 4,
-    //       group_buying_price_id: 2,
-    //       price_structure_zone_id: 8,
-    //       is_reference: true,
-    //       cost: "200",
-    //       margin_type: "FIX_AMOUNT",
-    //       margin_value: "200",
-    //     },
-    //   ],
-    //   add_zone: [
-    //     {
-    //       price_structure_cost_id: 4,
-    //       internal_region: 1,
-    //       is_default: false,
-    //     },
-    //   ],
-    //   total_cost_by_zone: [
-    //     {
-    //       id: 3,
-    //       price_structure_cost_id: 4,
-    //       group_buying_price_id: 2,
-    //       price_structure_zone_id: 8,
-    //       is_reference: true,
-    //       cost: "200",
-    //       margin_type: "PERCENT",
-    //       margin_value: "200",
-    //     },
-    //   ],
-    //   zone: [
-    //     {
-    //       id: 8,
-    //       price_structure_cost_id: 4,
-    //       internal_region: 2,
-    //       is_default: true,
-    //     },
-    //   ],
-    // });
+    updatePriceStructure({
+      status: "DRAFTED",
+      add_distributions: dataSubmit.distribution_channel,
+      add_products: dataSubmit.product_selected.map((data: any) => data.id),
+      add_total_cost: dataSubmit.product_selected?.[0]?.distribution_channel?.[0]?.cost ? dataSubmit.product_selected.map((data: any, index: any) => ({
+        price_structure_cost_by_distribution_id: data.distribution_channel[index]?.id,
+        group_buying_price_id: data.distribution_channel[index]?.level?.[index].buyingPrice,
+        is_reference: data.distribution_channel[index]?.is_reference,
+        level: data.distribution_channel[index]?.level?.[index].id,
+        cost: data.distribution_channel[index]?.cost,
+        margin_type: data.distribution_channel[index]?.margin_type,
+        margin_value: parseFloat(data.distribution_channel[index]?.margin_value),
+      })
+      ) : [],
+      add_cost_by_distribution:
+      dataSubmit.product_selected?.[0]?.distribution_channel?.[0]?.manage_by_zone ? dataSubmit.product_selected.map((data: any, index: any) => (
+        {
+          price_structure_cost_id: data.distribution_channel[index]?.structureId,
+          distribution_channel: data.distribution_channel[index]?.id,
+          managed_by_zone: data.distribution_channel[index]?.manage_by_zone,
+        },
+      )) : [],
+      add_total_cost_by_zone: dataSubmit.product_selected?.[0]?.distribution_channel?.[0]?.manage_by_zone_detail?.region_selected?.[0]?.distribution_channel?.[0]?.cost ? dataSubmit.product_selected.map((data: any, index: any) => ({
+        price_structure_cost_id: data.distribution_channel[index]?.manage_by_zone_detail?.region_selected[index].distribution_channel[index].structureId,
+          group_buying_price_id: data.distribution_channel[index]?.manage_by_zone_detail?.region_selected[index].distribution_channel[index].level?.[index].buyingPrice,
+          price_structure_zone_id: data.distribution_channel[index]?.manage_by_zone_detail?.region_selected[index].distribution_channel[index].id,
+          is_reference: data.distribution_channel[index]?.manage_by_zone_detail?.region_selected[index].distribution_channel[index].is_reference || false,
+          level: data.distribution_channel[index]?.manage_by_zone_detail?.region_selected[index].distribution_channel[index].level?.[index].id,
+          cost: data.distribution_channel[index]?.manage_by_zone_detail?.region_selected[index].distribution_channel[index].cost || "0",
+          margin_type: data.distribution_channel[index]?.manage_by_zone_detail?.region_selected[index].distribution_channel[index].margin_type || "FIX_AMOUNT",
+          margin_value: parseFloat(data.distribution_channel[index]?.manage_by_zone_detail?.region_selected[index].distribution_channel[index].margin_value),
+      })) : [],
+      add_zone: dataSubmit.product_selected?.[0]?.distribution_channel?.[0]?.manage_by_zone_detail?.zone_type ? dataSubmit.product_selected.map((data: any, index: any) => data.distribution_channel[index]?.manage_by_zone_detail?.zone_type) : [],
+      add_cost_by_region: dataSubmit.product_selected?.[0]?.distribution_channel?.[0]?.manage_by_zone_detail?.region_selected?.[0]?.distribution_channel?.[0]?.id ?
+      dataSubmit.product_selected.map((data: any, index: any) => ({
+        price_structure_cost_id: data.distribution_channel[index]?.manage_by_zone_detail?.region_selected[index].distribution_channel[index].structureId,
+        region: data.distribution_channel[index]?.manage_by_zone_detail?.region_selected[index].distribution_channel[index].id,
+      })) : [],
+      del_distributions:[],
+      del_products: [],
+      total_cost: [],
+      add_zone: [],
+      total_cost_by_zone: [],
+      zone: [],
+      cost_by_distribution: [],
+      cost_by_region: [],
+      inactive_reason: dataSubmit?.inactive_reason,
+    });
   };
 
   useEffect(
@@ -989,7 +970,7 @@ const DetailPricingStructure: any = () => {
 
       dataSalesOrganizationHirarcy?.map((field: any) => {
         if (
-          dataWatchManageByZone?.manage_by_zone_detail?.internal_region.includes(field.id as never)
+          dataWatchManageByZone?.manage_by_zone_detail?.internal_region?.includes(field.id as never)
         ) {
           tempRegionSelected.push(field);
 
@@ -1368,6 +1349,7 @@ const DetailPricingStructure: any = () => {
                         <Spacer size={3} />
                         <ComponentDistributionChannelMarginType
                           control={control}
+                          getValues={getValues}
                           indexExpandedRowRenderProductSelected={
                             manageByZone?.data?.indexExpandedRowRenderProductSelected
                           }
@@ -1389,7 +1371,7 @@ const DetailPricingStructure: any = () => {
 
               <Spacer size={24} />
 
-              {manageByZone?.data?.dataDistChannel.level.map((subLevel: any, indexLevel: any) => {
+              {manageByZone?.data?.dataDistChannel.level?.map((subLevel: any, indexLevel: any) => {
                 return (
                   <Col key={indexLevel}>
                     <Text color={"blue.dark"} variant={"headingRegular"}>
@@ -1478,6 +1460,7 @@ const DetailPricingStructure: any = () => {
                               <Spacer size={3} />
                               <ComponentLevelMarginType
                                 control={control}
+                                getValues={getValues}
                                 indexExpandedRowRenderProductSelected={
                                   manageByZone?.data?.indexExpandedRowRenderProductSelected
                                 }
@@ -1657,7 +1640,7 @@ const DetailPricingStructure: any = () => {
                         ) => {
                           return (
                             <>
-                              {recordExpandedRowRenderRegionSelected.distribution_channel.map(
+                              {recordExpandedRowRenderRegionSelected.distribution_channel?.map(
                                 (dataDistChannel: any, indexDistChannel: any) => {
                                   return (
                                     <Card key={indexDistChannel} margin="20px" padding="20px">
@@ -1970,7 +1953,7 @@ const DetailPricingStructure: any = () => {
             <Row gap="4px" alignItems="center">
               <ArrowLeft style={{ cursor: "pointer" }} onClick={() => router.back()} />
               <Text variant={"h4"}>
-                {pricingStructureListById.priceStructureConfig?.name || "N/A"}
+                {pricingStructureListById?.priceStructureConfig?.name || "N/A"}
               </Text>
             </Row>
 
@@ -2016,21 +1999,36 @@ const DetailPricingStructure: any = () => {
 
                   {pricingStructureListById?.status === "WAITING" ? (
                     <>
-                      <Button
+                    {
+                      pricingStructureListById?.changesHistory?.from === "ACTIVE" && pricingStructureListById?.changesHistory?.to === "WAITING" || pricingStructureListById?.changesHistory?.from === "REJECTED" && pricingStructureListById?.changesHistory?.to === "WAITING" || pricingStructureListById?.changesHistory?.from === "INACTIVE" && pricingStructureListById?.changesHistory?.to === "WAITING"  ? (
+                        <Button
+                        disabled={isLoadingRejectPriceStructure}
                         size="big"
                         variant={"tertiary"}
-                        onClick={() => setModalReject({ open: true })}
+                        onClick={handleSubmit(onSubmit)}
                       >
-                        Reject
+                        {isLoadingRejectPriceStructure || isLoadingUpdatePriceStructure ? 'Loading' : 'Reject'}
                       </Button>
+                      ) : (
+                        <Button
+                        disabled={isLoadingRejectPriceStructure}
+                        size="big"
+                        variant={"tertiary"}
+                        onClick={() => setModalReject({open: true})}
+                      >
+                        {isLoadingRejectPriceStructure || isLoadingUpdatePriceStructure ? 'Loading' : 'Reject'}
+                      </Button>
+                      )
+                    }
+                      
 
-                      <Button size="big" variant={"primary"} onClick={approve}>
-                        Approve
+                      <Button disabled={isLoadingApprovePriceStructure} size="big" variant={"primary"} onClick={approve}>
+                        {isLoadingApprovePriceStructure ? 'Loading...' : 'Approve'}
                       </Button>
                     </>
                   ) : (
                     <>
-                      {pricingStructureListById?.status !== "ACTIVE" && (
+                      {pricingStructureListById?.status !== "ACTIVE" && pricingStructureListById?.status !== "REJECTED" && pricingStructureListById?.status !== "INACTIVE" && (
                         <Button
                           disabled={isLoadingPricingStructureDraft}
                           size="big"
@@ -2041,12 +2039,12 @@ const DetailPricingStructure: any = () => {
                         </Button>
                       )}
                       <Button
-                        disabled={isLoadingPricingStructure}
+                        disabled={isLoadingUpdatePriceStructure}
                         size="big"
                         variant={"primary"}
                         onClick={handleSubmit(onSubmit)}
                       >
-                        {isLoadingPricingStructure ? "Loading..." : "Submit"}
+                        {isLoadingUpdatePriceStructure ? "Loading..." : "Submit"}
                       </Button>
                     </>
                   )}
@@ -2055,6 +2053,28 @@ const DetailPricingStructure: any = () => {
             </Card>
 
             <Spacer size={12} />
+
+            {pricingStructureListById?.priceStructureRejection?.rejectionReason && pricingStructureListById?.status === "REJECTED" && (
+						<Card  backgroundColor='transparent' margin="0px 16px 0px 16px" padding='0px'>
+							<Alert>
+								<Text variant="subtitle2" color="white">
+									{pricingStructureListById?.priceStructureRejection?.rejectionReason}
+								</Text>
+							</Alert>
+							<Spacer size={20} />
+						</Card>
+					)}
+
+					{pricingStructureListById?.status === "WAITING"  && pricingStructureListById?.inactiveReason && (
+						<Card backgroundColor='transparent' padding='0px' margin="0px 16px 0px 16px">
+							<Alert variant="warning">
+								<Text variant="subtitle2" color="cheese.darkest">
+									{pricingStructureListById?.inactiveReason}
+								</Text>
+							</Alert>
+							<Spacer size={20} />
+						</Card>
+					)}
 
             <Card padding="20px">
               <Text color={"blue.dark"} variant={"headingMedium"}>
@@ -2096,6 +2116,7 @@ const DetailPricingStructure: any = () => {
                           </Row>
                           <Spacer size={3} />
                           <FormSelect
+                            disabled={getValues('status') === 'WAITING'}
                             defaultValue={value}
                             error={error?.message}
                             height="48px"
@@ -2149,6 +2170,7 @@ const DetailPricingStructure: any = () => {
                           </Label>
                           <Spacer size={3} />
                           <FormSelect
+                            disabled={getValues('status') === 'WAITING'}
                             defaultValue={value}
                             error={error?.message}
                             height="48px"
@@ -2202,6 +2224,7 @@ const DetailPricingStructure: any = () => {
                           </Label>
                           <Spacer size={3} />
                           <FormSelect
+                            disabled={getValues('status') === 'WAITING'}
                             defaultValue={value}
                             error={error?.message}
                             height="48px"
@@ -2254,6 +2277,7 @@ const DetailPricingStructure: any = () => {
                         render={({ field: { onChange, value }, fieldState: { error } }) => {
                           return (
                             <DropdownMenuOptionCustome
+                              disabled={getValues('status') === 'WAITING'}
                               label="Distribution Channel"
                               actionLabel="Add New Distribution Channel"
                               isShowActionLabel
@@ -2292,13 +2316,14 @@ const DetailPricingStructure: any = () => {
                 <Row justifyContent="space-between" alignItems="center">
                   <Col>
                     <Search
+                      disabled={getValues('status') === 'WAITING'}
                       width="450px"
                       placeholder="Search Products"
                       onChange={(e: any) => setSearchProduct(e.target.value)}
                     />
                   </Col>
 
-                  <Col>
+                  {getValues('status') !== 'WAITING' && (<Col>
                     <Row gap="14px" justifyContent="space-between" alignItems="center">
                       <Col>
                         <Button
@@ -2319,7 +2344,6 @@ const DetailPricingStructure: any = () => {
                       <Col>
                         <Button
                           size="big"
-                          disabled={Object.keys(errors).length}
                           variant={"tertiary"}
                           onClick={() =>
                             setModal({ open: true, typeForm: "Add Products", data: {} })
@@ -2329,7 +2353,7 @@ const DetailPricingStructure: any = () => {
                         </Button>
                       </Col>
                     </Row>
-                  </Col>
+                  </Col>)}
                 </Row>
 
                 {isEmpty ? (
@@ -2381,7 +2405,7 @@ const DetailPricingStructure: any = () => {
                         ) => {
                           return (
                             <>
-                              {recordExpandedRowRenderProductSelected.distribution_channel.map(
+                              {recordExpandedRowRenderProductSelected.distribution_channel?.map(
                                 (dataDistChannel: any, indexDistChannel: any) => {
                                   return (
                                     <Card key={indexDistChannel} margin="20px" padding="20px">
@@ -2398,6 +2422,7 @@ const DetailPricingStructure: any = () => {
                                           return (
                                             <Row alignItems="center" gap="12px">
                                               <Switch
+                                              disabled={getValues('status') === 'WAITING'}
                                                 defaultChecked={value || false}
                                                 checked={value}
                                                 onChange={onChange}
@@ -2412,8 +2437,7 @@ const DetailPricingStructure: any = () => {
 
                                       <Divider />
 
-                                      {
-                                        <ManageZoneComponent
+                                      <ManageZoneComponent
                                           control={control}
                                           regionSelected={regionSelected}
                                           indexExpandedRowRenderProductSelected={
@@ -2430,7 +2454,6 @@ const DetailPricingStructure: any = () => {
                                           setManageByZone={setManageByZone}
                                           manageByZone={manageByZone}
                                         />
-                                      }
                                     </Card>
                                   );
                                 }
@@ -2640,7 +2663,7 @@ const DetailPricingStructure: any = () => {
         />
 
         {modalReject.open && (
-          <ModalRejectPartner
+          <ModalRejectPriceStructure
             visible={modalReject.open}
             onCancel={() => setModalReject({ open: false })}
             onOk={(data: any) => reject(data)}
@@ -2684,6 +2707,7 @@ const ComponentLevelMarginType = (props: any) => {
 
   return (
     <FormInput
+      disabled={props.getValues('status') === 'WAITING'}
       size={"large"}
       onChange={props.onChange}
       placeholder={`e.g 20`}
@@ -2723,6 +2747,7 @@ const ComponentDistributionChannelMarginType = (props: any) => {
   return (
     <FormInput
       size={"large"}
+      disabled={props.getValues('status') === 'WAITING'}
       onChange={props.onChange}
       placeholder={`e.g 20`}
       suffix={data?.margin_type === "Percent" ? "%" : undefined}
@@ -2758,7 +2783,7 @@ const ManageZoneComponent = (props: any) => {
     name: `product_selected.${props.indexExpandedRowRenderProductSelected}.distribution_channel.${props.indexDistChannel}`,
   });
 
-  if (data.manage_by_zone) {
+  if (data?.manage_by_zone) {
     return (
       <Card
         backgroundColor="#f4fbfc"
@@ -2825,7 +2850,7 @@ const ManageZoneComponent = (props: any) => {
           name={`product_selected.${props.indexExpandedRowRenderProductSelected}.distribution_channel.${props.indexDistChannel}.is_reference`}
           render={({ field: { onChange, value } }) => (
             <Row alignItems="center" gap="12px">
-              <Switch defaultChecked={value || false} checked={value} onChange={onChange} />
+              <Switch disabled={props.getValues('status') === 'WAITING'} defaultChecked={value || false} checked={value} onChange={onChange} />
               <Text>is Reference</Text>
               <Tooltip
                 title="Data create from manage price structure config"
@@ -2843,6 +2868,7 @@ const ManageZoneComponent = (props: any) => {
         <Row width="100%" alignItems="center" gap="12px">
           <Col width="40%">
             <Input
+              disabled={props.getValues('status') === 'WAITING'}
               type="number"
               width="100%"
               label="Cost"
@@ -2868,6 +2894,7 @@ const ManageZoneComponent = (props: any) => {
               name={`product_selected.${props.indexExpandedRowRenderProductSelected}.distribution_channel.${props.indexDistChannel}.margin_type`}
               render={({ field: { onChange, value }, fieldState: { error } }) => (
                 <Dropdown
+                  disabled={props.getValues('status') === 'WAITING'}
                   error={error?.message}
                   defaultValue={value}
                   label="Margin Type"
@@ -2895,6 +2922,7 @@ const ManageZoneComponent = (props: any) => {
                   <Spacer size={3} />
                   <ComponentDistributionChannelMarginType
                     control={props.control}
+                    getValues={props.getValues}
                     indexExpandedRowRenderProductSelected={
                       props.indexExpandedRowRenderProductSelected
                     }
@@ -2914,7 +2942,7 @@ const ManageZoneComponent = (props: any) => {
 
         <Spacer size={24} />
 
-        {props.dataDistChannel.level.map((subLevel: any, indexLevel: any) => {
+        {props.dataDistChannel.level?.map((subLevel: any, indexLevel: any) => {
           return (
             <Col key={indexLevel}>
               <Text color={"blue.dark"} variant={"headingRegular"}>
@@ -2928,7 +2956,7 @@ const ManageZoneComponent = (props: any) => {
                 name={`product_selected.${props.indexExpandedRowRenderProductSelected}.distribution_channel.${props.indexDistChannel}.level.${indexLevel}.is_reference`}
                 render={({ field: { onChange, value } }) => (
                   <Row alignItems="center" gap="12px">
-                    <Switch defaultChecked={value || false} checked={value} onChange={onChange} />
+                    <Switch disabled={props.getValues('status') === 'WAITING'} defaultChecked={value || false} checked={value} onChange={onChange} />
                     <Text>is Reference</Text>
                     <Tooltip
                       title="Data create from manage price structure config"
@@ -2947,6 +2975,7 @@ const ManageZoneComponent = (props: any) => {
                 <Col width="40%">
                   <Input
                     width="100%"
+                    disabled={props.getValues('status') === 'WAITING'}
                     label={subLevel.nameLevel}
                     defaultValue={props.getValues(
                       `product_selected.${props.indexExpandedRowRenderProductSelected}.distribution_channel.${props.indexDistChannel}.level.${indexLevel}.cost`
@@ -2971,6 +3000,7 @@ const ManageZoneComponent = (props: any) => {
                     name={`product_selected.${props.indexExpandedRowRenderProductSelected}.distribution_channel.${props.indexDistChannel}.level.${indexLevel}.margin_type`}
                     render={({ field: { onChange, value }, fieldState: { error } }) => (
                       <Dropdown
+                      disabled={props.getValues('status') === 'WAITING'}
                         error={error?.message}
                         defaultValue={value}
                         label="Margin Type"
@@ -2997,6 +3027,7 @@ const ManageZoneComponent = (props: any) => {
                         <Label>Margin Value</Label>
                         <Spacer size={3} />
                         <ComponentLevelMarginType
+                          getValues={props.getValues}
                           control={props.control}
                           indexExpandedRowRenderProductSelected={
                             props.indexExpandedRowRenderProductSelected

@@ -11,7 +11,7 @@ import styled from 'styled-components';
 import useDebounce from '../../../../lib/useDebounce';
 import { useCoaInfiniteLists } from '../../../../hooks/finance-config/useCoaTemplate';
 
-export default function Accounting({ control, accounting }: any) {
+export default function Accounting({ control, setValue }: any) {
 
   const [totalRowsCoaTemplateReceivable, setTotalRowsCoaTemplateReceivable] = useState(0);
   const [searchCoaTemplateReceivable, setSearchCoaTemplateReceivable] = useState("");
@@ -103,96 +103,85 @@ export default function Accounting({ control, accounting }: any) {
   return (
     <Row width="100%" noWrap>
       <Col width={"50%"}>
-        <Spacer size={36} />
         <Text variant="headingMedium" color="blue.darker">Account Receivable</Text>
         <Spacer size={20} />
-        <Controller
-            control={control}
-            name="accounting.income_account.id"
-            defaultValue={accountingForm?.income_account?.name}
-            render={({ field: { onChange } }) => (
-              <>
-                <span>
-                  <Label style={{ display: "inline" }}>Income Account</Label>{" "}
-                  <span></span>
-                </span>
+        <>
+          <span>
+            <Label style={{ display: "inline" }}>Income Account</Label>{" "}
+            <span></span>
+          </span>
 
-                <Spacer size={3} />
-                <CustomFormSelect
-                  defaultValue={accountingForm?.income_account?.name}
-                  style={{ width: "100%", height: '48px' }}
-                  size={"large"}
-                  placeholder={"Select"}
-                  borderColor={"#AAAAAA"}
-                  arrowColor={"#000"}
-                  withSearch
-                  isLoading={isFetchingCoaTemplateReceivable}
-                  isLoadingMore={isFetchingMoreCoaTemplateReceivable}
-                  fetchMore={() => {
-                    if (hasNextCoaTemplateReceivable) {
-                      fetchNextPageCoaTemplateReceivable();
-                    }
-                  }}
-                  items={
-                    isFetchingCoaTemplateReceivable || isFetchingMoreCoaTemplateReceivable
-                      ? []
-                      : listCoaTemplateReceivable
-                  }
-                  onChange={(value: any) => {
-                    onChange(value);
-                  }}
-                  onSearch={(value: any) => {
-                    setSearchCoaTemplateReceivable(value);
-                  }}
-                />
-              </>
-            )}
+          <Spacer size={3} />
+          <CustomFormSelect
+            labelInValue
+            defaultValue={accountingForm?.income_account?.name}
+            style={{ width: "100%", height: '48px' }}
+            size={"large"}
+            placeholder={"Select"}
+            borderColor={"#AAAAAA"}
+            arrowColor={"#000"}
+            withSearch
+            isLoading={isFetchingCoaTemplateReceivable}
+            isLoadingMore={isFetchingMoreCoaTemplateReceivable}
+            fetchMore={() => {
+              if (hasNextCoaTemplateReceivable) {
+                fetchNextPageCoaTemplateReceivable();
+              }
+            }}
+            items={
+              isFetchingCoaTemplateReceivable || isFetchingMoreCoaTemplateReceivable
+                ? []
+                : listCoaTemplateReceivable
+            }
+            onChange={(value: any) => {
+              setValue('accounting.income_account.name', value.label);
+              setValue('accounting.income_account.id', value.value);
+            }}
+            onSearch={(value: any) => {
+              setSearchCoaTemplateReceivable(value);
+            }}
           />
+        </>
         <Spacer size={73} />
         <Text variant="headingMedium" color="blue.darker">Account Payable</Text>
         <Spacer size={20} />
-        <Controller
-            control={control}
-            name="accounting.expense_account.id"
-            defaultValue={accountingForm?.expense_account?.name}
-            render={({ field: { onChange } }) => (
-              <>
-                <span>
-                  <Label style={{ display: "inline" }}>Expense Account</Label>{" "}
-                  <span></span>
-                </span>
+        <>
+          <span>
+            <Label style={{ display: "inline" }}>Expense Account</Label>{" "}
+            <span></span>
+          </span>
 
-                <Spacer size={3} />
-                <CustomFormSelect
-                  defaultValue={accountingForm?.expense_account?.name}
-                  style={{ width: "100%", height: '48px' }}
-                  size={"large"}
-                  placeholder={"Select"}
-                  borderColor={"#AAAAAA"}
-                  arrowColor={"#000"}
-                  withSearch
-                  isLoading={isFetchingCoaTemplatePayable}
-                  isLoadingMore={isFetchingMoreCoaTemplatePayable}
-                  fetchMore={() => {
-                    if (hasNextCoaTemplatePayable) {
-                      fetchNextPageCoaTemplatePayable();
-                    }
-                  }}
-                  items={
-                    isFetchingCoaTemplatePayable || isFetchingMoreCoaTemplatePayable
-                      ? []
-                      : listCoaTemplatePayable
-                  }
-                  onChange={(value: any) => {
-                    onChange(value);
-                  }}
-                  onSearch={(value: any) => {
-                    setSearchCoaTemplatePayable(value);
-                  }}
-                />
-              </>
-            )}
+          <Spacer size={3} />
+          <CustomFormSelect
+            labelInValue
+            defaultValue={accountingForm?.expense_account?.name}
+            style={{ width: "100%", height: '48px' }}
+            size={"large"}
+            placeholder={"Select"}
+            borderColor={"#AAAAAA"}
+            arrowColor={"#000"}
+            withSearch
+            isLoading={isFetchingCoaTemplatePayable}
+            isLoadingMore={isFetchingMoreCoaTemplatePayable}
+            fetchMore={() => {
+              if (hasNextCoaTemplatePayable) {
+                fetchNextPageCoaTemplatePayable();
+              }
+            }}
+            items={
+              isFetchingCoaTemplatePayable || isFetchingMoreCoaTemplatePayable
+                ? []
+                : listCoaTemplatePayable
+            }
+            onChange={(value: any) => {
+              setValue('accounting.expense_account.name', value.label);
+              setValue('accounting.expense_account.id', value.value);
+            }}
+            onSearch={(value: any) => {
+              setSearchCoaTemplatePayable(value);
+            }}
           />
+        </>
       </Col>
     </Row>
   )

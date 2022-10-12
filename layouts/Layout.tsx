@@ -10,6 +10,7 @@ import {
   ICInventory,
   ICPurchasOrg,
   ICDollar,
+  ICPackage,
 } from "../assets";
 import ICAccount from "../assets/icons/ic-avatar-default.svg";
 import ICAccountSetting from "../assets/icons/ic-setting.svg";
@@ -21,6 +22,9 @@ import ICBadge from "../assets/icons/ic-badge.svg";
 import ICSalesman from "../assets/icons/ic-salesman.svg";
 import ICDocument from "../assets/icons/ic-document.svg";
 import ICTransportation from "../assets/icons/ic-transportation.svg";
+import ICGlobe from "../assets/icons/ic-globe-lang.svg"
+import ICPercent from "../assets/icons/ic-percent.svg"
+import ICPaperMoney from "../assets/icons/ic-paper-money.svg"
 import styled from "styled-components";
 
 const menuConfig = [
@@ -245,6 +249,13 @@ const menuMdm = [
       },
     ],
   },
+  {
+    key: "vendor",
+    title: "Vendor",
+    content: () => "Vendor",
+    icon: ICPackage,
+    onClick: () => Router.push("/vendor"),
+  },
   { type: "divider" },
   { type: "title", title: "SALES" },
   {
@@ -323,21 +334,21 @@ const menuMdm = [
     key: "profit-center",
     title: "Profit Center",
     content: () => "Profit Center",
-    icon: ICDollar,
+    icon: ICPaperMoney,
     onClick: () => Router.push("/profit-center"),
   },
   {
     key: "tax",
     title: "Tax",
     content: () => "Tax",
-    icon: ICDocument,
+    icon: ICPercent,
     onClick: () => Router.push("/tax"),
   },
   {
     key: "cost-center",
     title: "Cost Center",
     content: () => "Cost Center",
-    icon: ICDocument,
+    icon: ICDollar,
     onClick: () => Router.push("/cost-center"),
   },
   { type: "divider" },
@@ -454,6 +465,13 @@ const menuMdm = [
     ],
   },
   {
+    key: "library-language",
+    title: "Library Language",
+    content: () => "Library Language",
+    icon: ICGlobe,
+    onClick: () => Router.push("/library-language"),
+  },
+  {
     key: "working-calendar",
     title: "Working Calendar",
     content: () => "Working Calendar",
@@ -532,54 +550,59 @@ const AdminLayout = (props: any) => {
           selectedKeys={[current]}
           items={itemsMenu}
         >
-          <Notification items={notifItems} />
-
-          <Spacer size={10} />
-
-          <MenuLogout
-            menu={
-              <WrapperMenuLogout>
-                <WrapeprProfile>
-                  <ICAccount />
-                  <div>
-                    <TextName>Admin</TextName>
-                    <TextRole>Super User</TextRole>
-                  </div>
-                </WrapeprProfile>
-                <a
-                  style={{ color: "#000" }}
-                  target="_blank"
-                  href="https://accounts.edot.id/infopribadi"
-                  rel="noopener noreferrer"
-                >
+          <div style={{
+            display: "flex",
+            paddingTop: '.7rem',
+            marginBottom: '.78rem',
+            background: '#fff'
+          }}>
+            <Notification items={notifItems}/>
+            <Spacer size={15} />
+            <MenuLogout
+              menu={
+                <WrapperMenuLogout>
+                  <WrapeprProfile>
+                    <ICAccount />
+                    <div>
+                      <TextName>Admin</TextName>
+                      <TextRole>Super User</TextRole>
+                    </div>
+                  </WrapeprProfile>
+                  <a
+                    style={{ color: "#000" }}
+                    target="_blank"
+                    href="https://accounts.edot.id/infopribadi"
+                    rel="noopener noreferrer"
+                  >
+                    <div style={flexStyles}>
+                      <ICAccountSetting />
+                      <p>Account Settings</p>
+                    </div>
+                  </a>
                   <div style={flexStyles}>
-                    <ICAccountSetting />
-                    <p>Account Settings</p>
+                    <ICCompany />
+                    <p>Company List</p>
                   </div>
-                </a>
-                <div style={flexStyles}>
-                  <ICCompany />
-                  <p>Company List</p>
+                  <div style={flexStyles}>
+                    <ICChangeLanguage />
+                    <p>Change Language</p>
+                  </div>
+                  <div style={flexStyles} onClick={handleLogout}>
+                    <ICLogout />
+                    <p>Logout</p>
+                  </div>
+                </WrapperMenuLogout>
+              }
+            >
+              <MenuDropdown>
+                <div style={{ gap: "5px", display: "flex", alignItems: "center", fontSize: "14px" }}>
+                  <ICAccount size={64} />
+                  <p>Admin</p>
                 </div>
-                <div style={flexStyles}>
-                  <ICChangeLanguage />
-                  <p>Change Language</p>
-                </div>
-                <div style={flexStyles} onClick={handleLogout}>
-                  <ICLogout />
-                  <p>Logout</p>
-                </div>
-              </WrapperMenuLogout>
-            }
-          >
-            <MenuDropdown>
-              <div style={{ gap: "5px", display: "flex", alignItems: "center", fontSize: "14px" }}>
-                <ICAccount size={64} />
-                <p>Admin</p>
-              </div>
-              <ICArrowBottom />
-            </MenuDropdown>
-          </MenuLogout>
+                <ICArrowBottom />
+              </MenuDropdown>
+            </MenuLogout>
+          </div>
         </Header>
         <div style={{ padding: "20px" }}>{props}</div>
       </Layout>
@@ -597,6 +620,13 @@ const WrapeprProfile = styled.div`
   cursor: pointer;
 `;
 
+const WrapperNotifLogout = styled.div`
+  display: flex
+  padding-top: .5rem
+  margin-bottom: .5rem
+  background: #fff'
+  box-shadow: 0px 4px 16px rgba(170, 170, 170, 0.15);
+`
 const WrapperMenuLogout = styled.div`
   width: 200px;
   height: 272px;
