@@ -166,7 +166,7 @@ function useCreatePricingStructureList({ options }) {
 function useCreatePricingStructureDraftList({ options }) {
   return useMutation(
     (updates) =>
-      mdmService(`/price-structure`, {
+      mdmService(`/price-structure/save-draft`, {
         method: "POST",
         data: updates,
       }),
