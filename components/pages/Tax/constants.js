@@ -11,9 +11,9 @@ const TaxBodyFields = {
 };
 
 const glAccountList = [
-  { id: 1, value: "Land Freight" },
-  { id: 2, value: "Air Freight" },
-  { id: 3, value: "Sea Freight" },
+  { id: "G/L3000001", value: "Land Freight" },
+  { id: "G/L3000002", value: "Air Freight" },
+  { id: "G/L3000003", value: "Sea Freight" },
 ];
 
 const columnsTaxType = [
