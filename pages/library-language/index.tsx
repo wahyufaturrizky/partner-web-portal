@@ -23,6 +23,7 @@ import { mdmDownloadService } from "../../lib/client";
 import { useRouter } from "next/router";
 import { useCostCenters, useUploadFileCostCenter } from "hooks/mdm/cost-center/useCostCenter";
 import ModalManageLanguage from "components/elements/Modal/ModalManageLanguage";
+import moment from "moment";
 
 const downloadFile = (params: any) =>
   mdmDownloadService("/cost-center/download", { params }).then((res) => {
@@ -78,19 +79,43 @@ const LibraryLanguage = () => {
         pagination.setTotalItems(data.totalRow);
       },
       select: (data: any) => {
-        const mappedData = data?.rows?.map((element: any) => {
+        const listLanguageLibrary = {
+          status: "SUCCESS",
+          data: {
+              rows: [
+                  {
+                      code : "mdm",
+                      name : "Master Data Management",
+                      created_at: "2022-10-11T11:06:06.000Z",
+                      created_by: 0,
+                      modified_at: null,
+                      modified_by: null,
+                      deleted_by: null,
+                      deleted_at: null
+                  }
+              ],
+              total_row : 1,
+              sort_by : [
+                  "code",
+                  "name"
+              ]
+          },
+          message: "list language library"
+      }
+
+        const mappedData = listLanguageLibrary?.data?.rows?.map((element: any) => {
+          console.log(moment(element.created_at).format("DD/mm/YYYY"), '<<<date')
           return {
-            key: element.costCenterId,
-            id: element.costCenterId,
-            companyId: element.companyId,
+            key: element.code,
             code: element.code,
             name: element.name,
+            modified_at: element.modified_at? moment(element?.modified_at).format("DD/MM/YYYY") : moment(element?.created_at).format("DD/MM/YYYY") ,
             action: (
               <div style={{ display: "flex", justifyContent: "left" }}>
                 <Button
                   size="small"
                   onClick={() => {
-                    router.push(`/cost-center/${element.companyId}/${element.costCenterId}`);
+                    router.push(`/library-language/${element.code}`);
                   }}
                   variant="tertiary"
                 >
@@ -100,10 +125,11 @@ const LibraryLanguage = () => {
             ),
           };
         });
-        return { data: mappedData, totalRow: data.totalRow };
+        return { data: mappedData, totalRow: listLanguageLibrary?.data?.total_row };
       },
     },
   });
+
 
   const { mutate: uploadFileCostCenter, isLoading: isLoadingUploadFileCostCenter } = useUploadFileCostCenter({
     query: {
@@ -121,13 +147,13 @@ const LibraryLanguage = () => {
   const columns = [
     {
       title: "Module",
-      dataIndex: "id",
-      key: 'id',
+      dataIndex: "name",
+      key: 'code',
     },
     {
       title: "Last Update",
-      dataIndex: "code",
-      key: 'profitCenterCode'
+      dataIndex: "modified_at",
+      key: 'modified_at'
     },
     {
       title: "Action",
@@ -168,7 +194,7 @@ const LibraryLanguage = () => {
   return (
     <>
       <Col>
-        <Text variant={"h4"}>Cost Center List</Text>
+        <Text variant={"h4"}>Library Language</Text>
         <Spacer size={20} />
       </Col>
       <Card>

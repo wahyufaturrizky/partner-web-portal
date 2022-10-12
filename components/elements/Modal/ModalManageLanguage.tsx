@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import { useFetchDetailSalesman } from "hooks/mdm/salesman/useSalesmanDivision";
 import {
   Text,
   Button,
@@ -12,7 +11,6 @@ import {
   Pagination,
   Modal,
   Spin,
-  Image,
   FileUploaderAllFilesDragger,
   Input, 
 } from "pink-lava-ui";
@@ -22,7 +20,14 @@ import useDebounce from "lib/useDebounce";
 import { queryClient } from "pages/_app";
 import { useAllLibraryLanguage, useCreateLibraryLanguage, useDeleteLibraryLanguage, useUpdateLibraryLanguage } from "hooks/mdm/library-language/useLibraryLanguage";
 
-
+async function createFile(urlData : any){
+  let response = await fetch(urlData);
+  let data = await response.blob();
+  let metadata = {
+    type: 'image/jpeg'
+  };
+  return new File([data], urlData?.split('/')?.pop(), metadata);
+}
 
 const renderConfirmationText = (type: any, data: any) => {
   switch (type) {
@@ -71,7 +76,6 @@ const ModalManageLanguage = ({
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const debounceSearch = useDebounce(search, 1000);
 
-  
   const {
     data: libraryLanguageData,
     isLoading: isLoadingLibraryLanguage,
@@ -182,6 +186,7 @@ const ModalManageLanguage = ({
       setSelectedRowKeys(selectedRowKeys);
     },
   };
+
 
   if(isLoadingLibraryLanguage){
     return (
@@ -395,10 +400,14 @@ const ModalManageLanguage = ({
                           Cancel
                       </Button>
                       <Button
-                          onClick={() => {
+                          onClick={async () => {
                             const formData = new FormData();
+                            let newFile = isShowDetail?.file
+                            if(typeof isShowDetail?.file === 'string') {
+                              newFile = await createFile(isShowDetail?.file)
+                            }
                             formData.append("name", isShowDetail?.name)
-                            formData.append("file", isShowDetail?.file);
+                            formData.append("file", newFile);
                             updateLibraryLanguage(formData)
                           }}
                           full
@@ -450,7 +459,6 @@ const ModalManageLanguage = ({
                           inputHeight={"65px"}
                           inputBorderColor={"pink"}
                           onSubmit={(file: any) => {
-                            console.log(file, '<<<<cek')
                               setShowDetail({...isShowDetail, file});
                             }}
                           defaultFileList={[isShowDetail?.file]}
