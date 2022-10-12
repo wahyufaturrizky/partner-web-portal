@@ -38,9 +38,9 @@ export default function VendorCreate() {
   const renderTabItem = (activeTab: any) => {
     switch (activeTab) {
       case "Contacts":
-        return <Contacts />;
+        return <Contacts formType={"add"} />;
       case "Addresses":
-        return <Addresses />;
+        return <Addresses formType={"add"} />;
       case "Purchasing":
         return <Purchasing />;
       case "Invoicing":

@@ -8,7 +8,7 @@ import { useCountryInfiniteLists } from "hooks/mdm/country-structure/useCountrie
 import useDebounce from "lib/useDebounce";
 import styled from "styled-components";
 
-const Addresses = () => {
+const Addresses = ({ formType }: any) => {
   const { register, control, setValue } = useFormContext();
 
   const { fields, append, remove, update }: any = useFieldArray({
@@ -105,20 +105,39 @@ const Addresses = () => {
         <Button
           size="big"
           onClick={() => {
-            append({
-              type: "",
-              street: "",
-              country: "",
-              province: "",
-              city: "",
-              district: "",
-              zone: "",
-              postal_code: "",
-              lon: "",
-              lat: "",
-              is_primary: fields.length === 0,
-              photo: "",
-            });
+            if (formType === "edit") {
+              append({
+                id: 0,
+                type: "",
+                street: "",
+                country: "",
+                province: "",
+                city: "",
+                district: "",
+                zone: "",
+                postal_code: "",
+                lon: "",
+                lat: "",
+                is_primary: fields.length === 0,
+                photo: "",
+                deleted: false,
+              });
+            } else {
+              append({
+                type: "",
+                street: "",
+                country: "",
+                province: "",
+                city: "",
+                district: "",
+                zone: "",
+                postal_code: "",
+                lon: "",
+                lat: "",
+                is_primary: fields.length === 0,
+                photo: "",
+              });
+            }
           }}
         >
           <ICPlusWhite /> Add More Address
@@ -200,10 +219,8 @@ const Addresses = () => {
                       arrowColor={"#000"}
                       withSearch={false}
                       items={[
-                        { id: "Home", value: "Home" },
                         { id: "Office", value: "Office" },
-                        { id: "Apartment", value: "Apartment" },
-                        { id: "School", value: "School" },
+                        { id: "Store/Outlet", value: "Store/Outlet" },
                       ]}
                       onChange={(value: any) => {
                         onChange(value);
@@ -371,12 +388,7 @@ const Addresses = () => {
                       borderColor={"#AAAAAA"}
                       arrowColor={"#000"}
                       withSearch={false}
-                      items={[
-                        { id: "Home", value: "Home" },
-                        { id: "Office", value: "Office" },
-                        { id: "Apartment", value: "Apartment" },
-                        { id: "School", value: "School" },
-                      ]}
+                      items={[]}
                       onChange={(value: any) => {}}
                     />
                   </Col>
@@ -399,12 +411,7 @@ const Addresses = () => {
                       borderColor={"#AAAAAA"}
                       arrowColor={"#000"}
                       withSearch={false}
-                      items={[
-                        { id: "Home", value: "Home" },
-                        { id: "Office", value: "Office" },
-                        { id: "Apartment", value: "Apartment" },
-                        { id: "School", value: "School" },
-                      ]}
+                      items={[]}
                       onChange={(value: any) => {
                         onChange(value);
                       }}

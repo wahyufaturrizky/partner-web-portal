@@ -35,7 +35,7 @@ const menuList = [
   },
 ];
 
-const Contacts = () => {
+const Contacts = ({ formType }: any) => {
   const { control, setValue } = useFormContext();
 
   const { fields, append, remove, update }: any = useFieldArray<any>({
@@ -157,17 +157,38 @@ const Contacts = () => {
           }}
           contactData={showFormContact.data}
           onSaveContact={(contactObject: any) => {
-            switch (showFormContact.type) {
-              case "add":
-                append({ ...contactObject, is_primary: fields.length === 0, filtered: false });
-                setShowFormContact({ type: "", open: false, data: {}, index: 0 });
-                break;
-              case "edit":
-                update(showFormContact.index, { ...contactObject });
-                setShowFormContact({ type: "", open: false, data: {}, index: 0 });
-                break;
-              default:
-                break;
+            if (formType === "edit") {
+              switch (showFormContact.type) {
+                case "add":
+                  append({
+                    ...contactObject,
+                    is_primary: fields.length === 0,
+                    filtered: false,
+                    id: 0,
+                    deleted: false,
+                  });
+                  setShowFormContact({ type: "", open: false, data: {}, index: 0 });
+                  break;
+                case "edit":
+                  update(showFormContact.index, { ...contactObject });
+                  setShowFormContact({ type: "", open: false, data: {}, index: 0 });
+                  break;
+                default:
+                  break;
+              }
+            } else {
+              switch (showFormContact.type) {
+                case "add":
+                  append({ ...contactObject, is_primary: fields.length === 0, filtered: false });
+                  setShowFormContact({ type: "", open: false, data: {}, index: 0 });
+                  break;
+                case "edit":
+                  update(showFormContact.index, { ...contactObject });
+                  setShowFormContact({ type: "", open: false, data: {}, index: 0 });
+                  break;
+                default:
+                  break;
+              }
             }
           }}
         />

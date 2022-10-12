@@ -89,9 +89,9 @@ export default function VendorDetail() {
   const renderTabItem = (activeTab: any) => {
     switch (activeTab) {
       case "Contacts":
-        return <Contacts />;
+        return <Contacts formType={"edit"} />;
       case "Addresses":
-        return <Addresses />;
+        return <Addresses formType={"edit"} />;
       case "Purchasing":
         return <Purchasing />;
       case "Invoicing":
@@ -140,15 +140,15 @@ export default function VendorDetail() {
     id: vendor_id,
     options: {
       onSuccess: (data: any) => {
-        setValue("customer_id", data.customerId);
         setSelectFromForm(data?.customerId === "");
         setRadioValue(data?.type?.toLowerCase());
 
+        // General Form
+        setValue("customer_id", data.customerId);
         setValue("status", data?.status);
         setValue("name", data?.name);
         setValue("group", data?.group);
         setValue("company.website", data?.companyWebsite);
-
         setCompanyLogo(data?.companyLogo);
         setValue("individu.job", data?.personalJob);
         setValue("individu.title", data?.personalTitle);
@@ -160,13 +160,81 @@ export default function VendorDetail() {
         setValue("email", data?.email);
         setValue("is_pkp", data?.isPkp);
         setValue("external_code", data?.externalCode);
+
+        // Contact Form
+        const mappingContact = data?.contacts?.map((contact: any) => {
+          return {
+            id: contact.id,
+            filtered: false,
+            is_primary: contact.isPrimary,
+            title: contact.title,
+            name: contact.name,
+            job: contact.job,
+            mobile: contact.mobile,
+            email: contact.email,
+            nik: contact.nik,
+            deleted: false,
+          };
+        });
+
+        setValue("contacts", mappingContact);
+
+        // Address Form
+        const mappingAddress = data?.addresses?.map((address: any) => {
+          return {
+            id: address.id,
+            is_primary: address.isPrimary,
+            type: address.type,
+            street: address.street,
+            country: address.country,
+            province: address.countryLevelsArray[0] ?? "",
+            city: address.countryLevelsArray[1] ?? "",
+            district: address.countryLevelsArray[2] ?? "",
+            zone: address.countryLevelsArray[3] ?? "",
+            postal_code: address.postalCode,
+            lon: address.lon,
+            lat: address.lat,
+            photo: address.photo,
+            deleted: false,
+          };
+        });
+
+        setValue("addresses", mappingAddress);
+
+        // Purchasing Form
+        const mappingPurchasing = {
+          term_of_payment: data?.purchasing?.termOfPayment,
+          billing_blocking: data?.purchasing?.billingBlocking,
+          po_blocking: data?.purchasing?.poBlocking,
+          receipt_blocking: data?.purchasing?.receiptBlocking,
+          purchase_organization: data?.purchasing?.purchaseOrganization ?? [],
+        };
+
+        setValue("purchasing", mappingPurchasing);
+
+        // Invoicing Form
+        const mappingInvoicing = {
+          reconciliation_account: data?.invoicing.reconciliationAccount,
+          tax_country: data?.invoicing.taxCountry,
+          tax_name: data?.invoicing?.taxName,
+          tax_address: data?.invoicing?.taxAddress,
+          tax_type: data?.invoicing?.taxType,
+          tax_code: data?.invoicing?.taxCode,
+          currency: data?.invoicing?.currency,
+          payment_method: data?.invoicing?.paymentMethod,
+          banks: data?.invoicing?.banks ?? [],
+        };
+
+        setValue("invoicing", mappingInvoicing);
       },
     },
   });
 
   const onSubmit = (data: any) => {
     const companyPayload =
-      radioValue === "company" ? { logo: "", website: data?.company?.website ?? "" } : null;
+      radioValue === "company"
+        ? { logo: companyLogo, website: data?.company?.website ?? "" }
+        : null;
 
     const individuPayload =
       radioValue === "individu"
@@ -185,7 +253,27 @@ export default function VendorDetail() {
 
     const addressPayload =
       data?.addresses?.map((address: any) => {
-        return address;
+        let mappCountrylevel = [];
+
+        mappCountrylevel[0] = address.province === "" ? 0 : address.province;
+        mappCountrylevel[1] = address.city === "" ? 0 : address.city;
+        mappCountrylevel[2] = address.district === "" ? 0 : address.district;
+        mappCountrylevel[3] = address.zone === "" ? 0 : address.zone;
+
+        // cek apakah array isinya semuanya 0
+        const allEqual = mappCountrylevel.every((value) => value === 0);
+
+        return {
+          is_primary: address.is_primary,
+          type: address.type,
+          street: address.street,
+          country: address.country,
+          country_levels: allEqual ? [] : mappCountrylevel,
+          postal_code: address.postal_code,
+          lon: address.lon,
+          lat: address.lat,
+          photo: "",
+        };
       }) ?? [];
 
     const purchasingPayload = objectIsEmpty(data?.purchasing) ? null : data?.purchasing;
@@ -218,9 +306,8 @@ export default function VendorDetail() {
       purchasing: purchasingPayload,
       invoicing: mappingInvoicing,
     };
-
-    console.log("data", formData);
-    // updateVendor(formData);
+    // console.log("data", formData);
+    updateVendor(formData);
   };
 
   if (isFetchingVendor || isLoadingVendor)

@@ -9,6 +9,7 @@ import {
   FileUploaderAllFiles,
   Switch,
   Tooltip,
+  Spin,
 } from "pink-lava-ui";
 import { ExclamationCircleOutlined } from "@ant-design/icons";
 import { useFormContext, Controller, useWatch } from "react-hook-form";
@@ -65,6 +66,7 @@ const General = ({ type, formType }: any) => {
 
   // Vendor Group API
   const {
+    isLoading: isLoadingVendor,
     isFetching: isFetchingVendorGroup,
     isFetchingNextPage: isFetchingMoreVendorGroup,
     hasNextPage: hasNextVendorGroup,
@@ -81,7 +83,7 @@ const General = ({ type, formType }: any) => {
           return group.rows?.map((element: any) => {
             return {
               label: element.name,
-              value: `${element.id}`,
+              value: element.id,
             };
           });
         });
@@ -100,6 +102,7 @@ const General = ({ type, formType }: any) => {
 
   // Job Position API
   const {
+    isLoading: isLoadingJobPosition,
     isFetching: isFetchingJobPosition,
     isFetchingNextPage: isFetchingMoreJobPosition,
     hasNextPage: hasNextJobPosition,
@@ -136,6 +139,7 @@ const General = ({ type, formType }: any) => {
 
   // Language API
   const {
+    isLoading: isLoiadingLanguages,
     isFetching: isFetchingLanguages,
     isFetchingNextPage: isFetchingMoreLanguages,
     hasNextPage: hasNextLanguages,
@@ -251,7 +255,7 @@ const General = ({ type, formType }: any) => {
   });
 
   return (
-    <div style={{ height: "620px" }}>
+    <div style={{ height: "650px" }}>
       <Row width="100%" noWrap>
         {type === "company" && (
           <>
@@ -283,30 +287,40 @@ const General = ({ type, formType }: any) => {
                     name="customer_id"
                     render={({ field: { onChange }, formState: { errors } }) => (
                       <>
-                        <Text variant="headingRegular">Customer ID</Text>
-                        <Spacer size={6} />
-                        <FormSelect
-                          style={{ width: "100%" }}
-                          size={"large"}
-                          placeholder={"Select"}
-                          borderColor={"#AAAAAA"}
-                          arrowColor={"#000"}
-                          withSearch
-                          isLoading={isFetchingCustomer}
-                          isLoadingMore={isFetchingMoreCompany}
-                          fetchMore={() => {
-                            if (hasNextPageCustomer) {
-                              fetchNextPageCustomer();
-                            }
-                          }}
-                          items={isFetchingCustomer && !isFetchingMoreCustomer ? [] : customerList}
-                          onChange={(value: any) => {
-                            onChange(value);
-                          }}
-                          onSearch={(value: any) => {
-                            setSearchCustomer(value);
-                          }}
-                        />
+                        {isLoadingCustomer ? (
+                          <Center>
+                            <Spin tip="" />
+                          </Center>
+                        ) : (
+                          <>
+                            <Text variant="headingRegular">Customer ID</Text>
+                            <Spacer size={6} />
+                            <FormSelect
+                              style={{ width: "100%" }}
+                              size={"large"}
+                              placeholder={"Select"}
+                              borderColor={"#AAAAAA"}
+                              arrowColor={"#000"}
+                              withSearch
+                              isLoading={isFetchingCustomer}
+                              isLoadingMore={isFetchingMoreCompany}
+                              fetchMore={() => {
+                                if (hasNextPageCustomer) {
+                                  fetchNextPageCustomer();
+                                }
+                              }}
+                              items={
+                                isFetchingCustomer && !isFetchingMoreCustomer ? [] : customerList
+                              }
+                              onChange={(value: any) => {
+                                onChange(value);
+                              }}
+                              onSearch={(value: any) => {
+                                setSearchCustomer(value);
+                              }}
+                            />
+                          </>
+                        )}
                       </>
                     )}
                   />
@@ -388,34 +402,42 @@ const General = ({ type, formType }: any) => {
                     control={control}
                     defaultValue={""}
                     name="customer_id"
-                    render={({ field: { onChange }, formState: { errors } }) => (
-                      <Col width="100%" justifyContent={"center"}>
-                        <Text variant="headingRegular">Customer ID</Text>
-                        <Spacer size={6} />
-                        <FormSelect
-                          style={{ width: "100%" }}
-                          size={"large"}
-                          placeholder={"Select"}
-                          borderColor={"#AAAAAA"}
-                          arrowColor={"#000"}
-                          withSearch
-                          isLoading={isFetchingCustomer}
-                          isLoadingMore={isFetchingMoreCompany}
-                          fetchMore={() => {
-                            if (hasNextPageCustomer) {
-                              fetchNextPageCustomer();
+                    render={({ field: { onChange }, formState: { errors } }) =>
+                      isLoadingCustomer ? (
+                        <Center>
+                          <Spin tip="" />
+                        </Center>
+                      ) : (
+                        <Col width="100%" justifyContent={"center"}>
+                          <Text variant="headingRegular">Customer ID</Text>
+                          <Spacer size={6} />
+                          <FormSelect
+                            style={{ width: "100%" }}
+                            size={"large"}
+                            placeholder={"Select"}
+                            borderColor={"#AAAAAA"}
+                            arrowColor={"#000"}
+                            withSearch
+                            isLoading={isFetchingCustomer}
+                            isLoadingMore={isFetchingMoreCompany}
+                            fetchMore={() => {
+                              if (hasNextPageCustomer) {
+                                fetchNextPageCustomer();
+                              }
+                            }}
+                            items={
+                              isFetchingCustomer && !isFetchingMoreCustomer ? [] : customerList
                             }
-                          }}
-                          items={isFetchingCustomer && !isFetchingMoreCustomer ? [] : customerList}
-                          onChange={(value: any) => {
-                            onChange(value);
-                          }}
-                          onSearch={(value: any) => {
-                            setSearchCustomer(value);
-                          }}
-                        />
-                      </Col>
-                    )}
+                            onChange={(value: any) => {
+                              onChange(value);
+                            }}
+                            onSearch={(value: any) => {
+                              setSearchCustomer(value);
+                            }}
+                          />
+                        </Col>
+                      )
+                    }
                   />
                 ) : (
                   <Col width={"100%"}>
@@ -443,7 +465,7 @@ const General = ({ type, formType }: any) => {
 
       <Spacer size={20} />
 
-      <Row width="100%" noWrap gap={"10px"}>
+      <Row width="100%" noWrap gap={"10px"} alignItems={"center"}>
         {type === "company" && (
           <Col width={"100%"}>
             <Input
@@ -462,9 +484,60 @@ const General = ({ type, formType }: any) => {
               control={control}
               defaultValue={""}
               name="individu.job"
-              render={({ field: { onChange, value }, formState: { errors } }) => (
+              render={({ field: { onChange, value }, formState: { errors } }) =>
+                isLoadingJobPosition ? (
+                  <Center>
+                    <Spin tip="" />
+                  </Center>
+                ) : (
+                  <>
+                    <Text variant="headingRegular">Job Position</Text>
+                    <Spacer size={6} />
+                    <FormSelect
+                      defaultValue={value}
+                      style={{ width: "100%" }}
+                      size={"large"}
+                      placeholder={"Select"}
+                      borderColor={"#AAAAAA"}
+                      arrowColor={"#000"}
+                      withSearch
+                      isLoading={isFetchingJobPosition}
+                      isLoadingMore={isFetchingMoreJobPosition}
+                      fetchMore={() => {
+                        if (hasNextJobPosition) {
+                          fetchNextPageJobPosition();
+                        }
+                      }}
+                      items={
+                        isFetchingJobPosition && !isFetchingMoreJobPosition ? [] : listJobPosition
+                      }
+                      onChange={(value: any) => {
+                        onChange(value);
+                      }}
+                      onSearch={(value: any) => {
+                        setSearchJobPosition(value);
+                      }}
+                    />
+                  </>
+                )
+              }
+            />
+          </Col>
+        )}
+
+        <Col width={"100%"}>
+          <Controller
+            control={control}
+            defaultValue={""}
+            name="group"
+            render={({ field: { onChange, value }, formState: { errors } }) =>
+              isLoadingVendor ? (
+                <Center>
+                  <Spin tip="" />
+                </Center>
+              ) : (
                 <>
-                  <Text variant="headingRegular">Job Position</Text>
+                  <Text variant="headingRegular">Vendor Group</Text>
                   <Spacer size={6} />
                   <FormSelect
                     defaultValue={value}
@@ -474,63 +547,28 @@ const General = ({ type, formType }: any) => {
                     borderColor={"#AAAAAA"}
                     arrowColor={"#000"}
                     withSearch
-                    isLoading={isFetchingJobPosition}
-                    isLoadingMore={isFetchingMoreJobPosition}
+                    isLoading={isFetchingVendorGroup}
+                    isLoadingMore={isFetchingMoreVendorGroup}
                     fetchMore={() => {
-                      if (hasNextJobPosition) {
-                        fetchNextPageJobPosition();
+                      if (hasNextVendorGroup) {
+                        fetchNextPageVendorGroup();
                       }
                     }}
                     items={
-                      isFetchingJobPosition && !isFetchingMoreJobPosition ? [] : listJobPosition
+                      isFetchingVendorGroup && !isFetchingMoreVendorGroup ? [] : listVendorGroup
                     }
                     onChange={(value: any) => {
                       onChange(value);
                     }}
                     onSearch={(value: any) => {
-                      setSearchJobPosition(value);
+                      setSearchVendorGroup(value);
                     }}
                   />
                 </>
-              )}
-            />
-          </Col>
-        )}
-
-        <Controller
-          control={control}
-          defaultValue={""}
-          name="group"
-          render={({ field: { onChange, value }, formState: { errors } }) => (
-            <Col width={"100%"}>
-              <Text variant="headingRegular">Vendor Group</Text>
-              <Spacer size={6} />
-              <FormSelect
-                defaultValue={value}
-                style={{ width: "100%" }}
-                size={"large"}
-                placeholder={"Select"}
-                borderColor={"#AAAAAA"}
-                arrowColor={"#000"}
-                withSearch
-                isLoading={isFetchingVendorGroup}
-                isLoadingMore={isFetchingMoreVendorGroup}
-                fetchMore={() => {
-                  if (hasNextVendorGroup) {
-                    fetchNextPageVendorGroup();
-                  }
-                }}
-                items={isFetchingVendorGroup && !isFetchingMoreVendorGroup ? [] : listVendorGroup}
-                onChange={(value: any) => {
-                  onChange(value);
-                }}
-                onSearch={(value: any) => {
-                  setSearchVendorGroup(value);
-                }}
-              />
-            </Col>
-          )}
-        />
+              )
+            }
+          />
+        </Col>
       </Row>
 
       <Spacer size={20} />
@@ -553,35 +591,41 @@ const General = ({ type, formType }: any) => {
             control={control}
             defaultValue={""}
             name="individu.company"
-            render={({ field: { onChange, value }, formState: { errors } }) => (
-              <Col width={"100%"}>
-                <Text variant="headingRegular">Company</Text>
-                <Spacer size={6} />
-                <FormSelect
-                  defaultValue={value}
-                  style={{ width: "100%" }}
-                  size={"large"}
-                  placeholder={"Select"}
-                  borderColor={"#AAAAAA"}
-                  arrowColor={"#000"}
-                  withSearch
-                  isLoading={isFetchingCompany}
-                  isLoadingMore={isFetchingMoreCompany}
-                  fetchMore={() => {
-                    if (hasNextPageCompany) {
-                      fetchNextPageCompany();
-                    }
-                  }}
-                  items={isFetchingCompany && !isFetchingMoreCompany ? [] : companyList}
-                  onChange={(value: any) => {
-                    onChange(value);
-                  }}
-                  onSearch={(value: any) => {
-                    setSearchCompany(value);
-                  }}
-                />
-              </Col>
-            )}
+            render={({ field: { onChange, value }, formState: { errors } }) =>
+              isLoadingCompany ? (
+                <Center>
+                  <Spin tip="" />
+                </Center>
+              ) : (
+                <Col width={"100%"}>
+                  <Text variant="headingRegular">Company</Text>
+                  <Spacer size={6} />
+                  <FormSelect
+                    defaultValue={value}
+                    style={{ width: "100%" }}
+                    size={"large"}
+                    placeholder={"Select"}
+                    borderColor={"#AAAAAA"}
+                    arrowColor={"#000"}
+                    withSearch
+                    isLoading={isFetchingCompany}
+                    isLoadingMore={isFetchingMoreCompany}
+                    fetchMore={() => {
+                      if (hasNextPageCompany) {
+                        fetchNextPageCompany();
+                      }
+                    }}
+                    items={isFetchingCompany && !isFetchingMoreCompany ? [] : companyList}
+                    onChange={(value: any) => {
+                      onChange(value);
+                    }}
+                    onSearch={(value: any) => {
+                      setSearchCompany(value);
+                    }}
+                  />
+                </Col>
+              )
+            }
           />
         )}
 
@@ -599,41 +643,48 @@ const General = ({ type, formType }: any) => {
 
       <Spacer size={20} />
 
-      <Row width="100%" noWrap gap={"10px"}>
+      <Row width="100%" noWrap gap={"10px"} alignItems={"center"}>
         <Col width={"100%"}>
           <Controller
             control={control}
             defaultValue={""}
             name="language"
-            render={({ field: { onChange, value }, formState: { errors } }) => (
-              <>
-                <Text variant="headingRegular">Language</Text>
-                <Spacer size={6} />
-                <FormSelect
-                  defaultValue={value}
-                  style={{ width: "100%" }}
-                  size={"large"}
-                  placeholder={"Select"}
-                  borderColor={"#AAAAAA"}
-                  arrowColor={"#000"}
-                  withSearch
-                  isLoading={isFetchingLanguages}
-                  isLoadingMore={isFetchingMoreLanguages}
-                  fetchMore={() => {
-                    if (hasNextLanguages) {
-                      fetchNextPageLanguages();
-                    }
-                  }}
-                  items={isFetchingLanguages && !isFetchingMoreLanguages ? [] : listLanguage}
-                  onChange={(value: any) => {
-                    onChange(value);
-                  }}
-                  onSearch={(value: any) => {
-                    setSearchLanguage(value);
-                  }}
-                />
-              </>
-            )}
+            render={({ field: { onChange, value }, formState: { errors } }) =>
+              isLoiadingLanguages ? (
+                <Center>
+                  <Spin tip="" />
+                </Center>
+              ) : (
+                <>
+                  {" "}
+                  <Text variant="headingRegular">Language</Text>
+                  <Spacer size={6} />
+                  <FormSelect
+                    defaultValue={value}
+                    style={{ width: "100%" }}
+                    size={"large"}
+                    placeholder={"Select"}
+                    borderColor={"#AAAAAA"}
+                    arrowColor={"#000"}
+                    withSearch
+                    isLoading={isFetchingLanguages}
+                    isLoadingMore={isFetchingMoreLanguages}
+                    fetchMore={() => {
+                      if (hasNextLanguages) {
+                        fetchNextPageLanguages();
+                      }
+                    }}
+                    items={isFetchingLanguages && !isFetchingMoreLanguages ? [] : listLanguage}
+                    onChange={(value: any) => {
+                      onChange(value);
+                    }}
+                    onSearch={(value: any) => {
+                      setSearchLanguage(value);
+                    }}
+                  />
+                </>
+              )
+            }
           />
         </Col>
 
@@ -730,6 +781,12 @@ const CustomerContainer = styled.div`
   display: flex;
   gap: 8px;
   width: 100%;
+`;
+
+const Center = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
 `;
 
 export default General;
