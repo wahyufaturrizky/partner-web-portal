@@ -140,25 +140,20 @@ const UserConfigPermission: any = () => {
   return (
     <>
       <Col>
-        <Text variant={"h4"}>Partner Config Permission List</Text>
+        <Text variant={"h4"}>Permission List</Text>
         <Spacer size={20} />
         <HeaderFilter>
-          <Row alignItems="center">
+          <Row alignItems="center" noWrap>
             <Search
-              width="380px"
+              width="360px"
               placeholder="Search Permission Name"
               onChange={(e: any) => setSearch(e.target.value)}
             />
 
-            <Spacer size={8} />
-            <Text variant="subtitle1" color="black.dark">
-              Menu
-            </Text>
-
-            <Spacer size={8} />
+            <Spacer size={16} />
 
             <Dropdown
-              width="130px"
+              width="352px"
               label=""
               allowClear
               onClear={handleClearDropdownMenu}
@@ -167,26 +162,21 @@ const UserConfigPermission: any = () => {
                 fieldsMenuList &&
                 fieldsMenuList?.rows.map((data: any) => ({ id: data.id, value: data.name }))
               }
-              placeholder={"Select"}
+              placeholder={"Menu"}
               handleChange={handleChangeDropdownMenu}
               noSearch
               rounded
             />
 
-            <Spacer size={8} />
-            <Text variant="subtitle1" color="black.dark">
-              Is system config
-            </Text>
-
-            <Spacer size={8} />
+            <Spacer size={16} />
 
             <Dropdown
-              width="130px"
+              width="352px"
               label=""
               allowClear
               onClear={handleClearDropdownIsSystemConfig}
               items={valueIsSystemConfig}
-              placeholder={"Select"}
+              placeholder={"Is System Config"}
               handleChange={handleChangeDropdownIsSystemConfig}
               noSearch
               rounded
