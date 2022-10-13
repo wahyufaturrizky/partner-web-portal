@@ -158,8 +158,6 @@ const DetailPricingStructure: any = () => {
     data: null,
   });
 
-  const [percent, setPercent] = useState(0);
-
   
 
   const {
@@ -374,7 +372,7 @@ const DetailPricingStructure: any = () => {
     1000
   );
 
-  const { data: dataGroupBuying, isLoading: isLoadingGroupBuying } = useGroupBuyingLists({
+  const { data: dataGroupBuying } = useGroupBuyingLists({
     query: {
       limit: 1000000,
     },
@@ -383,7 +381,7 @@ const DetailPricingStructure: any = () => {
     },
   });
 
-  const { data: pricingStructureListById, isLoading: isLoadingPricingStructureListById } =
+  const { data: pricingStructureListById } =
     usePricingStructureList({
       price_structure_id: price_structure_id,
       options: {
@@ -421,7 +419,6 @@ const DetailPricingStructure: any = () => {
     isFetchingNextPage: isFetchingMorePricingConfigInfinite,
     hasNextPage: hasNextPagePricingConfigInfinite,
     fetchNextPage: fetchNextPagePricingConfigInfinite,
-    isLoading: isLoadingPricingConfigInfinite,
   } = usePricingConfigInfiniteLists({
     query: {
       search: debounceFetch,
@@ -586,7 +583,7 @@ const DetailPricingStructure: any = () => {
     },
   });
 
-  const { data: pricingStructureLists, isLoading: isLoadingPricingStructureList } =
+  const { data: pricingStructureLists } =
     usePricingStructureLists({
       options: {
         onSuccess: (data: any) => {
@@ -612,7 +609,6 @@ const DetailPricingStructure: any = () => {
     isFetchingNextPage: isFetchingMoreSalesOrganizationInfinite,
     hasNextPage: hasNextPageSalesOrganizationInfinite,
     fetchNextPage: fetchNextPageSalesOrganizationInfinite,
-    isLoading: isLoadingSalesOrganizationInfinite,
   } = useSalesOrganizationInfiniteLists({
     query: {
       search: debounceFetch,
@@ -649,7 +645,6 @@ const DetailPricingStructure: any = () => {
     isFetchingNextPage: isFetchingMorePricingStructureInfinite,
     hasNextPage: hasNextPagePricingStructureInfinite,
     fetchNextPage: fetchNextPagePricingStructureInfinite,
-    isLoading: isLoadingPricingStructureInfinite,
   } = usePricingStructureInfiniteLists({
     query: {
       search: debounceFetch,
@@ -686,7 +681,6 @@ const DetailPricingStructure: any = () => {
     isFetchingNextPage: isFetchingMoreCurrenciesInfinite,
     hasNextPage: hasNextPageCurrenciesInfinite,
     fetchNextPage: fetchNextPageCurrenciesInfinite,
-    isLoading: isLoadingCurrenciesInfinite,
   } = useCurrenciesInfiniteLists({
     query: {
       search: debounceFetch,
@@ -771,7 +765,7 @@ const DetailPricingStructure: any = () => {
   };
 
   const onSubmitDraft = (dataDraft: any) => {
-    updatePriceStructure({
+    pricingStructureDraft({
       status: "DRAFTED",
       add_distributions: dataSubmit.distribution_channel,
       add_products: dataSubmit.product_selected.map((data: any) => data.id),
@@ -1192,29 +1186,6 @@ const DetailPricingStructure: any = () => {
     setRegionSelected(tempRegionSelected);
   };
 
-  useEffect(() => {
-    const increaseProgress = () => {
-      let newPercent = percent + 12.5;
-
-      if (newPercent > 100) {
-        newPercent = 100;
-      }
-
-      setPercent(parseInt(String(newPercent)));
-    };
-    increaseProgress();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    isLoadingCurrenciesInfinite,
-    isLoadingGroupBuying,
-    isLoadingPricingConfigInfinite,
-    isLoadingProductList,
-    isLoadingSalesOrganizationInfinite,
-    isLoadingPricingStructureListById,
-    isLoadingPricingStructureList,
-    isLoadingPricingStructureInfinite,
-  ]);
-
   const isEmpty = productsSelected.length === 0;
 
   const isEmptyRegion = regionSelected.length === 0;
@@ -1222,18 +1193,7 @@ const DetailPricingStructure: any = () => {
   if (manageByZone.isShow) {
     return (
       <>
-        {isLoadingPricingConfigInfinite ||
-        isLoadingCurrenciesInfinite ||
-        isLoadingPricingStructureListById ||
-        isLoadingPricingStructureList ||
-        isLoadingGroupBuying ||
-        isLoadingProductList ||
-        isLoadingSalesOrganizationInfinite ? (
-          <Center>
-            <Spin tip="Loading data..." />
-          </Center>
-        ) : (
-          <Col>
+        <Col>
             <Row gap="4px" alignItems="center">
               <ArrowLeft
                 style={{ cursor: "pointer" }}
@@ -1931,25 +1891,12 @@ const DetailPricingStructure: any = () => {
               </Col>
             </Card>
           </Col>
-        )}
       </>
     );
   } else {
     return (
       <>
-        {isLoadingPricingConfigInfinite ||
-        isLoadingCurrenciesInfinite ||
-        isLoadingGroupBuying ||
-        isLoadingPricingStructureListById ||
-        isLoadingPricingStructureList ||
-        isLoadingPricingStructureInfinite ||
-        isLoadingProductList ||
-        isLoadingSalesOrganizationInfinite ? (
-          <Center>
-            <Spin tip="Loading data..." />
-          </Center>
-        ) : (
-          <Col>
+        <Col>
             <Row gap="4px" alignItems="center">
               <ArrowLeft style={{ cursor: "pointer" }} onClick={() => router.back()} />
               <Text variant={"h4"}>
@@ -2469,7 +2416,6 @@ const DetailPricingStructure: any = () => {
               </Col>
             </Card>
           </Col>
-        )}
 
         <Modal
           width={"80%"}
