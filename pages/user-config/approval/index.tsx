@@ -114,7 +114,7 @@ const UserConfigApproval: any = () => {
 	return (
 		<>
 			<Col>
-				<Text variant={"h4"}>Partner Config Approval List</Text>
+				<Text variant={"h4"}>Approval List</Text>
 				<Spacer size={20} />
 				<Card>
 					<Row justifyContent="space-between">
