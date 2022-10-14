@@ -279,13 +279,15 @@ const CreatePricingStructure: any = () => {
 
   const debounceFetch = useDebounce(
     searchPricingConfigInfinite ||
-      searchProduct ||
       searchSalesOrganizationInfinite ||
       searchPricingStructureInfinite ||
-      searchRegion ||
       searchCurrenciesInfinite,
     1000
   );
+
+  const debounceFetchProduct = useDebounce(searchProduct, 1000);
+
+  const debounceFetchRegion = useDebounce(searchRegion, 1000);
 
   const { data: dataGroupBuying } = useGroupBuyingLists({
     query: {
@@ -1255,6 +1257,7 @@ const CreatePricingStructure: any = () => {
                           }
                           onChange={(value: any) => {
                             onChange(value);
+                            setSearchSalesOrganizationInfinite("");
                           }}
                           onSearch={(value: any) => {
                             setSearchSalesOrganizationInfinite(value);
@@ -1740,6 +1743,7 @@ const CreatePricingStructure: any = () => {
                           }
                           onChange={(value: any) => {
                             onChange(value);
+                            setSearchPricingConfigInfinite("");
                           }}
                           onSearch={(value: any) => {
                             setSearchPricingConfigInfinite(value);
@@ -1786,12 +1790,13 @@ const CreatePricingStructure: any = () => {
                             }
                           }}
                           items={
-                            isFetchingCurrenciesInfinite && !isFetchingCurrenciesInfinite
+                            isFetchingCurrenciesInfinite && !isFetchingMoreCurrenciesInfinite
                               ? []
                               : currenciesInfiniteList
                           }
                           onChange={(value: any) => {
                             onChange(value);
+                            setSearchCurrenciesInfinite("");
                           }}
                           onSearch={(value: any) => {
                             setSearchCurrenciesInfinite(value);
@@ -1846,6 +1851,7 @@ const CreatePricingStructure: any = () => {
                           }
                           onChange={(value: any) => {
                             onChange(value);
+                            setSearchSalesOrganizationInfinite("");
                           }}
                           onSearch={(value: any) => {
                             setSearchSalesOrganizationInfinite(value);
@@ -2182,6 +2188,7 @@ const CreatePricingStructure: any = () => {
                         }
                         onChange={(value: any) => {
                           onChange(value);
+                          setSearchPricingStructureInfinite("");
                         }}
                         onSearch={(value: any) => {
                           setSearchPricingStructureInfinite(value);
