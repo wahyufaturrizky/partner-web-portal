@@ -1908,7 +1908,7 @@ const DetailPricingStructure: any = () => {
 
             <Card padding="20px">
               <Row alignItems="center" justifyContent="space-between">
-                {pricingStructureListById.status === "ACTIVE" ? (
+                {pricingStructureListById?.status === "ACTIVE" ? (
                   <Dropdown
                     label=""
                     isHtml
@@ -1925,11 +1925,11 @@ const DetailPricingStructure: any = () => {
                       }
                     }}
                     noSearch
-                    defaultValue={getValues("status") || pricingStructureListById.status}
+                    defaultValue={getValues("status") || pricingStructureListById?.status}
                   />
                 ) : (
-                  <DisabledDropdown2 status={pricingStructureListById.status}>
-                    {STATUS_APPROVAL_TEXT[pricingStructureListById.status]}
+                  <DisabledDropdown2 status={pricingStructureListById?.status}>
+                    {STATUS_APPROVAL_TEXT[pricingStructureListById?.status]}
                   </DisabledDropdown2>
                 )}
 
