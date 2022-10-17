@@ -469,7 +469,7 @@ const DetailPricingStructure: any = () => {
     isFetching: isFetchingProductList,
   } = useProductList({
     query: {
-      search: debounceFetch,
+      search: debounceFetchProduct,
       page: paginationProducts.page,
       limit: paginationProducts.itemsPerPage,
       company_id: "KSNI",
@@ -611,7 +611,6 @@ const DetailPricingStructure: any = () => {
           })),
       },
       query: {
-        search: debounceFetch,
         page: paginationProductActive.page,
         limit: paginationProductActive.itemsPerPage,
         status: "ACTIVE",
