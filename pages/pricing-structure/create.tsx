@@ -277,13 +277,13 @@ const CreatePricingStructure: any = () => {
       },
     });
 
-  const debounceFetch = useDebounce(
-    searchPricingConfigInfinite ||
-      searchSalesOrganizationInfinite ||
-      searchPricingStructureInfinite ||
-      searchCurrenciesInfinite,
-    1000
-  );
+  const debounceFetchPricingConfigInfinite = useDebounce(searchPricingConfigInfinite, 1000);
+
+  const debounceFetchSalesOrganizationInfinite = useDebounce(searchSalesOrganizationInfinite, 1000);
+
+  const debounceFetchPricingStructureInfinite = useDebounce(searchPricingStructureInfinite, 1000);
+
+  const debounceFetchCurrenciesInfinite = useDebounce(searchCurrenciesInfinite, 1000);
 
   const debounceFetchProduct = useDebounce(searchProduct, 1000);
 
@@ -305,7 +305,7 @@ const CreatePricingStructure: any = () => {
     fetchNextPage: fetchNextPagePricingConfigInfinite,
   } = usePricingConfigInfiniteLists({
     query: {
-      search: debounceFetch,
+      search: debounceFetchPricingConfigInfinite,
       limit: 10,
     },
     options: {
@@ -449,7 +449,7 @@ const CreatePricingStructure: any = () => {
     isLoading: isLoadingSalesOrganizationInfinite,
   } = useSalesOrganizationInfiniteLists({
     query: {
-      search: debounceFetch,
+      search: debounceFetchSalesOrganizationInfinite,
       limit: 10,
       company_code: "KSNI",
     },
@@ -486,7 +486,7 @@ const CreatePricingStructure: any = () => {
     isLoading: isLoadingPricingStructureInfinite,
   } = usePricingStructureInfiniteLists({
     query: {
-      search: debounceFetch,
+      search: debounceFetchPricingStructureInfinite,
       limit: 10,
       status: "ACTIVE",
     },
@@ -523,7 +523,7 @@ const CreatePricingStructure: any = () => {
     isLoading: isLoadingCurrenciesInfinite,
   } = useCurrenciesInfiniteLists({
     query: {
-      search: debounceFetch,
+      search: debounceFetchCurrenciesInfinite,
       limit: 10,
     },
     options: {
