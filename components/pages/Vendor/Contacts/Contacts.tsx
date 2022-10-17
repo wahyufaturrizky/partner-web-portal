@@ -114,10 +114,9 @@ const Contacts = ({ formType }: any) => {
                       switch (parseInt(e.key)) {
                         case 1:
                           const findIndex = fields.findIndex((contact: any) => contact.is_primary);
-                          const getContact = fields.filter((contact: any) => contact.is_primary);
 
                           // Ganti status primary true menjadi false di elemen lain
-                          update(findIndex, { ...getContact[0], is_primary: false });
+                          update(findIndex, { ...fields[findIndex], is_primary: false });
 
                           // Gantu status primary false menjadi true di elemen yang di tuju
                           update(contactIndex, { ...contact, is_primary: true });

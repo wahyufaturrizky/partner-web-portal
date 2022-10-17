@@ -172,10 +172,9 @@ const Addresses = ({ formType }: any) => {
                     color="blue.dark"
                     onClick={() => {
                       const findIndex = fields.findIndex((address: any) => address.is_primary);
-                      const getAddress = fields.filter((address: any) => address.is_primary);
 
                       // Ganti status primary true menjadi false di elemen lain
-                      update(findIndex, { ...getAddress[0], is_primary: false });
+                      update(findIndex, { ...fields[findIndex], is_primary: false });
 
                       // Gantu status primary false menjadi true di elemen yang di tuju
                       update(addressIndex, { ...address, is_primary: true });
