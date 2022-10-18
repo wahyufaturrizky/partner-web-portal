@@ -21,9 +21,9 @@ import { ICDownload, ICUpload } from "../../assets/icons";
 
 import { mdmDownloadService } from "../../lib/client";
 import { useRouter } from "next/router";
-import { useCostCenters, useUploadFileCostCenter } from "hooks/mdm/cost-center/useCostCenter";
 import ModalManageLanguage from "components/elements/Modal/ModalManageLanguage";
 import moment from "moment";
+import { useAllLibraryLanguage, useAllLibraryLanguageModule, useUploadLibraryLanguage } from "hooks/mdm/library-language/useLibraryLanguage";
 
 const downloadFile = (params: any) =>
   mdmDownloadService("/cost-center/download", { params }).then((res) => {
@@ -65,10 +65,10 @@ const LibraryLanguage = () => {
   const debounceSearch = useDebounce(search, 1000);
 
   const {
-    data: costCenterData,
-    isLoading: isLoadingCostCenter,
-    isFetching: isFetchingCostCenter,
-  } = useCostCenters({
+    data: libraryLanguageData,
+    isLoading: isLoadingLibraryLanguage,
+    isFetching: isFetchingLibraryLanguage,
+  } = useAllLibraryLanguageModule({
     query: {
       search: debounceSearch,
       page: pagination.page,
@@ -76,35 +76,10 @@ const LibraryLanguage = () => {
     },
     options: {
       onSuccess: (data: any) => {
-        pagination.setTotalItems(data.totalRow);
+        pagination.setTotalItems(data?.totalRow);
       },
       select: (data: any) => {
-        const listLanguageLibrary = {
-          status: "SUCCESS",
-          data: {
-              rows: [
-                  {
-                      code : "mdm",
-                      name : "Master Data Management",
-                      created_at: "2022-10-11T11:06:06.000Z",
-                      created_by: 0,
-                      modified_at: null,
-                      modified_by: null,
-                      deleted_by: null,
-                      deleted_at: null
-                  }
-              ],
-              total_row : 1,
-              sort_by : [
-                  "code",
-                  "name"
-              ]
-          },
-          message: "list language library"
-      }
-
-        const mappedData = listLanguageLibrary?.data?.rows?.map((element: any) => {
-          console.log(moment(element.created_at).format("DD/mm/YYYY"), '<<<date')
+        const mappedData = data?.rows?.map((element: any) => {
           return {
             key: element.code,
             code: element.code,
@@ -125,17 +100,17 @@ const LibraryLanguage = () => {
             ),
           };
         });
-        return { data: mappedData, totalRow: listLanguageLibrary?.data?.total_row };
+        return { data: mappedData, totalRow: data?.total_row };
       },
     },
   });
 
 
-  const { mutate: uploadFileCostCenter, isLoading: isLoadingUploadFileCostCenter } = useUploadFileCostCenter({
-    query: {
-      with_data: "N",
-      company_id: costCenterData?.data[0]?.companyId,
-    },
+  const { mutate: uploadFileLibraryLanguage, isLoading: isLoadingUploadFileLibraryLanguage } = useUploadLibraryLanguage({
+    // query: {
+    //   with_data: "N",
+    //   company_id: libraryLanguageData?.data[0]?.companyId,
+    // },
     options: {
       onSuccess: () => {
         queryClient.invalidateQueries(["cost-centers"]);
@@ -175,16 +150,16 @@ const LibraryLanguage = () => {
 
   const onSubmitFile = (file: any) => {
     const formData = new FormData();
-    formData.append("company_id", costCenterData?.data[0]?.companyId);
+    formData.append("company_id", libraryLanguageData?.data[0]?.companyId);
     formData.append("file", file);
     const uploadedData = {
       file: formData,
-      company_id: costCenterData?.data[0]?.companyId
+      company_id: libraryLanguageData?.data[0]?.companyId
     }
-    uploadFileCostCenter(formData);
+    uploadFileLibraryLanguage(formData);
   };
 
-  if(isLoadingCostCenter || isLoadingUploadFileCostCenter){
+  if(isLoadingLibraryLanguage){
   return (
     <Center>
       <Spin tip="Loading data..." />
@@ -215,7 +190,7 @@ const LibraryLanguage = () => {
               textColor={"pink.regular"}
               iconStyle={{ fontSize: "12px" }}
               onClick={(e: any) => {
-                const companyId = costCenterData?.data[0]?.companyId
+                const companyId = libraryLanguageData?.data[0]?.companyId
                 switch (parseInt(e.key)) {
                   case 1:
                     downloadFile({ with_data: "N", company_id: companyId });
@@ -279,9 +254,9 @@ const LibraryLanguage = () => {
       <Card style={{ padding: "16px 20px" }}>
         <Col gap={"60px"}>
           <Table
-            loading={isLoadingCostCenter || isFetchingCostCenter}
+            loading={isLoadingLibraryLanguage || isFetchingLibraryLanguage}
             columns={columns}
-            data={costCenterData?.data}
+            data={libraryLanguageData?.data}
             // rowSelection={rowSelection}
             rowKey={"id"}
           />
@@ -323,6 +298,7 @@ const TopButtonHolder = styled.div`
   flex-direction: column;
   justify-content: center;
 `
+
 const Center = styled.div`
   display: flex;
   justify-content: center;
