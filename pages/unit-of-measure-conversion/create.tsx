@@ -382,7 +382,12 @@ const UOMConversionCreate = () => {
                 name="uom"
                 render={({ field: { onChange } }) => (
                   <>
-                    <Label>UoM</Label>
+                    <div style={{
+                      display: 'flex'
+                    }}>
+                      <Label>UoM</Label>
+                      <Span>&#42;</Span>
+                    </div>
                     <Spacer size={3} />
                     <CreateSelectDiv>
                       <InputAddonAfter>Per</InputAddonAfter>
