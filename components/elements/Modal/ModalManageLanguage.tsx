@@ -188,7 +188,7 @@ const ModalManageLanguage = ({
   };
 
 
-  if(isLoadingLibraryLanguage){
+  if(isLoadingLibraryLanguage || isLoadingUpdateLibraryLanguage){
     return (
       <div>
         <Spin/>
