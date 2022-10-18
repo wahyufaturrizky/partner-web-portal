@@ -101,7 +101,7 @@ const useCountryTaxInfiniteLists = ({ query = {}, options }) => {
 function useCreateTax({ options }) {
   return useMutation(
     (data) =>
-      mdmService(`/tax`, {
+      mdmService(`/tax-item`, {
         method: "POST",
         data,
       }),
@@ -150,6 +150,30 @@ const useUploadFileTax = ({ options }) => {
   );
 };
 
+const useDeleteTaxItem = ({ options }) => {
+  return useMutation(
+    (data) =>
+      mdmService(`/tax-item`, {
+        method: "DELETE",
+        data,
+      }),
+    {
+      ...options,
+    }
+  );
+};
+
+const fetchDetailTaxItem = async ({ id, taxId }) => {
+  return mdmService(`/tax-item/${taxId}/${id}`).then((data) => data);
+};
+
+const useDetailTaxItem = ({ id, taxId, options }) => {
+  console.log(id);
+  return useQuery(["tax-item-detail", id], () => fetchDetailTaxItem({ id, taxId }), {
+    ...options,
+  });
+};
+
 export {
   useTaxes,
   useTax,
@@ -160,4 +184,6 @@ export {
   useUpdateTax,
   useDeletTax,
   useUploadFileTax,
+  useDeleteTaxItem,
+  useDetailTaxItem,
 };

@@ -20,6 +20,27 @@ const useTermOfPayments = ({ query = {}, options }) => {
   });
 };
 
+const fetchInfiniteTermOfPayments = async ({ pageParam = 1, queryKey }) => {
+  const searchQuery = queryKey[1].search;
+  return mdmService(`/top`, {
+    params: {
+      search: searchQuery,
+      limit: 10,
+      page: pageParam,
+      sortBy: "created_at",
+      sortOrder: "DESC",
+      ...queryKey[1],
+    },
+  }).then((data) => data);
+};
+
+const useTopInfiniteLists = ({ query = {}, options }) => {
+  return useInfiniteQuery(["top/infinite", query], fetchInfiniteTermOfPayments, {
+    keepPreviousData: true,
+    ...options,
+  });
+};
+
 const fetchTermOfPayment = async ({ id, companyId }) => {
   return mdmService(`/top/${companyId}/${id}`).then((data) => data);
 };
@@ -95,6 +116,7 @@ const useUploadFileTermOfPayment = ({ options }) => {
 export {
   useTermOfPayments,
   useTermOfPayment,
+  useTopInfiniteLists,
   useTopForm,
   useCreateTermOfPayment,
   useUpdateTermOfPayment,

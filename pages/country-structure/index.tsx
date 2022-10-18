@@ -149,6 +149,7 @@ const ListTemplateMenu = () => {
 								size="big"
 								variant="tertiary"
 								onClick={() => setVisible({ delete: true, upload: false })}
+								disabled={rowSelection.selectedItem?.length < 1}
 							>
 								Delete
 							</Button>

@@ -277,10 +277,6 @@ const DraftPricingStructure: any = ({
           </Center>
         ) : (
           <Card style={{ minHeight: "574px", padding: "16px 20px" }}>
-            <Text variant="headingRegular" color="blue.darker">
-              {search ? `Search Result` : `Total Draft Pricing Structure`} :{" "}
-              {pricingStructureLists?.totalRow}{" "}
-            </Text>
             <Spacer size={20} />
             {isEmpty ? (
               <EmptyState

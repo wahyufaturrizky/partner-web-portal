@@ -12,7 +12,7 @@ import {
 } from "pink-lava-ui";
 import styled from "styled-components";
 import ArrowLeft from "../../assets/icons/arrow-left.svg";
-import { useFieldArray, useForm, useWatch } from "react-hook-form";
+import { useFieldArray, useForm, useWatch, Controller } from "react-hook-form";
 import ModalAddRetailPricing from "components/elements/Modal/ModalAddRetailPricing";
 import { ICDelete, ICEdit } from "../../assets";
 import { useRouter } from "next/router";
@@ -40,10 +40,11 @@ const CreateRetailPricing: any = () => {
     control,
     handleSubmit,
     setValue,
+    formState: { errors }
   } = useForm({
     defaultValues: {
       name: '',
-      availability: [{ based_on: "" }],
+      availability: [{ based_on: "COUNTRY" }],
       rules: []
     },
   });
@@ -63,13 +64,12 @@ const CreateRetailPricing: any = () => {
     name: "rules"
   });
 
-
-
   const [showModalRules, setShowModalRules] = useState({
     visibility: false,
     tempRule: null,
     index: null
   })
+
   const columns = [
     {
       title: "key",
@@ -138,7 +138,7 @@ const CreateRetailPricing: any = () => {
 
   const getValue = (data:any) => {
     if (data.price_computation.toLowerCase().replace("- ", " ") === 'discount'){
-      return data.value ? `Discount ${data.value}` : "";
+      return data.value ? `Discount ${data.value} %` : "";
     }
 
     if (data.price_computation.toLowerCase().replace("- ", " ") === 'fixed price'){
@@ -180,6 +180,49 @@ const CreateRetailPricing: any = () => {
 
   const onSubmit = (data:any) => {
     data.company_id = 'KSNI'
+    data.availability = data?.availability?.map((data) => {
+      let newData:any = {
+        based_on: data?.based_on
+      }
+      if(data.based_on === 'BRANCH'){
+        newData.branch = {
+          ids: data?.value?.map((data:any) => data?.id) || [],
+          select_all: !!data?.select_all
+        }
+      } else if( data.based_on === 'SALES ORGANIZATION') {
+        newData.sales_organization = {
+          level: data?.id,
+          select_all: !!data?.select_all,
+          ids: data?.value?.map((data:any) => data?.id) || []
+        }
+      } else if(data.based_on === 'COUNTRY'){
+        newData.country = {
+          id: data?.country?.id,
+          level: data?.country?.value?.map((data:any) => ({
+            id: data?.id,
+            values: data?.levels?.map((data:any) => data?.id) || []
+          }))
+        }
+      }
+      return newData
+    })
+
+    data.rules = data.rules.map((data:any) => {
+      if(data.product_category){
+        data.product_category_id = data.product_category.id
+        delete data.product_category;
+      }
+      if(data.product_group){
+        data.product_group_id = data.product_group.id
+        delete data.product_group
+      }
+      if(data.product_variant){
+        data.product_variant_id = data.product_variant.id
+        delete data.product_variant;
+      }
+      return data;
+    })
+    
     createRetailPricing(data);
   }
 
@@ -192,7 +235,6 @@ const CreateRetailPricing: any = () => {
         apply_on: data.applyOn.toUpperCase(),
         price_computation: data.priceComputation.toUpperCase(),
         min_qty: data.minimumQuantity,
-        
       }
 
       if(valid_date_split){
@@ -200,15 +242,21 @@ const CreateRetailPricing: any = () => {
       }
 
       if(newRule.apply_on === 'PRODUCT CATEGORY') {
-        newRule.product_category_id = data.productCategory
+        newRule.product_category = {
+          id: data.productCategory
+        }
       }
 
       if(newRule.apply_on === 'PRODUCT VARIANT') {
-        newRule.product_variant_id = data.productVariant
+        newRule.product_variant = {
+          id: data.productVariant
+        }
       }
 
       if(newRule.apply_on === 'PRODUCT GROUP') {
-        newRule.product_group_id = data.productGroup
+        newRule.product_group = {
+          id: data.productGroup
+        }
       }
 
       appendRules(newRule)
@@ -245,13 +293,16 @@ const CreateRetailPricing: any = () => {
             <Accordion.Header variant="blue">General</Accordion.Header>
             <Accordion.Body>
               <Row width="100%" gap="20px" noWrap>
-                <Input
+               <Input
                   width="100%"
                   label="Name"
                   height="48px"
                   placeholder={"e.g Public Pricelist"}
+                  error={errors.name?.message}
                   required
-                  {...register('name')}
+                  {...register('name', {
+                    required: "Name must be filled"
+                  })}
                 />
               </Row>
               <Spacer size={20} />
@@ -272,7 +323,7 @@ const CreateRetailPricing: any = () => {
 
         <Accordion>
           <Accordion.Item key={2}>
-            <Accordion.Header variant="blue">Inventory Valuation</Accordion.Header>
+            <Accordion.Header variant="blue">Price Rules</Accordion.Header>
             <Accordion.Body>
               <Row width="100%" gap="20px" noWrap>
                 <DownloadUploadContainer>
@@ -344,7 +395,7 @@ const CreateRetailPricing: any = () => {
               })
             }}
             onSubmit={(index, data:any) => {
-              if(index){
+              if(index || index === 0){
                 updateRules(index, data)
               } else {
                 appendRules(data)
@@ -355,7 +406,7 @@ const CreateRetailPricing: any = () => {
                 index:null
               })
             }}
-            defaultValues={showModalRules?.tempRule}
+            defaultValues={JSON?.parse(JSON?.stringify(showModalRules?.tempRule))}
             index={showModalRules?.index}
           />
         }

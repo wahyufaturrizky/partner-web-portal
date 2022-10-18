@@ -555,8 +555,10 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
     isCreateProductVariant
   }
 
-  // const currentDate = moment();
-  // const createdAtDate = productDetail?.createdAt;
+  const currentDate = moment();
+  const createdAtDate = moment(productDetail?.createdAt)
+  const isNewProduct = currentDate.diff(createdAtDate, `days`) <= 0
+
   return (
     <Col>
       {
@@ -573,9 +575,11 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
           <ArrowLeft style={{ cursor: "pointer" }} onClick={() => router.back()} />
           <Text variant={"h4"}>{productForm?.name}</Text>
           <Spacer size={8} />
-          <CustomLozenge variant={'blue'}>
-            New Product Launch
-          </CustomLozenge>
+          {isNewProduct && (
+            <CustomLozenge variant={'blue'}>
+              New Product Launch
+            </CustomLozenge> 
+          )}
         </Row>
       }
 
@@ -818,6 +822,7 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
                     {...register("sku", {
                       required: 'Sku Number is required'
                     })}
+                    error={errors.sku?.message}
                   />
               </Col>
 

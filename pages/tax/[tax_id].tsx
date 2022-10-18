@@ -12,16 +12,24 @@ import {
   FormSelect,
   Switch,
   Spin,
+  Tabs
 } from "pink-lava-ui";
 import styled from "styled-components";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { useRouter } from "next/router";
 import { queryClient } from "../_app";
 import useDebounce from "../../lib/useDebounce";
 import { ModalDeleteConfirmation } from "../../components/elements/Modal/ModalConfirmationDelete";
 import ArrowLeft from "../../assets/icons/arrow-left.svg";
 import usePagination from "@lucasmogari/react-pagination";
-import { useCountryTaxInfiniteLists, useCreateTax, useDeletTax, useTaxInfiniteLists, useUpdateTax } from "hooks/mdm/Tax/useTax";
+import { useCountryTaxInfiniteLists, useCreateTax, useDeleteTaxItem, useDeletTax, useTaxInfiniteLists, useUpdateTax } from "hooks/mdm/Tax/useTax";
+import { columnsTaxType, dataTaxType, listTabItems, TaxBodyFields } from "components/pages/Tax/constants";
+import TaxList from "components/pages/Tax/fragments/TaxList";
+import VatList from "components/pages/Tax/fragments/VatList";
+import { ICDelete, ICEdit } from "assets";
+import WithholdingForm from "components/pages/Tax/fragments/WithholdingForm";
+import TaxTypeForm from "components/pages/Tax/fragments/TaxTypeForm";
+import moment from "moment";
 
 const renderConfirmationText = (type: any, data: any) => {
 switch (type) {
@@ -29,7 +37,7 @@ switch (type) {
     return data.selectedRowKeys.length > 1
       ? `Are you sure to delete ${data.selectedRowKeys.length} items ?`
       : `Are you sure to delete Tax Name ${
-          data?.taxData?.find((el: any) => el.key === data.selectedRowKeys[0]).name
+          data?.taxData?.tax_item_name
         } ?`;
   case "detail":
     return `Are you sure to delete Uom Name ${data.uomName} ?`;
@@ -47,6 +55,23 @@ interface TaxDetail {
     name: string;
     percentage: string; 
     activeStatus: string;
+    taxItems : [{
+      taxItemId :string,
+      taxItemType: string,
+      taxName : string,
+      glAccount: string,
+      taxType : string,
+      taxCode : string,
+        details: [{
+          tax_item_id : string,
+          tax_item_detail_id : string,
+          period_from : string,
+          period_to : string,
+          percentage : string,
+          percentage_subject_to_tax : string,
+          withholding_tax_rate : string,
+        }]
+    }] 
 }
 
 
@@ -68,13 +93,18 @@ const TaxDetail = () => {
   const [search, setSearch] = useState("");
 
   const [isShowDelete, setShowDelete] = useState({ open: false, type: "selection", data: {} });
-  const [showCreateModal, setShowCreateModal] = useState(false)
+  const [showCreateModal, setShowCreateModal] = useState({ open: false, type: "", data: {} })
+  const [showTaxTypeModal, setShowTaxTypeModal] = useState(false)
 
   const debounceSearch = useDebounce(search, 1000);
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [statusId, setStatusId] = useState(null)
   const [updatedTaskData, setUpdatedTaskData] = useState(null)
-  const { register, control, handleSubmit, reset } = useForm();
+  const [tabAktived, setTabAktived] = useState<string>('Withholding Tax')
+  const [formType, setFormType] = useState<string>('Withholding Tax')
+  const [arrayTax,setArrayTax] = useState<{data:string}[]>([])
+  const [allTaxData,setAllTaxData] = useState<{data:string}[]>([])
+  const { register, control, handleSubmit, reset, getValues ,formState: { errors },} = useForm();
   
   const {
     isFetching: isFetchingCountryList,
@@ -107,6 +137,27 @@ const TaxDetail = () => {
       },
     },
   });
+  // switch elements detail information
+  const switchTabItem = () => {
+    switch (tabAktived) {
+      case 'Withholding Tax':
+        return <TaxList {...propsTaxList}/>
+      case 'VAT':
+        return <VatList {...propsTaxList}/>
+      default:
+        return null
+    }
+  }
+  //useFieldArray ADDRESSES
+  const {
+    fields: fieldsTax,
+    append: appendTax,
+    replace: replaceTax,
+    remove: removeTax,
+  } = useFieldArray({
+    control,
+    name: "item_details",
+  });
 
   const {
     data: TaxData,
@@ -122,27 +173,50 @@ const TaxDetail = () => {
     options: {
       onSuccess: (data: any) => {
         pagination.setTotalItems(data?.totalRow);
+        setAllTaxData(data.data);
       },
       select: (data: any) => {
-        const mappedData = data?.pages[0]?.rows?.map((taxDetail: TaxDetail) => {
+
+        const mappedData = data?.pages[0]?.rows?.map((taxDetail: TaxDetail,_index : any) => {          
             return {
+                key: _index,
                 id: taxDetail.taxId,
-                key: taxDetail.taxId,
                 country_name: taxDetail.country.name,
                 country_id: taxDetail.countryId,
                 name: taxDetail.name,
                 percentage: taxDetail.percentage,
-                active_status: taxDetail.activeStatus
+                active_status: taxDetail.activeStatus,
+                tax_item: taxDetail.taxItems.map((item :any ) => {
+                  
+                  return {
+                    tax_item_id :item.taxItemId,
+                    tax_item_name : item.taxName,
+                    tax_item_type : item.taxItemType,
+                    gl_account : item.glAccount,
+                    tax_type : item.taxType,
+                    tax_code : item.taxCode,
+                    deleted_by : item.deletedBy,
+                    details: item.details.map((item_detail :any) => {
+                      return {
+                          tax_item_id : item_detail.taxItemId,
+                          tax_item_detail_id : item_detail.taxItemDetailId,
+                          period_from : item_detail.periodFrom,
+                          period_to : item_detail.periodTo,
+                          percentage : item_detail.percentage,
+                          percentage_subject_to_tax : item_detail.percentageSubjectToTax,
+                          withholding_tax_rate : item_detail.withholdingTaxRate,
+                      }
+                    })
+                  }
+                })
             }
         })
-
         return {data :mappedData, totalRows: data.totalRow}
       }
     },
   });
 
-
-  const { mutate: deleteUOM, isLoading: isLoadingDeleteUOM } = useDeletTax({
+  const { mutate: deleteTaxItem, isLoading: isLoadingDeleteTaxItem } = useDeleteTaxItem({
     options: {
       onSuccess: () => {
         queryClient.invalidateQueries(["tax/infinite"]);
@@ -176,21 +250,39 @@ const TaxDetail = () => {
       updateTax(updatedTaskData)
     }
   }, [updatedTaskData])
+
   
   // belum bisa dari backend
-  const deleteTax = (id: any) => {
-    deleteUOM({ ids:[...id] })
+  const deleteTax = (param: any) => {     
+    const deleteParam: any = {
+      tax_ids:[TaxData?.data[0]?.id],
+      tax_item_ids:[param.taxData.tax_item_detail_id]
+    } 
+    deleteTaxItem(deleteParam)
   }
 
-  const handleNewTax = (tax: any) => {
+  const handleNewTax = (data: any) => {
+    
     const newTax: any = {
-            country_id : tax.country_id,
-            name : tax.name,
-            percentage : tax.percentage,
-            active_status:"ACTIVE"
+        tax_id : TaxData?.data[0]?.id,
+        tax_name : data.tax_name,
+        tax_item_type : tabAktived == 'Withholding Tax' ? 'WITHHOLDING' : tabAktived ,
+        gl_account : `${data.gl_account}`,
+        tax_type : data.tax_type,
+        tax_code : data.tax_code,
+        status : "ACTIVE",
+        item_details : data.item_details?.map((item: any) => {
+          return {
+            percentage: item.percentage,
+            period_from: item.period[0],
+            period_to: item.period[1],
+            percentage_subject_to_tax: item.percentage_subject_to_tax,
+            withholding_tax_rate: item.withholding_tax_rate
+          }
+        })
     }
     createTax(newTax)
-    setShowCreateModal(false)
+    setShowCreateModal({ open: false, type: "", data: {} })
   }
 
   const updateTaxStatus = (rowKey: any) => {
@@ -208,27 +300,103 @@ const TaxDetail = () => {
   }
   
   const columns = [
+    { title: "", dataIndex: "key" },
+    { title: "", dataIndex: "id" },
+    { title: "", dataIndex: "tax_item_type" },
     {
-      title: "Tax Name",
-      dataIndex: "name",
-      key: 'name',
+      title: "",
+      dataIndex: "action",
+      width: "15%",
+      render: (_: any, record: any) => {
+        if (record.tax_item_name) {
+          return (
+            <Row gap="16px" alignItems="center" nowrap>
+              <Col>
+                <ICEdit onClick={() => onHandleEdit(record)}/>
+              </Col>
+              <Col>
+                <ICDelete onClick={() =>
+                        setShowDelete({
+                          open: true,
+                          type: "selection",
+                          data: { taxData: record, selectedRowKeys },
+                        })
+                      } />
+              </Col>
+            </Row>
+          )
+        }
+      }
     },
     {
-      title: "Percentage",
-      dataIndex: "percentage",
-      key: 'percentage'
+      title: "Tax Name",
+      dataIndex: "tax_item_name",
+      key: 'tax_item_name',
+    },
+    {
+      title: "G/L Account",
+      dataIndex: "gl_account",
+      key: 'gl_account'
+    },
+    {
+      title: "Tax Type",
+      dataIndex: "tax_type",
+      key: 'tax_type'
+    },
+    {
+      title: "Tax Code",
+      dataIndex: "tax_code",
+      key: 'tax_code'
+    },
+    {
+      title: "Percentage Subject Tax",
+      dataIndex: "percentage_subject_to_tax",
+      key: 'percentage_subject_to_tax'
+    },
+    {
+      title: "Percentage Subject Tax",
+      dataIndex: "withholding_tax_rate",
+      key: 'withholding_tax_rate'
+    },
+    {
+      title: "Period",
+      dataIndex: "period",
+      key: 'period'
     },
     {
       title: "Active",
       dataIndex: 'active_status',
       render: (status: string, rowKey: any) => {
-        return (
-        <>
-          <Switch checked={checkedStatus(status)} onChange={() => updateTaxStatus(rowKey)}/>
-        </>
-      )},
+        if (rowKey.tax_item_name) {
+          return (
+            <>
+              <Switch checked={checkedStatus(status)} onChange={() => updateTaxStatus(rowKey)}/>
+            </>
+          )
+        }
+      },
     },
   ];
+  
+  const datadetails = allTaxData[0]?.tax_item.map((item) => {
+    const datadetails = item.details.map((item2, index) => {  
+      return {
+        tax_item_detail_id: item.tax_item_id,
+        tax_item_name: index !== 0 ? null : item.tax_item_name,
+        gl_account: index !== 0 ? null : item.gl_account,
+        tax_type: index !== 0 ? null : item.tax_type,
+        tax_item_type: item.tax_item_type,
+        tax_code: index !== 0 ? null : item.tax_code,
+        percentage_subject_to_tax: item2.percentage_subject_to_tax,
+        withholding_tax_rate: item2.withholding_tax_rate,
+        period: `${moment(item2.period_from).format("D MMM YYYY")} to ${moment(item2.period_to).format("D MMM YYYY")}`,
+        details: item.details,
+        deleted_by: item.deleted_by
+      };
+    });
+    return datadetails;
+  });
+  const dataMerge = [].concat.apply([], datadetails);
 
   const rowSelection = {
     selectedRowKeys,
@@ -244,7 +412,53 @@ const TaxDetail = () => {
         </Center>
     )
   }
+    const onHandleEdit = (render: any) => {
+        setShowCreateModal({ open: true, type: "edit", data: render })
+    };
+    const removeBankAccount = (param :any) => {
+        const columns= arrayTax.filter(
+          (filtering :any) => filtering?.key !== param 
+        )
+        setArrayTax(columns);
+    }
+    const propsTaxList = {
+      onHandleEdit,
+      isLoadingTax:isLoadingTax,
+      isFetchingTax:isFetchingTax,
+      columns:columns,
+      data:TaxData?.data[0]?.tax_item,
+      rowSelection:rowSelection,
+      pagination:pagination,
+      removeBankAccount,
+      setShowCreateModal,
+      dataSource:dataMerge
+  }
+    const propsWithHolding = {
+    control,
+    register,
+    fieldsTax,
+    appendTax,
+    replaceTax,
+    removeTax,
+    TaxBodyFields,
+    getValues,
+    reset,
+    setShowTaxTypeModal,
+    tabAktived,
+    errors,
+    showCreateModal
+  }
 
+  const propsTaxType = {
+    control,
+    register,
+    getValues,
+    reset,
+    setShowTaxTypeModal,
+    columns : columnsTaxType,
+    data : dataTaxType[0].data.rows
+  }
+  
   return (
     <>
       <Col>
@@ -321,7 +535,7 @@ const TaxDetail = () => {
             </Row>
           <Spacer size={20} />
           <Col>
-              <HeaderLabel>Tax</HeaderLabel>
+              {/* <HeaderLabel>Tax</HeaderLabel>
               <Spacer size={20} />
               <Row gap="16px">
                 <Button size="big" variant={"primary"} onClick={() => setShowCreateModal(true)}>
@@ -342,61 +556,34 @@ const TaxDetail = () => {
                   Delete
                 </Button>
               </Row>
+              <Spacer size={20} /> */}
+              <Tabs
+                defaultActiveKey={tabAktived}
+                listTabPane={listTabItems.slice(0, listTabItems.length)}
+                onChange={(e: any) => setTabAktived(e)}
+              />
               <Spacer size={20} />
-                <Col gap={"60px"}>
-                  <Table
-                    loading={isLoadingTax || isFetchingTax}
-                    columns={columns}
-                    data={TaxData?.data}
-                    rowSelection={rowSelection}
-                  />
-                  <Pagination pagination={pagination} />
-                </Col>
+              {switchTabItem()}
+              <Spacer size={100} />
           </Col>
         </Card>
       </Col>
 
-      {showCreateModal && (
+      {showCreateModal.open && (
         <Modal
         // style={{fontSize: '20px'}}
         centered
-        width={'400px'}
-        visible={showCreateModal}
-        onCancel={() => setShowCreateModal(false)}
+        width={'60%'}
+        visible={showCreateModal.open}
+        onCancel={() => setShowCreateModal({ open: false, type: "", data: {} })}
         footer={null}
         content={
           <TopButtonHolder>
             <CreateTitle>
-              Add New Tax
+              Add New {tabAktived}
             </CreateTitle>
             <Spacer size={20} />
-            <Col width="100%">
-              <Input
-                      width="80%"
-                      label="Tax Name"
-                      required
-                      height="40px"
-                      placeholder={"e.g PPh 21"}
-                      {...register("name", { required: "Please enter name." })}
-                    />
-            </Col>
-              <Spacer size={15} />
-
-            <Col width={"100%"}>
-            <CreateInputDiv>
-                <Input
-                    width="80%"
-                    label="Percentage"
-                    height="40px"
-                    required
-                    placeholder={"e.g 10"}
-                    addonAfter="PCS"
-                    {...register("percentage", { required: "Please enter name." })}
-                />
-                <InputAddonBefore>%</InputAddonBefore>
-            </CreateInputDiv>
-            </Col>
-              
+            <WithholdingForm {...propsWithHolding}/>
             <Spacer size={100} />
             <DeleteCardButtonHolder>
               <Button
@@ -404,9 +591,9 @@ const TaxDetail = () => {
                 variant="tertiary"
                 key="submit"
                 type="primary"
-                onClick={() => setShowCreateModal(false)}
+                onClick={() => setShowCreateModal({ open: false, type: "", data: {} })}
               >
-                Cancel
+                Cancels
               </Button>
               <Button
                 variant="primary"
@@ -448,15 +635,54 @@ const TaxDetail = () => {
                   variant="primary"
                   size="big"
                   onClick={() => {
-                      deleteTax(selectedRowKeys)
+                      deleteTax(isShowDelete.data)
                   }}
                 >
-                  {isLoadingDeleteUOM ? "loading..." : "Yes"}
+                  {isLoadingDeleteTaxItem ? "loading..." : "Yes"}
                 </Button>
               </DeleteCardButtonHolder>
             </TopButtonHolder>
           }
         />
+      )}
+
+      {showTaxTypeModal && (
+        <Modal
+        // style={{fontSize: '20px'}}
+        centered
+        width={'60%'}
+        visible={showTaxTypeModal}
+        onCancel={() => setShowTaxTypeModal(false)}
+        footer={null}
+        content={
+          <TopButtonHolder>
+            <CreateTitle>
+              Add New Tax Type Modal
+            </CreateTitle>
+            <Spacer size={20} />
+            <TaxTypeForm {...propsTaxType} />
+            <Spacer size={100} />
+            <DeleteCardButtonHolder>
+              <Button
+                // size="medium"
+                variant="tertiary"
+                key="submit"
+                type="primary"
+                onClick={() => setShowTaxTypeModal(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="primary"
+                // size="small"
+                onClick={handleSubmit(handleNewTax)}
+              >
+                save
+              </Button>
+            </DeleteCardButtonHolder>
+          </TopButtonHolder>
+        }
+      />
       )}
     </>
   );

@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Text, Col, Row, Spacer, Spin, Input, FormSelectCustom, FormSelect, DropdownMenuOptionCustom, DropdownMenuOptionCustome, Dropdown2 } from "pink-lava-ui";
+import { Text, Col, Row, Spacer, Spin, Input, FormSelectCustom, FormSelect, DropdownMenuOptionCustom, Tooltip } from "pink-lava-ui";
+import { ExclamationCircleOutlined } from "@ant-design/icons";
 import { Controller, useFieldArray, useWatch } from "react-hook-form";
 import styled from "styled-components";
 import { useBranchInfiniteLists } from "hooks/mdm/branch/useBranch";
@@ -8,6 +9,7 @@ import { useCountryInfiniteLists, useFetchDetailCountry } from "hooks/mdm/countr
 import _ from "lodash";
 import useDebounce from "lib/useDebounce";
 import CountryStructureForm from "./CountryStructureForm";
+import { colors } from "utils/color";
 
 const getFilterOption = (group: any) => {
   switch (group) {
@@ -30,14 +32,13 @@ const defaultGroup = [
 ]
 
 const Conditions = ({
-  register,
   control,
   setValue,
   availabilityWatch,
   retailPricing=[]
 }: any) => {
 
-  const basedOn = retailPricing?.availability?.map(({based_on}:any) => based_on);
+  const basedOn = retailPricing?.availability?.map(({based_on}:any) => based_on) || availabilityWatch?.map(({based_on}:any) => based_on) || []
 
   const [groupingOption, setGroupingOption] = useState(defaultGroup?.filter(({value}) => !basedOn?.includes(value)));
 
@@ -59,7 +60,7 @@ const Conditions = ({
     });
   };
 
-  const handleGroupChange = (value: any, onChange: any, index: any) => {
+  const handleGroupChange = (value: any, index: any) => {
     let tempAvailabilityWatch = _.cloneDeep(availabilityWatch);
     tempAvailabilityWatch[index] = {}
     tempAvailabilityWatch[index].based_on = value;
@@ -111,30 +112,44 @@ const Conditions = ({
             <Controller
               control={control}
               name={`availability.${index}.based_on`}
-              defaultValue={defaultGroup.find(group => group.value === retailPricing?.availability?.[index]?.based_on)}
-              render={({ field: { onChange }, formState: { errors } }) => (
-                <Col width={"100%"}>
-                  <Label>Based On</Label>
-                  <Spacer size={3} />
-                  <CustomFormSelect
-                    style={{ width: "100%" }}
-                    defaultValue={defaultGroup.find(group => group.value === retailPricing?.availability?.[index]?.based_on)}
-                    size={"large"}
-                    placeholder={"Select"}
-                    borderColor={"#AAAAAA"}
-                    arrowColor={"#000"}
-                    items={groupingOption}
-                    onChange={(value: any) => {
-                      handleGroupChange(value, onChange, index);
-                    }}
-                  />
-                  {errors?.items?.[index]?.based_on?.type === "required" && (
-                    <Text variant="alert" color={"red.regular"}>
-                      This field is required
-                    </Text>
-                  )}
-                </Col>
-              )}
+              rules={{
+                required: {
+                  value: true,
+                  message: "This Field is required.",
+                },
+              }}
+              render={({ field: { onChange, value }, fieldState: { error } }) => {
+                return (
+                  <Col width={"100%"}>
+                    <Label>
+                      Based On
+                      <Spacer size={5} display="inline-block" />
+                      <Tooltip
+                        overlayInnerStyle={{ width: "fit-content" }}
+                        title={`Based On`}
+                        color={"#F4FBFC"}
+                      >
+                        <ExclamationCircleOutlined />
+                      </Tooltip>
+                    </Label>
+                    <Spacer size={3} />
+                    <CustomFormSelect
+                      height="48px"
+                      defaultValue={value === "" ? undefined: _.startCase(_.toLower(value))}
+                      style={{ width: "100%" }}
+                      placeholder={"Select"}
+                      borderColor={error?.message ? "#ED1C24" : "#AAAAAA"}
+                      arrowColor={"#000"}
+                      size={"large"}
+                      items={groupingOption}
+                      onChange={(value: any) => {
+                        handleGroupChange(value, index);
+                      }}
+                      error={error?.message}
+                    />
+                  </Col>
+                )
+              }}
             />
 
             <Spacer size={20} />
@@ -152,19 +167,19 @@ const Conditions = ({
 
           <Row width="100%">
             {(availabilityWatch[index]?.based_on === "COUNTRY") && (
-              <CountryCondition country={retailPricing?.availability?.[index].country} control={control} index={index} />
+              <CountryCondition country={availabilityWatch[index]} control={control} index={index} setValue={setValue} />
             )}
           </Row>
 
           <Row width="100%">
             {(availabilityWatch[index]?.based_on === "BRANCH" ) && (
-              <BranchCondition branch={retailPricing?.availability?.[index]} control={control} index={index} setValue={setValue} />
+              <BranchCondition selectAll={availabilityWatch[index]?.select_all} control={control} index={index} setValue={setValue} />
             )}
           </Row>
 
           <Row width="100%">
             {(availabilityWatch[index]?.based_on === "SALES ORGANIZATION") && (
-              <SalesOrganizationCondition salesOrganization={retailPricing?.availability?.[index]} setValue={setValue} control={control} index={index} />
+              <SalesOrganizationCondition salesOrganization={availabilityWatch[index]} setValue={setValue} control={control} index={index} selectAll={availabilityWatch[index].select_all}/>
             )}
           </Row>
 
@@ -184,15 +199,13 @@ const Conditions = ({
   )
 }
 
-const CountryCondition = ({ control, index, country } : any) => {
+const CountryCondition = ({ control, index, country, setValue } : any) => {
   const [countryList, setCountryList] = useState<any[]>([]);
   const [totalRowsCountryList, setTotalRowsCountryList] = useState(0);
   const [searchCountry, setSearchCountry] = useState("");
   const debounceFetchCountry = useDebounce(searchCountry, 1000);
 
   const [countryStructure, setCountryStructure] = useState([]);
-  const [countryId, setCountryId] = useState(country?.id)
-  const [selectedLevel, setSelectedLevel] = useState(country?.level?.map((data: any) => parseInt(data.id)) || [])
 
   const {
     isFetching: isFetchingCountry,
@@ -212,6 +225,7 @@ const CountryCondition = ({ control, index, country } : any) => {
             return {
               value: element.id,
               label: element.name,
+              key: element.id
             };
           });
         });
@@ -228,124 +242,117 @@ const CountryCondition = ({ control, index, country } : any) => {
     },
   });
 
-  const { data: detailCountry, isLoading } = useFetchDetailCountry({
-		country_id: countryId,
+  const { isSuccess } = useFetchDetailCountry({
+		country_id: country?.country?.id,
 		options: {
 			onSuccess: (data: any) => {
 				setCountryStructure(
 					data.structure.map((data: any, index: any) => ({
             value: data.id,
             label: data.name,
+            key: data.id
 					}))
 				);
 			},
-      enabled: !!countryId
+      enabled: !!country?.country?.id
 		},
 	});
-
-  const {
-    replace: replaceLevels,
-  } = useFieldArray({
-    control,
-    name: `availability.${index}.country.level`
-  });
-
-  const watchLevel = useWatch({
-    name:`availability.${index}.country.level`,
-    control
-  })
 
   return (
     <>
       <Row width="100%" noWrap>
-        <Controller
-          control={control}
-          name={`availability.${index}.country.id`}
-          defaultValue={country?.name}
-          render={({ field: { onChange } }) => (
-            <Col width="100%" justifyContent="flex-end">
-              <span>
-                <Label style={{ display: "inline" }}>Country </Label>{" "}
-                <span></span>
-              </span>
-
-              <Spacer size={3} />
-              <CustomFormSelect
-                defaultValue={country?.name}
-                style={{ width: "100%", height: '48px' }}
-                size={"large"}
-                placeholder={"Select"}
-                borderColor={"#AAAAAA"}
-                arrowColor={"#000"}
-                withSearch
-                isLoading={isFetchingCountry}
-                isLoadingMore={isFetchingMoreCountry}
-                fetchMore={() => {
-                  if (hasNextPageCountry) {
-                    fetchNextPageCountry();
-                  }
-                }}
-                items={
-                  isFetchingCountry || isFetchingMoreCountry
-                    ? []
-                    : countryList
-                }
-                onChange={(value: any) => {
-                  onChange(value);
-                  setSelectedLevel([])
-                  setCountryId(value)
-                  replaceLevels([])
-                }}
-                onSearch={(value: any) => {
-                  setSearchCountry(value);
-                }}
-              />
-            </Col>
-          )}
-        />
-
-        <Spacer size={20} />
-
-        <Col width="100%" gap="5px">
+        <Col width="100%" justifyContent="flex-end">
           <span>
-            <Label style={{ display: "inline" }}>Level</Label>{" "}
+            <Label style={{ display: "inline" }}>Country </Label>{" "}
             <span></span>
           </span>
-          <CustomFormSelectCustom
-            mode="multiple"
-            style={{
-              height: "48px",
-            }}
+          <Spacer size={3} />
+          <CustomFormSelect
+            defaultValue={country?.country?.name}
+            labelInValue
+            style={{ width: "100%", height: '48px' }}
             size={"large"}
-            showArrow
-            items={countryStructure}
-            showSearch={false}
-            value={selectedLevel}
-            maxTagCount={6}
+            placeholder={"Select"}
+            borderColor={"#AAAAAA"}
+            arrowColor={"#000"}
+            withSearch
+            isLoading={isFetchingCountry}
+            isLoadingMore={isFetchingMoreCountry}
+            fetchMore={() => {
+              if (hasNextPageCountry) {
+                fetchNextPageCountry();
+              }
+            }}
+            items={
+              isFetchingCountry || isFetchingMoreCountry
+                ? []
+                : countryList
+            }
             onChange={(value: any) => {
-              setSelectedLevel(value)
-              replaceLevels(
-                value.map((id:any) => ({
-                  id: id
-                })
-              ))
+              setValue(`availability.${index}.country.id`, value.key);
+              setValue(`availability.${index}.country.name`, value.label);
+              setValue(`availability.${index}.country.value`, []);
+            }}
+            onSearch={(value: any) => {
+              setSearchCountry(value);
             }}
           />
         </Col>
+
+        <Spacer size={20} />
+
+        <Controller
+          control={control}
+          shouldUnregister={true}
+          name={`availability.${index}.country.value`}
+          render={({ field: { onChange, value }, formState: { errors } }) => {
+            value = value?.map((value:any) => parseInt(value.id))
+            return (
+              <Col width="100%" gap="5px">
+                <span>
+                  <Label style={{ display: "inline" }}>Level</Label>{" "}
+                </span>
+                <Spacer size={3} />
+                <CustomFormSelectCustom
+                  labelInValue
+                  mode="multiple"
+                  style={{
+                    height: "48px",
+                  }}
+                  placeholder={"Select"}
+                  size={"large"}
+                  showArrow
+                  items={countryStructure}
+                  showSearch={false}
+                  value={value}
+                  maxTagCount={6}
+                  onChange={(value: any) => {
+                    value = value?.map((value:any) => ({
+                      id: value.key,
+                      name: value?.label?.[1],
+                      levels: country?.country?.value?.find((value:any) => value.id === value.key) || []
+                    })) || []
+                    onChange(value)
+                  }}
+                />
+              </Col>
+            )
+          }}
+        />
       </Row>
 
       <Spacer size={20} />
       
-      {!isLoading && watchLevel?.map((data:any, levelIndex:any) => {
-        const structure = detailCountry?.structure?.find((country: any) => country.id === data.id);
-
+      {isSuccess && country?.country?.value?.map((data:any, levelIndex:any) => {
         return (
           <Col key={data.id} width="100%">
             <CountryStructureForm
+              key={data.id}
               id={data.id} 
-              label={structure?.name}
+              label={data?.name}
               control={control}
-              name={`availability.${index}.country.level.${levelIndex}.values`}
+              name={`availability.${index}.country.value.${levelIndex}.levels`}
+              setValue={setValue}
             />
             <Spacer size={20} />
           </Col>
@@ -356,12 +363,10 @@ const CountryCondition = ({ control, index, country } : any) => {
   )
 }
 
-const SalesOrganizationCondition = ({ control, index, setValue, salesOrganization } : any) => {
+const SalesOrganizationCondition = ({ control, index, setValue, salesOrganization, selectAll } : any) => {
 
   const [hirarchy, setHirarchy] = useState([]);
   const [listStructure, setListStructure] = useState([]);
-  const [selectedStructure, setSelectedStructure] = useState(salesOrganization?.id);
-  const [selectedLevelValue, setSelectedValue] = useState(salesOrganization?.value?.map((data:any) => parseInt(data.id)) || []);
 
   useSalesOrganization({
     company_code: 'KSNI',
@@ -369,8 +374,9 @@ const SalesOrganizationCondition = ({ control, index, setValue, salesOrganizatio
       onSuccess: (data: any) => {
         setListStructure(
           data.salesOrganizationStructures.map((data: any, index: string) => ({
-            value: data.name,
-            id: data.id
+            value: data.id,
+            key: data.id,
+            label: data.name
           }))
         );
       },
@@ -380,57 +386,62 @@ const SalesOrganizationCondition = ({ control, index, setValue, salesOrganizatio
   const {
     isFetching: isFetchingHirarchy,
   } = useSalesOrganizationHirarcy({
-    structure_id: selectedStructure,
+    structure_id: salesOrganization.id,
     options: {
       onSuccess: (data: any) => {
         const mappedData = data?.map((element: any) => {
             return {
               value: element.id,
               label: element.name,
+              key: element.id
             };
         });
         const flattenArray = [].concat(...mappedData);
         setHirarchy(flattenArray)
       },
-      enabled: !!selectedStructure
+      enabled: !!salesOrganization.id
     },
   });
 
-  const selectedNameStructure = listStructure?.find(s => s?.id === selectedStructure)
-
-  useEffect(() => {
-    setValue(`availability.${index}.sales_organization.select_all`, false)
-  }, [])
+  const onSelectAll = (selectAll:boolean) => {
+    setValue(`availability.${index}.select_all`, selectAll)
+    let hirarchies = hirarchy.map((value:any) => ({
+      id: value.key,
+      name: value.label
+    }))
+    if(selectAll){
+      setValue(`availability.${index}.value`, hirarchies)
+    }else{
+      setValue(`availability.${index}.value`, [])
+    }
+  }
   
   return (
     <>
       <Row width="100%" noWrap>
-        <Controller
-            control={control}
-            name={`availability.${index}.sales_organization.level`}
+        <Col width="100%">
+          <Label>Sales Organization Level</Label>
+          <Spacer size={3} />
+          <CustomFormSelect
             defaultValue={salesOrganization?.name}
-            render={({ field: { onChange } }) => (
-              <Dropdown2
-                label="Sales Organization Level"
-                labelBold={true}
-                defaultValue={salesOrganization?.name}
-                width="100%"
-                noSearch
-                items={listStructure}
-                handleChange={(value: any) => {
-                  onChange(value)
-                  setSelectedValue([])
-                  setSelectedStructure(value);
-                  setValue(`availability.${index}.sales_organization.ids`, [])
-                }}
-              />
-            )}
-        />
+            style={{ width: "100%" }}
+            size={"large"}
+            placeholder={"Select"}
+            borderColor={"#AAAAAA"}
+            arrowColor={"#000"}
+            items={listStructure}
+            labelInValue={true}
+            onChange={(value: any) => {
+              setValue(`availability.${index}.id`, value.key);
+              setValue(`availability.${index}.name`, value.label);
+            }}
+          />
+        </Col>
       </Row>
 
       <Spacer size={20} />
 
-      {selectedStructure &&
+      {salesOrganization.id &&
         <Row width="100%">
           <Col width="100%">
             {isFetchingHirarchy ?
@@ -439,21 +450,30 @@ const SalesOrganizationCondition = ({ control, index, setValue, salesOrganizatio
               <Controller
                 control={control}
                 shouldUnregister={true}
-                name={`availability.${index}.sales_organization.ids`}
+                name={`availability.${index}.value`}
                 render={({ field: { onChange, value }, fieldState: { error } }) => {
+                  value = value?.map((value:any) => parseInt(value.id)) || []
                   return (
-                    <DropdownMenuOptionCustome
-                      label={`${selectedNameStructure?.value}` || salesOrganization?.name}
+                    <DropdownMenuOptionCustom
+                      label={<Label>{salesOrganization?.name}`</Label>}
                       isAllowClear
                       required
+                      mode="multiple"
                       placeholder="Select"
-                      handleChangeValue={(value: string[]) => {
-                        setSelectedValue(value)
+                      onChange={(value:any) => {
+                        value = value?.map((value:any) => ({
+                          id: value.key,
+                          name: value.label
+                        })) || []
                         onChange(value)
                       }}
-                      valueSelectedItems={selectedLevelValue}
+                      value={value || []}
+                      valueSelectedItems={value || []}
                       noSearch
                       listItems={hirarchy}
+                      onSelectAll={() => onSelectAll(true)}
+                      onClearAll={() =>  onSelectAll(false)}
+                      selectAll={selectAll}
                     />
                   )
                 }}
@@ -466,13 +486,11 @@ const SalesOrganizationCondition = ({ control, index, setValue, salesOrganizatio
   )
 }
 
-const BranchCondition = ({ control, index, branch, setValue }: any) => {
+const BranchCondition = ({ control, index, setValue, selectAll }: any) => {
   const [branchList, setBranchList] = useState<any[]>([]);
   const [totalRowsBranchList, setTotalRowsBranchList] = useState(0);
   const [searchBranch, setSearchBranch] = useState("");
   const debounceFetchLevel = useDebounce(searchBranch, 1000);
-  const [selectedBranch, setSelectedBranch] = useState(branch?.value?.map((data:any) => data.id) || []);
-  
   const {
     isFetching: isFetchingBranch,
     isFetchingNextPage: isFetchingMoreBranch,
@@ -492,6 +510,7 @@ const BranchCondition = ({ control, index, branch, setValue }: any) => {
             return {
               value: element.branchId,
               label: element.name,
+              key: element.branchId
             };
           });
         });
@@ -508,24 +527,38 @@ const BranchCondition = ({ control, index, branch, setValue }: any) => {
     },
   });
 
-  useEffect(() => {
-    setValue(`availability.${index}.branch.select_all`, false)
-  }, [])
+  const onSelectAll = (selectAll:boolean) => {
+    setValue(`availability.${index}.select_all`, selectAll)
+    let branches = branchList.map((value:any) => ({
+      id: value.key,
+      name: value.label
+    }))
+    if(selectAll){
+      setValue(`availability.${index}.value`, branches)
+    }else{
+      setValue(`availability.${index}.value`, [])
+    }
+  }
 
   return (
     <Col width="100%">
       <Controller
         control={control}
-        name={`availability.${index}.branch.ids`}
-        render={({ field: { onChange, value }, fieldState: { error } }) => { 
+        name={`availability.${index}.value`}
+        render={({ field: { onChange, value=[] }, fieldState: { error } }) => { 
+          value = value?.map((value:any) => ({
+            value: value.id,
+            key: value.id,
+            label: value.name
+          }))
           return (       
             <DropdownMenuOptionCustom
-              label="Branch"
+              label={<Label>Branch</Label>}
               mode="multiple"
-              placeholder="Select Process"
+              placeholder="Select"
               labelInValue
               filterOption={false}
-              value={selectedBranch}
+              value={value || []}
               isLoading={isFetchingBranch}
               isLoadingMore={isFetchingMoreBranch}
               listItems={isFetchingBranch && !isFetchingMoreBranch ? [] : branchList}
@@ -538,14 +571,20 @@ const BranchCondition = ({ control, index, branch, setValue }: any) => {
                 setSearchBranch(value);
               }}
               onChange={(value:any) => {
-                onChange(value.map((data: any) => data.value))
-                setSelectedBranch(value)
+                value = value?.map((value:any) => ({
+                  id: value.key,
+                  name: value.label
+                })) || []
+                onChange(value)
               }}
-              valueSelectedItems={selectedBranch}
+              valueSelectedItems={value || []}
               allowClear={true}
               onClear={() => {
                 setSearchBranch("");
               }}
+              onSelectAll={() => onSelectAll(true)}
+              onClearAll={() =>  onSelectAll(false)}
+              selectAll={selectAll}
             />
             );
           }}
@@ -561,7 +600,7 @@ const Separator = styled.div`
 `;
 
 const Label = styled.div`
-  font-weight: 600;
+  font-weight: bold;
   font-size: 16px;
   line-height: 24px;
   color: #000000;

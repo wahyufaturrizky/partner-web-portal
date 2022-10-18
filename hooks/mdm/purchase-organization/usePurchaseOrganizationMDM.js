@@ -1,4 +1,4 @@
-import { useQuery, useMutation } from "react-query";
+import { useQuery, useMutation, useInfiniteQuery } from "react-query";
 import { mdmService } from "../../../lib/client";
 
 const fetchPurchaseOrganizationsMDM = async ({ query = {} }) => {
@@ -97,9 +97,31 @@ const useUploadFilePurchaseOrganizationMDM = ({ options }) => {
   );
 };
 
+const fetchInfinitePurchaseOrg = async ({ pageParam = 1, queryKey }) => {
+  const searchQuery = queryKey[1].search;
+  return mdmService(`/purchase-organization`, {
+    params: {
+      search: searchQuery,
+      limit: 10,
+      page: pageParam,
+      sortBy: "created_at",
+      sortOrder: "DESC",
+      ...queryKey[1],
+    },
+  }).then((data) => data);
+};
+
+const usePurchaseOrgInfiniteList = ({ query = {}, options }) => {
+  return useInfiniteQuery(["purchase-organization/infinite", query], fetchInfinitePurchaseOrg, {
+    keepPreviousData: true,
+    ...options,
+  });
+};
+
 export {
   usePurchaseOrganizationsMDM,
   usePurchaseOrganizationMDM,
+  usePurchaseOrgInfiniteList,
   useCreatePurchaseOrganizationMDM,
   useUpdatePurchaseOrganizationMDM,
   useDeletePurchaseOrganizationMDM,
