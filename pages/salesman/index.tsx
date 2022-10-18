@@ -41,7 +41,7 @@ export default function Salesman() {
   const router = useRouter()
   const pagination = usePagination({
     page: 1,
-    itemsPerPage: 10,
+    itemsPerPage: 20,
     maxPageItems: Infinity,
     numbers: true,
     arrows: true,
@@ -51,7 +51,7 @@ export default function Salesman() {
   const columns = [
     {
       title: "Salesman ID",
-      dataIndex: "idCard",
+      dataIndex: "code",
     },
     {
       title: "Salesman Name",
@@ -88,7 +88,7 @@ export default function Salesman() {
     },
     {
       title: "Action",
-      render: ({ id, statusText, idCard, name, code }: any) => (
+      render: ({ id, statusText, idCard, name, division }: any) => (
         <Button
           size="small"
           variant="tertiary"
@@ -99,7 +99,7 @@ export default function Salesman() {
               status: statusText,
               idCard,
               name,
-              code
+              division
             },
           })}
         >
@@ -172,7 +172,7 @@ export default function Salesman() {
 
   return (
     <div>
-      <Text variant="h4">Salesman List</Text>
+      <Text variant="h4">Salesman</Text>
       <Spacer size={20} />
       <ContentSwitcher
         options={options({
@@ -203,15 +203,21 @@ export default function Salesman() {
               {
                 label: "By Country",
                 list: [
-                  { label: 'filter-1', value: 'filter-1' },
-                  { label: 'filter-2', value: 'filter-2' },
-                  { label: 'filter-3', value: 'filter-3' },
+                  { label: 'PMA Bandung Selatan', value: 'filter-1' },
+                  { label: 'PMA Majalengka', value: 'filter-2' },
+                ]
+              },
+              {
+                label: "By Division",
+                list: [
+                  { label: 'Division 1', value: 'division-1' },
                 ]
               }
             ]}
             label={false}
             width={194}
             roundedSelector
+            isShowClearFilter
             defaultValue="All"
             placeholder="Filter"
             noSearch

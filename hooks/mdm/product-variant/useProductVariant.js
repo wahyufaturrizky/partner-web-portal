@@ -1,4 +1,4 @@
-import { useQuery, useMutation } from "react-query";
+import { useQuery, useMutation, useInfiniteQuery } from "react-query";
 import { mdmService } from "../../../lib/client";
 
 const fetchProductVariant = async ({ query = {} }) => {
@@ -16,6 +16,27 @@ const fetchProductVariant = async ({ query = {} }) => {
 
 const useProductVariantList = ({ query = {}, options }) => {
   return useQuery(["product-variant", query], () => fetchProductVariant({ query }), {
+    ...options,
+  });
+};
+
+const fetchInfiniteProductVariantList = async ({ pageParam = 1, queryKey }) => {
+  const searchQuery = queryKey[1].search;
+  return mdmService(`/product-variants`, {
+    params: {
+      search: searchQuery,
+      limit: 10,
+      page: pageParam,
+      sortBy: "created_at",
+      sortOrder: "DESC",
+      ...queryKey[1],
+    },
+  }).then((data) => data);
+};
+
+const useProductVariantInfiniteLists = ({ query = {}, options }) => {
+  return useInfiniteQuery(["product-variant/infinite", query], fetchInfiniteProductVariantList, {
+    keepPreviousData: true,
     ...options,
   });
 };
@@ -95,4 +116,4 @@ const useUploadImageProductVariant = ({ options }) => {
   );
 };
 
-export { useUploadImageProductVariant, useProductVariantList, useProductVariantDetail, useCreateProductVariant, useUpdateProductVariant, useDeleteProductVariant, useUploadFileProductVariant };
+export { useUploadImageProductVariant, useProductVariantInfiniteLists, useProductVariantList, useProductVariantDetail, useCreateProductVariant, useUpdateProductVariant, useDeleteProductVariant, useUploadFileProductVariant };

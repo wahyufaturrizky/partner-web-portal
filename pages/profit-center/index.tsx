@@ -54,7 +54,7 @@ const ProfitCenter = () => {
   const router = useRouter();
   const pagination = usePagination({
     page: 1,
-    itemsPerPage: 10,
+    itemsPerPage: 20,
     maxPageItems: Infinity,
     numbers: true,
     arrows: true,
@@ -312,8 +312,6 @@ const ProfitCenter = () => {
                   variant="primary"
                   size="big"
                   onClick={() => {
-                    console.log(selectedRowKeys);
-                    
                     deleteProfit({ profit_center_ids: selectedRowKeys, company_ids: ["KSNI"] });
                   }}
                 >

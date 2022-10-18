@@ -14,9 +14,8 @@ import styled from 'styled-components'
 import usePagination from '@lucasmogari/react-pagination';
 
 import { queryClient } from "pages/_app";
-import { mdmDownloadService } from 'lib/client';
 import { ModalDeleteConfirmation } from "components/elements/Modal/ModalConfirmationDelete";
-import { downloadFileSalesDivision, downloadOptions } from 'components/pages/Salesman/constants'
+import { columnsSalesDivision, downloadFileSalesDivision, downloadOptions } from 'components/pages/Salesman/constants'
 import ModalAddSalesDivision from 'components/elements/Modal/ModalAddSalesDivision'
 import { useProductList } from 'hooks/mdm/product-list/useProductList';
 import {
@@ -32,7 +31,7 @@ import ModalUpdateSalesDivision from 'components/elements/Modal/ModalUpdateSales
 export default function ComponentSalesmanDivision() {
   const pagination = usePagination({
     page: 1,
-    itemsPerPage: 10,
+    itemsPerPage: 20,
     maxPageItems: Infinity,
     numbers: true,
     arrows: true,
@@ -48,39 +47,6 @@ export default function ComponentSalesmanDivision() {
     upload: false,
     update: false,
   });
-
-  const columns = [
-    {
-      title: "Division ID",
-      dataIndex: "code",
-      width: "30%"
-    },
-    {
-      title: "Division Name",
-      dataIndex: "divisiName",
-      width: "30%"
-    },
-    {
-      title: "Product",
-      dataIndex: "product",
-      width: "20%"
-    },
-    {
-      title: "Action",
-      render: (items: any) => (
-        <Button
-          size="small"
-          onClick={() => {
-            setFormsUpdate({ ...items })
-            setVisible({  ...visible, update: true })
-          }}
-          variant="tertiary"
-        >
-          View Detail
-        </Button>
-      )
-    },
-  ]
 
   const rowSelection = {
     selectedItems,
@@ -136,7 +102,7 @@ export default function ComponentSalesmanDivision() {
     options: {
       onSuccess: () => {
         refetch()
-        setVisible({ ...visible, create: false })
+        setVisible({ ...visible, update: false })
       }
     },
     id: formsUpdate?.id
@@ -198,6 +164,39 @@ export default function ComponentSalesmanDivision() {
     handleUploadDocuments(formData)
   }
 
+  const columnsSalesDivision = [
+    {
+      title: "Division ID",
+      dataIndex: "code",
+      width: "30%"
+    },
+    {
+      title: "Division Name",
+      dataIndex: "divisiName",
+      width: "30%"
+    },
+    {
+      title: "Product",
+      dataIndex: "product",
+      width: "20%"
+    },
+    {
+      title: "Action",
+      render: (items: any) => (
+        <Button
+          size="small"
+          onClick={() => {
+            setFormsUpdate({ ...items })
+            setVisible({ ...visible, update: true })
+          }}
+          variant="tertiary"
+        >
+          View Detail
+        </Button>
+      )
+    },
+  ]
+
   return (
     <div>
       <Text variant="h4">Sales Division</Text>
@@ -210,13 +209,13 @@ export default function ComponentSalesmanDivision() {
             onChange={({ target }: any) => setSearch(target.value)}
           />
           <FlexElement>
-            <Button
+            {/* <Button
               disabled={selectedItems.length < 1}
               onClick={() => setVisible({ ...visible, delete: true })}
               variant="tertiary"
             >
               Delete
-            </Button>
+            </Button> */}
             <DropdownMenu
               title="More"
               buttonVariant="secondary"
@@ -235,9 +234,9 @@ export default function ComponentSalesmanDivision() {
       <Spacer size={10} />
       <Card>
         <Table
-          rowSelection={rowSelection}
+          // rowSelection={rowSelection}
           loading={isLoading}
-          columns={columns}
+          columns={columnsSalesDivision}
           data={data?.rows?.map((item: any) => ({ ...item, key: item?.id }))}
           />
         <Spacer size={50} />

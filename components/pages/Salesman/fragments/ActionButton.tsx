@@ -5,6 +5,7 @@ import styled from 'styled-components'
 const ActionButton = ({
   onCancel,
   onReject,
+  isDisabled,
   onSubmit,
   onDraft,
   status
@@ -14,8 +15,8 @@ const ActionButton = ({
   const fnButtonLeft = status === "Waiting for Approval" ? onReject : onCancel
 
   const middleButtonAction = status === "Draft" && (
-    <Button onClick={onDraft} variant="secondary">
-      Save as Draft
+    <Button onClick={onDraft} disabled={!isDisabled} variant="secondary">
+      {isDisabled ? 'Save as Draft' : 'Loading...' }
     </Button>
   )
 
@@ -25,8 +26,8 @@ const ActionButton = ({
         {labelButtonLeft}
       </Button>
       {middleButtonAction}
-      <Button onClick={onSubmit} variant="primary">
-        {labelButtonRight}
+      <Button disabled={!isDisabled} onClick={onSubmit} variant="primary">
+        {isDisabled ? labelButtonRight : 'Loading...' }
       </Button>
     </FlexElement>
   )

@@ -38,6 +38,7 @@ import moment from 'moment';
 import _ from 'lodash';
 import ArrowLeft from "../../../assets/icons/arrow-left.svg";
 import { queryClient } from "../../../pages/_app";
+import { useProductCategoryInfiniteLists } from 'hooks/mdm/product-category/useProductCategory';
 
 export default function CreateProductVariant({ isCreateProductVariant = true}) {
   const router = useRouter();
@@ -51,8 +52,14 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
   const [searchProductBrand, setSearchProductBrand] = useState("");
   const debounceFetchProductBrand = useDebounce(searchProductBrand, 1000);
 
+  const [listProductCategory , setListProductCategory] = useState<any[]>([]);
+  const [totalRowsProductCategory, setTotalRowsProductCategory] = useState(0);
+  const [searchProductCategory, setSearchProductCategory] = useState("");
+  const debounceFetchProductCategory = useDebounce(searchProductCategory, 1000);
+
   const [canBePurchased, setCanBePurchased] = useState(false);
   const [canBeSold, setCanBeSold] = useState(false);
+  const [canBeManufacture, setCanManufacture] = useState(false);
 
   const [isShowDelete, setShowDelete] = useState({ open: false });
 
@@ -63,7 +70,7 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
     { title: "Purchasing" },
     { title: "Accounting" },
     { title: "Branch" },
-    { title: "Division" },
+    { title: "Sales" },
     { title: "Registration" },
   ];
 
@@ -117,7 +124,6 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
       packaging_size: "",
       cost_of_product: 0,
       sales_price: 0,
-      category: null,
       brand: {},
       base_uom: {},
       purchase_uom: {},
@@ -133,7 +139,14 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
       },
       accounting: {},
       registration: [],
-      branch: []
+      branch: {
+        ids: []
+      },
+      category : {},
+      uom: [],
+      sales_division: {
+        ids: []
+      }
     }
   });
 
@@ -156,11 +169,41 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
       enabled: isUpdate,
       onSuccess: (data: any) => {
         data = toSnakeCase(data);
-        Object.keys(data).forEach(key => {
-          setValue(key, data[key]);
-          setCanBePurchased(data.can_be_purchased);
-          setCanBeSold(data.can_be_sold);
-        })
+          Object.keys(data).forEach(key => {
+            if(key === 'uom_conversion'){
+              setValue('uom', data[key]?.map((data:any, index:any) => ({
+                baseUom: data.base_uom_name,
+                conversionNumber: data.conversion_number,
+                id: data.id,
+                index,
+                key: data.id,
+                levelId: data?.level?.id,
+                qty: data?.qty,
+                uomConversionItemId: data.conversion_id
+              })))
+            } else if(key === 'registrations') {
+              setValue('registration', data[key])
+            } else if(key === 'branch') {
+                let branchIds:any = []
+                data[key].forEach((branch:any) => {
+                  branchIds.push(...branch.branchs.map((branch:any) => branch.id))
+                })
+                let branch = {
+                  ids: branchIds
+                }
+                setValue(key, branch)
+            } else if(key === 'sales_division') {
+                let branch = {
+                  ids:  data[key]?.map((data:any) => data?.id) || []
+                }
+                setValue(key, branch)
+            } else {
+              setValue(key, data[key]);
+            }
+            setCanBePurchased(data.can_be_purchased);
+            setCanBeSold(data.can_be_sold);
+            setCanManufacture(data.can_be_manufactured);
+          })
       return data;
     }
   }})
@@ -192,6 +235,41 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
       },
       getNextPageParam: (_lastPage: any, pages: any) => {
         if (listProductBrand.length < totalRowsProductBrand) {
+          return pages.length + 1;
+        } else {
+          return undefined;
+        }
+      },
+    },
+  });
+
+  const {
+    isFetching: isFetchingProductCategory,
+    isFetchingNextPage: isFetchingMoreProductCategory,
+    hasNextPage: hasNextProductCategory,
+    fetchNextPage: fetchNextPageProductCategory,
+  } = useProductCategoryInfiniteLists({
+    query: {
+      search: debounceFetchProductCategory,
+      company_id: "KSNI",
+      limit: 10,
+    },
+    options: {
+      onSuccess: (data: any) => {
+        setTotalRowsProductCategory(data?.pages[0].totalRow);
+        const mappedData = data?.pages?.map((group: any) => {
+          return group.rows?.map((element: any) => {
+            return {
+              label: element.name, 
+              value: element.productCategoryId,
+            };
+          });
+        });
+        const flattenArray = [].concat(...mappedData);
+        setListProductCategory(flattenArray);
+      },
+      getNextPageParam: (_lastPage: any, pages: any) => {
+        if (listProductCategory.length < totalRowsProductCategory) {
           return pages.length + 1;
         } else {
           return undefined;
@@ -271,20 +349,33 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
       'sales_price',
       'registration',
       'barcode',
-      'sku'
+      'sku',
+      'accounting',
+      'sales_division'
     ])
 
+    payload.uom_conversion = [];
+
+    if (data?.uom?.length > 0 && payload.use_unit_leveling) {
+      payload.uom_conversion = data?.uom?.map(data => ({
+        level_id: data?.levelId,
+        uom_conversion_item_id: 39,
+        conversion_id: "MCM-0000017"
+      }))
+    } else {
+      payload.uom_conversion = [];
+    }
+
+    payload.branch = data.branch;
     payload.can_be_sold = canBeSold;
     payload.can_be_purchased = canBePurchased;
+    payload.can_be_manufactured = canBeManufacture;
 
+    payload.expired_date = data?.expired_date?.includes("/")
     payload.expired_date = data?.expired_date?.includes('/') ? moment(data.expired_date, 'DD/MM/YYYY').utc().toString() : moment(data.expired_date).utc().toString();
     payload.product_brand_id = data.brand.id;
     payload.base_uom_id = data.base_uom.uom_id;
     payload.purchase_uom_id = data.purchase_uom.uom_id;
-    payload.accounting = {
-      income_account_id: data?.accounting?.income_account?.id || 0,
-      expense_account_id: data?.accounting?.expense_account?.id || 0
-    };
     payload.company_code = 'KSNI'
     payload.inventory = {
       weight: {
@@ -303,6 +394,8 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
       },
       storage_management:  {
         ...data?.inventory?.storage_management,
+        transportation_group: data?.inventory?.storage_management?.transportation_group,
+        transportation_type: data?.inventory?.storage_management?.transportation_type?.id
     }
     }
     payload.registration = data.registration.map(data => ({
@@ -310,8 +403,9 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
       number: data.number,
       valid_from: data.valid_from?.includes('/') ? moment(data.valid_from, 'DD/MM/YYYY').utc().toString() : moment(data.valid_from).utc().toString(),
       valid_to: data.valid_to?.includes('/') ? moment(data.valid_to, 'DD/MM/YYYY').utc().toString() : moment(data.valid_to).utc().toString(),
-    }))
+    })) || [];
 
+    payload.product_category_id = data?.category?.id
     if(isUpdate){
       delete payload.company_id
       delete payload.company_code
@@ -326,6 +420,7 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
     getValues,
     register,
     control,
+    errors
   }
 
   const propsRegistrations = {
@@ -340,27 +435,50 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
   const propsAccounting = {
     control,
     accounting: {},
+    setValue
   }
 
+  const salesDivisionForm = useWatch({
+    control,
+    name: 'sales_division'
+  })
+
+  const propsDivision = {
+    setValue,
+    salesDivision: salesDivisionForm
+  }
+
+  const branchForm = useWatch({
+    control,
+    name: 'branch'
+  })
+
   const switchTabItem = () => {
-    switch (tabAktived) {
-      case 'Registration':
-        return <Registration {...propsRegistrations} />
-      case 'Branch':
-        return <Branch />
-      case 'Purchasing':
-        return <Purchasing />
-      case 'Accounting':
-        return <Accounting {...propsAccounting} />
-      case 'Inventory':
-        return <Inventory {...propsInventory} />
-      case 'Detail':
-        return <Detail {...propsDetail} />
-      case 'Division':
-        return <Division />
-      default:
-        return null
-    }
+    return (
+      <>
+        <div style={{display: tabAktived === 'Registration' ? 'block': 'none'}}>
+          <Registration {...propsRegistrations} />
+          </div>
+        <div style={{display: tabAktived === 'Branch' ? 'block': 'none'}}>
+          <Branch setValue={setValue} branch={branchForm} isUpdate={isUpdate} />
+        </div>
+        <div style={{display: tabAktived === 'Purchasing' ? 'block': 'none'}}>
+          <Purchasing />
+        </div>
+        <div style={{display: tabAktived === 'Accounting' ? 'block': 'none'}}>
+          <Accounting {...propsAccounting} />
+        </div>
+        <div style={{display: tabAktived === 'Inventory' ? 'block': 'none'}}>
+          <Inventory {...propsInventory} />
+        </div>
+        <div style={{display: tabAktived === 'Detail' ? 'block': 'none'}}>
+          <Detail {...propsDetail} />
+        </div>
+        <div style={{display: tabAktived === 'Sales' ? 'block': 'none'}}>
+          <Division {...propsDivision} />
+        </div>
+      </>
+    )
   }
 
   const productForm = useWatch({
@@ -371,6 +489,7 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
   const {
     fields: fieldsProductVariants,
     replace: replaceProductVariants,
+    update: updateProductVariants
   } = useFieldArray({
     control,
     name: "variants"
@@ -387,6 +506,10 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
     name: 'name'
   })
 
+  const inventoryWatch = useWatch({
+    control,
+    name: "inventory",
+  });
 
   const combinationVariant = (list:string[][] = [[]], n = 0, result:any=[], current:any = []) => {
     if (n === list.length) result.push(current)
@@ -400,7 +523,7 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
       return false
     })
 
-    if(options.map(data => data.option_items.map(data => data.id))?.length > 0){
+    if (options?.length > 0 && options.map((data) => data?.option_items.map((data) => data?.id))?.length > 0) {
       let allValues = options.map(data => data.option_items.map(data => data.name || data.label));
       allValues.unshift([productForm.name])
       const variants = combinationVariant(allValues)?.map(data => data.join(" "));
@@ -413,6 +536,8 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
         barcode: '-',
       }))
       replaceProductVariants(finalVariants)
+    } else {
+      replaceProductVariants([])
     }
 
   }, [optionsForm, nameForm])
@@ -426,16 +551,19 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
     isUpdate,
     fieldsProductVariants,
     replaceProductVariants,
+    updateProductVariants,
     isCreateProductVariant
   }
 
-  // const currentDate = moment();
-  // const createdAtDate = productDetail?.createdAt;
+  const currentDate = moment();
+  const createdAtDate = moment(productDetail?.createdAt)
+  const isNewProduct = currentDate.diff(createdAtDate, `days`) <= 0
+
   return (
     <Col>
       {
        isLoadingProduct ?
-          <Spin tip="Loading data..." />
+          <Spin tip="Loading..." />
        : 
       <>
 
@@ -447,9 +575,11 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
           <ArrowLeft style={{ cursor: "pointer" }} onClick={() => router.back()} />
           <Text variant={"h4"}>{productForm?.name}</Text>
           <Spacer size={8} />
-          <CustomLozenge variant={'blue'}>
-            New Product Launch
-          </CustomLozenge>
+          {isNewProduct && (
+            <CustomLozenge variant={'blue'}>
+              New Product Launch
+            </CustomLozenge> 
+          )}
         </Row>
       }
 
@@ -468,6 +598,14 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
           <Checkbox size="small" checked={canBeSold} onChange={()=>setCanBeSold(!canBeSold)}/>
           <div style={{ cursor: "pointer" }} onClick={()=>setCanBeSold(!canBeSold)}>
             <Text variant={"h6"}>Can Be Sold</Text>
+          </div>
+        </Row>
+      </Col>
+      <Col>
+        <Row alignItems="center">
+          <Checkbox size="small" checked={canBeManufacture} onChange={()=>setCanManufacture(!canBeManufacture)}/>
+          <div style={{ cursor: "pointer" }} onClick={()=>setCanManufacture(!canBeManufacture)}>
+            <Text variant={"h6"}>Can Be Manufacture</Text>
           </div>
         </Row>
       </Col>
@@ -504,7 +642,14 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
                 Cancel
               </Button>
             }
-            <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
+             <Button size="big" variant={"primary"} onClick={(e: any) => {
+                  if(!inventoryWatch?.weight?.net){
+                    setTabAktived('Inventory')
+                    handleSubmit(onSubmit)(e)
+                  } else {
+                    handleSubmit(onSubmit)(e)
+                  }
+                }}>
               {isLoadingCreateProduct || isLoadingUploadImage || isLoadingUpdateProduct? "Loading..." : "Save"}
             </Button>
           </Row>
@@ -541,6 +686,7 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
                   {...register("name", {
                     required: 'Product Name must be filled'
                   })}
+                  error={errors.name?.message}
                   required
                 />
               </Col>
@@ -571,20 +717,46 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
 
             <Row width="100%" noWrap>
               <Col width="100%">
-                <Controller
+              <Controller
                   control={control}
-                  name="product_category_id"
+                  name="category.id"
+                  defaultValue={productForm?.category?.name}
                   render={({ field: { onChange } }) => (
-                    <Dropdown
-                      defaultValue={productForm?.category?.name}
-                      label="Product Category"
-                      width="100%"
-                      noSearch
-                      items={productCategory}
-                      handleChange={(value: any) => {
-                        onChange(value);
-                      }}
-                    />
+                    <Col width="100%">
+                      <span>
+                        <Label style={{ display: "inline" }}>Product Category </Label>{" "}
+                        <span></span>
+                      </span>
+
+                      <Spacer size={3} />
+                      <CustomFormSelect
+                        defaultValue={productForm?.category?.name}
+                        style={{ width: "100%", height: '48px' }}
+                        size={"large"}
+                        placeholder={"Select"}
+                        borderColor={"#AAAAAA"}
+                        arrowColor={"#000"}
+                        withSearch
+                        isLoading={isFetchingProductCategory}
+                        isLoadingMore={isFetchingMoreProductCategory}
+                        fetchMore={() => {
+                          if (hasNextProductCategory) {
+                            fetchNextPageProductCategory();
+                          }
+                        }}
+                        items={
+                          isFetchingProductCategory || isFetchingMoreProductCategory
+                            ? []
+                            : listProductCategory
+                        }
+                        onChange={(value: any) => {
+                          onChange(value);
+                        }}
+                        onSearch={(value: any) => {
+                          setSearchProductCategory(value);
+                        }}
+                      />
+                    </Col>
                   )}
                 />
               </Col>
@@ -650,6 +822,7 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
                     {...register("sku", {
                       required: 'Sku Number is required'
                     })}
+                    error={errors.sku?.message}
                   />
               </Col>
 
@@ -689,7 +862,7 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
                     <DatePickerInput
                       fullWidth
                       onChange={(date: any, dateString: any) => onChange(dateString)}
-                      label="Expired Date"
+                      label="Discontinue Date"
                       defaultValue={moment(productForm.expired_date)} format={'DD/MM/YYYY'}
                     />
                   )}
@@ -705,10 +878,10 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
       
       <Accordion>
         <Accordion.Item key={1}>
-          <Accordion.Header variant="blue">Detail Information</Accordion.Header>
+          <Accordion.Header variant="blue">Product Information</Accordion.Header>
           <Accordion.Body>
             <Tabs
-              defaultActiveKey={tabAktived}
+              activeKey={tabAktived}
               listTabPane={listTabItems}
               onChange={(e: any) => setTabAktived(e)}
             />
@@ -764,7 +937,7 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
                       deleteProductList({ ids: [id] });
                   }}
                 >
-                  {isLoadingDeleteProductList ? "loading..." : "Yes"}
+                  {isLoadingDeleteProductList ? "Loading..." : "Yes"}
                 </Button>
               </div>
             </div>

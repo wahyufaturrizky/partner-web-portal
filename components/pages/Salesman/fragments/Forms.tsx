@@ -8,7 +8,7 @@ import {
 } from 'pink-lava-ui'
 
 const Forms = ({
-  code,
+  queryDivision,
   status,
   forms,
   setDivision,
@@ -72,7 +72,7 @@ const Forms = ({
             }
           })}
           handleChange={(value: any) => setDivision(value)}
-          defaultValue={code || 'sales division not found'}
+          defaultValue={queryDivision}
           onSearch={(value: any) => setSearch(value)}
           disabled={status === "Rejected" || status === "Waiting for Approval"}
         />

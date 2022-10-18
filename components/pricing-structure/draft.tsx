@@ -49,7 +49,7 @@ const DraftPricingStructure: any = ({
   const router = useRouter();
   const pagination = usePagination({
     page: 1,
-    itemsPerPage: 10,
+    itemsPerPage: 20,
     maxPageItems: Infinity,
     numbers: true,
     arrows: true,
@@ -72,13 +72,12 @@ const DraftPricingStructure: any = ({
       onSuccess: (data: any) => {
         pagination.setTotalItems(data.totalRow);
       },
-      enabled: false,
     },
     query: {
       search,
       page: pagination.page,
       limit: pagination.itemsPerPage,
-      status: "DRAFT",
+      status: "DRAFTED",
     },
   });
 
@@ -110,8 +109,9 @@ const DraftPricingStructure: any = ({
     },
     {
       title: "Products",
-      dataIndex: "products",
+      dataIndex: "priceStructureCosts",
       width: "28%",
+      render: (e: any) => `${e?.length} Products`,
     },
     {
       title: "Status",
@@ -133,8 +133,8 @@ const DraftPricingStructure: any = ({
   pricingStructureLists?.rows?.map((element: any) => {
     data.push({
       key: element.id,
+      priceStructureCosts: element.priceStructureCosts,
       proposal_number: element.proposalNumber,
-      products: element.elementType.products,
       status: element.status,
       action: (
         <Button
@@ -150,10 +150,6 @@ const DraftPricingStructure: any = ({
     });
   });
   const paginateField = data;
-
-  const onSelectChange = (selectedRowKeys: any) => {
-    setSelectedRowKeys(selectedRowKeys);
-  };
 
   const rowSelection = {
     selectedRowKeys,
@@ -281,16 +277,12 @@ const DraftPricingStructure: any = ({
           </Center>
         ) : (
           <Card style={{ minHeight: "574px", padding: "16px 20px" }}>
-            <Text variant="headingRegular" color="blue.darker">
-              {search ? `Search Result` : `Total Draft Pricing Structure`} :{" "}
-              {pricingStructureLists?.totalRow}{" "}
-            </Text>
             <Spacer size={20} />
             {isEmpty ? (
               <EmptyState
-                image={"/empty-state.svg"}
+                image={"/icons/empty-state.svg"}
                 title={"The Data You Are Looking for Cannot be Found"}
-                description={`Don't worry you can Create a new pricing structure`}
+                subtitle={`Don't worry you can Create a new pricing structure`}
                 height={400}
               />
             ) : (
@@ -306,7 +298,7 @@ const DraftPricingStructure: any = ({
       {modalDelete.open && (
         <ModalDeleteConfirmation
           totalSelected={selectedRowKeys?.length}
-          itemTitle={paginateField?.find((menu: any) => menu.key === selectedRowKeys[0])?.products}
+          itemTitle={paginateField?.find((menu: any) => menu.key === selectedRowKeys[0])?.key}
           visible={modalDelete.open}
           onCancel={() => setModalDelete({ open: false })}
           onOk={() => deletePricingStructure({ ids: selectedRowKeys })}

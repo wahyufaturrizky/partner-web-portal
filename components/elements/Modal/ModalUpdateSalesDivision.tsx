@@ -90,6 +90,7 @@ const ModalUpdateSalesDivision = ({
 									label="Product"
 									isAllowClear
 									required
+									placeholder="Type Product Name"
 									handleChangeValue={(value: string[]) => setItemSelected(value)}
 									valueSelectedItems={itemSelected}
 									noSearch

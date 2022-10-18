@@ -8,10 +8,6 @@ import {
   Button,
   Accordion,
   Input,
-  TextArea,
-  Dropdown2,
-  Switch,
-  Spin,
   Checkbox,
 } from "pink-lava-ui";
 import styled from "styled-components";
@@ -19,27 +15,107 @@ import Router, { useRouter } from "next/router";
 import ArrowLeft from "../../../assets/icons/arrow-left.svg";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useForm } from "react-hook-form";
-import usePagination from "@lucasmogari/react-pagination";
+import { Controller, useForm } from "react-hook-form";
+import { useCreateSequenceNumber } from "../../../hooks/sequence-number/useSequenceNumber";
+import { useBusinessProcesses } from "../../../hooks/business-process/useBusinessProcess";
+import { useBranchList } from "hooks/mdm/branch/useBranch";
 
-const AddSequenceNumber: any = ({onBack}) => {
+const schema = yup
+  .object({
+    name: yup.string().required("Name is Required"),
+    // company: yup.string().required("Company code is Required"),
+    process_id: yup.string().required("Process is Required"),
+    // branch_id: yup.string().default(""),
+    // branch_name: yup.string().default(""),
+  })
+  .required();
+
+const AddSequenceNumber: any = ({ onBack, dataParent }) => {
   const router = useRouter();
 
-  const pagination = usePagination({
-    page: 1,
-    itemsPerPage: 10,
-    maxPageItems: Infinity,
-    numbers: true,
-    arrows: true,
-    totalItems: 100,
+  const [incCompany, setIncCompany] = useState(false);
+  const [incBranch, setIncBranch] = useState(false);
+  const [periodMonth, setPeriodMonth] = useState(false);
+  const [periodYear, setPeriodYear] = useState(false);
+
+  const {
+    data: businessProcessesData,
+    isLoading: isLoadingBP,
+    isFetching: isFetchingBP,
+  } = useBusinessProcesses({
+    query: {},
+    options: {
+      onSuccess: (data: any) => {},
+    },
   });
+
+  const { data: listBranch, isLoading: isLoadingBranch } = useBranchList({
+    query: { company_id: "KSNI" },
+    options: {
+      onSuccess: (data) => {},
+    },
+  });
+
+  const { mutate: createSequence } = useCreateSequenceNumber({
+    options: {
+      onSuccess: (data) => {
+        router.push("/user-config/sequence-number");
+      },
+    },
+  });
+
+  const {
+    register,
+    handleSubmit,
+    control,
+    setValue,
+    formState: { errors },
+  } = useForm({
+    resolver: yupResolver(schema),
+    // defaultValues: defaultValue,
+  });
+
+  const onSubmit = (data: any) => {
+    let include = [];
+    incCompany && include.push("COMPANY");
+    incBranch && include.push("BRANCH");
+
+    let periodically_update = [];
+    periodMonth && periodically_update.push("MONTH");
+    periodYear && periodically_update.push("YEAR");
+
+    const payload = {
+      ...data,
+      branchId: "BRA-0000002",
+      branchName: "PMA Bandung Selatan",
+      company_id: 1,
+      include: include,
+      periodically_update: periodically_update,
+      parent_id: dataParent.parentId,
+    };
+
+    // console.log(payload, "payload");
+    createSequence(payload);
+  };
+
+  // const handleChangeBranch = ({ value }) => {
+  //   const isBranch = listBranch.rows.filter((b) => b.branchId == value);
+  //   if (isBranch) {
+  //     setValue("branch_id", `${isBranch[0].branchId}`);
+  //     setValue("branch_name", `${isBranch[0].name}`);
+  //   }
+  //   console.log(isBranch, "awfwafwa");
+  // };
 
   return (
     <>
       <Col>
-        <Row gap="4px" alignItems="center">
-          <ArrowLeft style={{ cursor: "pointer" }} onClick={onBack} />
-          <Text variant={"h4"}>Add Sequence</Text>
+        <Row gap="16px" justifyContent="flex" alignItems="center">
+          <ArrowLeft style={{ cursor: "pointer" }} onClick={() => onBack()} />
+          {/* <Text variant={"h4"}>{sequence_id}</Text> */}
+          <Text variant={"h4"}>
+            {dataParent.branchName ? dataParent.branchName : "-"}
+          </Text>
         </Row>
         <Spacer size={12} />
         <Card padding="20px">
@@ -49,11 +125,11 @@ const AddSequenceNumber: any = ({onBack}) => {
                 <Button
                   size="big"
                   variant={"tertiary"}
-                  onClick={() => Router.push("/company-list")}
+                  onClick={() => Router.push("/user-config/sequence-number")}
                 >
                   Cancel
                 </Button>
-                <Button size="big" variant={"primary"}>
+                <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
                   Save
                 </Button>
               </Row>
@@ -72,8 +148,9 @@ const AddSequenceNumber: any = ({onBack}) => {
                   <Input
                     label="Sequence Name"
                     height="48px"
-                    placeholder={"e.g"}
-                    // {...register("name", { required: true })}
+                    placeholder={"e.g Transaction Quotation"}
+                    {...register("name", { required: true })}
+                    error={errors?.name?.message}
                     required
                   />
                 </Col>
@@ -81,13 +158,15 @@ const AddSequenceNumber: any = ({onBack}) => {
                   <Dropdown
                     width="100%"
                     label="Process"
-                    items={[]}
+                    items={businessProcessesData?.rows?.map((data) => ({
+                      id: data.id,
+                      value: data.name,
+                    }))}
                     placeholder={"Select"}
-                    // handleChange={(value) => setValue("numberFormat", value)}
-                    required
-                    // error={errors?.numberFormat?.message}
-                    // {...register("numberFormat", { required: true })}
+                    handleChange={(value) => setValue("process_id", value)}
+                    error={errors?.process_id?.message}
                     noSearch
+                    isLoading={isLoadingBP}
                   />
                 </Col>
               </Row>
@@ -96,7 +175,7 @@ const AddSequenceNumber: any = ({onBack}) => {
                   <Input
                     label="Company"
                     height="48px"
-                    placeholder={"e.g"}
+                    placeholder={"PT. Kaldu Sari Nabati"}
                     disabled={true}
                     // {...register("name", { required: true })}
                   />
@@ -105,12 +184,22 @@ const AddSequenceNumber: any = ({onBack}) => {
                   <Dropdown
                     width="100%"
                     label="Branch"
-                    items={[]}
+                    items={listBranch?.rows?.map((data) => ({
+                      id: data.branchId,
+                      value: data.name,
+                    }))}
                     placeholder={"Select"}
-                    // handleChange={(value) => setValue("numberFormat", value)}
+                    // handleChange={(value) => {
+                    //   console.log(value);
+                    //   setValue("branch_id", value);
+                    // }}
+                    defaultValue={dataParent.branchId}
+                    // handleChange={(value) => handleChangeBranch({ value })}
                     // error={errors?.numberFormat?.message}
-                    // {...register("numberFormat", { required: true })}
+                    // {...register("branch_id")}
                     noSearch
+                    isLoading={isLoadingBranch}
+                    disabled
                   />
                 </Col>
               </Row>
@@ -130,9 +219,9 @@ const AddSequenceNumber: any = ({onBack}) => {
                   width="100%"
                   label="Sequence Code Preview"
                   height="48px"
-                  placeholder={"e.g"}
-                  disabled={true}
-                  // {...register("name", { required: true })}
+                  placeholder={""}
+                  // disabled={true}
+                  {...register("sequenceCode", { required: true })}
                 />
               </Row>
               <Spacer size={20} />
@@ -147,24 +236,17 @@ const AddSequenceNumber: any = ({onBack}) => {
                   <Row style={{ marginRight: "12px" }} alignItems="center" gap="12px">
                     <Row>
                       <Checkbox
-                        checked={false}
-                        //   onChange={(value: boolean) => {
-                        //     onChange(value);
-                        //     setIsCompany(value);
-                        //   }}
+                        checked={incCompany}
+                        onChange={(checked: any) => setIncCompany(checked)}
                       />
-
                       <Text variant={"h6"} bold>
                         Company
                       </Text>
                     </Row>
                     <Row>
                       <Checkbox
-                        checked={false}
-                        //   onChange={(value: boolean) => {
-                        //     onChange(value);
-                        //     setIsBranch(value);
-                        //   }}
+                        checked={incBranch}
+                        onChange={(checked: any) => setIncBranch(checked)}
                       />
                       <Text variant={"h6"} bold>
                         Branch
@@ -182,11 +264,8 @@ const AddSequenceNumber: any = ({onBack}) => {
                   <Row style={{ marginRight: "12px" }} alignItems="center" gap="12px">
                     <Row>
                       <Checkbox
-                        checked={false}
-                        //   onChange={(value: boolean) => {
-                        //     onChange(value);
-                        //     setIsCompany(value);
-                        //   }}
+                        checked={periodMonth}
+                        onChange={(checked: any) => setPeriodMonth(checked)}
                       />
 
                       <Text variant={"h6"} bold>
@@ -195,11 +274,8 @@ const AddSequenceNumber: any = ({onBack}) => {
                     </Row>
                     <Row>
                       <Checkbox
-                        checked={false}
-                        //   onChange={(value: boolean) => {
-                        //     onChange(value);
-                        //     setIsBranch(value);
-                        //   }}
+                        checked={periodYear}
+                        onChange={(checked: any) => setPeriodYear(checked)}
                       />
                       <Text variant={"h6"} bold>
                         Year
@@ -221,8 +297,8 @@ const AddSequenceNumber: any = ({onBack}) => {
                       width="100%"
                       label=""
                       height="48px"
-                      placeholder={"e.g"}
-                      // {...register("name", { required: true })}
+                      placeholder={"e.g SO"}
+                      {...register("prefix")}
                     />
                   </Col>
                 </Row>
@@ -237,8 +313,8 @@ const AddSequenceNumber: any = ({onBack}) => {
                       width="100%"
                       label=""
                       height="48px"
-                      placeholder={"e.g"}
-                      // {...register("name", { required: true })}
+                      placeholder={"e.g PMA"}
+                      {...register("suffix")}
                     />
                   </Col>
                 </Row>
@@ -253,8 +329,8 @@ const AddSequenceNumber: any = ({onBack}) => {
                       width="100%"
                       label=""
                       height="48px"
-                      placeholder={"e.g"}
-                      // {...register("name", { required: true })}
+                      placeholder={"e.g 7"}
+                      {...register("digit_size")}
                     />
                   </Col>
                 </Row>
@@ -269,8 +345,8 @@ const AddSequenceNumber: any = ({onBack}) => {
                       width="100%"
                       label=""
                       height="48px"
-                      placeholder={"e.g"}
-                      // {...register("name", { required: true })}
+                      placeholder={"e.g - (Strip) or / (Slash)"}
+                      {...register("separator")}
                     />
                   </Col>
                 </Row>
@@ -285,8 +361,8 @@ const AddSequenceNumber: any = ({onBack}) => {
                       width="100%"
                       label=""
                       height="48px"
-                      placeholder={"e.g"}
-                      // {...register("name", { required: true })}
+                      placeholder={"e.g 1"}
+                      {...register("start_number")}
                     />
                   </Col>
                 </Row>
@@ -301,8 +377,8 @@ const AddSequenceNumber: any = ({onBack}) => {
                       width="100%"
                       label=""
                       height="48px"
-                      placeholder={"e.g"}
-                      // {...register("name", { required: true })}
+                      placeholder={"e.g 1"}
+                      {...register("next_number")}
                     />
                   </Col>
                 </Row>

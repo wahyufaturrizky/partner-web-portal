@@ -30,7 +30,7 @@ const ListTemplateMenu = () => {
 	const router = useRouter();
 	const pagination = usePagination({
 		page: 1,
-		itemsPerPage: 10,
+		itemsPerPage: 20,
 		maxPageItems: Infinity,
 		numbers: true,
 		arrows: true,
@@ -149,6 +149,7 @@ const ListTemplateMenu = () => {
 								size="big"
 								variant="tertiary"
 								onClick={() => setVisible({ delete: true, upload: false })}
+								disabled={rowSelection.selectedItem?.length < 1}
 							>
 								Delete
 							</Button>

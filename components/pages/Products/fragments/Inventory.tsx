@@ -12,9 +12,10 @@ import styled from 'styled-components'
 import useDebounce from '../../../../lib/useDebounce'
 import { useUOMInfiniteLists } from '../../../../hooks/mdm/unit-of-measure/useUOM'
 import { Controller, useWatch } from 'react-hook-form'
+import { useTransportationInfiniteLists } from 'hooks/mdm/transportation-group/useTransportationGroup'
 
 export default function Inventory(props: any) {
-  const { setValue, register, control } = props
+  const { setValue, register, control, errors } = props
 
   const inventoryForm = useWatch({
     control: control,
@@ -40,6 +41,16 @@ export default function Inventory(props: any) {
   const [searchUomTemplate, setSearchUomTemplate] = useState("");
   const debounceFetchUomTemplate = useDebounce(searchUomTemplate, 1000);
   const [listUomTemplate, setListUomTemplate] = useState<any[]>([]);
+
+  const [totalRowsTransportationGroup, setTotalRowsTransportationGroup] = useState(0);
+  const [searchTransportationGroup, setSearchTransportationGroup] = useState("");
+  const debounceFetchTransportationGroup = useDebounce(searchTransportationGroup, 1000);
+  const [listTransportationGroup, setListTransportationGroup] = useState<any[]>([]);
+  
+  const [totalRowsTransportationType, setTotalRowsTransportationType] = useState(0);
+  const [searchTransportationType, setSearchTransportationType] = useState("");
+  const debounceFetchTransportationType = useDebounce(searchTransportationType, 1000);
+  const [listTransportationType, setListTransportationType] = useState<any[]>([]);
   
   const {
     isFetching: isFetchingUomTemplate,
@@ -76,6 +87,52 @@ export default function Inventory(props: any) {
     },
   });
 
+  const {
+    isFetching: isFetchingTransportation,
+    isFetchingNextPage: isFetchingMoreTransportation,
+    hasNextPage: hasNextTransportation,
+    fetchNextPage: fetchNextPageTransportation,
+  } = useTransportationInfiniteLists({
+    query: {
+      search: debounceFetchTransportationGroup,
+      limit: 10,
+    },
+    options: {
+      onSuccess: (data: any) => {
+        setTotalRowsTransportationGroup(data.pages[0].totalRow);
+        const mappedData = data?.pages?.map((group: any) => {
+          return group.rows?.map((element: any) => {
+            return {
+              label: element.transportationGroup,
+              value: element.transportationGroupId,
+            };
+          });
+        });
+        const flattenArray = [].concat(...mappedData);
+        setListTransportationGroup(flattenArray);
+
+        setTotalRowsTransportationType(data.pages[0].totalRow);
+        const mappedDataTransportationType = data?.pages?.map((group: any) => {
+          return group.rows?.map((element: any) => {
+            return {
+              label: element.transportationType,
+              value: element.transportationGroupId,
+            };
+          });
+        });
+        const flattenArrayTransportationType = [].concat(...mappedDataTransportationType);
+        setListTransportationType(flattenArrayTransportationType);
+      },
+      getNextPageParam: (_lastPage: any, pages: any) => {
+        if (listTransportationGroup.length < totalRowsTransportationGroup) {
+          return pages.length + 1;
+        } else {
+          return undefined;
+        }
+      },
+    },
+  });
+
   return (
     <div>
       <Col>
@@ -87,10 +144,11 @@ export default function Inventory(props: any) {
               width="100%"
               label="Net Weight"
               height="48px"
-              placeholder={"e.g Nabati Cheese"}
+              placeholder={"e.g 100"}
               {...register("inventory.weight.net", {
                 required: 'Net Weight must be filled'
               })}
+              error={errors?.inventory?.weight?.net?.message}
             />
           <Spacer size={20} />
             <Controller
@@ -141,7 +199,7 @@ export default function Inventory(props: any) {
               width="100%"
               label="Gross Weight"
               height="48px"
-              placeholder={"e.g Nabati Cheese"}
+              placeholder={"e.g 200"}
               {...register("inventory.weight.gross")}
             />
           </Col>
@@ -153,7 +211,7 @@ export default function Inventory(props: any) {
         <Spacer size={20} />
         <Row gap="20px" width="100%" noWrap>
           <Col gap="4px" width="100%" noWrap>
-            <Text style={{ position: 'absolute', fontWeight: 'bold' }} variant="subtitle1" color="black.regular">Dimension (Length x Width x Height)</Text>
+            <LabelDimension>Dimension (Length x Width x Height)</LabelDimension>
             <Row gap="4px" width="100%" noWrap>
               <CustomInput
                 label=""
@@ -282,24 +340,90 @@ export default function Inventory(props: any) {
         </Row>
         <Spacer size={20} />
         <Row gap="20px" width="100%" noWrap>
-          <Dropdown2
-            labelBold
-            label="Transportation Group"
-            width="100%"
-            items={[]}
-            handleChange={(value: string) => setValue("inventory.storage_management.transportation_group", value)}
-            onSearch={(search: string) => {}}
-            defaultValue={inventoryForm.storage_management?.transportation_group}
-          />
-          <Dropdown2
-            labelBold
-            label="Transportation Type"
-            width="100%"
-            items={[]}
-            handleChange={(value: string) => setValue("inventory.storage_management.transportation_type.id", value)}
-            onSearch={(search: string) => {}}
-            defaultValue={inventoryForm.storage_management?.transportation_type?.name}
-          />
+          <Controller
+              control={control}
+              name="inventory.storage_management.transportation_group"
+              defaultValue={inventoryForm.storage_management?.transportation_group}
+              render={({ field: { onChange } }) => (
+                <Col width="100%">
+                  <span>
+                    <Label style={{ display: "inline" }}>Transportation Group</Label>{" "}
+                    <span></span>
+                  </span>
+
+                  <Spacer size={3} />
+                  <CustomFormSelect
+                    defaultValue={inventoryForm.storage_management?.transportation_group}
+                    style={{ width: "100%", height: '48px' }}
+                    size={"large"}
+                    placeholder={"Select"}
+                    borderColor={"#AAAAAA"}
+                    arrowColor={"#000"}
+                    withSearch
+                    isLoading={isFetchingTransportation}
+                    isLoadingMore={isFetchingMoreTransportation}
+                    fetchMore={() => {
+                      if (hasNextTransportation) {
+                        fetchNextPageTransportation();
+                      }
+                    }}
+                    items={
+                      isFetchingTransportation || isFetchingMoreTransportation
+                        ? []
+                        : listTransportationGroup
+                    }
+                    onChange={(value: any) => {
+                      onChange(value);
+                    }}
+                    onSearch={(value: any) => {
+                      setSearchTransportationGroup(value);
+                    }}
+                  />
+                </Col>
+              )}
+            />
+            <Controller
+              control={control}
+              name="inventory.storage_management.transportation_type.id"
+              defaultValue={inventoryForm.storage_management?.transportation_type?.name}
+              render={({ field: { onChange } }) => (
+                <Col width="100%">
+                  <span>
+                    <Label style={{ display: "inline" }}>Transportation Type</Label>{" "}
+                    <span></span>
+                  </span>
+
+                  <Spacer size={3} />
+                  <CustomFormSelect
+                    defaultValue={inventoryForm.storage_management?.transportation_type?.name}
+                    style={{ width: "100%", height: '48px' }}
+                    size={"large"}
+                    placeholder={"Select"}
+                    borderColor={"#AAAAAA"}
+                    arrowColor={"#000"}
+                    withSearch
+                    isLoading={isFetchingTransportation}
+                    isLoadingMore={isFetchingMoreTransportation}
+                    fetchMore={() => {
+                      if (hasNextTransportation) {
+                        fetchNextPageTransportation();
+                      }
+                    }}
+                    items={
+                      isFetchingTransportation || isFetchingMoreTransportation
+                        ? []
+                        : listTransportationType
+                    }
+                    onChange={(value: any) => {
+                      onChange(value);
+                    }}
+                    onSearch={(value: any) => {
+                      setSearchTransportationGroup(value);
+                    }}
+                  />
+                </Col>
+              )}
+            />
         </Row>
         <Spacer size={20} />
         <Row gap="20px" width="100%" noWrap>
@@ -325,6 +449,11 @@ export default function Inventory(props: any) {
   )
 }
 
+const LabelDimension = styled.div`
+  font-weight: bold;
+  font-size: 16px;
+  line-height: 24px;
+`
 const Label = styled.div`
   font-weight: bold;
   font-size: 16px;

@@ -48,7 +48,7 @@ const UOMConversionCreate = () => {
   const router = useRouter();
   const pagination = usePagination({
     page: 1,
-    itemsPerPage: 10,
+    itemsPerPage: 20,
     maxPageItems: Infinity,
     numbers: true,
     arrows: true,
@@ -166,14 +166,17 @@ const UOMConversionCreate = () => {
   const updateStatusUom = (rowKey: any) => {}
 
   const onSave = (data: any) => {
-    const tempTable = [...newUomTable]
-    const savedTable = tempTable.map(uom => {
-      return {
-        qty: uom.qty,
-        uom_id: listUomCategory.find(e => e.label === uom.uom).value,
-        conversion_number: uom.conversionNumber
-      }
-    })
+    const savedTable: { qty: any; uom_id: any; conversion_number: any; }[] = [] 
+    if(newUomTable){
+      const tempTable = [...newUomTable]
+      tempTable.forEach(uom => {
+        savedTable?.push({
+          qty: uom.qty,
+          uom_id: listUomCategory.find(e => e.label === uom.uom).value,
+          conversion_number: uom.conversionNumber
+        })
+      })
+    }
     const saveData = {
     company_id: "KSNI",
     name: data.name,
@@ -222,12 +225,12 @@ const UOMConversionCreate = () => {
     },
   };
 
-  if (isFetchingUomCategory)
-  return (
-    <Center>
-      <Spin tip="Loading data..." />
-    </Center>
-  );
+  // if (isFetchingUomCategory)
+  // return (
+  //   <Center>
+  //     <Spin tip="Loading data..." />
+  //   </Center>
+  // );
 
   return (
     <>
@@ -279,11 +282,16 @@ const UOMConversionCreate = () => {
                 name="baseUom"
                 render={({ field: { onChange } }) => (
                   <>
-                    <Label>Base UoM</Label>
+                    <div style={{
+                      display: 'flex'
+                    }}>
+                      <Label>Base UoM</Label>
+                      <Span>&#42;</Span>
+                    </div>
                     <Spacer size={3} />
                     <FormSelect
                       style={{ width: "100%" }}
-                      defaultValue={newUom.base_uom_id}
+                      // defaultValue={newUom.base_uom_id}
                       size={"large"}
                       required
                       placeholder={"Select"}
@@ -527,6 +535,11 @@ const HeaderLabel = styled.p`
   line-height: 27px;
   color: #1E858E;
 `
+const Span = styled.span`
+  color: #ed1c24;
+  margin-left: 5px;
+  font-weight: bold;
+`;
 
 const DeleteCardButtonHolder = styled.div`
     display: flex;

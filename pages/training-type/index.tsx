@@ -56,7 +56,7 @@ const renderConfirmationText = (type: any, data: any) => {
 const TrainingType = () => {
   const pagination = usePagination({
     page: 1,
-    itemsPerPage: 10,
+    itemsPerPage: 20,
     maxPageItems: Infinity,
     numbers: true,
     arrows: true,

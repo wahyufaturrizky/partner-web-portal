@@ -104,7 +104,7 @@ const PricingStructureList: any = () => {
 
   const paginationGroupBuying = usePagination({
     page: 1,
-    itemsPerPage: 10,
+    itemsPerPage: 20,
     maxPageItems: Infinity,
     numbers: true,
     arrows: true,
@@ -113,7 +113,7 @@ const PricingStructureList: any = () => {
 
   const paginationPricingConfig = usePagination({
     page: 1,
-    itemsPerPage: 10,
+    itemsPerPage: 20,
     maxPageItems: Infinity,
     numbers: true,
     arrows: true,
@@ -132,7 +132,6 @@ const PricingStructureList: any = () => {
   } = usePricingStructureLists({
     options: {
       onSuccess: (data: any) => {},
-      enabled: false,
     },
     query: {
       status: "ACTIVE",
@@ -350,13 +349,14 @@ const PricingStructureList: any = () => {
     typeForm: "",
   });
 
-  const totalRowByStatus = pricingStructureLists?.totalRowByStatus;
-
   const options = [
     {
       label: (
         <Flex>
-          Active {totalRowByStatus?.active > 0 && <Notif>{totalRowByStatus?.active}</Notif>}
+          Active{" "}
+          {pricingStructureLists?.active > 0 && (
+            <Notif hidden>{pricingStructureLists?.active}</Notif>
+          )}
         </Flex>
       ),
       value: "active",
@@ -364,7 +364,10 @@ const PricingStructureList: any = () => {
     {
       label: (
         <Flex>
-          Inactive {totalRowByStatus?.inactive > 0 && <Notif>{totalRowByStatus?.inactive}</Notif>}
+          Inactive{" "}
+          {pricingStructureLists?.inactive > 0 && (
+            <Notif hidden>{pricingStructureLists?.inactive}</Notif>
+          )}
         </Flex>
       ),
       value: "inactive",
@@ -373,7 +376,7 @@ const PricingStructureList: any = () => {
       label: (
         <Flex>
           Waiting for Approval{" "}
-          {totalRowByStatus?.waiting > 0 && <Notif>{totalRowByStatus?.waiting}</Notif>}
+          {pricingStructureLists?.waiting > 0 && <Notif>{pricingStructureLists?.waiting}</Notif>}
         </Flex>
       ),
       value: "waiting-approval",
@@ -381,14 +384,22 @@ const PricingStructureList: any = () => {
     {
       label: (
         <Flex>
-          Rejected {totalRowByStatus?.reject > 0 && <Notif>{totalRowByStatus?.reject}</Notif>}
+          Rejected{" "}
+          {pricingStructureLists?.rejected > 0 && (
+            <Notif hidden>{pricingStructureLists?.rejected}</Notif>
+          )}
         </Flex>
       ),
       value: "rejected",
     },
     {
       label: (
-        <Flex>Draft {totalRowByStatus?.draft > 0 && <Notif>{totalRowByStatus?.draft}</Notif>}</Flex>
+        <Flex>
+          Draft{" "}
+          {pricingStructureLists?.drafted > 0 && (
+            <Notif hidden>{pricingStructureLists?.drafted}</Notif>
+          )}
+        </Flex>
       ),
       value: "draft",
     },
@@ -576,6 +587,7 @@ const PricingStructureList: any = () => {
             <InActivePricingStructure
               modalPricingStructureForm={modalPricingStructureForm}
               setModalPricingStructureForm={setModalPricingStructureForm}
+              refetchCount={refetch}
             />
           ) : tab === "draft" ? (
             <DraftPricingStructure
@@ -587,11 +599,13 @@ const PricingStructureList: any = () => {
             <RejectedPricingStructure
               modalPricingStructureForm={modalPricingStructureForm}
               setModalPricingStructureForm={setModalPricingStructureForm}
+              refetchCount={refetch}
             />
           ) : (
             <WaitingApprovalPricingStructure
               modalPricingStructureForm={modalPricingStructureForm}
               setModalPricingStructureForm={setModalPricingStructureForm}
+              refetchCount={refetch}
             />
           )}
         </Col>
@@ -602,7 +616,7 @@ const PricingStructureList: any = () => {
           centered
           width={
             modalPricingStructureForm.typeForm === "Manage Customer Group Buying Price" ||
-            modalPricingStructureForm.typeForm === "Manage Price Structure Config"
+            modalPricingStructureForm.typeForm === "Manage Price Structure Configuration"
               ? "90%"
               : "50%"
           }
@@ -911,7 +925,7 @@ const PricingStructureList: any = () => {
                   </Col>
                 </Card>
               </>
-            ) : modalPricingStructureForm.typeForm === "Manage Price Structure Config" ? (
+            ) : modalPricingStructureForm.typeForm === "Manage Price Structure Configuration" ? (
               <>
                 <Card>
                   <Row justifyContent="space-between">
@@ -1110,7 +1124,7 @@ const Notif = styled.div`
   border: 1px solid #eb008b;
   box-sizing: border-box;
   border-radius: 24px;
-  display: flex;
+  display: ${(p: any) => (p.hidden ? "none" : "flex")};
   justify-content: center;
   align-items: center;
   width: 20px;

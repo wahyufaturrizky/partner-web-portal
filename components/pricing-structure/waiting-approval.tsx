@@ -1,48 +1,36 @@
-import React, { useState } from "react";
-import styled from "styled-components";
+import usePagination from "@lucasmogari/react-pagination";
+import { useRouter } from "next/router";
 import {
-  Text,
+  Button,
+  Col,
+  DropdownMenu,
+  EmptyState,
+  FileUploadModal,
+  Lozenge,
+  Pagination,
   Row,
   Search,
   Spacer,
-  Button,
-  Col,
-  Table,
-  Pagination,
-  Lozenge,
   Spin,
-  EmptyState,
-  DropdownMenu,
-  FileUploadModal,
-  Modal,
+  Table,
+  Text,
 } from "pink-lava-ui";
-import usePagination from "@lucasmogari/react-pagination";
-import { useRouter } from "next/router";
-import { STATUS_APPROVAL_VARIANT, STATUS_APPROVAL_TEXT } from "../../utils/utils";
+import { useState } from "react";
+import styled from "styled-components";
 import {
-  useDeletePricingStructureList,
+  ICDollarBlack,
+  ICDownload,
+  ICManageCustGroupBuyingPrice,
+  ICUpload,
+  ICArrowRight,
+} from "../../assets";
+import {
   usePricingStructureLists,
   useUploadFilePricingStructureMDM,
 } from "../../hooks/pricing-structure/usePricingStructure";
-import { ICDollarBlack, ICDownload, ICManageCustGroupBuyingPrice, ICUpload } from "../../assets";
-import { queryClient } from "../../pages/_app";
 import { mdmDownloadService } from "../../lib/client";
-
-const renderConfirmationText = (type: any, data: any) => {
-  switch (type) {
-    case "selection":
-      return data.selectedRowKeys.length > 1
-        ? `Are you sure to delete ${data.selectedRowKeys.length} items ?`
-        : `Are you sure to delete name ${
-            data?.data?.data.find((el: any) => el.key === data.selectedRowKeys[0])?.name
-          } ?`;
-    case "detail":
-      return `Are you sure to delete name ${data.name} ?`;
-
-    default:
-      break;
-  }
-};
+import { queryClient } from "../../pages/_app";
+import { STATUS_APPROVAL_TEXT, STATUS_APPROVAL_VARIANT } from "../../utils/utils";
 
 const downloadFile = (params: any) =>
   mdmDownloadService("/pricing-structure/template/download", { params }).then((res) => {
@@ -54,10 +42,17 @@ const downloadFile = (params: any) =>
   });
 
 const WaitingApprovalPricingStructure: any = (props: any) => {
+  const status = {
+    DRAFTED: "Draft",
+    ACTIVE: "Active",
+    INACTIVE: "Inactive",
+    REJECTED: "Rejected",
+    WAITING: "Waiting",
+  };
   const router = useRouter();
   const pagination = usePagination({
     page: 1,
-    itemsPerPage: 10,
+    itemsPerPage: 20,
     maxPageItems: Infinity,
     numbers: true,
     arrows: true,
@@ -67,19 +62,12 @@ const WaitingApprovalPricingStructure: any = (props: any) => {
   const [search, setSearch] = useState("");
 
   const [isShowUpload, setShowUpload] = useState(false);
-  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
-  const [isShowDelete, setShowDelete] = useState({
-    open: false,
-    type: "selection",
-    data: {},
-  });
 
   const { data: pricingStructureLists, isLoading } = usePricingStructureLists({
     options: {
       onSuccess: (data: any) => {
         pagination.setTotalItems(data.totalRow);
       },
-      enabled: false,
     },
     query: {
       search,
@@ -100,14 +88,31 @@ const WaitingApprovalPricingStructure: any = (props: any) => {
 
   const columns = [
     {
-      title: "Partner Name",
-      dataIndex: "partner_name",
-      width: "28%",
+      title: "Proposal Number",
+      dataIndex: "proposalNumber",
     },
     {
-      title: "Company Type",
-      dataIndex: "company_type",
-      width: "28%",
+      title: "Products",
+      dataIndex: "priceStructureCosts",
+      render: (e: any) => `${e?.length || 0} Products`,
+    },
+    {
+      title: "Information",
+      dataIndex: "changesHistory",
+      render: (e: any) =>
+        e !== null && (
+          <Row gap="12px" alignItems="center">
+            <Col>
+              <Text>{status[e?.from]}</Text>
+            </Col>
+            <Col>
+              <ICArrowRight />
+            </Col>
+            <Col>
+              <Text>{status[e?.to]}</Text>
+            </Col>
+          </Row>
+        ),
     },
     {
       title: "Status",
@@ -129,8 +134,9 @@ const WaitingApprovalPricingStructure: any = (props: any) => {
   pricingStructureLists?.rows?.map((element: any) => {
     data.push({
       key: element.id,
-      proposal_number: element.proposalNumber,
-      products: element.elementType.products,
+      priceStructureCosts: element.priceStructureCosts,
+      proposalNumber: element.proposalNumber,
+      changesHistory: element.changesHistory,
       status: element.status,
       action: (
         <Button
@@ -153,24 +159,6 @@ const WaitingApprovalPricingStructure: any = (props: any) => {
 
     uploadFileProductBrandMDM(formData);
   };
-
-  const rowSelection = {
-    selectedRowKeys,
-    onChange: (selectedRowKeys: any) => {
-      setSelectedRowKeys(selectedRowKeys);
-    },
-  };
-
-  const { mutate: deletePricingStructure, isLoading: isLoadingDeletePricingStructure }: any =
-    useDeletePricingStructureList({
-      options: {
-        onSuccess: () => {
-          setShowDelete({ open: false, data: {}, type: "" });
-          setSelectedRowKeys([]);
-          queryClient.invalidateQueries(["price-structure"]);
-        },
-      },
-    });
 
   return (
     <>
@@ -275,21 +263,17 @@ const WaitingApprovalPricingStructure: any = (props: any) => {
           </Center>
         ) : (
           <Card style={{ minHeight: "574px", padding: "16px 20px" }}>
-            <Text variant="headingRegular" color="blue.darker">
-              {search ? `Search Result` : `Total Waiting for Approval Pricing Structure`} :{" "}
-              {pricingStructureLists?.totalRow}{" "}
-            </Text>
             <Spacer size={20} />
             {isEmpty ? (
               <EmptyState
-                image={"/empty-state.svg"}
+                image={"/icons/empty-state.svg"}
                 title={"The Data You Are Looking for Cannot be Found"}
-                description={`Don't worry you can Create a new pricing structure`}
+                subtitle={`Don't worry you can Create a new pricing structure`}
                 height={400}
               />
             ) : (
               <Col gap="60px">
-                <Table columns={columns} data={paginateField} rowSelection={rowSelection} />
+                <Table columns={columns} data={paginateField} />
                 <Pagination pagination={pagination} />
               </Col>
             )}
@@ -303,59 +287,6 @@ const WaitingApprovalPricingStructure: any = (props: any) => {
           visible={isShowUpload}
           setVisible={setShowUpload}
           onSubmit={onSubmitFile}
-        />
-      )}
-
-      {isShowDelete.open && (
-        <Modal
-          closable={false}
-          centered
-          visible={isShowDelete.open}
-          onCancel={() => setShowDelete({ open: false, type: "", data: {} })}
-          title={"Confirm Delete"}
-          footer={null}
-          content={
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "center",
-              }}
-            >
-              <Spacer size={4} />
-              {renderConfirmationText(isShowDelete.type, isShowDelete.data)}
-              <Spacer size={20} />
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "center",
-                  gap: "10px",
-                  marginBottom: "20px",
-                }}
-              >
-                <Button
-                  size="big"
-                  variant="tertiary"
-                  key="submit"
-                  type="primary"
-                  onClick={() => setShowDelete({ open: false, type: "", data: {} })}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  variant="primary"
-                  size="big"
-                  onClick={() => {
-                    if (isShowDelete.type === "selection") {
-                      deletePricingStructure({ ids: selectedRowKeys });
-                    }
-                  }}
-                >
-                  {isLoadingDeletePricingStructure ? "loading..." : "Yes"}
-                </Button>
-              </div>
-            </div>
-          }
         />
       )}
     </>

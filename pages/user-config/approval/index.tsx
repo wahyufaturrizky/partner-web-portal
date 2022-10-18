@@ -12,7 +12,7 @@ import { colors } from "../../../utils/color";
 const UserConfigApproval: any = () => {
 	const pagination = usePagination({
 		page: 1,
-		itemsPerPage: 10,
+		itemsPerPage: 20,
 		maxPageItems: Infinity,
 		numbers: true,
 		arrows: true,
@@ -114,7 +114,7 @@ const UserConfigApproval: any = () => {
 	return (
 		<>
 			<Col>
-				<Text variant={"h4"}>Partner Config Approval List</Text>
+				<Text variant={"h4"}>Approval List</Text>
 				<Spacer size={20} />
 				<Card>
 					<Row justifyContent="space-between">

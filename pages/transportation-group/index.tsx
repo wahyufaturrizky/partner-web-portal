@@ -26,12 +26,15 @@ import {
 } from "../../hooks/mdm/transportation-group/useTransportationGroup";
 import useDebounce from "../../lib/useDebounce";
 import { queryClient } from "../_app";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { ICDownload, ICUpload } from "../../assets/icons";
 import { mdmDownloadService } from "../../lib/client";
 
 const downloadFile = (params: any) =>
-  mdmDownloadService("/transportation-group/download", { params }).then((res) => {
+  mdmDownloadService(
+    `/transportation-group/download${params.with_data === "Y" ? "" : "/template"}`,
+    {}
+  ).then((res) => {
     let dataUrl = window.URL.createObjectURL(new Blob([res.data]));
     let tempLink = document.createElement("a");
     tempLink.href = dataUrl;
@@ -45,11 +48,11 @@ const renderConfirmationText = (type: any, data: any) => {
       return data.selectedRowKeys.length > 1
         ? `Are you sure to delete ${data.selectedRowKeys.length} items ?`
         : `Are you sure to delete Transportation Name - ${
-            data?.transportationData?.data.find((el: any) => el.key === data.selectedRowKeys[0])
-              ?.transportationName
+            data?.transportationsData?.data.find((el: any) => el.key === data.selectedRowKeys[0])
+              ?.transportationGroup
           } ?`;
     case "detail":
-      return `Are you sure to delete Transportation Name - ${data.transportationName} ?`;
+      return `Are you sure to delete Transportation Name - ${data.transportationGroup} ?`;
 
     default:
       break;
@@ -59,7 +62,7 @@ const renderConfirmationText = (type: any, data: any) => {
 const TransportationGroup = () => {
   const pagination = usePagination({
     page: 1,
-    itemsPerPage: 10,
+    itemsPerPage: 20,
     maxPageItems: Infinity,
     numbers: true,
     arrows: true,
@@ -77,7 +80,7 @@ const TransportationGroup = () => {
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const debounceSearch = useDebounce(search, 1000);
 
-  const { register, handleSubmit } = useForm();
+  const { register, control, handleSubmit } = useForm();
 
   const {
     data: transportationsData,
@@ -88,21 +91,24 @@ const TransportationGroup = () => {
       search: debounceSearch,
       page: pagination.page,
       limit: pagination.itemsPerPage,
-      company_id: "KSNI",
+      // company_id: "KSNI",
     },
     options: {
-      initialData: [],
       onSuccess: (data: any) => {
         pagination.setTotalItems(data.totalRow);
       },
       select: (data: any) => {
         const mappedData = data?.rows?.map((element: any) => {
           return {
-            key: element.transportationId,
-            id: element.transportationId,
-            transportationType: element.type,
-            transportationVolume: element.volume,
-            transportationWeight: element.weight,
+            key: element.id,
+            id: element.transportationGroupId,
+            transportationGroup: element.transportationGroup,
+            transportationType: element.transportationType,
+            transportationVolume: `${element.volume ? element.volume + " mm3" : "-"}`,
+            transportationWeight: `${element.weight ? element.weight + " kg" : "-"}`,
+            transportationLength: element.length,
+            transportationWidth: element.width,
+            transportationHeight: element.height,
             action: (
               <div style={{ display: "flex", justifyContent: "left" }}>
                 <Button
@@ -134,10 +140,10 @@ const TransportationGroup = () => {
       },
     });
 
-  const { mutate: updateTransportation, isLoading: isLoadingTransportation } =
+  const { mutate: updateTransportation, isLoading: isLoadingUpdateTransportation } =
     useUpdateTransportation({
-      id: modalForm?.data?.transportationId,
-      companyId: "KSNI",
+      id: modalForm?.data?.id,
+      // companyId: "KSNI",
       options: {
         onSuccess: () => {
           setModalForm({ open: false, typeForm: "", data: {} });
@@ -208,7 +214,7 @@ const TransportationGroup = () => {
     switch (modalForm.typeForm) {
       case "create":
         const formData = {
-          company_id: "KSNI",
+          // company_id: "KSNI",
           ...data,
         };
         createTransportation(formData);
@@ -224,8 +230,8 @@ const TransportationGroup = () => {
 
   const onSubmitFile = (file: any) => {
     const formData = new FormData();
-    formData.append("company_id", "KSNI");
-    formData.append("file", file);
+    // formData.append("company_id", "KSNI");
+    formData.append("upload_file", file);
 
     uploadFileTransportation(formData);
   };
@@ -363,24 +369,67 @@ const TransportationGroup = () => {
                   <Text variant="headingRegular">
                     Transportation Group<span style={{ color: "#EB008B" }}>*</span>
                   </Text>
-                  <FormSelect
-                    style={{ width: "100%" }}
-                    size={"large"}
-                    showArrow
-                    items={[
-                      { label: "Land Freight", value: "Land Freight" },
-                      { label: "Air Freight", value: "Air Freight" },
-                      { label: "Sea Freight", value: "Sea Freight" },
-                    ]}
-                    placeholder={"Select"}
-                    onChange={(value: any) => {}}
+                  <Controller
+                    control={control}
+                    rules={{ required: true }}
+                    shouldUnregister={true}
+                    defaultValue={modalForm.data?.transportationGroup}
+                    name="transportation_group"
+                    render={({ field: { onChange }, formState: { errors } }) => (
+                      <>
+                        <FormSelect
+                          style={{ width: "100%" }}
+                          size={"large"}
+                          defaultValue={modalForm.data?.transportationGroup}
+                          showArrow
+                          items={[
+                            { label: "Land Freight", value: "Land Freight" },
+                            { label: "Air Freight", value: "Air Freight" },
+                            { label: "Sea Freight", value: "Sea Freight" },
+                          ]}
+                          placeholder={"Select"}
+                          onChange={(value: any) => {
+                            onChange(value);
+                          }}
+                        />
+                        {errors?.transportation_group?.type === "required" && (
+                          <Text variant="alert" color={"red.regular"}>
+                            This field is required
+                          </Text>
+                        )}
+                      </>
+                    )}
                   />
                 </Col>
+
                 <Col width={"100%"}>
                   <Text variant="headingRegular">
                     Transportation Type<span style={{ color: "#EB008B" }}>*</span>
                   </Text>
-                  <FormInput size={"large"} placeholder={"e.g Tronton Box"} />
+                  <Controller
+                    control={control}
+                    rules={{ required: true }}
+                    shouldUnregister={true}
+                    defaultValue={modalForm.data?.transportationType}
+                    name="transportation_type"
+                    render={({ field: { onChange }, formState: { errors } }) => (
+                      <>
+                        <FormInput
+                          defaultValue={modalForm.data?.transportationType}
+                          size={"large"}
+                          placeholder={"e.g Tronton Box"}
+                          onChange={(e: any) => {
+                            onChange(e.target.value);
+                          }}
+                        />
+                        {errors?.transportation_type?.type === "required" && (
+                          <Text variant="alert" color={"red.regular"}>
+                            This field is required
+                          </Text>
+                        )}
+                      </>
+                    )}
+                  />
                 </Col>
               </Row>
 
@@ -389,11 +438,67 @@ const TransportationGroup = () => {
               <Row width="100%" noWrap gap="10px">
                 <Col width={"100%"}>
                   <Text variant="headingRegular">Volume</Text>
-                  <FormInput size={"large"} placeholder={"e.g 55"} addonAfter="m3" />
+                  <Controller
+                    control={control}
+                    shouldUnregister={true}
+                    defaultValue={modalForm.data?.volume}
+                    rules={{
+                      validate: {
+                        isNumber: (value) => !isNaN(value) || value !== "",
+                      },
+                    }}
+                    name="volume"
+                    render={({ field: { onChange }, formState: { errors } }) => (
+                      <>
+                        <FormInput
+                          defaultValue={modalForm.data?.volume}
+                          size={"large"}
+                          placeholder={"e.g 55"}
+                          addonAfter="m3"
+                          onChange={(e: any) => {
+                            onChange(e.target.value);
+                          }}
+                        />
+                        {errors?.volume?.type === "isNumber" && (
+                          <Text variant="alert" color={"red.regular"}>
+                            Value must be a number
+                          </Text>
+                        )}
+                      </>
+                    )}
+                  />
                 </Col>
                 <Col width={"100%"}>
                   <Text variant="headingRegular">Weight</Text>
-                  <FormInput size={"large"} placeholder={"e.g 15.000"} addonAfter="kg" />
+                  <Controller
+                    control={control}
+                    shouldUnregister={true}
+                    defaultValue={modalForm.data?.weight}
+                    rules={{
+                      validate: {
+                        isNumber: (value) => !isNaN(value) || value !== "",
+                      },
+                    }}
+                    name="weight"
+                    render={({ field: { onChange }, formState: { errors } }) => (
+                      <>
+                        <FormInput
+                          defaultValue={modalForm.data?.weight}
+                          size={"large"}
+                          placeholder={"e.g 55"}
+                          addonAfter="kg"
+                          onChange={(e: any) => {
+                            onChange(e.target.value);
+                          }}
+                        />
+                        {errors?.weight?.type === "isNumber" && (
+                          <Text variant="alert" color={"red.regular"}>
+                            Value must be a number
+                          </Text>
+                        )}
+                      </>
+                    )}
+                  />
                 </Col>
               </Row>
 
@@ -408,15 +513,99 @@ const TransportationGroup = () => {
               <Row width="100%" noWrap gap="10px">
                 <Col width={"100%"}>
                   <Text variant="headingRegular">length</Text>
-                  <FormInput size={"large"} placeholder={"e.g 950"} addonAfter="cm" />
+                  <Controller
+                    control={control}
+                    shouldUnregister={true}
+                    defaultValue={modalForm.data?.length}
+                    rules={{
+                      validate: {
+                        isNumber: (value) => !isNaN(value) || value !== "",
+                      },
+                    }}
+                    name="length"
+                    render={({ field: { onChange }, formState: { errors } }) => (
+                      <>
+                        <FormInput
+                          defaultValue={modalForm.data?.length}
+                          size={"large"}
+                          placeholder={"e.g 55"}
+                          addonAfter="cm"
+                          onChange={(e: any) => {
+                            onChange(e.target.value);
+                          }}
+                        />
+                        {errors?.length?.type === "isNumber" && (
+                          <Text variant="alert" color={"red.regular"}>
+                            Value must be a number
+                          </Text>
+                        )}
+                      </>
+                    )}
+                  />
                 </Col>
                 <Col width={"100%"}>
                   <Text variant="headingRegular">Width</Text>
-                  <FormInput size={"large"} placeholder={"e.g 240"} addonAfter="cm" />
+                  <Controller
+                    control={control}
+                    shouldUnregister={true}
+                    defaultValue={modalForm.data?.width}
+                    rules={{
+                      validate: {
+                        isNumber: (value) => !isNaN(value) || value !== "",
+                      },
+                    }}
+                    name="width"
+                    render={({ field: { onChange }, formState: { errors } }) => (
+                      <>
+                        <FormInput
+                          defaultValue={modalForm.data?.width}
+                          size={"large"}
+                          placeholder={"e.g 55"}
+                          addonAfter="cm"
+                          onChange={(e: any) => {
+                            onChange(e.target.value);
+                          }}
+                        />
+                        {errors?.width?.type === "isNumber" && (
+                          <Text variant="alert" color={"red.regular"}>
+                            Value must be a number
+                          </Text>
+                        )}
+                      </>
+                    )}
+                  />
                 </Col>
                 <Col width={"100%"}>
                   <Text variant="headingRegular">Height</Text>
-                  <FormInput size={"large"} placeholder={"e.g 240"} addonAfter="cm" />
+                  <Controller
+                    control={control}
+                    shouldUnregister={true}
+                    defaultValue={modalForm.data?.height}
+                    rules={{
+                      validate: {
+                        isNumber: (value) => !isNaN(value) || value !== "",
+                      },
+                    }}
+                    name="height"
+                    render={({ field: { onChange }, formState: { errors } }) => (
+                      <>
+                        <FormInput
+                          defaultValue={modalForm.data?.height}
+                          size={"large"}
+                          placeholder={"e.g 55"}
+                          addonAfter="cm"
+                          onChange={(e: any) => {
+                            onChange(e.target.value);
+                          }}
+                        />
+                        {errors?.height?.type === "isNumber" && (
+                          <Text variant="alert" color={"red.regular"}>
+                            Value must be a number
+                          </Text>
+                        )}
+                      </>
+                    )}
+                  />
                 </Col>
               </Row>
 
@@ -429,32 +618,20 @@ const TransportationGroup = () => {
                   marginBottom: "20px",
                 }}
               >
-                {modalForm.typeForm === "create" ? (
-                  <Button
-                    size="big"
-                    variant={"tertiary"}
-                    key="submit"
-                    type="primary"
-                    onClick={() => setModalForm({ open: false, data: {}, typeForm: "" })}
-                  >
-                    Cancel
-                  </Button>
-                ) : (
-                  <Button
-                    size="big"
-                    variant={"tertiary"}
-                    key="submit"
-                    type="primary"
-                    onClick={() => {
-                      setShowDelete({ open: true, type: "detail", data: modalForm.data });
-                    }}
-                  >
-                    Delete
-                  </Button>
-                )}
+                <Button
+                  size="big"
+                  variant={"tertiary"}
+                  key="submit"
+                  type="primary"
+                  onClick={() => setModalForm({ open: false, data: {}, typeForm: "" })}
+                >
+                  Cancel
+                </Button>
 
                 <Button onClick={handleSubmit(onSubmit)} variant="primary" size="big">
-                  {isLoadingCreateTransportation || isLoadingTransportation ? "Loading..." : "Save"}
+                  {isLoadingCreateTransportation || isLoadingUpdateTransportation
+                    ? "Loading..."
+                    : "Save"}
                 </Button>
               </div>
             </div>
@@ -503,11 +680,10 @@ const TransportationGroup = () => {
                   size="big"
                   onClick={() => {
                     if (isShowDelete.type === "selection") {
-                      deleteTransportation({ ids: selectedRowKeys, company_id: "KSNI" });
+                      deleteTransportation({ ids: selectedRowKeys });
                     } else {
                       deleteTransportation({
-                        ids: [modalForm.data.uomCategoryId],
-                        company_id: "KSNI",
+                        ids: [modalForm.data.transportationId],
                       });
                     }
                   }}

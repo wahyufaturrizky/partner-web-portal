@@ -43,9 +43,10 @@ const SequenceNumber = () => {
     isLoading: isLoadingData,
   } = useAllSequenceNumber({
     options: {
-      onSuccess: (data: any) => {
+      onSuccess: (data) => {
         pagination.setTotalItems(data.totalRow);
         // setIsLoading(false);
+        console.log(data, "data response");
       },
     },
     query: {
@@ -55,38 +56,40 @@ const SequenceNumber = () => {
     },
   });
 
-  const {
-    data: fieldsCompany,
-    refetch: refetchFieldsCompany,
-    isLoading: isLoadingDataCompany,
-  } = useCompanyList({
-    options: {
-      onSuccess: (data: any) => {
-        pagination.setTotalItems(data.totalRow);
-        // setIsLoading(false);
-      },
-    },
-  });
+  // const {
+  //   data: fieldsCompany,
+  //   refetch: refetchFieldsCompany,
+  //   isLoading: isLoadingDataCompany,
+  // } = useCompanyList({
+  //   options: {
+  //     onSuccess: (data) => {
+  //       pagination.setTotalItems(data.totalRow);
+  //       // setIsLoading(false);
+  //       console.log(data, "COMPANUES");
+  //     },
+  //   },
+  // });
 
-  const handleCompanyId = (companyId: any) => {
-    const company = fieldsCompany.rows.find((item: any) => item.id == companyId);
-    if (company) return company.name;
-  };
+  // const handleCompanyId = (companyId) => {
+  //   const company = fieldsCompany.rows.find((item) => item.id == companyId);
+  //   if (company) return company.name;
+  // };
 
   const data: any = [];
-  !isLoadingDataCompany &&
+  // !isLoadingDataCompany &&
     !isLoadingData &&
     fields.rows?.map((field: any) => {
       data.push({
         key: field.id,
-        company: handleCompanyId(field.companyId),
-        branchName: field.branch,
+        // company: handleCompanyId(field.companyId),
+        company: field.companyName,
+        branchName: field.branchName ? field.branchName : '-',
         action: (
           <div>
             <Button
               size="small"
               onClick={() => {
-                router.push(`/user-config/sequence-number/${field.id}`);
+                router.push(`/user-config/sequence-number/${field.parentId}`);
               }}
               variant="tertiary"
             >
@@ -138,6 +141,7 @@ const SequenceNumber = () => {
     </Col>
   );
 };
+
 const Card = styled.div`
   background: #ffffff;
   border-radius: 16px;

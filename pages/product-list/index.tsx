@@ -13,6 +13,7 @@ import {
   Spacer,
   Table,
   Text,
+  FormSelect,
 } from "pink-lava-ui";
 import { useState } from "react";
 import styled from "styled-components";
@@ -25,6 +26,7 @@ import {
 import { mdmDownloadService } from "../../lib/client";
 import useDebounce from "../../lib/useDebounce";
 import { queryClient } from "../_app";
+import { useProductCategoryInfiniteLists } from 'hooks/mdm/product-category/useProductCategory';
 
 const downloadFile = (params: any) =>
   mdmDownloadService("/product/download", { params }).then((res) => {
@@ -56,13 +58,14 @@ const Product = () => {
   const router = useRouter();
   const pagination = usePagination({
     page: 1,
-    itemsPerPage: 10,
+    itemsPerPage: 20,
     maxPageItems: Infinity,
     numbers: true,
     arrows: true,
     totalItems: 100,
   });
 
+  const [productCategory, setProductCategory] = useState("")
   const [search, setSearch] = useState("");
   const [isShowDelete, setShowDelete] = useState({ open: false, type: "selection", data: {} });
   const [isShowUpload, setShowUpload] = useState(false);
@@ -84,6 +87,7 @@ const Product = () => {
       page: pagination.page,
       limit: pagination.itemsPerPage,
       company_id: "KSNI",
+      category_id: productCategory
     },
     options: {
       onSuccess: (data: any) => {
@@ -98,6 +102,7 @@ const Product = () => {
             status: element.status,
             productCategoryName: element.productCategoryName,
             hasVariant: element.hasVariant,
+            variant: element?.productVariants?.length ?? '-',
             action: (
               <div style={{ display: "flex", justifyContent: "left" }}>
                 <Button
@@ -151,11 +156,15 @@ const Product = () => {
       dataIndex: "name",
     },
     {
+      title: "Product Variant",
+      dataIndex: "variant",
+    },
+    {
       title: "Product Category Name",
       dataIndex: "productCategoryName",
     },
     {
-      title: "status",
+      title: "Status",
       dataIndex: "status",
       render: (status: any) => (
         <Lozenge variant={status === "active" ? "green" : "black"}>
@@ -190,6 +199,46 @@ const Product = () => {
     uploadFileProduct(formData);
   };
 
+  const [listProductCategory , setListProductCategory] = useState<any[]>([]);
+  const [totalRowsProductCategory, setTotalRowsProductCategory] = useState(0);
+  const [searchProductCategory, setSearchProductCategory] = useState("");
+  const debounceFetchProductCategory = useDebounce(searchProductCategory, 1000);
+
+  const {
+    isFetching: isFetchingProductCategory,
+    isFetchingNextPage: isFetchingMoreProductCategory,
+    hasNextPage: hasNextProductCategory,
+    fetchNextPage: fetchNextPageProductCategory,
+  } = useProductCategoryInfiniteLists({
+    query: {
+      search: debounceFetchProductCategory,
+      company_id: "KSNI",
+      limit: 10,
+    },
+    options: {
+      onSuccess: (data: any) => {
+        setTotalRowsProductCategory(data?.pages[0].totalRow);
+        const mappedData = data?.pages?.map((group: any) => {
+          return group.rows?.map((element: any) => {
+            return {
+              label: element.name, 
+              value: element.productCategoryId,
+            };
+          });
+        });
+        const flattenArray = [].concat(...mappedData);
+        setListProductCategory(flattenArray);
+      },
+      getNextPageParam: (_lastPage: any, pages: any) => {
+        if (listProductCategory.length < totalRowsProductCategory) {
+          return pages.length + 1;
+        } else {
+          return undefined;
+        }
+      },
+    },
+  });
+
   return (
     <>
       <Col>
@@ -198,28 +247,44 @@ const Product = () => {
       </Col>
       <Card>
         <Row justifyContent="space-between">
-          <Search
-            width="340px"
-            placeholder="Search Product ID, Name, Category, Status"
-            onChange={(e: any) => {
-              setSearch(e.target.value);
-            }}
-          />
+          <Row Row gap="16px">
+            <Search
+              width="360px"
+              placeholder="Search Product ID, Name, Category, Status"
+              onChange={(e: any) => {
+                setSearch(e.target.value);
+              }}
+            />
+            <Col width="200px">
+              <CustomFormSelect
+                style={{ width: "100%", height: '48px' }}
+                size={"large"}
+                placeholder={"Product Category"}
+                borderColor={"#AAAAAA"}
+                arrowColor={"#000"}
+                withSearch
+                isLoading={isFetchingProductCategory}
+                isLoadingMore={isFetchingMoreProductCategory}
+                fetchMore={() => {
+                  if (hasNextProductCategory) {
+                    fetchNextPageProductCategory();
+                  }
+                }}
+                items={
+                  isFetchingProductCategory || isFetchingMoreProductCategory
+                    ? []
+                    : listProductCategory
+                }
+                onChange={(value: any) => {
+                  setProductCategory(value)
+                }}
+                onSearch={(value: any) => {
+                  setSearchProductCategory(value);
+                }}
+              />
+            </Col>
+          </Row>
           <Row gap="16px">
-            <Button
-              size="big"
-              variant={"tertiary"}
-              onClick={() =>
-                setShowDelete({
-                  open: true,
-                  type: "selection",
-                  data: { productListData: productListData, selectedRowKeys },
-                })
-              }
-              disabled={rowSelection.selectedRowKeys?.length === 0}
-            >
-              Delete
-            </Button>
             <DropdownMenu
               title={"More"}
               buttonVariant={"secondary"}
@@ -291,7 +356,6 @@ const Product = () => {
             loading={isLoadingProductList || isFetchingProductList}
             columns={columns}
             data={productListData?.data}
-            rowSelection={rowSelection}
           />
           <Pagination pagination={pagination} />
         </Col>
@@ -362,6 +426,34 @@ const Product = () => {
     </>
   );
 };
+
+const CustomFormSelect = styled(FormSelect)`
+  
+  .ant-select-selection-placeholder {
+    line-height: 48px !important;
+  }
+
+  .ant-select-selection-search-input {
+    height: 48px !important;
+  }
+
+  .ant-select-selector {
+    height: 48px !important;
+    border-radius: 64px !important;
+  }
+
+  .ant-select-selection-item {
+    display: flex;
+    align-items: center;
+  }
+`
+
+const Label = styled.div`
+  font-weight: bold;
+  font-size: 16px;
+  line-height: 24px;
+  color: #000000;
+`;
 
 const Card = styled.div`
   background: #ffffff;

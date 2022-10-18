@@ -301,6 +301,7 @@ const CreateConfig = () => {
 		setErrors(newErrors);
 	};
 
+	console.log("countryStructure[showManageData.index]", countryStructure[showManageData.index])
 
 	return (
 		<>

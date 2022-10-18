@@ -45,7 +45,7 @@ const UOMConversionDetail = () => {
   const router = useRouter();
   const pagination = usePagination({
     page: 1,
-    itemsPerPage: 10,
+    itemsPerPage: 20,
     maxPageItems: Infinity,
     numbers: true,
     arrows: true,
@@ -69,7 +69,7 @@ const UOMConversionDetail = () => {
   const {
     isFetching: isFetchingUomCategory,
     isFetchingNextPage: isFetchingMoreUomCategory,
-    isLoading: isLoadingUOM,
+    isLoading: isLoadingUOMCategory,
     hasNextPage,
     fetchNextPage,
   } = useUOMInfiniteLists({
@@ -152,6 +152,7 @@ const UOMConversionDetail = () => {
     options: {
       onSuccess: () => {
         queryClient.invalidateQueries(["uom-conversion"]);
+        router.back()
       },
     },
   });
@@ -179,6 +180,7 @@ const UOMConversionDetail = () => {
       newData.remove_items.push({id: uomId})
     })
     updateUom(newData)
+    setSelectedRowKeys([])
     setShowDelete({ open: false, type: "", data: {} })
   }
 
@@ -231,7 +233,7 @@ const UOMConversionDetail = () => {
       items: UomData?.dataForUpdate
     }
     updateUom(newData)
-    router.back()
+  
   }
 
   const columns = [
@@ -266,14 +268,14 @@ const UOMConversionDetail = () => {
     },
   ];
   
-  const rowSelection = {
+  let rowSelection = {
     selectedRowKeys,
     onChange: (selectedRowKeys: any, selectedRows: any) => {
       setSelectedRowKeys(selectedRowKeys);
     },
   };
 
-  if (isLoadingUom || isFetchingUom || isFetchingUomCategory)
+  if (isLoadingUom || isFetchingUom || isLoadingUOMCategory)
   return (
     <Center>
       <Spin tip="Loading data..." />
@@ -332,7 +334,12 @@ const UOMConversionDetail = () => {
                 defaultValue={UomData?.baseUomId}
                 render={({ field: { onChange } }) => (
                   <>
-                    <Label>Base UoM</Label>
+                    <div style={{
+                      display: 'flex'
+                    }}>
+                      <Label>Base UoM</Label>
+                      <Span>&#42;</Span>
+                    </div>
                     <Spacer size={3} />
                     <FormSelect
                       defaultValue={UomData?.baseUomId}
@@ -387,7 +394,7 @@ const UOMConversionDetail = () => {
                       data: { uomData: UomData?.data, selectedRowKeys },
                     })
                   }
-                  disabled={rowSelection.selectedRowKeys?.length === 0}
+                  disabled={selectedRowKeys?.length === 0}
                 >
                   Delete
                 </Button>
@@ -395,7 +402,7 @@ const UOMConversionDetail = () => {
               <Spacer size={20} />
                 <Col gap={"60px"}>
                   <Table
-                    loading={isLoadingUOM || isFetchingUom}
+                    loading={isLoadingUOMCategory || isFetchingUom}
                     columns={columns}
                     data={UomData?.data}
                     rowSelection={rowSelection}
@@ -579,6 +586,11 @@ const HeaderLabel = styled.p`
   line-height: 27px;
   color: #1E858E;
 `
+const Span = styled.span`
+  color: #ed1c24;
+  margin-left: 5px;
+  font-weight: bold;
+`;
 
 const DeleteCardButtonHolder = styled.div`
     display: flex;
