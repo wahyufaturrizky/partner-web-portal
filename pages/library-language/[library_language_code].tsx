@@ -63,7 +63,6 @@ const LibraryLanguageDetail = () => {
     },
   });
 
-  console.log(typeRefName === '')
   const {
     data: libraryLanguageRefTypeData,
     isLoading: isLoadingLibraryLanguageRefType,

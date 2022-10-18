@@ -30,7 +30,6 @@ const downloadFile = (params: any) =>
     let dataUrl = window.URL.createObjectURL(new Blob([res.data]));
     let tempLink = document.createElement("a");
     tempLink.href = dataUrl;
-    console.log(dataUrl, '<<<<url')
     tempLink.setAttribute("download", `cost_center_${new Date().getTime()}.xlsx`);
     tempLink.click();
   });
