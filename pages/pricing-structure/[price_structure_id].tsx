@@ -395,7 +395,7 @@ const DetailPricingStructure: any = () => {
     },
   });
 
-  const { data: pricingStructureListById } =
+  const { data: pricingStructureListById, isLoading: isLoadingPricingStructureListById } =
     usePricingStructureList({
       price_structure_id: price_structure_id,
       options: {
@@ -1910,7 +1910,13 @@ const DetailPricingStructure: any = () => {
   } else {
     return (
       <>
-        <Col>
+      {
+        isLoadingPricingStructureListById ? (
+          <Row alignItems='center' justifyContent='center'>
+            <Spin tip='loading...' />
+          </Row>
+        ) : (
+          <Col>
             <Row gap="4px" alignItems="center">
               <ArrowLeft style={{ cursor: "pointer" }} onClick={() => router.back()} />
               <Text variant={"h4"}>
@@ -1942,9 +1948,9 @@ const DetailPricingStructure: any = () => {
                     defaultValue={getValues("status") || pricingStructureListById?.status}
                   />
                 ) : (
-                  <DisabledDropdown2 status={pricingStructureListById?.status}>
-                    {STATUS_APPROVAL_TEXT[pricingStructureListById?.status]}
-                  </DisabledDropdown2>
+                    <DisabledDropdown2 status={pricingStructureListById?.status}>
+                      {STATUS_APPROVAL_TEXT[pricingStructureListById?.status]}
+                    </DisabledDropdown2>
                 )}
 
                 <Row alignItems="center" gap="16px" justifyContent="space-between">
@@ -2432,6 +2438,9 @@ const DetailPricingStructure: any = () => {
               </Col>
             </Card>
           </Col>
+        )
+      }
+        
 
         <Modal
           width={"80%"}
