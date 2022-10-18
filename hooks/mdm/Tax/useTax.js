@@ -111,10 +111,10 @@ function useCreateTax({ options }) {
   );
 }
 
-function useUpdateTax({ id, countryId, options }) {
+function useUpdateTax({ id, taxItem, options }) {
   return useMutation(
     (data) =>
-      mdmService(`/tax/${countryId}/${id}`, {
+      mdmService(`/tax-item/${id}/${taxItem}`, {
         method: "PUT",
         data,
       }),
@@ -163,6 +163,19 @@ const useDeleteTaxItem = ({ options }) => {
   );
 };
 
+const useDeleteTaxItemDetail = ({ options }) => {
+  return useMutation(
+    (data) =>
+      mdmService(`/tax-item-detail`, {
+        method: "DELETE",
+        data,
+      }),
+    {
+      ...options,
+    }
+  );
+};
+
 const fetchDetailTaxItem = async ({ id, taxId }) => {
   return mdmService(`/tax-item/${taxId}/${id}`).then((data) => data);
 };
@@ -186,4 +199,5 @@ export {
   useUploadFileTax,
   useDeleteTaxItem,
   useDetailTaxItem,
+  useDeleteTaxItemDetail,
 };
