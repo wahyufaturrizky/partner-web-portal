@@ -63,12 +63,13 @@ const LibraryLanguageDetail = () => {
     },
   });
 
+  console.log(typeRefName === '')
   const {
     data: libraryLanguageRefTypeData,
     isLoading: isLoadingLibraryLanguageRefType,
     isFetching: isFetchingLibraryLanguageRefType,
   } = useLibraryLanguageModuleRefType({
-    refType: typeRefName,
+    refType: typeRefName && typeRefName,
     code: library_language_code,
     query: {
       search: debounceSearchDropdown

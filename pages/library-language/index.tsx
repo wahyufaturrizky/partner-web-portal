@@ -26,10 +26,11 @@ import moment from "moment";
 import { useAllLibraryLanguage, useAllLibraryLanguageModule, useUploadLibraryLanguage } from "hooks/mdm/library-language/useLibraryLanguage";
 
 const downloadFile = (params: any) =>
-  mdmDownloadService("/cost-center/download", { params }).then((res) => {
+  mdmDownloadService("/library-language/download-template", { params }).then((res) => {
     let dataUrl = window.URL.createObjectURL(new Blob([res.data]));
     let tempLink = document.createElement("a");
     tempLink.href = dataUrl;
+    console.log(dataUrl, '<<<<url')
     tempLink.setAttribute("download", `cost_center_${new Date().getTime()}.xlsx`);
     tempLink.click();
   });
@@ -193,13 +194,13 @@ const LibraryLanguage = () => {
                 const companyId = libraryLanguageData?.data[0]?.companyId
                 switch (parseInt(e.key)) {
                   case 1:
-                    downloadFile({ with_data: "N", company_id: companyId });
+                    downloadFile({ with_data: "N"});
                     break;
                   case 2:
                     setShowUpload(true);
                     break;
                   case 3:
-                    downloadFile({ with_data: "Y", company_id: companyId });
+                    downloadFile({ with_data: "Y"});
                     break;
                   case 4:
                     setShowManageLang(true);

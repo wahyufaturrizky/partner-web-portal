@@ -183,7 +183,7 @@ const useLibraryLanguageModuleRefType = ({ refType, code, query = {}, options })
     () => fetchLibraryLanguageModuleRefType({ refType, code, query }),
     {
       keepPreviousData: true,
-      enabled: true,
+      enabled: refType !== "",
       ...options,
     }
   );
