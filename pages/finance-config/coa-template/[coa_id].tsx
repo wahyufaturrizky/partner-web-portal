@@ -152,11 +152,12 @@ const DetailCoa: any = () => {
       },
     };
 
-    if (!coaName) {
-      setError("Name is required");
-    } else {
-      updateCoa(payload);
-    }
+    console.log(payload);
+    // if (!coaName) {
+    //   setError("Name is required");
+    // } else {
+    //   updateCoa(payload);
+    // }
   };
 
   const paginationCoaAccount = usePagination({
@@ -187,11 +188,25 @@ const DetailCoa: any = () => {
     },
   });
 
+  const { data: coaData, isLoading: isLoadingCoa } = useDetailCoa({
+    coa_id: coa_id,
+    options: {
+      onSuccess: (data: any) => {},
+    },
+    query: {
+      page: paginationCoaAccount.page,
+      limit: paginationCoaAccount.itemsPerPage,
+      search: searchAccountGroup,
+      account_group_id: accountGroupId,
+      code: accountCode,
+    },
+  });
+
   const paginateField: any = [];
 
-  allCoaItems?.map((field: any) => {
+  allCoaItems?.map((field: any, index) => {
     paginateField.push({
-      key: field.id,
+      key: field.accountCode,
       account_code: field.accountCode,
       account_name: field.accountName,
       account_group: field.accountGroup.groupName,
@@ -291,7 +306,6 @@ const DetailCoa: any = () => {
         })) ?? [],
     },
   ];
-
   return (
     <>
       <Col>
@@ -310,7 +324,7 @@ const DetailCoa: any = () => {
                       router.back();
                     }}
                   />
-                  <Text variant={"h4"}>{dataCoa?.name}</Text>
+                  <Text variant={"h4"}>{coaData?.name}</Text>
                 </Row>
                 <Spacer size={20} />
                 <Card style={{ height: "88px" }}>
@@ -337,6 +351,7 @@ const DetailCoa: any = () => {
                         size="big"
                         variant={"tertiary"}
                         onClick={() => setModalDelete({ open: true })}
+                        disabled={rowSelection.selectedRowKeys?.length === 0}
                       >
                         Delete
                       </Button>
@@ -467,15 +482,24 @@ const DetailCoa: any = () => {
                     });
                     setCoaItemsNew(coaItemsUpdated);
                   } else {
+                    // Update COA to view
                     const coaItemsUpdatedNew = coaItems?.map((coaItem) => {
                       if (coaItem.accountCode === newAccount.accountCode) {
-                        return newAccount;
+                        return {
+                          id: coaItem?.id,
+                          ...newAccount,
+                        };
                       }
                       return coaItem;
                     });
                     setCoaItems(coaItemsUpdatedNew);
+
+                    // Update COA for payload update
+                    const getIdCoa = coaItems?.filter(
+                      (coaItem) => coaItem.accountCode === newAccount.accountCode
+                    )[0]?.id;
                     const coaItemsUpdatedNewUpdated = _.unionBy(
-                      [newAccount],
+                      [{ id: getIdCoa, ...newAccount }],
                       coaItemsUpdated,
                       "accountCode"
                     );
@@ -517,10 +541,41 @@ const DetailCoa: any = () => {
 
         {modalDelete.open && (
           <ModalDeleteConfirmation
-            itemTitle={dataCoa?.name}
+            totalSelected={selectedRowKeys?.length}
+            itemTitle={
+              allCoaItems?.find((element: any) => element.accountCode === selectedRowKeys[0])
+                ?.accountName
+            }
             visible={modalDelete.open}
             onCancel={() => setModalDelete({ open: false })}
-            onOk={() => deleteCoa({ ids: [coa_id] })}
+            onOk={() => {
+              if (selectedRowKeys?.length > 1) {
+                let getCoaItemNew = coaItemsNew.filter(
+                  (item) => !selectedRowKeys.includes(item.accountCode)
+                );
+                let getAccountCode = coaItems.map((item) => item.accountCode);
+
+                let deletedCoa = selectedRowKeys.filter((item) => getAccountCode.includes(item));
+
+                setCoaItemsNew(getCoaItemNew);
+                setCoaItemsDeleted(deletedCoa);
+                setModalDelete({ open: false });
+              } else {
+                if (coaItemsNew?.some((item) => item.accountCode === selectedRowKeys[0])) {
+                  let cloneCoaItemsNew = _.cloneDeep(coaItemsNew);
+                  cloneCoaItemsNew = cloneCoaItemsNew.filter(
+                    (acc) => acc.accountCode !== selectedRowKeys[0]
+                  );
+                  setCoaItemsNew(cloneCoaItemsNew);
+                  setModalDelete({ open: false });
+                } else {
+                  const cloneDeletedCoaItems = _.cloneDeep(coaItemsDeleted);
+                  cloneDeletedCoaItems.push(selectedRowKeys[0]);
+                  setCoaItemsDeleted(cloneDeletedCoaItems);
+                  setModalDelete({ open: false });
+                }
+              }
+            }}
           />
         )}
       </Col>
