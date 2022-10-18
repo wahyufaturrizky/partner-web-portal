@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import Router, { useRouter } from "next/router";
+import { useRouter } from "next/router";
 import styled from "styled-components";
 import usePagination from "@lucasmogari/react-pagination";
 import _ from "lodash";
@@ -306,7 +306,9 @@ const DetailCoa: any = () => {
                 <Row gap="4px" alignItems="center">
                   <ArrowLeft
                     style={{ cursor: "pointer" }}
-                    onClick={() => Router.push("/coa-template")}
+                    onClick={() => {
+                      router.back();
+                    }}
                   />
                   <Text variant={"h4"}>{dataCoa?.name}</Text>
                 </Row>
@@ -527,15 +529,15 @@ const DetailCoa: any = () => {
 };
 
 const Center = styled.div`
-	display: flex;
-	justify-content: center;
-	align-items: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 `;
 
 const Card = styled.div`
-	background: #ffffff;
-	border-radius: 16px;
-	padding: 16px;
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 16px;
 `;
 
 export default DetailCoa;

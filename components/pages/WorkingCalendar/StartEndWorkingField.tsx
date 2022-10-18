@@ -25,6 +25,7 @@ const StartEndWorkingField = ({ control, setStartDate, setEndDate, workingCalend
               <DatePickerInput
                 label=""
                 fullWidth
+                placeholder={"01/01/2022"}
                 defaultValue={
                   workingCalendarData?.start ? moment(workingCalendarData?.start, "DD/MM/YYYY") : ""
                 }
@@ -50,6 +51,7 @@ const StartEndWorkingField = ({ control, setStartDate, setEndDate, workingCalend
               <DatePickerInput
                 label=""
                 fullWidth
+                placeholder={"01/01/2022"}
                 defaultValue={
                   workingCalendarData?.end ? moment(workingCalendarData?.end, "DD/MM/YYYY") : ""
                 }

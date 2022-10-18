@@ -64,7 +64,7 @@ export const ModalCopyCoA: any = ({
 					<Button
 						size="small"
 						onClick={() => {
-							window.open(`/coa-template/${field.id}`, "_blank");
+							window.open(`/finance-config/coa-template/${field.id}`, "_blank");
 						}}
 						variant="tertiary"
 					>

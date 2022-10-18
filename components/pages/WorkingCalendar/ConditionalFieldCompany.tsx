@@ -207,6 +207,7 @@ const ConditionalFieldCompany = ({ control, onChangePayload, workingCalendarData
       <Controller
         control={control}
         shouldUnregister={true}
+        rules={{ required: true }}
         defaultValue={workingCalendarData?.company?.company}
         name="company"
         render={({ field: { onChange }, formState: { errors } }) => (
@@ -240,11 +241,11 @@ const ConditionalFieldCompany = ({ control, onChangePayload, workingCalendarData
               }}
             />
 
-            {/* {errors?.company_name?.type === "required" && (
-                  <Text variant="alert" color={"red.regular"}>
-                    This field is required
-                  </Text>
-                )} */}
+            {errors?.company?.type === "required" && (
+              <Text variant="alert" color={"red.regular"}>
+                This field is required
+              </Text>
+            )}
           </>
         )}
       />
@@ -299,6 +300,7 @@ const ConditionalFieldCompany = ({ control, onChangePayload, workingCalendarData
             <Controller
               control={control}
               shouldUnregister={true}
+              rules={{ required: true }}
               defaultValue={workingCalendarData?.company?.salesOrganization}
               name="sales_organization"
               render={({ field: { onChange }, formState: { errors } }) => (
@@ -331,11 +333,11 @@ const ConditionalFieldCompany = ({ control, onChangePayload, workingCalendarData
                       setSalesOrgList(filterData);
                     }}
                   />
-                  {/* {errors?.company_name?.type === "required" && (
-                  <Text variant="alert" color={"red.regular"}>
-                    This field is required
-                  </Text>
-                )} */}
+                  {errors?.sales_organization?.type === "required" && (
+                    <Text variant="alert" color={"red.regular"}>
+                      This field is required
+                    </Text>
+                  )}
                 </>
               )}
             />
@@ -347,6 +349,7 @@ const ConditionalFieldCompany = ({ control, onChangePayload, workingCalendarData
             <Controller
               control={control}
               shouldUnregister={true}
+              rules={{ required: true }}
               defaultValue={workingCalendarData?.company?.distributionChannel}
               name="distribution_channel"
               render={({ field: { onChange }, formState: { errors } }) => (
@@ -382,11 +385,11 @@ const ConditionalFieldCompany = ({ control, onChangePayload, workingCalendarData
                       setSalesHierarcyList(filterData);
                     }}
                   />
-                  {/* {errors?.company_name?.type === "required" && (
-                  <Text variant="alert" color={"red.regular"}>
-                    This field is required
-                  </Text>
-                )} */}
+                  {errors?.distribution_channel?.type === "required" && (
+                    <Text variant="alert" color={"red.regular"}>
+                      This field is required
+                    </Text>
+                  )}
                 </>
               )}
             />
@@ -403,8 +406,9 @@ const ConditionalFieldCompany = ({ control, onChangePayload, workingCalendarData
             <Controller
               control={control}
               shouldUnregister={true}
+              rules={{ required: true }}
               defaultValue={workingCalendarData?.company?.branch}
-              name="country"
+              name="branch"
               render={({ field: { onChange }, formState: { errors } }) => (
                 <>
                   <FormSelect
@@ -435,11 +439,11 @@ const ConditionalFieldCompany = ({ control, onChangePayload, workingCalendarData
                       setSearchBranch(value);
                     }}
                   />
-                  {/* {errors?.company_name?.type === "required" && (
-                  <Text variant="alert" color={"red.regular"}>
-                    This field is required
-                  </Text>
-                )} */}
+                  {errors?.branch?.type === "required" && (
+                    <Text variant="alert" color={"red.regular"}>
+                      This field is required
+                    </Text>
+                  )}
                 </>
               )}
             />
