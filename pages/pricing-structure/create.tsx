@@ -584,6 +584,15 @@ const CreatePricingStructure: any = () => {
     [errors]
   );
 
+  const rowSelectionProduct = {
+    selectedRowKeys: selectedRowKeysProduct,
+    onChange: (selectedRowKeys: any, rowSelected: any) => {
+      setSelectedRowKeysProduct(selectedRowKeys);
+      setSelectedRowTableProductSelected(rowSelected);
+    },
+    preserveSelectedRowKeys: true,
+  };
+
   const handleSelectedField = (data: any) => {
     setModal({ ...modal, open: false });
     if (typeForm === "Add Products") {
@@ -876,19 +885,12 @@ const CreatePricingStructure: any = () => {
     },
   ];
 
-  const rowSelectionProduct = {
-    selectedRowKeys: selectedRowKeysProduct,
-    onChange: (selectedRowKeys: any, rowSelected: any) => {
-      setSelectedRowKeysProduct(selectedRowKeys);
-      setSelectedRowTableProductSelected(rowSelected);
-    },
-  };
-
   const rowSelectionProductsSelected = {
     selectedRowKeys: selectedRowKeysProductsSelected,
     onChange: (selectedRowKeys: any) => {
       setSelectedRowKeysProductsSelected(selectedRowKeys);
     },
+    preserveSelectedRowKeys: true,
   };
 
   const rowSelectionRegionSelected = {
