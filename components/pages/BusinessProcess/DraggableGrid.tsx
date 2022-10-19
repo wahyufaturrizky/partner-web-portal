@@ -13,7 +13,7 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import { useSortable, SortableContext, rectSortingStrategy } from "@dnd-kit/sortable";
 import styled from "styled-components";
-
+import { ICArrowRightDiagram } from "assets";
 const getTotalCharacters = (string: any) => string.length;
 
 const DraggableGrids = ({ processList, onDrag }: any) => {
@@ -78,7 +78,7 @@ const DraggableGrids = ({ processList, onDrag }: any) => {
 			transform: CSS.Transform.toString(transform),
 			transition: transition,
 		};
-
+		const total = processList.length - 1;
 		return (
 			<div ref={setNodeRef} style={style} {...attributes} {...listeners}>
 				{isDragging ? (
@@ -99,18 +99,25 @@ const DraggableGrids = ({ processList, onDrag }: any) => {
 						</Item>
 					</Tooltip>
 				) : (
-					<Item>
-						<Text
-							color={"white"}
-							textAlign="center"
-							variant="headingRegular"
-							inline
-							ellipsis
-							style={{ margin: "0 8px" }}
-						>
-							{`${props.data.index + 1}. ${props.data.name}`}
-						</Text>
-					</Item>
+					<ContainerItem>
+						<Item>
+							<Text
+								color={"white"}
+								textAlign="center"
+								variant="headingRegular"
+								inline
+								ellipsis
+								style={{ margin: "0 8px" }}
+							>
+								{`${props.data.index + 1}. ${props.data.name}`}
+							</Text>
+						</Item>
+						{props.data.index !== total && (
+						<Arrow>
+							<ICArrowRightDiagram/>
+						</Arrow>
+						)}
+					</ContainerItem>
 				)}
 			</div>
 		);
@@ -127,7 +134,7 @@ const StaticGridItem = ({ data }: any) => (
 			ellipsis
 			style={{ margin: "0 8px" }}
 		>
-			{`${data.index + 1}. ${data.name}`}
+			{`${data.index + 1}asdasd. ${data.name}`}
 		</Text>
 	</Item>
 );
@@ -148,5 +155,14 @@ const Item = styled.div`
 	height: 55px;
 	width: 150px;
 `;
-
+const ContainerItem = styled.div`
+	display: flex;
+`;
+const Arrow = styled.div`
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	height: 55px;
+	width: 50px;
+`;
 export default DraggableGrids;
