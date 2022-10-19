@@ -116,7 +116,7 @@ const BusinessProcess = () => {
           <Row justifyContent="space-between">
             <Search
               width="380px"
-              placeholder="Search Business Process Name, Status"
+              placeholder="Search Business Process Name"
               onChange={(e: any) => {
                 setSearch(e.target.value);
               }}
