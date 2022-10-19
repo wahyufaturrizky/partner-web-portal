@@ -243,10 +243,6 @@ const ActivePricingStructure: any = (props: any) => {
           </Center>
         ) : (
           <Card style={{ minHeight: "574px", padding: "16px 20px" }}>
-            <Text variant="headingRegular" color="blue.darker">
-              {search ? `Search Result` : `Total Active Pricing Structure`} :{" "}
-              {pricingStructureLists?.totalRow}{" "}
-            </Text>
             <Spacer size={20} />
             {isEmpty ? (
               <EmptyState

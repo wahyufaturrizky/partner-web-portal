@@ -1,183 +1,169 @@
 import React, { useState } from "react";
 import styled from "styled-components";
-import {
-	Text,
-	Button,
-	Spin,
-	Col,
-	Row,
-	Spacer,
-	Search,
-	Table,
-	Pagination,
-} from "pink-lava-ui";
+import { Text, Button, Spin, Col, Row, Spacer, Search, Table, Pagination } from "pink-lava-ui";
 import usePagination from "@lucasmogari/react-pagination";
 import { ModalDeleteConfirmation } from "../../../components/elements/Modal/ModalConfirmationDelete";
 import { useRouter } from "next/router";
 import { useCoa, useDeleteCoa } from "../../../hooks/finance-config/useCoaTemplate";
+import useDebounce from "lib/useDebounce";
+import { queryClient } from "pages/_app";
 
 const FinanceConfigCoATemplate: any = () => {
-	const router = useRouter();
+  const router = useRouter();
 
-	const pagination = usePagination({
-		page: 1,
-		itemsPerPage: 20,
-		maxPageItems: Infinity,
-		numbers: true,
-		arrows: true,
-		totalItems: 100,
-	});
+  const pagination = usePagination({
+    page: 1,
+    itemsPerPage: 20,
+    maxPageItems: Infinity,
+    numbers: true,
+    arrows: true,
+    totalItems: 100,
+  });
 
-	const [isLoading, setLoading] = useState(true);
-	const [search, setSearch] = useState("");
-	const [modalDelete, setModalDelete] = useState({ open: false });
+  const [search, setSearch] = useState("");
+  const [modalDelete, setModalDelete] = useState({ open: false });
+  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+  const debounceSearch = useDebounce(search, 1000);
 
-	const columns = [
-		{
-			title: "Name",
-			dataIndex: "field_name",
-		},
-		{
-			title: "Action",
-			dataIndex: "action",
-			width: "15%",
-			align: "left",
-		},
-	];
+  const columns = [
+    {
+      title: "Name",
+      dataIndex: "field_name",
+    },
+    {
+      title: "Action",
+      dataIndex: "action",
+      width: "15%",
+      align: "left",
+    },
+  ];
 
-	const { data: fields, refetch: refetchFields } = useCoa({
-		options: {
-			onSuccess: (data: any) => {
-				pagination.setTotalItems(data.totalRow);
-				setLoading(false);
-			},
-		},
-		query: {
-			search,
-			page: pagination.page,
-			limit: pagination.itemsPerPage,
-		},
-	});
+  const {
+    data: coaData,
+    isLoading: isLoadingCoa,
+    isFetching: isFetchingCoa,
+  } = useCoa({
+    query: {
+      search: debounceSearch,
+      page: pagination.page,
+      limit: pagination.itemsPerPage,
+    },
+    options: {
+      onSuccess: (data: any) => {
+        pagination.setTotalItems(data.totalRow);
+      },
+      select: (data: any) => {
+        const mappedData = data?.rows?.map((element: any) => {
+          return {
+            key: element.id,
+            field_name: element.name,
+            action: (
+              <div style={{ display: "flex", justifyContent: "left" }}>
+                <Button
+                  size="small"
+                  onClick={() => {
+                    router.push(`/finance-config/coa-template/${element.id}`);
+                  }}
+                  variant="tertiary"
+                >
+                  View Detail
+                </Button>
+              </div>
+            ),
+          };
+        });
 
-	const { mutate: deleteFields } = useDeleteCoa({
-		options: {
-			onSuccess: () => {
-				refetchFields();
-				setModalDelete({ open: false });
-			},
-		},
-	});
+        return { data: mappedData, totalRow: data.totalRow };
+      },
+    },
+  });
 
-	const data: any = [];
-	fields?.rows?.map((field: any) => {
-		data.push({
-			key: field.id,
-			field_name: field.name,
-			approval_status: field.status,
-			action: (
-				<div style={{ display: "flex", justifyContent: "left" }}>
-					<Button
-						size="small"
-						onClick={() => {
-							router.push(`/finance-config/coa-template/${field.id}`);
-						}}
-						variant="tertiary"
-					>
-						View Detail
-					</Button>
-				</div>
-			),
-		});
-	});
+  const { mutate: deleteFields } = useDeleteCoa({
+    options: {
+      onSuccess: () => {
+        setSelectedRowKeys([]);
+        setModalDelete({ open: false });
+        queryClient.invalidateQueries(["coa-list"]);
+      },
+    },
+  });
 
-	const paginateField = data;
-	const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+  const onSelectChange = (selectedRowKeys: any) => {
+    setSelectedRowKeys(selectedRowKeys);
+  };
 
-	const onSelectChange = (selectedRowKeys: any) => {
-		setSelectedRowKeys(selectedRowKeys);
-	};
+  const rowSelection = {
+    selectedRowKeys,
+    onChange: onSelectChange,
+  };
 
-	const rowSelection = {
-		selectedRowKeys,
-		onChange: onSelectChange,
-	};
+  return (
+    <>
+      <Col>
+        <Text variant={"h4"}>CoA Template List</Text>
+        <Spacer size={20} />
+        <Card>
+          <Row justifyContent="space-between">
+            <Search
+              width="380px"
+              placeholder="Search Name"
+              onChange={(e: any) => setSearch(e.target.value)}
+            />
+            <Row gap="16px">
+              <Button
+                size="big"
+                variant="tertiary"
+                onClick={() => setModalDelete({ open: true })}
+                disabled={rowSelection.selectedRowKeys?.length === 0}
+              >
+                Delete
+              </Button>
+              <Button
+                size="big"
+                variant={"primary"}
+                onClick={() => {
+                  router.push(`/finance-config/coa-template/create`);
+                }}
+              >
+                Create
+              </Button>
+            </Row>
+          </Row>
+        </Card>
+        <Spacer size={10} />
+        <Card style={{ padding: "16px 20px" }}>
+          <Spacer size={10} />
+          <Col gap="60px">
+            <Table
+              loading={isLoadingCoa || isFetchingCoa}
+              columns={columns}
+              data={coaData?.data}
+              rowSelection={rowSelection}
+            />
+            <Pagination pagination={pagination} />
+          </Col>
+        </Card>
+      </Col>
 
-	return (
-		<>
-			{isLoading ? (
-				<Center>
-					<Spin tip="Loading data..." />
-				</Center>
-			) : (
-				<Col>
-					<Text variant={"h4"}>CoA Template</Text>
-					<Spacer size={20} />
-					<Card>
-						<Row justifyContent="space-between">
-							<Search
-								width="380px"
-								placeholder="Search Name"
-								onChange={(e: any) => setSearch(e.target.value)}
-							/>
-							<Row gap="16px">
-								<Button
-									size="big"
-									variant="tertiary"
-									onClick={() => setModalDelete({ open: true })}
-									disabled={rowSelection.selectedRowKeys?.length === 0}
-								>
-									Delete
-								</Button>
-								<Button
-									size="big"
-									variant={"primary"}
-									onClick={() => {
-										router.push(`/finance-config/coa-template/create`);
-									}}
-								>
-									Create
-								</Button>
-							</Row>
-						</Row>
-					</Card>
-					<Spacer size={10} />
-					{!isLoading && (
-						<Card style={{ padding: "16px 20px" }}>
-							<Spacer size={10} />
-							<Col gap="60px">
-								<Table columns={columns} data={paginateField} rowSelection={rowSelection} />
-								<Pagination pagination={pagination} />
-							</Col>
-						</Card>
-					)}
-				</Col>
-			)}
-
-			{modalDelete.open && (
-				<ModalDeleteConfirmation
-					totalSelected={selectedRowKeys?.length}
-					itemTitle={
-						paginateField?.find((element: any) => element.key === selectedRowKeys[0])?.field_name
-					}
-					visible={modalDelete.open}
-					onCancel={() => setModalDelete({ open: false })}
-					onOk={() => deleteFields({ ids: selectedRowKeys })}
-				/>
-			)}
-		</>
-	);
+      {modalDelete.open && (
+        <ModalDeleteConfirmation
+          totalSelected={selectedRowKeys?.length}
+          itemTitle={
+            coaData?.data?.find((element: any) => element.key === selectedRowKeys[0])?.field_name
+          }
+          visible={modalDelete.open}
+          onCancel={() => setModalDelete({ open: false })}
+          onOk={() => deleteFields({ ids: selectedRowKeys })}
+        />
+      )}
+    </>
+  );
 };
 
-const Center = styled.div`
-	display: flex;
-	justify-content: center;
-	align-items: center;
-`;
-
 const Card = styled.div`
-	background: #ffffff;
-	border-radius: 16px;
-	padding: 16px;
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 16px;
 `;
 
 export default FinanceConfigCoATemplate;

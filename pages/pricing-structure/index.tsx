@@ -354,7 +354,9 @@ const PricingStructureList: any = () => {
       label: (
         <Flex>
           Active{" "}
-          {pricingStructureLists?.active > 0 && <Notif>{pricingStructureLists?.active}</Notif>}
+          {pricingStructureLists?.active > 0 && (
+            <Notif hidden>{pricingStructureLists?.active}</Notif>
+          )}
         </Flex>
       ),
       value: "active",
@@ -363,7 +365,9 @@ const PricingStructureList: any = () => {
       label: (
         <Flex>
           Inactive{" "}
-          {pricingStructureLists?.inactive > 0 && <Notif>{pricingStructureLists?.inactive}</Notif>}
+          {pricingStructureLists?.inactive > 0 && (
+            <Notif hidden>{pricingStructureLists?.inactive}</Notif>
+          )}
         </Flex>
       ),
       value: "inactive",
@@ -381,7 +385,9 @@ const PricingStructureList: any = () => {
       label: (
         <Flex>
           Rejected{" "}
-          {pricingStructureLists?.rejected > 0 && <Notif>{pricingStructureLists?.rejected}</Notif>}
+          {pricingStructureLists?.rejected > 0 && (
+            <Notif hidden>{pricingStructureLists?.rejected}</Notif>
+          )}
         </Flex>
       ),
       value: "rejected",
@@ -390,7 +396,9 @@ const PricingStructureList: any = () => {
       label: (
         <Flex>
           Draft{" "}
-          {pricingStructureLists?.drafted > 0 && <Notif>{pricingStructureLists?.drafted}</Notif>}
+          {pricingStructureLists?.drafted > 0 && (
+            <Notif hidden>{pricingStructureLists?.drafted}</Notif>
+          )}
         </Flex>
       ),
       value: "draft",
@@ -1116,7 +1124,7 @@ const Notif = styled.div`
   border: 1px solid #eb008b;
   box-sizing: border-box;
   border-radius: 24px;
-  display: flex;
+  display: ${(p: any) => (p.hidden ? "none" : "flex")};
   justify-content: center;
   align-items: center;
   width: 20px;

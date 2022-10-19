@@ -77,6 +77,7 @@ export default function VendorCreate() {
     const contactsPayload =
       data?.contacts?.map((contact: any) => {
         delete contact?.filtered;
+        delete contact?.id;
         return contact;
       }) ?? [];
 

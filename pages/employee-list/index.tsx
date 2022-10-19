@@ -162,6 +162,7 @@ const EmployeeList = () => {
   ];
 
   const rowSelection = {
+    preserveSelectedRowKeys: true,
     selectedRowKeys,
     onChange: (selectedRowKeys: any) => {
       setSelectedRowKeys(selectedRowKeys);

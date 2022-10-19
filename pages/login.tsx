@@ -14,6 +14,7 @@ import {
   useUpdatePassword,
   useVerifyOTP,
 } from "../hooks/auth/useAuth";
+import toast, { Toaster } from 'react-hot-toast';
 
 import ICFlagIndonesia from '../assets/icons/ic-flag-idn.svg'
 import ICFlagEnglish from '../assets/icons/ic-flag-us.svg'
@@ -157,6 +158,7 @@ const Login: any = () => {
         error.data.status === "ERROR" &&
         error.data.type === "VALIDATION_ERROR"
       ) {
+        toast(error.data.message);
       }
     },
   });

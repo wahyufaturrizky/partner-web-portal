@@ -158,8 +158,6 @@ const DetailPricingStructure: any = () => {
     data: null,
   });
 
-  const [percent, setPercent] = useState(0);
-
   
 
   const {
@@ -364,17 +362,31 @@ const DetailPricingStructure: any = () => {
       },
     });
 
-  const debounceFetch = useDebounce(
-    searchPricingConfigInfinite ||
-      searchProduct ||
-      searchSalesOrganizationInfinite ||
-      searchPricingStructureInfinite ||
-      searchRegion ||
-      searchCurrenciesInfinite,
-    1000
-  );
+    const debounceFetchPricingConfigInfinite = useDebounce(
+      searchPricingConfigInfinite,
+      1000
+    );
+  
+    const debounceFetchSalesOrganizationInfinite = useDebounce(
+        searchSalesOrganizationInfinite,
+      1000
+    );
+  
+    const debounceFetchPricingStructureInfinite = useDebounce(
+        searchPricingStructureInfinite,
+      1000
+    );
+  
+    const debounceFetchCurrenciesInfinite = useDebounce(
+        searchCurrenciesInfinite,
+      1000
+    );
 
-  const { data: dataGroupBuying, isLoading: isLoadingGroupBuying } = useGroupBuyingLists({
+  const debounceFetchProduct = useDebounce(searchProduct, 1000);
+
+  const debounceFetchRegion = useDebounce(searchRegion, 1000);
+
+  const { data: dataGroupBuying } = useGroupBuyingLists({
     query: {
       limit: 1000000,
     },
@@ -421,10 +433,9 @@ const DetailPricingStructure: any = () => {
     isFetchingNextPage: isFetchingMorePricingConfigInfinite,
     hasNextPage: hasNextPagePricingConfigInfinite,
     fetchNextPage: fetchNextPagePricingConfigInfinite,
-    isLoading: isLoadingPricingConfigInfinite,
   } = usePricingConfigInfiniteLists({
     query: {
-      search: debounceFetch,
+      search: debounceFetchPricingConfigInfinite,
       limit: 10,
     },
     options: {
@@ -458,7 +469,7 @@ const DetailPricingStructure: any = () => {
     isFetching: isFetchingProductList,
   } = useProductList({
     query: {
-      search: debounceFetch,
+      search: debounceFetchProduct,
       page: paginationProducts.page,
       limit: paginationProducts.itemsPerPage,
       company_id: "KSNI",
@@ -586,7 +597,7 @@ const DetailPricingStructure: any = () => {
     },
   });
 
-  const { data: pricingStructureLists, isLoading: isLoadingPricingStructureList } =
+  const { data: pricingStructureLists } =
     usePricingStructureLists({
       options: {
         onSuccess: (data: any) => {
@@ -600,7 +611,6 @@ const DetailPricingStructure: any = () => {
           })),
       },
       query: {
-        search: debounceFetch,
         page: paginationProductActive.page,
         limit: paginationProductActive.itemsPerPage,
         status: "ACTIVE",
@@ -612,10 +622,9 @@ const DetailPricingStructure: any = () => {
     isFetchingNextPage: isFetchingMoreSalesOrganizationInfinite,
     hasNextPage: hasNextPageSalesOrganizationInfinite,
     fetchNextPage: fetchNextPageSalesOrganizationInfinite,
-    isLoading: isLoadingSalesOrganizationInfinite,
   } = useSalesOrganizationInfiniteLists({
     query: {
-      search: debounceFetch,
+      search: debounceFetchSalesOrganizationInfinite,
       limit: 10,
       company_code: "KSNI",
     },
@@ -649,10 +658,9 @@ const DetailPricingStructure: any = () => {
     isFetchingNextPage: isFetchingMorePricingStructureInfinite,
     hasNextPage: hasNextPagePricingStructureInfinite,
     fetchNextPage: fetchNextPagePricingStructureInfinite,
-    isLoading: isLoadingPricingStructureInfinite,
   } = usePricingStructureInfiniteLists({
     query: {
-      search: debounceFetch,
+      search: debounceFetchPricingStructureInfinite,
       limit: 10,
       status: "ACTIVE",
     },
@@ -686,10 +694,9 @@ const DetailPricingStructure: any = () => {
     isFetchingNextPage: isFetchingMoreCurrenciesInfinite,
     hasNextPage: hasNextPageCurrenciesInfinite,
     fetchNextPage: fetchNextPageCurrenciesInfinite,
-    isLoading: isLoadingCurrenciesInfinite,
   } = useCurrenciesInfiniteLists({
     query: {
-      search: debounceFetch,
+      search: debounceFetchCurrenciesInfinite,
       limit: 10,
     },
     options: {
@@ -771,7 +778,7 @@ const DetailPricingStructure: any = () => {
   };
 
   const onSubmitDraft = (dataDraft: any) => {
-    updatePriceStructure({
+    pricingStructureDraft({
       status: "DRAFTED",
       add_distributions: dataSubmit.distribution_channel,
       add_products: dataSubmit.product_selected.map((data: any) => data.id),
@@ -834,6 +841,15 @@ const DetailPricingStructure: any = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [errors]
   );
+
+  const rowSelectionProduct = {
+    selectedRowKeys: selectedRowKeysProduct,
+    onChange: (selectedRowKeys: any, rowSelected: any) => {
+      setSelectedRowKeysProduct(selectedRowKeys);
+      setSelectedRowTableProductSelected(rowSelected);
+    },
+    preserveSelectedRowKeys: true,
+  };
 
   const handleSelectedField = (data: any) => {
     setModal({ ...modal, open: false });
@@ -1127,19 +1143,12 @@ const DetailPricingStructure: any = () => {
     },
   ];
 
-  const rowSelectionProduct = {
-    selectedRowKeys: selectedRowKeysProduct,
-    onChange: (selectedRowKeys: any, rowSelected: any) => {
-      setSelectedRowKeysProduct(selectedRowKeys);
-      setSelectedRowTableProductSelected(rowSelected);
-    },
-  };
-
   const rowSelectionProductsSelected = {
     selectedRowKeys: selectedRowKeysProductsSelected,
     onChange: (selectedRowKeys: any) => {
       setSelectedRowKeysProductsSelected(selectedRowKeys);
     },
+    preserveSelectedRowKeys: true,
   };
 
   const rowSelectionRegionSelected = {
@@ -1192,29 +1201,6 @@ const DetailPricingStructure: any = () => {
     setRegionSelected(tempRegionSelected);
   };
 
-  useEffect(() => {
-    const increaseProgress = () => {
-      let newPercent = percent + 12.5;
-
-      if (newPercent > 100) {
-        newPercent = 100;
-      }
-
-      setPercent(parseInt(String(newPercent)));
-    };
-    increaseProgress();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    isLoadingCurrenciesInfinite,
-    isLoadingGroupBuying,
-    isLoadingPricingConfigInfinite,
-    isLoadingProductList,
-    isLoadingSalesOrganizationInfinite,
-    isLoadingPricingStructureListById,
-    isLoadingPricingStructureList,
-    isLoadingPricingStructureInfinite,
-  ]);
-
   const isEmpty = productsSelected.length === 0;
 
   const isEmptyRegion = regionSelected.length === 0;
@@ -1222,18 +1208,7 @@ const DetailPricingStructure: any = () => {
   if (manageByZone.isShow) {
     return (
       <>
-        {isLoadingPricingConfigInfinite ||
-        isLoadingCurrenciesInfinite ||
-        isLoadingPricingStructureListById ||
-        isLoadingPricingStructureList ||
-        isLoadingGroupBuying ||
-        isLoadingProductList ||
-        isLoadingSalesOrganizationInfinite ? (
-          <Center>
-            <Spin tip="Loading data..." />
-          </Center>
-        ) : (
-          <Col>
+        <Col>
             <Row gap="4px" alignItems="center">
               <ArrowLeft
                 style={{ cursor: "pointer" }}
@@ -1542,6 +1517,7 @@ const DetailPricingStructure: any = () => {
                             }
                             onChange={(value: any) => {
                               onChange(value);
+                              setSearchSalesOrganizationInfinite("")
                             }}
                             onSearch={(value: any) => {
                               setSearchSalesOrganizationInfinite(value);
@@ -1931,23 +1907,16 @@ const DetailPricingStructure: any = () => {
               </Col>
             </Card>
           </Col>
-        )}
       </>
     );
   } else {
     return (
       <>
-        {isLoadingPricingConfigInfinite ||
-        isLoadingCurrenciesInfinite ||
-        isLoadingGroupBuying ||
-        isLoadingPricingStructureListById ||
-        isLoadingPricingStructureList ||
-        isLoadingPricingStructureInfinite ||
-        isLoadingProductList ||
-        isLoadingSalesOrganizationInfinite ? (
-          <Center>
-            <Spin tip="Loading data..." />
-          </Center>
+      {
+        isLoadingPricingStructureListById ? (
+          <Row alignItems='center' justifyContent='center'>
+            <Spin tip='loading...' />
+          </Row>
         ) : (
           <Col>
             <Row gap="4px" alignItems="center">
@@ -1961,7 +1930,7 @@ const DetailPricingStructure: any = () => {
 
             <Card padding="20px">
               <Row alignItems="center" justifyContent="space-between">
-                {pricingStructureListById.status === "ACTIVE" ? (
+                {pricingStructureListById?.status === "ACTIVE" ? (
                   <Dropdown
                     label=""
                     isHtml
@@ -1978,12 +1947,12 @@ const DetailPricingStructure: any = () => {
                       }
                     }}
                     noSearch
-                    defaultValue={getValues("status") || pricingStructureListById.status}
+                    defaultValue={getValues("status") || pricingStructureListById?.status}
                   />
                 ) : (
-                  <DisabledDropdown2 status={pricingStructureListById.status}>
-                    {STATUS_APPROVAL_TEXT[pricingStructureListById.status]}
-                  </DisabledDropdown2>
+                    <DisabledDropdown2 status={pricingStructureListById?.status}>
+                      {STATUS_APPROVAL_TEXT[pricingStructureListById?.status]}
+                    </DisabledDropdown2>
                 )}
 
                 <Row alignItems="center" gap="16px" justifyContent="space-between">
@@ -2141,6 +2110,7 @@ const DetailPricingStructure: any = () => {
                             }
                             onChange={(value: any) => {
                               onChange(value);
+                              setSearchPricingConfigInfinite("")
                             }}
                             onSearch={(value: any) => {
                               setSearchPricingConfigInfinite(value);
@@ -2188,12 +2158,13 @@ const DetailPricingStructure: any = () => {
                               }
                             }}
                             items={
-                              isFetchingCurrenciesInfinite && !isFetchingCurrenciesInfinite
+                              isFetchingCurrenciesInfinite && !isFetchingMoreCurrenciesInfinite
                                 ? []
                                 : currenciesInfiniteList
                             }
                             onChange={(value: any) => {
                               onChange(value);
+                              setSearchCurrenciesInfinite("")
                             }}
                             onSearch={(value: any) => {
                               setSearchCurrenciesInfinite(value);
@@ -2469,7 +2440,9 @@ const DetailPricingStructure: any = () => {
               </Col>
             </Card>
           </Col>
-        )}
+        )
+      }
+        
 
         <Modal
           width={"80%"}
@@ -2590,6 +2563,7 @@ const DetailPricingStructure: any = () => {
                         }
                         onChange={(value: any) => {
                           onChange(value);
+                          setSearchPricingStructureInfinite("")
                         }}
                         onSearch={(value: any) => {
                           setSearchPricingStructureInfinite(value);
