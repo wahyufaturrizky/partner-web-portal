@@ -175,7 +175,7 @@ export default function WithholdingForm(props: any) {
               <CreateInputDiv>
                 <Input
                   width="80%"
-                  label="Percentage Subject to Tax1"
+                  label="Percentage Subject to Tax"
                   height="48px"
                   required
                   placeholder={"e.g 10"}
