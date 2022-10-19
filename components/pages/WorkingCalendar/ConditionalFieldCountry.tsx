@@ -63,6 +63,7 @@ const ConditionalFieldCountry = ({ control, workingCalendarData, type }: any) =>
         control={control}
         shouldUnregister={true}
         defaultValue={workingCalendarData?.country ?? ""}
+        rules={{ required: true }}
         name="country"
         render={({ field: { onChange }, formState: { errors } }) => (
           <>
@@ -89,11 +90,11 @@ const ConditionalFieldCountry = ({ control, workingCalendarData, type }: any) =>
                 setSearchCountry(value);
               }}
             />
-            {/* {errors?.company_name?.type === "required" && (
-                  <Text variant="alert" color={"red.regular"}>
-                    This field is required
-                  </Text>
-                )} */}
+            {errors?.country?.type === "required" && (
+              <Text variant="alert" color={"red.regular"}>
+                This field is required
+              </Text>
+            )}
           </>
         )}
       />

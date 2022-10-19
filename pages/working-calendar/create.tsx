@@ -41,7 +41,13 @@ const WorkingCalendarCreate = () => {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
-  const { register, control, handleSubmit, setValue } = useForm({
+  const {
+    register,
+    control,
+    handleSubmit,
+    setValue,
+    formState: { errors },
+  } = useForm({
     defaultValues: {
       public_holidays: [{ holiday_date: "", holiday_name: "" }],
     },
@@ -126,8 +132,13 @@ const WorkingCalendarCreate = () => {
                   height="40px"
                   label=""
                   placeholder={"e.g NBT-ID"}
-                  {...register("calendar_name")}
+                  {...register("calendar_name", { required: true })}
                 />
+                {errors?.calendar_name?.type === "required" && (
+                  <Text variant="alert" color={"red.regular"}>
+                    This field is required
+                  </Text>
+                )}
               </Row>
 
               <Spacer size={20} />
@@ -260,6 +271,7 @@ const WorkingCalendarCreate = () => {
                         <DatePickerInput
                           label=""
                           fullWidth
+                          placeholder={"01/01/2022"}
                           onChange={(date: any, dateString: any) => {
                             onChange(dateString);
                           }}

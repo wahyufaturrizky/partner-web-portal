@@ -98,11 +98,11 @@ const ModuleConfig: any = () => {
 		onChange: onSelectChange,
 	};
 
-	const parents = parentsData?.rows?.map((config: any) => ({ id: config.id, value: config.name }));
+	const parents = parentsData?.rows?.filter((filter) => filter.parentId == null).map((config: any) => ({ id: config.id, value: config.name }));
 	if (parents?.length > 0) {
 		parents.unshift({ id: "", value: "All" });
 	}
-
+	
 	return (
 		<>
 			<Col>
@@ -119,7 +119,7 @@ const ModuleConfig: any = () => {
 							<Spacer size={8} />
 							<Dropdown
 								width="200px"
-								defaultValue="All"
+								defaultValue=""
 								items={parents}
 								placeholder="Parent"
 								handleChange={(value: any) => setParent(value)}

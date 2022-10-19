@@ -76,7 +76,7 @@ const ConfigDetail: any = () => {
 		config_id,
 		options: {
 			onSuccess: () => {
-				Router.push("/config");
+				Router.push("/module-config");
 			},
 		},
 	});

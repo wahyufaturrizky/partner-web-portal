@@ -100,6 +100,8 @@ const WorkingCalendarCreate = () => {
           data?.publicHolidays?.length > 0 ? mappedPublicHolidays : publicHolidaysDefaultValue
         );
         setWorkingDaysPayload(data?.workingDays);
+        setStartDate(data?.start);
+        setEndDate(data?.end);
       },
     },
   });
