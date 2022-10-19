@@ -15,6 +15,7 @@ import styled from "styled-components";
 import { IconAdd } from "assets";
 import { Controller } from "react-hook-form";
 import { glAccountList } from "../constants";
+import moment from "moment";
 
 export default function WithholdingForm(props: any) {
   const {
@@ -22,7 +23,7 @@ export default function WithholdingForm(props: any) {
     fieldsTax,
     appendTax,
     replaceTax,
-    removeTax,
+    remove,
     control,
     register,
     TaxBodyFields,
@@ -30,53 +31,74 @@ export default function WithholdingForm(props: any) {
     setShowTaxTypeModal,
     tabAktived,
     errors,
-    showCreateModal
+    showCreateModal,
+    setValue,
+    setShowDelete
   } = props;
   const [isPeriod, setIsPeriod] = useState<boolean>(false);
   const [isUpdated, setIsUpdated] = useState<boolean>(false);
   const [array, setArray] = useState<{ data: string }[]>([]);
   const [dataUpdate, setDataUpdate] = useState({});
+
   const handleAddMorePeriod = () => {
-    if (showCreateModal?.type === 'create') {
+    if (showCreateModal?.type === "create") {
       appendTax({
         ...TaxBodyFields,
         key: fieldsTax?.length,
       });
       setArray((oldArray) => [...oldArray, fieldsTax?.length]);
-    } else if (showCreateModal?.type === 'edit') {
+    } else if (showCreateModal?.type === "edit") {
       setDataUpdate((prevState: any) => ({
         ...prevState,
-        details: [...prevState.details, {
-          
-
-              "period_from": "2022-10-06T01:52:15.998Z",
-              "period_to": "2022-10-06T01:52:15.998Z",
-              "percentage": "10",
-              "percentage_subject_to_tax": "10",
-              "withholding_tax_rate": "10"
-          
-        }]
-      }))
+        details: [
+          ...prevState.details,
+          {
+            period_from: "2022-10-06T01:52:15.998Z",
+            period_to: "2022-10-06T01:52:15.998Z",
+            percentage: "10",
+            percentage_subject_to_tax: "10",
+            withholding_tax_rate: "10",
+          },
+        ],
+      }));
     }
   };
   useEffect(() => {
-    if (showCreateModal?.type === 'create') {
+    if (showCreateModal?.type === "create") {
+      reset();
       if (isPeriod && fieldsTax?.length < 1) {
         handleAddMorePeriod();
       } else {
-        removeTax(array);
+        reset();
+        // console.log("edit");
       }
     }
-  }, [isPeriod]);
-
+  }, [isPeriod, showCreateModal]);
+  useEffect(() => {
+    if (showCreateModal.type == 'edit') {      
+      const detailData = showCreateModal?.data;
+      setValue(`tax_name`, detailData.tax_item_name);
+      setValue(`tax_code`, detailData.tax_code);
+      setValue(`gl_account`, detailData.gl_account)
+      showCreateModal?.data?.details?.map((v, i) => {
+        // console.log("Value",v);
+        
+        setValue(`item_details.${i}.percentage`, v.percentage);
+        setValue(`item_details.${i}.period`, [v.period_from, v.period_to]);
+        setValue(`item_details.${i}.withholding_tax_rate`, v.withholding_tax_rate);
+        setValue(`item_details.${i}.percentage_subject_to_tax`, v.percentage_subject_to_tax);
+        setValue(`item_details.${i}.tax_item_detail_id`, v.tax_item_detail_id);
+      });
+    }
+  }, []);
   const propsFieldForm = {
     getValues,
     control,
     fieldsTax,
     replaceTax,
-    removeTax,
+    remove,
     register,
-    tabAktived
+    tabAktived,
   };
 
   const listTaxType = [
@@ -85,134 +107,159 @@ export default function WithholdingForm(props: any) {
     { id: "W3", value: "W3" },
   ];
 
-  const FormContact = ({
-  index,
-  field,
-  fieldsTax,
-  removeTax,
-  tabAktived
-}: any) => {
-  const propsButtonSetPrimary = {
-    index,
-    field,
-    removeTax,
-    fieldsTax
-  };
-  return (
-    <>
-      <ButtonSetFormsPrimary {...propsButtonSetPrimary} />
-      <Spacer size={30} />
-      <Row gap="20px" width="100%">
-        <Col width="48%">
-          <Controller
-            control={control}
-            name={`item_details.${index}.period`}
-            //defaultValue={retailPricing?.valid_date?.map((date:any) => moment(date))}
-            render={({ field: { onChange } }) => (
-              <Col width="100%">
-                <RangeDatePicker
-                  fullWidth
-                  //defaultValue={retailPricing?.valid_date?.map((date:any) => moment(date))}
-                  onChange={(date: any, dateString: any) => onChange(dateString)}
-                  label="Period"
-                  format={"DD/MM/YYYY"}
+  const FormContact = ({ index, field, fieldsTax, remove, tabAktived }: any) => {
+    const propsButtonSetPrimary = {
+      index,
+      field,
+      remove,
+      fieldsTax,
+    };
+
+    // console.log("fieldnya ", field);
+    // const dateFormat = "YYYY-MM-DD";
+    // console.log("dataUpdate",dataUpdate);
+    
+    return (
+      <>
+        <ButtonSetFormsPrimary {...propsButtonSetPrimary} />
+        <Spacer size={30} />
+        <Row gap="20px" width="100%">
+          <Col width="48%">
+            <Controller
+              control={control}
+              name={`item_details.${index}.period`}
+              defaultValue={[moment(field.period_from).format("DD/MM/YYYY"), moment(field.period_to).format("DD/MM/YYYY")]}
+              render={({ field: { onChange } }) => (
+                <Col width="100%">
+                  <RangeDatePicker
+                    fullWidth
+                    defaultValue={[moment(field.period_from), moment(field.period_to)]}
+
+                    onChange={(date: any, dateString: any) => onChange(dateString)}
+                    label="Period"
+                    format={"DD/MM/YYYY"}
+                  />
+                </Col>
+              )}
+            />
+          </Col>
+          {tabAktived === "VAT" ? (
+            <Col width="48%">
+              <CreateInputDiv>
+                <Input
+                  width="80%"
+                  label="Percentage"
+                  height="48px"
+                  required
+                  placeholder={"e.g 10"}
+                  key={field.tax_item_detail_id}
+                  {...register(`item_details.${index}.percentage`, {
+                    required: "Percentage must be filled",
+                  })}
+                  // value={field.percentage}
+                  // onChange= {(event: any) => setDataUpdate((prevState:any) => ({
+                  //   ...prevState,
+                  //   tax_item_name : event.target.value
+                  // }))}
+                  defaultValue={field.percentage}
                 />
-              </Col>
-            )}
-          />
-        </Col>
-        {tabAktived === 'VAT' ? (
-        <Col width="48%">
-          <CreateInputDiv>
-            <Input
-              width="80%"
-              label="Percentage"
-              height="48px"
-              required
-              placeholder={"e.g 10"}
-              {...register(`item_details.${index}.percentage`, {
-                required: "Percentage must be filled",
-              })}
-            />
-            <InputAddonBefore>%</InputAddonBefore>
-          </CreateInputDiv>
-        </Col>
-        ):null}
-      </Row>
-      <Spacer size={30} />
-      {tabAktived === 'Withholding Tax' ? (
-      <Row gap="20px" width="100%">
-        <Col width="48%">
-          <CreateInputDiv>
-            <Input
-              width="80%"
-              label="Percentage Subject to Tax"
-              height="48px"
-              required
-              placeholder={"e.g 10"}
-              {...register(`item_details.${index}.percentage_subject_to_tax`, {
-                required: "Percentage Subject to Tax must be filled",
-              })}
-            />
-            <InputAddonBefore>%</InputAddonBefore>
-          </CreateInputDiv>
-        </Col>
-        <Col width="48%">
-          <CreateInputDiv>
-            <Input
-              width="80%"
-              label="Withholding Tax Rate"
-              height="48px"
-              required
-              placeholder={"e.g 10"}
-              {...register(`item_details.${index}.withholding_tax_rate`, {
-                required: "Withholding Tax Rate street must be filled",
-              })}
-            />
-            <InputAddonBefore>%</InputAddonBefore>
-          </CreateInputDiv>
-        </Col>
-      </Row>
-      ) : null}
-      <Spacer size={30} />
-    </>
-  );
-};
-const ButtonSetFormsPrimary = ({ index, removeTax, fieldsTax }: any) => {
-  const isDeleteAktifed: boolean = fieldsTax?.length >= 1;
-  return (
-    <>
-      <Row gap="12px" alignItems="center">
-        {isDeleteAktifed && (
-          <>
-            <Text color="pink.regular">Period {index + 1}</Text>|
-            <div style={{ cursor: "pointer" }}>
-              <Text color="pink.regular" onClick={() => removeTax(index)}>
-                Delete
-              </Text>
-            </div>
-          </>
-        )}
-      </Row>
-    </>
-  );
-};
+                <InputAddonBefore>%</InputAddonBefore>
+              </CreateInputDiv>
+            </Col>
+          ) : null}
+        </Row>
+        <Spacer size={30} />
+        {tabAktived === "Withholding Tax" ? (
+          <Row gap="20px" width="100%">
+            <Col width="48%">
+              <CreateInputDiv>
+                <Input
+                  width="80%"
+                  label="Percentage Subject to Tax"
+                  height="48px"
+                  required
+                  placeholder={"e.g 10"}
+                  {...register(`item_details.${index}.percentage_subject_to_tax`, {
+                    required: "Percentage Subject to Tax must be filled",
+                  })}
+                  defaultValue={field.percentage_subject_to_tax}
+                />
+                <InputAddonBefore>%</InputAddonBefore>
+              </CreateInputDiv>
+            </Col>
+            <Col width="48%">
+              <CreateInputDiv>
+                <Input
+                  width="80%"
+                  label="Withholding Tax Rate"
+                  height="48px"
+                  required
+                  placeholder={"e.g 10"}
+                  {...register(`item_details.${index}.withholding_tax_rate`, {
+                    required: "Withholding Tax Rate street must be filled",
+                  })}
+                  defaultValue={field.withholding_tax_rate}
+                />
+                <InputAddonBefore>%</InputAddonBefore>
+              </CreateInputDiv>
+            </Col>
+          </Row>
+        ) : null}
+        <Spacer size={30} />
+      </>
+    );
+  };
+  
+  const ButtonSetFormsPrimary = ({ index, remove, fieldsTax }: any) => {
 
+    const isDeleteAktifed: boolean = fieldsTax?.length >= 1;
+    return (
+      <>
+        <Row gap="12px" alignItems="center">
+          {isDeleteAktifed && (
+            <>
+              <Text color="pink.regular">Period {index + 1}</Text>|
+              <div style={{ cursor: "pointer" }}>
+                <Text color="pink.regular" onClick={() => {
+                  console.log(fieldsTax[index])
+                  
+                  showCreateModal.type == 'edit' && fieldsTax[index].tax_item_id ? 
+                    setShowDelete({ open: true,
+                      type: "item-detail",
+                      data: { name: `Period ${index+1}` ,tax_item_id: fieldsTax[index].tax_item_id, tax_item_detail_id:fieldsTax[index].tax_item_detail_id, index:index }
+                    }) : remove(index)
+                  }
+                }>
+                  Delete
+                </Text>
+              </div>
+            </>
+          )}
+        </Row>
+      </>
+    );
+  };
 
-  useEffect(()=>{
+  useEffect(() => {
     if (showCreateModal) {
       if (showCreateModal?.open && !isUpdated) {
-        setDataUpdate(showCreateModal.data)
-        if (showCreateModal?.type === 'edit' && showCreateModal?.data?.details.length > 0) {
+        // console.log("showCreateModalEffect", showCreateModal);
+
+        setDataUpdate(showCreateModal.data);
+        if (showCreateModal?.type === "edit" && showCreateModal?.data?.details.length > 0) {
           setIsPeriod(true);
+        }else{
+          console.log("masuk");
+          
         }
-        setIsUpdated(true)
+        setIsUpdated(true);
       } else if (!showCreateModal?.open) {
         setIsPeriod(false);
         setDataUpdate({});
       }
     }
-  },[showCreateModal, isUpdated]);
+  }, [showCreateModal, isUpdated]);
+
   return (
     <>
       <Row gap="20px" width="100%">
@@ -227,11 +274,13 @@ const ButtonSetFormsPrimary = ({ index, removeTax, fieldsTax }: any) => {
               required: "Tax Name must be filled",
             })}
             // defaultValue={dataUpdate?.tax_item_name}
-            value={dataUpdate?.tax_item_name}
-            onChange= {(event: any) => setDataUpdate((prevState:any) => ({
-              ...prevState, 
-              tax_item_name : event.target.value
-            }))}
+            // value={dataUpdate?.tax_item_name}
+            // onChange={(event: any) =>
+            //   setDataUpdate((prevState: any) => ({
+            //     ...prevState,
+            //     tax_item_name: event.target.value,
+            //   }))
+            // }
             error={errors?.tax_name?.message}
           />
           <Spacer size={10} />
@@ -287,7 +336,13 @@ const ButtonSetFormsPrimary = ({ index, removeTax, fieldsTax }: any) => {
             {...register(`tax_code`, {
               required: "Tax code must be filled",
             })}
-            defaultValue={showCreateModal?.data?.tax_code}
+            value={dataUpdate?.tax_code}
+            onChange={(event: any) =>
+              setDataUpdate((prevState: any) => ({
+                ...prevState,
+                tax_code: event.target.value,
+              }))
+            }
             error={errors?.tax_code?.message}
           />
           <Spacer size={10} />
@@ -306,22 +361,95 @@ const ButtonSetFormsPrimary = ({ index, removeTax, fieldsTax }: any) => {
       <Spacer size={20} />
       <hr style={{ borderTop: "dashed 1px" }} />
       <Spacer size={20} />
-      {showCreateModal?.type === 'create' &&  fieldsTax.map((field: any, index: number | string) => (
-        <div key={index}>
-          <FormContact index={index} field={field} fieldsTax={fieldsTax} tabAktived={tabAktived} removeTax={removeTax}  />
-        </div>
-      ))}
-      {showCreateModal?.type === 'edit' && typeof dataUpdate?.details !== undefined && Array.isArray(dataUpdate?.details) && dataUpdate?.details?.length && dataUpdate?.details.map((field: any, index: number | string) => (
-        <div key={index}>
-          <FormContact index={index} field={field} fieldsTax={dataUpdate?.details} tabAktived={tabAktived} removeTax={(index: any) => {
-            console.log(index)
-            setDataUpdate((prevState: any) => ({
-              ...prevState,
-              details: [...prevState.details.slice(0, index), ...prevState.details.slice(index + 1)]
-            }))
-          }} />
-        </div>
-      ))}
+      {!isPeriod && tabAktived === "VAT" && (
+        <Row gap="20px" width="100%">
+          <Col width="48%">
+            <CreateInputDiv>
+              <Input
+                width="80%"
+                label="Percentage"
+                height="48px"
+                required
+                placeholder={"e.g 10"}
+                {...register(`item_details.0.percentage`, {
+                  required: "Percentage must be filled",
+                })}
+              />
+              <InputAddonBefore>%</InputAddonBefore>
+            </CreateInputDiv>
+          </Col>
+        </Row>
+      )}
+      {!isPeriod && tabAktived === "Withholding Tax" && (
+        <Row gap="20px" width="100%">
+          <Col width="48%">
+            <CreateInputDiv>
+              <Input
+                width="80%"
+                label="Percentage Subject to Tax"
+                height="48px"
+                required
+                placeholder={"e.g 10"}
+                {...register(`item_details.0.percentage_subject_to_tax`, {
+                  required: "Percentage Subject to Tax must be filled",
+                })}
+              />
+              <InputAddonBefore>%</InputAddonBefore>
+            </CreateInputDiv>
+          </Col>
+          <Col width="48%">
+            <CreateInputDiv>
+              <Input
+                width="80%"
+                label="Withholding Tax Rate"
+                height="48px"
+                required
+                placeholder={"e.g 10"}
+                {...register(`item_details.0.withholding_tax_rate`, {
+                  required: "Withholding Tax Rate street must be filled",
+                })}
+              />
+              <InputAddonBefore>%</InputAddonBefore>
+            </CreateInputDiv>
+          </Col>
+        </Row>
+      )}
+      {showCreateModal?.type === "create" && isPeriod &&
+        fieldsTax.map((field: any, index: number | string) => (
+          <div key={index}>
+            <FormContact
+              index={index}
+              field={field}
+              fieldsTax={fieldsTax}
+              tabAktived={tabAktived}
+              remove={remove}
+            />
+          </div>
+        ))}
+      {showCreateModal?.type === "edit" && isPeriod &&
+        typeof dataUpdate?.details !== undefined &&
+        Array.isArray(dataUpdate?.details) &&
+        dataUpdate?.details?.length &&
+        dataUpdate?.details.map((field: any, index: number | string) => (
+          <div key={index}>
+            <FormContact
+              index={index}
+              field={field}
+              fieldsTax={dataUpdate?.details}
+              tabAktived={tabAktived}
+              remove={(index: any) => {
+                // console.log(index);
+                setDataUpdate((prevState: any) => ({
+                  ...prevState,
+                  details: [
+                    ...prevState.details.slice(0, index),
+                    ...prevState.details.slice(index + 1),
+                  ],
+                }));
+              }}
+            />
+          </div>
+        ))}
       {isPeriod ? (
         <Text variant={"h6"} color="pink.regular" onClick={handleAddMorePeriod}>
           + Add more period
