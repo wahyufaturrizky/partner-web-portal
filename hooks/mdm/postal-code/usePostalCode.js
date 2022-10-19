@@ -122,6 +122,19 @@ const useCountryStructures = ({ country, options }) => {
   });
 };
 
+const useUploadFilePostalCodesMDM = ({ options }) => {
+  return useMutation(
+    (data) =>
+      mdmService(`/postal-code/upload`, {
+        method: "POST",
+        data,
+      }),
+    {
+      ...options,
+    }
+  );
+};
+
 export {
   usePostalCodes,
   usePostalCode,
@@ -131,4 +144,5 @@ export {
   useCountries,
   useCountryStructures,
   usePostalCodeInfiniteLists,
+  useUploadFilePostalCodesMDM,
 };
