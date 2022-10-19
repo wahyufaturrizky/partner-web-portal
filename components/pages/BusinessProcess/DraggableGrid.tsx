@@ -134,7 +134,7 @@ const StaticGridItem = ({ data }: any) => (
 			ellipsis
 			style={{ margin: "0 8px" }}
 		>
-			{`${data.index + 1}asdasd. ${data.name}`}
+			{`${data.index + 1}. ${data.name}`}
 		</Text>
 	</Item>
 );
