@@ -292,6 +292,8 @@ const GeneralForms = ({
             required: "name must be filled",
           })}
         />
+        <Spacer size={10} />
+
         <Input
           width="100%"
           height="50px"
@@ -381,7 +383,7 @@ const GeneralForms = ({
             required: "mobile must be filled",
           })}
         />
-        <Spacer size={40} />
+        <Spacer size={50} />
         <Input
           width="100%"
           label="Email"
