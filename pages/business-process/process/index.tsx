@@ -139,9 +139,6 @@ const ProcessList: any = () => {
 								onChange={(e: any) => setSearch(e.target.value)}
 							/>
 							<Spacer size={16} />
-							<Text variant="subtitle1" color="black.dark">
-								Modul
-							</Text>
 							<Spacer size={8} />
 							<Dropdown
 								width="200px"
@@ -153,7 +150,7 @@ const ProcessList: any = () => {
 									dataConfigsModule &&
 									dataConfigsModule?.rows.map((data: any) => ({ id: data.id, value: data.name }))
 								}
-								placeholder={"Select"}
+								placeholder={"Modul"}
 								handleChange={handleChangeDropdown}
 								noSearch
 								rounded

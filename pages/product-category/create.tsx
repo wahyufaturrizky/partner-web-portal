@@ -219,7 +219,7 @@ const CreateProductCategory: any = () => {
                   //   onSearch={(search) => setSearchCountry(search)}
                   //   error={errors?.country?.message}
                   //   {...register("country")}
-                  defaultValue={"Manual"}
+                  defaultValue={""}
                   noSearch
                 />
               </Row>
@@ -234,7 +234,7 @@ const CreateProductCategory: any = () => {
             <Accordion.Header variant="blue">Account Properties</Accordion.Header>
             <Accordion.Body>
               <Row width="49%" gap="20px" noWrap>
-              {automate == "Automated" && (
+              {(automate == "" || automate == "Automated") && (
                   <Dropdown
                     label="Price Difference Account"
                     width={"100%"}
@@ -278,7 +278,7 @@ const CreateProductCategory: any = () => {
                 />
               </Row>
               <Spacer size={10} />
-              {automate == "Automated" && (
+              {(automate == "" || automate == "Automated") && (
                 <>
                   <Row>
                     <Label>Account Stock Properties</Label>

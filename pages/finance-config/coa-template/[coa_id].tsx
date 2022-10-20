@@ -306,6 +306,9 @@ const DetailCoa: any = () => {
         })) ?? [],
     },
   ];
+
+  const isSearchAndFilter =
+    !!searchAccountGroup || accountGroupId.length > 0 || accountCode.length > 0;
   return (
     <>
       <Col>
@@ -366,7 +369,7 @@ const DetailCoa: any = () => {
                 <Card style={{ padding: "16px 20px", height: "626px" }}>
                   <Spacer size={10} />
                   <Col gap="30px">
-                    {allCoaItems.length !== 0 ? (
+                    {allCoaItems.length !== 0 || isSearchAndFilter ? (
                       <>
                         <Row justifyContent="space-between" alignItems="center">
                           <Row gap="16px" alignItems="center">

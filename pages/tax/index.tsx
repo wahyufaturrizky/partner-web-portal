@@ -230,13 +230,6 @@ const Tax = () => {
                 },
               ]}
             />
-            <Button
-              size="big"
-              variant="primary"
-              onClick={() => router.push("/tax/create")}
-            >
-              Create
-            </Button>
           </Row>
         </Row>
       </Card>
