@@ -1,29 +1,38 @@
-import React, { useEffect, useState } from "react";
+import { ExclamationCircleOutlined } from "@ant-design/icons";
+import ArrowLeft from "assets/icons/arrow-left.svg";
+import { useRouter } from "next/router";
 import {
+  Accordion,
   Button,
   Col,
-  Input,
-  Row,
-  Tabs,
-  Spacer,
   Dropdown,
-  Text,
-  Accordion,
-  Radio,
-  Switch,
+  Input,
   Lozenge,
+  Radio,
+  Row,
+  Spacer,
+  Switch,
+  Tabs,
+  Text,
+  Spin,
 } from "pink-lava-ui";
-import { useForm, Controller, useFieldArray } from "react-hook-form";
-import { ExclamationCircleOutlined } from "@ant-design/icons";
-import { useRouter } from "next/router";
+import React, { useState } from "react";
+import { Controller, useFieldArray, useForm } from "react-hook-form";
 import styled from "styled-components";
 
-import UploadImage from "./fragments/UploadImages";
+import { ModalDeleteConfirmation } from "components/elements/Modal/ModalConfirmationDelete";
+import {
+  useConvertToVendor,
+  useCreateCustomers,
+  useDeleteCustomers,
+  useUploadLogo,
+} from "hooks/mdm/customers/useCustomersMDM";
 import { listTabItems, status } from "./constants";
-import { useCreateCustomers, useUploadLogo } from "hooks/mdm/customers/useCustomersMDM";
-import Sales from "./fragments/Sales";
-import Purchasing from "./fragments/Purchasing";
 import Invoicing from "./fragments/Invoicing";
+import Purchasing from "./fragments/Purchasing";
+import Sales from "./fragments/Sales";
+import UploadImage from "./fragments/UploadImages";
+import { queryClient } from "pages/_app";
 
 export default function CreateCustomers({
   detailCustomer,
@@ -31,12 +40,14 @@ export default function CreateCustomers({
   getDataCustomerGroup,
   setSearchCustomerGroup,
   setSearchLanguages,
+  isLoadingCustomer,
 }: any) {
   const router = useRouter();
   const [tabAktived, setTabAktived] = useState<string>("Contact");
   const [formType, setFormType] = useState<string>("Company");
   const [imageLogo, setImageLogo] = useState<string>("");
   const [isPKP, setIsPKP] = useState<boolean>(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [checked, setChecked] = useState<any>({
     sales_order_blocking: false,
     billing_blocking: false,
@@ -88,6 +99,16 @@ export default function CreateCustomers({
   const { mutate: createCustomer } = useCreateCustomers({
     options: {
       onSuccess: () => alert("create success!"),
+    },
+  });
+
+  const { mutate: deleteCustomer, isLoading: isLoadingDeleteCustomer }: any = useDeleteCustomers({
+    options: {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["vendors"]);
+        setShowDeleteModal(false);
+        router.back();
+      },
     },
   });
 
@@ -159,10 +180,21 @@ export default function CreateCustomers({
     setSearchCustomerGroup,
   };
 
+  const { mutate: updateConvertVendor, isLoading: isLoadingConvertVendor } = useConvertToVendor({
+    id: detailCustomer?.id,
+    options: {
+      onSuccess: (data: any) => {},
+    },
+  });
+
   const propsHeaderForm = {
     control,
     router,
     onSubmit: handleSubmit(onSubmit),
+    detailCustomer,
+    setShowDeleteModal,
+    isLoadingConvertVendor,
+    updateConvertVendor,
   };
 
   const switchTabItem = () => {
@@ -201,13 +233,26 @@ export default function CreateCustomers({
   };
   console.log("@detailCustomer", detailCustomer);
 
+  if (isLoadingCustomer) {
+    return (
+      <Row alignItems="center" justifyContent="center">
+        <Col>
+          <Spin tip="Loading..." />
+        </Col>
+      </Row>
+    );
+  }
+
   return (
     <div>
       <FlexElement>
+        {detailCustomer && (
+          <ArrowLeft style={{ cursor: "pointer" }} onClick={() => router.back()} />
+        )}
         <Label>{detailCustomer?.name || "Create Customer"}</Label>
-        {detailCustomer?.name ? (
+        {detailCustomer?.registrationStatus ? (
           <Lozenge variant="blue">
-            <Row alignItems="center">New Open Outlet</Row>
+            <Row alignItems="center">{detailCustomer?.registrationStatus}</Row>
           </Lozenge>
         ) : (
           _formType.map((item) => (
@@ -258,6 +303,17 @@ export default function CreateCustomers({
           </Accordion.Item>
         </Accordion>
       </Card>
+
+      {showDeleteModal && (
+        <ModalDeleteConfirmation
+          totalSelected={1}
+          itemTitle={detailCustomer.name}
+          visible={showDeleteModal}
+          isLoading={isLoadingDeleteCustomer}
+          onCancel={() => setShowDeleteModal(false)}
+          onOk={() => deleteCustomer({ ids: [detailCustomer.id] })}
+        />
+      )}
     </div>
   );
 }
@@ -300,6 +356,7 @@ const GeneralForms = ({
           type="number"
           label="Tax Number"
           placeholder="e.g 123456789"
+          error={errors?.customer?.tax_number?.message}
           defaultValue={detailCustomer?.taxNumber}
           {...register("customer.tax_number", {
             required: "Tax Number must be filled",
@@ -326,6 +383,7 @@ const GeneralForms = ({
           label="Website"
           height="50px"
           placeholder="e.g ksni.com"
+          error={errors?.customer?.website?.message}
           defaultValue={detailCustomer?.website}
           {...register("customer.website", {
             required: "website must be filled",
@@ -341,9 +399,10 @@ const GeneralForms = ({
             },
           }}
           name="customer.language"
-          render={({ field: { onChange } }) => (
+          render={({ field: { onChange }, fieldState: { error } }) => (
             <>
               <Dropdown
+                error={error?.message}
                 required
                 label="Language"
                 height="50px"
@@ -366,6 +425,7 @@ const GeneralForms = ({
           type="number"
           placeholder="e.g 021 123456"
           defaultValue={detailCustomer?.phone}
+          error={errors?.customer?.phone?.message}
           {...register("customer.phone", {
             required: "phone must be filled",
           })}
@@ -391,6 +451,7 @@ const GeneralForms = ({
           type="email"
           defaultValue={detailCustomer?.email}
           placeholder={"e.g admin@kasni.co.id"}
+          error={errors?.customer?.email?.message}
           {...register("customer.email", {
             required: "email must be filled",
           })}
@@ -428,7 +489,15 @@ const GeneralForms = ({
   );
 };
 
-const HeaderActionForm = ({ control, router, onSubmit }: any) => {
+const HeaderActionForm = ({
+  control,
+  router,
+  onSubmit,
+  detailCustomer,
+  setShowDeleteModal,
+  updateConvertVendor,
+  isLoadingConvertVendor,
+}: any) => {
   return (
     <Card>
       <Row justifyContent="space-between" alignItems="center" nowrap>
@@ -450,9 +519,24 @@ const HeaderActionForm = ({ control, router, onSubmit }: any) => {
           )}
         />
         <Row gap="16px">
-          <Button size="big" variant="tertiary" onClick={() => router.back()}>
-            Cancel
+          <Button
+            size="big"
+            variant="tertiary"
+            onClick={() => (detailCustomer ? setShowDeleteModal(true) : router.back())}
+          >
+            {detailCustomer ? "Delete" : "Cancel"}
           </Button>
+
+          <Button
+            size="big"
+            variant={"secondary"}
+            onClick={() => {
+              updateConvertVendor();
+            }}
+          >
+            {isLoadingConvertVendor ? "Loading..." : " Convert to Vendor"}
+          </Button>
+
           <Button size="big" variant="primary" onClick={onSubmit}>
             Save
           </Button>

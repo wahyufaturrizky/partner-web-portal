@@ -74,6 +74,19 @@ const useCreateCustomers = ({ options }) => {
   });
 };
 
+function useConvertToVendor({ id, options }) {
+  return useMutation(
+    (data) =>
+      mdmService(`/customer/convert/${id}`, {
+        method: "POST",
+        data,
+      }),
+    {
+      ...options,
+    }
+  );
+}
+
 const useDeleteCustomers = ({ options }) => {
   return useMutation(
     (ids) =>
@@ -105,4 +118,5 @@ export {
   useDeleteCustomers,
   useDetailCustomer,
   useUploadLogo,
+  useConvertToVendor,
 };
