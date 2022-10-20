@@ -26,7 +26,12 @@ const BusinessType = () => {
           justifyContent: "center",
         }}
       >
-        <Text variant={"caption"} textAlign={"center"} color={"grey.light"}>
+        <Text
+          variant={"caption"}
+          textAlign={"center"}
+          color={"grey.light"}
+          hoverColor={"grey.light"}
+        >
           Fill in the data according to where you work, after that we will verify the data.
         </Text>
       </div>

@@ -20,8 +20,13 @@ const CreateAccount = () => {
     <form>
       <Col alignItems={"Center"}>
         <Text variant={"h4"}>Create Account</Text>
-        <div style={{ width: "60%" }}>
-          <Text variant={"caption"} textAlign={"center"} color={"grey.light"}>
+        <div style={{ width: "60%", justifyContent: "center", display: "flex" }}>
+          <Text
+            variant={"caption"}
+            textAlign={"center"}
+            color={"grey.light"}
+            hoverColor={"grey.light"}
+          >
             We're so happy you're here, let’s start by signing up. It may take less than 5 minutes.
           </Text>
         </div>

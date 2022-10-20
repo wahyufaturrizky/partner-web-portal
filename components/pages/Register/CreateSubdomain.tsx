@@ -16,7 +16,12 @@ const CreateSubdomain = () => {
     <Col alignItems={"center"}>
       <Text variant={"h4"}>Create Subdomain</Text>
       <div style={{ width: "60%" }}>
-        <Text variant={"caption"} textAlign={"center"} color={"grey.light"}>
+        <Text
+          variant={"caption"}
+          textAlign={"center"}
+          color={"grey.light"}
+          hoverColor={"grey.light"}
+        >
           It's almost finished, Please check the subdomain name that we have suggested or want to
           create a new one according to your wishes. Subdomain are internet addresses for diferent
           section of your website

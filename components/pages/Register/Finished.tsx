@@ -27,7 +27,12 @@ const Finished = () => {
           justifyContent: "center",
         }}
       >
-        <Text variant={"caption"} textAlign={"center"} color={"grey.light"}>
+        <Text
+          variant={"caption"}
+          textAlign={"center"}
+          color={"grey.light"}
+          hoverColor={"grey.light"}
+        >
           Your data is complete, please check again before registering.
         </Text>
       </div>

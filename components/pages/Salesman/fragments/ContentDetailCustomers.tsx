@@ -1,23 +1,62 @@
-import React from 'react'
-import {
-  Pagination,
-  Checkbox,
-  Spacer,
-  Text,
-  Row,
-  Col,
-  Table,
-  DatePickerInput,
-} from 'pink-lava-ui'
-import moment from 'moment'
-import { columnsDetailCustomers } from '../constants'
-import { FlexElement } from './ActionButton'
+import React, { useState } from "react";
+import { Pagination, Checkbox, Spacer, Text, Row, Col, Table, DatePickerInput } from "pink-lava-ui";
+import moment from "moment";
+import { columnsDetailCustomers } from "../constants";
+import { FlexElement } from "./ActionButton";
+import { useFetchSalesmanCustomerDetail } from "hooks/mdm/salesman/useSalesman";
+import usePagination from "@lucasmogari/react-pagination";
+import useDebounce from "lib/useDebounce";
 
-const ContentDetailCustomer = ({
-  checkedDate = false,
-  onChecked,
-  pagination
-}: any) => {
+const ContentDetailCustomer = ({ customerId }: any) => {
+  const pagination = usePagination({
+    page: 1,
+    itemsPerPage: 20,
+    maxPageItems: Infinity,
+    numbers: true,
+    arrows: true,
+    totalItems: 100,
+  });
+
+  const [defaultChecked, setDefaultChecked] = useState(false);
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const debounceStartDate = useDebounce(startDate, 1000);
+  const debounceEndDate = useDebounce(endDate, 1000);
+  const debounceToday = useDebounce(defaultChecked, 1000);
+
+  const {
+    data: salesCustomerData,
+    isLoading: isLoadingSalesCustomer,
+    isFetching: isFetchingSalesCustomer,
+  } = useFetchSalesmanCustomerDetail({
+    query: {
+      customer: customerId,
+      company: "KSNI",
+      start: debounceStartDate,
+      end: debounceEndDate,
+      today: debounceToday ? "Y" : "N",
+    },
+    options: {
+      onSuccess: (data: any) => {
+        pagination.setTotalItems(data.totalRow);
+      },
+      select: (data: any) => {
+        const mappedData = data?.rows?.map((element: any, index: any) => {
+          return {
+            key: index,
+            branch: element.branch,
+            frequency: element.visitFrequency,
+            day: element.visitDay,
+            date: element.date,
+            startTime: element.startTime,
+            endTime: element.endTime,
+            duration: element.duration,
+          };
+        });
+        return { data: mappedData, totalRow: data.totalRow };
+      },
+    },
+  });
 
   return (
     <div>
@@ -27,43 +66,61 @@ const ContentDetailCustomer = ({
           <DatePickerInput
             fullWidth
             placeholder="input start date"
-            value={checkedDate && moment()}
-            defaultValue={moment()}
+            value={startDate === "" ? "" : moment(startDate, "MM-DD-YYYY")}
             label="Start Date"
+            format={"DD/MM/YYYY"}
+            onChange={(date: any, dateString: any) => {
+              const formatDate = moment(dateString, "DD-MM-YYYY").format("MM-DD-YYYY");
+
+              setStartDate(formatDate);
+              setEndDate("");
+              setDefaultChecked(false);
+            }}
           />
         </Col>
         <Col width="45%">
           <DatePickerInput
             fullWidth
-            disabled={checkedDate}
+            disabled={defaultChecked}
             placeholder="end start date"
-            defaultValue={moment()}
-            value={checkedDate && moment()}
+            value={endDate === "" ? "" : moment(endDate, "MM-DD-YYYY")}
             label="End Date"
+            format={"DD/MM/YYYY"}
+            onChange={(date: any, dateString: any) => {
+              const formatDate = moment(dateString, "DD-MM-YYYY").format("MM-DD-YYYY");
+              setEndDate(formatDate);
+            }}
+            disabledDate={(current: any) => {
+              return startDate === ""
+                ? false
+                : current && current < moment(startDate, "MM-DD-YYYY").endOf("day");
+            }}
           />
         </Col>
         <FlexElement style={{ paddingTop: "1.5rem", gap: "1px" }}>
           <Checkbox
-            checked={checkedDate}
-            onChange={onChecked}
+            checked={defaultChecked}
+            onChange={() => {
+              setDefaultChecked(!defaultChecked);
+
+              setStartDate(!defaultChecked ? moment().format("MM-DD-YYYY") : "");
+              setEndDate(!defaultChecked ? moment().format("MM-DD-YYYY") : "");
+            }}
           />
           <Text>Today</Text>
         </FlexElement>
       </Row>
       <Spacer size={20} />
       <Table
+        loading={isLoadingSalesCustomer || isFetchingSalesCustomer}
         columns={columnsDetailCustomers}
-        data={[
-          { branch: 'PT. Indomaret Buah Batu', frequency: 'M1', day: 'Monday', date: '02/02/2022', startTime: '08:00:00', endTime: '08:30:00', duration: '0 Days, 0 Hours, 30 minutes, 00 seconds' },
-          { branch: 'PT. Indomaret Buah Batu', frequency: 'M2', day: 'Tuesday', date: '02/02/2022', startTime: '09:00:00', endTime: '08:30:00', duration: '0 Days, 0 Hours, 30 minutes, 00 seconds' },
-          { branch: 'PT. Indomaret Buah Batu', frequency: 'M3', day: 'Wednesday', date: '02/02/2022', startTime: '10:00:00', endTime: '08:30:00', duration: '0 Days, 0 Hours, 30 minutes, 00 seconds' },
-        ]}
+        data={salesCustomerData?.data}
       />
       <Spacer size={20} />
       <Pagination pagination={pagination} />
       <Spacer size={20} />
     </div>
-  )
-}
+  );
+};
 
-export default ContentDetailCustomer
+export default ContentDetailCustomer;
