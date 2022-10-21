@@ -128,6 +128,7 @@ const DetailMenuList: any = () => {
 					name: data.menu.name,
 					process_name: data.menu.processName,
 					screen: data.menu.screen,
+					fee: data.menu.fee
 				});
 
 				setDataAllowedField(tempDataAllowedField);
