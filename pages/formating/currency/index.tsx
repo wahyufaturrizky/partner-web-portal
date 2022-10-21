@@ -72,7 +72,7 @@ export default function FormatingCurrency() {
       <Row justifyContent="flex-start">
         <Search
           width="380px"
-          placeholder="Search Currency Format"
+          placeholder="Search Currency or Currency Format"
           onChange={({ target }: any) => setSearch(target.value)}
         />
       </Row>
