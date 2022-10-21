@@ -40,20 +40,25 @@ export default function FormatingCurrency() {
 	const columns = [
 		{
 			title: "Currency",
+			dataIndex: "currencyCode",
+			width: "35%",
+		},
+		{
+			title: "Currency Name",
 			dataIndex: "currency",
-			width: "50%",
+			width: "35%",
 		},
 		{
 			title: "Currency Format",
 			dataIndex: "currencyFormat",
-			width: "50%",
 		},
 	];
 
 	const data: any = [];
-	fields?.rows?.map((field: any) => {
+	fields?.rows?.map((field) => {
 		data.push({
 			key: field.id,
+			currencyCode: field.currencyCode ? field.currencyCode : '-',
 			currency: field.format,
 			currencyFormat: field.currencyFormat,
 		});
