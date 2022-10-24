@@ -65,7 +65,6 @@ const UOMConversionDetail = () => {
 
 
   const { register, control, handleSubmit } = useForm();
-  
   const {
     isFetching: isFetchingUomCategory,
     isFetchingNextPage: isFetchingMoreUomCategory,
@@ -152,7 +151,7 @@ const UOMConversionDetail = () => {
     options: {
       onSuccess: () => {
         queryClient.invalidateQueries(["uom-conversion"]);
-        router.back()
+        // router.back()
       },
     },
   });
@@ -162,11 +161,9 @@ const UOMConversionDetail = () => {
       onSuccess: () => {
         queryClient.invalidateQueries(["uom-list"]);
         setShowDeleteModal(false);
-        router.back();
       },
     },
   });
-
 
   const updateDeleteUom = (id: any) => {
     let newData = {
@@ -176,7 +173,7 @@ const UOMConversionDetail = () => {
       remove_items: []
     }
     
-    id.forEach((uomId:number) => {
+    id?.forEach((uomId:number) => {
       newData.remove_items.push({id: uomId})
     })
     updateUom(newData)
@@ -226,14 +223,13 @@ const UOMConversionDetail = () => {
     updateUom(newData)
   }
 
-  const onSave = (data: any) => {
+  const onSave = (data: any, open: boolean) => {
     const newData: any = {
       name: data?.name,
       base_uom_id: data?.baseUom,
       items: UomData?.dataForUpdate
     }
     updateUom(newData)
-  
   }
 
   const columns = [
@@ -300,7 +296,11 @@ const UOMConversionDetail = () => {
               <Button size="big" variant={"tertiary"} onClick={() => setShowDeleteModal(true)}>
                 Delete
               </Button>
-              <Button size="big" variant={"primary"} onClick={handleSubmit(onSave)}>
+              <Button size="big" variant={"primary"} onClick={(e) => {
+                handleSubmit(onSave)(e)
+                router.back()
+              }
+              }>
                 {isLoadingUpdateUom ? "Loading..." : "Save"}
               </Button>
             </Row>
@@ -364,6 +364,7 @@ const UOMConversionDetail = () => {
                       }
                       onChange={(value: any) => {
                         onChange(value);
+                        setSearch("")
                       }}
                       onSearch={(value: any) => {
                         setSearch(value);
@@ -459,6 +460,7 @@ const UOMConversionDetail = () => {
                         }
                         onChange={(value: any) => {
                           onChange(value);
+                          setSearch("")
                         }}
                         onSearch={(value: any) => {
                           setSearch(value);
@@ -499,7 +501,7 @@ const UOMConversionDetail = () => {
               </Button>
               <Button
                 variant="primary"
-                onClick={handleSubmit(updateCreateUom)}
+                onClick={handleSubmit(updateCreateUom, false)}
               >
                 save
               </Button>
