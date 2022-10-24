@@ -152,12 +152,11 @@ const DetailCoa: any = () => {
       },
     };
 
-    console.log(payload);
-    // if (!coaName) {
-    //   setError("Name is required");
-    // } else {
-    //   updateCoa(payload);
-    // }
+    if (!coaName) {
+      setError("Name is required");
+    } else {
+      updateCoa(payload);
+    }
   };
 
   const paginationCoaAccount = usePagination({
