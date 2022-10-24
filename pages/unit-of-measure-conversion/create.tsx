@@ -142,23 +142,23 @@ const UOMConversionCreate = () => {
       setNewUomTable([{
         id: 1,
         qty: 1,
-        uom: listUomCategory.find(e => e.value === data.uom).label,
+        uom: listUomCategory?.find(e => e.value === data.uom)?.label,
         conversionNumber: data.conversionNumber,
-        baseUom: listUomCategory.find(e => e.value === data.baseUom).label
+        baseUom: listUomCategory?.find(e => e.value === data.baseUom)?.label
       }])
     } else {
       setNewUomTable(prev => [...prev, {
         id: newUomTable.length+1,
         qty: 1,
-        uom: listUomCategory.find(e => e.value === data.uom).label,
+        uom: listUomCategory?.find(e => e.value === data.uom)?.label,
         conversionNumber: data.conversionNumber,
-        baseUom: listUomCategory.find(e => e.value === data.baseUom).label
+        baseUom: listUomCategory?.find(e => e.value === data.baseUom)?.label
       }])
     }
     setNewUom({
       company_id: "KSNI",
       name: data.name,
-      base_uom_id: listUomCategory.find(e => e.value === data.uom).label,
+      base_uom_id: listUomCategory?.find(e => e.value === data.uom)?.label,
     })
     setShowCreateModal(false)
   };
@@ -312,6 +312,7 @@ const UOMConversionCreate = () => {
                       }
                       onChange={(value: any) => {
                         onChange(value);
+                        setSearch("")
                       }}
                       onSearch={(value: any) => {
                         setSearch(value);
@@ -413,6 +414,7 @@ const UOMConversionCreate = () => {
                         }
                         onChange={(value: any) => {
                           onChange(value);
+                          setSearch("")
                         }}
                         onSearch={(value: any) => {
                           setSearch(value);
