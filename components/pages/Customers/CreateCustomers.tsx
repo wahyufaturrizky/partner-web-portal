@@ -16,6 +16,7 @@ import {
   Text,
   Spin,
   FileUploaderAllFiles,
+  Modal,
 } from "pink-lava-ui";
 import React, { useState } from "react";
 import { Controller, FormProvider, useFieldArray, useForm } from "react-hook-form";
@@ -32,14 +33,15 @@ import { listTabItems, status } from "./constants";
 import Invoicing from "./fragments/Invoicing";
 import Purchasing from "./fragments/Purchasing";
 import Sales from "./fragments/Sales";
-import UploadImage from "./fragments/UploadImages";
 import { queryClient } from "pages/_app";
 import Contacts from "./fragments/Contacts";
 import Addresses from "./fragments/Addresses";
+import { ICSuccessCheck } from "assets";
 
 export default function CreateCustomers({
   detailCustomer,
   getDataLanguages,
+  isLoadingLanguages,
   getDataCustomerGroup,
   setSearchCustomerGroup,
   setSearchLanguages,
@@ -48,7 +50,10 @@ export default function CreateCustomers({
   const router = useRouter();
   const [tabAktived, setTabAktived] = useState<string>("Contact");
   const [formType, setFormType] = useState<string>("Company");
-  const [imageLogo, setImageLogo] = useState<string>("");
+  const [isSuccessConvertToVendor, setIsSuccessConvertToVendor] = useState<{
+    open: boolean;
+    data: null;
+  }>({ open: false, data: null });
   const [isPKP, setIsPKP] = useState<boolean>(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [visibleModalBankAccount, setVisibleModalBankAccount] = useState<{
@@ -215,9 +220,22 @@ export default function CreateCustomers({
   };
 
   const onSubmit = (data: any) => {
-    const { customer, invoicing, purchasing, sales } = data || {};
+    const { customer, invoicing, purchasing, sales, bank, contact, address } = data || {};
+
+    const tempcontact = contact.map((data: any) => {
+      if (data.filtered || data.is_primary) {
+        delete data.filtered;
+        delete data.is_primary;
+        return data;
+      } else {
+        return data;
+      }
+    });
+
     const payloads = {
-      ...data,
+      bank,
+      contact: tempcontact,
+      address,
       customer: {
         ...customer,
         is_company: isCompany,
@@ -279,6 +297,7 @@ export default function CreateCustomers({
     setIsPKP,
     control,
     listItemsLanguages,
+    isLoadingLanguages,
     handleUploadCompanyLogoCustomer,
     isCompany,
     setSearchLanguages,
@@ -290,7 +309,14 @@ export default function CreateCustomers({
   const { mutate: updateConvertVendor, isLoading: isLoadingConvertVendor } = useConvertToVendor({
     id: detailCustomer?.id,
     options: {
-      onSuccess: (data: any) => {},
+      onSuccess: (data: any) => {
+        console.log("@data", data);
+
+        setIsSuccessConvertToVendor({
+          data: data,
+          open: true,
+        });
+      },
     },
   });
 
@@ -429,6 +455,62 @@ export default function CreateCustomers({
           onOk={() => deleteCustomer({ ids: [detailCustomer.id] })}
         />
       )}
+
+      {isSuccessConvertToVendor.open && (
+        <Modal
+          centered
+          width={432}
+          closable={false}
+          visible={isSuccessConvertToVendor.open}
+          onCancel={() => setIsSuccessConvertToVendor({ open: false, data: null })}
+          footer={null}
+          content={
+            <Row justifyContent="center">
+              <Col>
+                <Spacer size={24} />
+
+                <Row alignItems="center" justifyContent="center">
+                  <ICSuccessCheck />
+                  <Text variant="headingLarge" color={"green.dark"}>
+                    Success
+                  </Text>
+                </Row>
+
+                <Spacer size={10} />
+
+                <Text textAlign="center" variant="headingLarge">
+                  Vendor ID {isSuccessConvertToVendor?.data?.id} has been successfully converted
+                </Text>
+
+                <Spacer size={24} />
+
+                <Row alignItems="center" justifyContent="space-between">
+                  <Button
+                    size="big"
+                    variant={"tertiary"}
+                    key="submit"
+                    type="primary"
+                    onClick={() => setIsSuccessConvertToVendor({ open: false, data: null })}
+                  >
+                    Cancel
+                  </Button>
+
+                  <Button
+                    size="big"
+                    key="submit"
+                    type="primary"
+                    onClick={() => router.push(`/vendor/${isSuccessConvertToVendor?.data?.id}`)}
+                  >
+                    Go to Vendor
+                  </Button>
+                </Row>
+
+                <Spacer size={24} />
+              </Col>
+            </Row>
+          }
+        />
+      )}
     </div>
   );
 }
@@ -441,6 +523,7 @@ const GeneralForms = ({
   setIsPKP,
   control,
   listItemsLanguages,
+  isLoadingLanguages,
   handleUploadCompanyLogoCustomer,
   isCompany,
   setSearchLanguages,
@@ -525,6 +608,7 @@ const GeneralForms = ({
                 width="100%"
                 handleChange={onChange}
                 items={listItemsLanguages}
+                loading={isLoadingLanguages}
                 onSearch={(value: string) => setSearchLanguages(value)}
               />
             </>
@@ -657,15 +741,18 @@ const HeaderActionForm = ({
             {detailCustomer ? "Delete" : "Cancel"}
           </Button>
 
-          <Button
-            size="big"
-            variant={"secondary"}
-            onClick={() => {
-              updateConvertVendor();
-            }}
-          >
-            {isLoadingConvertVendor ? "Loading..." : " Convert to Vendor"}
-          </Button>
+          {detailCustomer && (
+            <Button
+              size="big"
+              variant={"secondary"}
+              disabled={isLoadingConvertVendor || detailCustomer?.vendor?.id}
+              onClick={() => {
+                updateConvertVendor();
+              }}
+            >
+              {isLoadingConvertVendor ? "Loading..." : " Convert to Vendor"}
+            </Button>
+          )}
 
           <Button
             disabled={isLoadingCraeteCustomer}

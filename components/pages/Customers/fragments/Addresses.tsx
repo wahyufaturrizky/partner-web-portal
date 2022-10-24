@@ -145,8 +145,8 @@ const Addresses = ({ formType }: any) => {
                 district: "",
                 zone: "",
                 postal_code: "",
-                lon: "",
-                lat: "",
+                longtitude: "",
+                latitude: "",
                 is_primary: fields.length === 0,
                 photo: "",
                 deleted: false,
@@ -161,8 +161,8 @@ const Addresses = ({ formType }: any) => {
                 district: "",
                 zone: "",
                 postal_code: "",
-                lon: "",
-                lat: "",
+                longtitude: "",
+                latitude: "",
                 is_primary: fields.length === 0,
                 photo: "",
               });
@@ -479,7 +479,7 @@ const Addresses = ({ formType }: any) => {
                   height="40px"
                   defaultValue={""}
                   placeholder={"e.g 38.8951"}
-                  {...register(`address.${addressIndex}.lon`)}
+                  {...register(`address.${addressIndex}.longtitude`)}
                 />
               </Col>
 
@@ -490,7 +490,7 @@ const Addresses = ({ formType }: any) => {
                   height="40px"
                   defaultValue={""}
                   placeholder={"e.g -77.0364"}
-                  {...register(`address.${addressIndex}.lat`)}
+                  {...register(`address.${addressIndex}.latitude`)}
                 />
               </Col>
             </Row>
