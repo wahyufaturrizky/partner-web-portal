@@ -76,7 +76,7 @@ export default function ModalAddNewContacts({
             height="40px"
             placeholder="e.g Business"
             label="Job Position"
-            defaultValue={contactData?.job_position ?? ""}
+            defaultValue={contactData?.job ?? ""}
             {...register("job", { shouldUnregister: true })}
           />
           <Spacer size={10} />

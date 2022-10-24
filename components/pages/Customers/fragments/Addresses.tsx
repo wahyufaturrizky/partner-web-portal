@@ -1,295 +1,522 @@
-import React from 'react'
-import { Controller } from 'react-hook-form'
+import React, { useState } from "react";
 import {
-  Button,
   Col,
-  Input,
   Row,
   Spacer,
-  Dropdown,
-  Lozenge,
   Text,
-  FileUploaderAllFiles
+  Button,
+  FormSelect,
+  Input,
+  Spin,
+  FileUploaderAllFiles,
 } from "pink-lava-ui";
+import { useFormContext, useFieldArray, Controller } from "react-hook-form";
+import { ICPlusWhite } from "assets";
+import { CheckOutlined } from "@ant-design/icons";
+import { useCountryStructureVendor, useCountryPostalVendor } from "hooks/mdm/vendor/useVendor";
+import { useCountryInfiniteLists } from "hooks/mdm/country-structure/useCountries";
+import useDebounce from "lib/useDebounce";
+import styled from "styled-components";
+import { useUploadStorePhotoAddress } from "hooks/mdm/customers/useCustomersMDM";
 
-import { ICCheckPrimary, IconAdd } from "assets";
+const Addresses = ({ formType }: any) => {
+  const { register, control, setValue } = useFormContext();
 
-export default function Addresses(props: any) {
-  const {} = props
+  const { fields, append, remove, update }: any = useFieldArray({
+    control,
+    name: "address",
+  });
 
-  const handleAddMoreAddresss = () => {}
+  const [indexStorePhoto, setindexStorePhoto] = useState(0);
 
-  return (
-    <div>
-      <Button
-        size="big"
-        variant="primary"
-        onClick={handleAddMoreAddresss}
-      >
-        <IconAdd />
-        Add More Address
-      </Button>
-      <Spacer size={20} />
-      <div>
-        <FormContact />
-        <Spacer size={30} />
-        <hr />
-        <Spacer size={30} />
-      </div>
-    </div>
-  )
-}
+  // Country State
+  const [totalRowsCountry, setTotalRowsCountry] = useState(0);
+  const [listCountry, setListCountry] = useState([]);
+  const [searchCountry, setSearchCountry] = useState("");
+  const debounceSearchCountry = useDebounce(searchCountry, 1000);
 
-const FormContact = ({}: any) => {
+  // Country Structure State
+  const [totalRowsCountryStructure, setTotalRowsCountryStructure] = useState(0);
+  const [listCountryStructure, setListCountryStructure] = useState([]);
+  const [searchCountryStructure, setSearchCountryStructure] = useState("");
+  const debounceSearchCountryStructure = useDebounce(searchCountryStructure, 1000);
 
-  const setAsPrimary = () => {}
-  
-  const listFakeCountres = [
-    { id: 1, value: 'Indonesia' },
-    { id: 2, value: 'Japan' },
-    { id: 3, value: 'Malaysia' },
-    { id: 4, value: 'Singepore' },
-  ]
+  // Postal State
+  const [totalRowsPostal, setTotalRowsPostal] = useState(0);
+  const [listPostal, setListPostal] = useState([]);
+  const [searchPostal, setSearchPostal] = useState("");
+  const debounceSearchPostal = useDebounce(searchPostal, 1000);
 
+  const { mutate: uploadStorePhotoAddress, isLoading: isLoadingStorePhotoAddress } =
+    useUploadStorePhotoAddress({
+      options: {
+        onSuccess: ({ imageUrl }: { imageUrl: string }) => {
+          setValue(`address.${indexStorePhoto}.image`, imageUrl);
+        },
+      },
+    });
 
-  const listFakePostalCode = [
-    { id: 'POSTAL-1', value: 'Example - postal code - 1' },
-    { id: 'POSTAL-2', value: 'Example - postal code - 2' },
-    { id: 'POSTAL-3', value: 'Example - postal code - 3' },
-    { id: 'POSTAL-4', value: 'Example - postal code - 4' },
-  ]
+  const handleUploadStorePhotoAddress = async (files: any) => {
+    const formData: any = new FormData();
+    await formData.append("image", files);
 
-  const listFakeProvince = [
-    { id: 1, value: 'Lampung' },
-    { id: 2, value: 'Jawa Barat' },
-    { id: 3, value: 'Jawa Tengah' },
-    { id: 4, value: 'DKI Timur' },
-  ]
+    return uploadStorePhotoAddress(formData);
+  };
 
-  const listFakeAddressType = [
-    { id: "Home", value: "Home" },
-    { id: "Office", value: "Office" },
-    { id: "Apartment", value: "Apartment" },
-    { id: "School", value: "School" },
-  ]
-
-  return (
-    <>
-      <Controller
-        name={`address.is_primary`}
-        render={() => <ButtonSetFormsPrimary />}
-      />
-      <Spacer size={30} />
-      <Row gap="20px" width="100%">
-        <Col width="48%">
-          <Controller
-            name={`address.address_type`}
-            rules={{ required: "Please enter address type." }}
-            render={({ field: { onChange }, fieldState: { error } }) => (
-              <Dropdown
-                label="Address Type"
-                width="100%"
-                noSearch
-                error={error?.message}
-                items={listFakeAddressType}
-                handleChange={(value: string) => onChange(value)}
-              />
-            )}
-          />
-
-          <Spacer size={10} />
-          <Controller
-            name={`address.country`}
-            rules={{ required: "Please enter country." }}
-            render={({ field: { onChange }, fieldState: { error } }) => (
-              <Dropdown
-                label="Country"
-                width="100%"
-                noSearch
-                error={error?.message}
-                items={listFakeCountres}
-                handleChange={(value: string) => onChange(value)}
-              />
-            )} />
-          <Spacer size={10} />
-          <Controller
-            name={`address.city`}
-            rules={{ required: "Please enter city." }}
-            render={({ field: { onChange }, fieldState: { error } }) => (
-              <Dropdown
-                label="City"
-                width="100%"
-                noSearch
-                error={error?.message}
-                items={listFakeCountres}
-                handleChange={(value: string) => onChange(value)}
-              />
-            )} />
-          <Spacer size={10} />
-          <Controller
-            name={`address.zone`}
-            rules={{ required: "Please enter zone." }}
-            render={({ field: { onChange }, fieldState: { error } }) => (
-              <Dropdown
-                label="Zone"
-                width="100%"
-                noSearch
-                error={error?.message}
-                items={listFakeCountres}
-                handleChange={(value: string) => onChange(value)}
-              />
-            )} />
-          <Spacer size={10} />
-          <Input
-            height="48px"
-            placeholder="e.g 1421.31231.1231"
-            label="Longitude"
-            width="100%"
-            noSearch
-            required
-            // {...register(`address.${index}.longtitude`, {
-            //   required: 'longtitude must be filled'
-            // })}
-          />
-          <Spacer size={30} />
-          {/* <UploadImage control={control} index={index} /> */}
-        </Col>
-        <Col width="48%">
-          <Input
-            width="100%"
-            height="48px"
-            placeholder="e.g Front Groceries No. 5"
-            label="Street"
-            required
-            // {...register(`address.${index}.street`, {
-            //   required: 'street must be filled'
-            // })}
-          />
-          <Spacer size={10} />
-          <Controller
-            name={`address.province`}
-            rules={{ required: "Please enter province." }}
-            render={({ field: { onChange }, fieldState: { error } }) => (
-              <Dropdown
-                label="Province"
-                width="100%"
-                noSearch
-                error={error?.message}
-                items={listFakeProvince}
-                handleChange={(value: string) => onChange(value)}
-              />
-            )} />
-          <Spacer size={10} />
-          <Controller
-            rules={{ required: "Please enter district" }}
-            name={`address.district`}
-            render={({ field: { onChange }, fieldState: { error } }) => (
-              <Dropdown
-                label="District"
-                width="100%"
-                noSearch
-                error={error?.message}
-                items={listFakeCountres}
-                handleChange={(value: string) => onChange(value)}
-              />
-            )} />
-          <Spacer size={10} />
-          <Controller
-            rules={{ required: "Please enter postal code." }}
-            name={`address.postal_code`}
-            render={({ field: { onChange }, fieldState: { error } }) => (
-              <Dropdown
-                label="Postal Code"
-                width="100%"
-                noSearch
-                items={listFakePostalCode}
-                error={error?.message}
-                handleChange={(value: string) => onChange(value)}
-              />
-            )} />
-          <Spacer size={10} />
-          <Input
-            height="48px"
-            placeholder="e.g 1421.31231.1231"
-            label="Latitude"
-            width="100%"
-            // {...register(`address.${index}.latitude`, {
-            //   required: 'latitude must be filled'
-            // })}
-          />
-        </Col>
-      </Row>
-    </>
-  )
-}
-
-const ButtonSetFormsPrimary = ({
-}: any) => {
-  // const isDeleteAktifed: boolean = fieldsAddress?.length > 1
-  return (
-    <>
-      <Text color="blue.dark" variant="headingMedium">
-        {/* {getValues(`address.${index}.is_primary`)
-          ? "Home"
-          : "New Address"} */}
-      </Text>
-      <Row gap="12px" alignItems="center">
-        {/* {(index === 0 && fieldsAddress.length < 2) || getValues(`address.${index}.is_primary`)
-          ? (
-            <Lozenge variant="blue">
-              <Row alignItems="center">
-                <ICCheckPrimary />
-                Primary
-              </Row>
-            </Lozenge>
-          )
-          : (
-            <Text
-              clickable
-              color="pink.regular"
-              onClick={setAsPrimary}>
-              Set as Primary
-            </Text>
-          )
+  // Country API
+  const {
+    isLoading: isLoadingCountry,
+    isFetching: isFetchingCountry,
+    isFetchingNextPage: isFetchingMoreCountry,
+    hasNextPage: hasNextPageCountry,
+    fetchNextPage: fetchNextPageCountry,
+  } = useCountryInfiniteLists({
+    query: {
+      search: debounceSearchCountry,
+      limit: 10,
+    },
+    options: {
+      onSuccess: (data: any) => {
+        setTotalRowsCountry(data.pages[0].totalRow);
+        const mappedData = data?.pages?.map((group: any) => {
+          return group.rows?.map((element: any) => {
+            return {
+              value: element.id,
+              label: element.name,
+            };
+          });
+        });
+        const flattenArray = [].concat(...mappedData);
+        setListCountry(flattenArray);
+      },
+      getNextPageParam: (_lastPage: any, pages: any) => {
+        if (listCountry.length < totalRowsCountry) {
+          return pages.length + 1;
+        } else {
+          return undefined;
         }
-        {
-          isDeleteAktifed && (
-            <> |
-              <div style={{ cursor: "pointer" }}>
-                <Text color="pink.regular" onClick={() => removeAddress(index)}>
-                  Delete
-                </Text>
-              </div>
-            </>
-          )
-        } */}
-      </Row>
-    </>
-  )
-}
+      },
+    },
+  });
 
-const UploadImage = ({ control, index }:
-  { index: number, control: any }) => {
+  const {
+    data: countryPostalData,
+    isLoading: isLoadingCountryPostal,
+    isFetching: isFetchingCountryPostal,
+  } = useCountryPostalVendor({
+    countryId: "",
+    level: "",
+    options: {
+      enabled: false,
+      onSuccess: (data: any) => {
+        // pagination.setTotalItems(data.totalRow);
+      },
+    },
+  });
+
+  const {
+    data: vendorData,
+    isLoading: isLoadingVendor,
+    isFetching: isFetchingVendor,
+  } = useCountryStructureVendor({
+    id: "",
+    options: {
+      enabled: false,
+      onSuccess: (data: any) => {
+        // pagination.setTotalItems(data.totalRow);
+      },
+    },
+  });
+
   return (
-    <Controller
-      control={control}
-      name={`address.${index}.logo_store`}
-      render={({ field: { onChange } }) => (
-        <FileUploaderAllFiles
-          label="Store photo"
-          onSubmit={(file: any) => onChange(file)}
-          defaultFile="/placeholder-employee-photo.svg"
-          withCrop
-          sizeImagePhoto="125px"
-          removeable
-          textPhoto={[
-            "Dimension Minimum Size 300 x 300",
-            "File Size Max. 1MB",
-          ]}
-        />
-      )}
-    ></Controller>
-  )
-}
+    <Col width="100%">
+      <Row width={"250px"}>
+        <Button
+          size="big"
+          onClick={() => {
+            if (formType === "edit") {
+              append({
+                id: 0,
+                type: "",
+                street: "",
+                country: "",
+                province: "",
+                city: "",
+                district: "",
+                zone: "",
+                postal_code: "",
+                lon: "",
+                lat: "",
+                is_primary: fields.length === 0,
+                photo: "",
+                deleted: false,
+              });
+            } else {
+              append({
+                type: "",
+                street: "",
+                country: "",
+                province: "",
+                city: "",
+                district: "",
+                zone: "",
+                postal_code: "",
+                lon: "",
+                lat: "",
+                is_primary: fields.length === 0,
+                photo: "",
+              });
+            }
+          }}
+        >
+          <ICPlusWhite /> Add More Address
+        </Button>
+      </Row>
 
+      <Spacer size={20} />
 
+      {fields.map((address: any, addressIndex: any) => {
+        return (
+          <Col key={address.id}>
+            <FileUploaderAllFiles
+              label="Company Logo"
+              onSubmit={(file: any) => {
+                setindexStorePhoto(addressIndex);
+                handleUploadStorePhotoAddress(file);
+              }}
+              disabled={isLoadingStorePhotoAddress}
+              defaultFile="/placeholder-employee-photo.svg"
+              withCrop
+              sizeImagePhoto="125px"
+              removeable
+              textPhoto={[
+                "Dimension Minimum 72 x 72, Optimal size 300 x 300",
+                "File Size Max. 5MB",
+              ]}
+            />
+
+            <Spacer size={10} />
+
+            <Text variant="headingRegular" color="blue.dark">
+              New Address
+            </Text>
+
+            <Spacer size={10} />
+
+            <Row gap={"5px"}>
+              {address.is_primary ? (
+                <>
+                  <AddressLabel>
+                    <CheckOutlined /> Primary
+                  </AddressLabel>{" "}
+                  |
+                </>
+              ) : (
+                <>
+                  <Text
+                    variant="subtitle1"
+                    clickable
+                    inline
+                    color="blue.dark"
+                    onClick={() => {
+                      const findIndex = fields.findIndex((address: any) => address.is_primary);
+
+                      // Ganti status primary true menjadi false di elemen lain
+                      update(findIndex, { ...fields[findIndex], is_primary: false });
+
+                      // Gantu status primary false menjadi true di elemen yang di tuju
+                      update(addressIndex, { ...address, is_primary: true });
+                    }}
+                  >
+                    Set Primary
+                  </Text>{" "}
+                  |
+                </>
+              )}
+
+              <Text
+                variant="subtitle1"
+                color="pink.regular"
+                clickable
+                inline
+                onClick={() => {
+                  remove(addressIndex);
+                }}
+              >
+                Delete
+              </Text>
+            </Row>
+
+            <Spacer size={10} />
+
+            <Row width="100%" gap={"10px"} noWrap>
+              <Controller
+                control={control}
+                defaultValue={""}
+                name={`address.${addressIndex}.type`}
+                render={({ field: { onChange, value }, formState: { errors } }) => (
+                  <Col width="50%">
+                    <Text variant="headingRegular">Address Type</Text>
+                    <Spacer size={5} />
+                    <FormSelect
+                      defaultValue={value}
+                      style={{ width: "100%" }}
+                      size={"large"}
+                      placeholder={"Select"}
+                      borderColor={"#AAAAAA"}
+                      arrowColor={"#000"}
+                      withSearch={false}
+                      items={[
+                        { id: "Office", value: "Office" },
+                        { id: "Store/Outlet", value: "Store/Outlet" },
+                      ]}
+                      onChange={(value: any) => {
+                        onChange(value);
+                      }}
+                    />
+                  </Col>
+                )}
+              />
+
+              <Col width="50%">
+                <Input
+                  required
+                  width="100%"
+                  label="Street"
+                  height="40px"
+                  defaultValue={""}
+                  placeholder={"e.g Front Groceries No. 5"}
+                  {...register(`address.${addressIndex}.street`)}
+                />
+              </Col>
+            </Row>
+
+            <Spacer size={10} />
+
+            <Row width="100%" gap={"10px"} noWrap>
+              <Controller
+                control={control}
+                defaultValue={""}
+                name={`address.${addressIndex}.country`}
+                render={({ field: { onChange }, formState: { errors } }) => (
+                  <Col width="50%">
+                    {isLoadingCountry ? (
+                      <Center>
+                        <Spin tip="" />
+                      </Center>
+                    ) : (
+                      <>
+                        <Text variant="headingRegular">Country</Text>
+                        <Spacer size={5} />
+                        <FormSelect
+                          defaultValue={""}
+                          style={{ width: "100%" }}
+                          size={"large"}
+                          placeholder={"Select"}
+                          borderColor={"#AAAAAA"}
+                          arrowColor={"#000"}
+                          withSearch
+                          isLoading={isFetchingCountry}
+                          isLoadingMore={isFetchingMoreCountry}
+                          fetchMore={() => {
+                            if (hasNextPageCountry) {
+                              fetchNextPageCountry();
+                            }
+                          }}
+                          items={isFetchingCountry && !isFetchingMoreCountry ? [] : listCountry}
+                          onChange={(value: any) => {
+                            onChange(value);
+                          }}
+                          onSearch={(value: any) => {
+                            setSearchCountry(value);
+                          }}
+                        />
+                      </>
+                    )}
+                  </Col>
+                )}
+              />
+
+              <Controller
+                control={control}
+                defaultValue={""}
+                name={`address.${addressIndex}.province`}
+                render={({ field: { onChange, value }, formState: { errors } }) => (
+                  <Col width="50%">
+                    <Text variant="headingRegular">Province</Text>
+                    <Spacer size={5} />
+                    <FormSelect
+                      defaultValue={value}
+                      style={{ width: "100%" }}
+                      size={"large"}
+                      placeholder={"Select"}
+                      borderColor={"#AAAAAA"}
+                      arrowColor={"#000"}
+                      withSearch={false}
+                      items={[]}
+                      onChange={(value: any) => {
+                        onChange(value);
+                      }}
+                    />
+                  </Col>
+                )}
+              />
+            </Row>
+
+            <Spacer size={10} />
+
+            <Row width="100%" gap={"10px"} noWrap>
+              <Controller
+                control={control}
+                defaultValue={""}
+                name={`address.${addressIndex}.city`}
+                render={({ field: { onChange, value }, formState: { errors } }) => (
+                  <Col width="50%">
+                    <Text variant="headingRegular">City</Text>
+                    <Spacer size={5} />
+                    <FormSelect
+                      defaultValue={value}
+                      style={{ width: "100%" }}
+                      size={"large"}
+                      placeholder={"Select"}
+                      borderColor={"#AAAAAA"}
+                      arrowColor={"#000"}
+                      withSearch={false}
+                      items={[]}
+                      onChange={(value: any) => {
+                        onChange(value);
+                      }}
+                    />
+                  </Col>
+                )}
+              />
+
+              <Controller
+                control={control}
+                defaultValue={""}
+                name={`address.${addressIndex}.district`}
+                render={({ field: { onChange, value }, formState: { errors } }) => (
+                  <Col width="50%">
+                    <Text variant="headingRegular">District</Text>
+                    <Spacer size={5} />
+                    <FormSelect
+                      defaultValue={value}
+                      style={{ width: "100%" }}
+                      size={"large"}
+                      placeholder={"Select"}
+                      borderColor={"#AAAAAA"}
+                      arrowColor={"#000"}
+                      withSearch={false}
+                      items={[]}
+                      onChange={(value: any) => {
+                        onChange(value);
+                      }}
+                    />
+                  </Col>
+                )}
+              />
+            </Row>
+
+            <Spacer size={10} />
+
+            <Row width="100%" gap={"10px"} noWrap>
+              <Controller
+                control={control}
+                defaultValue={""}
+                name={`address.${addressIndex}.zone`}
+                render={({ field: { onChange, value }, formState: { errors } }) => (
+                  <Col width="50%">
+                    <Text variant="headingRegular">Zone</Text>
+                    <Spacer size={5} />
+                    <FormSelect
+                      defaultValue={value}
+                      style={{ width: "100%" }}
+                      size={"large"}
+                      placeholder={"Select"}
+                      borderColor={"#AAAAAA"}
+                      arrowColor={"#000"}
+                      withSearch={false}
+                      items={[]}
+                      onChange={(value: any) => {}}
+                    />
+                  </Col>
+                )}
+              />
+
+              <Controller
+                control={control}
+                defaultValue={""}
+                name={`address.${addressIndex}.postal_code`}
+                render={({ field: { onChange, value }, formState: { errors } }) => (
+                  <Col width="50%">
+                    <Text variant="headingRegular">Postal Code</Text>
+                    <Spacer size={5} />
+                    <FormSelect
+                      defaultValue={value}
+                      style={{ width: "100%" }}
+                      size={"large"}
+                      placeholder={"Select"}
+                      borderColor={"#AAAAAA"}
+                      arrowColor={"#000"}
+                      withSearch={false}
+                      items={[]}
+                      onChange={(value: any) => {
+                        onChange(value);
+                      }}
+                    />
+                  </Col>
+                )}
+              />
+            </Row>
+
+            <Spacer size={10} />
+
+            <Row width="100%" gap={"10px"} noWrap>
+              <Col width="50%">
+                <Input
+                  width="100%"
+                  label="Longitude"
+                  height="40px"
+                  defaultValue={""}
+                  placeholder={"e.g 38.8951"}
+                  {...register(`address.${addressIndex}.lon`)}
+                />
+              </Col>
+
+              <Col width="50%">
+                <Input
+                  width="100%"
+                  label="Latitude"
+                  height="40px"
+                  defaultValue={""}
+                  placeholder={"e.g -77.0364"}
+                  {...register(`address.${addressIndex}.lat`)}
+                />
+              </Col>
+            </Row>
+
+            <Spacer size={25} />
+          </Col>
+        );
+      })}
+    </Col>
+  );
+};
+
+const AddressLabel: any = styled.p`
+  display: inline;
+  width: fit-content;
+  background: #d5fafd;
+  padding: 4px 8px;
+  font-weight: 600;
+  font-size: 10px;
+  color: #1e858e;
+`;
+
+const Center = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
+
+export default Addresses;

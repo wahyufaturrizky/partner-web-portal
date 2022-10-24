@@ -15,9 +15,10 @@ import {
   Tabs,
   Text,
   Spin,
+  FileUploaderAllFiles,
 } from "pink-lava-ui";
 import React, { useState } from "react";
-import { Controller, useFieldArray, useForm } from "react-hook-form";
+import { Controller, FormProvider, useFieldArray, useForm } from "react-hook-form";
 import styled from "styled-components";
 
 import { ModalDeleteConfirmation } from "components/elements/Modal/ModalConfirmationDelete";
@@ -25,7 +26,7 @@ import {
   useConvertToVendor,
   useCreateCustomers,
   useDeleteCustomers,
-  useUploadLogo,
+  useUploadLogoCompany,
 } from "hooks/mdm/customers/useCustomersMDM";
 import { listTabItems, status } from "./constants";
 import Invoicing from "./fragments/Invoicing";
@@ -33,6 +34,8 @@ import Purchasing from "./fragments/Purchasing";
 import Sales from "./fragments/Sales";
 import UploadImage from "./fragments/UploadImages";
 import { queryClient } from "pages/_app";
+import Contacts from "./fragments/Contacts";
+import Addresses from "./fragments/Addresses";
 
 export default function CreateCustomers({
   detailCustomer,
@@ -48,6 +51,15 @@ export default function CreateCustomers({
   const [imageLogo, setImageLogo] = useState<string>("");
   const [isPKP, setIsPKP] = useState<boolean>(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [visibleModalBankAccount, setVisibleModalBankAccount] = useState<{
+    open: boolean;
+    typeForm: string;
+    data: null;
+  }>({
+    open: false,
+    typeForm: "Edit Bank Account",
+    data: null,
+  });
   const [checked, setChecked] = useState<any>({
     sales_order_blocking: false,
     billing_blocking: false,
@@ -65,19 +77,89 @@ export default function CreateCustomers({
   const isCompany: boolean = formType === "Company";
   const _formType: string[] = ["Company", "Individu"];
 
+  const methods = useForm({
+    shouldUseNativeValidation: true,
+    defaultValues: {
+      bank: [],
+      customer: {
+        name: "",
+        is_company: false,
+        phone: "",
+        tax_number: "",
+        mobile: "",
+        active_status: "ACTIVE",
+        ppkp: true,
+        website: "",
+        email: "",
+        language: null,
+        customer_group: null,
+        external_code: "",
+        company_logo: "",
+      },
+      contact: [
+        {
+          name: "",
+          role: "",
+          email: "",
+          tittle: "",
+          nik: "",
+          mobile: "",
+        },
+      ],
+      address: [
+        {
+          is_primary: false,
+          address_type: "",
+          street: "",
+          country: null,
+          postal_code: "",
+          longtitude: "",
+          latitude: "",
+          lvl_1: 1,
+          lvl_2: 1,
+          lvl_3: 1,
+          lvl_4: 1,
+          lvl_5: 1,
+          lvl_6: 1,
+          lvl_7: 1,
+          lvl_8: 1,
+          lvl_9: 1,
+          lvl_10: 1,
+        },
+      ],
+      invoicing: {
+        credit_limit: null,
+        credit_balance: null,
+        credit_used: null,
+        income_account: "",
+        expense_account: "",
+        tax_name: "",
+        tax_city: "",
+        tax_address: "",
+        currency: "",
+      },
+      purchasing: {
+        term_of_payment: "",
+      },
+      sales: {
+        branch: null,
+        salesman: null,
+        term_payment: "",
+        sales_order_blocking: false,
+        billing_blocking: false,
+        delivery_order_blocking: false,
+      },
+    },
+  });
+
   const {
     control,
-    reset,
     handleSubmit,
     register,
     formState: { errors },
     setValue,
-  } = useForm({
-    shouldUseNativeValidation: true,
-    defaultValues: {
-      bank: [],
-    },
-  });
+    getValues,
+  } = methods;
 
   const {
     register: bankRegister,
@@ -91,14 +173,18 @@ export default function CreateCustomers({
     fields: fieldsBank,
     append: appendBank,
     remove: removeBank,
+    replace: replaceBank,
   } = useFieldArray<any>({
     control,
     name: "bank",
   });
 
-  const { mutate: createCustomer } = useCreateCustomers({
+  const { mutate: createCustomer, isLoading: isLoadingCraeteCustomer } = useCreateCustomers({
     options: {
-      onSuccess: () => alert("create success!"),
+      onSuccess: () => {
+        alert("create success!");
+        router.back();
+      },
     },
   });
 
@@ -112,19 +198,20 @@ export default function CreateCustomers({
     },
   });
 
-  const { mutate: uploadCustomer } = useUploadLogo({
-    options: {
-      onSuccess: ({ imageUrl }: { imageUrl: string }) => {
-        setImageLogo(imageUrl);
+  const { mutate: uploadCustomerCompanyLogo, isLoading: isLoadingCustomerCompanyLogo } =
+    useUploadLogoCompany({
+      options: {
+        onSuccess: ({ imageUrl }: { imageUrl: string }) => {
+          setValue("customer.company_logo", imageUrl);
+        },
       },
-    },
-  });
+    });
 
-  const handleUploadCustomer = async (files: any) => {
+  const handleUploadCompanyLogoCustomer = async (files: any) => {
     const formData: any = new FormData();
     await formData.append("image", files);
 
-    return uploadCustomer(formData);
+    return uploadCustomerCompanyLogo(formData);
   };
 
   const onSubmit = (data: any) => {
@@ -133,7 +220,6 @@ export default function CreateCustomers({
       ...data,
       customer: {
         ...customer,
-        company_logo: imageLogo,
         is_company: isCompany,
         ppkp: isPKP,
       },
@@ -159,10 +245,30 @@ export default function CreateCustomers({
         term_payment: sales?.term_payment || "",
       },
     };
+    console.log("@payloads", payloads);
+    createCustomer(payloads);
   };
 
   const onHandleBankSubmit = (data: any) => {
-    appendBank({ ...data });
+    if (visibleModalBankAccount.typeForm === "Edit Bank Account") {
+      let tempEdit = fieldsBank.map((mapDataItem) => {
+        if (mapDataItem.id === visibleModalBankAccount?.data?.id) {
+          mapDataItem.bank_name = data.bank_name;
+          mapDataItem.account_number = data.account_number;
+          mapDataItem.account_name = data.account_name;
+
+          return { ...mapDataItem };
+        } else {
+          return mapDataItem;
+        }
+      });
+
+      replaceBank(tempEdit);
+    } else {
+      appendBank({ ...data });
+    }
+
+    setVisibleModalBankAccount({ typeForm: "", data: null, open: false });
   };
 
   const propsGeneralForm = {
@@ -173,11 +279,12 @@ export default function CreateCustomers({
     setIsPKP,
     control,
     listItemsLanguages,
-    handleUploadCustomer,
+    handleUploadCompanyLogoCustomer,
     isCompany,
     setSearchLanguages,
     listItemsCustomerGruop,
     setSearchCustomerGroup,
+    isLoadingCustomerCompanyLogo,
   };
 
   const { mutate: updateConvertVendor, isLoading: isLoadingConvertVendor } = useConvertToVendor({
@@ -195,12 +302,15 @@ export default function CreateCustomers({
     setShowDeleteModal,
     isLoadingConvertVendor,
     updateConvertVendor,
+    isLoadingCraeteCustomer,
   };
 
   const switchTabItem = () => {
     switch (tabAktived) {
       case formType === "Company" && "Contact":
+        return <Contacts formType={detailCustomer ? "edit" : "add"} />;
       case "Addresses":
+        return <Addresses formType={detailCustomer ? "edit" : "add"} />;
       case "Sales":
         return (
           <Sales
@@ -215,6 +325,8 @@ export default function CreateCustomers({
         return (
           <Invoicing
             fieldsBank={fieldsBank}
+            setVisibleModalBankAccount={setVisibleModalBankAccount}
+            visibleModalBankAccount={visibleModalBankAccount}
             errorsFormBank={errorsFormBank}
             handleBankSubmit={handleBankSubmit}
             isSubmitSuccessful={isSubmitSuccessful}
@@ -231,7 +343,6 @@ export default function CreateCustomers({
         return <Sales control={control} setValue={setValue} />;
     }
   };
-  console.log("@detailCustomer", detailCustomer);
 
   if (isLoadingCustomer) {
     return (
@@ -275,34 +386,38 @@ export default function CreateCustomers({
       <Spacer size={20} />
       <HeaderActionForm {...propsHeaderForm} />
       <Spacer size={20} />
-      <Card>
-        <Accordion>
-          <Accordion.Item key={1}>
-            <Accordion.Header variant="blue">General</Accordion.Header>
-            <Accordion.Body>
-              <GeneralForms {...propsGeneralForm} />
-            </Accordion.Body>
-          </Accordion.Item>
-        </Accordion>
-      </Card>
-      <Spacer size={20} />
-      <Card>
-        <Accordion>
-          <Accordion.Item key={2}>
-            <Accordion.Header variant="blue">Detail Information</Accordion.Header>
-            <Accordion.Body>
-              <Tabs
-                defaultActiveKey={tabAktived}
-                listTabPane={isCompany ? listTabItems : listTabItems.slice(1, listTabItems.length)}
-                onChange={(e: any) => setTabAktived(e)}
-              />
-              <Spacer size={20} />
-              {switchTabItem()}
-              <Spacer size={100} />
-            </Accordion.Body>
-          </Accordion.Item>
-        </Accordion>
-      </Card>
+      <FormProvider {...methods}>
+        <Card>
+          <Accordion>
+            <Accordion.Item key={1}>
+              <Accordion.Header variant="blue">General</Accordion.Header>
+              <Accordion.Body>
+                <GeneralForms {...propsGeneralForm} />
+              </Accordion.Body>
+            </Accordion.Item>
+          </Accordion>
+        </Card>
+        <Spacer size={20} />
+        <Card>
+          <Accordion>
+            <Accordion.Item key={2}>
+              <Accordion.Header variant="blue">Detail Information</Accordion.Header>
+              <Accordion.Body>
+                <Tabs
+                  defaultActiveKey={tabAktived}
+                  listTabPane={
+                    isCompany ? listTabItems : listTabItems.slice(1, listTabItems.length)
+                  }
+                  onChange={(e: any) => setTabAktived(e)}
+                />
+                <Spacer size={20} />
+                {switchTabItem()}
+                <Spacer size={100} />
+              </Accordion.Body>
+            </Accordion.Item>
+          </Accordion>
+        </Card>
+      </FormProvider>
 
       {showDeleteModal && (
         <ModalDeleteConfirmation
@@ -326,11 +441,12 @@ const GeneralForms = ({
   setIsPKP,
   control,
   listItemsLanguages,
-  handleUploadCustomer,
+  handleUploadCompanyLogoCustomer,
   isCompany,
   setSearchLanguages,
   listItemsCustomerGruop,
   setSearchCustomerGroup,
+  isLoadingCustomerCompanyLogo,
 }: any) => {
   return (
     <Row width="100%" gap="12px">
@@ -415,7 +531,18 @@ const GeneralForms = ({
           )}
         />
         <Spacer size={10} />
-        {isCompany && <UploadImage handleUpload={handleUploadCustomer} control={control} />}
+        {isCompany && (
+          <FileUploaderAllFiles
+            label="Company Logo"
+            onSubmit={(file: any) => handleUploadCompanyLogoCustomer(file)}
+            disabled={isLoadingCustomerCompanyLogo}
+            defaultFile="/placeholder-employee-photo.svg"
+            withCrop
+            sizeImagePhoto="125px"
+            removeable
+            textPhoto={["Dimension Minimum 72 x 72, Optimal size 300 x 300", "File Size Max. 5MB"]}
+          />
+        )}
       </Col>
       <Col width="50%">
         <Input
@@ -497,6 +624,7 @@ const HeaderActionForm = ({
   setShowDeleteModal,
   updateConvertVendor,
   isLoadingConvertVendor,
+  isLoadingCraeteCustomer,
 }: any) => {
   return (
     <Card>
@@ -513,7 +641,9 @@ const HeaderActionForm = ({
                 isHtml
                 items={status}
                 defaultValue="ACTIVE"
-                handleChange={onChange}
+                handleChange={(value: any) => {
+                  onChange(value);
+                }}
               />
             </>
           )}
@@ -537,8 +667,13 @@ const HeaderActionForm = ({
             {isLoadingConvertVendor ? "Loading..." : " Convert to Vendor"}
           </Button>
 
-          <Button size="big" variant="primary" onClick={onSubmit}>
-            Save
+          <Button
+            disabled={isLoadingCraeteCustomer}
+            size="big"
+            variant="primary"
+            onClick={onSubmit}
+          >
+            {isLoadingCraeteCustomer ? "Loading..." : "Save"}
           </Button>
         </Row>
       </Row>

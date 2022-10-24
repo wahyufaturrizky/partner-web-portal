@@ -25,6 +25,7 @@ import ICCopy from "./ic-copy.svg";
 import ICPackage from "./ic-package.svg";
 import ICArrowRight from "./ic-arrow-right.svg";
 import ICArrowRightDiagram from "./arrow-right.svg";
+import ICEhash from "./ic-ehash.svg";
 export {
   IconAdd,
   ICField,
@@ -53,4 +54,5 @@ export {
   ICPackage,
   ICArrowRight,
   ICArrowRightDiagram,
+  ICEhash,
 };

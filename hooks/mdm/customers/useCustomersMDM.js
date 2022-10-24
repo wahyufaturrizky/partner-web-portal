@@ -17,10 +17,21 @@ const fetchDetailCustomer = async ({ id }) => {
   return mdmService(`/customer/${id}`).then((data) => data);
 };
 
-const useUploadLogo = ({ options }) => {
+const useUploadLogoCompany = ({ options }) => {
   return useMutation(
     (data) =>
       mdmService("/customer/upload", {
+        method: "POST",
+        data,
+      }),
+    { ...options }
+  );
+};
+
+const useUploadStorePhotoAddress = ({ options }) => {
+  return useMutation(
+    (data) =>
+      mdmService("/customer/address/upload", {
         method: "POST",
         data,
       }),
@@ -117,6 +128,7 @@ export {
   useUpdateCustomer,
   useDeleteCustomers,
   useDetailCustomer,
-  useUploadLogo,
+  useUploadLogoCompany,
   useConvertToVendor,
+  useUploadStorePhotoAddress,
 };
