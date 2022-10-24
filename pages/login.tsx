@@ -14,17 +14,33 @@ import {
   useUpdatePassword,
   useVerifyOTP,
 } from "../hooks/auth/useAuth";
-import toast, { Toaster } from 'react-hot-toast';
+import toast, { Toaster } from "react-hot-toast";
 
-import ICFlagIndonesia from '../assets/icons/ic-flag-idn.svg'
-import ICFlagEnglish from '../assets/icons/ic-flag-us.svg'
+import ICFlagIndonesia from "../assets/icons/ic-flag-idn.svg";
+import ICFlagEnglish from "../assets/icons/ic-flag-us.svg";
 
-const flexStyles = { display: 'flex', alignItems: 'center', gap: '.5rem' }
+const flexStyles = { display: "flex", alignItems: "center", gap: ".5rem" };
 
 const languageOptions = [
-  {value: <div style={flexStyles}><ICFlagIndonesia /><p>Indonesia</p></div>, id: "id" },
-  {value: <div style={flexStyles}><ICFlagEnglish /><p>English</p></div>, id: "en" },
-]
+  {
+    value: (
+      <div style={flexStyles}>
+        <ICFlagIndonesia />
+        <p>Indonesia</p>
+      </div>
+    ),
+    id: "id",
+  },
+  {
+    value: (
+      <div style={flexStyles}>
+        <ICFlagEnglish />
+        <p>English</p>
+      </div>
+    ),
+    id: "en",
+  },
+];
 
 const schemaLogin = yup
   .object({
@@ -218,17 +234,17 @@ const Login: any = () => {
   return (
     <Container>
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-      <LanguageOption>
-        <Dropdown
-          width="174px"
-          label=""
-          defaultValue="id"
-          items={languageOptions}
-          placeholder="Indonesia"
-          rounded
-          noSearch
-        />
-      </LanguageOption>
+        <LanguageOption>
+          <Dropdown
+            width="174px"
+            label=""
+            defaultValue="id"
+            items={languageOptions}
+            placeholder="Indonesia"
+            rounded
+            noSearch
+          />
+        </LanguageOption>
         <div>
           <Image src="/images/edot-logo-blue.svg" alt="logo-nabati" width={200} height={100} />
           <Spacer size={12} />
@@ -366,7 +382,12 @@ const Login: any = () => {
                       style={{ cursor: "pointer" }}
                       onClick={() => setOtpFlow({ isShowOtpFlow: true, usingWaOrSms: "SMS" })}
                     >
-                      <Image src="/icons/send-otp-sms.svg" alt="edot-logo" width={408} height={96} />
+                      <Image
+                        src="/icons/send-otp-sms.svg"
+                        alt="edot-logo"
+                        width={408}
+                        height={96}
+                      />
                     </div>
                     <div
                       style={{ cursor: "pointer" }}
@@ -470,7 +491,7 @@ const Login: any = () => {
                   <div
                     style={{ cursor: "pointer", display: "inline-block" }}
                     onClick={() => {
-                      router.push("/register");
+                      window.open("https://zeus-portal.nabatisnack.co.id/register", "_blank");
                     }}
                   >
                     <Text variant="subtitle2" inline color="pink.regular">
@@ -485,9 +506,7 @@ const Login: any = () => {
       </div>
       <ImageBackgroundDown src="/images/illustration-footer.svg" />
       <Footer>
-        <p className="">
-          edot.co.id &bull; Support &bull; Term & Privacy
-        </p>
+        <p className="">edot.co.id &bull; Support &bull; Term & Privacy</p>
       </Footer>
 
       {isShowModal && (
@@ -541,8 +560,6 @@ const Login: any = () => {
   );
 };
 
-
-
 const Card = styled.div`
   background: #fff;
   box-shadow: 0px 0.25rem 1rem rgba(170, 170, 170, 0.15);
@@ -554,7 +571,7 @@ const Card = styled.div`
 `;
 
 const Container = styled.div`
-  background:  linear-gradient(180deg, #FFFFFF 18.39%, #D5FAFD 150.89%);
+  background: linear-gradient(180deg, #ffffff 18.39%, #d5fafd 150.89%);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -571,24 +588,23 @@ const ImageBackgroundDown = styled.img`
   right: 0;
   left: 0;
   width: 100%;
-
 `;
 
 const ButtonFlat = styled.div`
-  color: #EB008B;
+  color: #eb008b;
   text-align: center;
   cursor: pointer;
   font-weight: 600;
-`
+`;
 
 const LanguageOption = styled.div`
   top: 1rem;
   right: 1rem;
   position: absolute;
-`
+`;
 
 const Footer = styled.div`
-  font-family: 'Avenir Next', sans serif;
+  font-family: "Avenir Next", sans serif;
   font-style: normal;
   font-weight: 500;
   color: white;
@@ -597,7 +613,7 @@ const Footer = styled.div`
   z-index: 3;
   position: absolute;
   bottom: 1rem;
-`
+`;
 
 export default Login;
 Login.getLayout = (page: any) => page;

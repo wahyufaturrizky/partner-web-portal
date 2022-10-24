@@ -10,7 +10,7 @@ const fetchListSalesman = async ({ query }) => {
       page: 1,
       ...query,
     },
-  }).then(data => data);
+  }).then((data) => data);
 };
 
 const fetchCountTabItems = async () => {
@@ -35,6 +35,29 @@ const useFetchDetailSalesman = ({ id, options }) => {
     keepPreviousData: true,
     ...options,
   });
+};
+
+const fetchSalesmanCustomerDetails = async ({ query }) => {
+  return mdmService(`/salesman/customer/details`, {
+    params: {
+      page: 1,
+      limit: 10,
+      sortBy: "branch",
+      sortOrder: "asc",
+      ...query,
+    },
+  }).then((data) => data);
+};
+
+const useFetchSalesmanCustomerDetail = ({ query, options }) => {
+  return useQuery(
+    ["salesman-customer-detail", query],
+    () => fetchSalesmanCustomerDetails({ query }),
+    {
+      keepPreviousData: true,
+      ...options,
+    }
+  );
 };
 
 const useUpdateSalesman = ({ id, options }) => {
@@ -72,4 +95,5 @@ export {
   useUpdateSalesman,
   useFetchListSalesman,
   useFetchDetailSalesman,
+  useFetchSalesmanCustomerDetail,
 };
