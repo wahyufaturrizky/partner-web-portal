@@ -36,7 +36,7 @@ export default function ModalAddBankAccount({
             required
             error={bankRegister.bank_name?.message}
             placeholder={"e.g BCA"}
-            {...bankRegister("bank", {
+            {...bankRegister("bank_name", {
               shouldUnregister: true,
               required: "Please enter bank name.",
               maxLength: {

@@ -41,7 +41,7 @@ const Contacts = ({ formType }: any) => {
 
   const { fields, append, remove, update }: any = useFieldArray<any>({
     control,
-    name: "contacts",
+    name: "contact",
   });
 
   const [showFormContact, setShowFormContact] = useState<any>({
@@ -72,7 +72,7 @@ const Contacts = ({ formType }: any) => {
                   };
                 }
               });
-              setValue("contacts", mapContact);
+              setValue("contact", mapContact);
             }}
           />
 

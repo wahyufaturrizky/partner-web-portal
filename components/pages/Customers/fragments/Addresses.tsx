@@ -9,6 +9,7 @@ import {
   Input,
   Spin,
   FileUploaderAllFiles,
+  TextArea,
 } from "pink-lava-ui";
 import { useFormContext, useFieldArray, Controller } from "react-hook-form";
 import { ICPlusWhite } from "assets";
@@ -19,7 +20,7 @@ import useDebounce from "lib/useDebounce";
 import styled from "styled-components";
 import { useUploadStorePhotoAddress } from "hooks/mdm/customers/useCustomersMDM";
 
-const Addresses = ({ formType }: any) => {
+const Addresses = ({ formType, getValues }: any) => {
   const { register, control, setValue } = useFormContext();
 
   const { fields, append, remove, update }: any = useFieldArray({
@@ -137,7 +138,7 @@ const Addresses = ({ formType }: any) => {
             if (formType === "edit") {
               append({
                 id: 0,
-                type: "",
+                address_type: "",
                 street: "",
                 country: "",
                 province: "",
@@ -153,7 +154,7 @@ const Addresses = ({ formType }: any) => {
               });
             } else {
               append({
-                type: "",
+                address_type: "",
                 street: "",
                 country: "",
                 province: "",
@@ -224,7 +225,7 @@ const Addresses = ({ formType }: any) => {
                       // Ganti status primary true menjadi false di elemen lain
                       update(findIndex, { ...fields[findIndex], is_primary: false });
 
-                      // Gantu status primary false menjadi true di elemen yang di tuju
+                      // Ganti status primary false menjadi true di elemen yang di tuju
                       update(addressIndex, { ...address, is_primary: true });
                     }}
                   >
@@ -252,8 +253,8 @@ const Addresses = ({ formType }: any) => {
             <Row width="100%" gap={"10px"} noWrap>
               <Controller
                 control={control}
-                defaultValue={""}
-                name={`address.${addressIndex}.type`}
+                defaultValue={getValues(`address.${addressIndex}.address_type`)}
+                name={`address.${addressIndex}.address_type`}
                 render={({ field: { onChange, value }, formState: { errors } }) => (
                   <Col width="50%">
                     <Text variant="headingRegular">Address Type</Text>
@@ -264,11 +265,14 @@ const Addresses = ({ formType }: any) => {
                       size={"large"}
                       placeholder={"Select"}
                       borderColor={"#AAAAAA"}
+                      error={errors?.["address"]?.[addressIndex]?.["address_type"]?.["message"]}
                       arrowColor={"#000"}
                       withSearch={false}
                       items={[
+                        { id: "Home", value: "Home" },
                         { id: "Office", value: "Office" },
-                        { id: "Store/Outlet", value: "Store/Outlet" },
+                        { id: "Apartment", value: "Apartment" },
+                        { id: "School", value: "School" },
                       ]}
                       onChange={(value: any) => {
                         onChange(value);
@@ -279,14 +283,32 @@ const Addresses = ({ formType }: any) => {
               />
 
               <Col width="50%">
-                <Input
-                  required
-                  width="100%"
-                  label="Street"
-                  height="40px"
-                  defaultValue={""}
-                  placeholder={"e.g Front Groceries No. 5"}
-                  {...register(`address.${addressIndex}.street`)}
+                <Controller
+                  control={control}
+                  defaultValue={getValues(`address.${addressIndex}.street`)}
+                  rules={{
+                    maxLength: {
+                      value: 225,
+                      message: "Max length exceeded",
+                    },
+                    required: {
+                      value: true,
+                      message: "Please enter account street.",
+                    },
+                  }}
+                  name={`address.${addressIndex}.street`}
+                  render={({ field: { onChange, value }, formState: { errors } }) => (
+                    <TextArea
+                      width="100%"
+                      rows={2}
+                      defaultValue={value}
+                      onChange={onChange}
+                      required
+                      error={errors?.["address"]?.[addressIndex]?.["street"]?.["message"]}
+                      placeholder="e.g Front Groceries No. 5"
+                      label="Street"
+                    />
+                  )}
                 />
               </Col>
             </Row>

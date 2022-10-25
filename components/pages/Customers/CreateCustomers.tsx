@@ -17,6 +17,7 @@ import {
   Spin,
   FileUploaderAllFiles,
   Modal,
+  FormSelect,
 } from "pink-lava-ui";
 import React, { useState } from "react";
 import { Controller, FormProvider, useFieldArray, useForm } from "react-hook-form";
@@ -42,10 +43,15 @@ export default function CreateCustomers({
   detailCustomer,
   getDataLanguages,
   isLoadingLanguages,
-  getDataCustomerGroup,
   setSearchCustomerGroup,
   setSearchLanguages,
   isLoadingCustomer,
+  isFetchingCustomerGroupsLists,
+  isFetchingMoreCustomerGroupsLists,
+  hasNextPageCustomerGroupsLists,
+  fetchNextPageCustomerGroupsLists,
+  customerGroupsList,
+  isLoadingCustomerGroupsLists,
 }: any) {
   const router = useRouter();
   const [tabAktived, setTabAktived] = useState<string>("Contact");
@@ -71,10 +77,6 @@ export default function CreateCustomers({
     delivery_order_blocking: false,
   });
 
-  const listItemsCustomerGruop = getDataCustomerGroup?.rows?.map(({ id, name }: any) => {
-    return { value: name, id };
-  });
-
   const listItemsLanguages = getDataLanguages?.rows?.map(({ name, id }: any) => {
     return { value: name, id };
   });
@@ -85,74 +87,78 @@ export default function CreateCustomers({
   const methods = useForm({
     shouldUseNativeValidation: true,
     defaultValues: {
-      bank: [],
+      bank: detailCustomer?.customerBanks.map((data: any) => ({
+        key: data.id,
+        id: data.id,
+        bank_name: data.bankName,
+        account_number: data.accountNumber,
+        account_name: data.accountName,
+      })),
       customer: {
-        name: "",
-        is_company: false,
-        phone: "",
-        tax_number: "",
-        mobile: "",
-        active_status: "ACTIVE",
-        ppkp: true,
-        website: "",
-        email: "",
-        language: null,
-        customer_group: null,
-        external_code: "",
-        company_logo: "",
+        name: detailCustomer?.name,
+        is_company: detailCustomer?.isCompany,
+        phone: detailCustomer?.phone,
+        tax_number: detailCustomer?.taxNumber,
+        mobile: detailCustomer?.mobile,
+        active_status: detailCustomer?.activeStatus,
+        ppkp: detailCustomer?.ppkp,
+        website: detailCustomer?.website,
+        email: detailCustomer?.email,
+        language: detailCustomer?.language,
+        customer_group: detailCustomer?.customerGroup,
+        external_code: detailCustomer?.externalCode,
+        company_logo: detailCustomer?.companyLogo,
       },
-      contact: [
-        {
-          name: "",
-          role: "",
-          email: "",
-          tittle: "",
-          nik: "",
-          mobile: "",
-        },
-      ],
-      address: [
-        {
-          is_primary: false,
-          address_type: "",
-          street: "",
-          country: null,
-          postal_code: "",
-          longtitude: "",
-          latitude: "",
-          lvl_1: 1,
-          lvl_2: 1,
-          lvl_3: 1,
-          lvl_4: 1,
-          lvl_5: 1,
-          lvl_6: 1,
-          lvl_7: 1,
-          lvl_8: 1,
-          lvl_9: 1,
-          lvl_10: 1,
-        },
-      ],
+      contact: detailCustomer?.customerContacts.map((data: any) => ({
+        name: data?.name,
+        role: data?.role,
+        email: data?.email,
+        tittle: data?.tittle,
+        nik: data?.nik,
+        mobile: data?.mobile,
+      })),
+      address: detailCustomer?.customerAddresses.map((data: any) => ({
+        is_primary: data.isPrimary,
+        address_type: data.addressType,
+        street: data.street,
+        country: data.country,
+        postal_code: data.postalCode,
+        longtitude: data.longtitude,
+        latitude: data.latitude,
+        image: data.image,
+        imageUrl: data.imageUrl,
+        lvl_1: 1,
+        lvl_2: 1,
+        lvl_3: 1,
+        lvl_4: 1,
+        lvl_5: 1,
+        lvl_6: 1,
+        lvl_7: 1,
+        lvl_8: 1,
+        lvl_9: 1,
+        lvl_10: 1,
+      })),
       invoicing: {
-        credit_limit: null,
-        credit_balance: null,
-        credit_used: null,
-        income_account: "",
-        expense_account: "",
-        tax_name: "",
-        tax_city: "",
-        tax_address: "",
-        currency: "",
+        credit_limit: detailCustomer?.customerInvoicing?.creditLimit,
+        credit_balance: detailCustomer?.customerInvoicing?.creditBalance,
+        credit_used: detailCustomer?.customerInvoicing?.creditUsed,
+        income_account: detailCustomer?.customerInvoicing?.incomeAccount,
+        expense_account: detailCustomer?.customerInvoicing?.expenseAccount,
+        tax_name: detailCustomer?.customerInvoicing?.taxName,
+        tax_city: detailCustomer?.customerInvoicing?.taxCity,
+        tax_address: detailCustomer?.customerInvoicing?.taxAddress,
+        currency: detailCustomer?.customerInvoicing?.currency,
       },
       purchasing: {
-        term_of_payment: "",
+        term_of_payment: detailCustomer?.customerPurchasing?.termOfPayment,
       },
       sales: {
-        branch: null,
-        salesman: null,
-        term_payment: "",
-        sales_order_blocking: false,
-        billing_blocking: false,
-        delivery_order_blocking: false,
+        branch: detailCustomer?.customerSales?.branch,
+        salesman: detailCustomer?.customerSales?.salesman,
+        term_payment: detailCustomer?.customerSales?.termPayment,
+        sales_order_blocking: detailCustomer?.customerSales?.salesOrderBlocking,
+        billing_blocking: detailCustomer?.customerSales?.billingBlocking,
+        delivery_order_blocking: detailCustomer?.customerSales?.deliveryOrderBlocking,
       },
     },
   });
@@ -184,7 +190,7 @@ export default function CreateCustomers({
     name: "bank",
   });
 
-  const { mutate: createCustomer, isLoading: isLoadingCraeteCustomer } = useCreateCustomers({
+  const { mutate: createCustomer, isLoading: isLoadingCreateCustomer } = useCreateCustomers({
     options: {
       onSuccess: () => {
         alert("create success!");
@@ -222,7 +228,7 @@ export default function CreateCustomers({
   const onSubmit = (data: any) => {
     const { customer, invoicing, purchasing, sales, bank, contact, address } = data || {};
 
-    const tempcontact = contact.map((data: any) => {
+    const tempcontact = contact?.map((data: any) => {
       if (data.filtered || data.is_primary) {
         delete data.filtered;
         delete data.is_primary;
@@ -263,7 +269,8 @@ export default function CreateCustomers({
         term_payment: sales?.term_payment || "",
       },
     };
-    console.log("@payloads", payloads);
+    console.log(payloads);
+
     createCustomer(payloads);
   };
 
@@ -301,17 +308,19 @@ export default function CreateCustomers({
     handleUploadCompanyLogoCustomer,
     isCompany,
     setSearchLanguages,
-    listItemsCustomerGruop,
     setSearchCustomerGroup,
     isLoadingCustomerCompanyLogo,
+    isFetchingCustomerGroupsLists,
+    isFetchingMoreCustomerGroupsLists,
+    hasNextPageCustomerGroupsLists,
+    fetchNextPageCustomerGroupsLists,
+    customerGroupsList,
   };
 
   const { mutate: updateConvertVendor, isLoading: isLoadingConvertVendor } = useConvertToVendor({
     id: detailCustomer?.id,
     options: {
       onSuccess: (data: any) => {
-        console.log("@data", data);
-
         setIsSuccessConvertToVendor({
           data: data,
           open: true,
@@ -328,7 +337,7 @@ export default function CreateCustomers({
     setShowDeleteModal,
     isLoadingConvertVendor,
     updateConvertVendor,
-    isLoadingCraeteCustomer,
+    isLoadingCreateCustomer,
   };
 
   const switchTabItem = () => {
@@ -336,7 +345,7 @@ export default function CreateCustomers({
       case formType === "Company" && "Contact":
         return <Contacts formType={detailCustomer ? "edit" : "add"} />;
       case "Addresses":
-        return <Addresses formType={detailCustomer ? "edit" : "add"} />;
+        return <Addresses getValues={getValues} formType={detailCustomer ? "edit" : "add"} />;
       case "Sales":
         return (
           <Sales
@@ -370,7 +379,7 @@ export default function CreateCustomers({
     }
   };
 
-  if (isLoadingCustomer) {
+  if (isLoadingCustomer || isLoadingCustomerGroupsLists || isLoadingLanguages) {
     return (
       <Row alignItems="center" justifyContent="center">
         <Col>
@@ -378,141 +387,141 @@ export default function CreateCustomers({
         </Col>
       </Row>
     );
-  }
-
-  return (
-    <div>
-      <FlexElement>
-        {detailCustomer && (
-          <ArrowLeft style={{ cursor: "pointer" }} onClick={() => router.back()} />
-        )}
-        <Label>{detailCustomer?.name || "Create Customer"}</Label>
-        {detailCustomer?.registrationStatus ? (
-          <Lozenge variant="blue">
-            <Row alignItems="center">{detailCustomer?.registrationStatus}</Row>
-          </Lozenge>
-        ) : (
-          _formType.map((item) => (
-            <FlexElement key={item}>
-              <Radio
-                value={item}
-                defaultValue="Company"
-                checked={item === formType}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                  setFormType(e.target.value);
-                  item === "Individu" && setTabAktived("Addresses");
-                }}
-              />{" "}
-              {item}
-              <Spacer size={20} />
-            </FlexElement>
-          ))
-        )}
-      </FlexElement>
-      <Spacer size={20} />
-      <HeaderActionForm {...propsHeaderForm} />
-      <Spacer size={20} />
-      <FormProvider {...methods}>
-        <Card>
-          <Accordion>
-            <Accordion.Item key={1}>
-              <Accordion.Header variant="blue">General</Accordion.Header>
-              <Accordion.Body>
-                <GeneralForms {...propsGeneralForm} />
-              </Accordion.Body>
-            </Accordion.Item>
-          </Accordion>
-        </Card>
-        <Spacer size={20} />
-        <Card>
-          <Accordion>
-            <Accordion.Item key={2}>
-              <Accordion.Header variant="blue">Detail Information</Accordion.Header>
-              <Accordion.Body>
-                <Tabs
-                  defaultActiveKey={tabAktived}
-                  listTabPane={
-                    isCompany ? listTabItems : listTabItems.slice(1, listTabItems.length)
-                  }
-                  onChange={(e: any) => setTabAktived(e)}
-                />
+  } else {
+    return (
+      <div>
+        <FlexElement>
+          {detailCustomer && (
+            <ArrowLeft style={{ cursor: "pointer" }} onClick={() => router.back()} />
+          )}
+          <Label>{detailCustomer?.name || "Create Customer"}</Label>
+          {detailCustomer?.registrationStatus ? (
+            <Lozenge variant="blue">
+              <Row alignItems="center">{detailCustomer?.registrationStatus}</Row>
+            </Lozenge>
+          ) : (
+            _formType.map((item) => (
+              <FlexElement key={item}>
+                <Radio
+                  value={item}
+                  defaultValue="Company"
+                  checked={item === formType}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                    setFormType(e.target.value);
+                    item === "Individu" && setTabAktived("Addresses");
+                  }}
+                />{" "}
+                {item}
                 <Spacer size={20} />
-                {switchTabItem()}
-                <Spacer size={100} />
-              </Accordion.Body>
-            </Accordion.Item>
-          </Accordion>
-        </Card>
-      </FormProvider>
+              </FlexElement>
+            ))
+          )}
+        </FlexElement>
+        <Spacer size={20} />
+        <HeaderActionForm {...propsHeaderForm} />
+        <Spacer size={20} />
+        <FormProvider {...methods}>
+          <Card>
+            <Accordion>
+              <Accordion.Item key={1}>
+                <Accordion.Header variant="blue">General</Accordion.Header>
+                <Accordion.Body>
+                  <GeneralForms {...propsGeneralForm} />
+                </Accordion.Body>
+              </Accordion.Item>
+            </Accordion>
+          </Card>
+          <Spacer size={20} />
+          <Card>
+            <Accordion>
+              <Accordion.Item key={2}>
+                <Accordion.Header variant="blue">Detail Information</Accordion.Header>
+                <Accordion.Body>
+                  <Tabs
+                    defaultActiveKey={tabAktived}
+                    listTabPane={
+                      isCompany ? listTabItems : listTabItems.slice(1, listTabItems.length)
+                    }
+                    onChange={(e: any) => setTabAktived(e)}
+                  />
+                  <Spacer size={20} />
+                  {switchTabItem()}
+                  <Spacer size={100} />
+                </Accordion.Body>
+              </Accordion.Item>
+            </Accordion>
+          </Card>
+        </FormProvider>
 
-      {showDeleteModal && (
-        <ModalDeleteConfirmation
-          totalSelected={1}
-          itemTitle={detailCustomer.name}
-          visible={showDeleteModal}
-          isLoading={isLoadingDeleteCustomer}
-          onCancel={() => setShowDeleteModal(false)}
-          onOk={() => deleteCustomer({ ids: [detailCustomer.id] })}
-        />
-      )}
+        {showDeleteModal && (
+          <ModalDeleteConfirmation
+            totalSelected={1}
+            itemTitle={detailCustomer.name}
+            visible={showDeleteModal}
+            isLoading={isLoadingDeleteCustomer}
+            onCancel={() => setShowDeleteModal(false)}
+            onOk={() => deleteCustomer({ ids: [detailCustomer.id] })}
+          />
+        )}
 
-      {isSuccessConvertToVendor.open && (
-        <Modal
-          centered
-          width={432}
-          closable={false}
-          visible={isSuccessConvertToVendor.open}
-          onCancel={() => setIsSuccessConvertToVendor({ open: false, data: null })}
-          footer={null}
-          content={
-            <Row justifyContent="center">
-              <Col>
-                <Spacer size={24} />
+        {isSuccessConvertToVendor.open && (
+          <Modal
+            centered
+            width={432}
+            closable={false}
+            visible={isSuccessConvertToVendor.open}
+            onCancel={() => setIsSuccessConvertToVendor({ open: false, data: null })}
+            footer={null}
+            content={
+              <Row justifyContent="center">
+                <Col>
+                  <Spacer size={24} />
 
-                <Row alignItems="center" justifyContent="center">
-                  <ICSuccessCheck />
-                  <Text variant="headingLarge" color={"green.dark"}>
-                    Success
+                  <Row alignItems="center" justifyContent="center">
+                    <ICSuccessCheck />
+                    <Text variant="headingLarge" color={"green.dark"}>
+                      Success
+                    </Text>
+                  </Row>
+
+                  <Spacer size={10} />
+
+                  <Text textAlign="center" variant="headingLarge">
+                    Vendor ID {isSuccessConvertToVendor?.data?.id} has been successfully converted
                   </Text>
-                </Row>
 
-                <Spacer size={10} />
+                  <Spacer size={24} />
 
-                <Text textAlign="center" variant="headingLarge">
-                  Vendor ID {isSuccessConvertToVendor?.data?.id} has been successfully converted
-                </Text>
+                  <Row alignItems="center" justifyContent="space-between">
+                    <Button
+                      size="big"
+                      variant={"tertiary"}
+                      key="submit"
+                      type="primary"
+                      onClick={() => setIsSuccessConvertToVendor({ open: false, data: null })}
+                    >
+                      Cancel
+                    </Button>
 
-                <Spacer size={24} />
+                    <Button
+                      size="big"
+                      key="submit"
+                      type="primary"
+                      onClick={() => router.push(`/vendor/${isSuccessConvertToVendor?.data?.id}`)}
+                    >
+                      Go to Vendor
+                    </Button>
+                  </Row>
 
-                <Row alignItems="center" justifyContent="space-between">
-                  <Button
-                    size="big"
-                    variant={"tertiary"}
-                    key="submit"
-                    type="primary"
-                    onClick={() => setIsSuccessConvertToVendor({ open: false, data: null })}
-                  >
-                    Cancel
-                  </Button>
-
-                  <Button
-                    size="big"
-                    key="submit"
-                    type="primary"
-                    onClick={() => router.push(`/vendor/${isSuccessConvertToVendor?.data?.id}`)}
-                  >
-                    Go to Vendor
-                  </Button>
-                </Row>
-
-                <Spacer size={24} />
-              </Col>
-            </Row>
-          }
-        />
-      )}
-    </div>
-  );
+                  <Spacer size={24} />
+                </Col>
+              </Row>
+            }
+          />
+        )}
+      </div>
+    );
+  }
 }
 
 const GeneralForms = ({
@@ -527,9 +536,13 @@ const GeneralForms = ({
   handleUploadCompanyLogoCustomer,
   isCompany,
   setSearchLanguages,
-  listItemsCustomerGruop,
   setSearchCustomerGroup,
   isLoadingCustomerCompanyLogo,
+  isFetchingCustomerGroupsLists,
+  isFetchingMoreCustomerGroupsLists,
+  hasNextPageCustomerGroupsLists,
+  fetchNextPageCustomerGroupsLists,
+  customerGroupsList,
 }: any) => {
   return (
     <Row width="100%" gap="12px">
@@ -667,20 +680,42 @@ const GeneralForms = ({
             required: "email must be filled",
           })}
         />
+
         <Spacer size={10} />
+
         <Controller
           control={control}
           name="customer.customer_group"
           render={({ field: { onChange } }) => (
             <>
-              <Dropdown
-                label="Customer Group"
-                height="50px"
-                width="100%"
-                isLoading
-                items={listItemsCustomerGruop}
-                handleChange={onChange}
-                onSearch={(value: string) => setSearchCustomerGroup(value)}
+              <LabelDropdown>Customer Group</LabelDropdown>
+              <Spacer size={3} />
+              <FormSelect
+                height="48px"
+                style={{ width: "100%" }}
+                size={"large"}
+                placeholder={"Select"}
+                borderColor={"#AAAAAA"}
+                arrowColor={"#000"}
+                withSearch
+                isLoading={isFetchingCustomerGroupsLists}
+                isLoadingMore={isFetchingMoreCustomerGroupsLists}
+                fetchMore={() => {
+                  if (hasNextPageCustomerGroupsLists) {
+                    fetchNextPageCustomerGroupsLists();
+                  }
+                }}
+                items={
+                  isFetchingCustomerGroupsLists && !isFetchingMoreCustomerGroupsLists
+                    ? []
+                    : customerGroupsList
+                }
+                onChange={(value: any) => {
+                  onChange(value);
+                }}
+                onSearch={(value: any) => {
+                  setSearchCustomerGroup(value);
+                }}
               />
             </>
           )}
@@ -708,7 +743,7 @@ const HeaderActionForm = ({
   setShowDeleteModal,
   updateConvertVendor,
   isLoadingConvertVendor,
-  isLoadingCraeteCustomer,
+  isLoadingCreateCustomer,
 }: any) => {
   return (
     <Card>
@@ -716,7 +751,7 @@ const HeaderActionForm = ({
         <Controller
           control={control}
           name="customer.active_status"
-          defaultValue="ACTIVE"
+          defaultValue={detailCustomer?.activeStatus || "ACTIVE"}
           render={({ field: { onChange } }) => (
             <>
               <Dropdown
@@ -755,12 +790,12 @@ const HeaderActionForm = ({
           )}
 
           <Button
-            disabled={isLoadingCraeteCustomer}
+            disabled={isLoadingCreateCustomer}
             size="big"
             variant="primary"
             onClick={onSubmit}
           >
-            {isLoadingCraeteCustomer ? "Loading..." : "Save"}
+            {isLoadingCreateCustomer ? "Loading..." : "Save"}
           </Button>
         </Row>
       </Row>
@@ -785,4 +820,11 @@ const Card = styled.div`
 const FlexElement = styled.div`
   display: flex;
   align-items: center;
+`;
+
+const LabelDropdown = styled.div`
+  font-weight: bold;
+  font-size: 16px;
+  line-height: 24px;
+  color: #000000;
 `;
