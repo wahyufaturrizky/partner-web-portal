@@ -108,7 +108,7 @@ const CreateSequenceNumber: any = () => {
       <Col>
         <Row gap="4px" alignItems="center">
           {/* <ArrowLeft style={{ cursor: "pointer" }} onClick={onBack} /> */}
-          <Text variant={"h4"}>Create</Text>
+          <Text variant={"h4"}>Create Sequence</Text>
         </Row>
         <Spacer size={12} />
         <Card padding="20px">
