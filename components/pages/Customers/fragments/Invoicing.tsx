@@ -1,22 +1,12 @@
-import React, { useState } from 'react'
-import styled from 'styled-components'
-import {
-  Table,
-  Button,
-  Input,
-  Spacer,
-  Dropdown,
-  Dropdown2,
-  Row,
-  Col,
-} from 'pink-lava-ui'
-import { Controller } from 'react-hook-form';
-import IconAdd from 'assets/icons/ICAdd'
+import React, { useState } from "react";
+import styled from "styled-components";
+import { Table, Button, Input, Spacer, Dropdown, Dropdown2, Row, Col } from "pink-lava-ui";
+import { Controller } from "react-hook-form";
+import IconAdd from "assets/icons/ICAdd";
 
-
-import ModalAddBankAccount from 'components/elements/Modal/ModalAddBankAccount'
-import { useCurrenciesMDM } from 'hooks/company-list/useCompany';
-import { columnsInvoicingTableBank } from '../constants';
+import ModalAddBankAccount from "components/elements/Modal/ModalAddBankAccount";
+import { useCurrenciesMDM } from "hooks/company-list/useCompany";
+import { columnsInvoicingTableBank } from "../constants";
 
 export default function Invoicing(props: any) {
   const {
@@ -27,46 +17,46 @@ export default function Invoicing(props: any) {
     onHandleBankSubmit,
     bankRegister,
     removeBank,
-
     control,
     register,
-  } = props
+    setVisibleModalBankAccount,
+    visibleModalBankAccount,
+  } = props;
   const [search, setSearch] = useState({
-    currency: '',
-    taxAddress: '',
-    taxCity: '',
-    expanse: '',
-    income: ''
-  })
-  const [visible, setVisible] = useState(false)
+    currency: "",
+    taxAddress: "",
+    taxCity: "",
+    expanse: "",
+    income: "",
+  });
 
   const listFakeIncomeAccount = [
-    { value: 'RP. 2.000.000 - Payment', id: 'payment' },
-    { value: 'RP. 5.000.000 - Income', id: 'income' },
-    { value: 'RP. 10.000.000 - Bonus', id: 'bonus' },
-  ]
+    { value: "RP. 2.000.000 - Payment", id: "payment" },
+    { value: "RP. 5.000.000 - Income", id: "income" },
+    { value: "RP. 10.000.000 - Bonus", id: "bonus" },
+  ];
 
   const listFakeTaxCity = [
-    { value: 'DIY Yogyakarta', id: 'yogyakarta' },
-    { value: 'Jakarta', id: 'jakarta' },
-    { value: 'Lampung', id: 'lampung' },
-    { value: 'Bandung', id: 'bandung' },
-  ]
+    { value: "DIY Yogyakarta", id: "yogyakarta" },
+    { value: "Jakarta", id: "jakarta" },
+    { value: "Lampung", id: "lampung" },
+    { value: "Bandung", id: "bandung" },
+  ];
 
   const { data: listCurrencies } = useCurrenciesMDM({
     options: { onSuccess: () => {} },
-    query: { search: search.currency }
-  })
+    query: { search: search.currency },
+  });
 
   const _listCurrencies = listCurrencies?.rows?.map((items: any) => ({
-      id: items?.currency,
-      value: items?.currencyName
-    }))
+    id: items?.currency,
+    value: items?.currencyName,
+  }));
 
-  const _columnsInvoicingTableBank =
-    columnsInvoicingTableBank(removeBank).filter(
-      ({ dataIndex }) => dataIndex !== "id" && dataIndex !== "key"
-  )
+  const _columnsInvoicingTableBank = columnsInvoicingTableBank(
+    removeBank,
+    setVisibleModalBankAccount
+  ).filter(({ dataIndex }) => dataIndex !== "id" && dataIndex !== "key");
 
   return (
     <div>
@@ -79,7 +69,7 @@ export default function Invoicing(props: any) {
             width="100%"
             type="number"
             height="50px"
-            {...register('invoicing.credit_limit')}
+            {...register("invoicing.credit_limit")}
           />
           <Spacer size={10} />
           <Input
@@ -87,7 +77,7 @@ export default function Invoicing(props: any) {
             width="100%"
             height="50px"
             disabled
-            {...register('invoicing.credit_used')}
+            {...register("invoicing.credit_used")}
           />
         </Col>
         <Col width="48%">
@@ -96,7 +86,7 @@ export default function Invoicing(props: any) {
             width="100%"
             height="50px"
             disabled
-            {...register('invoicing.credit_balance')}
+            {...register("invoicing.credit_balance")}
           />
           <Spacer size={10} />
           <Controller
@@ -111,9 +101,10 @@ export default function Invoicing(props: any) {
                 isShowActionLabel
                 handleChange={onChange}
                 items={_columnsInvoicingTableBank}
-                handleClickActionLabel={() => { }}
+                handleClickActionLabel={() => {}}
               />
-            )}/>
+            )}
+          />
         </Col>
       </Row>
       <Spacer size={30} />
@@ -133,8 +124,9 @@ export default function Invoicing(props: any) {
                 handleChange={onChange}
                 noSearch
                 items={listFakeIncomeAccount}
-            />
-          )} />
+              />
+            )}
+          />
         </Col>
       </Row>
       <Spacer size={30} />
@@ -143,15 +135,18 @@ export default function Invoicing(props: any) {
       <Button
         size="big"
         variant="primary"
-        onClick={() => setVisible(true)}>
+        onClick={() =>
+          setVisibleModalBankAccount({
+            data: null,
+            open: true,
+            typeForm: "Add Bank Account",
+          })
+        }
+      >
         <IconAdd /> Add Bank Account
       </Button>
       <Spacer size={20} />
-      <Table
-        width="100%"
-        data={fieldsBank || []}
-        columns={_columnsInvoicingTableBank}
-      />
+      <Table width="100%" data={fieldsBank || []} columns={_columnsInvoicingTableBank} />
       <Spacer size={30} />
       <Label>Taxes</Label>
       <Spacer size={20} />
@@ -162,7 +157,7 @@ export default function Invoicing(props: any) {
             width="100%"
             height="48px"
             placeholder="e.g Tax Items"
-            {...register('invoicing.tax_name')}
+            {...register("invoicing.tax_name")}
           />
           <Spacer size={20} />
         </Col>
@@ -178,11 +173,11 @@ export default function Invoicing(props: any) {
                   actionLabel="Add New Tax City"
                   isShowActionLabel
                   items={listFakeTaxCity}
-                  handleClickActionLabel={() => { }}
+                  handleClickActionLabel={() => {}}
                   handleChange={onChange}
                 />
-              )} />
-            
+              )}
+            />
           </Col>
           <Col width="48%">
             <Input
@@ -190,7 +185,7 @@ export default function Invoicing(props: any) {
               width="100%"
               placeholder="e.g Jalan Soekarano Hatta No.1"
               height="48px"
-              {...register('invoicing.tax_address')}
+              {...register("invoicing.tax_address")}
             />
           </Col>
         </Row>
@@ -212,7 +207,7 @@ export default function Invoicing(props: any) {
                   isShowActionLabel
                   items={_listCurrencies}
                   onSearch={(value: string) => setSearch({ ...search, currency: value })}
-                  handleClickActionLabel={() => window.open('/')}
+                  handleClickActionLabel={() => window.open("/")}
                   handleChange={onChange}
                 />
               </>
@@ -223,8 +218,8 @@ export default function Invoicing(props: any) {
 
       {/* modal create list-bank */}
       <ModalAddBankAccount
-        onCancel={() => setVisible(false)}
-        visible={visible}
+        onCancel={() => setVisibleModalBankAccount({ open: false, data: null, typeForm: "" })}
+        visible={visibleModalBankAccount}
         fieldsBank={fieldsBank}
         handleBankSubmit={handleBankSubmit}
         errorsFormBank={errorsFormBank}
@@ -232,12 +227,12 @@ export default function Invoicing(props: any) {
         bankRegister={bankRegister}
       />
     </div>
-  )
+  );
 }
 
 const Label = styled.p`
   font-weight: 600;
   font-size: 20px;
   line-height: 27px;
-  color: #1E858E;
-`
+  color: #1e858e;
+`;

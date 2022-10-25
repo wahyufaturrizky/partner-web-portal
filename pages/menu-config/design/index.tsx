@@ -151,7 +151,7 @@ const MenuConfigDesign: any = () => {
       {modalDelete.open && (
         <ModalDeleteConfirmation
           totalSelected={selectedRowKeys?.length}
-          itemTitle={fields?.find((menu: any) => menu.key === selectedRowKeys[0])?.field_name}
+          itemTitle={fields?.data?.find((menu: any) => menu.key === selectedRowKeys[0])?.field_name}
           visible={modalDelete.open}
           isLoading={isLoadingDeleteProcessList}
           onCancel={() => setModalDelete({ open: false })}

@@ -14,6 +14,7 @@ import {
   Switch,
   FileUploaderAllFiles,
   Spin,
+  Radio,
 } from "pink-lava-ui";
 import styled from "styled-components";
 import Router, { useRouter } from "next/router";
@@ -334,39 +335,39 @@ const schema = yup
   .object({
     name: yup.string().required("Name is Required"),
     code: yup.string().required("Company code is Required"),
-    email: yup.string().email("Email not validated").required("Email is Required"),
-    address: yup.string(),
-    taxId: yup.string(),
-    language: yup.string(),
-    source_exchange: yup.string(),
+    email: yup.string().email("Email not validated"),
+    address: yup.string().default(""),
+    taxId: yup.string().default(""),
+    language: yup.string().required("Language is Required"),
+    source_exchange: yup.string().default(""),
     country: yup.string().required("Country is Required"),
-    industry: yup.string().required("Industry is Required"),
-    numberOfEmployee: yup.string(),
-    sector: yup.string().required("Sector is Required"),
-    menuDesign: yup.string(),
-    companyType: yup.string().required("Company Type is Required"),
-    corporate: yup.string(),
+    industry: yup.string().default(""),
+    numberOfEmployee: yup.string().default(""),
+    sector: yup.string().default(""),
+    fromTemplate: yup.string().default("none"),
+    companyType: yup.string().default(""),
+    corporate: yup.string().default(""),
     currency: yup.string().required("Currency is Required"),
-    coaTemplate: yup.string().required("CoA Template is Required"),
-    formatDate: yup.string().required("Format Date is Required"),
-    numberFormat: yup.string().required("Number Format is Required"),
-    timezone: yup.string(),
+    coaTemplate: yup.string().default(""),
+    formatDate: yup.string().default(""),
+    numberFormat: yup.string().default(""),
+    timezone: yup.string().default(""),
     isPkp: yup.boolean(),
-    advancePricing: yup.boolean(),
+    advanceApproval: yup.boolean(),
+    retailPricing: yup.boolean(),
     pricingStructure: yup.boolean(),
-    usingApproval: yup.boolean(),
   })
   .required();
 
 const defaultValue = {
-  activeStatus: "Y",
+  activeStatus: "Active",
   isPkp: false,
-  advancePricing: false,
+  advanceApproval: false,
+  retailPricing: false,
   pricingStructure: false,
-  usingApproval: false,
   chart_of_account: "",
   external_code: "",
-  fiscal_year: 0
+  fiscal_year: 0,
 };
 
 const CreateCompany: any = () => {
@@ -385,7 +386,7 @@ const CreateCompany: any = () => {
 
   const [searchCurrency, setSearchCurrency] = useState("");
 
-  const [searchMenuDesign, setSearchMenuDesign] = useState("");
+  const [searchFromTemplate, setSearchFromTemplate] = useState("");
 
   const [searchTimezone, setSearchTimezone] = useState();
 
@@ -400,8 +401,9 @@ const CreateCompany: any = () => {
     sourceExchange: "",
   });
 
-
   const [foto, setFoto] = useState("");
+
+  const [fromTemplate, setFromTemplate] = useState("none");
 
   const {
     register,
@@ -414,8 +416,8 @@ const CreateCompany: any = () => {
   });
 
   const activeStatus = [
-    { id: "Y", value: '<div key="1" style="color:green;">Active</div>' },
-    { id: "N", value: '<div key="2" style="color:red;">Non Active</div>' },
+    { id: "Active", value: '<div key="1" style="color:green;">Active</div>' },
+    { id: "Unactive", value: '<div key="2" style="color:red;">Non Active</div>' },
   ];
 
   const { data: dateFormatData, isLoading: isLoadingDateFormatList } = useDateFormatLists({
@@ -439,14 +441,14 @@ const CreateCompany: any = () => {
     },
   });
 
-  const { data: menuDesignData, isLoading: isLoadingMenuDesignList } = useMenuDesignLists({
-    options: {
-      onSuccess: (data) => {},
-    },
-    query: {
-      search: searchMenuDesign,
-    },
-  });
+  // const { data: menuDesignData, isLoading: isLoadingMenuDesignList } = useMenuDesignLists({
+  //   options: {
+  //     onSuccess: (data) => {},
+  //   },
+  //   query: {
+  //     search: searchMenuDesign,
+  //   },
+  // });
 
   const { data: currencyData, isLoading: isLoadingCurrencyList } = useCurrenciesMDM({
     options: {
@@ -476,9 +478,9 @@ const CreateCompany: any = () => {
   });
 
   const { data: listLanguage } = useLanguages({
-    options: { onSuccess: () => {}},
-    query: {}
-  })
+    options: { onSuccess: () => {} },
+    query: {},
+  });
 
   const handleSearchIndustry = (value) => {
     const newIndustry = IndustryDataFake.filter((tz) => tz.value.includes(value));
@@ -500,17 +502,16 @@ const CreateCompany: any = () => {
     },
   });
 
-  const { mutate: uploadLogo, isLoading: isLoadingUploadLogo } =
-    useUploadLogoCompany({
-      options: {
-        onSuccess: (data) => {
-          setFoto(data)
-          alert('Upload Success')
-        },
+  const { mutate: uploadLogo, isLoading: isLoadingUploadLogo } = useUploadLogoCompany({
+    options: {
+      onSuccess: (data) => {
+        setFoto(data);
+        alert("Upload Success");
       },
-    });
+    },
+  });
 
-  const handleUploadLogo = (file:any) => {
+  const handleUploadLogo = (file: any) => {
     const formData = new FormData();
     formData.append("upload_file", file);
     uploadLogo(formData);
@@ -527,28 +528,28 @@ const CreateCompany: any = () => {
       industry: data.industry,
       employees: data.numberOfEmployee,
       sector: data.sector,
-      menu_design: data.menuDesign || "",
+      from_template: fromTemplate,
       tax_id: data.taxId,
       pkp: data.isPkp,
       logo: foto,
       company_type: data.companyType,
       corporate: data.corporate,
       currency: data.currency,
+      source_exchange: data.source_exchange || "",
+      language: data.language,
       coa: data.coaTemplate,
       format_date: data.formatDate,
       format_number: data.numberFormat,
       timezone: data.timezone || "",
-      advance_pricing: data.advancePricing,
+      advance_approval: data.advanceApproval,
+      retail_pricing: data.retailPricing,
       pricing_structure: data.pricingStructure,
-      use_approval: data.usingApproval,
-      status: data.activeStatus,
-      fiscal_year: data.fiscal_year,
-      source_exchange: data.source_exchange || "",
-      language: data.language,
       chart_of_account: data.chart_of_account,
-      external_code: data.external_code
-
+      fiscal_year: data.fiscal_year,
+      external_code: data.external_code,
+      status: data.activeStatus,
     };
+    // console.log(payload);
     createCompany(payload);
   };
 
@@ -570,7 +571,7 @@ const CreateCompany: any = () => {
               placeholder={"Status"}
               handleChange={(text) => setValue("activeStatus", text)}
               noSearch
-              defaultValue="Y"
+              defaultValue="Active"
             />
             <Row>
               <Row gap="16px">
@@ -596,12 +597,25 @@ const CreateCompany: any = () => {
             <Accordion.Header variant="blue">Company Profile</Accordion.Header>
             <Accordion.Body>
               <Row width="100%" gap="20px" noWrap>
+                <FileUploaderAllFiles
+                  label="Company Logo"
+                  // onSubmit={(file) => setFoto(file)}
+                  onSubmit={(file) => handleUploadLogo(file)}
+                  defaultFile="/placeholder-employee-photo.svg"
+                  withCrop={true}
+                  removeable
+                  textPhoto={["Format .JPG .JPEG .PNG and Dimension Minimum 72 x 72, Optimal size 300 x 300", "File Size Max. 5MB"]}
+                />
+              </Row>
+
+              <Row width="100%" gap="20px" noWrap>
                 <Input
                   width="100%"
                   label="Name"
                   height="48px"
                   placeholder={"e.g PT. Kaldu Sari Nabati Indonesia"}
                   error={errors?.name?.message}
+                  required
                   {...register("name", { required: true })}
                 />
                 <Input
@@ -610,6 +624,7 @@ const CreateCompany: any = () => {
                   height="48px"
                   placeholder={"e.g KSNI"}
                   error={errors?.code?.message}
+                  required
                   {...register("code", { required: true })}
                 />
               </Row>
@@ -625,10 +640,18 @@ const CreateCompany: any = () => {
                   />
                 </Col>
                 <Col width="50%">
-                  <TextArea
+                  {/* <TextArea
                     width="100%"
                     rows={1}
                     label={<Text placeholder="e.g JL. Soekarno Hatta">Address</Text>}
+                    {...register("address")}
+                    onChange={(e) => setAddress(e.target.value)}
+                  /> */}
+                  <Input
+                    width="100%"
+                    label="Address"
+                    height="48px"
+                    placeholder={"e.g JL. Soekarno Hatta"}
                     {...register("address")}
                     onChange={(e) => setAddress(e.target.value)}
                   />
@@ -639,7 +662,7 @@ const CreateCompany: any = () => {
                   {isLoadingCountryList ? (
                     <Spin tip="Loading data..." />
                   ) : (
-                    <Dropdown2
+                    <Dropdown
                       label="Country"
                       width={"100%"}
                       items={countryData.rows.map((data) => ({
@@ -663,7 +686,6 @@ const CreateCompany: any = () => {
                     placeholder={"Select"}
                     handleChange={(value: any) => handleSelectIndustry(value)}
                     onSearch={(search) => handleSearchIndustry(search)}
-                    required
                     error={errors?.industry?.message}
                     {...register("industry", { required: true })}
                   />
@@ -677,7 +699,8 @@ const CreateCompany: any = () => {
                     items={NumberOfEmployeeDataFake}
                     placeholder={"Select"}
                     handleChange={(value: any) => setValue("numberOfEmployee", value)}
-                    {...register("numberOfEmployee")}
+                    required
+                    {...register("numberOfEmployee", { required: true })}
                     noSearch
                   />
                 </Col>
@@ -688,46 +711,30 @@ const CreateCompany: any = () => {
                     items={sectorList}
                     placeholder={"Select"}
                     handleChange={(value) => setValue("sector", value)}
-                    required
                     noSearch
                     error={errors?.sector?.message}
                     {...register("sector", { required: true })}
                   />
                 </Col>
               </Row>
-              <Row width="100%" gap="20px" noWrap>
+              {/* <Row width="100%" gap="20px" noWrap>
                 <Col width="50%">
-                  {isLoadingMenuDesignList ? (
-                    <Spin tip="Loading data..." />
-                  ) : (
-                    <Dropdown2
-                      label="Menu Design"
-                      width={"100%"}
-                      items={menuDesignData.rows.map((data) => ({
-                        id: data.id,
-                        value: data.name,
-                      }))}
-                      placeholder={"Select"}
-                      handleChange={(value) => setValue("menuDesign", value)}
-                      onSearch={(search) => setSearchMenuDesign(search)}
-                      required
-                      error={errors?.menuDesign?.message}
-                      {...register("menuDesign", { required: true })}
-                    />
-                  )}
-                  <FileUploaderAllFiles
-                    label="Company Logo"
-                    // onSubmit={(file) => setFoto(file)}
-                    onSubmit={(file) => handleUploadLogo(file)}
-                    defaultFile={"/default-file.svg"}
-                    withCrop={true}
-                    removeable
+                  <Dropdown
+                    label="Menu Design"
+                    width={"100%"}
+                    items={[]}
+                    placeholder={"Select"}
+                    handleChange={(value) => setValue("fromTemplate", value)}
+                    // onSearch={(search) => setSearchMenuDesign(search)}
+                    {...register("fromTemplate")}
                   />
                 </Col>
+              </Row> */}
+              <Row width="100%" gap="20px" noWrap>
                 <Col width="50%">
                   <Input
                     width="100%"
-                    label="Tax ID (optional)"
+                    label="Tax ID"
                     height="48px"
                     placeholder={"e.g 10"}
                     {...register("taxId")}
@@ -735,6 +742,36 @@ const CreateCompany: any = () => {
                   <Row>
                     <Text variant="body1">PKP ? </Text>
                     <Switch defaultChecked={false} onChange={(value) => setValue("isPkp", value)} />
+                  </Row>
+                </Col>
+                <Col width="50%">
+                  <Row width="100%" gap={20} noWrap>
+                    <Span>Copy from Template</Span>
+                  </Row>
+                  <Row width="100%" noWrap>
+                    <Flex>
+                      <Radio
+                        value={"companyInternal"}
+                        checked={fromTemplate == 'none'}
+                        onChange={(e: any) => setFromTemplate('none')}
+                      >
+                        <SpanAlign>None</SpanAlign>
+                      </Radio>
+                      <Radio
+                        value={"companyInternal"}
+                        checked={fromTemplate == 'eDot'}
+                        onChange={(e: any) => setFromTemplate('eDot')}
+                      >
+                        eDOT
+                      </Radio>
+                      <Radio
+                        value={"companyInternal"}
+                        checked={fromTemplate == 'Other Company'}
+                        onChange={(e: any) => setFromTemplate('Other Company')}
+                      >
+                        Other Company
+                      </Radio>
+                    </Flex>
                   </Row>
                 </Col>
               </Row>
@@ -756,10 +793,9 @@ const CreateCompany: any = () => {
                     items={CompanyTypeDataFake}
                     placeholder={"Select"}
                     handleChange={(value) => setValue("companyType", value)}
-                    required
                     noSearch
                     error={errors?.companyType?.message}
-                    {...register("companyType", { required: true })}
+                    {...register("companyType")}
                   />
                 </Col>
                 <Col width="50%">
@@ -823,9 +859,8 @@ const CreateCompany: any = () => {
                       }))}
                       placeholder={"Select"}
                       handleChange={(value) => setValue("formatDate", value)}
-                      required
                       error={errors?.formatDate?.message}
-                      {...register("formatDate", { required: true })}
+                      {...register("formatDate")}
                       noSearch
                     />
                   )}
@@ -834,19 +869,18 @@ const CreateCompany: any = () => {
                   {isLoadingCoaList ? (
                     <Spin tip="Loading data..." />
                   ) : (
-                    <Dropdown2
+                    <Dropdown
                       label="CoA Template"
                       width={"100%"}
                       items={coaData.rows.map((data) => ({
                         value: data.name,
-                        id: data.name,
+                        id: data.id,
                       }))}
                       placeholder={"Select"}
                       handleChange={(value) => setValue("coaTemplate", value)}
                       onSearch={(search) => setSearchCoa(search)}
-                      required
                       error={errors?.coaTemplate?.message}
-                      {...register("coaTemplate", { required: true })}
+                      {...register("coaTemplate")}
                     />
                   )}
                 </Col>
@@ -867,22 +901,22 @@ const CreateCompany: any = () => {
                       placeholder={"Select"}
                       handleChange={(value) => setValue("timezone", value)}
                       onSearch={(search) => setSearchTimezone(search)}
-                      required
                       error={errors?.timezone?.message}
-                      {...register("timezone", { required: true })}
+                      {...register("timezone")}
                     />
                   )}
                   <Dropdown
                     label="Language"
                     width="100%"
                     items={listLanguage?.rows.map((data: any) => ({
-                        id: data?.id,
-                        value: data?.name
-                      })
-                    )}
+                      id: data?.id,
+                      value: data?.name,
+                    }))}
                     placeholder={"Select"}
                     handleChange={(value: string) => setValue("language", value)}
                     onSearch={(search: string) => setSearch(search)}
+                    required
+                    error={errors?.language?.message}
                     {...register("language", { required: true })}
                   />
                 </Col>
@@ -900,9 +934,8 @@ const CreateCompany: any = () => {
                       }))}
                       placeholder={"Select"}
                       handleChange={(value) => setValue("numberFormat", value)}
-                      required
                       error={errors?.numberFormat?.message}
-                      {...register("numberFormat", { required: true })}
+                      {...register("numberFormat")}
                       noSearch
                     />
                   )}
@@ -910,27 +943,27 @@ const CreateCompany: any = () => {
               </Row>
               <Spacer size={20} />
               <Row width="100%" gap="20px" noWrap>
-                  <Row width="100%" gap="20px" noWrap>
-                    <Text variant="body1">Company Use Advance Pricing</Text>
-                    <Switch
-                      defaultChecked={false}
-                      onChange={(value) => setValue("advancePricing", value)}
-                    />
-                  </Row>
-                  <Row justifyContent="center" width="100%" gap="20px" noWrap>
-                    <Text variant="body1">Company Use Pricing Structure</Text>
-                    <Switch
-                      defaultChecked={false}
-                      onChange={(value) => setValue("pricingStructure", value)}
-                    />
-                  </Row>
-                <Row width="100%" justifyContent="end"  gap="20px" noWrap>
-                    <Text variant="body1">Using Approval</Text>
-                    <Switch
-                      defaultChecked={false}
-                      onChange={(value) => setValue("usingApproval", value)}
-                    />
-                  </Row>
+                <Row width="100%" gap="20px" noWrap>
+                  <Text variant="body1">Company Use Advance Approval</Text>
+                  <Switch
+                    defaultChecked={false}
+                    onChange={(value) => setValue("advanceApproval", value)}
+                  />
+                </Row>
+                <Row justifyContent="center" width="100%" gap="20px" noWrap>
+                  <Text variant="body1">Company Use Retail Pricing</Text>
+                  <Switch
+                    defaultChecked={false}
+                    onChange={(value) => setValue("retailPricing", value)}
+                  />
+                </Row>
+                <Row width="100%" justifyContent="end" gap="20px" noWrap>
+                  <Text variant="body1">Company Use Pricing Structure</Text>
+                  <Switch
+                    defaultChecked={false}
+                    onChange={(value) => setValue("pricingStructure", value)}
+                  />
+                </Row>
               </Row>
             </Accordion.Body>
           </Accordion.Item>
@@ -965,10 +998,13 @@ const CreateCompany: any = () => {
                   <DatePickerInput
                     fullWidth
                     placeholder="YYYY"
-                    onChange={(date: any, dateString: any) => setValue("fiscal_year", Number(dateString))}
-                    label="Expired Date"
+                    onChange={(date: any, dateString: any) =>
+                      setValue("fiscal_year", Number(dateString))
+                    }
+                    label="Fiscal Year"
                     picker="year"
-                    defaultValue={moment()} format='YYYY'
+                    defaultValue={moment(2022)} 
+                    // format="YYYY"
                   />
                 </Col>
               </Row>
@@ -984,6 +1020,23 @@ const Card = styled.div`
   background: #ffffff;
   border-radius: 16px;
   padding: ${(p) => (p.padding ? p.padding : "16px")};
+`;
+
+const Flex = styled.div`
+  width: 100%;
+  display: flex:
+  text-align: center;
+  align-items: center;
+  font-weight: 700;
+  margin-top: 20px;
+`;
+
+const Span = styled.span`
+  font-weight: 700;
+`;
+
+const SpanAlign = styled.span`
+  margin: auto;
 `;
 
 export default CreateCompany;

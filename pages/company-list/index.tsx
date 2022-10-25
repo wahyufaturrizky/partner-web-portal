@@ -140,7 +140,7 @@ const CompanyList: any = () => {
           <Row justifyContent="space-between">
             <Search
               width="380px"
-              placeholder="Search Role Name"
+              placeholder="Search Company Name"
               onChange={(e) => setSearch(e.target.value)}
             />
             <Row gap="16px">

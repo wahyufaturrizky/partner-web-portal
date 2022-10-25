@@ -1,4 +1,4 @@
-import { useQuery, useMutation } from "react-query";
+import { useQuery, useMutation, useInfiniteQuery } from "react-query";
 import { mdmService } from "../../../lib/client";
 
 const fetchCustomerGroupsMDM = async ({ query = {} }) => {
@@ -17,6 +17,27 @@ const fetchCustomerGroupsMDM = async ({ query = {} }) => {
 
 const useCustomerGroupsMDM = ({ query = {}, options }) => {
   return useQuery(["customer-group", query], () => fetchCustomerGroupsMDM({ query }), {
+    ...options,
+  });
+};
+
+const fetchInfiniteCustomerGroups = async ({ pageParam = 1, queryKey }) => {
+  const searchQuery = queryKey[1].search;
+  return mdmService(`/customer-group`, {
+    params: {
+      search: searchQuery,
+      limit: 10,
+      page: pageParam,
+      sortBy: "created_at",
+      sortOrder: "DESC",
+      ...queryKey[1],
+    },
+  }).then((data) => data);
+};
+
+const useInfiniteCustomerGroupsLists = ({ query = {}, options }) => {
+  return useInfiniteQuery(["customer-group/infinite", query], fetchInfiniteCustomerGroups, {
+    keepPreviousData: true,
     ...options,
   });
 };
@@ -101,4 +122,5 @@ export {
   useDeleteCustomerGroupMDM,
   useUploadFileCustomerGroupMDM,
   useParentCustomerGroupMDM,
+  useInfiniteCustomerGroupsLists,
 };

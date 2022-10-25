@@ -129,6 +129,8 @@ const WorkingCalendarCreate = () => {
     });
 
   const onSubmit = (data: any) => {
+    delete data?.branch;
+
     const companyPayload = statusCard === "company" ? companyPayloads : null;
     const countryPayload = statusCard === "country" ? data.country : null;
 
