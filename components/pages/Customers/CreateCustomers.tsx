@@ -239,11 +239,51 @@ export default function CreateCustomers({
     });
 
     const payloads = {
-      bank,
-      contact: tempcontact,
-      address,
+      bank: bank.map((data: any) => ({
+        bank_name: data.bank_name,
+        account_number: data.account_number,
+        account_name: data.account_name,
+      })),
+      contact: contact.map((data: any) => ({
+        name: data.name,
+        role: data.role,
+        email: data.email,
+        tittle: data.tittle,
+        nik: data.nik,
+        mobile: data.mobile,
+      })),
+      address: address.map((data: any) => ({
+        is_primary: data.is_primary,
+        address_type: data.address_type,
+        street: data.address_type,
+        country: data.country,
+        postal_code: data.postal_code,
+        longtitude: data.longtitude,
+        latitude: data.latitude,
+        lvl_1: 1,
+        lvl_2: 1,
+        lvl_3: 1,
+        lvl_4: 1,
+        lvl_5: 1,
+        lvl_6: 1,
+        lvl_7: 1,
+        lvl_8: 1,
+        lvl_9: 1,
+        lvl_10: 1,
+        image: data.image,
+      })),
       customer: {
-        ...customer,
+        name: customer.name,
+        phone: customer.phone,
+        tax_number: customer.tax_number,
+        mobile: customer.mobile,
+        active_status: customer.active_status,
+        website: customer.website,
+        email: customer.email,
+        language: customer.language,
+        customer_group: Number(customer.customer_group),
+        external_code: customer.external_code,
+        company_logo: customer.company_logo,
         is_company: isCompany,
         ppkp: isPKP,
       },
@@ -251,7 +291,6 @@ export default function CreateCustomers({
         term_of_payment: purchasing?.term_of_payment || "",
       },
       invoicing: {
-        ...data.invoicing,
         credit_limit: Number(invoicing?.credit_limit) || 1,
         credit_balance: Number(invoicing?.credit_balance) || 1,
         credit_used: Number(invoicing?.credit_used) || 1,
@@ -263,13 +302,14 @@ export default function CreateCustomers({
         currency: invoicing?.currency || "",
       },
       sales: {
-        ...sales,
-        branch: sales?.branch || "",
-        salesman: sales?.salesman || "",
-        term_payment: sales?.term_payment || "",
+        branch: Number(sales?.branch) || 1,
+        salesman: Number(sales?.salesman) || 1,
+        term_payment: sales?.term_payment || "1",
+        sales_order_blocking: sales.sales_order_blocking || true,
+        billing_blocking: sales.billing_blocking || true,
+        delivery_order_blocking: sales.delivery_order_blocking || true,
       },
     };
-    console.log(payloads);
 
     createCustomer(payloads);
   };
