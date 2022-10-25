@@ -203,12 +203,14 @@ const DetailCoa: any = () => {
 
   const paginateField: any = [];
 
+  console.log(allCoaItems);
+
   allCoaItems?.map((field: any, index) => {
     paginateField.push({
       key: field.accountCode,
       account_code: field.accountCode,
       account_name: field.accountName,
-      account_group: field.accountGroup.groupName,
+      account_group: field?.accountGroup?.groupName,
       allow_reconciliation: (
         <Switch
           defaultChecked={field.allowReconciliation == "Y" ? true : false}
