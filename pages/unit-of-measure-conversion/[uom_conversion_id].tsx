@@ -223,7 +223,7 @@ const UOMConversionDetail = () => {
     updateUom(newData)
   }
 
-  const onSave = (data: any, open: boolean) => {
+  const onSave = (data: any) => {
     const newData: any = {
       name: data?.name,
       base_uom_id: data?.baseUom,
