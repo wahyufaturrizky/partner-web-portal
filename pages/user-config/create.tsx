@@ -15,12 +15,14 @@ import { useTimezone } from "../../hooks/timezone/useTimezone";
 import { useLanguages } from "../../hooks/languages/useLanguages";
 import { useTimezoneInfiniteLists } from "hooks/mdm/branch/useBranch";
 import useDebounce from "lib/useDebounce";
+import { useEmployeeInfiniteLists } from "hooks/mdm/employee-list/useEmployeeListMDM";
 
 const schema = yup
 	.object({
 		// title: yup.string().required("Title is Required"),
 		fullname: yup.string().required("Full Name is Required"),
 		// roleId: yup.string().required("Associated Employee is Required"),
+		associatedEmployee: yup.string().required("Associated Employee is Required"),
 		email: yup.string().required("Email is Required"),
 		phoneNumber: yup.string().required("Phone Number is Required"),
 		// timezone: yup.string().required("Timezone is Required"),
@@ -52,12 +54,19 @@ const CreateUserConfig: any = () => {
 		resolver: yupResolver(schema),
 		defaultValues: defaultValue,
 	});
-	// const { register, control, handleSubmit } = useForm();
-	console.log(errors, '<<<error')
+	
 	const [searchTimezone, setSearchTimezone] = useState("")
+	const [searchEmployee, setSearchEmployee] = useState("")
+
 	const debounceFetchTimezone = useDebounce(searchTimezone, 1000);
+	const debounceFetchEmployee = useDebounce(searchEmployee, 1000);
+
 	const [timezoneRows, setTimezoneRows] = useState(null)
+	const [employeeRows, setEmployeeRows] = useState(null)
+	
 	const [listTimezone, setListTimezone] = useState<any[]>([])
+	const [listEmployee, setListEmployee] = useState<any[]>([])
+	const [employeeLanguages, setEmployeeLanguages] = useState("")
 
 	const { data: rolesData } = useRolePermissions({
 		query: {
@@ -71,29 +80,68 @@ const CreateUserConfig: any = () => {
 		isLoading: isLoadingTimezone,
 		hasNextPage: timezoneHasNextPage,
 		fetchNextPage: timezoneFetchNextPage, 
-	  } = useTimezoneInfiniteLists({
-		query: {
-		  search: debounceFetchTimezone,
-		},
-		options: {
-		  onSuccess: (data: any) => {
-			setTimezoneRows(data?.pages[0]?.totalRow);
-			setListTimezone(data?.pages[0]?.rows?.map((timezone: { utc: string; id: number; }) => {
-			  return {
+	} = useTimezoneInfiniteLists({
+	query: {
+		search: debounceFetchTimezone,
+	},
+	options: {
+		onSuccess: (data: any) => {
+		setTimezoneRows(data?.pages[0]?.totalRow);
+		const mappedData = data?.pages?.map((group: any) => {
+			return group?.rows?.map((timezone: { utc: string; id: number; }) => {
+				return {
 				label: timezone.utc, value: timezone.id
-			  }
-			}))
-		  },
-		  getNextPageParam: (_lastPage: any, pages: any) => {
-			if (timezoneRows && listTimezone.length < timezoneRows) {
-			  return pages.length + 1;
-			} else {
-			  return undefined;
-			}
-		  },
-		},
-	  });
+				}
 
+			})
+		});
+		const flattenArray = [].concat(...mappedData);
+		setListTimezone(flattenArray)
+		},
+		getNextPageParam: (_lastPage: any, pages: any) => {
+		if (timezoneRows && listTimezone.length < timezoneRows) {
+			return pages.length + 1;
+		} else {
+			return undefined;
+		}
+		},
+	},
+	});
+
+	const { 
+		isFetching: isFetchingEmployee,
+		isFetchingNextPage: isFetchingMoreEmployee,
+		isLoading: isLoadingEmployee,
+		hasNextPage: employeeHasNextPage,
+		fetchNextPage: employeeFetchNextPage, 
+	} = useEmployeeInfiniteLists({
+	query: {
+		search: debounceFetchEmployee,
+		company: "KSNI",
+		limit: 10
+	},
+	options: {
+		onSuccess: (data: any) => {
+		setEmployeeRows(data?.pages[0]?.totalRow);
+		const mappedData = data?.pages?.map((group: any) => {
+			return group?.rows?.map((employee: { nik: string; name: string; id: number; languages: string }) => {
+				return {
+				label: employee.nik + ' - ' + employee.name, value: employee.id, language: employee?.languages  
+				}
+			}
+		)})
+		const flattenArray = [].concat(...mappedData);
+        setListEmployee(flattenArray);
+		},
+		getNextPageParam: (_lastPage: any, pages: any) => {
+		if (employeeRows && listEmployee.length < employeeRows) {
+			return pages.length + 1;
+		} else {
+			return undefined;
+		}
+		},
+	},
+	});
 	const { mutate: createUser } = useCreateUser({
 		options: {
 			onSuccess: () => {
@@ -116,7 +164,7 @@ const CreateUserConfig: any = () => {
 		// createUser(data)
 	};
 
-	if(isLoadingTimezone){
+	if(isLoadingTimezone || isLoadingEmployee){
 		return <>loading data...</>
 	}
 	return (
@@ -188,14 +236,46 @@ const CreateUserConfig: any = () => {
 									</Col>
 									<Spacer size={20}/>
 									<Col width={'50%'}>
-										<Dropdown
-											label="Associated Employee"
-											width={"100%"}
-											items={roles}
-											noSearch
-											placeholder={"Select"}
-											handleChange={(value) => setValue("roleId", value)}
-										/>
+										<Controller
+											control={control}
+											name="associatedEmployee"
+											render={({ field: { onChange } }) => (
+												<>
+												<Label>Associated Employee</Label>
+												<Spacer size={4}/>
+												<FormSelect
+													style={{ width: "100%"}}
+													height={"48px"}
+													size={"large"}
+													placeholder={"Select"}
+													borderColor={"#AAAAAA"}
+													arrowColor={"#000"}
+													withSearch
+													error={errors?.associatedEmployee?.message}
+													isLoading={isFetchingEmployee}
+													isLoadingMore={isFetchingMoreEmployee}
+													fetchMore={() => {
+													if (employeeHasNextPage) {
+														employeeFetchNextPage();
+													}
+													}}
+													items={
+													isFetchingEmployee && !isFetchingMoreEmployee
+														? []
+														: listEmployee
+													}
+													onChange={(value: any) => {
+													onChange(value);
+													setEmployeeLanguages(listEmployee.filter(employee => employee.value === value)[0]?.language)
+													console.log(employeeLanguages, '<<<<')
+													}}
+													onSearch={(value: any) => {
+													setSearchEmployee(value);
+													}}
+												/>
+												</>
+											)}
+											/>
 									</Col>
 								</Row>
 								<Spacer size={20}/>
@@ -275,6 +355,7 @@ const CreateUserConfig: any = () => {
 										label="Language"
 										items={language}
 										width={"100%"}
+										value={employeeLanguages && employeeLanguages}
 										placeholder={"Select"}
 										handleChange={(value) => setValue("language", value)}
 										noSearch
