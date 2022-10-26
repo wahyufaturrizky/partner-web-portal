@@ -76,20 +76,28 @@ const listSalesItems = [
   { label: "Delivery Order Blocking", value: "delivery_order_blocking" },
 ];
 
-const columnsInvoicingTableBank = (removeBank) => [
+const columnsInvoicingTableBank = (removeBank, setVisibleModalBankAccount) => [
   { title: "", dataIndex: "key" },
   { title: "", dataIndex: "id" },
   {
     title: "",
     dataIndex: "action",
     width: "15%",
-    render: (_, { id }) => (
+    render: (_, record) => (
       <Row gap="16px" alignItems="center" nowrap>
         <Col>
-          <ICEdit onClick={() => {}} />
+          <ICEdit
+            onClick={() => {
+              setVisibleModalBankAccount({
+                open: true,
+                typeForm: "Edit Bank Account",
+                data: record,
+              });
+            }}
+          />
         </Col>
         <Col>
-          <ICDelete onClick={() => removeBank(id)} />
+          <ICDelete onClick={() => removeBank(record.id)} />
         </Col>
       </Row>
     ),

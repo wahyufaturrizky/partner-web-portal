@@ -31,6 +31,17 @@ const useAccountGroupParent = ({ query = {}, options } = {}) => {
   });
 };
 
+const fetchAccountGroupDetail = async ({ query = {}, id }) => {
+  return client(`/account-group/${id}`).then((data) => data);
+};
+
+const useAccountGroupsDetail = ({ query = {}, options, id } = {}) => {
+  return useQuery(["account-group-detail", query], () => fetchAccountGroupDetail({ query, id }), {
+    keepPreviousData: true,
+    ...options,
+  });
+};
+
 function useCreateAccountGroup({ options }) {
   return useMutation(
     (updates) =>
@@ -73,6 +84,7 @@ const useDeleteAccountGroup = ({ options }) => {
 export {
   useAccountGroups,
   useAccountGroupParent,
+  useAccountGroupsDetail,
   useCreateAccountGroup,
   useUpdateAccountGroup,
   useDeleteAccountGroup,

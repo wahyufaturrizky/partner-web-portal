@@ -65,7 +65,7 @@ const UserConfigUser: any = () => {
 	const columns = [
 		{
 			title: "Employee ID",
-			dataIndex: "employee_id",
+			dataIndex: "key",
 		},
 		{
 			title: "Name",

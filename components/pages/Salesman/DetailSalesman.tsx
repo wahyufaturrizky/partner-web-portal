@@ -24,20 +24,11 @@ import ActionButton from "./fragments/ActionButton";
 import Forms from "./fragments/Forms";
 
 export default function ComponentDetailSalesman({ listCustomers, isLoading }: any) {
-  const pagination = usePagination({
-    page: 1,
-    itemsPerPage: 20,
-    maxPageItems: Infinity,
-    numbers: true,
-    arrows: true,
-    totalItems: 100,
-  });
   const router = useRouter();
   const { status, salesman_id, name, idCard, division: queryDivision }: any = router.query || {};
   const [search, setSearch] = useState<string>("");
   const [division, setDivision] = useState("");
   const [remarks, setRemarks] = useState("");
-  const [defaultChecked, setDefaultChecked] = useState<boolean>(false);
   const [modalCustomer, setModalCustomer] = useState<any>({
     visible: false,
     data: {},
@@ -367,14 +358,7 @@ export default function ComponentDetailSalesman({ listCustomers, isLoading }: an
               </Button>
             </Row>
           }
-          content={
-            <ContentDetailCustomer
-              detailCustomer={modalCustomer?.data}
-              pagination={pagination}
-              checkedDate={defaultChecked}
-              onChecked={() => setDefaultChecked(!defaultChecked)}
-            />
-          }
+          content={<ContentDetailCustomer customerId={modalCustomer?.data?.id} />}
         />
       )}
     </div>

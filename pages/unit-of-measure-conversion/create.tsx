@@ -55,14 +55,17 @@ const UOMConversionCreate = () => {
     totalItems: 100,
   });
   const [listUomCategory, setListUomCategory] = useState<any[]>([]);
+  const [listUomCategoryModal, setListUomCategoryModal] = useState<any[]>([]);
   const [totalRows, setTotalRows] = useState(0);
   const [search, setSearch] = useState("");
+  const [searchModal, setSearchModal] = useState("");
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isShowDelete, setShowDelete] = useState({ open: false, type: "selection", data: {} });
   const [showCreateModal, setShowCreateModal] = useState(false)
 
   const debounceFetch = useDebounce(search, 1000);
+  const debounceFetchModal = useDebounce(searchModal, 1000);
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
 
   const [newUom, setNewUom] = useState({
@@ -110,6 +113,42 @@ const UOMConversionCreate = () => {
     },
   });
 
+  const {
+    isFetching: isFetchingUomCategoryModal,
+    isFetchingNextPage: isFetchingMoreUomCategoryModal,
+    isLoading: isLoadingUOMModal,
+    hasNextPage: hasNextPageModal,
+    fetchNextPage: fetchNextPageModal,
+  } = useUOMInfiniteLists({
+    query: {
+      search: debounceFetchModal,
+      company_id: "KSNI",
+      limit: 10,
+    },
+    options: {
+      onSuccess: (data: any) => {
+        setTotalRows(data.pages[0].totalRow);
+        const mappedData = data?.pages?.map((group: any) => {
+          return group.rows?.map((element: any) => {
+            return {
+              value: element.uomId,
+              label: element.name,
+            };
+          });
+        });
+        const flattenArray = [].concat(...mappedData);
+        setListUomCategoryModal(flattenArray);
+      },
+      getNextPageParam: (_lastPage: any, pages: any) => {
+        if (listUomCategory.length < totalRows) {
+          return pages.length + 1;
+        } else {
+          return undefined;
+        }
+      },
+    },
+  });
+
   const { mutate: createUom, isLoading: isLoadingCreateUom } = useCreateUOMConversion({
     options: {
       onSuccess: () => {
@@ -142,23 +181,23 @@ const UOMConversionCreate = () => {
       setNewUomTable([{
         id: 1,
         qty: 1,
-        uom: listUomCategory.find(e => e.value === data.uom).label,
+        uom: listUomCategory?.find(e => e.value === data.uom)?.label ? listUomCategory?.find(e => e.value === data.uom)?.label : listUomCategoryModal?.find(e => e.value === data.uom)?.label,
         conversionNumber: data.conversionNumber,
-        baseUom: listUomCategory.find(e => e.value === data.baseUom).label
+        baseUom: listUomCategory?.find(e => e.value === data.baseUom)?.label ? listUomCategory?.find(e => e.value === data.baseUom)?.label : listUomCategoryModal?.find(e => e.value === data.baseUom)?.label
       }])
     } else {
       setNewUomTable(prev => [...prev, {
         id: newUomTable.length+1,
         qty: 1,
-        uom: listUomCategory.find(e => e.value === data.uom).label,
+        uom: listUomCategory?.find(e => e.value === data.uom)?.label ? listUomCategory?.find(e => e.value === data.uom)?.label : listUomCategoryModal?.find(e => e.value === data.uom)?.label,
         conversionNumber: data.conversionNumber,
-        baseUom: listUomCategory.find(e => e.value === data.baseUom).label
+        baseUom: listUomCategory?.find(e => e.value === data.baseUom)?.label ? listUomCategory?.find(e => e.value === data.baseUom)?.label : listUomCategoryModal?.find(e => e.value === data.baseUom)?.label
       }])
     }
     setNewUom({
       company_id: "KSNI",
       name: data.name,
-      base_uom_id: listUomCategory.find(e => e.value === data.uom).label,
+      base_uom_id: listUomCategory?.find(e => e.value === data.uom)?.label ? listUomCategory?.find(e => e.value === data.uom)?.label : listUomCategoryModal?.find(e => e.value === data.uom)?.label,
     })
     setShowCreateModal(false)
   };
@@ -172,7 +211,7 @@ const UOMConversionCreate = () => {
       tempTable.forEach(uom => {
         savedTable?.push({
           qty: uom.qty,
-          uom_id: listUomCategory.find(e => e.label === uom.uom).value,
+          uom_id: listUomCategory.find(e => e.label === uom.uom).value ? listUomCategory.find(e => e.label === uom.uom).value : listUomCategoryModal.find(e => e.label === uom.uom).value,
           conversion_number: uom.conversionNumber
         })
       })
@@ -312,6 +351,7 @@ const UOMConversionCreate = () => {
                       }
                       onChange={(value: any) => {
                         onChange(value);
+                        setSearch("")
                       }}
                       onSearch={(value: any) => {
                         setSearch(value);
@@ -399,23 +439,24 @@ const UOMConversionCreate = () => {
                         borderColor={"#AAAAAA"}
                         arrowColor={"#000"}
                         withSearch
-                        isLoading={isFetchingUomCategory}
-                        isLoadingMore={isFetchingMoreUomCategory}
+                        isLoading={isFetchingUomCategoryModal}
+                        isLoadingMore={isFetchingMoreUomCategoryModal}
                         fetchMore={() => {
-                          if (hasNextPage) {
-                            fetchNextPage();
+                          if (hasNextPageModal) {
+                            fetchNextPageModal();
                           }
                         }}
                         items={
-                          isFetchingUomCategory && !isFetchingMoreUomCategory
+                          isFetchingUomCategoryModal && !isFetchingMoreUomCategoryModal
                             ? []
-                            : listUomCategory
+                            : listUomCategoryModal
                         }
                         onChange={(value: any) => {
                           onChange(value);
+                          setSearchModal("")
                         }}
                         onSearch={(value: any) => {
-                          setSearch(value);
+                          setSearchModal(value);
                         }}
                         />
                     </CreateSelectDiv>

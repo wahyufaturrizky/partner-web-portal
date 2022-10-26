@@ -1,6 +1,7 @@
 import { DownOutlined, DragOutlined } from "@ant-design/icons";
 import usePagination from "@lucasmogari/react-pagination";
-import Router from "next/router";
+import Image from "next/image";
+import Router, { useRouter } from "next/router";
 import {
   Accordion,
   Button,
@@ -12,21 +13,22 @@ import {
   Row,
   Search,
   Spacer,
+  Spin,
   Table,
   Text,
   Tree,
 } from "pink-lava-ui";
 import React, { useState } from "react";
 import styled from "styled-components";
-
+import { ModalDeleteConfirmation } from "../../../components/elements/Modal/ModalConfirmationDelete";
+import { useConfigs } from "../../../hooks/config/useConfig";
 import {
-  useCreateMenuDesignList,
   useCreateModuleMenuDesignList,
   useCreateSubMenuDesignList,
+  useDeleteMenuDesignList,
   useMenuDesignList,
   useUpdateMenuDesignList,
 } from "../../../hooks/menu-config/useMenuDesign";
-import { useConfigs } from "../../../hooks/config/useConfig";
 import { useMenuLists } from "../../../hooks/menu-config/useMenuConfig";
 
 const x = 3;
@@ -65,7 +67,7 @@ const generateData: any = (_level: any, _preKey: any, _tns: any) => {
     return tns;
   }
 
-  const level: any = _level - 1;
+  const level = _level - 1;
   children.forEach((key, index) => {
     tns[index].children = [];
     return generateData(level, key, tns[index].children);
@@ -74,17 +76,20 @@ const generateData: any = (_level: any, _preKey: any, _tns: any) => {
 
 generateData(z);
 
-const CreateMenuDesignList: any = () => {
+const DetailMenuDesignList: any = () => {
+  const router = useRouter();
+  const { menu_design_id } = router.query;
+
   const [dataListStatus, setDataListStatus] = useState("Y");
   const [selectedRowKeysModuleConfig, setSelectedRowKeysModuleConfig] = useState([]);
   const [selectedRowKeysMenuLists, setSelectedRowKeysMenuLists] = useState([]);
   const [removeMenu, setRemoveMenu] = useState([]);
   const [removeModule, setRemoveModule] = useState([]);
-  const [dataCeratedNewMenuDesign, setdataCeratedNewMenuDesign] = useState(null);
   const [stateModuleId, setStateModuleId] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [searchModuleConfig, setSearchModuleConfig] = useState("");
   const [searchMenuLists, setSearchMenuLists] = useState("");
+  const [modalDelete, setModalDelete] = useState({ open: false });
   const [stateFieldInput, setStateFieldInput] = useState({
     name: "",
   });
@@ -115,7 +120,9 @@ const CreateMenuDesignList: any = () => {
 
   const [gData, setGData] = useState(defaultData);
 
-  const onDragEnter = (info: any) => {};
+  const onDragEnter = (info: any) => {
+    // setExpandedKeys(info.expandedKeys)
+  };
 
   const onDrop = (info: any) => {
     const dropKey = info.node.key;
@@ -163,7 +170,7 @@ const CreateMenuDesignList: any = () => {
       });
     } else {
       let ar: any = [];
-      let i;
+      let i: any;
       loop(data, dropKey, (_item: any, index: any, arr: any) => {
         ar = arr;
         i = index;
@@ -185,24 +192,6 @@ const CreateMenuDesignList: any = () => {
       [e.target.id]: e.target.value,
     });
   };
-
-  const { mutate: createMenuDesign, isLoading: isLoadingCreateMenuDesign } =
-    useCreateMenuDesignList({
-      options: {
-        onSuccess: (data: any) => {
-          if (data) {
-            setdataCeratedNewMenuDesign(data);
-          }
-        },
-        onError: (error: any) => {
-          if (error?.data) {
-            window.alert(error.data.errors && error.data.errors[0].message);
-          } else {
-            window.alert(error.data.message);
-          }
-        },
-      },
-    });
 
   const { mutate: createModuleMenuDesignList } = useCreateModuleMenuDesignList({
     options: {
@@ -276,20 +265,24 @@ const CreateMenuDesignList: any = () => {
           window.alert(error.data.message);
         },
       },
-      menuDesignListId: dataCeratedNewMenuDesign?.id,
+      menuDesignListId: menu_design_id,
     });
 
-  const { data: dataMenuDesignById, refetch: refetchMenuDesignById } = useMenuDesignList({
+  const {
+    data: dataMenuDesignById,
+    refetch: refetchMenuDesignById,
+    isLoading: isLoadingMenuDesignById,
+  } = useMenuDesignList({
     options: {
       onSuccess: (data: any) => {
-        setStateModal({
-          ...stateModal,
-          isShowModal: false,
+        setDataListStatus(data.status);
+        setStateFieldInput({
+          ...stateFieldInput,
+          name: data.name,
         });
       },
-      enabled: dataCeratedNewMenuDesign?.id ? true : false,
     },
-    menu_design_list_id: dataCeratedNewMenuDesign?.id,
+    menu_design_list_id: menu_design_id,
   });
 
   let filterByIdParentAndGroup: any = [];
@@ -307,33 +300,12 @@ const CreateMenuDesignList: any = () => {
   });
 
   const handleCreateModule = () => {
-    if (dataCeratedNewMenuDesign) {
-      setIsLoading(true);
-      const dataModule: any = {
-        id: dataCeratedNewMenuDesign?.id,
-        module: selectedRowKeysModuleConfig,
-      };
-      createModuleMenuDesignList(dataModule);
-    } else {
-      const isEmptyField = Object.keys(stateFieldInput).find(
-        (thereIsEmptyField) => stateFieldInput && stateFieldInput[thereIsEmptyField] === ""
-      );
-
-      if (!isEmptyField) {
-        if (selectedRowKeysModuleConfig.length > 0) {
-          const data: any = {
-            name: name,
-            module: selectedRowKeysModuleConfig,
-            status: dataListStatus,
-          };
-          createMenuDesign(data);
-        } else {
-          window.alert("Please choose module!");
-        }
-      } else {
-        window.alert(`field ${isEmptyField} must be fill!`);
-      }
-    }
+    setIsLoading(true);
+    const dataModule: any = {
+      id: Router?.query?.id,
+      module: selectedRowKeysModuleConfig,
+    };
+    createModuleMenuDesignList(dataModule);
   };
 
   const handleCreateSubMenu = () => {
@@ -346,7 +318,7 @@ const CreateMenuDesignList: any = () => {
   };
 
   const handleUpdateMenuDesign = () => {
-    const isEmptyField = Object.keys(stateFieldInput).find(
+    const isEmptyField: any = Object.keys(stateFieldInput).find(
       (thereIsEmptyField) => stateFieldInput && stateFieldInput[thereIsEmptyField] === ""
     );
 
@@ -378,12 +350,11 @@ const CreateMenuDesignList: any = () => {
           modules: mappingMpdules,
           menu_design: {
             name: name,
-            id: dataCeratedNewMenuDesign.data.id,
+            id: Router?.query?.id,
             status: dataListStatus,
           },
         };
-        // console.log("data",data)
-        // updateMenuDesignList(data);
+        updateMenuDesignList(data);
       } else {
         window.alert("Please choose module!");
       }
@@ -397,15 +368,13 @@ const CreateMenuDesignList: any = () => {
       del_modules: removeModule,
       del_menus: removeMenu,
       menu_design: {
-        id: dataCeratedNewMenuDesign.data.id,
+        id: Router?.query?.id,
       },
     };
     updateMenuDesignList(data);
   };
 
-  const handleChangeDropdownStatus = (value: any) => {
-    setDataListStatus(value);
-  };
+  const handleChangeDropdownStatus = (value: any) => setDataListStatus(value);
 
   const columnsModuleConfig = [
     {
@@ -444,7 +413,7 @@ const CreateMenuDesignList: any = () => {
   });
 
   const dataTableModuleConfig: any = [];
-  dataTableFieldModuleConfig?.rows?.map((field: any) => {
+  dataTableFieldModuleConfig?.rows?.map((field) => {
     dataTableModuleConfig.push({
       key: field.id,
       field_id: field.id,
@@ -455,9 +424,7 @@ const CreateMenuDesignList: any = () => {
 
   const paginateModuleConfig = dataTableModuleConfig;
 
-  const onSelectChangeTableModuleConfig = (value: any) => {
-    setSelectedRowKeysModuleConfig(value);
-  };
+  const onSelectChangeTableModuleConfig = (value: any) => setSelectedRowKeysModuleConfig(value);
 
   const rowSelectionModuleConfig = {
     selectedRowKeys: selectedRowKeysModuleConfig,
@@ -469,6 +436,7 @@ const CreateMenuDesignList: any = () => {
       onSuccess: (data: any) => {
         paginationMenuLists.setTotalItems(data.totalRow);
       },
+      refetchOnWindowFocus: "always",
     },
     query: {
       search: searchMenuLists,
@@ -507,8 +475,8 @@ const CreateMenuDesignList: any = () => {
 
     setRemoveModule(
       info.checkedNodes
-        .filter((filtering) => "children" in filtering === true)
-        .map((dataRemoveMenu) => dataRemoveMenu.key)
+        .filter((filtering: any) => "children" in filtering === true)
+        .map((dataRemoveMenu: any) => dataRemoveMenu.key)
     );
   };
 
@@ -522,27 +490,47 @@ const CreateMenuDesignList: any = () => {
     });
   };
 
+  const { mutate: mutateDeleteMenuDesignList } = useDeleteMenuDesignList({
+    options: {
+      onSuccess: () => {
+        setModalDelete({ open: false });
+        Router.back();
+      },
+    },
+  });
+
+  console.log(filterByIdParentAndGroup);
+
   return (
     <>
       <Col>
-        <Row gap="4px">
-          <Text variant={"h4"}>Create Menu Design</Text>
+        <Row alignItems="center" gap="4px">
+          <div onClick={() => Router.back()} style={{ cursor: "pointer" }}>
+            <Image src="/icons/arrow-left.svg" alt="arrow-left" width={32} height={32} />
+          </div>
+          <Text variant={"h4"}>Detail Menu Design - {Router.query.name}</Text>
         </Row>
+
         <Card padding="20px">
           <Row justifyContent="space-between" alignItems="center" nowrap>
-            <Dropdown
-              width="185px"
-              label=""
-              allowClear
-              items={[
-                { id: "Y", value: "Active" },
-                { id: "N", value: "InActive" },
-              ]}
-              defaultValue="Active"
-              placeholder={"Select"}
-              handleChange={handleChangeDropdownStatus}
-              noSearch
-            />
+            {isLoadingMenuDesignById ? (
+              <Spin tip="Loading data..." />
+            ) : (
+              <Dropdown
+                width="185px"
+                label=""
+                loading={isLoadingMenuDesignById}
+                allowClear
+                items={[
+                  { id: "Y", value: "Active" },
+                  { id: "N", value: "InActive" },
+                ]}
+                defaultValue={dataListStatus === "Y" ? "Active" : "InActive"}
+                placeholder={"Select"}
+                handleChange={handleChangeDropdownStatus}
+                noSearch
+              />
+            )}
             <Row gap="16px">
               <Button size="big" variant={"tertiary"} onClick={() => Router.back()}>
                 Cancel
@@ -562,14 +550,19 @@ const CreateMenuDesignList: any = () => {
             <Accordion.Body>
               <Row width="50%" gap="20px" noWrap>
                 <Col width="100%">
-                  <Input
-                    id="name"
-                    width="100%"
-                    label="Name"
-                    height="48px"
-                    placeholder={"e.g Shipment and Delivery"}
-                    onChange={handleChangeInput}
-                  />
+                  {isLoadingMenuDesignById ? (
+                    <Spin tip="Loading data..." />
+                  ) : (
+                    <Input
+                      id="name"
+                      width="100%"
+                      label="Name"
+                      value={name}
+                      height="48px"
+                      placeholder={"e.g Shipment and Delivery"}
+                      onChange={handleChangeInput}
+                    />
+                  )}
                 </Col>
               </Row>
             </Accordion.Body>
@@ -611,7 +604,10 @@ const CreateMenuDesignList: any = () => {
 
               <Spacer size={16} />
 
-              {filterByIdParentAndGroup?.length > 0 &&
+              {isLoadingMenuDesignById ? (
+                <Spin tip="Loading data..." />
+              ) : (
+                filterByIdParentAndGroup?.length > 0 &&
                 filterByIdParentAndGroup.map(
                   (subfilterByIdParentAndGroup, indexSubfilterByIdParentAndGroup) => {
                     if (subfilterByIdParentAndGroup) {
@@ -682,7 +678,8 @@ const CreateMenuDesignList: any = () => {
                       );
                     }
                   }
-                )}
+                )
+              )}
             </Accordion.Body>
           </Accordion.Item>
         </Accordion>
@@ -704,22 +701,18 @@ const CreateMenuDesignList: any = () => {
                 gap: "12px",
               }}
             >
-              <Button
-                onClick={() => setStateModal({ ...stateModal, isShowModal: false })}
-                variant="tertiary"
-                size="big"
-              >
-                Cancel
+              <Button onClick={() => setModalDelete({ open: true })} variant="tertiary" size="big">
+                Delete
               </Button>
               <Button
-                disabled={isLoadingCreateMenuDesign || isLoading}
+                disabled={isLoading}
                 onClick={() =>
                   titleModal === "Add Module" ? handleCreateModule() : handleCreateSubMenu()
                 }
                 variant="primary"
                 size="big"
               >
-                {isLoadingCreateMenuDesign || isLoading ? "Loading..." : "Add"}
+                {isLoading ? "Loading..." : "Add"}
               </Button>
             </div>
           }
@@ -730,27 +723,26 @@ const CreateMenuDesignList: any = () => {
                 <Search
                   width="380px"
                   placeholder={`Search ${titleModal === "Add Module" ? "Module" : "Menu"} Name`}
-                  onChange={(e: any) =>
+                  onChange={(e) =>
                     titleModal === "Add Module"
                       ? setSearchModuleConfig(e.target.value)
                       : setSearchMenuLists(e.target.value)
                   }
                 />
-              </Row>
-              <Spacer size={10} />
-              <Row gap="16px">
-                <Button
-                  size="big"
-                  variant={"tertiary"}
-                  onClick={() =>
-                    window.open(
-                      `/${titleModal === "Add Module" ? "module-config" : "menu-config"}/create`,
-                      "_blank"
-                    )
-                  }
-                >
-                  {titleModal === "Add Module" ? "Create Module" : titleModal}
-                </Button>
+                <Row gap="16px">
+                  <Button
+                    size="big"
+                    variant={"primary"}
+                    onClick={() =>
+                      window.open(
+                        `/${titleModal === "Add Module" ? "config" : "menu-config"}/create`,
+                        "_blank"
+                      )
+                    }
+                  >
+                    {titleModal}
+                  </Button>
+                </Row>
               </Row>
               <Spacer size={10} />
               <Table
@@ -773,6 +765,15 @@ const CreateMenuDesignList: any = () => {
               <Spacer size={14} />
             </>
           }
+        />
+      )}
+
+      {modalDelete.open && (
+        <ModalDeleteConfirmation
+          itemTitle={Router.query.name}
+          visible={modalDelete.open}
+          onCancel={() => setModalDelete({ open: false })}
+          onOk={() => mutateDeleteMenuDesignList({ id: [menu_design_id] })}
         />
       )}
     </>
@@ -800,4 +801,4 @@ const Card = styled.div`
   padding: ${(p) => (p.padding ? p.padding : "16px")};
 `;
 
-export default CreateMenuDesignList;
+export default DetailMenuDesignList;

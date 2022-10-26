@@ -5,11 +5,11 @@ import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import styled from "styled-components";
 import * as yup from "yup";
-import Router from "next/router";
+import Router, { useRouter } from "next/router";
 
 import ArrowLeft from "../../assets/icons/arrow-left.svg";
 
-import { useCreateUser } from "../../hooks/user-config/useUser";
+import { useCreateUser, useDeleteUser, useUpdateUser, useUser } from "../../hooks/user-config/useUser";
 import { useRolePermissions } from "../../hooks/role/useRole";
 import { useLanguages } from "../../hooks/languages/useLanguages";
 import { useTimezoneInfiniteLists } from "hooks/mdm/branch/useBranch";
@@ -20,18 +20,10 @@ const phoneRegex = /^(\+?\d{0,4})?\s?-?\s?(\(?\d{3}\)?)\s?-?\s?(\(?\d{3}\)?)\s?-
 const schema = yup
 	.object({
 		fullname: yup.string().required("Full Name is Required"),
-		// employee_id: yup.string().required("Associated Employee is Required"),
 		email: yup.string().email("Must be Valid Email").required("Email is Required"),
 		phone_number: yup.string().matches(phoneRegex, "Must be Valid Phone Number").required("Phone Number is Required"),
-		password: yup.string().required("Password is Required"),
-		confirmPassword: yup.string().required("Password is Required").oneOf([yup.ref('password')], 'Passwords does not match'),
 	})
 	.required();
-
-const defaultValue = {
-	status: "ACTIVE",
-	title: "Mr."
-};
 
 const personTitle = [{
 	id: "Mr.",
@@ -43,7 +35,13 @@ const personTitle = [{
 	id: "Ms.",
 	value: "Ms."
 }]
-const CreateUserConfig: any = () => {
+
+const UpdateUserConfig: any = () => {
+    const router = useRouter();
+    const { user_id } = router.query;
+
+	const [defaultValues, setDefaultValues] = useState({})
+
 	const {
 		register,
 		handleSubmit,
@@ -52,9 +50,8 @@ const CreateUserConfig: any = () => {
 		formState: { errors },
 	} = useForm({
 		resolver: yupResolver(schema),
-		defaultValues: defaultValue,
+		defaultValues: defaultValues,
 	});
-
 	const [searchTimezone, setSearchTimezone] = useState("")
 	const [searchEmployee, setSearchEmployee] = useState("")
 
@@ -68,11 +65,29 @@ const CreateUserConfig: any = () => {
 	const [listEmployee, setListEmployee] = useState<any[]>([])
 	const [employeeLanguages, setEmployeeLanguages] = useState("")
 
-	const { data: rolesData } = useRolePermissions({
-		query: {
-			limit: 10000,
-		},
-	});
+
+    const {
+        data: UserData,
+        isLoading: isLoadingUser,
+        isFetching: isFetchingUser,
+      } = useUser({
+        user_id: user_id && user_id,
+        options: {
+          onSuccess: (data: any) => {
+			setDefaultValues({
+				id: data?.id,
+				title: data?.title,
+				fullname: data?.fullname,
+				employee_id: data?.employeeId,
+				email: data?.email,
+				phone_number: data?.phoneNumber,
+				timezone: data?.timezone,
+				language: data?.language,
+				status: data?.status
+			})
+          },
+        },
+      });
 
 	const { 
 		isFetching: isFetchingTimezone,
@@ -143,7 +158,15 @@ const CreateUserConfig: any = () => {
 	},
 	});
 
-	const { mutate: createUser } = useCreateUser({
+	const { mutate: updateUser } = useUpdateUser({
+		user_id,
+		options: {
+			onSuccess: () => {
+				Router.push("/user-config");
+			},
+		},
+	});
+	const { mutate: deleteUser } = useDeleteUser({
 		options: {
 			onSuccess: () => {
 				Router.push("/user-config");
@@ -151,7 +174,8 @@ const CreateUserConfig: any = () => {
 		},
 	});
 
-	const roles = rolesData?.rows?.map((row) => ({ id: row.id, value: row.name })) ?? [];
+
+
 	const { data: languageData } = useLanguages();
 	const language = languageData?.rows?.map((row) => ({ id: row.id, value: row.name })) ?? [];
 
@@ -161,10 +185,21 @@ const CreateUserConfig: any = () => {
 	];
 
 	const onSubmit = (data: any) => {
-		createUser(data)
+		const updatedData = {
+			// id: data?.id ? data?.id : defaultValues?.id,
+			title: data?.title ? data?.title : defaultValues?.title,
+			fullname: data?.fullname ? data?.fullname : defaultValues?.fullname,
+			employee_id: data?.employee_id ? data?.employee_id : defaultValues?.employee_id,
+			email: data?.email ? data?.email : defaultValues?.email,
+			phone_number: data?.phone_number ? data?.phone_number : defaultValues?.phone_number,
+			timezone: data?.timezone ? data?.timezone : defaultValues?.timezone,
+			language: data?.language ? data?.language : defaultValues?.language,
+			status: data?.status ? data?.status : defaultValues?.status,
+		}
+		updateUser(updatedData)
 	};
 
-	if(isLoadingTimezone || isLoadingEmployee){
+	if(isLoadingTimezone || isLoadingEmployee || isLoadingUser){
 		return <>loading data...</>
 	}
 	return (
@@ -172,7 +207,7 @@ const CreateUserConfig: any = () => {
 			<Col>
 				<Row gap="4px" alignItems="center">
 					<ArrowLeft style={{ cursor: "pointer" }} onClick={() => Router.push("/user-config")} />
-					<Text variant={"h4"}>Create User</Text>
+					<Text variant={"h4"}>{defaultValues?.fullname}</Text>
 				</Row>
 				
 				<Spacer size={12} />
@@ -187,12 +222,12 @@ const CreateUserConfig: any = () => {
 							placeholder={"Status"}
 							handleChange={(text) => setValue("status", text)}
 							noSearch
-							defaultValue="ACTIVE"
+							defaultValue={defaultValues?.status}
 						/>
 						<Row>
 							<Row gap="16px">
-								<Button size="big" variant={"tertiary"} onClick={() => Router.push("/user-config")}>
-									Cancel
+								<Button size="big" variant={"tertiary"} onClick={() => deleteUser({ids: [user_id]})}>
+									Delete
 								</Button>
 								<Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
 									Save
@@ -215,7 +250,7 @@ const CreateUserConfig: any = () => {
 											width={"100%"}
 											items={personTitle}
 											noSearch
-											defaultValue={personTitle[0]}
+											defaultValue={defaultValues?.title}
 											placeholder={"Select"}
 											handleChange={(value) => setValue("title", value)}
 										/>
@@ -230,6 +265,7 @@ const CreateUserConfig: any = () => {
 											required
 											error={errors?.fullname?.message}
 											noSearch
+											defaultValue={defaultValues?.fullname}
 											placeholder={"e.g Grace"}
 											{...register("fullname", { required: true })}
 										/>
@@ -252,6 +288,7 @@ const CreateUserConfig: any = () => {
 													arrowColor={"#000"}
 													withSearch
 													error={errors?.employee_id?.message}
+													defaultValue={listEmployee?.filter(employee => employee?.value === defaultValues?.employee_id)[0]}
 													isLoading={isFetchingEmployee}
 													isLoadingMore={isFetchingMoreEmployee}
 													fetchMore={() => {
@@ -296,6 +333,7 @@ const CreateUserConfig: any = () => {
 										label="Email"
 										height="48px"
 										required
+										defaultValue={defaultValues?.email}
 										error={errors?.email?.message}
 										placeholder={"e.g grace@nabatisnack.co.id"}
 										{...register("email", { required: true })}
@@ -305,6 +343,7 @@ const CreateUserConfig: any = () => {
 										label="Phone Number"
 										height="48px"
 										required
+										defaultValue={defaultValues?.phone_number}
 										error={errors?.phone_number?.message}
 										placeholder={"e.g 081234567890"}
 										{...register("phone_number", { required: true })}
@@ -329,6 +368,7 @@ const CreateUserConfig: any = () => {
 											withSearch
 											isLoading={isFetchingTimezone}
 											isLoadingMore={isFetchingMoreTimezone}
+											defaultValue={listTimezone?.filter(timezone => timezone?.value === defaultValues?.timezone)[0].label}
 											fetchMore={() => {
 											if (timezoneHasNextPage) {
 												timezoneFetchNextPage();
@@ -354,33 +394,16 @@ const CreateUserConfig: any = () => {
 										label="Language"
 										items={language}
 										width={"100%"}
-										value={employeeLanguages && employeeLanguages}
+										defaultValue={defaultValues?.language}
 										placeholder={"Select"}
 										handleChange={(value) => setValue("language", value)}
 										noSearch
 									/>
 								</Row>
 								<Row width="100%" gap="20px" noWrap>
-									<Input
-										width="100%"
-										label="Password"
-										height="48px"
-										required
-										type={"password"}
-										error={errors?.password?.message}
-										placeholder={"Type Password"}
-										{...register("password", { required: true })}
-									/>
-									<Input
-										width="100%"
-										label="Confirm Password"
-										required
-										height="48px"
-										type={"password"}
-										error={errors?.confirmPassword?.message}
-										placeholder={"Type Password"}
-										{...register("confirmPassword", { required: true })}
-									/>
+									<Button size="big" variant={"tertiary"} onClick={() => Router.push("https://accounts.edot.id/infopribadi")}>
+										Reset Password
+									</Button>
 								</Row>
 							</Col>
 						</Accordion.Body>
@@ -422,4 +445,4 @@ const Label = styled.div`
   color: #000000;
 `;
 
-export default CreateUserConfig;
+export default UpdateUserConfig;

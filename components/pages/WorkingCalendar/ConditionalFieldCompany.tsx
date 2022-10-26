@@ -207,8 +207,10 @@ const ConditionalFieldCompany = ({ control, onChangePayload, workingCalendarData
       <Controller
         control={control}
         shouldUnregister={true}
-        rules={{ required: true }}
-        defaultValue={workingCalendarData?.company?.company}
+        rules={{
+          required: true,
+        }}
+        defaultValue={workingCalendarData?.company?.company ?? ""}
         name="company"
         render={({ field: { onChange }, formState: { errors } }) => (
           <>
@@ -229,6 +231,7 @@ const ConditionalFieldCompany = ({ control, onChangePayload, workingCalendarData
               }}
               items={isFetchingCompany && isFetchingMoreCompany ? [] : companyList}
               onChange={(value: any) => {
+                onChange(value);
                 setCompanyPayload((prevState) => {
                   return {
                     ...prevState,
@@ -241,7 +244,7 @@ const ConditionalFieldCompany = ({ control, onChangePayload, workingCalendarData
               }}
             />
 
-            {errors?.company?.type === "required" && (
+            {(errors?.company?.type === "required" || errors?.company?.type === "isEmpty") && (
               <Text variant="alert" color={"red.regular"}>
                 This field is required
               </Text>
@@ -406,13 +409,15 @@ const ConditionalFieldCompany = ({ control, onChangePayload, workingCalendarData
             <Controller
               control={control}
               shouldUnregister={true}
-              rules={{ required: true }}
-              defaultValue={workingCalendarData?.company?.branch}
+              rules={{
+                required: true,
+              }}
+              defaultValue={workingCalendarData?.company?.branch ?? ""}
               name="branch"
               render={({ field: { onChange }, formState: { errors } }) => (
                 <>
                   <FormSelect
-                    defaultValue={workingCalendarData?.company?.branch}
+                    defaultValue={workingCalendarData?.company?.branch ?? ""}
                     style={{ width: "100%" }}
                     size={"large"}
                     placeholder={"Select"}
@@ -428,6 +433,7 @@ const ConditionalFieldCompany = ({ control, onChangePayload, workingCalendarData
                     }}
                     items={branchList}
                     onChange={(value: any) => {
+                      onChange(value);
                       setCompanyPayload((prevState) => {
                         return {
                           ...prevState,
@@ -439,7 +445,7 @@ const ConditionalFieldCompany = ({ control, onChangePayload, workingCalendarData
                       setSearchBranch(value);
                     }}
                   />
-                  {errors?.branch?.type === "required" && (
+                  {(errors?.branch?.type === "required" || errors?.branch?.type === "isEmpty") && (
                     <Text variant="alert" color={"red.regular"}>
                       This field is required
                     </Text>
