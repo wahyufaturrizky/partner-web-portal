@@ -468,7 +468,7 @@ const Addresses = ({
                       arrowColor={"#000"}
                       withSearch={false}
                       items={[]}
-                      onChange={(value: any) => {}}
+                      onChange={onChange}
                     />
                   </Col>
                 )}
@@ -478,11 +478,10 @@ const Addresses = ({
                 control={control}
                 name={`address.${addressIndex}.postal_code`}
                 render={({ field: { onChange, value } }) => (
-                  <>
+                  <Col width="50%">
                     <Text variant="headingRegular">Postal Code</Text>
                     <Spacer size={5} />
                     <FormSelect
-                      height="48px"
                       defaultValue={value}
                       style={{ width: "100%" }}
                       size={"large"}
@@ -507,7 +506,7 @@ const Addresses = ({
                         setSearchPostalCode(value);
                       }}
                     />
-                  </>
+                  </Col>
                 )}
               />
             </Row>

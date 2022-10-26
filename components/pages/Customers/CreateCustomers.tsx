@@ -28,6 +28,7 @@ import {
   useConvertToVendor,
   useCreateCustomers,
   useDeleteCustomers,
+  useUpdateCustomer,
   useUploadLogoCompany,
 } from "hooks/mdm/customers/useCustomersMDM";
 import { listTabItems, status } from "./constants";
@@ -43,6 +44,7 @@ export default function CreateCustomers({
   detailCustomer,
   getDataLanguages,
   isLoadingLanguages,
+  isLoadingPostalCode,
   setSearchCustomerGroup,
   setSearchLanguages,
   isLoadingCustomer,
@@ -58,6 +60,13 @@ export default function CreateCustomers({
   fetchNextPagePostalCode,
   postalCodeList,
   setSearchPostalCode,
+  methods,
+  control,
+  handleSubmit,
+  register,
+  errors,
+  setValue,
+  getValues,
 }: any) {
   const router = useRouter();
   const [tabAktived, setTabAktived] = useState<string>("Contact");
@@ -66,7 +75,6 @@ export default function CreateCustomers({
     open: boolean;
     data: null;
   }>({ open: false, data: null });
-  const [isPKP, setIsPKP] = useState<boolean>(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [visibleModalBankAccount, setVisibleModalBankAccount] = useState<{
     open: boolean;
@@ -89,94 +97,6 @@ export default function CreateCustomers({
 
   const isCompany: boolean = formType === "Company";
   const _formType: string[] = ["Company", "Individu"];
-
-  const methods = useForm({
-    shouldUseNativeValidation: true,
-    defaultValues: {
-      bank: detailCustomer?.customerBanks.map((data: any) => ({
-        key: data.id,
-        id: data.id,
-        bank_name: data.bankName,
-        account_number: data.accountNumber,
-        account_name: data.accountName,
-      })),
-      customer: {
-        name: detailCustomer?.name,
-        is_company: detailCustomer?.isCompany,
-        phone: detailCustomer?.phone,
-        tax_number: detailCustomer?.taxNumber,
-        mobile: detailCustomer?.mobile,
-        active_status: detailCustomer?.activeStatus,
-        ppkp: detailCustomer?.ppkp,
-        website: detailCustomer?.website,
-        email: detailCustomer?.email,
-        language: detailCustomer?.language,
-        customer_group: detailCustomer?.customerGroup,
-        external_code: detailCustomer?.externalCode,
-        company_logo: detailCustomer?.companyLogo,
-      },
-      contact: detailCustomer?.customerContacts.map((data: any) => ({
-        name: data?.name,
-        role: data?.role,
-        email: data?.email,
-        tittle: data?.tittle,
-        nik: data?.nik,
-        mobile: data?.mobile,
-      })),
-      address: detailCustomer?.customerAddresses.map((data: any) => ({
-        is_primary: data.isPrimary,
-        address_type: data.addressType,
-        street: data.street,
-        country: data.country,
-        postal_code: data.postalCode,
-        longtitude: data.longtitude,
-        latitude: data.latitude,
-        image: data.image,
-        imageUrl: data.imageUrl,
-        lvl_1: 1,
-        lvl_2: 1,
-        lvl_3: 1,
-        lvl_4: 1,
-        lvl_5: 1,
-        lvl_6: 1,
-        lvl_7: 1,
-        lvl_8: 1,
-        lvl_9: 1,
-        lvl_10: 1,
-      })),
-      invoicing: {
-        credit_limit: detailCustomer?.customerInvoicing?.creditLimit,
-        credit_balance: detailCustomer?.customerInvoicing?.creditBalance,
-        credit_used: detailCustomer?.customerInvoicing?.creditUsed,
-        income_account: detailCustomer?.customerInvoicing?.incomeAccount,
-        expense_account: detailCustomer?.customerInvoicing?.expenseAccount,
-        tax_name: detailCustomer?.customerInvoicing?.taxName,
-        tax_city: detailCustomer?.customerInvoicing?.taxCity,
-        tax_address: detailCustomer?.customerInvoicing?.taxAddress,
-        currency: detailCustomer?.customerInvoicing?.currency,
-      },
-      purchasing: {
-        term_of_payment: detailCustomer?.customerPurchasing?.termOfPayment,
-      },
-      sales: {
-        branch: detailCustomer?.customerSales?.branch,
-        salesman: detailCustomer?.customerSales?.salesman,
-        term_payment: detailCustomer?.customerSales?.termPayment,
-        sales_order_blocking: detailCustomer?.customerSales?.salesOrderBlocking,
-        billing_blocking: detailCustomer?.customerSales?.billingBlocking,
-        delivery_order_blocking: detailCustomer?.customerSales?.deliveryOrderBlocking,
-      },
-    },
-  });
-
-  const {
-    control,
-    handleSubmit,
-    register,
-    formState: { errors },
-    setValue,
-    getValues,
-  } = methods;
 
   const {
     register: bankRegister,
@@ -203,6 +123,16 @@ export default function CreateCustomers({
         router.back();
       },
     },
+  });
+
+  const { mutate: updateCustomer, isLoading: isLoadingUpdateCustomer } = useUpdateCustomer({
+    options: {
+      onSuccess: () => {
+        alert("update success!");
+        router.back();
+      },
+    },
+    id: detailCustomer?.id,
   });
 
   const { mutate: deleteCustomer, isLoading: isLoadingDeleteCustomer }: any = useDeleteCustomers({
@@ -234,16 +164,6 @@ export default function CreateCustomers({
   const onSubmit = (data: any) => {
     const { customer, invoicing, purchasing, sales, bank, contact, address } = data || {};
 
-    const tempcontact = contact?.map((data: any) => {
-      if (data.filtered || data.is_primary) {
-        delete data.filtered;
-        delete data.is_primary;
-        return data;
-      } else {
-        return data;
-      }
-    });
-
     const payloads = {
       bank: bank.map((data: any) => ({
         bank_name: data.bank_name,
@@ -262,20 +182,10 @@ export default function CreateCustomers({
         is_primary: data.is_primary,
         address_type: data.address_type,
         street: data.address_type,
-        country: 1,
+        country: data.country,
         postal_code: data.postal_code,
         longtitude: data.longtitude,
         latitude: data.latitude,
-        lvl_1: 1,
-        lvl_2: 1,
-        lvl_3: 1,
-        lvl_4: 1,
-        lvl_5: 1,
-        lvl_6: 1,
-        lvl_7: 1,
-        lvl_8: 1,
-        lvl_9: 1,
-        lvl_10: 1,
         image: data.image,
       })),
       customer: {
@@ -291,33 +201,81 @@ export default function CreateCustomers({
         external_code: customer.external_code,
         company_logo: customer.company_logo,
         is_company: isCompany,
-        ppkp: isPKP,
+        ppkp: customer.ppkp,
       },
       purchasing: {
-        term_of_payment: purchasing?.term_of_payment || "",
+        term_of_payment: purchasing?.term_of_payment,
       },
       invoicing: {
-        credit_limit: Number(invoicing?.credit_limit) || 1,
-        credit_balance: Number(invoicing?.credit_balance) || 1,
-        credit_used: Number(invoicing?.credit_used) || 1,
-        income_account: invoicing?.income_account || "",
-        expense_account: invoicing?.expense_account || "",
-        tax_name: invoicing?.income_account || "",
-        tax_city: invoicing?.tax_city || "",
-        tax_address: invoicing?.tax_address || "",
-        currency: invoicing?.currency || "",
+        credit_limit: Number(invoicing?.credit_limit),
+        credit_balance: Number(invoicing?.credit_balance),
+        credit_used: Number(invoicing?.credit_used),
+        income_account: invoicing?.income_account,
+        expense_account: invoicing?.expense_account,
+        tax_name: invoicing?.tax_name,
+        tax_city: invoicing?.tax_city,
+        tax_address: invoicing?.tax_address,
+        currency: invoicing?.currency,
       },
       sales: {
-        branch: Number(sales?.branch) || 1,
-        salesman: Number(sales?.salesman) || 1,
-        term_payment: sales?.term_payment || "1",
-        sales_order_blocking: sales.sales_order_blocking || true,
-        billing_blocking: sales.billing_blocking || true,
-        delivery_order_blocking: sales.delivery_order_blocking || true,
+        branch: Number(sales?.branch),
+        salesman: Number(sales?.salesman),
+        term_payment: sales?.term_payment,
+        sales_order_blocking: sales.sales_order_blocking,
+        billing_blocking: sales.billing_blocking,
+        delivery_order_blocking: sales.delivery_order_blocking,
       },
     };
 
-    createCustomer(payloads);
+    if (detailCustomer) {
+      updateCustomer({
+        ...payloads,
+        customer: {
+          ...payloads.customer,
+          id: customer.id,
+        },
+        sales: {
+          ...payloads.sales,
+          id: sales.id,
+        },
+        bank: bank.map((data: any) => ({
+          bank_name: data.bank_name,
+          account_number: data.account_number,
+          account_name: data.account_name,
+          id: data.id,
+        })),
+        contact: contact.map((data: any) => ({
+          name: data.name,
+          role: data.role,
+          email: data.email,
+          tittle: data.tittle,
+          nik: data.nik,
+          mobile: data.mobile,
+          id: data.id,
+        })),
+        address: address.map((data: any) => ({
+          id: data.id,
+          is_primary: data.is_primary,
+          address_type: data.address_type,
+          street: data.address_type,
+          country: data.country,
+          postal_code: data.postal_code,
+          longtitude: data.longtitude,
+          latitude: data.latitude,
+          image: data.image || "-",
+        })),
+        purchasing: {
+          id: purchasing.id,
+          term_of_payment: purchasing.term_of_payment,
+        },
+        invoicing: {
+          ...invoicing,
+          id: invoicing.id,
+        },
+      });
+    } else {
+      createCustomer(payloads);
+    }
   };
 
   const onHandleBankSubmit = (data: any) => {
@@ -346,8 +304,6 @@ export default function CreateCustomers({
     detailCustomer,
     errors,
     register,
-    isPKP,
-    setIsPKP,
     control,
     listItemsLanguages,
     isLoadingLanguages,
@@ -361,6 +317,7 @@ export default function CreateCustomers({
     hasNextPageCustomerGroupsLists,
     fetchNextPageCustomerGroupsLists,
     customerGroupsList,
+    getValues,
   };
 
   const { mutate: updateConvertVendor, isLoading: isLoadingConvertVendor } = useConvertToVendor({
@@ -384,6 +341,7 @@ export default function CreateCustomers({
     isLoadingConvertVendor,
     updateConvertVendor,
     isLoadingCreateCustomer,
+    isLoadingUpdateCustomer,
   };
 
   const switchTabItem = () => {
@@ -436,7 +394,12 @@ export default function CreateCustomers({
     }
   };
 
-  if (isLoadingCustomer || isLoadingCustomerGroupsLists || isLoadingLanguages) {
+  if (
+    isLoadingCustomer ||
+    isLoadingCustomerGroupsLists ||
+    isLoadingLanguages ||
+    isLoadingPostalCode
+  ) {
     return (
       <Row alignItems="center" justifyContent="center">
         <Col>
@@ -582,11 +545,8 @@ export default function CreateCustomers({
 }
 
 const GeneralForms = ({
-  detailCustomer,
   errors,
   register,
-  isPKP,
-  setIsPKP,
   control,
   listItemsLanguages,
   isLoadingLanguages,
@@ -600,6 +560,7 @@ const GeneralForms = ({
   hasNextPageCustomerGroupsLists,
   fetchNextPageCustomerGroupsLists,
   customerGroupsList,
+  getValues,
 }: any) => {
   return (
     <Row width="100%" gap="12px">
@@ -609,7 +570,6 @@ const GeneralForms = ({
           width="100%"
           label="Name"
           height="50px"
-          defaultValue={detailCustomer?.name}
           placeholder="e.g PT. Kaldu Sari Nabati Indonesia"
           required
           error={errors?.customer?.name?.message}
@@ -626,7 +586,6 @@ const GeneralForms = ({
           label="Tax Number"
           placeholder="e.g 123456789"
           error={errors?.customer?.tax_number?.message}
-          defaultValue={detailCustomer?.taxNumber}
           {...register("customer.tax_number", {
             required: "Tax Number must be filled",
           })}
@@ -639,10 +598,18 @@ const GeneralForms = ({
           <Text>PKP?</Text>
           <ExclamationCircleOutlined />
           <Spacer size={10} />
-          <Switch
-            checked={isPKP}
-            defaultChecked={isPKP}
-            onChange={(value: boolean) => setIsPKP(value)}
+          <Controller
+            control={control}
+            rules={{
+              required: {
+                value: true,
+                message: "Please enter language.",
+              },
+            }}
+            name="customer.ppkp"
+            render={({ field: { onChange, value }, fieldState: { error } }) => {
+              return <Switch checked={value} defaultChecked={value} onChange={onChange} />;
+            }}
           />
         </FlexElement>
         <Spacer size={10} />
@@ -653,7 +620,6 @@ const GeneralForms = ({
           height="50px"
           placeholder="e.g ksni.com"
           error={errors?.customer?.website?.message}
-          defaultValue={detailCustomer?.website}
           {...register("customer.website", {
             required: "website must be filled",
           })}
@@ -661,6 +627,7 @@ const GeneralForms = ({
         <Spacer size={10} />
         <Controller
           control={control}
+          defaultValue={getValues("customer.language")}
           rules={{
             required: {
               value: true,
@@ -668,21 +635,24 @@ const GeneralForms = ({
             },
           }}
           name="customer.language"
-          render={({ field: { onChange }, fieldState: { error } }) => (
-            <>
-              <Dropdown
-                error={error?.message}
-                required
-                label="Language"
-                height="50px"
-                width="100%"
-                handleChange={onChange}
-                items={listItemsLanguages}
-                loading={isLoadingLanguages}
-                onSearch={(value: string) => setSearchLanguages(value)}
-              />
-            </>
-          )}
+          render={({ field: { onChange, value }, fieldState: { error } }) => {
+            return (
+              <>
+                <Dropdown
+                  error={error?.message}
+                  defaultValue={value}
+                  required
+                  label="Language"
+                  height="50px"
+                  width="100%"
+                  handleChange={onChange}
+                  items={listItemsLanguages}
+                  loading={isLoadingLanguages}
+                  onSearch={(value: string) => setSearchLanguages(value)}
+                />
+              </>
+            );
+          }}
         />
         <Spacer size={10} />
         {isCompany && (
@@ -705,7 +675,6 @@ const GeneralForms = ({
           height="50px"
           type="number"
           placeholder="e.g 021 123456"
-          defaultValue={detailCustomer?.phone}
           error={errors?.customer?.phone?.message}
           {...register("customer.phone", {
             required: "phone must be filled",
@@ -717,7 +686,6 @@ const GeneralForms = ({
           label="Mobile"
           height="50px"
           type="number"
-          defaultValue={detailCustomer?.mobile}
           error={errors?.customer?.mobile?.message}
           placeholder="e.g 081234567891011"
           {...register("customer.mobile", {
@@ -730,7 +698,6 @@ const GeneralForms = ({
           label="Email"
           height="50px"
           type="email"
-          defaultValue={detailCustomer?.email}
           placeholder={"e.g admin@kasni.co.id"}
           error={errors?.customer?.email?.message}
           {...register("customer.email", {
@@ -783,7 +750,6 @@ const GeneralForms = ({
           label="External Code"
           height="50px"
           type="number"
-          defaultValue={detailCustomer?.externalCode}
           placeholder={"e.g 123456"}
           {...register("customer.external_code")}
         />
@@ -801,6 +767,7 @@ const HeaderActionForm = ({
   updateConvertVendor,
   isLoadingConvertVendor,
   isLoadingCreateCustomer,
+  isLoadingUpdateCustomer,
 }: any) => {
   return (
     <Card>
@@ -808,7 +775,6 @@ const HeaderActionForm = ({
         <Controller
           control={control}
           name="customer.active_status"
-          defaultValue={detailCustomer?.activeStatus || "ACTIVE"}
           render={({ field: { onChange } }) => (
             <>
               <Dropdown
@@ -847,12 +813,12 @@ const HeaderActionForm = ({
           )}
 
           <Button
-            disabled={isLoadingCreateCustomer}
+            disabled={isLoadingCreateCustomer || isLoadingUpdateCustomer}
             size="big"
             variant="primary"
             onClick={onSubmit}
           >
-            {isLoadingCreateCustomer ? "Loading..." : "Save"}
+            {isLoadingCreateCustomer || isLoadingUpdateCustomer ? "Loading..." : "Save"}
           </Button>
         </Row>
       </Row>

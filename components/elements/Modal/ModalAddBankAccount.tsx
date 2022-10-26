@@ -48,6 +48,7 @@ export default function ModalAddBankAccount({
 
           <Spacer size={10} />
           <Input
+            defaultValue={visible.data?.account_number}
             required
             width="100%"
             type="number"
@@ -61,6 +62,7 @@ export default function ModalAddBankAccount({
           />
           <Spacer size={10} />
           <Input
+            defaultValue={visible.data?.account_name}
             required
             width="100%"
             label="Account Name"

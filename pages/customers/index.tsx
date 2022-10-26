@@ -13,9 +13,9 @@ import {
   Text,
 } from "pink-lava-ui";
 import usePagination from "@lucasmogari/react-pagination";
-import { useListCustomers, useDeleteCustomers } from '../../hooks/mdm/customers/useCustomersMDM'
+import { useListCustomers, useDeleteCustomers } from "../../hooks/mdm/customers/useCustomersMDM";
 import { ICDownload, ICUpload } from "../../assets";
-import { ModalDeleteConfirmation } from '../../components/elements/Modal/ModalConfirmationDelete'
+import { ModalDeleteConfirmation } from "../../components/elements/Modal/ModalConfirmationDelete";
 import { mdmDownloadService } from "../../lib/client";
 
 export default function Customer() {
@@ -27,10 +27,10 @@ export default function Customer() {
     arrows: true,
     totalItems: 100,
   });
-  const router = useRouter()
+  const router = useRouter();
   const [search, setSearch] = useState("");
   const [itemsSelected, setItemsSelected] = useState([]);
-  const [visible, setVisible] = useState(false)
+  const [visible, setVisible] = useState(false);
 
   const columns = [
     {
@@ -56,35 +56,35 @@ export default function Customer() {
       align: "left",
       render: (id: any) => (
         <div style={{ display: "flex", justifyContent: "left" }}>
-          <Button
-            size="small"
-            onClick={() => router.push(`/customers/${id}`)}
-            variant="tertiary"
-          >
+          <Button size="small" onClick={() => router.push(`/customers/${id}`)} variant="tertiary">
             View Detail
           </Button>
         </div>
-      )
+      ),
     },
   ];
 
-  const { data: listCustomers, isLoading, refetch } = useListCustomers({
+  const {
+    data: listCustomers,
+    isLoading,
+    refetch,
+  } = useListCustomers({
     options: {
       onSuccess: (items: any) => {
         pagination.setTotalItems(items?.totalRow);
       },
       select: ({ rows, totalRow }: any) => {
-        const data =  rows?.map((items: any) => {
+        const data = rows?.map((items: any) => {
           return {
             key: items?.id,
             id: items?.id,
             name: items?.name,
-            group: items?.group?.name || '-', 
-            salesman: items?.salesman?.name || '-'
-          }
-        }) 
-        return { data, totalRow }
-      }
+            group: items?.group?.name || "-",
+            salesman: items?.salesman?.name || "-",
+          };
+        });
+        return { data, totalRow };
+      },
     },
     query: {
       search,
@@ -96,12 +96,12 @@ export default function Customer() {
   const { mutate: deleteCustomer, isLoading: loadingDelete }: any = useDeleteCustomers({
     options: {
       onSuccess: () => {
-        refetch()
-        setItemsSelected([])
-        setVisible(false)
-      }
-    }
-  })
+        refetch();
+        setItemsSelected([]);
+        setVisible(false);
+      },
+    },
+  });
 
   const actDrowpdown = [
     {
@@ -131,24 +131,24 @@ export default function Customer() {
         </ButtonAction>
       ),
     },
-  ]
+  ];
 
   const rowSelection = {
     itemsSelected,
     onChange: (selected: any) => {
-      setItemsSelected(selected)
+      setItemsSelected(selected);
     },
-  }
+  };
 
   const handleDownloadFile = (id: any) => {
-    mdmDownloadService(`/customer/download/MCS-0000012`, {params: {}}).then(res => {
+    mdmDownloadService(`/customer/download/MCS-0000012`, { params: {} }).then((res) => {
       let dataUrl = window.URL.createObjectURL(new Blob([res?.data]));
       let tempLink = document.createElement("a");
       tempLink.href = dataUrl;
       tempLink.setAttribute("download", `customers_${id} ${new Date().getTime()}.xlsx`);
       tempLink.click();
-    })
-  }
+    });
+  };
 
   return (
     <div>
@@ -179,14 +179,10 @@ export default function Customer() {
               textVariant={"button"}
               textColor={"pink.regular"}
               iconStyle={{ fontSize: "12px" }}
-              onClick={({ key }: any) => key === '1' && handleDownloadFile()}
+              onClick={({ key }: any) => key === "1" && handleDownloadFile()}
               menuList={actDrowpdown}
             />
-            <Button
-              size="big"
-              variant="primary"
-              onClick={() => router.push('/customers/create')}
-            >
+            <Button size="big" variant="primary" onClick={() => router.push("/customers/create")}>
               Create
             </Button>
           </Row>
@@ -214,7 +210,7 @@ export default function Customer() {
         onOk={() => deleteCustomer({ delete: itemsSelected })}
       />
     </div>
-  )
+  );
 }
 
 const Card = styled.div`
@@ -230,5 +226,4 @@ const ButtonAction = styled.button`
   display: flex;
   align-items: center;
   justify-content: space-between;
-`
-
+`;

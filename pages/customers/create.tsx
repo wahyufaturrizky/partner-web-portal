@@ -2,6 +2,7 @@ import { useLanguages } from "hooks/languages/useLanguages";
 import { usePostalCodeInfiniteLists } from "hooks/mdm/postal-code/usePostalCode";
 import useDebounce from "lib/useDebounce";
 import { useState } from "react";
+import { useForm } from "react-hook-form";
 import CreateCustomers from "../../components/pages/Customers/CreateCustomers";
 import { useInfiniteCustomerGroupsLists } from "../../hooks/mdm/customers/useCustomersGroupMDM";
 
@@ -22,6 +23,61 @@ export default function PageCreateCustomer() {
   const debounceFetchCustomerGroup = useDebounce(search.customerGroup, 1000);
   const debounceFetchPostalCode = useDebounce(searchPostalCode, 1000);
 
+  const methods = useForm({
+    shouldUseNativeValidation: true,
+    defaultValues: {
+      bank: [],
+      customer: {
+        name: "",
+        is_company: false,
+        phone: "",
+        tax_number: "",
+        mobile: "",
+        active_status: "",
+        ppkp: false,
+        website: "",
+        email: "",
+        language: "",
+        customer_group: "",
+        external_code: "",
+        company_logo: "-",
+      },
+      contact: [],
+      address: [],
+      invoicing: {
+        credit_limit: 1,
+        credit_balance: 1,
+        credit_used: 1,
+        income_account: "-",
+        expense_account: "",
+        tax_name: "",
+        tax_city: "",
+        tax_address: "",
+        currency: "",
+      },
+      purchasing: {
+        term_of_payment: "",
+      },
+      sales: {
+        branch: 1,
+        salesman: 1,
+        term_payment: "1",
+        sales_order_blocking: true,
+        billing_blocking: true,
+        delivery_order_blocking: true,
+      },
+    },
+  });
+
+  const {
+    control,
+    handleSubmit,
+    register,
+    formState: { errors },
+    setValue,
+    getValues,
+  } = methods;
+
   const { data: getDataLanguages, isLoading: isLoadingLanguages } = useLanguages({
     options: { onSuccess: () => {} },
     query: {
@@ -34,6 +90,7 @@ export default function PageCreateCustomer() {
     isFetchingNextPage: isFetchingMorePostalCode,
     hasNextPage: hasNextPagePostalCode,
     fetchNextPage: fetchNextPagePostalCode,
+    isLoading: isLoadingPostalCode,
   } = usePostalCodeInfiniteLists({
     query: {
       search: debounceFetchPostalCode,
@@ -115,6 +172,14 @@ export default function PageCreateCustomer() {
     fetchNextPagePostalCode,
     postalCodeList,
     setSearchPostalCode,
+    isLoadingPostalCode,
+    methods,
+    control,
+    handleSubmit,
+    register,
+    errors,
+    setValue,
+    getValues,
   };
 
   return <CreateCustomers {...propsDropdownField} />;

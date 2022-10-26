@@ -13,7 +13,6 @@ export default function Invoicing(props: any) {
     fieldsBank,
     errorsFormBank,
     handleBankSubmit,
-    isSubmitSuccessful,
     onHandleBankSubmit,
     bankRegister,
     removeBank,
