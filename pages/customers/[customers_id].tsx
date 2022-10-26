@@ -50,6 +50,7 @@ export default function CustomersDetail() {
       contact: [],
       address: [],
       invoicing: {
+        id: "",
         credit_limit: 1,
         credit_balance: 1,
         credit_used: 1,

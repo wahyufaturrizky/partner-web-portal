@@ -33,7 +33,7 @@ export default function PageCreateCustomer() {
         phone: "",
         tax_number: "",
         mobile: "",
-        active_status: "",
+        active_status: "ACTIVE",
         ppkp: false,
         website: "",
         email: "",

@@ -480,7 +480,7 @@ export default function CreateCustomers({
             visible={showDeleteModal}
             isLoading={isLoadingDeleteCustomer}
             onCancel={() => setShowDeleteModal(false)}
-            onOk={() => deleteCustomer({ ids: [detailCustomer.id] })}
+            onOk={() => deleteCustomer({ delete: [detailCustomer.id] })}
           />
         )}
 
@@ -656,15 +656,28 @@ const GeneralForms = ({
         />
         <Spacer size={10} />
         {isCompany && (
-          <FileUploaderAllFiles
-            label="Company Logo"
-            onSubmit={(file: any) => handleUploadCompanyLogoCustomer(file)}
-            disabled={isLoadingCustomerCompanyLogo}
-            defaultFile="/placeholder-employee-photo.svg"
-            withCrop
-            sizeImagePhoto="125px"
-            removeable
-            textPhoto={["Dimension Minimum 72 x 72, Optimal size 300 x 300", "File Size Max. 5MB"]}
+          <Controller
+            control={control}
+            name="customer.company_logo"
+            render={({ field: { value } }) => {
+              console.log("@value", value);
+
+              return (
+                <FileUploaderAllFiles
+                  label="Company Logo"
+                  onSubmit={(file: any) => handleUploadCompanyLogoCustomer(file)}
+                  disabled={isLoadingCustomerCompanyLogo}
+                  defaultFile={value === "-" ? "/placeholder-employee-photo.svg" : value}
+                  withCrop
+                  sizeImagePhoto="125px"
+                  removeable
+                  textPhoto={[
+                    "Dimension Minimum 72 x 72, Optimal size 300 x 300",
+                    "File Size Max. 5MB",
+                  ]}
+                />
+              );
+            }}
           />
         )}
       </Col>
@@ -775,14 +788,14 @@ const HeaderActionForm = ({
         <Controller
           control={control}
           name="customer.active_status"
-          render={({ field: { onChange } }) => (
+          render={({ field: { onChange, value } }) => (
             <>
               <Dropdown
                 width="185px"
                 noSearch
                 isHtml
                 items={status}
-                defaultValue="ACTIVE"
+                defaultValue={value}
                 handleChange={(value: any) => {
                   onChange(value);
                 }}

@@ -188,21 +188,29 @@ const Addresses = ({
       {fields.map((address: any, addressIndex: any) => {
         return (
           <Col key={address.id}>
-            <FileUploaderAllFiles
-              label="Company Logo"
-              onSubmit={(file: any) => {
-                setindexStorePhoto(addressIndex);
-                handleUploadStorePhotoAddress(file);
+            <Controller
+              control={control}
+              name={`address.${addressIndex}.imageUrl`}
+              render={({ field: { value } }) => {
+                return (
+                  <FileUploaderAllFiles
+                    label="Store Photo"
+                    onSubmit={(file: any) => {
+                      setindexStorePhoto(addressIndex);
+                      handleUploadStorePhotoAddress(file);
+                    }}
+                    disabled={isLoadingStorePhotoAddress}
+                    defaultFile={value || "/placeholder-employee-photo.svg"}
+                    withCrop
+                    sizeImagePhoto="125px"
+                    removeable
+                    textPhoto={[
+                      "Dimension Minimum 72 x 72, Optimal size 300 x 300",
+                      "File Size Max. 5MB",
+                    ]}
+                  />
+                );
               }}
-              disabled={isLoadingStorePhotoAddress}
-              defaultFile="/placeholder-employee-photo.svg"
-              withCrop
-              sizeImagePhoto="125px"
-              removeable
-              textPhoto={[
-                "Dimension Minimum 72 x 72, Optimal size 300 x 300",
-                "File Size Max. 5MB",
-              ]}
             />
 
             <Spacer size={10} />
