@@ -1,5 +1,5 @@
 import { yupResolver } from "@hookform/resolvers/yup";
-import { Button, Dropdown, Input, Modal, Spacer, Spin } from "pink-lava-ui";
+import { Button, Dropdown, Input, Modal, Spacer, Spin, Row } from "pink-lava-ui";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
@@ -98,76 +98,82 @@ export const ModalCreatePostalCode: any = ({
 
   return (
     <Modal
-      // visible={visible && !isLoading}
       visible={visible}
       onCancel={onCancel}
       title={"Create Postal Code"}
       footer={
-        <div
-          style={{
-            display: "flex",
-            marginBottom: "12px",
-            marginRight: "12px",
-            justifyContent: "flex-end",
-            gap: "12px",
-          }}
-        >
-          <Button
-            disabled={isLoading}
-            onClick={handleSubmit(onSubmit)}
-            variant="primary"
-            size="big"
+        !isLoadingCountries && (
+          <div
+            style={{
+              display: "flex",
+              marginBottom: "12px",
+              marginRight: "12px",
+              justifyContent: "flex-end",
+              gap: "12px",
+            }}
           >
-            {isLoading ? "Loading" : "Save"}
-          </Button>
-        </div>
+            <Button
+              disabled={isLoading}
+              onClick={handleSubmit(onSubmit)}
+              variant="primary"
+              size="big"
+            >
+              {isLoading ? "Loading" : "Save"}
+            </Button>
+          </div>
+        )
       }
       content={
         <>
           <Spacer size={20} />
           {isLoadingCountries ? (
-            <Spin tip="Loading data..." />
+            <Row justifyContent="center">
+              <Spin tip="Loading data..." />
+            </Row>
           ) : (
-            <Dropdown
-              label="Country"
-              width="100%"
-              items={dataCountries}
-              placeholder={"Select"}
-              handleChange={(value: any) => setSelectedCountry(value)}
-              onSearch={(search: any) => setSearch(search)}
-            />
-          )}
-          <Spacer size={20} />
-
-          {dataCountryStructures ? (
-            dataCountryStructures?.rows.map((data, index) => (
+            <>
               <Dropdown
-                key={index}
-                label={data.name}
-                noSearch
-                width={"100%"}
-                items={data.structures[0]?.values.map((dataStructures) => ({
-                  id: dataStructures.id,
-                  value: dataStructures.name,
-                }))}
+                label="Country"
+                width="100%"
+                items={dataCountries}
                 placeholder={"Select"}
-                handleChange={(value: any) =>
-                  setSelectedCountryStructures([...selectedCountryStructures, value])
-                }
+                handleChange={(value: any) => setSelectedCountry(value)}
+                onSearch={(search: any) => setSearch(search)}
               />
-            ))
-          ) : isFetchingCountryStructures ? (
-            <Spin tip="Loading data..." />
-          ) : null}
 
-          <Spacer size={20} />
-          <Input
-            error={errors?.code?.message}
-            {...register("code", { required: true })}
-            label="Postal Code"
-            placeholder={"e.g 40551"}
-          />
-          <Spacer size={20} />
+              <Spacer size={20} />
+
+              {dataCountryStructures ? (
+                dataCountryStructures?.rows.map((data, index) => (
+                  <Dropdown
+                    key={index}
+                    label={data.name}
+                    noSearch
+                    width={"100%"}
+                    items={data.structures[0]?.values.map((dataStructures) => ({
+                      id: dataStructures.id,
+                      value: dataStructures.name,
+                    }))}
+                    placeholder={"Select"}
+                    handleChange={(value: any) =>
+                      setSelectedCountryStructures([...selectedCountryStructures, value])
+                    }
+                  />
+                ))
+              ) : isFetchingCountryStructures ? (
+                <Spin tip="Loading data..." />
+              ) : null}
+
+              <Spacer size={20} />
+              <Input
+                error={errors?.code?.message}
+                {...register("code", { required: true })}
+                label="Postal Code"
+                placeholder={"e.g 40551"}
+              />
+              <Spacer size={20} />
+            </>
+          )}
         </>
       }
     />

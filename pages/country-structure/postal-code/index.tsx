@@ -66,11 +66,11 @@ const CountryPostalCode = () => {
   const columns = [
     {
       title: "Postal Code ID",
-      dataIndex: "postal_code_id",
+      dataIndex: "postal_code",
     },
     {
       title: "Postal Code",
-      dataIndex: "postal_code",
+      dataIndex: "postal_code_id",
     },
     {
       title: "Country Name",
