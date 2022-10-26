@@ -86,6 +86,7 @@ const CountryStructureCurrency = () => {
 		data: currenciesMDMData,
 		isLoading: isLoadingCurrenciesMDM,
 		isFetching: isFetchingCurrenciesMDM,
+		refetch: refetchurrenciesMDM
 	} = useCurrenciesMDM({
 		query: {
 			search: debounceSearch,
@@ -130,6 +131,7 @@ const CountryStructureCurrency = () => {
 				onSuccess: () => {
 					setModalCurrencyForm({ open: false, typeForm: "", data: {} });
 					queryClient.invalidateQueries(["currencies"]);
+					refetchurrenciesMDM();
 				},
 			},
 		}
@@ -142,6 +144,7 @@ const CountryStructureCurrency = () => {
 				onSuccess: () => {
 					setModalCurrencyForm({ open: false, typeForm: "", data: {} });
 					queryClient.invalidateQueries(["currencies"]);
+					refetchurrenciesMDM();
 				},
 			},
 		}
@@ -154,6 +157,7 @@ const CountryStructureCurrency = () => {
 				setModalCurrencyForm({ open: false, data: {}, typeForm: "" });
 				setSelectedRowKeys([]);
 				queryClient.invalidateQueries(["currencies"]);
+				refetchurrenciesMDM();
 			},
 		},
 	});
@@ -164,6 +168,7 @@ const CountryStructureCurrency = () => {
 				onSuccess: () => {
 					queryClient.invalidateQueries(["currencies"]);
 					setShowUpload(false);
+					refetchurrenciesMDM();
 				},
 			},
 		});
