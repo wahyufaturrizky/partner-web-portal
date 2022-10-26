@@ -7,6 +7,7 @@ import IconAdd from "assets/icons/ICAdd";
 import ModalAddBankAccount from "components/elements/Modal/ModalAddBankAccount";
 import { useCurrenciesMDM } from "hooks/company-list/useCompany";
 import { columnsInvoicingTableBank } from "../constants";
+import { useCoaList } from "hooks/mdm/product-category/useProductCategory";
 
 export default function Invoicing(props: any) {
   const {
@@ -35,6 +36,13 @@ export default function Invoicing(props: any) {
     { value: "RP. 10.000.000 - Bonus", id: "bonus" },
   ];
 
+  const { data: coaListReceivable, isLoading: isLoadingCoaListReceivable } = useCoaList({
+    status: "receivable",
+    options: {
+      onSuccess: () => {},
+    },
+  });
+
   const listFakeTaxCity = [
     { value: "DIY Yogyakarta", id: "yogyakarta" },
     { value: "Jakarta", id: "jakarta" },
@@ -48,8 +56,8 @@ export default function Invoicing(props: any) {
   });
 
   const _listCurrencies = listCurrencies?.rows?.map((items: any) => ({
-    id: items?.currency,
-    value: items?.currencyName,
+    id: items?.id,
+    value: items?.currency + " " + items?.currencyName,
   }));
 
   const _columnsInvoicingTableBank = columnsInvoicingTableBank(
@@ -91,16 +99,20 @@ export default function Invoicing(props: any) {
           <Controller
             control={control}
             name="invoicing.income_account"
-            render={({ field: { onChange } }) => (
+            render={({ field: { onChange, value } }) => (
               <Dropdown
                 label="Income Account"
                 noSearch
+                loading={isLoadingCoaListReceivable}
+                defaultValue={value}
                 width="100%"
                 actionLabel="Add New Income Account"
                 isShowActionLabel
                 handleChange={onChange}
-                items={_columnsInvoicingTableBank}
-                handleClickActionLabel={() => {}}
+                items={coaListReceivable?.rows?.map((data) => ({
+                  id: data.accountName,
+                  value: data.accountName,
+                }))}
               />
             )}
           />
@@ -114,8 +126,9 @@ export default function Invoicing(props: any) {
           <Controller
             control={control}
             name="invoicing.expense_account"
-            render={({ field: { onChange } }) => (
+            render={({ field: { onChange, value } }) => (
               <Dropdown
+                defaultValue={value}
                 label="Expense Account"
                 width="100%"
                 actionLabel="Add New Expense Account"
@@ -165,10 +178,11 @@ export default function Invoicing(props: any) {
             <Controller
               control={control}
               name="invoicing.tax_city"
-              render={({ field: { onChange } }) => (
+              render={({ field: { onChange, value } }) => (
                 <Dropdown
                   label="Tax City"
                   width="100%"
+                  defaultValue={value}
                   actionLabel="Add New Tax City"
                   isShowActionLabel
                   items={listFakeTaxCity}
@@ -197,9 +211,10 @@ export default function Invoicing(props: any) {
           <Controller
             control={control}
             name="invoicing.currency"
-            render={({ field: { onChange } }) => (
+            render={({ field: { onChange, value } }) => (
               <>
                 <Dropdown
+                  defaultValue={value}
                   label="Currency Code"
                   width="100%"
                   actionLabel="Add New Currency Code"

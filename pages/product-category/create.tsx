@@ -89,7 +89,7 @@ const CreateProductCategory: any = () => {
 
   const { data: coaList, isLoading: isLoadingCoaList } = useCoa({
     options: {
-      onSuccess: (data: any) => {},
+      onSuccess: () => {},
     },
     query: {
       search: searchCoa,
@@ -98,7 +98,7 @@ const CreateProductCategory: any = () => {
 
   const { mutate: createProductCategory } = useCreateProductCategory({
     options: {
-      onSuccess: (data) => {
+      onSuccess: () => {
         alert("Create Success!");
         router.push("/product-category");
       },
@@ -234,7 +234,7 @@ const CreateProductCategory: any = () => {
             <Accordion.Header variant="blue">Account Properties</Accordion.Header>
             <Accordion.Body>
               <Row width="49%" gap="20px" noWrap>
-              {(automate == "" || automate == "Automated") && (
+                {(automate == "" || automate == "Automated") && (
                   <Dropdown
                     label="Price Difference Account"
                     width={"100%"}
@@ -245,7 +245,7 @@ const CreateProductCategory: any = () => {
                     //   error={errors?.country?.message}
                     //   {...register("country")}
                   />
-                  )}
+                )}
               </Row>
               <Row width="100%" gap="20px" noWrap>
                 <Dropdown

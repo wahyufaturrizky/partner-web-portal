@@ -34,7 +34,7 @@ export default function CustomersDetail() {
       customer: {
         name: "",
         id: "",
-        is_company: false,
+        is_company: "Company",
         phone: "",
         tax_number: "",
         mobile: "",
@@ -70,9 +70,9 @@ export default function CustomersDetail() {
         branch: 1,
         salesman: 1,
         term_payment: "1",
-        sales_order_blocking: true,
-        billing_blocking: true,
-        delivery_order_blocking: true,
+        sales_order_blocking: false,
+        billing_blocking: false,
+        delivery_order_blocking: false,
       },
     },
   });
@@ -109,7 +109,7 @@ export default function CustomersDetail() {
         );
 
         setValue("customer.name", dataCustomerDetail.name);
-        setValue("customer.is_company", dataCustomerDetail.isCompany);
+        setValue("customer.is_company", dataCustomerDetail.isCompany ? "Company" : "Individu");
         setValue("customer.phone", dataCustomerDetail.phone);
         setValue("customer.tax_number", dataCustomerDetail.taxNumber);
         setValue("customer.mobile", dataCustomerDetail.mobile);
@@ -280,6 +280,7 @@ export default function CustomersDetail() {
     errors,
     setValue,
     getValues,
+    router,
   };
 
   return <CreateCustomers isUpdate {...propsDropdownField} />;

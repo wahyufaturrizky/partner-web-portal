@@ -20,7 +20,7 @@ import {
   FormSelect,
 } from "pink-lava-ui";
 import React, { useState } from "react";
-import { Controller, FormProvider, useFieldArray, useForm } from "react-hook-form";
+import { Controller, FormProvider, useFieldArray, useForm, useWatch } from "react-hook-form";
 import styled from "styled-components";
 
 import { ModalDeleteConfirmation } from "components/elements/Modal/ModalConfirmationDelete";
@@ -67,10 +67,13 @@ export default function CreateCustomers({
   errors,
   setValue,
   getValues,
+  router,
 }: any) {
-  const router = useRouter();
+  const dataWatchCustomer = useWatch({
+    control,
+    name: "customer",
+  });
   const [tabAktived, setTabAktived] = useState<string>("Contact");
-  const [formType, setFormType] = useState<string>("Company");
   const [isSuccessConvertToVendor, setIsSuccessConvertToVendor] = useState<{
     open: boolean;
     data: null;
@@ -85,17 +88,11 @@ export default function CreateCustomers({
     typeForm: "Edit Bank Account",
     data: null,
   });
-  const [checked, setChecked] = useState<any>({
-    sales_order_blocking: false,
-    billing_blocking: false,
-    delivery_order_blocking: false,
-  });
 
   const listItemsLanguages = getDataLanguages?.rows?.map(({ name, id }: any) => {
     return { value: name, id };
   });
 
-  const isCompany: boolean = formType === "Company";
   const _formType: string[] = ["Company", "Individu"];
 
   const {
@@ -200,7 +197,7 @@ export default function CreateCustomers({
         customer_group: Number(customer.customer_group),
         external_code: customer.external_code,
         company_logo: customer.company_logo,
-        is_company: isCompany,
+        is_company: customer.is_company === "Company" ? true : false,
         ppkp: customer.ppkp,
       },
       purchasing: {
@@ -308,7 +305,6 @@ export default function CreateCustomers({
     listItemsLanguages,
     isLoadingLanguages,
     handleUploadCompanyLogoCustomer,
-    isCompany,
     setSearchLanguages,
     setSearchCustomerGroup,
     isLoadingCustomerCompanyLogo,
@@ -318,6 +314,7 @@ export default function CreateCustomers({
     fetchNextPageCustomerGroupsLists,
     customerGroupsList,
     getValues,
+    dataWatchCustomer,
   };
 
   const { mutate: updateConvertVendor, isLoading: isLoadingConvertVendor } = useConvertToVendor({
@@ -346,7 +343,7 @@ export default function CreateCustomers({
 
   const switchTabItem = () => {
     switch (tabAktived) {
-      case formType === "Company" && "Contact":
+      case dataWatchCustomer.is_company === "Company" && "Contact":
         return <Contacts formType={detailCustomer ? "edit" : "add"} />;
       case "Addresses":
         return (
@@ -362,15 +359,7 @@ export default function CreateCustomers({
           />
         );
       case "Sales":
-        return (
-          <Sales
-            checked={checked}
-            setChecked={setChecked}
-            register={register}
-            control={control}
-            setValue={setValue}
-          />
-        );
+        return <Sales register={register} control={control} setValue={setValue} />;
       case "Invoicing":
         return (
           <Invoicing
@@ -415,6 +404,7 @@ export default function CreateCustomers({
             <ArrowLeft style={{ cursor: "pointer" }} onClick={() => router.back()} />
           )}
           <Label>{detailCustomer?.name || "Create Customer"}</Label>
+          {console.log("@dataWatchCustomer", dataWatchCustomer)}
           {detailCustomer?.registrationStatus ? (
             <Lozenge variant="blue">
               <Row alignItems="center">{detailCustomer?.registrationStatus}</Row>
@@ -422,17 +412,29 @@ export default function CreateCustomers({
           ) : (
             _formType.map((item) => (
               <FlexElement key={item}>
-                <Radio
-                  value={item}
-                  defaultValue="Company"
-                  checked={item === formType}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                    setFormType(e.target.value);
-                    item === "Individu" && setTabAktived("Addresses");
+                <Controller
+                  control={control}
+                  name="customer.is_company"
+                  render={({ field: { onChange, value } }) => {
+                    return (
+                      <>
+                        <Radio
+                          value={item}
+                          defaultValue={value}
+                          checked={item === dataWatchCustomer.is_company}
+                          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                            onChange(e.target.value);
+                            item === "Individu"
+                              ? setTabAktived("Addresses")
+                              : setTabAktived("Contact");
+                          }}
+                        />
+                        {item}
+                        <Spacer size={20} />
+                      </>
+                    );
                   }}
-                />{" "}
-                {item}
-                <Spacer size={20} />
+                />
               </FlexElement>
             ))
           )}
@@ -460,7 +462,9 @@ export default function CreateCustomers({
                   <Tabs
                     defaultActiveKey={tabAktived}
                     listTabPane={
-                      isCompany ? listTabItems : listTabItems.slice(1, listTabItems.length)
+                      dataWatchCustomer.is_company === "Company"
+                        ? listTabItems
+                        : listTabItems.slice(1, listTabItems.length)
                     }
                     onChange={(e: any) => setTabAktived(e)}
                   />
@@ -551,7 +555,6 @@ const GeneralForms = ({
   listItemsLanguages,
   isLoadingLanguages,
   handleUploadCompanyLogoCustomer,
-  isCompany,
   setSearchLanguages,
   setSearchCustomerGroup,
   isLoadingCustomerCompanyLogo,
@@ -561,6 +564,7 @@ const GeneralForms = ({
   fetchNextPageCustomerGroupsLists,
   customerGroupsList,
   getValues,
+  dataWatchCustomer,
 }: any) => {
   return (
     <Row width="100%" gap="12px">
@@ -655,7 +659,7 @@ const GeneralForms = ({
           }}
         />
         <Spacer size={10} />
-        {isCompany && (
+        {dataWatchCustomer.is_company === "Company" && (
           <Controller
             control={control}
             name="customer.company_logo"

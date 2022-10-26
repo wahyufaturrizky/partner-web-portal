@@ -1,6 +1,7 @@
-import { useState } from "react";
+import usePagination from "@lucasmogari/react-pagination";
+import { mdmDownloadService } from "lib/client";
 import { useRouter } from "next/router";
-import styled from "styled-components";
+import { queryClient } from "pages/_app";
 import {
   Button,
   Col,
@@ -11,12 +12,26 @@ import {
   Spacer,
   Table,
   Text,
+  FileUploadModal,
 } from "pink-lava-ui";
-import usePagination from "@lucasmogari/react-pagination";
-import { useListCustomers, useDeleteCustomers } from "../../hooks/mdm/customers/useCustomersMDM";
+import { useState } from "react";
+import styled from "styled-components";
 import { ICDownload, ICUpload } from "../../assets";
 import { ModalDeleteConfirmation } from "../../components/elements/Modal/ModalConfirmationDelete";
-import { mdmDownloadService } from "../../lib/client";
+import {
+  useDeleteCustomers,
+  useListCustomers,
+  useUploadFileCustomerMDM,
+} from "../../hooks/mdm/customers/useCustomersMDM";
+
+const downloadFile = (params: any) =>
+  mdmDownloadService("/customer/download", { params }).then((res) => {
+    let dataUrl = window.URL.createObjectURL(new Blob([res.data]));
+    let tempLink = document.createElement("a");
+    tempLink.href = dataUrl;
+    tempLink.setAttribute("download", `customer_${new Date().getTime()}.xlsx`);
+    tempLink.click();
+  });
 
 export default function Customer() {
   const pagination = usePagination({
@@ -28,6 +43,7 @@ export default function Customer() {
     totalItems: 100,
   });
   const router = useRouter();
+  const [isShowUpload, setShowUpload] = useState(false);
   const [search, setSearch] = useState("");
   const [itemsSelected, setItemsSelected] = useState([]);
   const [visible, setVisible] = useState(false);
@@ -133,6 +149,15 @@ export default function Customer() {
     },
   ];
 
+  const { mutate: uploadFileCustomerMDM } = useUploadFileCustomerMDM({
+    options: {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["postal-code"]);
+        setShowUpload(false);
+      },
+    },
+  });
+
   const rowSelection = {
     itemsSelected,
     onChange: (selected: any) => {
@@ -140,14 +165,11 @@ export default function Customer() {
     },
   };
 
-  const handleDownloadFile = (id: any) => {
-    mdmDownloadService(`/customer/download/MCS-0000012`, { params: {} }).then((res) => {
-      let dataUrl = window.URL.createObjectURL(new Blob([res?.data]));
-      let tempLink = document.createElement("a");
-      tempLink.href = dataUrl;
-      tempLink.setAttribute("download", `customers_${id} ${new Date().getTime()}.xlsx`);
-      tempLink.click();
-    });
+  const onSubmitFile = (file: any) => {
+    const formData = new FormData();
+    formData.append("upload_file", file);
+
+    uploadFileCustomerMDM(formData);
   };
 
   return (
@@ -179,7 +201,21 @@ export default function Customer() {
               textVariant={"button"}
               textColor={"pink.regular"}
               iconStyle={{ fontSize: "12px" }}
-              onClick={({ key }: any) => key === "1" && handleDownloadFile()}
+              onClick={(e: any) => {
+                switch (parseInt(e.key)) {
+                  case 1:
+                    downloadFile({ with_data: "N" });
+                    break;
+                  case 2:
+                    setShowUpload(true);
+                    break;
+                  case 3:
+                    downloadFile({ with_data: "Y" });
+                    break;
+                  default:
+                    break;
+                }
+              }}
               menuList={actDrowpdown}
             />
             <Button size="big" variant="primary" onClick={() => router.push("/customers/create")}>
@@ -209,6 +245,14 @@ export default function Customer() {
         onCancel={() => setVisible(false)}
         onOk={() => deleteCustomer({ delete: itemsSelected })}
       />
+
+      {isShowUpload && (
+        <FileUploadModal
+          visible={isShowUpload}
+          setVisible={setShowUpload}
+          onSubmit={onSubmitFile}
+        />
+      )}
     </div>
   );
 }

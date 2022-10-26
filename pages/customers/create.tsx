@@ -1,12 +1,14 @@
 import { useLanguages } from "hooks/languages/useLanguages";
 import { usePostalCodeInfiniteLists } from "hooks/mdm/postal-code/usePostalCode";
 import useDebounce from "lib/useDebounce";
+import { useRouter } from "next/router";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import CreateCustomers from "../../components/pages/Customers/CreateCustomers";
 import { useInfiniteCustomerGroupsLists } from "../../hooks/mdm/customers/useCustomersGroupMDM";
 
 export default function PageCreateCustomer() {
+  const router = useRouter();
   const [search, setSearch] = useState({
     languages: "",
     customerGroup: "",
@@ -29,7 +31,7 @@ export default function PageCreateCustomer() {
       bank: [],
       customer: {
         name: "",
-        is_company: false,
+        is_company: "Company",
         phone: "",
         tax_number: "",
         mobile: "",
@@ -62,9 +64,9 @@ export default function PageCreateCustomer() {
         branch: 1,
         salesman: 1,
         term_payment: "1",
-        sales_order_blocking: true,
-        billing_blocking: true,
-        delivery_order_blocking: true,
+        sales_order_blocking: false,
+        billing_blocking: false,
+        delivery_order_blocking: false,
       },
     },
   });
@@ -180,6 +182,7 @@ export default function PageCreateCustomer() {
     errors,
     setValue,
     getValues,
+    router,
   };
 
   return <CreateCustomers {...propsDropdownField} />;

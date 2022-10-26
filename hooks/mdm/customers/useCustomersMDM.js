@@ -28,6 +28,19 @@ const useUploadLogoCompany = ({ options }) => {
   );
 };
 
+const useUploadFileCustomerMDM = ({ options }) => {
+  return useMutation(
+    (data) =>
+      mdmService(`/customer/upload`, {
+        method: "POST",
+        data,
+      }),
+    {
+      ...options,
+    }
+  );
+};
+
 const useUploadStorePhotoAddress = ({ options }) => {
   return useMutation(
     (data) =>
@@ -135,4 +148,5 @@ export {
   useUploadLogoCompany,
   useConvertToVendor,
   useUploadStorePhotoAddress,
+  useUploadFileCustomerMDM,
 };

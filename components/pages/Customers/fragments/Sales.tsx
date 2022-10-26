@@ -1,15 +1,15 @@
-import React, { useEffect, useState } from "react";
-import { Row, Col, Spacer, Checkbox, Text, Dropdown } from "pink-lava-ui";
-import styled from "styled-components";
+import { Checkbox, Col, Dropdown, Row, Spacer, Text } from "pink-lava-ui";
+import { useState } from "react";
 import { Controller } from "react-hook-form";
+import styled from "styled-components";
 
-import { useTermOfPayments } from "hooks/mdm/term-of-payment/useTermOfPayment";
 import { useBranchList } from "hooks/mdm/branch/useBranch";
 import { useFetchListSalesman } from "hooks/mdm/salesman/useSalesman";
+import { useTermOfPayments } from "hooks/mdm/term-of-payment/useTermOfPayment";
 import { listSalesItems } from "../constants";
 
 export default function Sales(props: any) {
-  const { register, setValue, control, checked, setChecked } = props;
+  const { register, setValue, control } = props;
   const [search, setSearch] = useState({
     branch: null,
     term_payment: "",
@@ -49,13 +49,6 @@ export default function Sales(props: any) {
     id: item?.id,
   }));
 
-  useEffect(() => {
-    listSalesItems.map(({ value }) => {
-      register(`sales.${value}`, checked[value]);
-      setValue(`sales.${value}`, checked[value]);
-    });
-  }, [checked, setValue, register]);
-
   return (
     <div>
       <Label>Sales</Label>
@@ -65,9 +58,10 @@ export default function Sales(props: any) {
           <Controller
             control={control}
             name="sales.branch"
-            render={({ field: { onChange } }) => (
+            render={({ field: { onChange, value } }) => (
               <Dropdown
                 width="100%"
+                defaultValue={value}
                 label="Branch"
                 actionLabel="Add New Branch"
                 items={_listBranch}
@@ -80,9 +74,10 @@ export default function Sales(props: any) {
           <Controller
             control={control}
             name="sales.term_payment"
-            render={({ field: { onChange } }) => (
+            render={({ field: { onChange, value } }) => (
               <Dropdown
                 noSearch
+                defaultValue={value}
                 isShowActionLabel
                 width="100%"
                 label="Term of Payment"
@@ -118,18 +113,21 @@ export default function Sales(props: any) {
       <Spacer size={20} />
       {listSalesItems.map(({ value, label }, index) => (
         <>
-          <Row key={index} alignItems="center">
-            <Checkbox
-              checked={checked[value]}
-              onChange={(status: any) => {
-                setChecked({ ...checked, [value]: status });
-                register(`sales.${value}`, checked[value]);
-                setValue(`sales.${value}`, checked[value]);
-              }}
-            />
-            <Text>{label}</Text>
-          </Row>
-          <Spacer size={20} />
+          <Controller
+            control={control}
+            name={`sales.${value}`}
+            render={({ field: { onChange, value } }) => {
+              return (
+                <>
+                  <Row key={index} alignItems="center">
+                    <Checkbox checked={value} onChange={onChange} />
+                    <Text>{label}</Text>
+                  </Row>
+                  <Spacer size={20} />
+                </>
+              );
+            }}
+          />
         </>
       ))}
     </div>
