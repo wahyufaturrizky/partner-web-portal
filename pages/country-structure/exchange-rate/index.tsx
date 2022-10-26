@@ -217,8 +217,8 @@ const ExchangeRate = () => {
     
     if (dataAccess == "1") {
       setDataCurrency(data.currency);
-      setDataFromDate(data.from_date);
-      setDataToDate(data.from_date);
+      setDataFromDate(data.from_date_daily);
+      setDataToDate(data.from_date_daily);
     } else {
       setDataCurrency(data.currency);
       setDataFromDate(data.from_date);
@@ -360,6 +360,7 @@ const ExchangeRate = () => {
               width={"100%"}
               items={dailyAccess}
               handleChange={(value: string) => setDataAccess(value)}
+              defaultValue={dataAccess}
               valueSelectedItems={dataAccess}
               noSearch
               placeholder={"Select"}
@@ -407,14 +408,12 @@ const ExchangeRate = () => {
             <Col width={"40%"}>
               <Controller
                 control={control}
-                name={`from_date`}
-                defaultValue={moment().format("DD/MM/YYYY")}
+                name={`from_date_daily`}
                 render={({ field: { onChange } }) => (
                   <DatePickerInput
                     fullWidth
                     onChange={(date: any, dateString: any) => onChange(dateString)}
                     label="Daily Date"
-                    // defaultValue={moment()}
                     format={"DD/MM/YYYY"}
                   />
                 )}
