@@ -604,6 +604,7 @@ const CreateCompany: any = () => {
                   defaultFile="/placeholder-employee-photo.svg"
                   withCrop={true}
                   removeable
+                  textPhoto={["Format .JPG .JPEG .PNG and Dimension Minimum 72 x 72, Optimal size 300 x 300", "File Size Max. 5MB"]}
                 />
               </Row>
 
