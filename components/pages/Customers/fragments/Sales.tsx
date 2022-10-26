@@ -12,8 +12,11 @@ export default function Sales(props: any) {
   const { register, setValue, control, checked, setChecked } = props;
   const [search, setSearch] = useState({
     branch: null,
-    termOfPayment: "",
-    salesman: "",
+    term_payment: "",
+    salesman: null,
+    sales_order_blocking: "",
+    billing_blocking: "",
+    delivery_order_blocking: "",
   });
 
   const { data: listSalesman } = useFetchListSalesman({
@@ -23,7 +26,7 @@ export default function Sales(props: any) {
 
   const { data: listTermOfPayment } = useTermOfPayments({
     options: { onSuccess: () => {} },
-    query: { company_id: "KSNI", search: search.termOfPayment },
+    query: { company_id: "KSNI", search: search.term_payment },
   });
 
   const { data: listBranch } = useBranchList({
@@ -43,7 +46,7 @@ export default function Sales(props: any) {
 
   const _listBranch = listBranch?.rows?.map((item: any) => ({
     value: item?.name,
-    id: item?.branchId,
+    id: item?.id,
   }));
 
   useEffect(() => {
@@ -86,7 +89,7 @@ export default function Sales(props: any) {
                 actionLabel="Add New Term of Payment"
                 handleChange={onChange}
                 items={_listTermOfPayment}
-                onSearch={(value: string) => setSearch({ ...search, termOfPayment: value })}
+                onSearch={(value: string) => setSearch({ ...search, term_payment: value })}
               />
             )}
           />
