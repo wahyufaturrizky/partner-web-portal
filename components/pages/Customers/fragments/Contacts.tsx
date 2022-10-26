@@ -106,7 +106,7 @@ const Contacts = ({ formType }: any) => {
                           <CheckOutlined /> Primary
                         </ContactLabel>
                       )}
-                      <ContactLabel>{contact?.job}</ContactLabel>
+                      <ContactLabel>{contact?.role}</ContactLabel>
                     </Row>
                     <Spacer size={10} />
                     <ContactEmail>{contact?.email}</ContactEmail>

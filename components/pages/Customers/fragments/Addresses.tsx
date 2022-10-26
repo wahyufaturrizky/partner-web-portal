@@ -20,7 +20,16 @@ import useDebounce from "lib/useDebounce";
 import styled from "styled-components";
 import { useUploadStorePhotoAddress } from "hooks/mdm/customers/useCustomersMDM";
 
-const Addresses = ({ formType, getValues }: any) => {
+const Addresses = ({
+  formType,
+  getValues,
+  isFetchingPostalCode,
+  isFetchingMorePostalCode,
+  hasNextPagePostalCode,
+  fetchNextPagePostalCode,
+  postalCodeList,
+  setSearchPostalCode,
+}: any) => {
   const { register, control, setValue } = useFormContext();
 
   const { fields, append, remove, update }: any = useFieldArray({
@@ -467,26 +476,38 @@ const Addresses = ({ formType, getValues }: any) => {
 
               <Controller
                 control={control}
-                defaultValue={""}
                 name={`address.${addressIndex}.postal_code`}
-                render={({ field: { onChange, value }, formState: { errors } }) => (
-                  <Col width="50%">
+                render={({ field: { onChange, value } }) => (
+                  <>
                     <Text variant="headingRegular">Postal Code</Text>
                     <Spacer size={5} />
                     <FormSelect
+                      height="48px"
                       defaultValue={value}
                       style={{ width: "100%" }}
                       size={"large"}
                       placeholder={"Select"}
                       borderColor={"#AAAAAA"}
                       arrowColor={"#000"}
-                      withSearch={false}
-                      items={[]}
+                      withSearch
+                      isLoading={isFetchingPostalCode}
+                      isLoadingMore={isFetchingMorePostalCode}
+                      fetchMore={() => {
+                        if (hasNextPagePostalCode) {
+                          fetchNextPagePostalCode();
+                        }
+                      }}
+                      items={
+                        isFetchingPostalCode && !isFetchingMorePostalCode ? [] : postalCodeList
+                      }
                       onChange={(value: any) => {
                         onChange(value);
                       }}
+                      onSearch={(value: any) => {
+                        setSearchPostalCode(value);
+                      }}
                     />
-                  </Col>
+                  </>
                 )}
               />
             </Row>

@@ -52,6 +52,12 @@ export default function CreateCustomers({
   fetchNextPageCustomerGroupsLists,
   customerGroupsList,
   isLoadingCustomerGroupsLists,
+  isFetchingPostalCode,
+  isFetchingMorePostalCode,
+  hasNextPagePostalCode,
+  fetchNextPagePostalCode,
+  postalCodeList,
+  setSearchPostalCode,
 }: any) {
   const router = useRouter();
   const [tabAktived, setTabAktived] = useState<string>("Contact");
@@ -256,7 +262,7 @@ export default function CreateCustomers({
         is_primary: data.is_primary,
         address_type: data.address_type,
         street: data.address_type,
-        country: data.country,
+        country: 1,
         postal_code: data.postal_code,
         longtitude: data.longtitude,
         latitude: data.latitude,
@@ -385,7 +391,18 @@ export default function CreateCustomers({
       case formType === "Company" && "Contact":
         return <Contacts formType={detailCustomer ? "edit" : "add"} />;
       case "Addresses":
-        return <Addresses getValues={getValues} formType={detailCustomer ? "edit" : "add"} />;
+        return (
+          <Addresses
+            isFetchingPostalCode={isFetchingPostalCode}
+            isFetchingMorePostalCode={isFetchingMorePostalCode}
+            hasNextPagePostalCode={hasNextPagePostalCode}
+            fetchNextPagePostalCode={fetchNextPagePostalCode}
+            postalCodeList={postalCodeList}
+            setSearchPostalCode={setSearchPostalCode}
+            getValues={getValues}
+            formType={detailCustomer ? "edit" : "add"}
+          />
+        );
       case "Sales":
         return (
           <Sales

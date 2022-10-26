@@ -1,9 +1,9 @@
 import { useLanguages } from "hooks/languages/useLanguages";
+import { usePostalCodeInfiniteLists } from "hooks/mdm/postal-code/usePostalCode";
 import useDebounce from "lib/useDebounce";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import CreateCustomers from "../../components/pages/Customers/CreateCustomers";
-import { useDataCountries } from "../../hooks/mdm/country-structure/useCountries";
 import { useInfiniteCustomerGroupsLists } from "../../hooks/mdm/customers/useCustomersGroupMDM";
 import { useDetailCustomer } from "../../hooks/mdm/customers/useCustomersMDM";
 
@@ -15,11 +15,16 @@ export default function CustomersDetail() {
     customerGroup: "",
   });
 
+  const [postalCodeList, setPostalCodeList] = useState<any[]>([]);
+  const [totalRowsPostalCodeList, setTotalRowsPostalCodeList] = useState(0);
+  const [searchPostalCode, setSearchPostalCode] = useState("");
+
   const [customerGroupsList, setListCustomerGroupsList] = useState<any[]>([]);
   const [totalRowsCustomerGroupsList, setTotalRowsCustomerGroupsList] = useState(0);
 
   const debounceFetchLanguages = useDebounce(search.languages, 1000);
   const debounceFetchCustomerGroup = useDebounce(search.customerGroup, 1000);
+  const debounceFetchPostalCode = useDebounce(searchPostalCode, 1000);
 
   const { data: getDataLanguages, isLoading: isLoadingLanguages } = useLanguages({
     options: { onSuccess: () => {} },
@@ -32,6 +37,40 @@ export default function CustomersDetail() {
       onSuccess: () => {},
     },
     id: customers_id,
+  });
+
+  const {
+    isFetching: isFetchingPostalCode,
+    isFetchingNextPage: isFetchingMorePostalCode,
+    hasNextPage: hasNextPagePostalCode,
+    fetchNextPage: fetchNextPagePostalCode,
+  } = usePostalCodeInfiniteLists({
+    query: {
+      search: debounceFetchPostalCode,
+      limit: 10,
+    },
+    options: {
+      onSuccess: (data: any) => {
+        setTotalRowsPostalCodeList(data.pages[0].totalRow);
+        const mappedData = data?.pages?.map((group: any) => {
+          return group.rows?.map((element: any) => {
+            return {
+              value: element.codeText,
+              label: element.code,
+            };
+          });
+        });
+        const flattenArray = [].concat(...mappedData);
+        setPostalCodeList(flattenArray);
+      },
+      getNextPageParam: (_lastPage: any, pages: any) => {
+        if (postalCodeList.length < totalRowsPostalCodeList) {
+          return pages.length + 1;
+        } else {
+          return undefined;
+        }
+      },
+    },
   });
 
   const {
@@ -84,6 +123,12 @@ export default function CustomersDetail() {
     setSearchLanguage: () => {},
     setSearchLanguages: (value: string) => setSearch({ ...search, languages: value }),
     setSearchCustomerGroup: (value: string) => setSearch({ ...search, customerGroup: value }),
+    isFetchingPostalCode,
+    isFetchingMorePostalCode,
+    hasNextPagePostalCode,
+    fetchNextPagePostalCode,
+    postalCodeList,
+    setSearchPostalCode,
   };
 
   return <CreateCustomers isUpdate {...propsDropdownField} />;
