@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import {
   Text,
@@ -24,6 +24,7 @@ import { queryClient } from "../_app";
 import { ICDownload, ICUpload } from "../../assets/icons";
 import { mdmDownloadService } from "../../lib/client";
 import { useRouter } from "next/router";
+import { lang } from "lang";
 
 const downloadFile = (params: any) =>
   mdmDownloadService("/product-group/download", { params }).then((res) => {
@@ -52,6 +53,7 @@ const renderConfirmationText = (type: any, data: any) => {
 };
 
 const ProductGroup = () => {
+  const t = localStorage.getItem("lan");
   const router = useRouter();
   const pagination = usePagination({
     page: 1,
@@ -72,6 +74,7 @@ const ProductGroup = () => {
     data: productsGroupData,
     isLoading: isLoadingProductsGroup,
     isFetching: isFetchingProductsGroup,
+    refetch: refetchGroupData,
   } = useProductsGroup({
     query: {
       search: debounceSearch,
@@ -163,10 +166,14 @@ const ProductGroup = () => {
     uploadFileProductGroup(formData);
   };
 
+  useEffect(() => {
+    refetchGroupData();
+  }, [refetchGroupData, t]);
+
   return (
     <>
       <Col>
-        <Text variant={"h4"}>Product Group</Text>
+        <Text variant={"h4"}>{lang[t].productgroup.headertitle}</Text>
         <Spacer size={20} />
       </Col>
       <Card>

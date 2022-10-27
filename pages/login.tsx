@@ -1,9 +1,9 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import Image from "next/image";
-import { useRouter } from "next/router";
-import { Button, Col, Input, Modal, Row, Spacer, Text, Dropdown } from "pink-lava-ui";
-import React, { useCallback, useEffect, useState } from "react";
+import { Button, Col, Dropdown, Input, Modal, Row, Spacer, Text } from "pink-lava-ui";
+import { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
+import toast from "react-hot-toast";
 import OtpInput from "react-otp-input";
 import styled from "styled-components";
 import * as yup from "yup";
@@ -14,7 +14,6 @@ import {
   useUpdatePassword,
   useVerifyOTP,
 } from "../hooks/auth/useAuth";
-import toast, { Toaster } from "react-hot-toast";
 
 import ICFlagIndonesia from "../assets/icons/ic-flag-idn.svg";
 import ICFlagEnglish from "../assets/icons/ic-flag-us.svg";
@@ -29,7 +28,7 @@ const languageOptions = [
         <p>Indonesia</p>
       </div>
     ),
-    id: "id",
+    id: "id-ID",
   },
   {
     value: (
@@ -38,7 +37,7 @@ const languageOptions = [
         <p>English</p>
       </div>
     ),
-    id: "en",
+    id: "en-US",
   },
 ];
 
@@ -77,7 +76,6 @@ interface OTPFlowInterface {
 }
 
 const Login: any = () => {
-  const router = useRouter();
   const [isForgotPassword, setIsForgotPassword] = useState<boolean>(false);
   const [isResetWithPhone, setIsResetWithPhone] = useState<boolean>(false);
   const [isFlowCreateNewPassword, setIsFlowCreateNewPassword] = useState<boolean>(false);
@@ -238,9 +236,10 @@ const Login: any = () => {
           <Dropdown
             width="174px"
             label=""
-            defaultValue="id"
+            defaultValue="en-US"
             items={languageOptions}
             placeholder="Indonesia"
+            handleChange={(value: any) => localStorage.setItem("lan", value)}
             rounded
             noSearch
           />

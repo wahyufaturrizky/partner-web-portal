@@ -1,31 +1,32 @@
-import React, { useState } from "react";
 import Router from "next/router";
-import { Sidebar, Layout, Header, MenuLogout, Notification, Spacer } from "pink-lava-ui";
+import { Header, Layout, MenuLogout, Notification, Sidebar, Spacer, Row, Col } from "pink-lava-ui";
+import { useState } from "react";
+import styled from "styled-components";
 import {
-  ICField,
-  ICUser,
-  ICMenu,
   ICCalendar,
+  ICDollar,
+  ICField,
   ICFinance,
   ICInventory,
-  ICPurchasOrg,
-  ICDollar,
+  ICMenu,
   ICPackage,
+  ICPurchasOrg,
+  ICUser,
 } from "../assets";
+import ICArrowBottom from "../assets/icons/ic-arrow-bottom.svg";
 import ICAccount from "../assets/icons/ic-avatar-default.svg";
-import ICAccountSetting from "../assets/icons/ic-setting.svg";
+import ICBadge from "../assets/icons/ic-badge.svg";
 import ICCompany from "../assets/icons/ic-company.svg";
+import ICDocument from "../assets/icons/ic-document.svg";
 import ICChangeLanguage from "../assets/icons/ic-globe.svg";
 import ICLogout from "../assets/icons/ic-logout.svg";
-import ICArrowBottom from "../assets/icons/ic-arrow-bottom.svg";
-import ICBadge from "../assets/icons/ic-badge.svg";
+import ICPaperMoney from "../assets/icons/ic-paper-money.svg";
+import ICPercent from "../assets/icons/ic-percent.svg";
 import ICSalesman from "../assets/icons/ic-salesman.svg";
-import ICDocument from "../assets/icons/ic-document.svg";
+import ICAccountSetting from "../assets/icons/ic-setting.svg";
 import ICTransportation from "../assets/icons/ic-transportation.svg";
-import ICGlobe from "../assets/icons/ic-globe-lang.svg"
-import ICPercent from "../assets/icons/ic-percent.svg"
-import ICPaperMoney from "../assets/icons/ic-paper-money.svg"
-import styled from "styled-components";
+import ICFlagIndonesia from "../assets/icons/ic-flag-idn.svg";
+import ICFlagEnglish from "../assets/icons/ic-flag-us.svg";
 
 const menuConfig = [
   { type: "title", title: "Overview" },
@@ -513,10 +514,11 @@ const flexStyles = {
 
 const AdminLayout = (props: any) => {
   const [current, setCurrent] = useState("0");
+  const [isChangeLang, setIsChangeLang] = useState(false);
 
   const handleCLickTabNav = (e: any) => {
     setCurrent(e.key);
-    Router.push('/dashboard')
+    Router.push("/dashboard");
   };
 
   const handleLogout = (e: any) => {
@@ -531,10 +533,11 @@ const AdminLayout = (props: any) => {
         menu={current === "0" ? menuConfig : menuMdm}
         defaultMenu={"dashboard"}
       />
-      <Layout className="site-layout"
+      <Layout
+        className="site-layout"
         style={{
-          height: '100vh',
-          overflow: 'auto',
+          height: "100vh",
+          overflow: "auto",
         }}
       >
         <Header
@@ -543,58 +546,95 @@ const AdminLayout = (props: any) => {
           selectedKeys={[current]}
           items={itemsMenu}
         >
-          <div style={{
-            display: "flex",
-            paddingTop: '.7rem',
-            marginBottom: '.78rem',
-            background: '#fff'
-          }}>
-            <Notification items={notifItems}/>
+          <div
+            style={{
+              display: "flex",
+              paddingTop: ".7rem",
+              marginBottom: ".78rem",
+              background: "#fff",
+            }}
+          >
+            <Notification items={notifItems} />
             <Spacer size={15} />
-            <MenuLogout
-              menu={
-                <WrapperMenuLogout>
-                  <WrapeprProfile>
-                    <ICAccount />
-                    <div>
-                      <TextName>Admin</TextName>
-                      <TextRole>Super User</TextRole>
-                    </div>
-                  </WrapeprProfile>
-                  <a
-                    style={{ color: "#000" }}
-                    target="_blank"
-                    href="https://accounts.edot.id/infopribadi"
-                    rel="noopener noreferrer"
+
+            {isChangeLang ? (
+              <LanguageOption>
+                <Col>
+                  <div
+                    style={{ cursor: "pointer" }}
+                    onClick={() => {
+                      localStorage.setItem("lan", "id-ID");
+                      setIsChangeLang(false);
+                    }}
                   >
+                    <Row gap="12px" alignItems="center">
+                      <ICFlagIndonesia />
+                      <p>Indonesia</p>
+                    </Row>
+                  </div>
+
+                  <div
+                    style={{ cursor: "pointer" }}
+                    onClick={() => {
+                      localStorage.setItem("lan", "en-US");
+                      setIsChangeLang(false);
+                    }}
+                  >
+                    <Row gap="12px" alignItems="center">
+                      <ICFlagEnglish />
+                      <p>English</p>
+                    </Row>
+                  </div>
+                </Col>
+              </LanguageOption>
+            ) : (
+              <MenuLogout
+                menu={
+                  <WrapperMenuLogout>
+                    <WrapeprProfile>
+                      <ICAccount />
+                      <div>
+                        <TextName>Admin</TextName>
+                        <TextRole>Super User</TextRole>
+                      </div>
+                    </WrapeprProfile>
+                    <a
+                      style={{ color: "#000" }}
+                      target="_blank"
+                      href="https://accounts.edot.id/infopribadi"
+                      rel="noopener noreferrer"
+                    >
+                      <div style={flexStyles}>
+                        <ICAccountSetting />
+                        <p>Account Settings</p>
+                      </div>
+                    </a>
                     <div style={flexStyles}>
-                      <ICAccountSetting />
-                      <p>Account Settings</p>
+                      <ICCompany />
+                      <p>Company List</p>
                     </div>
-                  </a>
-                  <div style={flexStyles}>
-                    <ICCompany />
-                    <p>Company List</p>
+                    <div style={flexStyles} onClick={() => setIsChangeLang(true)}>
+                      <ICChangeLanguage />
+                      <p>Change Language</p>
+                    </div>
+                    <div style={flexStyles} onClick={handleLogout}>
+                      <ICLogout />
+                      <p>Logout</p>
+                    </div>
+                  </WrapperMenuLogout>
+                }
+              >
+                <MenuDropdown>
+                  <div
+                    style={{ gap: "5px", display: "flex", alignItems: "center", fontSize: "14px" }}
+                  >
+                    <ICAccount size={64} />
+                    <p>Admin</p>
                   </div>
-                  <div style={flexStyles}>
-                    <ICChangeLanguage />
-                    <p>Change Language</p>
-                  </div>
-                  <div style={flexStyles} onClick={handleLogout}>
-                    <ICLogout />
-                    <p>Logout</p>
-                  </div>
-                </WrapperMenuLogout>
-              }
-            >
-              <MenuDropdown>
-                <div style={{ gap: "5px", display: "flex", alignItems: "center", fontSize: "14px" }}>
-                  <ICAccount size={64} />
-                  <p>Admin</p>
-                </div>
-                <ICArrowBottom />
-              </MenuDropdown>
-            </MenuLogout>
+                  <ICArrowBottom />
+                </MenuDropdown>
+              </MenuLogout>
+            )}
           </div>
         </Header>
         <div style={{ padding: "20px" }}>{props}</div>
@@ -613,13 +653,6 @@ const WrapeprProfile = styled.div`
   cursor: pointer;
 `;
 
-const WrapperNotifLogout = styled.div`
-  display: flex
-  padding-top: .5rem
-  margin-bottom: .5rem
-  background: #fff'
-  box-shadow: 0px 4px 16px rgba(170, 170, 170, 0.15);
-`
 const WrapperMenuLogout = styled.div`
   width: 200px;
   height: 272px;
@@ -655,6 +688,18 @@ const TextRole = styled.p`
   line-height: 24px;
   margin: 0;
   color: #666666;
+`;
+
+const LanguageOption = styled.div`
+  top: 1rem;
+  right: 1rem;
+  position: absolute;
+  background-color: white;
+  width: 200px;
+  height: 160px;
+  box-shadow: 0px 4px 16px rgba(170, 170, 170, 0.15);
+  border-radius: 16px;
+  padding: 20px;
 `;
 
 export default AdminLayout;
