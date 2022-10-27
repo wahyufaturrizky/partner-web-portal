@@ -154,8 +154,6 @@ const ModalVendorGroup = ({ show, onCancel }: any) => {
     }
   };
 
-  console.log(vendorGroupData, selectedRowKeys[0]);
-
   return (
     <>
       <Modal

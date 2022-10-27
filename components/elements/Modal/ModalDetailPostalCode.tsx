@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Button, Spacer, Modal, Input, Dropdown, Spin } from "pink-lava-ui";
+import { Button, Spacer, Modal, Input, Dropdown, Spin, Row } from "pink-lava-ui";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
@@ -19,7 +19,6 @@ export const ModalDetailPostalCode: any = ({
   visible,
   defaultValue,
   onCancel,
-  onOk,
   error,
   dataModal,
   refetchPostalCode,
@@ -36,7 +35,6 @@ export const ModalDetailPostalCode: any = ({
     register,
     handleSubmit,
     formState: { errors },
-    setValue,
   } = useForm({
     defaultValues: defaultValue,
     resolver: yupResolver(schema),
@@ -49,7 +47,7 @@ export const ModalDetailPostalCode: any = ({
 
   const { data: countries, isLoading: isLoadingCountries } = useCountries({
     options: {
-      onSuccess: (data: any) => {},
+      onSuccess: () => {},
     },
     query: {
       search,
@@ -60,7 +58,7 @@ export const ModalDetailPostalCode: any = ({
     useCountryStructures({
       country: selectedCountry,
       options: {
-        onSuccess: (data: any) => {},
+        onSuccess: () => {},
       },
     });
 
@@ -96,68 +94,81 @@ export const ModalDetailPostalCode: any = ({
       onCancel={onCancel}
       title={"Postal Code"}
       footer={
-        <div
-          style={{
-            display: "flex",
-            marginBottom: "12px",
-            marginRight: "12px",
-            justifyContent: "flex-end",
-            gap: "12px",
-          }}
-        >
-          <Button onClick={handleSubmit(onSubmit)} variant="primary" size="big">
-            {isLoading ? "Loading" : "Save"}
-          </Button>
-        </div>
+        !isLoadingCountries && (
+          <div
+            style={{
+              display: "flex",
+              marginBottom: "12px",
+              marginRight: "12px",
+              justifyContent: "flex-end",
+              gap: "12px",
+            }}
+          >
+            <Button onClick={handleSubmit(onSubmit)} variant="primary" size="big">
+              {isLoading ? "Loading" : "Save"}
+            </Button>
+          </div>
+        )
       }
       content={
         <>
           <Spacer size={20} />
-          {!countries && isLoadingCountries ? (
-            <Spin tip="Loading data..." />
+          {isLoadingCountries ? (
+            <Row justifyContent="center">
+              <Spin tip="Loading data..." />
+            </Row>
           ) : (
-            <Dropdown
-              label="Country"
-              width={"100%"}
-              defaultValue={dataModal?.countryRecord?.name}
-              items={countries.rows.map((data: any) => ({ id: data.id, value: data.name }))}
-              placeholder={"Select"}
-              handleChange={(value: any) => setSelectedCountry(value)}
-              onSearch={(search: any) => setSearch(search)}
-            />
-          )}
-
-          <Spacer size={20} />
-
-          {dataCountryStructures ? (
-            dataCountryStructures?.rows.map((data: any, index: any) => (
+            <>
               <Dropdown
-                key={index}
-                label={data.name}
-                noSearch
+                label="Country"
                 width={"100%"}
-                items={data.structures[0]?.values.map((dataStructures: any) => ({
-                  id: dataStructures.id,
-                  value: dataStructures.name,
-                }))}
+                defaultValue={dataModal?.countryRecord?.name}
+                items={countries.rows.map((data: any) => ({ id: data.id, value: data.name }))}
                 placeholder={"Select"}
-                handleChange={(value: any) =>
-                  setSelectedCountryStructures([...selectedCountryStructures, value])
-                }
+                handleChange={(value: any) => setSelectedCountry(value)}
+                onSearch={(search: any) => setSearch(search)}
               />
-            ))
-          ) : isFetchingCountryStructures ? (
-            <Spin tip="Loading data..." />
-          ) : null}
 
-          <Spacer size={20} />
-          <Input
-            error={errors?.code?.message}
-            {...register("code", { required: true })}
-            label="Postal Code"
-            placeholder={"e.g 40551"}
-          />
-          <Spacer size={20} />
+              <Spacer size={20} />
+              {console.log("@dataCountryStructures", dataCountryStructures)}
+
+              {dataCountryStructures ? (
+                dataCountryStructures?.rows.map((data: any, index: any) => {
+                  console.log("@data", data);
+
+                  return (
+                    <Dropdown
+                      key={index}
+                      label={data.name}
+                      defaultValue={data.structures[0]?.values[0]?.name}
+                      noSearch
+                      width={"100%"}
+                      items={data.structures[0]?.values.map((dataStructures: any) => ({
+                        id: dataStructures.id,
+                        value: dataStructures.name,
+                      }))}
+                      placeholder={"Select"}
+                      handleChange={(value: any) =>
+                        setSelectedCountryStructures([...selectedCountryStructures, value])
+                      }
+                    />
+                  );
+                })
+              ) : isFetchingCountryStructures ? (
+                <Spin tip="Loading data..." />
+              ) : null}
+
+              <Spacer size={20} />
+              <Input
+                error={errors?.code?.message}
+                {...register("code", { required: true })}
+                label="Postal Code"
+                defaultValue={dataModal?.code}
+                placeholder={"e.g 40551"}
+              />
+              <Spacer size={20} />
+            </>
+          )}
         </>
       }
     />

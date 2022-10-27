@@ -465,13 +465,6 @@ const menuMdm = [
     ],
   },
   {
-    key: "library-language",
-    title: "Library Language",
-    content: () => "Library Language",
-    icon: ICGlobe,
-    onClick: () => Router.push("/library-language"),
-  },
-  {
     key: "working-calendar",
     title: "Working Calendar",
     content: () => "Working Calendar",

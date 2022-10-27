@@ -53,19 +53,22 @@ const UOMConversionDetail = () => {
   });
   const { uom_conversion_id } = router.query;
   const [listUomCategory, setListUomCategory] = useState<any[]>([]);
+  const [listUomCategoryModal, setListUomCategoryModal] = useState<any[]>([]);
   const [totalRows, setTotalRows] = useState(0);
   const [search, setSearch] = useState("");
+  const [searchModal, setSearchModal] = useState("");
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isShowDelete, setShowDelete] = useState({ open: false, type: "selection", data: {} });
   const [showCreateModal, setShowCreateModal] = useState(false)
 
   const debounceFetch = useDebounce(search, 1000);
+  const debounceFetchModal = useDebounce(searchModal, 1000);
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
 
 
   const { register, control, handleSubmit } = useForm();
-  
+
   const {
     isFetching: isFetchingUomCategory,
     isFetchingNextPage: isFetchingMoreUomCategory,
@@ -94,6 +97,42 @@ const UOMConversionDetail = () => {
       },
       getNextPageParam: (_lastPage: any, pages: any) => {
         if (listUomCategory.length < totalRows) {
+          return pages.length + 1;
+        } else {
+          return undefined;
+        }
+      },
+    },
+  });
+
+  const {
+    isFetching: isFetchingUomCategoryModal,
+    isFetchingNextPage: isFetchingMoreUomCategoryModal,
+    isLoading: isLoadingUOMCategoryModal,
+    hasNextPage: hasNextPageModal,
+    fetchNextPage: fetchNextPageModal,
+  } = useUOMInfiniteLists({
+    query: {
+      search: debounceFetchModal,
+      company_id: "KSNI",
+      limit: 10,
+    },
+    options: {
+      onSuccess: (data: any) => {
+        setTotalRows(data.pages[0].totalRow);
+        const mappedData = data?.pages?.map((group: any) => {
+          return group.rows?.map((element: any) => {
+            return {
+              value: element.uomId,
+              label: element.name,
+            };
+          });
+        });
+        const flattenArray = [].concat(...mappedData);
+        setListUomCategoryModal(flattenArray);
+      },
+      getNextPageParam: (_lastPage: any, pages: any) => {
+        if (listUomCategoryModal.length < totalRows) {
           return pages.length + 1;
         } else {
           return undefined;
@@ -152,7 +191,7 @@ const UOMConversionDetail = () => {
     options: {
       onSuccess: () => {
         queryClient.invalidateQueries(["uom-conversion"]);
-        router.back()
+        // router.back()
       },
     },
   });
@@ -162,11 +201,9 @@ const UOMConversionDetail = () => {
       onSuccess: () => {
         queryClient.invalidateQueries(["uom-list"]);
         setShowDeleteModal(false);
-        router.back();
       },
     },
   });
-
 
   const updateDeleteUom = (id: any) => {
     let newData = {
@@ -176,7 +213,7 @@ const UOMConversionDetail = () => {
       remove_items: []
     }
     
-    id.forEach((uomId:number) => {
+    id?.forEach((uomId:number) => {
       newData.remove_items.push({id: uomId})
     })
     updateUom(newData)
@@ -233,7 +270,6 @@ const UOMConversionDetail = () => {
       items: UomData?.dataForUpdate
     }
     updateUom(newData)
-  
   }
 
   const columns = [
@@ -275,7 +311,7 @@ const UOMConversionDetail = () => {
     },
   };
 
-  if (isLoadingUom || isFetchingUom || isLoadingUOMCategory)
+  if (isLoadingUom || isFetchingUom || isLoadingUOMCategory || isLoadingUOMCategoryModal)
   return (
     <Center>
       <Spin tip="Loading data..." />
@@ -300,7 +336,11 @@ const UOMConversionDetail = () => {
               <Button size="big" variant={"tertiary"} onClick={() => setShowDeleteModal(true)}>
                 Delete
               </Button>
-              <Button size="big" variant={"primary"} onClick={handleSubmit(onSave)}>
+              <Button size="big" variant={"primary"} onClick={(e) => {
+                handleSubmit(onSave)(e)
+                router.back()
+              }
+              }>
                 {isLoadingUpdateUom ? "Loading..." : "Save"}
               </Button>
             </Row>
@@ -445,23 +485,23 @@ const UOMConversionDetail = () => {
                         borderColor={"#AAAAAA"}
                         arrowColor={"#000"}
                         withSearch
-                        isLoading={isFetchingUomCategory}
-                        isLoadingMore={isFetchingMoreUomCategory}
+                        isLoading={isFetchingUomCategoryModal}
+                        isLoadingMore={isFetchingMoreUomCategoryModal}
                         fetchMore={() => {
-                          if (hasNextPage) {
-                            fetchNextPage();
+                          if (hasNextPageModal) {
+                            fetchNextPageModal();
                           }
                         }}
                         items={
-                          isFetchingUomCategory && !isFetchingMoreUomCategory
+                          isFetchingUomCategoryModal && !isFetchingMoreUomCategoryModal
                             ? []
-                            : listUomCategory
+                            : listUomCategoryModal
                         }
                         onChange={(value: any) => {
                           onChange(value);
                         }}
                         onSearch={(value: any) => {
-                          setSearch(value);
+                          setSearchModal(value);
                         }}
                         />
                     </CreateSelectDiv>
@@ -499,7 +539,7 @@ const UOMConversionDetail = () => {
               </Button>
               <Button
                 variant="primary"
-                onClick={handleSubmit(updateCreateUom)}
+                onClick={handleSubmit(updateCreateUom, false)}
               >
                 save
               </Button>

@@ -17,10 +17,34 @@ const fetchDetailCustomer = async ({ id }) => {
   return mdmService(`/customer/${id}`).then((data) => data);
 };
 
-const useUploadLogo = ({ options }) => {
+const useUploadLogoCompany = ({ options }) => {
   return useMutation(
     (data) =>
       mdmService("/customer/upload", {
+        method: "POST",
+        data,
+      }),
+    { ...options }
+  );
+};
+
+const useUploadFileCustomerMDM = ({ options }) => {
+  return useMutation(
+    (data) =>
+      mdmService(`/customer/upload`, {
+        method: "POST",
+        data,
+      }),
+    {
+      ...options,
+    }
+  );
+};
+
+const useUploadStorePhotoAddress = ({ options }) => {
+  return useMutation(
+    (data) =>
+      mdmService("/customer/address/upload", {
         method: "POST",
         data,
       }),
@@ -62,40 +86,57 @@ const useCustomerInfiniteLists = ({ query = {}, options }) => {
   });
 };
 
-const useCreateCustomers = ({ options }) => {
-  return useMutation((data) => {
-    return (
-      mdmService("/customer", {
+function useCreateCustomers({ options }) {
+  return useMutation(
+    (data) =>
+      mdmService(`/customer`, {
         method: "POST",
         data,
       }),
-      { ...options }
-    );
-  });
-};
+    {
+      ...options,
+    }
+  );
+}
+
+function useConvertToVendor({ id, options }) {
+  return useMutation(
+    (data) =>
+      mdmService(`/customer/convert/${id}`, {
+        method: "POST",
+        data,
+      }),
+    {
+      ...options,
+    }
+  );
+}
 
 const useDeleteCustomers = ({ options }) => {
   return useMutation(
     (ids) =>
-      mdmService("/customer", {
+      mdmService(`/customer`, {
         method: "DELETE",
         data: ids,
       }),
-    { ...options }
+    {
+      ...options,
+    }
   );
 };
 
-const useUpdateCustomer = ({ id, options }) => {
-  return useMutation((data) => {
-    return (
+function useUpdateCustomer({ id, options }) {
+  return useMutation(
+    (data) =>
       mdmService(`/customer/${id}`, {
         method: "PUT",
         data,
       }),
-      { ...options }
-    );
-  });
-};
+    {
+      ...options,
+    }
+  );
+}
 
 export {
   useListCustomers,
@@ -104,5 +145,8 @@ export {
   useUpdateCustomer,
   useDeleteCustomers,
   useDetailCustomer,
-  useUploadLogo,
+  useUploadLogoCompany,
+  useConvertToVendor,
+  useUploadStorePhotoAddress,
+  useUploadFileCustomerMDM,
 };

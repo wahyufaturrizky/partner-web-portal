@@ -118,7 +118,7 @@ const SequenceNumber = () => {
           <Row alignItems="center">
             <Search
               width="380px"
-              placeholder="Search Branch Name"
+              placeholder="Search Company, Branch Name"
               onChange={(e) => setSearch(e.target.value)}
             />
           </Row>

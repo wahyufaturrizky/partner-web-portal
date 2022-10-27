@@ -17,6 +17,7 @@ import {
 	Text,
 	DropdownMenuOptionCustome,
 	Spin,
+	Tag
 } from "pink-lava-ui";
 import React, { useState } from "react";
 import { useEffect } from "react";
@@ -48,8 +49,9 @@ const DetailMenuList: any = () => {
 		name: "",
 		screen: "",
 		process_name: "",
+		fee: ""
 	});
-	const { name, screen, process_name } = stateFieldInput;
+	const { name, screen, process_name, fee } = stateFieldInput;
 	const [stateModal, setStateModal] = useState({
 		isShowModal: false,
 		titleModal: "",
@@ -66,7 +68,7 @@ const DetailMenuList: any = () => {
 	const [selectedFilter, setSelectedFilter] = useState([]);
 	const paginationTableField = usePagination({
 		page: 1,
-		itemsPerPage: 20,
+		itemsPerPage: 10,
 		maxPageItems: Infinity,
 		numbers: true,
 		arrows: true,
@@ -74,7 +76,7 @@ const DetailMenuList: any = () => {
 	});
 	const paginationAllowedField = usePagination({
 		page: 1,
-		itemsPerPage: 20,
+		itemsPerPage: 10,
 		maxPageItems: Infinity,
 		numbers: true,
 		arrows: true,
@@ -82,7 +84,7 @@ const DetailMenuList: any = () => {
 	});
 	const paginationTablePermission = usePagination({
 		page: 1,
-		itemsPerPage: 20,
+		itemsPerPage: 10,
 		maxPageItems: Infinity,
 		numbers: true,
 		arrows: true,
@@ -95,11 +97,11 @@ const DetailMenuList: any = () => {
 		isLoading: isLoadingMenuList,
 	} = useMenuList({
 		options: {
-			onSuccess: (data: any) => {
-				let tempDataAllowedField: any = [];
-				let tempDataAssociatePermission: any = [];
+			onSuccess: (data) => {
+				let tempDataAllowedField = [];
+				let tempDataAssociatePermission = [];
 
-				data.field.map((data: any) => {
+				data.field.map((data) => {
 					tempDataAllowedField.push({
 						allowed_field: data.name,
 						allowed_field_id: data.id,
@@ -126,6 +128,7 @@ const DetailMenuList: any = () => {
 					name: data.menu.name,
 					process_name: data.menu.processName,
 					screen: data.menu.screen,
+					fee: data.menu.fee
 				});
 
 				setDataAllowedField(tempDataAllowedField);
@@ -156,7 +159,7 @@ const DetailMenuList: any = () => {
 		isLoading: isLoadingPermissions,
 	} = usePermissions({
 		options: {
-			onSuccess: (data: any) => {
+			onSuccess: (data) => {
 				paginationTablePermission.setTotalItems(data.totalRow);
 				setIsLoading(false);
 			},
@@ -174,7 +177,7 @@ const DetailMenuList: any = () => {
 		isLoading: isLoadingFilterListPermissions,
 	} = useFilterListPermissions({
 		options: {
-			onSuccess: (data: any) => {
+			onSuccess: (data) => {
 				paginationTablePermission.setTotalItems(data.totalRow);
 				setIsLoading(false);
 			},
@@ -191,14 +194,14 @@ const DetailMenuList: any = () => {
 
 	const columnsTablePermission = [
 		{
-			title: "Permission Name",
+			title: "Associated Module",
 			dataIndex: "field_name",
 		},
 	];
 
-	const dataTablePermission: any = [];
-	const datFieldPermission: any = [];
-	dataTableAssociatePermission?.rows?.map((field: any) => {
+	const dataTablePermission = [];
+	const datFieldPermission = [];
+	dataTableAssociatePermission?.rows?.map((field) => {
 		dataTablePermission.push({
 			key: field.id,
 			field_name: field.name,
@@ -219,7 +222,7 @@ const DetailMenuList: any = () => {
 
 	const paginateFieldTablePermission = dataTablePermission;
 
-	const onSelectChangeTablePermission = (selectedRowKeys: any, selectedRows: any) => {
+	const onSelectChangeTablePermission = (selectedRowKeys, selectedRows) => {
 		setSelectedRowTablePermission(selectedRows);
 		setSelectedRowKeysTablePermission(selectedRowKeys);
 	};
@@ -317,6 +320,10 @@ const DetailMenuList: any = () => {
 	const rowSelectionAllowedField = {
 		selectedRowKeys: selectedAllowedFieldRowKeys,
 		onChange: onSelectChangeAllowedField,
+		getCheckboxProps: (record: DataType) => ({
+			disabled:true,
+			name: record.name,
+		}),
 	};
 
 	const columnsTableField = [
@@ -344,8 +351,8 @@ const DetailMenuList: any = () => {
 		},
 	});
 
-	const dataTableField: any = [];
-	tableFieldData?.rows?.map((field: any) => {
+	const dataTableField = [];
+	tableFieldData?.rows?.map((field) => {
 		dataTableField.push({
 			key: field.id,
 			field_id: field.id,
@@ -356,7 +363,7 @@ const DetailMenuList: any = () => {
 
 	const paginateTableField = dataTableField;
 
-	const onSelectChangeTableField = (value: any, rowSelected: any) => {
+	const onSelectChangeTableField = (value, rowSelected) => {
 		setSelectedRowKeysTableField(value);
 		setSelectedRowTableField(rowSelected);
 	};
@@ -376,9 +383,9 @@ const DetailMenuList: any = () => {
 	});
 
 	const handleSelectedField = () => {
-		if (titleModal === "Associated Permissions") {
-			const tempDataAssociatedPermissionsField: any = [];
-			dataTablePermission?.map((field: any) => {
+		if (titleModal === "Associated Module") {
+			const tempDataAssociatedPermissionsField = [];
+			dataTablePermission?.map((field) => {
 				if (rowSelectionTablePermission.selectedRowKeys.includes(field.key)) {
 					tempDataAssociatedPermissionsField.push({
 						key: field.key,
@@ -393,8 +400,8 @@ const DetailMenuList: any = () => {
 				}
 			});
 		} else {
-			const tempDataAllowedField: any = [];
-			dataTableField?.map((field: any) => {
+			const tempDataAllowedField = [];
+			dataTableField?.map((field) => {
 				if (rowSelectionTableField.selectedRowKeys.includes(field.key)) {
 					tempDataAllowedField.push({
 						key: field.key,
@@ -450,7 +457,7 @@ const DetailMenuList: any = () => {
 	});
 
 	useEffect(() => {
-		if (isShowModal && titleModal === "Associated Permissions") {
+		if (isShowModal && titleModal === "Associated Module") {
 			setIsLoading(true);
 			const tempCheck = selectedFilter.find((finding) => finding);
 			reqBodyFilterListPermission({
@@ -477,7 +484,8 @@ const DetailMenuList: any = () => {
 				const data = {
 					name: stateFieldInput?.name,
 					screen: stateFieldInput?.screen,
-					process_name: stateFieldInput?.process_name,
+					process_name: isMenuProcess ? stateFieldInput?.process_name : undefined,
+					fee: stateFieldInput?.fee,
 					field: dataAllowedField.map((data) => data.key),
 					is_config: isZeus ? "Y" : "N",
 					is_partner: isHermes ? "Y" : "N",
@@ -572,48 +580,18 @@ const DetailMenuList: any = () => {
 					<Text variant={"h4"}>{Router.query.name}</Text>
 				</Row>
 				<Spacer size={8} />
-				<Row alignItems="center" gap="12px">
-					<Col>
-						<Row alignItems="center">
-							<Checkbox checked={isMenuProcess} onChange={onChangeIsMenuProcess} />
-							<div style={{ cursor: "pointer" }} onClick={onChangeIsMenuProcess}>
-								<Text variant={"h6"}>This menu is process</Text>
-							</div>
-						</Row>
-					</Col>
-					<Col>
-						<Row alignItems="center">
-							<Checkbox checked={isZeus} onChange={onChangeIsZues} />
-							<div style={{ cursor: "pointer" }} onClick={onChangeIsZues}>
-								<Text variant={"h6"}>Menu Zeus</Text>
-							</div>
-						</Row>
-					</Col>
-					<Col>
-						<Row alignItems="center">
-							<Checkbox checked={isHermes} onChange={onChangeIsHermes} />
-							<div style={{ cursor: "pointer" }} onClick={onChangeIsHermes}>
-								<Text variant={"h6"}>Menu Hermes</Text>
-							</div>
-						</Row>
-					</Col>
-				</Row>
 				<Spacer size={12} />
 				<Card padding="20px">
-					<Row justifyContent="flex-end" alignItems="center" nowrap>
+					<Row justifyContent="flex-start" alignItems="center" nowrap>
 						<Row>
-							<Row gap="16px">
-								{/* <Button
-									size="big"
-									variant={"tertiary"}
-									onClick={() => setModalDelete({ open: true })}
-								>
-									Delete
-								</Button> */}
-								<Button size="big" variant={"primary"} onClick={handleUpdateMenuList}>
-									{isLoading ? "loading..." : "Save"}
-								</Button>
-							</Row>
+							<Col>
+								<Row alignItems="center">
+									<Checkbox disabled checked={isMenuProcess} onChange={onChangeIsMenuProcess} />
+									<div style={{ cursor: "pointer" }}>
+										<Text variant={"subtitle1"}>This menu is Process</Text>
+									</div>
+								</Row>
+							</Col>
 						</Row>
 					</Row>
 				</Card>
@@ -633,6 +611,7 @@ const DetailMenuList: any = () => {
 									height="48px"
 									placeholder={"e.g Shipment and Delivery"}
 									onChange={handleChangeInput}
+									disabled
 								/>
 								<Input
 									id="screen"
@@ -642,10 +621,22 @@ const DetailMenuList: any = () => {
 									onChange={handleChangeInput}
 									height="48px"
 									placeholder={"e.g Shipment and Delivery"}
+									disabled
 								/>
 							</Row>
-							{isMenuProcess && (
-								<Row width="100%" gap="20px" noWrap>
+							<Spacer size={20} />
+							<Row width="100%" gap="20px" noWrap>
+								<Input
+									id="fee"
+									width="100%"
+									value={fee}
+									label="Permission Fee"
+									onChange={handleChangeInput}
+									height="48px"
+									placeholder={"e.g 10.000"}
+									disabled
+								/>
+								<div style={{ visibility: isMenuProcess ? "visible" : "hidden", width: "100%" }}>
 									<Input
 										id="process_name"
 										width="100%"
@@ -654,53 +645,28 @@ const DetailMenuList: any = () => {
 										onChange={handleChangeInput}
 										height="48px"
 										placeholder={"e.g Shipment"}
+										isOptional
+										disabled
 									/>
+								</div>
+							</Row>
+							<Spacer size={20} />
+							<Row>
+							<Col>
+								<Text variant="headingRegular">Associated Module</Text>
+								<Spacer size={16} />
+								<Row>
+									{dataAssociatedPermissionsField?.map((data:any) => {
+										return(
+											<>
+												<Tag>{data.field_name}</Tag>
+												<Spacer size={8} />
+											</>
+										)
+									})}
 								</Row>
-							)}
-
-							{!isLoading &&
-							!isLoadingPermissions &&
-							!isLoadingMenuList &&
-							!isLoadingFilterListPermissions &&
-							ishowForDropDown ? (
-								<DropdownMenuOptionCustome
-									loading={isLoading}
-									handleOpenTotalBadge={() =>
-										setStateModal({
-											...stateModal,
-											isShowModal: true,
-											titleModal: "Associated Permissions",
-											widthModal: 1000,
-										})
-									}
-									isAllowClear
-									valueSelectedItems={
-										dataAssociatedPermissionsField &&
-										dataAssociatedPermissionsField?.map((data) => data.key)
-									}
-									handleChangeValue={handleChangeInputAssociatePermission}
-									label="Associated Permissions"
-									listItems={datFieldPermission}
-								/>
-							) : (
-								<Spin tip="loading data..." />
-							)}
-
-							<div
-								style={{ cursor: "pointer" }}
-								onClick={() =>
-									setStateModal({
-										...stateModal,
-										isShowModal: true,
-										titleModal: "Associated Permissions",
-										widthModal: 1000,
-									})
-								}
-							>
-								<Text variant="headingSmall" color="pink.regular">
-									Advance View
-								</Text>
-							</div>
+							</Col>
+							</Row>
 						</Accordion.Body>
 					</Accordion.Item>
 				</Accordion>
@@ -721,25 +687,6 @@ const DetailMenuList: any = () => {
 									placeholder="Search Menu Name"
 									onChange={(e) => setSearchAllowedField(e.target.value)}
 								/>
-								<Row gap="16px">
-									<Button size="big" variant={"tertiary"} onClick={handleRemoveAllowedField}>
-										Remove
-									</Button>
-									<Button
-										size="big"
-										variant={"primary"}
-										onClick={() =>
-											setStateModal({
-												...stateModal,
-												isShowModal: true,
-												titleModal: "Add Field",
-												widthModal: 1000,
-											})
-										}
-									>
-										Add Field
-									</Button>
-								</Row>
 							</Row>
 							<Spacer size={10} />
 							<Table
@@ -776,7 +723,7 @@ const DetailMenuList: any = () => {
 							Cancel
 						</Button>
 						<Button onClick={handleSelectedField} variant="primary" size="big">
-							{titleModal === "Associated Permissions" ? "Apply" : "Add"}
+							{titleModal === "Associated Module" ? "Apply" : "Add"}
 						</Button>
 					</div>
 				}
@@ -787,18 +734,18 @@ const DetailMenuList: any = () => {
 							<Search
 								width="380px"
 								placeholder={
-									titleModal === "Associated Permissions"
+									titleModal === "Associated Module"
 										? "Search Permission Name"
 										: "Search Field ID, Name, Key"
 								}
 								onChange={(e) =>
-									titleModal === "Associated Permissions"
+									titleModal === "Associated Module"
 										? setSearchTablePermission(e.target.value)
 										: setSearchTableField(e.target.value)
 								}
 							/>
 							<Row gap="16px">
-								{titleModal === "Associated Permissions" ? (
+								{titleModal === "Associated Module" ? (
 									<DropdownMenuOptionGroup
 										label="Filter"
 										handleChangeValue={handleChangeFilterValue}
@@ -819,24 +766,24 @@ const DetailMenuList: any = () => {
 						<Spacer size={10} />
 						<Table
 							columns={
-								titleModal === "Associated Permissions"
+								titleModal === "Associated Module"
 									? columnsTablePermission
 									: columnsTableField.filter((filtering) => filtering.dataIndex !== "field_key")
 							}
 							data={
-								titleModal === "Associated Permissions"
+								titleModal === "Associated Module"
 									? paginateFieldTablePermission
 									: paginateTableField
 							}
 							rowSelection={
-								titleModal === "Associated Permissions"
+								titleModal === "Associated Module"
 									? rowSelectionTablePermission
 									: rowSelectionTableField
 							}
 						/>
 						<Pagination
 							pagination={
-								titleModal === "Associated Permissions"
+								titleModal === "Associated Module"
 									? paginationTablePermission
 									: paginationTableField
 							}

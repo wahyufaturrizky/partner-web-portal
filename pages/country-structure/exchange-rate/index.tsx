@@ -12,6 +12,7 @@ import {
   DropdownMenu,
   FileUploadModal,
   DatePickerInput,
+  FormSelect,
 } from "pink-lava-ui";
 import usePagination from "@lucasmogari/react-pagination";
 import {
@@ -25,6 +26,7 @@ import { useRouter } from "next/router";
 import { Controller, useForm } from "react-hook-form";
 import moment from "moment";
 import { mdmDownloadService } from "lib/client";
+import { useCurrenciesInfiniteLists } from "hooks/mdm/country-structure/useCurrencyMDM";
 
 const downloadFile = (params: any) =>
   mdmDownloadService("/exchange-rate/download", { params }).then((res) => {
@@ -37,7 +39,14 @@ const downloadFile = (params: any) =>
 
 const ExchangeRate = () => {
   const router = useRouter();
-  const [dataAccess, setDataAccess] = useState("");
+  const [dataAccess, setDataAccess] = useState("1");
+  const [dataCurrency, setDataCurrency] = useState("");
+  const [dataFromDate, setDataFromDate] = useState("");
+  const [dataToDate, setDataToDate] = useState("");
+  const [totalRowsCurrenciesInfiniteList, setTotalRowsCurrenciesInfiniteList] = useState(0);
+  const [currenciesInfiniteList, setCurrenciesInfiniteList] = useState<any[]>([]);
+  const [searchCurrenciesInfinite, setSearchCurrenciesInfinite] = useState("");
+  const debounceFetchCurrenciesInfinite = useDebounce(searchCurrenciesInfinite, 1000);
 
   const {
     control,
@@ -72,6 +81,9 @@ const ExchangeRate = () => {
       page: pagination.page,
       limit: pagination.itemsPerPage,
       company_id: "KSNI",
+      currency: dataCurrency,
+      start_date: dataFromDate,
+      end_date: dataToDate,
     },
     options: {
       onSuccess: (data: any) => {
@@ -106,6 +118,41 @@ const ExchangeRate = () => {
       },
     });
 
+  const {
+    isFetching: isFetchingCurrenciesInfinite,
+    isFetchingNextPage: isFetchingMoreCurrenciesInfinite,
+    hasNextPage: hasNextPageCurrenciesInfinite,
+    fetchNextPage: fetchNextPageCurrenciesInfinite,
+    isLoading: isLoadingCurrenciesInfinite,
+  } = useCurrenciesInfiniteLists({
+    query: {
+      search: debounceFetchCurrenciesInfinite,
+      limit: 10,
+    },
+    options: {
+      onSuccess: (data: any) => {
+        setTotalRowsCurrenciesInfiniteList(data.pages[0].totalRow);
+        const mappedData = data?.pages?.map((group: any) => {
+          return group.rows?.map((element: any) => {
+            return {
+              ...element,
+              value: element.currency,
+              label: `${element.currency} - ${element.currencyName}`,
+            };
+          });
+        });
+        const flattenArray = [].concat(...mappedData);
+        setCurrenciesInfiniteList(flattenArray);
+      },
+      getNextPageParam: (_lastPage: any, pages: any) => {
+        if (currenciesInfiniteList.length < totalRowsCurrenciesInfiniteList) {
+          return pages.length + 1;
+        } else {
+          return undefined;
+        }
+      },
+    },
+  });
   const columns = [
     {
       title: "Currency Code",
@@ -130,21 +177,6 @@ const ExchangeRate = () => {
     {
       title: "Last Updated",
       dataIndex: "exchangeLastUpdated",
-    },
-  ];
-
-  const currency = [
-    {
-      id: "1",
-      value: "IDR - Indonesian Rupiah",
-    },
-    {
-      id: "2",
-      value: "USD - United State Dollar",
-    },
-    {
-      id: "3",
-      value: "SGD - Singapore Dollar",
     },
   ];
 
@@ -178,6 +210,20 @@ const ExchangeRate = () => {
     formData.append("file", file);
 
     uploadFileExchange(formData);
+  };
+
+  const onSubmit = (data) => {
+    console.log(data);
+    
+    if (dataAccess == "1") {
+      setDataCurrency(data.currency);
+      setDataFromDate(data.from_date_daily);
+      setDataToDate(data.from_date_daily);
+    } else {
+      setDataCurrency(data.currency);
+      setDataFromDate(data.from_date);
+      setDataToDate(data.to_date);
+    }
   };
 
   return (
@@ -267,12 +313,45 @@ const ExchangeRate = () => {
       <Card style={{ padding: "16px 20px" }}>
         <Row width="100%" gap="14px" noWrap>
           <Col width={"40%"}>
-            <Dropdown
-              label="Currency"
-              width={"100%"}
-              items={currency}
-              placeholder={"Select"}
-              onSearch={() => setSearch("group")}
+            <Controller
+              control={control}
+              name="currency"
+              render={({ field: { onChange, value }, fieldState: { error } }) => (
+                <>
+                  <Label>Currency</Label>
+                  <Spacer size={3} />
+                  <FormSelect
+                    defaultValue={value}
+                    error={error?.message}
+                    height="48px"
+                    style={{ width: "100%" }}
+                    size={"large"}
+                    placeholder={"Select"}
+                    borderColor={error?.message ? "#ED1C24" : "#AAAAAA"}
+                    arrowColor={"#000"}
+                    withSearch
+                    isLoading={isFetchingCurrenciesInfinite}
+                    isLoadingMore={isFetchingMoreCurrenciesInfinite}
+                    fetchMore={() => {
+                      if (hasNextPageCurrenciesInfinite) {
+                        fetchNextPageCurrenciesInfinite();
+                      }
+                    }}
+                    items={
+                      isFetchingCurrenciesInfinite && !isFetchingMoreCurrenciesInfinite
+                        ? []
+                        : currenciesInfiniteList
+                    }
+                    onChange={(value: any) => {
+                      onChange(value);
+                      setSearchCurrenciesInfinite("");
+                    }}
+                    onSearch={(value: any) => {
+                      setSearchCurrenciesInfinite(value);
+                    }}
+                  />
+                </>
+              )}
             />
           </Col>
           <Col width={"40%"}>
@@ -281,6 +360,7 @@ const ExchangeRate = () => {
               width={"100%"}
               items={dailyAccess}
               handleChange={(value: string) => setDataAccess(value)}
+              defaultValue={dataAccess}
               valueSelectedItems={dataAccess}
               noSearch
               placeholder={"Select"}
@@ -295,6 +375,7 @@ const ExchangeRate = () => {
                 <Controller
                   control={control}
                   name={`from_date`}
+                  defaultValue={moment().format("DD/MM/YYYY")}
                   render={({ field: { onChange } }) => (
                     <DatePickerInput
                       fullWidth
@@ -310,6 +391,7 @@ const ExchangeRate = () => {
                 <Controller
                   control={control}
                   name={`to_date`}
+                  defaultValue={moment().format("DD/MM/YYYY")}
                   render={({ field: { onChange } }) => (
                     <DatePickerInput
                       fullWidth
@@ -326,13 +408,12 @@ const ExchangeRate = () => {
             <Col width={"40%"}>
               <Controller
                 control={control}
-                name={`daily_date`}
+                name={`from_date_daily`}
                 render={({ field: { onChange } }) => (
                   <DatePickerInput
                     fullWidth
                     onChange={(date: any, dateString: any) => onChange(dateString)}
                     label="Daily Date"
-                    defaultValue={moment()}
                     format={"DD/MM/YYYY"}
                   />
                 )}
@@ -346,7 +427,7 @@ const ExchangeRate = () => {
             style={{ paddingBottom: "5px" }}
             nowrap
           >
-            <Button size="big" variant={"primary"}>
+            <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
               View
             </Button>
           </Col>
@@ -375,6 +456,12 @@ const Card = styled.div`
   background: #ffffff;
   border-radius: 16px;
   padding: 16px;
+`;
+const Label = styled.div`
+  font-weight: bold;
+  font-size: 16px;
+  line-height: 24px;
+  color: #000000;
 `;
 
 export default ExchangeRate;

@@ -1,8 +1,8 @@
 import { useQuery, useMutation } from "react-query";
-import { client } from "../../lib/client";
+import { client, mdmService } from "../../lib/client";
 
 const fetchUsers = async ({ query = {} }) => {
-  return client(`/user`, {
+  return mdmService(`/user`, {
     params: {
       search: "",
       limit: 10,
@@ -44,7 +44,7 @@ const useApprovalUsers = ({ query = {}, options } = {}) => {
 function useCreateUser({ options }) {
   return useMutation(
     (updates) =>
-      client(`/user`, {
+      mdmService(`/user`, {
         method: "POST",
         data: updates,
       }),
@@ -55,7 +55,7 @@ function useCreateUser({ options }) {
 }
 
 const fetchUser = async ({ user_id }) => {
-  return client(`/user/${user_id}`).then((data) => data);
+  return mdmService(`/user/${user_id}`).then((data) => data);
 };
 
 const useUser = ({ user_id, options }) => {
@@ -80,7 +80,7 @@ function useApproveUser({ options }) {
 function useUpdateUser({ user_id, options }) {
   return useMutation(
     (updates) =>
-      client(`/user/${user_id}`, {
+      mdmService(`/user/${user_id}`, {
         method: "PUT",
         data: updates,
       }),
@@ -92,11 +92,13 @@ function useUpdateUser({ user_id, options }) {
 
 const useDeleteUser = ({ options }) => {
   return useMutation(
-    (ids) =>
-      client(`/user/delete`, {
+    (ids) => {
+      console.log(ids);
+      return mdmService(`/user/delete`, {
         method: "POST",
         data: ids,
-      }),
+      });
+    },
     {
       ...options,
     }

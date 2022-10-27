@@ -62,6 +62,7 @@ const DetailSequenceNumber: any = () => {
       onSuccess: (data) => {
         refetchField()
         alert('Success Updating Data')
+        setIsEdit(false)
       },
     },
   });

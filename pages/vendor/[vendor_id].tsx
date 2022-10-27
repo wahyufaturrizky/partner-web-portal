@@ -214,8 +214,8 @@ export default function VendorDetail() {
 
         // Invoicing Form
         const mappingInvoicing = {
-          reconciliation_account: data?.invoicing.reconciliationAccount,
-          tax_country: data?.invoicing.taxCountry,
+          reconciliation_account: data?.invoicing?.reconciliationAccount,
+          tax_country: data?.invoicing?.taxCountry,
           tax_name: data?.invoicing?.taxName,
           tax_address: data?.invoicing?.taxAddress,
           tax_type: data?.invoicing?.taxType,
