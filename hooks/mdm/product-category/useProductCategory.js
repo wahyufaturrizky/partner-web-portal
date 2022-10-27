@@ -108,6 +108,25 @@ const useCoaList = ({ query = {}, options, status }) => {
     ...options,
   });
 };
+const useCoaListReceive = ({ query = {}, options, status }) => {
+  return useQuery(["coa-list-receive", query], () => fetchCoaList({ query, status }), {
+    ...options,
+  });
+};
+
+const fetchAllCoaList = async ({ query = {} }) => {
+  return client(`/coa-list?company_code=KSNI`, {
+    params: {
+      ...query,
+    },
+  }).then((data) => data);
+};
+
+const useCoaListAll = ({ query = {}, options }) => {
+  return useQuery(["coa-list-all", query], () => fetchAllCoaList({ query }), {
+    ...options,
+  });
+};
 
 const useUploadFileProductCategory = ({ options }) => {
   return useMutation(
@@ -129,4 +148,6 @@ export {
   useCoaList,
   useProductCategoryInfiniteLists,
   useUploadFileProductCategory,
+  useCoaListReceive,
+  useCoaListAll,
 };
