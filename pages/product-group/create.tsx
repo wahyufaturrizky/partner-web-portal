@@ -10,8 +10,10 @@ import {
 import { queryClient } from "../_app";
 import usePagination from "@lucasmogari/react-pagination";
 import ConditionalField from "../../components/pages/ProductGroup/ConditionalField";
+import { lang } from "lang";
 
 const ProductGroupCreate = () => {
+  const t = localStorage.getItem("lan") || "en-US";
   const router = useRouter();
   const pagination = usePagination({
     page: 1,
@@ -118,7 +120,7 @@ const ProductGroupCreate = () => {
     <>
       <Col>
         <Row gap="4px">
-          <Text variant={"h4"}>Create Product Group</Text>
+          <Text variant={"h4"}>{lang[t].productGroup.create.headerTitle}</Text>
         </Row>
 
         <Spacer size={20} />

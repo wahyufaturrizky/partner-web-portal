@@ -1,6 +1,16 @@
 import Router from "next/router";
-import { Header, Layout, MenuLogout, Notification, Sidebar, Spacer, Row, Col } from "pink-lava-ui";
-import { useState } from "react";
+import {
+  Header,
+  Layout,
+  MenuLogout,
+  Notification,
+  Sidebar,
+  Spacer,
+  Row,
+  Col,
+  Text,
+} from "pink-lava-ui";
+import { useEffect, useState } from "react";
 import styled from "styled-components";
 import {
   ICCalendar,
@@ -567,6 +577,7 @@ const AdminLayout = (props: any) => {
                       setIsChangeLang(false);
                     }}
                   >
+                    <Text variant="headingRegular">Change Language</Text>
                     <Row gap="12px" alignItems="center">
                       <ICFlagIndonesia />
                       <p>Indonesia</p>

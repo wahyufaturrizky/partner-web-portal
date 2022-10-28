@@ -53,7 +53,7 @@ const renderConfirmationText = (type: any, data: any) => {
 };
 
 const ProductGroup = () => {
-  const t = localStorage.getItem("lan");
+  const t = localStorage.getItem("lan") || "en-US";
   const router = useRouter();
   const pagination = usePagination({
     page: 1,
@@ -136,15 +136,15 @@ const ProductGroup = () => {
 
   const columns = [
     {
-      title: "Product Grouping",
+      title: lang[t].productGroup.list.table.productGrouping,
       dataIndex: "id",
     },
     {
-      title: "Product Grouping Name",
+      title: lang[t].productGroup.list.table.productGroupingName,
       dataIndex: "productGroupName",
     },
     {
-      title: "Action",
+      title: lang[t].productGroup.list.table.action,
       dataIndex: "action",
       width: "15%",
       align: "left",
@@ -173,14 +173,14 @@ const ProductGroup = () => {
   return (
     <>
       <Col>
-        <Text variant={"h4"}>{lang[t].productgroup.headertitle}</Text>
+        <Text variant={"h4"}>{lang[t].productGroup.list.headerTitle}</Text>
         <Spacer size={20} />
       </Col>
       <Card>
         <Row justifyContent="space-between">
           <Search
             width="340px"
-            placeholder="Search Product Grouping, Name"
+            placeholder={lang[t].productGroup.list.field.searchList}
             onChange={(e: any) => {
               setSearch(e.target.value);
             }}
@@ -198,10 +198,10 @@ const ProductGroup = () => {
               }
               disabled={rowSelection.selectedRowKeys?.length === 0}
             >
-              Delete
+              {lang[t].productGroup.list.button.delete}
             </Button>
             <DropdownMenu
-              title={"More"}
+              title={lang[t].productGroup.list.button.more}
               buttonVariant={"secondary"}
               buttonSize={"big"}
               textVariant={"button"}
@@ -259,7 +259,7 @@ const ProductGroup = () => {
               variant="primary"
               onClick={() => router.push("/product-group/create")}
             >
-              Create
+              {lang[t].productGroup.list.button.create}
             </Button>
           </Row>
         </Row>
