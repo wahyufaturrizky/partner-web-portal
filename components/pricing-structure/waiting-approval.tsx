@@ -196,7 +196,7 @@ const WaitingApprovalPricingStructure: any = (props: any) => {
                     props.setModalPricingStructureForm({
                       ...props.modalPricingStructureForm,
                       open: true,
-                      typeForm: "Manage Price Structure Config",
+                      typeForm: "Manage Price Structure Configuration",
                     });
                     break;
                   default:

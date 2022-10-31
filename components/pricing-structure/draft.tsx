@@ -210,7 +210,7 @@ const DraftPricingStructure: any = ({
                     setModalPricingStructureForm({
                       ...modalPricingStructureForm,
                       open: true,
-                      typeForm: "Manage Price Structure Config",
+                      typeForm: "Manage Price Structure Configuration",
                     });
                     break;
                   default:

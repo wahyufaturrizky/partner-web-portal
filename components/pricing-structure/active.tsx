@@ -14,7 +14,6 @@ import {
   Spacer,
   Spin,
   Table,
-  Text,
 } from "pink-lava-ui";
 import { useState } from "react";
 import styled from "styled-components";
@@ -176,7 +175,7 @@ const ActivePricingStructure: any = (props: any) => {
                     props.setModalPricingStructureForm({
                       ...props.modalPricingStructureForm,
                       open: true,
-                      typeForm: "Manage Price Structure Config",
+                      typeForm: "Manage Price Structure Configuration",
                     });
                     break;
                   default:
