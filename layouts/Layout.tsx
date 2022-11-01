@@ -1,16 +1,16 @@
 import Router from "next/router";
 import {
+  Col,
   Header,
   Layout,
   MenuLogout,
   Notification,
+  Row,
   Sidebar,
   Spacer,
-  Row,
-  Col,
   Text,
 } from "pink-lava-ui";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import styled from "styled-components";
 import {
   ICCalendar,
@@ -28,6 +28,8 @@ import ICAccount from "../assets/icons/ic-avatar-default.svg";
 import ICBadge from "../assets/icons/ic-badge.svg";
 import ICCompany from "../assets/icons/ic-company.svg";
 import ICDocument from "../assets/icons/ic-document.svg";
+import ICFlagIndonesia from "../assets/icons/ic-flag-idn.svg";
+import ICFlagEnglish from "../assets/icons/ic-flag-us.svg";
 import ICChangeLanguage from "../assets/icons/ic-globe.svg";
 import ICLogout from "../assets/icons/ic-logout.svg";
 import ICPaperMoney from "../assets/icons/ic-paper-money.svg";
@@ -35,8 +37,6 @@ import ICPercent from "../assets/icons/ic-percent.svg";
 import ICSalesman from "../assets/icons/ic-salesman.svg";
 import ICAccountSetting from "../assets/icons/ic-setting.svg";
 import ICTransportation from "../assets/icons/ic-transportation.svg";
-import ICFlagIndonesia from "../assets/icons/ic-flag-idn.svg";
-import ICFlagEnglish from "../assets/icons/ic-flag-us.svg";
 
 const menuConfig = [
   { type: "title", title: "Overview" },

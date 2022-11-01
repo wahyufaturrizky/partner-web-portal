@@ -1,31 +1,31 @@
-import React, { useEffect, useState } from "react";
+import { yupResolver } from "@hookform/resolvers/yup";
+import usePagination from "@lucasmogari/react-pagination";
+import { lang } from "lang";
+import Router, { useRouter } from "next/router";
 import {
-  Text,
+  Accordion,
+  Button,
   Col,
+  Dropdown,
+  Dropdown2,
+  FileUploaderAllFiles,
+  Input,
   Row,
   Spacer,
-  Dropdown,
-  Button,
-  Accordion,
-  Input,
-  TextArea,
-  Dropdown2,
-  Switch,
-  FileUploaderAllFiles,
   Spin,
+  Switch,
+  Text,
+  TextArea,
 } from "pink-lava-ui";
-import styled from "styled-components";
-import Router, { useRouter } from "next/router";
-import ArrowLeft from "../../assets/icons/arrow-left.svg";
-import * as yup from "yup";
-import { yupResolver } from "@hookform/resolvers/yup";
+import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import usePagination from "@lucasmogari/react-pagination";
+import styled from "styled-components";
+import * as yup from "yup";
+import ArrowLeft from "../../assets/icons/arrow-left.svg";
 import {
   useCoa,
   useCompany,
   useCountries,
-  useCreateCompany,
   useCurrenciesMDM,
   useDateFormatLists,
   useMenuDesignLists,
@@ -34,7 +34,6 @@ import {
   useUpdateCompany,
   useUploadLogoCompany,
 } from "../../hooks/company-list/useCompany";
-import { useTimezone } from "../../hooks/timezone/useTimezone";
 
 const CompanyTypeDataFake = [
   {
@@ -365,6 +364,7 @@ const schema = yup
 // };
 
 const DetailCompany: any = () => {
+  const t = localStorage.getItem("lan") || "en-US";
   const router = useRouter();
   const { company_id } = router.query;
 
@@ -406,8 +406,14 @@ const DetailCompany: any = () => {
   });
 
   const activeStatus = [
-    { id: "Y", value: '<div key="1" style="color:green;">Active</div>' },
-    { id: "N", value: '<div key="2" style="color:red;">Non Active</div>' },
+    {
+      id: "Active",
+      value: `<div key="1" style="color:green;">${lang[t].companyList.tertier.active}</div>`,
+    },
+    {
+      id: "Unactive",
+      value: `<div key="2" style="color:red;">${lang[t].companyList.tertier.nonActive}</div>`,
+    },
   ];
 
   const {
@@ -419,7 +425,7 @@ const DetailCompany: any = () => {
     options: {
       onSuccess: (data: any) => {
         setAddress(data.address);
-        setFoto(data.logo)
+        setFoto(data.logo);
       },
     },
   });
@@ -502,17 +508,16 @@ const DetailCompany: any = () => {
     setSectorList(filterIndustry[0].data);
   };
 
-  const { mutate: uploadLogo, isLoading: isLoadingUploadLogo } =
-    useUploadLogoCompany({
-      options: {
-        onSuccess: (data) => {
-          setFoto(data)
-          alert('Upload Success')
-        },
+  const { mutate: uploadLogo, isLoading: isLoadingUploadLogo } = useUploadLogoCompany({
+    options: {
+      onSuccess: (data) => {
+        setFoto(data);
+        alert("Upload Success");
       },
-    });
+    },
+  });
 
-  const handleUploadLogo = (file:any) => {
+  const handleUploadLogo = (file: any) => {
     const formData = new FormData();
     formData.append("upload_file", file);
     uploadLogo(formData);
@@ -554,7 +559,7 @@ const DetailCompany: any = () => {
       <Col>
         <Row gap="4px" alignItems="center">
           <ArrowLeft style={{ cursor: "pointer" }} onClick={() => Router.push("/company-list")} />
-          <Text variant={"h4"}>Add New Company</Text>
+          <Text variant={"h4"}>{lang[t].companyList.addNewCompany}</Text>
         </Row>
         <Spacer size={12} />
         <Card padding="20px">
@@ -587,10 +592,10 @@ const DetailCompany: any = () => {
                   variant={"tertiary"}
                   onClick={() => Router.push("/company-list")}
                 >
-                  Cancel
+                  {lang[t].companyList.tertier.cancel}
                 </Button>
                 <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
-                  Save
+                  {lang[t].companyList.primary.save}
                 </Button>
               </Row>
             </Row>
@@ -601,12 +606,14 @@ const DetailCompany: any = () => {
         {!isLoadingCompanyData && !isFetchingCompanyData && (
           <Accordion>
             <Accordion.Item key={1}>
-              <Accordion.Header variant="blue">Company Profile</Accordion.Header>
+              <Accordion.Header variant="blue">
+                {lang[t].companyList.companyProfile}
+              </Accordion.Header>
               <Accordion.Body>
                 <Row width="100%" gap="20px" noWrap>
                   <Input
                     width="100%"
-                    label="Name"
+                    label={lang[t].companyList.name}
                     height="48px"
                     placeholder={"e.g PT. Kaldu Sari Nabati Indonesia"}
                     error={errors?.name?.message}
@@ -615,7 +622,7 @@ const DetailCompany: any = () => {
                   />
                   <Input
                     width="100%"
-                    label="Company Code"
+                    label={lang[t].companyList.companyCode}
                     height="48px"
                     placeholder={"e.g KSNI"}
                     error={errors?.code?.message}
@@ -627,7 +634,7 @@ const DetailCompany: any = () => {
                   <Col width="50%">
                     <Input
                       width="100%"
-                      label="Email"
+                      label={lang[t].companyList.email}
                       height="48px"
                       placeholder={"e.g karina@nabatisnack.co.id"}
                       error={errors?.email?.message}
@@ -639,7 +646,11 @@ const DetailCompany: any = () => {
                     <TextArea
                       width="100%"
                       rows={1}
-                      label={<Text placeholder="e.g JL. Soekarno Hatta">Address</Text>}
+                      label={
+                        <Text placeholder="e.g JL. Soekarno Hatta">
+                          {lang[t].companyList.address}
+                        </Text>
+                      }
                       {...register("address")}
                       onChange={(e) => setAddress(e.target.value)}
                       defaultValue={companyData.address}
@@ -657,7 +668,7 @@ const DetailCompany: any = () => {
                         defaultValue={companyData.country}
                         render={({ field: { onChange } }) => (
                           <Dropdown2
-                            label="Country"
+                            label={lang[t].companyList.country}
                             width={"100%"}
                             items={countryData.rows.map((data) => ({
                               id: data.id, // id
@@ -680,7 +691,7 @@ const DetailCompany: any = () => {
                   <Col width="50%">
                     <Controller
                       control={control}
-                      name="industry"
+                      name={lang[t].companyList.industry}
                       defaultValue={companyData.industry}
                       render={({ field: { onChange } }) => (
                         <Dropdown
@@ -709,7 +720,7 @@ const DetailCompany: any = () => {
                       defaultValue={companyData.employees}
                       render={({ field: { onChange } }) => (
                         <Dropdown
-                          label="Number of Employee"
+                          label={lang[t].companyList.numberOfEmployee}
                           width={"100%"}
                           items={NumberOfEmployeeDataFake}
                           placeholder={"Select"}
@@ -730,7 +741,7 @@ const DetailCompany: any = () => {
                       defaultValue={companyData.sector}
                       render={({ field: { onChange } }) => (
                         <Dropdown
-                          label="Sector"
+                          label={lang[t].companyList.sector}
                           width={"100%"}
                           items={sectorList}
                           placeholder={"Select"}
@@ -758,7 +769,7 @@ const DetailCompany: any = () => {
                         defaultValue={companyData.menuDesign}
                         render={({ field: { onChange } }) => (
                           <Dropdown2
-                            label="Menu Design"
+                            label={lang[t].companyList.menuDesign}
                             width={"100%"}
                             items={menuDesignData.rows.map((data) => ({
                               id: data.id,
@@ -778,7 +789,7 @@ const DetailCompany: any = () => {
                       />
                     )}
                     <FileUploaderAllFiles
-                      label="Company Logo"
+                      label={lang[t].companyList.companyLogo}
                       // onSubmit={(file) => setFoto(file)}
                       onSubmit={(file) => handleUploadLogo(file)}
                       defaultFile={foto}
@@ -789,7 +800,7 @@ const DetailCompany: any = () => {
                   <Col width="50%">
                     <Input
                       width="100%"
-                      label="Tax ID (optional)"
+                      label={lang[t].companyList.taxID}
                       height="48px"
                       placeholder={"e.g 10"}
                       {...register("taxId")}
@@ -822,7 +833,7 @@ const DetailCompany: any = () => {
         {!isLoadingCompanyData && !isFetchingCompanyData && (
           <Accordion>
             <Accordion.Item key={1}>
-              <Accordion.Header variant="blue">General Setup</Accordion.Header>
+              <Accordion.Header variant="blue">{lang[t].companyList.generalSetup}</Accordion.Header>
               <Accordion.Body>
                 <Row width="100%" gap="20px" noWrap>
                   <Col width="50%">
@@ -832,7 +843,7 @@ const DetailCompany: any = () => {
                       defaultValue={companyData.companyType}
                       render={({ field: { onChange } }) => (
                         <Dropdown
-                          label="Company Type"
+                          label={lang[t].companyList.companyType}
                           width={"100%"}
                           items={CompanyTypeDataFake}
                           placeholder={"Select"}
@@ -855,7 +866,7 @@ const DetailCompany: any = () => {
                       defaultValue={companyData.corporate}
                       render={({ field: { onChange } }) => (
                         <Dropdown
-                          label="Corporate"
+                          label={lang[t].companyList.corporate}
                           width={"100%"}
                           items={CorporateDataFake}
                           placeholder={"Select"}
@@ -881,7 +892,7 @@ const DetailCompany: any = () => {
                         defaultValue={companyData.currency}
                         render={({ field: { onChange } }) => (
                           <Dropdown2
-                            label="Currency"
+                            label={lang[t].companyList.currency}
                             width={"100%"}
                             items={currencyData.rows.map((data) => ({
                               value: `${data.currency} - ${data.currencyName}`,
@@ -911,7 +922,7 @@ const DetailCompany: any = () => {
                         defaultValue={companyData.coa}
                         render={({ field: { onChange } }) => (
                           <Dropdown2
-                            label="CoA Template"
+                            label={lang[t].companyList.coaTemplate}
                             width={"100%"}
                             items={coaData.rows.map((data) => ({
                               id: data.name,
@@ -943,7 +954,7 @@ const DetailCompany: any = () => {
                         defaultValue={companyData.formatDate}
                         render={({ field: { onChange } }) => (
                           <Dropdown
-                            label="Format Date"
+                            label={lang[t].companyList.formatDate}
                             width={"100%"}
                             items={dateFormatData.rows.map((data) => ({
                               value: data.format,
@@ -973,7 +984,7 @@ const DetailCompany: any = () => {
                         defaultValue={companyData.formatNumber}
                         render={({ field: { onChange } }) => (
                           <Dropdown
-                            label="Number Format"
+                            label={lang[t].companyList.numberFormat}
                             width={"100%"}
                             items={numberFormatData.rows.map((data) => ({
                               value: data.format,
@@ -1005,7 +1016,7 @@ const DetailCompany: any = () => {
                         defaultValue={companyData.timezone}
                         render={({ field: { onChange } }) => (
                           <Dropdown2
-                            label="Timezone"
+                            label={lang[t].companyList.timezone}
                             width={"100%"}
                             items={timezoneData.rows.map((data) => ({
                               value: `${data.utc} ${data.name}`,
@@ -1029,7 +1040,7 @@ const DetailCompany: any = () => {
                   <Col width="50%">
                     <Spacer size={20} />
                     <Row width="100%" gap="20px" noWrap>
-                      <Text variant="body1">Company Use Advance Pricing</Text>
+                      <Text variant="body1">{lang[t].companyList.companyUseAdvancePricing}</Text>
                       <Controller
                         control={control}
                         name="advancePricing"
@@ -1048,7 +1059,7 @@ const DetailCompany: any = () => {
                     </Row>
                     <Spacer size={20} />
                     <Row width="100%" gap="20px" noWrap>
-                      <Text variant="body1">Company Use Pricing Structure</Text>
+                      <Text variant="body1">{lang[t].companyList.companyUsePricingStructure}</Text>
                       <Controller
                         control={control}
                         name="pricingStructure"
@@ -1066,7 +1077,7 @@ const DetailCompany: any = () => {
                     </Row>
                     <Spacer size={20} />
                     <Row width="100%" gap="20px" noWrap>
-                      <Text variant="body1">Using Approval</Text>
+                      <Text variant="body1">{lang[t].companyList.usingApproval}</Text>
                       <Controller
                         control={control}
                         name="usingApproval"

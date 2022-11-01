@@ -54,6 +54,7 @@ const renderConfirmationText = (type: any, data: any) => {
 
 const ProductGroup = () => {
   const t = localStorage.getItem("lan") || "en-US";
+
   const router = useRouter();
   const pagination = usePagination({
     page: 1,

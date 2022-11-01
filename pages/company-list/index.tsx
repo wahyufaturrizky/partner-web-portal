@@ -4,8 +4,10 @@ import { Text, Button, Col, Row, Spacer, Search, Table, Pagination, Switch } fro
 import usePagination from "@lucasmogari/react-pagination";
 import { useRouter } from "next/router";
 import { useCompanyList, useStatusCompany } from "../../hooks/company-list/useCompany";
+import { lang } from "lang";
 
 const CompanyList: any = () => {
+  const t = localStorage.getItem("lan") || "en-US";
   const router = useRouter();
   const pagination = usePagination({
     page: 1,
@@ -23,23 +25,23 @@ const CompanyList: any = () => {
 
   const columns = [
     {
-      title: "Company Name",
+      title: lang[t].companyList.companyName,
       dataIndex: "name",
     },
     {
-      title: "Company Type",
+      title: lang[t].companyList.companyType,
       dataIndex: "type",
     },
     {
-      title: "Industry Fields",
+      title: lang[t].companyList.industryFields,
       dataIndex: "fields",
     },
     {
-      title: "Active",
+      title: lang[t].companyList.active,
       dataIndex: "active",
     },
     {
-      title: "Action",
+      title: lang[t].companyList.action,
       dataIndex: "action",
       width: "15%",
       align: "left",
@@ -105,7 +107,7 @@ const CompanyList: any = () => {
             }}
             variant="tertiary"
           >
-            View Detail
+            {lang[t].companyList.tertier.viewDetail}
           </Button>
         </div>
       ),
@@ -134,13 +136,13 @@ const CompanyList: any = () => {
   return (
     <>
       <Col>
-        <Text variant={"h4"}>Company List</Text>
+        <Text variant={"h4"}>{lang[t].companyList.companyList}</Text>
         <Spacer size={20} />
         <Card>
           <Row justifyContent="space-between">
             <Search
               width="380px"
-              placeholder="Search Company Name"
+              placeholder={lang[t].companyList.placeholderSearchCompanyName}
               onChange={(e) => setSearch(e.target.value)}
             />
             <Row gap="16px">
@@ -159,7 +161,7 @@ const CompanyList: any = () => {
                   router.push("/company-list/create");
                 }}
               >
-                + Add New Company
+                {lang[t].companyList.primary.addNewCompany}
               </Button>
             </Row>
           </Row>

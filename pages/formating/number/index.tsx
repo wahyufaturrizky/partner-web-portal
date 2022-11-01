@@ -4,56 +4,58 @@ import styled from "styled-components";
 import { Col, Pagination, Row, Search, Spacer, Table, Text } from "pink-lava-ui";
 
 import { useNumberFormatLists } from "../../../hooks/formating/useNumber";
+import { lang } from "lang";
 
 export default function FormatingNumber() {
-	const pagination = usePagination({
-		page: 1,
-		itemsPerPage: 20,
-		maxPageItems: Infinity,
-		numbers: true,
-		arrows: true,
-		totalItems: 100,
-	});
+  const t = localStorage.getItem("lan") || "en-US";
+  const pagination = usePagination({
+    page: 1,
+    itemsPerPage: 20,
+    maxPageItems: Infinity,
+    numbers: true,
+    arrows: true,
+    totalItems: 100,
+  });
 
-	const [search, setSearch] = useState("");
+  const [search, setSearch] = useState("");
 
-	const { data: fields, isLoading: isLoadingData } = useNumberFormatLists({
-		options: {
-			onSuccess: (data: any) => {
-				pagination.setTotalItems(data.totalRow);
-			},
-		},
-		query: {
-			search,
-			page: pagination.page,
-			limit: pagination.itemsPerPage,
-		},
-	});
+  const { data: fields, isLoading: isLoadingData } = useNumberFormatLists({
+    options: {
+      onSuccess: (data: any) => {
+        pagination.setTotalItems(data.totalRow);
+      },
+    },
+    query: {
+      search,
+      page: pagination.page,
+      limit: pagination.itemsPerPage,
+    },
+  });
 
-	const columns = [
-		{
-			title: "Format",
-			dataIndex: "format",
-			width: "50%",
-		},
-		{
-			title: "Number Format",
-			dataIndex: "numberFormat",
-			width: "50%",
-		},
-	];
+  const columns = [
+    {
+      title: lang[t].dateFormat.format,
+      dataIndex: "format",
+      width: "50%",
+    },
+    {
+      title: lang[t].dateFormat.numberFormat,
+      dataIndex: "numberFormat",
+      width: "50%",
+    },
+  ];
 
-	const data:any = [];
-	fields?.rows?.map((field: any) => {
-		data.push({
-			key: field.id,
-			format: field.format,
-			numberFormat: field.numberFormat,
-		});
-	});
+  const data: any = [];
+  fields?.rows?.map((field: any) => {
+    data.push({
+      key: field.id,
+      format: field.format,
+      numberFormat: field.numberFormat,
+    });
+  });
   return (
     <Col>
-      <Text variant={"h4"}>Number Format</Text>
+      <Text variant={"h4"}>{lang[t].dateFormat.numberFormat}</Text>
       <Spacer size={20} />
       <Card>
         <Row justifyContent="flex-start">
@@ -72,12 +74,11 @@ export default function FormatingNumber() {
         </Col>
       </Card>
     </Col>
-  )
+  );
 }
 
-
 const Card = styled.div`
-	background: #ffffff;
-	border-radius: 16px;
-	padding: 16px;
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 16px;
 `;
