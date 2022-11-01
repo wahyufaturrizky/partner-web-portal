@@ -63,6 +63,8 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
 
   const [isShowDelete, setShowDelete] = useState({ open: false });
 
+  const [isImageChange, setIsImageChange] = useState(false);
+
   // DUMMY DATA
   const listTabItems: { title: string }[] = [
     { title: "Detail" },
@@ -118,7 +120,7 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
       status: "active",
       can_be_sold: false,
       can_be_purchased: false,
-      expired_date: moment().utc().toString(),
+      expired_date: "",
       external_code: "",
       use_unit_leveling: false,
       packaging_size: "",
@@ -308,7 +310,7 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
     id,
     options: {
       onSuccess: (data:any) => {
-        if( getValues('image') && getFieldState('image').isDirty){
+        if( getValues('image') && isImageChange){
           const formData:any = new FormData();
           formData.append("image", getValues('image'));
           formData.append("company_id", "KSNI");
@@ -371,8 +373,11 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
     payload.can_be_purchased = canBePurchased;
     payload.can_be_manufactured = canBeManufacture;
 
-    payload.expired_date = data?.expired_date?.includes("/")
-    payload.expired_date = data?.expired_date?.includes('/') ? moment(data.expired_date, 'DD/MM/YYYY').utc().toString() : moment(data.expired_date).utc().toString();
+    if(data.expired_date){
+      payload.expired_date = data?.expired_date?.includes("/")
+      payload.expired_date = data?.expired_date?.includes('/') ? moment(data.expired_date, 'DD/MM/YYYY').utc().toString() : moment(data.expired_date).utc().toString();
+    }
+
     payload.product_brand_id = data.brand.id;
     payload.base_uom_id = data.base_uom.uom_id;
     payload.purchase_uom_id = data.purchase_uom.uom_id;
@@ -861,9 +866,9 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
                   render={({ field: { onChange } }) => (
                     <DatePickerInput
                       fullWidth
+                      placeholder="Select"
                       onChange={(date: any, dateString: any) => onChange(dateString)}
                       label="Discontinue Date"
-                      defaultValue={moment(productForm.expired_date)} format={'DD/MM/YYYY'}
                     />
                   )}
                 />
@@ -956,7 +961,10 @@ const UploadImage = ({ control, productForm }: { control: Control<FormValues>, p
       render={({ field: { onChange } }) => (
         <FileUploaderAllFiles
           label="Product Photo"
-          onSubmit={(file: any) => onChange(file)}
+          onSubmit={(file: any) => {
+            setIsImageChange(true)
+            onChange(file)
+          }}
           defaultFile={productForm?.image}
           withCrop
           sizeImagePhoto="125px"
