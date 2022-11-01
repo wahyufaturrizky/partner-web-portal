@@ -101,7 +101,7 @@ const ProductGroup = () => {
                   }}
                   variant="tertiary"
                 >
-                  View Detail
+                  {lang[t].productGroup.list.tertier.viewDetail}
                 </Button>
               </div>
             ),
@@ -230,7 +230,9 @@ const ProductGroup = () => {
                   value: (
                     <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
                       <ICDownload />
-                      <p style={{ margin: "0" }}>Download Template</p>
+                      <p style={{ margin: "0" }}>
+                        {lang[t].productGroup.list.ghost.downloadTemplate}
+                      </p>
                     </div>
                   ),
                 },
@@ -239,7 +241,9 @@ const ProductGroup = () => {
                   value: (
                     <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
                       <ICUpload />
-                      <p style={{ margin: "0" }}>Upload Template</p>
+                      <p style={{ margin: "0" }}>
+                        {lang[t].productGroup.list.ghost.uploadTemplate}
+                      </p>
                     </div>
                   ),
                 },
@@ -248,7 +252,7 @@ const ProductGroup = () => {
                   value: (
                     <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
                       <ICDownload />
-                      <p style={{ margin: "0" }}>Download Data</p>
+                      <p style={{ margin: "0" }}>{lang[t].productGroup.list.ghost.downloadData}</p>
                     </div>
                   ),
                 },

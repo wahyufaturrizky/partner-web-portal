@@ -90,15 +90,15 @@ const ProductGroupCreate = () => {
 
   const columns = [
     {
-      title: "Product Name",
+      title: lang[t].productGroup.create.table.productName,
       dataIndex: "productName",
     },
     {
-      title: "Product Category Name",
+      title: lang[t].productGroup.create.table.productCategoryName,
       dataIndex: "productCategory",
     },
     {
-      title: "Action",
+      title: lang[t].productGroup.create.table.action,
       dataIndex: "action",
       width: "15%",
       align: "left",
@@ -129,10 +129,10 @@ const ProductGroupCreate = () => {
           <Row justifyContent="flex-end" alignItems="center" nowrap>
             <Row gap="16px">
               <Button size="big" variant={"tertiary"} onClick={() => router.back()}>
-                Cancel
+                {lang[t].productGroup.list.tertier.cancel}
               </Button>
               <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
-                {isLoadingProductGroup ? "Loading..." : "Save"}
+                {isLoadingProductGroup ? "Loading..." : lang[t].productGroup.list.primary.save}
               </Button>
             </Row>
           </Row>
@@ -142,13 +142,15 @@ const ProductGroupCreate = () => {
 
         <Accordion>
           <Accordion.Item key={1}>
-            <Accordion.Header variant="blue">General</Accordion.Header>
+            <Accordion.Header variant="blue">
+              {lang[t].productGroup.create.accordion.general}
+            </Accordion.Header>
             <Accordion.Body>
               <Row width="100%">
                 <Col width="100%">
                   <Input
                     width="100%"
-                    label="Product Group Name"
+                    label={lang[t].productGroup.create.emptyState.groupName}
                     height="40px"
                     placeholder={"e.g Wafer 1K"}
                     {...register("name", { required: true })}
@@ -167,6 +169,12 @@ const ProductGroupCreate = () => {
                 setValue={setValue}
                 itemsWatch={itemsWatch}
                 filterProduct={filterProduct}
+                groupingBasedOnLable={lang[t].productGroup.create.emptyState.groupingBasedOn}
+                conditionLable={lang[t].productGroup.create.emptyState.condition}
+                minLable={lang[t].productGroup.create.emptyState.min}
+                maxLable={lang[t].productGroup.create.emptyState.max}
+                addMoreGroupingLable={lang[t].productGroup.create.emptyState.addMoreGrouping}
+                groupingLable={lang[t].productGroup.grouping}
                 type={"add"}
               />
             </Accordion.Body>
@@ -177,7 +185,9 @@ const ProductGroupCreate = () => {
 
         <Accordion>
           <Accordion.Item key={1}>
-            <Accordion.Header variant="blue">Result Samples</Accordion.Header>
+            <Accordion.Header variant="blue">
+              {lang[t].productGroup.create.accordion.resultSamples}
+            </Accordion.Header>
             <Accordion.Body>
               <Table loading={isLoadingFilterProduct} columns={columns} data={filteredProduct} />
               <Pagination pagination={pagination} />

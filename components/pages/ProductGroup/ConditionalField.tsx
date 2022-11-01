@@ -28,6 +28,12 @@ const ConditionalField = ({
   setIsFetchingBrand,
   removeList,
   type,
+  groupingBasedOnLable,
+  conditionLable,
+  minLable,
+  maxLable,
+  addMoreGroupingLable,
+  groupingLable,
 }: any) => {
   const [groupingOption, setGroupingOption] = useState([
     { label: "Sales Price", value: "PRICE" },
@@ -241,7 +247,7 @@ const ConditionalField = ({
 
                 <div>
                   <Text variant={"subtitle1"} inline color={"blue.regular"}>
-                    Grouping {index + 1}
+                    {groupingLable} {index + 1}
                   </Text>
                   {"  "}|{"  "}
                   <Text
@@ -267,7 +273,7 @@ const ConditionalField = ({
                 rules={{ required: true }}
                 render={({ field: { onChange }, formState: { errors } }) => (
                   <Col width={"100%"}>
-                    <Label>Grouping Based On</Label>
+                    <Label>{groupingBasedOnLable}</Label>
                     <Spacer size={3} />
                     <FormSelect
                       defaultValue={item?.group}
@@ -297,7 +303,7 @@ const ConditionalField = ({
                   name={`items.${index}.condition`}
                   render={({ field: { onChange }, formState: { errors } }) => (
                     <Col width="100%">
-                      <Label>Condition</Label>
+                      <Label>{conditionLable}</Label>
                       <Spacer size={3} />
                       <FormSelect
                         defaultValue={item?.condition}
@@ -438,7 +444,7 @@ const ConditionalField = ({
                 <Row width="100%" gap={"5px"} noWrap>
                   <Input
                     width="100%"
-                    label="Min"
+                    label={minLable}
                     height="40px"
                     placeholder={"e.g 1000"}
                     defaultValue={item?.value_from}
@@ -451,7 +457,7 @@ const ConditionalField = ({
 
                   <Input
                     width="100%"
-                    label="Max"
+                    label={maxLable}
                     height="40px"
                     placeholder={"e.g 1000"}
                     defaultValue={item?.value_to}
@@ -472,7 +478,7 @@ const ConditionalField = ({
 
       {itemsWatch[0]?.group !== "" && itemsWatch.length !== 3 && (
         <Text onClick={addGrouping} clickable variant="headingSmall" color="pink.regular">
-          + Add More Grouping
+          {addMoreGroupingLable}
         </Text>
       )}
     </>
