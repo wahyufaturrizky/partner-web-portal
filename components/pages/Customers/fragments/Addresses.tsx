@@ -20,7 +20,16 @@ import useDebounce from "lib/useDebounce";
 import styled from "styled-components";
 import { useUploadStorePhotoAddress } from "hooks/mdm/customers/useCustomersMDM";
 
-const Addresses = ({ formType, getValues }: any) => {
+const Addresses = ({
+  formType,
+  getValues,
+  isFetchingPostalCode,
+  isFetchingMorePostalCode,
+  hasNextPagePostalCode,
+  fetchNextPagePostalCode,
+  postalCodeList,
+  setSearchPostalCode,
+}: any) => {
   const { register, control, setValue } = useFormContext();
 
   const { fields, append, remove, update }: any = useFieldArray({
@@ -179,21 +188,29 @@ const Addresses = ({ formType, getValues }: any) => {
       {fields.map((address: any, addressIndex: any) => {
         return (
           <Col key={address.id}>
-            <FileUploaderAllFiles
-              label="Company Logo"
-              onSubmit={(file: any) => {
-                setindexStorePhoto(addressIndex);
-                handleUploadStorePhotoAddress(file);
+            <Controller
+              control={control}
+              name={`address.${addressIndex}.imageUrl`}
+              render={({ field: { value } }) => {
+                return (
+                  <FileUploaderAllFiles
+                    label="Store Photo"
+                    onSubmit={(file: any) => {
+                      setindexStorePhoto(addressIndex);
+                      handleUploadStorePhotoAddress(file);
+                    }}
+                    disabled={isLoadingStorePhotoAddress}
+                    defaultFile={value || "/placeholder-employee-photo.svg"}
+                    withCrop
+                    sizeImagePhoto="125px"
+                    removeable
+                    textPhoto={[
+                      "Dimension Minimum 72 x 72, Optimal size 300 x 300",
+                      "File Size Max. 5MB",
+                    ]}
+                  />
+                );
               }}
-              disabled={isLoadingStorePhotoAddress}
-              defaultFile="/placeholder-employee-photo.svg"
-              withCrop
-              sizeImagePhoto="125px"
-              removeable
-              textPhoto={[
-                "Dimension Minimum 72 x 72, Optimal size 300 x 300",
-                "File Size Max. 5MB",
-              ]}
             />
 
             <Spacer size={10} />
@@ -459,7 +476,7 @@ const Addresses = ({ formType, getValues }: any) => {
                       arrowColor={"#000"}
                       withSearch={false}
                       items={[]}
-                      onChange={(value: any) => {}}
+                      onChange={onChange}
                     />
                   </Col>
                 )}
@@ -467,9 +484,8 @@ const Addresses = ({ formType, getValues }: any) => {
 
               <Controller
                 control={control}
-                defaultValue={""}
                 name={`address.${addressIndex}.postal_code`}
-                render={({ field: { onChange, value }, formState: { errors } }) => (
+                render={({ field: { onChange, value } }) => (
                   <Col width="50%">
                     <Text variant="headingRegular">Postal Code</Text>
                     <Spacer size={5} />
@@ -480,10 +496,22 @@ const Addresses = ({ formType, getValues }: any) => {
                       placeholder={"Select"}
                       borderColor={"#AAAAAA"}
                       arrowColor={"#000"}
-                      withSearch={false}
-                      items={[]}
+                      withSearch
+                      isLoading={isFetchingPostalCode}
+                      isLoadingMore={isFetchingMorePostalCode}
+                      fetchMore={() => {
+                        if (hasNextPagePostalCode) {
+                          fetchNextPagePostalCode();
+                        }
+                      }}
+                      items={
+                        isFetchingPostalCode && !isFetchingMorePostalCode ? [] : postalCodeList
+                      }
                       onChange={(value: any) => {
                         onChange(value);
+                      }}
+                      onSearch={(value: any) => {
+                        setSearchPostalCode(value);
                       }}
                     />
                   </Col>

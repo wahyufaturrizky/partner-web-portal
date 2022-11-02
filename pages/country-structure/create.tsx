@@ -24,6 +24,8 @@ import * as ExcelJS from "exceljs/dist/exceljs.min.js";
 import { saveAs } from "file-saver";
 
 import styled from "styled-components";
+import { COUNTRY_CODE } from "utils/country_code_constant";
+import { PHONE_CODE } from "utils/phone_code_constant";
 
 async function downloadStructure(countryStructure: any) {
 	const wb = new ExcelJS.Workbook();
@@ -106,9 +108,13 @@ const CreateCountries = () => {
 	const [countryStructure, setCountryStructure] = useState<any>([]);
 	const [modalDelete, setModalDelete] = useState<any>({ open: false });
 	const [searchCurrency, setSearchCurrency] = useState("");
+	const [searchPhoneCode, setSearchPhoneCode] = useState("");
+	const [searchCountryCode, setSearchCountryCode] = useState("");
 	const [countryBasic, setCountryBasic] = useState({
 		name: "",
 		currencyId: "",
+		countryCode: "",
+		phoneCode: ""
 	});
 	const [allStructure, setAllStructure] = useState<any>([]);
 
@@ -142,11 +148,6 @@ const CreateCountries = () => {
 
 		if (!data.name) {
 			newErrors["name"] = "Country Name is required";
-			isError = true;
-		}
-
-		if (!data.currencyId) {
-			newErrors["currency"] = "Currency is required";
 			isError = true;
 		}
 
@@ -325,6 +326,53 @@ const CreateCountries = () => {
 										}
 									/>
 									<Dropdown
+										label="Country Code"
+										width={"100%"}
+										items={COUNTRY_CODE
+											.filter(data => data.includes(searchCountryCode))
+												.map(data => ({
+													value: data,
+													id: data
+												})
+										)}
+										placeholder={"Select"}
+										onSearch={(search: any) => setSearchCountryCode(search)}
+										handleChange={(value: any) => {
+											onFocusRemoveValidation({
+												target: {
+													name: "country",
+												},
+											});
+											setCountryBasic({ ...countryBasic, countryCode: value });
+										}}
+									/>
+								</Row>
+
+								<Spacer size={20} />
+
+								<Row width="100%" gap="20px" noWrap>
+									<Dropdown
+										label="Phone Code"
+										width={"100%"}
+										items={PHONE_CODE
+											.filter(data => data.includes(searchPhoneCode))
+												.map(data => ({
+													value: data,
+													id: data
+												})
+										)}
+										placeholder={"Select"}
+										onSearch={(search: any) => setSearchPhoneCode(search)}
+										handleChange={(value: any) => {
+											onFocusRemoveValidation({
+												target: {
+													name: "phone",
+												},
+											});
+											setCountryBasic({ ...countryBasic, phoneCode: value });
+										}}
+									/>
+									<Dropdown
 										label="Currency"
 										width={"100%"}
 										items={currencyList}
@@ -338,8 +386,6 @@ const CreateCountries = () => {
 											});
 											setCountryBasic({ ...countryBasic, currencyId: value });
 										}}
-										error={errors.currency}
-										required
 									/>
 								</Row>
 							</Accordion.Body>

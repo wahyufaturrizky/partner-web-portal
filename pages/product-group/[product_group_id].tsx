@@ -25,12 +25,14 @@ import usePagination from "@lucasmogari/react-pagination";
 import ArrowLeft from "../../assets/icons/arrow-left.svg";
 import { ModalDeleteConfirmation } from "../../components/elements/Modal/ModalConfirmationDelete";
 import ConditionalField from "../../components/pages/ProductGroup/ConditionalField";
+import { lang } from "lang";
 
 const itemDefaultValue = [
   { id: 0, group: "", condition: "", value_from: "0", value_to: "0", values: "0" },
 ];
 
-const ProductGroupCreate = () => {
+const ProductGroupDetail = () => {
+  const t = localStorage.getItem("lan") || "en-US";
   const router = useRouter();
   const { product_group_id } = router.query;
 
@@ -231,7 +233,9 @@ const ProductGroupCreate = () => {
                 Delete
               </Button>
               <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
-                {isLoadingUpdateProductGroup ? "Loading..." : "Save"}
+                {isLoadingUpdateProductGroup
+                  ? "Loading..."
+                  : lang[t].productGroup.detail.button.save}
               </Button>
             </Row>
           </Row>
@@ -327,4 +331,4 @@ const Center = styled.div`
   align-items: center;
 `;
 
-export default ProductGroupCreate;
+export default ProductGroupDetail;

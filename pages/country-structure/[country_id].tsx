@@ -26,6 +26,8 @@ import {
 import { ModalManageDataEdit } from "../../components/elements/Modal/ModalManageDataEdit";
 
 import styled from "styled-components";
+import { COUNTRY_CODE } from "utils/country_code_constant";
+import { PHONE_CODE } from "utils/phone_code_constant";
 
 const CreateConfig = () => {
 	const router = useRouter();
@@ -44,9 +46,13 @@ const CreateConfig = () => {
 	const [modalDelete, setModalDelete] = useState({ open: false });
 	const [modalDeleteCountry, setModalDeleteCountry] = useState({ open: false });
 	const [searchCurrency, setSearchCurrency] = useState("");
+	const [searchPhoneCode, setSearchPhoneCode] = useState("");
+	const [searchCountryCode, setSearchCountryCode] = useState("");
 	const [countryBasic, setCountryBasic] = useState({
 		name: "",
 		currencyId: "",
+		countryCode: "",
+		phoneCode: ""
 	});
 
 	const [showUploadStructure, setShowUploadStructure] = useState(false);
@@ -86,11 +92,6 @@ const CreateConfig = () => {
 
 		if (!data.name) {
 			newErrors["name"] = "Country Name is required";
-			isError = true;
-		}
-
-		if (!data.currencyId) {
-			newErrors["currency"] = "Currency is required";
 			isError = true;
 		}
 
@@ -270,7 +271,9 @@ const CreateConfig = () => {
 			onSuccess: (data: any) => {
 				setCountryBasic({
 					name: data.name,
-					currencyId: data.currencyId,
+					currencyId: data?.currency?.id,
+					countryCode: data?.countryCode,
+					phoneCode: data?.phoneCode
 				});
 				setCountryStructure(
 					data.structure.map((data: any, index: any) => ({
@@ -300,8 +303,6 @@ const CreateConfig = () => {
 		delete newErrors[e.target.name];
 		setErrors(newErrors);
 	};
-
-	console.log("countryStructure[showManageData.index]", countryStructure[showManageData.index])
 
 	return (
 		<>
@@ -344,12 +345,13 @@ const CreateConfig = () => {
 								<Row width="100%" gap="20px" noWrap>
 									<Input
 										width="100%"
+										name="name"
 										label="Country Name"
 										height="48px"
 										placeholder={"e.g Indonesia"}
-										value={countryBasic.name}
+										defaultValue={country?.currency?.name}
 										onChange={(e: any) => setCountryBasic({ ...countryBasic, name: e.target.value })}
-										error={errors.name}
+										error={errors?.name}
 										required
 										onFocus={() =>
 											onFocusRemoveValidation({
@@ -358,6 +360,55 @@ const CreateConfig = () => {
 												},
 											})
 										}
+									/>
+									<Dropdown
+										label="Country Code"
+										width={"100%"}
+										defaultValue={country?.countryCode}
+										items={COUNTRY_CODE
+											.filter(data => data.includes(searchCountryCode))
+												.map(data => ({
+													value: data,
+													id: data
+												})
+										)}
+										placeholder={"Select"}
+										onSearch={(search: any) => setSearchCountryCode(search)}
+										handleChange={(value: any) => {
+											onFocusRemoveValidation({
+												target: {
+													name: "country",
+												},
+											});
+											setCountryBasic({ ...countryBasic, countryCode: value });
+										}}
+									/>
+								</Row>
+
+								<Spacer size={20} />
+
+								<Row width="100%" gap="20px" noWrap>
+									<Dropdown
+										label="Phone Code"
+										width={"100%"}
+										defaultValue={country?.phoneCode}
+										items={PHONE_CODE
+											.filter(data => data.includes(searchPhoneCode))
+												.map(data => ({
+													value: data,
+													id: data
+												})
+										)}
+										placeholder={"Select"}
+										onSearch={(search: any) => setSearchPhoneCode(search)}
+										handleChange={(value: any) => {
+											onFocusRemoveValidation({
+												target: {
+													name: "phone",
+												},
+											});
+											setCountryBasic({ ...countryBasic, phoneCode: value });
+										}}
 									/>
 									<Dropdown
 										label="Currency"
@@ -373,9 +424,6 @@ const CreateConfig = () => {
 											});
 											setCountryBasic({ ...countryBasic, currencyId: value });
 										}}
-										error={errors.currency}
-										required
-										defaultValue={countryBasic.currencyId}
 									/>
 								</Row>
 							</Accordion.Body>

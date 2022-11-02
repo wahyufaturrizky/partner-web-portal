@@ -27,7 +27,7 @@ import { queryClient } from "../../pages/_app";
 import { STATUS_APPROVAL_TEXT, STATUS_APPROVAL_VARIANT } from "../../utils/utils";
 
 const downloadFile = (params: any) =>
-  mdmDownloadService("/pricing-structure/template/download", { params }).then((res) => {
+  mdmDownloadService("/price-structure/template/download", { params }).then((res) => {
     let dataUrl = window.URL.createObjectURL(new Blob([res.data]));
     let tempLink = document.createElement("a");
     tempLink.href = dataUrl;
@@ -170,7 +170,7 @@ const RejectedPricingStructure: any = (props: any) => {
                     props.setModalPricingStructureForm({
                       ...props.modalPricingStructureForm,
                       open: true,
-                      typeForm: "Manage Price Structure Config",
+                      typeForm: "Manage Price Structure Configuration",
                     });
                     break;
                   default:

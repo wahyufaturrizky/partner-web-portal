@@ -165,6 +165,7 @@ const AddSequenceNumber: any = ({ onBack, dataParent }) => {
                     placeholder={"Select"}
                     handleChange={(value) => setValue("process_id", value)}
                     error={errors?.process_id?.message}
+                    required
                     noSearch
                     isLoading={isLoadingBP}
                   />

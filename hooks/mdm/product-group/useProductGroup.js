@@ -124,5 +124,5 @@ export {
   useUpdateProductGroup,
   useDeleteProductGroup,
   useUploadFileProductGroup,
-  useProductGroupInfiniteLists
+  useProductGroupInfiniteLists,
 };
