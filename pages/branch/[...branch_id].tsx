@@ -5,13 +5,11 @@ import { Controller, useForm } from "react-hook-form";
 import { useRouter } from "next/router";
 import { useBranchDetail, useBranchParent, useCalendarDetail, useCalendarInfiniteLists, useCreateBranch, useTimezoneInfiniteLists, useUpdateBranch } from "../../hooks/mdm/branch/useBranch";
 import { queryClient } from "../_app";
-import { useCountryInfiniteLists, useFetchCountriesStructure, useFetchDetailCountry } from "hooks/mdm/country-structure/useCountries";
-import { useTimezone } from "hooks/timezone/useTimezone";
-import { useCities } from "hooks/city/useCity";
-import { useTimezones } from "hooks/company-list/useCompany";
 import useDebounce from "lib/useDebounce";
 import usePagination from "@lucasmogari/react-pagination";
 import { useSalesOrganizationHirarcy, useSalesOrganizationInfiniteLists } from "hooks/sales-organization/useSalesOrganization";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
 
 const BranchDetail = () => {
   const router = useRouter();

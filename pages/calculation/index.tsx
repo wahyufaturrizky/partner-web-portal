@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import styled from "styled-components";
+import { Controller, useForm } from "react-hook-form";
+
 import {
   Text,
   Button,
@@ -12,8 +14,13 @@ import {
   Modal,
   DropdownMenu,
   FileUploadModal,
+  Label,
+  FormSelect,
+  Dropdown
 } from "pink-lava-ui";
 import usePagination from "@lucasmogari/react-pagination";
+import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
+
 import {
   useBranchList,
   useUploadFileBranch,
@@ -21,9 +28,9 @@ import {
 } from "../../hooks/mdm/branch/useBranch";
 import useDebounce from "../../lib/useDebounce";
 import { queryClient } from "../_app";
-import { ICDownload, ICUpload } from "../../assets/icons";
 import { mdmDownloadService } from "../../lib/client";
 import { useRouter } from "next/router";
+import ModalCalculation from "components/elements/Modal/ModalCalculation";
 
 const downloadFile = (params: any) =>
   mdmDownloadService("/branch/download", { params }).then((res) => {
@@ -50,7 +57,7 @@ const renderConfirmationText = (type: any, data: any) => {
   }
 };
 
-const Branch = () => {
+const Calculation = () => {
   const router = useRouter();
   const pagination = usePagination({
     page: 1,
@@ -61,9 +68,18 @@ const Branch = () => {
     totalItems: 100,
   });
 
+  const { register, control, handleSubmit } = useForm();
+
   const [search, setSearch] = useState("");
   const [isShowDelete, setShowDelete] = useState({ open: false, type: "selection", data: {} });
+  const [isShowCreate, setShowCreate] = useState({ open: false, title: ''})
   const [isShowUpload, setShowUpload] = useState(false);
+
+  const [paymentButton, setPaymentButton] = useState({
+    monthly: true,
+    yearly: false
+  })
+
   const [modalForm, setModalForm] = useState({
     open: false,
     data: {},
@@ -85,7 +101,6 @@ const Branch = () => {
     },
     options: {
       onSuccess: (data: any) => {
-        console.log(data, '<<< abis tembak')
         pagination.setTotalItems(data.totalRow);
       },
       select: (data: any) => {
@@ -96,15 +111,33 @@ const Branch = () => {
               branchName: element.name,
               action: (
                 <div style={{ display: "flex", justifyContent: "left" }}>
-                  <Button
-                    size="small"
-                    onClick={() => {
-                      router.push(`/branch/${element.companyId}/${element.branchId}`);
-                    }}
-                    variant="tertiary"
-                  >
-                    View Detail
-                  </Button>
+                    <EditOutlined
+                  style={{
+                    cursor: "pointer",
+                    borderRadius: 3,
+                    backgroundColor: "#D5FAFD",
+                    color: "#2BBECB",
+                    padding: 4,
+                    fontSize: "18px",
+                  }}
+                  onClick={() => {
+                    console.log('masuk edit')
+                  }}
+                />
+                <Spacer size={5} />
+                <DeleteOutlined
+                  style={{
+                    cursor: "pointer",
+                    borderRadius: 3,
+                    backgroundColor: "#D5FAFD",
+                    color: "#EB008B",
+                    padding: 4,
+                    fontSize: "18px",
+                  }}
+                  onClick={() => {
+                    console.log('masuk delete')
+                  }}
+                />
                 </div>
               ),
             };
@@ -133,21 +166,48 @@ const Branch = () => {
     },
   });
 
+  const [listZone, setListZone] = useState([
+    { value: 1, label: 'Andir' },
+    { value: 2, label: 'Arcamanik' },
+    { value: 3, label: 'Baleendah' },
+  ])
+
   const columns = [
     {
-      title: "Branch ID",
+        title: "",
+        dataIndex: "action",
+        width: "7%",
+        align: "left",
+    },
+    {
+      title: "Role Name",
       dataIndex: "id",
     },
     {
-      title: "Branch Name",
+      title: "Total User",
       dataIndex: "branchName",
     },
     {
-      title: "Action",
-      dataIndex: "action",
-      width: "15%",
-      align: "left",
+      title: "Menu Name",
+      dataIndex: "id",
     },
+    {
+      title: "Company",
+      dataIndex: "branchName",
+    },
+    {
+      title: "Branch",
+      dataIndex: "id",
+    },
+    {
+      title: "Fee",
+      dataIndex: "branchName",
+    },
+    {
+      title: "Total Fee",
+      dataIndex: "branchName",
+    },
+    
   ];
 
   const rowSelection = {
@@ -164,110 +224,127 @@ const Branch = () => {
 
     uploadFileBranch(formData);
   };
+  console.log(isShowCreate, "<<<<<<payment")
 
   return (
     <>
       <Col>
-        <Text variant={"h4"}>Branch</Text>
+        <Text variant={"h4"}>Calculation</Text>
         <Spacer size={20} />
       </Col>
       <Card>
-        <Row justifyContent="space-between">
-          <Search
-            width="340px"
-            placeholder="Search Branch ID, Branch Name"
-            onChange={(e: any) => {
-              setSearch(e.target.value);
-            }}
-          />
-          <Row gap="16px">
-            <Button
-              size="big"
-              variant={"tertiary"}
-              onClick={() =>
-                setShowDelete({
-                  open: true,
-                  type: "selection",
-                  data: { branchData, selectedRowKeys },
-                })
-              }
-              disabled={rowSelection.selectedRowKeys?.length === 0}
-            >
-              Delete
+        <Text variant={"headingLarge"} style={{color: 'rgb(33, 145, 155)'}}>Choose the plan that's right for you</Text>
+        <Spacer size={20} />
+
+        <Row>
+            <Button size="big" variant="tertiary"
+                style={{ 
+                    color: paymentButton.monthly? '#BC006F': '#DDDDDD',
+                    border: paymentButton.monthly? '2px solid #EB008B': '2px solid #DDDDDD',
+                    width: '20%',
+                    borderRadius: '5px',
+                }}
+                onClick={() => setPaymentButton({monthly: true, yearly: false})}>
+              Monthly
             </Button>
-            <DropdownMenu
-              title={"More"}
-              buttonVariant={"secondary"}
-              buttonSize={"big"}
-              textVariant={"button"}
-              textColor={"pink.regular"}
-              iconStyle={{ fontSize: "12px" }}
-              onClick={(e: any) => {
-                switch (parseInt(e.key)) {
-                  case 1:
-                    downloadFile({ with_data: "N", company_id: "KSNI" });
-                    break;
-                  case 2:
-                    setShowUpload(true);
-                    break;
-                  case 3:
-                    downloadFile({ with_data: "Y", company_id: "KSNI" });
-                    break;
-                  case 4:
-                    break;
-                  default:
-                    break;
-                }
-              }}
-              menuList={[
-                {
-                  key: 1,
-                  value: (
-                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                      <ICDownload />
-                      <p style={{ margin: "0" }}>Download Template</p>
-                    </div>
-                  ),
-                },
-                {
-                  key: 2,
-                  value: (
-                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                      <ICUpload />
-                      <p style={{ margin: "0" }}>Upload Template</p>
-                    </div>
-                  ),
-                },
-                {
-                  key: 3,
-                  value: (
-                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                      <ICDownload />
-                      <p style={{ margin: "0" }}>Download Data</p>
-                    </div>
-                  ),
-                },
-              ]}
-            />
-            <Button size="big" variant="primary" onClick={() => router.push("/branch/create")}>
-              Create
+            <Spacer size={20} />
+
+            <Button size="big" variant="tertiary" 
+                style={{ 
+                    color: paymentButton.yearly? '#BC006F': '#DDDDDD',
+                    border: paymentButton.yearly? '2px solid #EB008B': '2px solid #DDDDDD',
+                    width: '20%',
+                    borderRadius: '5px',
+                }}
+                onClick={() => setPaymentButton({monthly: false, yearly: true})}>
+              Yearly
             </Button>
-          </Row>
+          
         </Row>
-      </Card>
-      <Spacer size={10} />
-      <Card style={{ padding: "16px 20px" }}>
+
+        <Spacer size={20} />
+        <Separator/>
+        <Spacer size={20} />
+        
+        <Text variant={"headingLarge"} style={{color: 'rgb(33, 145, 155)'}}>Set Roles, Menu, and User</Text>
+        <Spacer size={20} />
+        
+        <Row gap="16px">
+        
+        <Button size="big" variant="primary" onClick={() => setShowCreate({
+            open: true,
+            title: 'Add New Roles, Menu, etc'
+        })}>
+            + Add New
+        </Button>
+
+        <Search
+        width="340px"
+        placeholder="Search Role Name, Total User, Menu Name, etc."
+        onChange={(e: any) => {
+            setSearch(e.target.value);
+        }}
+        />
+        </Row>
+        <Spacer size={20} />
+
         <Col gap={"60px"}>
           <Table
             loading={isLoadingBranch || isFetchingBranch}
             columns={columns}
             data={branchData?.data}
-            rowSelection={rowSelection}
+            // rowSelection={rowSelection}
           />
           <Pagination pagination={pagination} />
         </Col>
       </Card>
 
+      <Spacer size={10} />
+
+      <Card style={{ padding: "16px 20px" }}>
+        <Text variant={"headingLarge"} style={{color: 'rgb(33, 145, 155)'}}>Choose who will be billed for?</Text>
+        <Spacer size={20} />
+
+        <Col width="100%" style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}>
+            <Dropdown
+                label="Assign Payment"
+                items={listZone}
+                width={"50%"}
+                // value={employeeLanguages && employeeLanguages}
+                placeholder={"Select"}
+                handleChange={(value) => setValue("language", value)}
+                onSearch={(value) => console.log(value)}
+                // noSearch
+            />
+
+            <div style={{
+                paddingRight: '1rem',
+                textAlign: 'right'
+            }}>
+                <Text variant={"subHeading"}>Total Payment</Text>
+                <Spacer size={10} />
+                <Text variant={"headingLarge"}>IDR 550.000</Text>
+            </div>
+        </Col>
+        <Spacer size={20} />
+        <Separator/>
+        <Spacer size={20} />
+        
+        <Row justifyContent={'space-between'}>
+            <div></div>
+            <Button size="big" variant="primary" onClick={() => router.push("/branch/create")}>
+                Submit
+            </Button>
+        </Row>
+      </Card>
+
+      {isShowCreate.open && (
+        <ModalCalculation
+            visible={isShowCreate.open}
+            title={isShowCreate.title}
+            onCancel={() => setShowCreate({open: false, title: ''})}
+        />
+      )}
       {isShowDelete.open && (
         <Modal
           closable={false}
@@ -340,4 +417,10 @@ const Card = styled.div`
   padding: 16px;
 `;
 
-export default Branch;
+const Separator = styled.div`
+  display: block;
+  height: 0;
+  border-bottom: 1px dashed #aaaaaa;
+`;
+
+export default Calculation;

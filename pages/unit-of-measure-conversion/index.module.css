@@ -1,0 +1,16 @@
+.overideAntdCheckbox {
+    display: none;
+}
+
+.expandableTable {
+    padding: 0;
+}
+
+.tableDropdown {
+    padding-left: 47.3%;
+    padding-bottom: 1rem;
+}
+
+.expandableTable :not(:last-child) { 
+    border-bottom: 1px solid #f0f0f0;
+}
