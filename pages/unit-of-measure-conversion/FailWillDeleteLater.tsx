@@ -13,6 +13,9 @@ import {
   DropdownMenu,
   FileUploadModal,
   Switch,
+  TableAntd,
+  Input,
+  InputWithTags
 } from "pink-lava-ui";
 import usePagination from "@lucasmogari/react-pagination";
 import { useUOMList, useUploadFileUOM, useDeletUOM } from "../../hooks/mdm/unit-of-measure/useUOM";
@@ -61,6 +64,9 @@ const UOMConversion = () => {
 
   const [search, setSearch] = useState("");
   const [isShowDelete, setShowDelete] = useState({ open: false, type: "selection", data: {} });
+  const [isShowCreate, setShowCreate] = useState(false);
+  const [isShowEdit, setShowEdit] = useState({ open: false, data: {} });
+
   const [isShowUpload, setShowUpload] = useState(false);
   const [modalForm, setModalForm] = useState({
     open: false,
@@ -120,13 +126,34 @@ const UOMConversion = () => {
       {
         // key:'UMC-0000001',
         id: 'UMC-0000001',
-        name: 'Conversion Product',
+        name: 'FMCG',
+        sector: "Manufacture",
         action: (
           <div style={{ display: "flex", justifyContent: "left" }}>
             <Button
               size="small"
               onClick={() => {
-                router.push(`/unit-of-measure-conversion/${'MPC-0000005'}`);
+                setShowEdit({
+                  open: true, data: {
+                    name: 'FMCG', sector: [
+                      {
+                      key: 'UMC-0000001-1',
+                      value: "Manufacture"
+                      },
+                      {
+                        key: 'UMC-0000001-3',
+                        sector: "Packing"
+                      },
+                      {
+                      key: 'UMC-0000001-4',
+                      value: "Distribution"
+                      },
+                      {
+                      key: 'UMC-0000001-5',
+                      value: "Package Goods"
+                      },
+                    ]
+                }})
               }}
               variant="tertiary"
             >
@@ -134,35 +161,48 @@ const UOMConversion = () => {
             </Button>
           </div>
         ),
-        children: [
+        advent: [
           {
-          key: 'UMC-0000001-1',
-          Qty: 1,
-          UoM: 'PACK',
-          conversionNumber: 12,
-          baseUoM: 'PCS',
-          status: "ACTIVE"
+          key: 'UMC-0000001-3',
+          sector: "Packing"
           },
           {
-          key: 'UMC-0000001-2',
-          Qty: 1,
-          UoM: 'CTN',
-          conversionNumber: 24,
-          baseUoM: 'PCS',
-          status: "INACTIVE"
+          key: 'UMC-0000001-4',
+          sector: "Distribution"
+          },
+          {
+          key: 'UMC-0000002-5',
+          sector: "Package Goods"
           },
         ]
       },
       {
         // key: 'UMC-0000002',
         id: 'UMC-0000002',
-        name: 'Conversion Transport',
+        name: 'E-Commerce',
+        sector: "Distribution",
         action: (
           <div style={{ display: "flex", justifyContent: "left" }}>
             <Button
               size="small"
               onClick={() => {
-                router.push(`/unit-of-measure-conversion/${'MPC-0000006'}`);
+                setShowEdit({
+                  open: true, data: {
+                    name: 'E-commerce', sector: [
+                      {
+                      key: 'UMC-0000002-1',
+                      value: "Manufacture"
+                      },
+                      {
+                      key: 'UMC-0000002-2',
+                      value: "Distribution"
+                      },
+                      {
+                      key: 'UMC-0000002-3',
+                      value: "Package Goods"
+                      },
+                    ]
+                }})
               }}
               variant="tertiary"
             >
@@ -170,22 +210,14 @@ const UOMConversion = () => {
             </Button>
           </div>
         ),
-        children: [
+        advent: [
           {
           key: 'UMC-0000002-1',
-          Qty: 1,
-          UoM: 'PACK',
-          conversionNumber: 22,
-          baseUoM: 'PCS',
-          status: "ACTIVE"
+          sector: "Manufacture"
           },
           {
-          key: 'UMC-0000002-2',
-          Qty: 1,
-          UoM: 'CTN',
-          conversionNumber: 21,
-          baseUoM: 'PCS',
-          status: "INACTIVE"
+          key: 'UMC-0000002-3',
+          sector: "Package Goods"
           },
         ]
       }
@@ -234,45 +266,15 @@ const UOMConversion = () => {
 
   const columns = [
     {
-      title: "UoM Conversion ID",
-      dataIndex: "id",
-      key: 'id',
-    },
-    {
-      title: "Uom Conversion Name",
+      title: "Industry",
       dataIndex: "name",
-      key: 'name'
+      key: 'name',
     },
+    TableAntd.EXPAND_COLUMN,
     {
-      title: "Qty",
-      dataIndex: "Qty",
-      key: 'Qty',
-    },
-    {
-      title: "UoM",
-      dataIndex: "UoM",
-      key: 'UoM'
-    },
-    {
-      title: "Conversion Number",
-      dataIndex: "conversionNumber",
-      key: 'conversionNumber'
-    },
-    {
-      title: "Base UoM",
-      dataIndex: "baseUoM",
-      key: 'baseUoM',
-    },
-    {
-      title: "Active",
-      dataIndex: 'status',
-      render: (status: string, rowKey: any) => (
-        <>
-        {rowKey.action? '' :
-          <Switch checked={checkedStatus(status)} onChange={() => checkTableChildren(rowKey)}/>
-        }
-        </>
-      ),
+      title: "Sector",
+      dataIndex: "sector",
+      key: 'sector'
     },
     {
       title: "Action",
@@ -281,12 +283,11 @@ const UOMConversion = () => {
       align: "left",
     },
   ];
-  
 
   const rowSelection = {
     selectedRowKeys,
     getCheckboxProps: (record: any) => {
-      if(record?.action){
+      if(record?.id){
         return {
           disabled: false,
         }
@@ -315,7 +316,7 @@ const UOMConversion = () => {
   return (
     <>
       <Col>
-        <Text variant={"h4"}>UoM Conversion</Text>
+        <Text variant={"h4"}>Industy & Sector</Text>
         <Spacer size={20} />
       </Col>
       <Card>
@@ -399,7 +400,7 @@ const UOMConversion = () => {
             <Button
               size="big"
               variant="primary"
-              onClick={() => router.push("/unit-of-measure/create")}
+              onClick={() => setShowCreate(true)}
             >
               Create
             </Button>
@@ -414,7 +415,23 @@ const UOMConversion = () => {
             columns={columns}
             data={dataUoM}
             rowSelection={rowSelection}
-            rowKey={"id"}
+            rowKey={(record) => record.id}
+            expandable={{
+              // expandRowByClick: true,
+              // expandIcon: true,
+              expandedRowRender: (record) => {
+                return(
+                <div className={styles.expandableTable} style={{display: "flex", flexDirection: "column", gap: "1rem"}}>
+                  {record.advent.map((e: { sector: string; }) => {
+                    return (
+                        <p className={styles.tableDropdown}>{e.sector}</p>
+                    )
+                  })}
+                </div>
+                  )
+              },
+              expandIconColumnIndex: 0
+            }}
           />
           <Pagination pagination={pagination} />
         </Col>
@@ -469,6 +486,128 @@ const UOMConversion = () => {
         />
       )}
 
+      {isShowCreate &&(
+        <Modal
+        centered
+        width={'450px'}
+        visible={isShowCreate}
+        onCancel={() => setShowCreate(false)}
+        footer={null}
+        content={
+          <TopButtonHolder>
+            <CreateTitle>
+              Create New Industry & Sector
+            </CreateTitle>
+            <Spacer size={20} />
+            <Col width="100%">
+              <Input
+                  width="80%"
+                  label="Industry"
+                  height="40px"
+                  placeholder={"e.g FMCG"}
+                  addonAfter="PCS"
+                  // {...register("conversionNumber", { required: "Please enter Conversion Number." })}
+                />
+            </Col>
+
+              <Spacer size={15} />
+
+              <Col width={"100%"}>
+                    <InputWithTags
+                      width="80%"
+                      label="Sector"
+                      height="40px"
+                      placeholder={"Type with separate comma or by pressing enter"}
+                      onChange={(e) => console.log(e)}
+                      // {...register("conversionNumber", { required: "Please enter Conversion Number." })}
+                    />
+              </Col>
+              
+              <Spacer size={15} />
+
+            <ModalButtonHolder>
+              <ModalButton
+                variant="tertiary"
+                key="submit"
+                type="primary"
+                onClick={() => setShowCreate(false)}
+              >
+                Cancel
+              </ModalButton>
+              <ModalButton
+                variant="primary"
+                onClick={() => console.log('masuk')}
+              >
+                save
+              </ModalButton>
+            </ModalButtonHolder>
+          </TopButtonHolder>
+        }
+      />
+      )}
+
+      {isShowEdit.open &&(
+        <Modal
+        centered
+        width={'450px'}
+        visible={isShowEdit}
+        onCancel={() => setShowEdit({open: false, data: {}})}
+        footer={null}
+        content={
+          <TopButtonHolder>
+            <CreateTitle>
+              Create New Industry & Sector
+            </CreateTitle>
+            <Spacer size={20} />
+            <Col width="100%">
+              <Input
+                  width="80%"
+                  label="Industry"
+                  height="40px"
+                  defaultValue={isShowEdit?.data?.name}
+                  placeholder={"e.g FMCG"}
+                  addonAfter="PCS"
+                  // {...register("conversionNumber", { required: "Please enter Conversion Number." })}
+                />
+            </Col>
+
+              <Spacer size={15} />
+
+              <Col width={"100%"}>
+                    <InputWithTags
+                      width="80%"
+                      label="Sector"
+                      height="40px"
+                      defaultValue={isShowEdit?.data?.sector}
+                      placeholder={"Type with separate comma or by pressing enter"}
+                      onChange={(e) => console.log(e)}
+                      // {...register("conversionNumber", { required: "Please enter Conversion Number." })}
+                    />
+              </Col>
+              
+              <Spacer size={15} />
+
+            <ModalButtonHolder>
+              <ModalButton
+                variant="tertiary"
+                key="submit"
+                type="primary"
+                onClick={() => setShowEdit({open: false, data: {}})}
+              >
+                Cancel
+              </ModalButton>
+              <ModalButton
+                variant="primary"
+                onClick={() => console.log('masuk')}
+              >
+                save
+              </ModalButton>
+            </ModalButtonHolder>
+          </TopButtonHolder>
+        }
+      />
+      )}
+
       {isShowUpload && (
         <FileUploadModal
           visible={isShowUpload}
@@ -490,5 +629,21 @@ const TopButtonHolder = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: center;
+`
+const CreateTitle = styled.div`
+  margin-top: 1rem;
+  font-weight: 600;
+  font-size: 1.5rem;
+`
+
+const ModalButtonHolder = styled.div`
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 20px;
+`
+
+const ModalButton = styled(Button)`
+  width: 50%;
 `
 export default UOMConversion;

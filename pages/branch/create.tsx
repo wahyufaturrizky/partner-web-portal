@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-// import { Text, Col, Row, Spacer, Button, Accordion, FormSelect, Input, Spin } from "pink-lava-ui";
 import { Text, Col, Row, Spacer, Spin, Button, Accordion, FormSelect, FormInput, Input } from "pink-lava-ui";
 import styled from "styled-components";
 import { Controller, useForm } from "react-hook-form";
@@ -8,6 +7,16 @@ import { useBranchParent, useCalendarDetail, useCalendarInfiniteLists, useCreate
 import { queryClient } from "../_app";
 import useDebounce from "lib/useDebounce";
 import { useSalesOrganizationHirarcy } from "hooks/sales-organization/useSalesOrganization";
+import { useCountryInfiniteLists } from "hooks/mdm/country-structure/useCountries";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
+
+const schema = yup
+	.object({
+		name: yup.string().required("Branch Name is Required"),
+		address: yup.string().required("Address is Required"),
+	})
+	.required();
 
 const BranchCreate = () => {
   const router = useRouter();
@@ -34,8 +43,18 @@ const BranchCreate = () => {
   const [listTimezone, setListTimezone] = useState([])
   const [listCalendar, setListCalendar] = useState([])
   const [listCountry, setListCountry] = useState([])
-  const { register, control, handleSubmit } = useForm();
 
+  // const { register, control, handleSubmit } = useForm();
+  const {
+      register,
+      handleSubmit,
+      setValue,
+      control,
+      formState: { errors },
+    } = useForm({
+      resolver: yupResolver(schema),
+      // defaultValues: defaultValues,
+    });
   const {
     data: branchParentData,
     isLoading: isLoadingBranchParentData,
@@ -176,23 +195,31 @@ const BranchCreate = () => {
     },
   });  
 
-  // country
-  const { 
+  const {
     isFetching: isFetchingCountry,
     isFetchingNextPage: isFetchingMoreCountry,
     isLoading: isLoadingCountry,
     hasNextPage: countryHasNextPage,
-    fetchNextPage: countryFetchNextPage, 
-  } = useCalendarInfiniteLists({
+    fetchNextPage: countryFetchNextPage,
+  } = useCountryInfiniteLists({
     query: {
       search: debounceFetchCountry,
+      limit: 10,
     },
     options: {
       onSuccess: (data: any) => {
-        setCountryRows(data?.pages[0]?.totalRow)
-        setListCountry(data?.pages[0]?.rows?.map((country: { country: any; id: any; }) => {
-          return { label: country.country, value: country.id}
-        }))
+        setCountryRows(data.pages[0].totalRow);
+        const mappedData = data?.pages?.map((group: any) => {
+          return group.rows?.map((element: any) => {
+            return {
+              value: element.id,
+              label: element.name,
+              key: element.id
+            };
+          });
+        });
+        const flattenArray = [].concat(...mappedData);
+        setListCountry(flattenArray);
       },
       getNextPageParam: (_lastPage: any, pages: any) => {
         if (countryRows && listCountry.length < countryRows) {
@@ -213,7 +240,7 @@ const BranchCreate = () => {
     },
   });
 
-  if( isLoadingCalendar || isLoadingSalesOrganizationData || isLoadingTimezone || isLoadingCountry || isLoadingBranchParentData){
+  if( isLoadingCalendar || isLoadingSalesOrganizationData || isLoadingTimezone || isLoadingCountry){
     return (
       <Center>
       <Spin tip="Loading data..." />
@@ -221,7 +248,6 @@ const BranchCreate = () => {
     )
   }
   const onSubmit = (data: any) => {
-    console.log(data, '<<<<datanya')
     const formData = {
       company_id: "KSNI",
       ...data,
@@ -272,6 +298,7 @@ const BranchCreate = () => {
                     width="100%"
                     label="Branch Name"
                     height="40px"
+                    error={errors?.name?.message}
                     required
                     placeholder={"e.g PMA Bandung Selatan GT"}
                     {...register("name", { required: "Please enter name." })}
@@ -296,6 +323,7 @@ const BranchCreate = () => {
                         arrowColor={"#000"}
                         withSearch
                         isLoading={isLoadingBranchParentData}
+                        isFetching={isFetchingBranchParentData}
                         items={
                           isLoadingBranchParentData && !isFetchingBranchParentData
                             ? []
@@ -510,63 +538,6 @@ const BranchCreate = () => {
             </Row>
 
             <Spacer size={15} />
-
-            <Row width="100%" noWrap>
-              <Col width={"100%"}>
-                <Controller
-                  control={control}
-                  name="uom_category_id"
-                  render={({ field: { onChange } }) => (
-                    <>
-                      <Label>Calendar</Label>
-                      <FormSelect
-                        style={{ width: "100%" }}
-                        size={"large"}
-                        placeholder={"Select"}
-                        borderColor={"#AAAAAA"}
-                        arrowColor={"#000"}
-                        withSearch
-                        isLoading={isFetchingCalendar}
-                        isLoadingMore={isFetchingMoreCalendar}
-                        fetchMore={() => {
-                          if (calendarHasNextPage) {
-                            calendarFetchNextPage();
-                          }
-                        }}
-                        items={
-                          isFetchingCalendar && !isFetchingMoreCalendar
-                            ? []
-                            : listCalendar
-                        }
-                        onChange={(value: any) => {
-                          onChange(value);
-                          setCalendarDetailId(value)
-                        }}
-                        onSearch={(value: any) => {
-                          setSearchCalendar(value);
-                        }}
-                      />
-                    </>
-                  )}
-                />
-              </Col>
-              <Spacer size={10} />
-
-              <Col width="100%">
-                <Controller
-                  control={control}
-                  name="external_code"
-                  render={({ field: { onChange } }) => (
-                    <>
-                      <Text variant="headingRegular">External Code</Text>
-                      <FormInput size={"large"} placeholder={"e.g 12345"} />
-                    </>
-                  )}
-                />
-              </Col>
-            </Row>
-
-            <Spacer size={15} />
           </Accordion.Body>
         </Accordion.Item>
       </Accordion>
@@ -582,6 +553,7 @@ const BranchCreate = () => {
                   label="Address"
                   height="40px"
                   required
+                  error={errors?.address?.message}
                   placeholder={"e.g Jl. Soekarno Hatta"}
                   {...register("address", { required: "Please enter name." })}
               />

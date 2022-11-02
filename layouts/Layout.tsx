@@ -51,6 +51,25 @@ const menuConfig = [
   { type: "divider" },
   { type: "title", title: "Configuration" },
   {
+    key: "billing",
+    title: "Billing",
+    icon: ICUser,
+    children: [
+      {
+        key: "billing-calculation",
+        title: "Calculation",
+        content: () => "Calculation",
+        onClick: () => Router.push("/calculation/"),
+      },
+      {
+        key: "billing-report",
+        title: "Report",
+        content: () => "Report",
+        onClick: () => Router.push("/user-config/role"),
+      },
+    ],
+  },
+  {
     key: "company-list",
     type: "menu",
     title: "Company List",

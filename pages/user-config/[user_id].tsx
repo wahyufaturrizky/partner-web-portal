@@ -3,8 +3,8 @@ import { Text, Col, Row, Spacer, Dropdown, Button, Accordion, Input, FormSelect,
 import { Controller, useForm } from "react-hook-form";
 
 import { yupResolver } from "@hookform/resolvers/yup";
-import styled from "styled-components";
 import * as yup from "yup";
+import styled from "styled-components";
 import Router, { useRouter } from "next/router";
 
 import ArrowLeft from "../../assets/icons/arrow-left.svg";
