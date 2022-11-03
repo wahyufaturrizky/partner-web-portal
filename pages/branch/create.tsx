@@ -204,7 +204,7 @@ const BranchCreate = () => {
   } = useCountryInfiniteLists({
     query: {
       search: debounceFetchCountry,
-      limit: 10,
+      limit: 1000,
     },
     options: {
       onSuccess: (data: any) => {
@@ -263,7 +263,6 @@ const BranchCreate = () => {
       longtitude: 123.123,
       latitude: -67.2123
     };
-    console.log(formData, '<<< ini inputnya')
     createBranch(formData);
   };
 

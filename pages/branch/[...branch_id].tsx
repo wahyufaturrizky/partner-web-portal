@@ -10,6 +10,14 @@ import usePagination from "@lucasmogari/react-pagination";
 import { useSalesOrganizationHirarcy, useSalesOrganizationInfiniteLists } from "hooks/sales-organization/useSalesOrganization";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
+import { useCountryInfiniteLists } from "hooks/mdm/country-structure/useCountries";
+
+const schema = yup
+	.object({
+		name: yup.string().required("Branch Name is Required"),
+		address: yup.string().required("Address is Required"),
+	})
+	.required();
 
 const BranchDetail = () => {
   const router = useRouter();
@@ -73,7 +81,18 @@ const BranchDetail = () => {
   ])
 
 
-  const { register, control, handleSubmit } = useForm();
+  // const { register, control, handleSubmit } = useForm();
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    control,
+    formState: { errors },
+  } = useForm({
+    resolver: yupResolver(schema),
+    // defaultValues: defaultValues,
+  });
+
 
   const {
     data: branchDetailData,
@@ -116,40 +135,6 @@ const BranchDetail = () => {
     },
   });
 
-  // company internal structure
-  //  ini untuk cari company jangan di hapus karena masih hardcoded
-
-  // const { 
-  //   isFetching: isFetchingSalesOrganization,
-  //   isFetchingNextPage: isFetchingMoreSalesOrganization,
-  //   isLoading: isLoadingSalesOrganization,
-  //   hasNextPage: salesOrganizationHasNextPage,
-  //   fetchNextPage: salesOrganizationFetchNextPage, 
-  // } = fetchInfiniteeSalesOrganizationLists({
-  //   query: {
-  //     search: debounceFetchSalesOrganization,
-  //     // company_code: "KSNI",
-  //     structure_id: 101, //structure untuk KSNI
-  //   },
-  //   options: {
-  //     onSuccess: (data: any) => {
-  //       setSalesOrganizationRows(data?.pages[0]?.totalRow);
-  //       // setListSalesOrganization(data?.pages[0]?.rows?.map(organization: any => {
-  //       //   return {
-  //       //     label: organization.utc, value: organization.id
-  //       //   }
-  //       // }))
-  //     },
-  //     getNextPageParam: (_lastPage: any, pages: any) => {
-  //       if (listSalesOrganization.length < salesOrganizationRows) {
-  //         return pages.length + 1;
-  //       } else {
-  //         return undefined;
-  //       }
-  //     },
-  //   },
-  // });
-
   const {
       data: salesOrganizationData,
       isLoading: isLoadingSalesOrganizationData,
@@ -172,6 +157,7 @@ const BranchDetail = () => {
         },
       },
   });
+
   // TimeZone
   const { 
     isFetching: isFetchingTimezone,
@@ -264,24 +250,31 @@ const BranchDetail = () => {
     },
   });        
 
-
-  // Country
-  const { 
+  const {
     isFetching: isFetchingCountry,
     isFetchingNextPage: isFetchingMoreCountry,
     isLoading: isLoadingCountry,
     hasNextPage: countryHasNextPage,
-    fetchNextPage: countryFetchNextPage, 
-  } = useCalendarInfiniteLists({
+    fetchNextPage: countryFetchNextPage,
+  } = useCountryInfiniteLists({
     query: {
       search: debounceFetchCountry,
+      limit: 10,
     },
     options: {
       onSuccess: (data: any) => {
-        setCountryRows(data?.pages[0]?.totalRow)
-        setListCountry(data?.pages[0]?.rows?.map((country: { country: any; id: any; }) => {
-          return { label: country.country, value: country.id}
-        }))
+        setCountryRows(data.pages[0].totalRow);
+        const mappedData = data?.pages?.map((group: any) => {
+          return group.rows?.map((element: any) => {
+            return {
+              value: element.id,
+              label: element.name,
+              key: element.id
+            };
+          });
+        });
+        const flattenArray = [].concat(...mappedData);
+        setListCountry(flattenArray);
       },
       getNextPageParam: (_lastPage: any, pages: any) => {
         if (countryRows && listCountry.length < countryRows) {
@@ -328,7 +321,6 @@ const BranchDetail = () => {
       start_working_day: calendarDetailData?.start? calendarDetailData?.start : branchDetailData?.startWorkingDay,
       end_working_day: calendarDetailData?.end ? calendarDetailData?.end : branchDetailData?.endWorkingDay,
     };
-    console.log(formData, '<<<data yang udah di olah mau di update')
     updateBranch(formData);
   };
 
@@ -338,7 +330,7 @@ const BranchDetail = () => {
       <Spin tip="Loading data..." />
     </Center>
   )};
-
+  
   return (
     <Col>
       <Row gap="4px">
@@ -370,6 +362,7 @@ const BranchDetail = () => {
                     width="100%"
                     label="Branch Name"
                     height="40px"
+                    error={errors?.name?.message}
                     defaultValue={branchDetailData?.name}
                     required
                     placeholder={"e.g PMA Bandung Selatan GT"}
@@ -630,6 +623,7 @@ const BranchDetail = () => {
                     height="40px"
                     defaultValue={branchDetailData?.address}
                     required
+                    error={errors?.address?.message}
                     placeholder={"e.g Jl.Soekarno Hatta"}
                     {...register("address", { required: "Please enter name." })}
                 />
@@ -652,7 +646,7 @@ const BranchDetail = () => {
                         borderColor={"#AAAAAA"}
                         arrowColor={"#000"}
                         withSearch
-                        defaultValue={listCountry?.filter((country: {value: number, label: string}) => country.value === +branchDetailData?.countryId)[0]?.label}
+                        defaultValue={listCountry?.filter((country: {value: number, label: string}) => country.value === branchDetailData?.countryId)[0]?.label}
                         isLoading={isFetchingCountry}
                         isLoadingMore={isFetchingMoreCountry}
                         fetchMore={() => {
