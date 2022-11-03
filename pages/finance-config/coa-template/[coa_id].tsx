@@ -31,9 +31,12 @@ import { ModalDeleteConfirmation } from "../../../components/elements/Modal/Moda
 import ArrowLeft from "../../../assets/icons/arrow-left.svg";
 import VectorPeople from "../../../assets/icons/vector-people.svg";
 import PlusAdd from "../../../assets/icons/plus-add.svg";
+import { lang } from "lang";
 
 const DetailCoa: any = () => {
   const router = useRouter();
+  const t = localStorage.getItem("lan") || "en-US";
+
   const { coa_id } = router.query;
   const [coaName, setCoaName] = useState("");
   const [coaItems, setCoaItems] = useState([]);
@@ -73,23 +76,23 @@ const DetailCoa: any = () => {
 
   const columns = [
     {
-      title: "Code",
+      title: lang[t].coaTemplate.create.template.table.code,
       dataIndex: "account_code",
     },
     {
-      title: "Account Name",
+      title: lang[t].coaTemplate.create.template.table.accountName,
       dataIndex: "account_name",
     },
     {
-      title: "Account Group",
+      title: lang[t].coaTemplate.create.template.table.accountGroup,
       dataIndex: "account_group",
     },
     {
-      title: "Allow Reconciliation",
+      title: lang[t].coaTemplate.create.template.table.allowReconciliation,
       dataIndex: "allow_reconciliation",
     },
     {
-      title: "Action",
+      title: lang[t].coaTemplate.create.template.table.action,
       dataIndex: "action",
       width: "15%",
       align: "left",
@@ -254,7 +257,7 @@ const DetailCoa: any = () => {
             }}
             variant="tertiary"
           >
-            View Detail
+            {lang[t].coaTemplate.list.button.detail}
           </Button>
         </div>
       ),
@@ -338,7 +341,7 @@ const DetailCoa: any = () => {
                         id="name"
                         label=""
                         height="48px"
-                        placeholder={"Type CoA Template Name, e.g CoA Indonesia - FMCG Maufacture"}
+                        placeholder={lang[t].coaTemplate.create.template.field.searchList}
                         defaultValue={coaName ? coaName : ""}
                         onChange={(e) => setCoaName(e.target.value)}
                         onBlur={(e) => {
@@ -357,10 +360,10 @@ const DetailCoa: any = () => {
                         onClick={() => setModalDelete({ open: true })}
                         disabled={rowSelection.selectedRowKeys?.length === 0}
                       >
-                        Delete
+                        {lang[t].coaTemplate.list.button.delete}
                       </Button>
                       <Button size="big" variant={"primary"} onClick={() => onSubmitCoa()}>
-                        Save
+                        {lang[t].coaTemplate.list.button.save}
                       </Button>
                     </Row>
                   </Row>
@@ -376,7 +379,7 @@ const DetailCoa: any = () => {
                           <Row gap="16px" alignItems="center">
                             <Search
                               width="380px"
-                              placeholder="Search Code, Account Name, Account Group"
+                              placeholder={lang[t].coaTemplate.create.template.field.search}
                               onChange={(e) => setSearchAccountGroup(e.target.value)}
                             />
 
@@ -400,7 +403,7 @@ const DetailCoa: any = () => {
                               variant={"ghost"}
                               onClick={() => setModalCopyCoa({ open: true })}
                             >
-                              Copy from CoA template
+                              {lang[t].coaTemplate.create.template.button.copyCoa}
                             </Button>
                             <Button
                               size="big"
@@ -412,7 +415,7 @@ const DetailCoa: any = () => {
                               <div style={{ marginRight: "6px" }}>
                                 <PlusAdd />
                               </div>
-                              Add Account
+                              {lang[t].coaTemplate.create.template.button.addAccount}
                             </Button>
                           </Row>
                         </Row>
@@ -427,11 +430,13 @@ const DetailCoa: any = () => {
                           <VectorPeople />
                         </Row>
                         <Row justifyContent="center">
-                          <Text variant="headingLarge">No Data Chart of Account</Text>
+                          <Text variant="headingLarge">
+                            {lang[t].coaTemplate.create.template.dictionary.noDataChart}
+                          </Text>
                         </Row>
                         <Row justifyContent="center">
                           <Text variant="headingRegular">
-                            Please add account or copy from CoA template first.
+                            {lang[t].coaTemplate.create.template.dictionary.noAccount}
                           </Text>
                         </Row>
                         <Row justifyContent="center" gap="15px">
@@ -440,7 +445,7 @@ const DetailCoa: any = () => {
                             variant={"tertiary"}
                             onClick={() => setModalCopyCoa({ open: true })}
                           >
-                            Copy from CoA Template
+                            {lang[t].coaTemplate.create.template.button.copyCoa}
                           </Button>
                           <Button
                             size="big"
@@ -449,7 +454,7 @@ const DetailCoa: any = () => {
                               setMode({ field: null, mode: "ADD_ACCOUNT", source: "" })
                             }
                           >
-                            Add Account
+                            {lang[t].coaTemplate.create.template.button.addAccount}
                           </Button>
                         </Row>
                       </>

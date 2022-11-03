@@ -165,6 +165,64 @@ export const lang = {
       companyUseAdvancePricing: "Company Use Advance Pricing",
       usingApproval: "Using Approval",
     },
+    coaTemplate: {
+      list: {
+        headerTitle: "CoA Template",
+        button: {
+          create: "Create",
+          delete: "Delete",
+          detail: "View Detail",
+          save: "Save",
+          cancel: "Cancel",
+        },
+        field: {
+          searchList: "Search CoA Template Name",
+        },
+        table: {
+          name: "Name",
+          action: "Action",
+        },
+      },
+      create: {
+        template: {
+          headerTitle: "Create new CoA Template",
+          button: {
+            copyCoa: "Copy from CoA Template",
+            addAccount: "Add Account",
+          },
+          field: {
+            searchList: "Type CoA Template Name, e.g CoA Indonesia - FMCG Maufacture",
+            search: "Search Account Name, Account group",
+            filter: "Filter",
+          },
+          table: {
+            code: "Code",
+            accountName: "Account Name",
+            accountGroup: "Account Group",
+            allowReconciliation: "Allow Reconciliation",
+            action: "Action",
+          },
+          dictionary: {
+            noDataChart: "No Data Chart of Account",
+            noAccount: "Please add account or copy from CoA template first.",
+          },
+        },
+        createAccount: {
+          headerTitle: "Create New Account",
+          field: {
+            code: "Code",
+            accountName: "Account Name",
+            accountGroup: "Account Group",
+            deprecated: "Deprecated",
+          },
+        },
+      },
+      detail: {
+        button: {
+          save: "Save",
+        },
+      },
+    },
   },
   "id-ID": {
     productGroup: {
@@ -333,6 +391,64 @@ export const lang = {
       menuDesign: "Desain Menu",
       companyUseAdvancePricing: "Perusahaan Menggunakan Harga Di Muka",
       usingApproval: "Menggunakan Persetujuan",
+    },
+    coaTemplate: {
+      list: {
+        headerTitle: "CoA Template",
+        button: {
+          create: "Membuat",
+          delete: "Menghapus",
+          detail: "Lihat Detail",
+          save: "Menyimpan",
+          cancel: "Membatalkan",
+        },
+        field: {
+          searchList: "Cari Nama Template CoA",
+        },
+        table: {
+          name: "Nama",
+          action: "Tindakan",
+        },
+      },
+      create: {
+        template: {
+          headerTitle: "Buat CoA Template",
+          button: {
+            copyCoa: "Salin dari CoA Template",
+            addAccount: "Tambah Akun",
+          },
+          field: {
+            searchList: "Tulis nama CoA Template, contoh. CoA Indonesia - FMCG Maufacture",
+            search: "Cari Nama Akun, Grup akun",
+            filter: "Saring",
+          },
+          table: {
+            code: "Kode",
+            accountName: "Nama Akun",
+            accountGroup: "Grup Akun",
+            allowReconciliation: "Izinkan Rekonsiliasi",
+            action: "Tindakan",
+          },
+          dictionary: {
+            noDataChart: "Tidak ada data Akun",
+            noAccount: "Silahkan tambah akun atau salin dari CoA Template.",
+          },
+        },
+        createAccount: {
+          headerTitle: "Buat Akun Baru",
+          field: {
+            code: "Kode",
+            accountName: "Nama Akun",
+            accountGroup: "Grup Akun",
+            deprecated: "Usang",
+          },
+        },
+      },
+      detail: {
+        button: {
+          save: "Save",
+        },
+      },
     },
   },
 };

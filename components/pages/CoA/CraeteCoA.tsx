@@ -4,8 +4,11 @@ import { Text, Button, Col, Row, Spacer, Switch, Input, Dropdown } from "pink-la
 import { useForm, Controller } from "react-hook-form";
 import { useAccountGroups } from "../../../hooks/finance-config/useAccountGroup";
 import { useValidateAccountCode } from "../../../hooks/finance-config/useCoaTemplate";
+import { lang } from "lang";
 
 const CreateAccount: any = ({ onSubmit, onBack, coaId, coaItemsDeleted }: any) => {
+  const t = localStorage.getItem("lan") || "en-US";
+
   const {
     register,
     handleSubmit,
@@ -68,13 +71,13 @@ const CreateAccount: any = ({ onSubmit, onBack, coaId, coaItemsDeleted }: any) =
     <>
       <Col>
         <Row gap="4px" alignItems="center">
-          <Text variant={"h4"}>Create new Account</Text>
+          <Text variant={"h4"}>{lang[t].coaTemplate.create.createAccount.headerTitle}</Text>
         </Row>
         <Spacer size={20} />
         <Card>
           <Row gap="16px" justifyContent="flex-end">
             <Button size="big" variant={"tertiary"} onClick={onBack}>
-              Cancel
+              {lang[t].coaTemplate.list.button.cancel}
             </Button>
             <Button
               disabled={codeError}
@@ -82,7 +85,7 @@ const CreateAccount: any = ({ onSubmit, onBack, coaId, coaItemsDeleted }: any) =
               variant={"primary"}
               onClick={handleSubmit(submitCoa)}
             >
-              Save
+              {lang[t].coaTemplate.list.button.save}
             </Button>
           </Row>
         </Card>
@@ -90,7 +93,7 @@ const CreateAccount: any = ({ onSubmit, onBack, coaId, coaItemsDeleted }: any) =
         <Card>
           <Row gap="20px" width="100%" alignItems="center" noWrap>
             <Input
-              label="Code"
+              label={lang[t].coaTemplate.create.createAccount.field.code}
               height="48px"
               type={"number"}
               placeholder={"e.g 10000000"}
@@ -104,7 +107,7 @@ const CreateAccount: any = ({ onSubmit, onBack, coaId, coaItemsDeleted }: any) =
           <Spacer size={20} />
           <Row gap="20px" width="100%" alignItems="center" noWrap>
             <Input
-              label="Account Name"
+              label={lang[t].coaTemplate.create.createAccount.field.accountName}
               height="48px"
               placeholder={"e.g AKTIVA"}
               {...register("accountName", { required: true })}
@@ -121,7 +124,7 @@ const CreateAccount: any = ({ onSubmit, onBack, coaId, coaItemsDeleted }: any) =
                 render={({ field: { onChange }, formState: { errors } }) => (
                   <>
                     <Dropdown
-                      label="Account Group"
+                      label={lang[t].coaTemplate.create.createAccount.field.accountGroup}
                       width={"100%"}
                       items={accounts}
                       placeholder={"Select"}
@@ -140,7 +143,7 @@ const CreateAccount: any = ({ onSubmit, onBack, coaId, coaItemsDeleted }: any) =
 
               <Col>
                 <Spacer size={20} />
-                <Text variant="subtitle1">Deprecated</Text>
+                <Text variant="subtitle1">{lang[t].coaTemplate.create.createAccount.field.deprecated}</Text>
               </Col>
               <Col>
                 <Spacer size={20} />

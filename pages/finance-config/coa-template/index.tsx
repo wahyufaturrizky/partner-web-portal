@@ -7,10 +7,12 @@ import { useRouter } from "next/router";
 import { useCoa, useDeleteCoa } from "../../../hooks/finance-config/useCoaTemplate";
 import useDebounce from "lib/useDebounce";
 import { queryClient } from "pages/_app";
+import { lang } from "lang";
 
 const FinanceConfigCoATemplate: any = () => {
   const router = useRouter();
-
+  const t = localStorage.getItem("lan") || "en-US";
+  console.log(t)
   const pagination = usePagination({
     page: 1,
     itemsPerPage: 20,
@@ -27,11 +29,11 @@ const FinanceConfigCoATemplate: any = () => {
 
   const columns = [
     {
-      title: "Name",
+      title: lang[t].coaTemplate.list.table.name,
       dataIndex: "field_name",
     },
     {
-      title: "Action",
+      title: lang[t].coaTemplate.list.table.action,
       dataIndex: "action",
       width: "15%",
       align: "left",
@@ -66,7 +68,7 @@ const FinanceConfigCoATemplate: any = () => {
                   }}
                   variant="tertiary"
                 >
-                  View Detail
+                  {lang[t].coaTemplate.list.button.detail}
                 </Button>
               </div>
             ),
@@ -100,13 +102,13 @@ const FinanceConfigCoATemplate: any = () => {
   return (
     <>
       <Col>
-        <Text variant={"h4"}>CoA Template List</Text>
+        <Text variant={"h4"}>{lang[t].coaTemplate.list.headerTitle}</Text>
         <Spacer size={20} />
         <Card>
           <Row justifyContent="space-between">
             <Search
               width="380px"
-              placeholder="Search Name"
+              placeholder={lang[t].coaTemplate.list.field.searchList}
               onChange={(e: any) => setSearch(e.target.value)}
             />
             <Row gap="16px">
@@ -116,7 +118,7 @@ const FinanceConfigCoATemplate: any = () => {
                 onClick={() => setModalDelete({ open: true })}
                 disabled={rowSelection.selectedRowKeys?.length === 0}
               >
-                Delete
+                {lang[t].coaTemplate.list.button.delete}
               </Button>
               <Button
                 size="big"
@@ -125,7 +127,7 @@ const FinanceConfigCoATemplate: any = () => {
                   router.push(`/finance-config/coa-template/create`);
                 }}
               >
-                Create
+                {lang[t].coaTemplate.list.button.create}
               </Button>
             </Row>
           </Row>
