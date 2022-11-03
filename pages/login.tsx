@@ -17,6 +17,7 @@ import {
 
 import ICFlagIndonesia from "../assets/icons/ic-flag-idn.svg";
 import ICFlagEnglish from "../assets/icons/ic-flag-us.svg";
+import { lang } from "lang";
 
 const flexStyles = { display: "flex", alignItems: "center", gap: ".5rem" };
 
@@ -76,6 +77,7 @@ interface OTPFlowInterface {
 }
 
 const Login: any = () => {
+  const [langValue, setLangValue] = useState<string>("en-US");
   const [isForgotPassword, setIsForgotPassword] = useState<boolean>(false);
   const [isResetWithPhone, setIsResetWithPhone] = useState<boolean>(false);
   const [isFlowCreateNewPassword, setIsFlowCreateNewPassword] = useState<boolean>(false);
@@ -239,7 +241,10 @@ const Login: any = () => {
             defaultValue="en-US"
             items={languageOptions}
             placeholder="Indonesia"
-            handleChange={(value: any) => localStorage.setItem("lan", value)}
+            handleChange={(value: any) => {
+              localStorage.setItem("lan", value);
+              setLangValue(value);
+            }}
             rounded
             noSearch
           />
@@ -264,7 +269,7 @@ const Login: any = () => {
                   ? "Select Verification Method"
                   : isForgotPassword
                   ? "Reset Password"
-                  : "Welcome Back!"}
+                  : lang[langValue].login.welcomeBack}
               </Text>
               <Spacer axis="vertical" size={4} />
               <Text textAlign="center" variant="body2" color="grey.light">
@@ -280,7 +285,7 @@ const Login: any = () => {
                     ).slice(8, 14)}`
                   : isForgotPassword
                   ? "Enter your registered email or mobile number. We will send a verification code or link to reset your password"
-                  : "login to enter dashboard"}
+                  : lang[langValue].login.subHeader}
               </Text>
             </Col>
 
@@ -440,8 +445,8 @@ const Login: any = () => {
                   {...register("username", {
                     required: true,
                   })}
-                  label="Username"
-                  placeholder="Type your NIK, Email, Phone number"
+                  label={lang[langValue].login.username}
+                  placeholder={lang[langValue].login.placeHolderUsername}
                   test-id="username"
                 />
                 <Spacer size={26} />
@@ -451,9 +456,9 @@ const Login: any = () => {
                     error?.errors?.find((err) => err.label === "password")?.message
                   }
                   {...register("password", { required: true })}
-                  label="Password"
+                  label={lang[langValue].login.password}
                   type="password"
-                  placeholder={"Type your password"}
+                  placeholder={lang[langValue].login.placeHolderPassword}
                   icon={<ICEyeCrossed />}
                   test-id="password"
                 />
@@ -463,7 +468,7 @@ const Login: any = () => {
                 <Row justifyContent="flex-end">
                   <Col>
                     <div style={{ cursor: "pointer" }} onClick={() => setIsForgotPassword(true)}>
-                      <Text color="pink.regular">Forgot Password?</Text>
+                      <Text color="pink.regular">{lang[langValue].login.forgotPassword}</Text>
                     </div>
                   </Col>
                 </Row>
@@ -478,14 +483,14 @@ const Login: any = () => {
                 <Spacer size={16} />
 
                 <Button size="xtra" onClick={handleSubmit(onSubmit)} full variant="primary">
-                  {isLoadingLogin ? "Loading..." : "Login"}
+                  {isLoadingLogin ? "Loading..." : lang[langValue].login.primary.login}
                 </Button>
 
                 <Spacer size={26} />
 
                 <span style={{ textAlign: "center" }}>
                   <Text fluid variant="subtitle2" inline>
-                    New user?{" "}
+                    {lang[langValue].login.newUser}{" "}
                   </Text>
                   <div
                     style={{ cursor: "pointer", display: "inline-block" }}
@@ -494,7 +499,7 @@ const Login: any = () => {
                     }}
                   >
                     <Text variant="subtitle2" inline color="pink.regular">
-                      Create an account
+                      {lang[langValue].login.createAnAccount}
                     </Text>
                   </div>
                 </span>

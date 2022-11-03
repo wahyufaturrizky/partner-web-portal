@@ -230,7 +230,7 @@ const ProductGroupDetail = () => {
           <Row justifyContent="flex-end" alignItems="center" nowrap>
             <Row gap="16px">
               <Button size="big" variant={"tertiary"} onClick={() => setShowDeleteModal(true)}>
-                Delete
+                {lang[t].productGroup.list.button.delete}
               </Button>
               <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
                 {isLoadingUpdateProductGroup
@@ -245,13 +245,15 @@ const ProductGroupDetail = () => {
 
         <Accordion>
           <Accordion.Item key={1}>
-            <Accordion.Header variant="blue">General</Accordion.Header>
+            <Accordion.Header variant="blue">
+              {lang[t].productGroup.detail.accordion.general}
+            </Accordion.Header>
             <Accordion.Body>
               <Row width="100%">
                 <Col width="100%">
                   <Input
                     width="100%"
-                    label="Product Group Name"
+                    label={lang[t].productGroup.detail.emptyState.groupName}
                     height="40px"
                     placeholder={"e.g Wafer 1K"}
                     defaultValue={productGroupData?.name}
@@ -273,6 +275,12 @@ const ProductGroupDetail = () => {
                 filterProduct={filterProduct}
                 setIsFetchingBrand={setIsFetchingProductBrand}
                 removeList={setRemoveList}
+                groupingBasedOnLable={lang[t].productGroup.detail.emptyState.groupingBasedOn}
+                conditionLable={lang[t].productGroup.detail.emptyState.condition}
+                minLable={lang[t].productGroup.detail.emptyState.min}
+                maxLable={lang[t].productGroup.detail.emptyState.max}
+                addMoreGroupingLable={lang[t].productGroup.detail.emptyState.addMoreGrouping}
+                groupingLable={lang[t].productGroup.grouping}
                 type={"edit"}
               />
             </Accordion.Body>

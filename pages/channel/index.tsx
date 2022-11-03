@@ -1,4 +1,5 @@
 import usePagination from "@lucasmogari/react-pagination";
+import { lang } from "lang";
 import {
   Button,
   Col,
@@ -28,35 +29,8 @@ import { mdmDownloadService } from "../../lib/client";
 import useDebounce from "../../lib/useDebounce";
 import { queryClient } from "../_app";
 
-const downloadFile = (params: any) =>
-  mdmDownloadService("/sales-channel/download", { params }).then((res) => {
-    let dataUrl = window.URL.createObjectURL(new Blob([res.data]));
-    let tempLink = document.createElement("a");
-    tempLink.href = dataUrl;
-    tempLink.setAttribute("download", `sales-channel_${new Date().getTime()}.xlsx`);
-    tempLink.click();
-  });
-
-const renderConfirmationText = (type: any, data: any) => {
-  switch (type) {
-    case "selection":
-      return data.selectedRowKeys.length > 1
-        ? `Are you sure to delete ${data.selectedRowKeys.length} items ?`
-        : `By deleting it will affect data that already uses Channel ${
-            data?.channelData?.data.find((el: any) => el.key === data.selectedRowKeys[0])?.name
-          }-${
-            data?.channelData?.data.find((el: any) => el.key === data.selectedRowKeys[0])
-              ?.salesChannelId
-          }`;
-    case "detail":
-      return `By deleting it will affect data that already uses Channel ${data.name}-${data.salesChannelId}`;
-
-    default:
-      break;
-  }
-};
-
 const ChannelMDM = () => {
+  const t = localStorage.getItem("lan") || "en-US";
   const pagination = usePagination({
     page: 1,
     itemsPerPage: 20,
@@ -78,6 +52,34 @@ const ChannelMDM = () => {
   const debounceSearch = useDebounce(search, 1000);
 
   const { register, handleSubmit } = useForm();
+
+  const downloadFile = (params: any) =>
+    mdmDownloadService("/sales-channel/download", { params }).then((res) => {
+      let dataUrl = window.URL.createObjectURL(new Blob([res.data]));
+      let tempLink = document.createElement("a");
+      tempLink.href = dataUrl;
+      tempLink.setAttribute("download", `sales-channel_${new Date().getTime()}.xlsx`);
+      tempLink.click();
+    });
+
+  const renderConfirmationText = (type: any, data: any) => {
+    switch (type) {
+      case "selection":
+        return data.selectedRowKeys.length > 1
+          ? `Are you sure to delete ${data.selectedRowKeys.length} items ?`
+          : `${lang[t].salesChannel.byDeleting} ${
+              data?.channelData?.data.find((el: any) => el.key === data.selectedRowKeys[0])?.name
+            }-${
+              data?.channelData?.data.find((el: any) => el.key === data.selectedRowKeys[0])
+                ?.salesChannelId
+            }`;
+      case "detail":
+        return `${lang[t].salesChannel.byDeleting} ${data.name}-${data.salesChannelId}`;
+
+      default:
+        break;
+    }
+  };
 
   const {
     data: channelsMDMData,
@@ -110,7 +112,7 @@ const ChannelMDM = () => {
                   }}
                   variant="tertiary"
                 >
-                  View Detail
+                  {lang[t].salesChannel.tertier.viewDetail}
                 </Button>
               </div>
             ),
@@ -164,15 +166,15 @@ const ChannelMDM = () => {
 
   const columns = [
     {
-      title: "Sales Channel ID",
+      title: lang[t].salesChannel.table.salesChannelId,
       dataIndex: "salesChannelId",
     },
     {
-      title: "Sales Channel Name",
+      title: lang[t].salesChannel.table.salesChannelName,
       dataIndex: "name",
     },
     {
-      title: "Action",
+      title: lang[t].salesChannel.table.action,
       dataIndex: "action",
       width: "15%",
       align: "left",
@@ -211,7 +213,7 @@ const ChannelMDM = () => {
   return (
     <>
       <Col>
-        <Text variant={"h4"}>Sales Channel</Text>
+        <Text variant={"h4"}>{lang[t].salesChannel.list.title}</Text>
         <Spacer size={20} />
       </Col>
       <Card>
@@ -236,10 +238,10 @@ const ChannelMDM = () => {
               }
               disabled={rowSelection.selectedRowKeys?.length === 0}
             >
-              Delete
+              {lang[t].salesChannel.tertier.delete}
             </Button>
             <DropdownMenu
-              title={"More"}
+              title={lang[t].salesChannel.tertier.more}
               buttonVariant={"secondary"}
               buttonSize={"big"}
               textVariant={"button"}
@@ -297,7 +299,7 @@ const ChannelMDM = () => {
               variant="primary"
               onClick={() => setModalChannelForm({ open: true, typeForm: "create", data: {} })}
             >
-              Create
+              {lang[t].salesChannel.primary.create}
             </Button>
           </Row>
         </Row>
@@ -322,7 +324,11 @@ const ChannelMDM = () => {
           closable={false}
           visible={modalChannelForm.open}
           onCancel={() => setModalChannelForm({ open: false, data: {}, typeForm: "" })}
-          title={modalChannelForm.typeForm === "create" ? "Create Channel" : "Channel"}
+          title={
+            modalChannelForm.typeForm === "create"
+              ? lang[t].salesChannel.createChannel
+              : lang[t].salesChannel.channel
+          }
           footer={null}
           content={
             <div
@@ -335,9 +341,9 @@ const ChannelMDM = () => {
               <Input
                 defaultValue={modalChannelForm.data?.name}
                 width="100%"
-                label="Sales Channel Name"
+                label={lang[t].salesChannel.salesChannelName}
                 height="48px"
-                placeholder={"e.g Modern Trade"}
+                placeholder={lang[t].salesChannel.placeHolder.egModernTrade}
                 {...register("name", {
                   shouldUnregister: true,
                 })}
@@ -359,7 +365,7 @@ const ChannelMDM = () => {
                     type="primary"
                     onClick={() => setModalChannelForm({ open: false, data: {}, typeForm: "" })}
                   >
-                    Cancel
+                    {lang[t].salesChannel.tertier.cancel}
                   </Button>
                 ) : (
                   <Button
@@ -371,12 +377,14 @@ const ChannelMDM = () => {
                       setShowDelete({ open: true, type: "detail", data: modalChannelForm.data });
                     }}
                   >
-                    Delete
+                    {lang[t].salesChannel.tertier.delete}
                   </Button>
                 )}
 
                 <Button onClick={handleSubmit(onSubmit)} variant="primary" size="big">
-                  {isLoadingcreateChannelMDM || isLoadingupdateChannelMDM ? "Loading..." : "Save"}
+                  {isLoadingcreateChannelMDM || isLoadingupdateChannelMDM
+                    ? lang[t].salesChannel.loading
+                    : lang[t].salesChannel.primary.save}
                 </Button>
               </div>
             </div>
@@ -390,7 +398,7 @@ const ChannelMDM = () => {
           centered
           visible={isShowDelete.open}
           onCancel={() => setShowDelete({ open: false, type: "", data: {} })}
-          title={"Confirm Delete"}
+          title={lang[t].salesChannel.list.confirmDelete}
           footer={null}
           content={
             <div
@@ -418,7 +426,7 @@ const ChannelMDM = () => {
                   type="primary"
                   onClick={() => setShowDelete({ open: false, type: "", data: {} })}
                 >
-                  Cancel
+                  {lang[t].salesChannel.tertier.cancel}
                 </Button>
                 <Button
                   variant="primary"
@@ -437,7 +445,9 @@ const ChannelMDM = () => {
                     }
                   }}
                 >
-                  {isLoadingdeleteChannelMDM ? "loading..." : "Yes"}
+                  {isLoadingdeleteChannelMDM
+                    ? lang[t].salesChannel.loading
+                    : lang[t].salesChannel.primary.yes}
                 </Button>
               </div>
             </div>

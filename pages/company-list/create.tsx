@@ -1,42 +1,39 @@
-import React, { useState } from "react";
+import { yupResolver } from "@hookform/resolvers/yup";
+import usePagination from "@lucasmogari/react-pagination";
+import { useLanguages } from "hooks/languages/useLanguages";
+import { lang } from "lang";
+import moment from "moment";
+import Router, { useRouter } from "next/router";
 import {
-  Text,
+  Accordion,
+  Button,
   Col,
+  DatePickerInput,
+  Dropdown,
+  FileUploaderAllFiles,
+  Input,
+  Radio,
   Row,
   Spacer,
-  Dropdown,
-  Button,
-  Accordion,
-  Input,
-  TextArea,
-  DatePickerInput,
-  Dropdown2,
-  Switch,
-  FileUploaderAllFiles,
   Spin,
-  Radio,
+  Switch,
+  Text,
 } from "pink-lava-ui";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
 import styled from "styled-components";
-import Router, { useRouter } from "next/router";
-import ArrowLeft from "../../assets/icons/arrow-left.svg";
 import * as yup from "yup";
-import { yupResolver } from "@hookform/resolvers/yup";
-import { Controller, useForm } from "react-hook-form";
-import usePagination from "@lucasmogari/react-pagination";
+import ArrowLeft from "../../assets/icons/arrow-left.svg";
 import {
   useCoa,
   useCountries,
   useCreateCompany,
   useCurrenciesMDM,
   useDateFormatLists,
-  useMenuDesignLists,
   useNumberFormatLists,
   useTimezones,
   useUploadLogoCompany,
 } from "../../hooks/company-list/useCompany";
-import { useTimezone } from "../../hooks/timezone/useTimezone";
-import { useLanguages } from "hooks/languages/useLanguages";
-import moment from "moment";
 
 const CompanyTypeDataFake = [
   {
@@ -371,6 +368,7 @@ const defaultValue = {
 };
 
 const CreateCompany: any = () => {
+  const t = localStorage.getItem("lan") || "en-US";
   const router = useRouter();
 
   const pagination = usePagination({
@@ -416,8 +414,14 @@ const CreateCompany: any = () => {
   });
 
   const activeStatus = [
-    { id: "Active", value: '<div key="1" style="color:green;">Active</div>' },
-    { id: "Unactive", value: '<div key="2" style="color:red;">Non Active</div>' },
+    {
+      id: "Active",
+      value: `<div key="1" style="color:green;">${lang[t].companyList.tertier.active}</div>`,
+    },
+    {
+      id: "Unactive",
+      value: `<div key="2" style="color:red;">${lang[t].companyList.tertier.nonActive}</div>`,
+    },
   ];
 
   const { data: dateFormatData, isLoading: isLoadingDateFormatList } = useDateFormatLists({
@@ -558,7 +562,7 @@ const CreateCompany: any = () => {
       <Col>
         <Row gap="4px" alignItems="center">
           <ArrowLeft style={{ cursor: "pointer" }} onClick={() => Router.push("/company-list")} />
-          <Text variant={"h4"}>Add New Company</Text>
+          <Text variant={"h4"}>{lang[t].companyList.addNewCompany}</Text>
         </Row>
         <Spacer size={12} />
         <Card padding="20px">
@@ -580,10 +584,10 @@ const CreateCompany: any = () => {
                   variant={"tertiary"}
                   onClick={() => Router.push("/company-list")}
                 >
-                  Cancel
+                  {lang[t].companyList.tertier.cancel}
                 </Button>
                 <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
-                  Save
+                  {lang[t].companyList.primary.save}
                 </Button>
               </Row>
             </Row>
@@ -594,24 +598,27 @@ const CreateCompany: any = () => {
 
         <Accordion>
           <Accordion.Item key={1}>
-            <Accordion.Header variant="blue">Company Profile</Accordion.Header>
+            <Accordion.Header variant="blue">{lang[t].companyList.companyProfile}</Accordion.Header>
             <Accordion.Body>
               <Row width="100%" gap="20px" noWrap>
                 <FileUploaderAllFiles
-                  label="Company Logo"
+                  label={lang[t].companyList.companyLogo}
                   // onSubmit={(file) => setFoto(file)}
                   onSubmit={(file) => handleUploadLogo(file)}
                   defaultFile="/placeholder-employee-photo.svg"
                   withCrop={true}
                   removeable
-                  textPhoto={["Format .JPG .JPEG .PNG and Dimension Minimum 72 x 72, Optimal size 300 x 300", "File Size Max. 5MB"]}
+                  textPhoto={[
+                    "Format .JPG .JPEG .PNG and Dimension Minimum 72 x 72, Optimal size 300 x 300",
+                    "File Size Max. 5MB",
+                  ]}
                 />
               </Row>
 
               <Row width="100%" gap="20px" noWrap>
                 <Input
                   width="100%"
-                  label="Name"
+                  label={lang[t].companyList.name}
                   height="48px"
                   placeholder={"e.g PT. Kaldu Sari Nabati Indonesia"}
                   error={errors?.name?.message}
@@ -620,7 +627,7 @@ const CreateCompany: any = () => {
                 />
                 <Input
                   width="100%"
-                  label="Company Code"
+                  label={lang[t].companyList.companyCode}
                   height="48px"
                   placeholder={"e.g KSNI"}
                   error={errors?.code?.message}
@@ -632,7 +639,7 @@ const CreateCompany: any = () => {
                 <Col width="50%">
                   <Input
                     width="100%"
-                    label="Email"
+                    label={lang[t].companyList.email}
                     height="48px"
                     placeholder={"e.g karina@nabatisnack.co.id"}
                     error={errors?.email?.message}
@@ -649,7 +656,7 @@ const CreateCompany: any = () => {
                   /> */}
                   <Input
                     width="100%"
-                    label="Address"
+                    label={lang[t].companyList.address}
                     height="48px"
                     placeholder={"e.g JL. Soekarno Hatta"}
                     {...register("address")}
@@ -663,7 +670,7 @@ const CreateCompany: any = () => {
                     <Spin tip="Loading data..." />
                   ) : (
                     <Dropdown
-                      label="Country"
+                      label={lang[t].companyList.country}
                       width={"100%"}
                       items={countryData.rows.map((data) => ({
                         id: data.name,
@@ -680,7 +687,7 @@ const CreateCompany: any = () => {
                 </Col>
                 <Col width="50%">
                   <Dropdown
-                    label="Industry"
+                    label={lang[t].companyList.industry}
                     width={"100%"}
                     items={industryList}
                     placeholder={"Select"}
@@ -694,7 +701,7 @@ const CreateCompany: any = () => {
               <Row width="100%" gap="20px" noWrap>
                 <Col width="50%">
                   <Dropdown
-                    label="Number of Employee"
+                    label={lang[t].companyList.numberOfEmployee}
                     width={"100%"}
                     items={NumberOfEmployeeDataFake}
                     placeholder={"Select"}
@@ -706,7 +713,7 @@ const CreateCompany: any = () => {
                 </Col>
                 <Col width="50%">
                   <Dropdown
-                    label="Sector"
+                    label={lang[t].companyList.sector}
                     width={"100%"}
                     items={sectorList}
                     placeholder={"Select"}
@@ -734,7 +741,7 @@ const CreateCompany: any = () => {
                 <Col width="50%">
                   <Input
                     width="100%"
-                    label="Tax ID"
+                    label={lang[t].companyList.taxID}
                     height="48px"
                     placeholder={"e.g 10"}
                     {...register("taxId")}
@@ -746,30 +753,30 @@ const CreateCompany: any = () => {
                 </Col>
                 <Col width="50%">
                   <Row width="100%" gap={20} noWrap>
-                    <Span>Copy from Template</Span>
+                    <Span>{lang[t].companyList.copyFromTemplate}</Span>
                   </Row>
                   <Row width="100%" noWrap>
                     <Flex>
                       <Radio
                         value={"companyInternal"}
-                        checked={fromTemplate == 'none'}
-                        onChange={(e: any) => setFromTemplate('none')}
+                        checked={fromTemplate == "none"}
+                        onChange={(e: any) => setFromTemplate("none")}
                       >
-                        <SpanAlign>None</SpanAlign>
+                        <SpanAlign>{lang[t].companyList.none}</SpanAlign>
                       </Radio>
                       <Radio
                         value={"companyInternal"}
-                        checked={fromTemplate == 'eDot'}
-                        onChange={(e: any) => setFromTemplate('eDot')}
+                        checked={fromTemplate == "eDot"}
+                        onChange={(e: any) => setFromTemplate("eDot")}
                       >
                         eDOT
                       </Radio>
                       <Radio
                         value={"companyInternal"}
-                        checked={fromTemplate == 'Other Company'}
-                        onChange={(e: any) => setFromTemplate('Other Company')}
+                        checked={fromTemplate == "Other Company"}
+                        onChange={(e: any) => setFromTemplate("Other Company")}
                       >
-                        Other Company
+                        {lang[t].companyList.otherCompany}
                       </Radio>
                     </Flex>
                   </Row>
@@ -783,12 +790,12 @@ const CreateCompany: any = () => {
 
         <Accordion>
           <Accordion.Item key={1}>
-            <Accordion.Header variant="blue">General Setup</Accordion.Header>
+            <Accordion.Header variant="blue">{lang[t].companyList.generalSetup}</Accordion.Header>
             <Accordion.Body>
               <Row width="100%" gap="20px" noWrap>
                 <Col width="50%">
                   <Dropdown
-                    label="Company Type"
+                    label={lang[t].companyList.companyType}
                     width={"100%"}
                     items={CompanyTypeDataFake}
                     placeholder={"Select"}
@@ -800,7 +807,7 @@ const CreateCompany: any = () => {
                 </Col>
                 <Col width="50%">
                   <Dropdown
-                    label="Corporate"
+                    label={lang[t].companyList.corporate}
                     width={"100%"}
                     items={CorporateDataFake}
                     placeholder={"Select"}
@@ -817,7 +824,7 @@ const CreateCompany: any = () => {
                     <Spin tip="Loading data..." />
                   ) : (
                     <Dropdown
-                      label="Currency"
+                      label={lang[t].companyList.currency}
                       width={"100%"}
                       items={currencyData.rows.map((data) => ({
                         value: `${data.currency} - ${data.currencyName}`,
@@ -834,7 +841,7 @@ const CreateCompany: any = () => {
                 </Col>
                 <Col width="50%">
                   <Dropdown
-                    label="Source Exchange Rate"
+                    label={lang[t].companyList.sourceExchangeRate}
                     width="100%"
                     items={[]}
                     placeholder={"Select"}
@@ -851,7 +858,7 @@ const CreateCompany: any = () => {
                     <Spin tip="Loading data..." />
                   ) : (
                     <Dropdown
-                      label="Format Date"
+                      label={lang[t].companyList.formatDate}
                       width={"100%"}
                       items={dateFormatData.rows.map((data) => ({
                         value: data.format,
@@ -870,7 +877,7 @@ const CreateCompany: any = () => {
                     <Spin tip="Loading data..." />
                   ) : (
                     <Dropdown
-                      label="CoA Template"
+                      label={lang[t].companyList.coaTemplate}
                       width={"100%"}
                       items={coaData.rows.map((data) => ({
                         value: data.name,
@@ -892,7 +899,7 @@ const CreateCompany: any = () => {
                     <Spin tip="Loading data..." />
                   ) : (
                     <Dropdown
-                      label="Timezone"
+                      label={lang[t].companyList.timezone}
                       width={"100%"}
                       items={timezoneData?.rows.map((data) => ({
                         value: `${data.utc} ${data.name}`,
@@ -906,7 +913,7 @@ const CreateCompany: any = () => {
                     />
                   )}
                   <Dropdown
-                    label="Language"
+                    label={lang[t].companyList.language}
                     width="100%"
                     items={listLanguage?.rows.map((data: any) => ({
                       id: data?.id,
@@ -926,7 +933,7 @@ const CreateCompany: any = () => {
                     <Spin tip="Loading data..." />
                   ) : (
                     <Dropdown
-                      label="Number Format"
+                      label={lang[t].companyList.numberFormat}
                       width={"100%"}
                       items={numberFormatData.rows.map((data) => ({
                         value: data.format,
@@ -944,21 +951,21 @@ const CreateCompany: any = () => {
               <Spacer size={20} />
               <Row width="100%" gap="20px" noWrap>
                 <Row width="100%" gap="20px" noWrap>
-                  <Text variant="body1">Company Use Advance Approval</Text>
+                  <Text variant="body1">{lang[t].companyList.companyUseAdvanceApproval}</Text>
                   <Switch
                     defaultChecked={false}
                     onChange={(value) => setValue("advanceApproval", value)}
                   />
                 </Row>
                 <Row justifyContent="center" width="100%" gap="20px" noWrap>
-                  <Text variant="body1">Company Use Retail Pricing</Text>
+                  <Text variant="body1">{lang[t].companyList.companyUseRetailPricing}</Text>
                   <Switch
                     defaultChecked={false}
                     onChange={(value) => setValue("retailPricing", value)}
                   />
                 </Row>
                 <Row width="100%" justifyContent="end" gap="20px" noWrap>
-                  <Text variant="body1">Company Use Pricing Structure</Text>
+                  <Text variant="body1">{lang[t].companyList.companyUsePricingStructure}</Text>
                   <Switch
                     defaultChecked={false}
                     onChange={(value) => setValue("pricingStructure", value)}
@@ -973,12 +980,12 @@ const CreateCompany: any = () => {
 
         <Accordion>
           <Accordion.Item key={1}>
-            <Accordion.Header variant="blue">Finance Setup</Accordion.Header>
+            <Accordion.Header variant="blue">{lang[t].companyList.financeSetup}</Accordion.Header>
             <Accordion.Body>
               <Row width="100%" gap="20px" noWrap>
                 <Col width="50%">
                   <Dropdown
-                    label="Chart of Account"
+                    label={lang[t].companyList.chartOfAccount}
                     width="100%"
                     items={[]}
                     placeholder={"Select"}
@@ -988,7 +995,7 @@ const CreateCompany: any = () => {
                   />
                   <Input
                     width="100%"
-                    label="ExternalCode"
+                    label={lang[t].companyList.externalCode}
                     height="48px"
                     placeholder="e.g 3221114810"
                     {...register("external_code")}
@@ -1001,9 +1008,9 @@ const CreateCompany: any = () => {
                     onChange={(date: any, dateString: any) =>
                       setValue("fiscal_year", Number(dateString))
                     }
-                    label="Fiscal Year"
+                    label={lang[t].companyList.fiscalYear}
                     picker="year"
-                    defaultValue={moment(2022)} 
+                    defaultValue={moment(2022)}
                     // format="YYYY"
                   />
                 </Col>
