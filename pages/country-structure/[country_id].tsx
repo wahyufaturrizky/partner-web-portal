@@ -109,7 +109,7 @@ const CreateConfig = () => {
 		return isError;
 	};
 
-	const onSubmit = () => {
+	const onSubmit = (isFromUploadManageData=false) => {
 		const { name, ...rest } = countryBasic
 		const data: any = {
 			...rest,
@@ -143,21 +143,26 @@ const CreateConfig = () => {
 				})) || []
 			}
 		};
-		
-		if(countryBasic.countryCode){
-			data.countryCode = countryBasic.countryCode
-		}
-		if(countryBasic.phoneCode){
-			data.phoneCode = countryBasic.phoneCode
-		}
-		if(countryBasic.currencyId){
-			data.currencyId = countryBasic.currencyId
-		}
-		if (!validateRequired(data)) {
-			if(name === country?.name){
-				delete data.name;
-			}
+
+		if(isFromUploadManageData){
+			delete data.name;
 			updateCountry(data);
+		} else {
+			if(countryBasic.countryCode){
+				data.countryCode = countryBasic.countryCode
+			}
+			if(countryBasic.phoneCode){
+				data.phoneCode = countryBasic.phoneCode
+			}
+			if(countryBasic.currencyId){
+				data.currencyId = countryBasic.currencyId
+			}
+			if (!validateRequired(data)) {
+				if(name === country?.name){
+					delete data.name;
+				}
+				updateCountry(data);
+			}
 		}
 	};
 
@@ -320,7 +325,7 @@ const CreateConfig = () => {
 
 	useEffect(() => {
 		if(showManageData.update){
-			onSubmit()
+			onSubmit(true)
 			setShowManageData(prev => ({...prev, update: false}))
 		}
 	}, [showManageData.update])
