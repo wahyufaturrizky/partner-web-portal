@@ -90,7 +90,11 @@ const CreateConfig = () => {
 		country_id,
 		options: {
 			onSuccess: () => {
-				router.push("/country-structure");
+				if(showManageData.update){
+					setShowManageData(prev => ({...prev, update: false}))
+				} else {
+					router.push("/country-structure");
+				}
 			},
 		},
 	});
@@ -110,9 +114,8 @@ const CreateConfig = () => {
 	};
 
 	const onSubmit = (isFromUploadManageData=false) => {
-		const { name, ...rest } = countryBasic
+		const { name } = countryBasic
 		const data: any = {
-			...rest,
 			name,
 			delete: {
 				structure: updateCountryStructure.delete,
@@ -326,7 +329,6 @@ const CreateConfig = () => {
 	useEffect(() => {
 		if(showManageData.update){
 			onSubmit(true)
-			setShowManageData(prev => ({...prev, update: false}))
 		}
 	}, [showManageData.update])
 	
