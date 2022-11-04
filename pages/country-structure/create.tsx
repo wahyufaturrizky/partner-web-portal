@@ -13,11 +13,13 @@ import {
 	Switch,
 	FileUploaderExcel,
 	Spin,
+	Checkbox,
+	FormInput
 } from "pink-lava-ui";
 
 import { ModalDeleteConfirmation } from "../../components/elements/Modal/ModalConfirmationDelete";
 import { ModalManageData } from "../../components/elements/Modal/ModalManageData";
-import { useCreateCountries } from "../../hooks/mdm/country-structure/useCountries";
+import { useCheckCountryName, useCreateCountries } from "../../hooks/mdm/country-structure/useCountries";
 import { useCurrenciesMDM } from "../../hooks/mdm/country-structure/useCurrencyMDM";
 
 import * as ExcelJS from "exceljs/dist/exceljs.min.js";
@@ -117,6 +119,9 @@ const CreateCountries = () => {
 		phoneCode: ""
 	});
 	const [allStructure, setAllStructure] = useState<any>([]);
+	const [checkCountryName, setCheckCountryName] = useState(false);
+	const [isCountryNameDuplicate, setIsCountryNameDuplicate] = useState(false)
+	const [isCountryNameFocused, setIsCountryNameFocused] = useState(false)
 
 	const [showUploadStructure, setShowUploadStructure] = useState<any>(false);
 	const [showManageData, setShowManageData] = useState<any>({
@@ -129,6 +134,7 @@ const CreateCountries = () => {
 			name: data,
 			level: index + 1,
 			connectPostalCode: "N",
+			isCity: false
 		}));
 		setCountryStructure(datas);
 	};
@@ -144,7 +150,7 @@ const CreateCountries = () => {
 
 	const validateRequired = (data: any) => {
 		const newErrors: any = _.cloneDeep(errors);
-		let isError = false;
+		let isError = isCountryNameDuplicate;
 
 		if (!data.name) {
 			newErrors["name"] = "Country Name is required";
@@ -174,9 +180,18 @@ const CreateCountries = () => {
 		});
 
 		const data: any = {
-			...countryBasic,
+			name: countryBasic.name,
 			...(newStructure.length > 0 && { structure: newStructure }),
 		};
+		if(countryBasic.countryCode){
+			data.countryCode = countryBasic.countryCode
+		}
+		if(countryBasic.phoneCode){
+			data.phoneCode = countryBasic.phoneCode.toString()
+		}
+		if(countryBasic.currencyId){
+			data.currencyId = countryBasic.currencyId
+		}
 		if (!validateRequired(data)) {
 			createCountry(data);
 		}
@@ -195,6 +210,7 @@ const CreateCountries = () => {
 		newStructure.push({
 			level: countryStructure.length + 1,
 			connectPostalCode: "N",
+			isCity: countryStructure.length === 0,
 			name: "",
 		});
 		setCountryStructure(newStructure);
@@ -209,6 +225,15 @@ const CreateCountries = () => {
 	const onChangeStructurePostalCode = (index: any) => {
 		let newStructure = _.cloneDeep(countryStructure);
 		newStructure[index].connectPostalCode = newStructure[index].connectPostalCode === "Y" ? "N" : "Y";
+		setCountryStructure(newStructure);
+	};
+
+	const onChangeStructureIsCity = (index: any) => {
+		let newStructure = _.cloneDeep(countryStructure).map((data:any) => ({
+			...data,
+			isCity: false,
+		}));
+		newStructure[index].isCity = !newStructure[index].isCity;
 		setCountryStructure(newStructure);
 	};
 
@@ -275,6 +300,23 @@ const CreateCountries = () => {
 		setErrors(newErrors);
 	};
 
+	useCheckCountryName({
+		name: countryBasic.name,
+		options: {
+			onSuccess: (data: any) => {
+				if(data){
+					const newErrors: any = _.cloneDeep(errors);
+					newErrors["name"] = "The Country name you are using already exists";
+					setErrors(newErrors)
+				} 
+				setIsCountryNameDuplicate(data)
+				setCheckCountryName(false)
+				setIsCountryNameFocused(false)
+			},
+			enabled: checkCountryName
+		}
+	});
+
 	return (
 		<>
 			{isLoadingCurrencies ? (
@@ -293,7 +335,7 @@ const CreateCountries = () => {
 								<Button size="big" variant={"tertiary"} onClick={() => router.push("/country-structure")}>
 									Cancel
 								</Button>
-								<Button size="big" variant={"primary"} onClick={onSubmit}>
+								<Button disabled={errors.name || isCountryNameFocused} size="big" variant={"primary"} onClick={onSubmit}>
 									Save
 								</Button>
 							</Row>
@@ -317,61 +359,46 @@ const CreateCountries = () => {
 										onChange={(e: any) => setCountryBasic({ ...countryBasic, name: e.target.value })}
 										error={errors?.name}
 										required
-										onFocus={() =>
+										onFocus={() => {
+											setIsCountryNameFocused(true)
 											onFocusRemoveValidation({
 												target: {
 													name: "name",
 												},
 											})
-										}
-									/>
-									<Dropdown
-										label="Country Code"
-										width={"100%"}
-										items={COUNTRY_CODE
-											.filter(data => data.includes(searchCountryCode))
-												.map(data => ({
-													value: data,
-													id: data
-												})
-										)}
-										placeholder={"Select"}
-										onSearch={(search: any) => setSearchCountryCode(search)}
-										handleChange={(value: any) => {
-											onFocusRemoveValidation({
-												target: {
-													name: "country",
-												},
-											});
-											setCountryBasic({ ...countryBasic, countryCode: value });
 										}}
+										onBlur={() => {
+											setCheckCountryName(true)
+										}}
+									/>
+									<Input
+										width="100%"
+										name="Country Code"
+										label="Country Code"
+										height="48px"
+										placeholder={"e.g ID"}
+										value={countryBasic.countryCode}
+										onChange={(e: any) => setCountryBasic({ ...countryBasic, countryCode: e.target.value })}
 									/>
 								</Row>
 
 								<Spacer size={20} />
 
 								<Row width="100%" gap="20px" noWrap>
-									<Dropdown
-										label="Phone Code"
-										width={"100%"}
-										items={PHONE_CODE
-											.filter(data => data.includes(searchPhoneCode))
-												.map(data => ({
-													value: data,
-													id: data
-												})
-										)}
-										placeholder={"Select"}
-										onSearch={(search: any) => setSearchPhoneCode(search)}
-										handleChange={(value: any) => {
-											onFocusRemoveValidation({
-												target: {
-													name: "phone",
-												},
-											});
-											setCountryBasic({ ...countryBasic, phoneCode: value });
-										}}
-									/>
+									<Col width="100%">
+										<Label> Phone Code </Label>
+										<Spacer size={4} />
+										<CustomFormInput
+											defaultValue={countryBasic?.phoneCode}
+											style={{ height: 48, width: '100%' }}
+											placeholder={`e.g 62`}
+											size={"large"}
+											width={"100%"}
+											addonBefore={"+"}
+											onChange={(value: any) => setCountryBasic({ ...countryBasic, phoneCode: value })}
+											type="number"
+										/>
+									</Col>
 									<Dropdown
 										label="Currency"
 										width={"100%"}
@@ -473,12 +500,22 @@ const CreateCountries = () => {
 											</Row>
 										</Row>
 										<Spacer size={8} />
-										<Row gap="15px" alignItems="center">
-											<Text variant="body2">Connect to postal code</Text>
-											<Switch
-												defaultChecked={false}
-												onChange={() => onChangeStructurePostalCode(index)}
-											/>
+										<Row>
+											<Row alignItems="center">
+												<Text variant="body2">Is City</Text>
+												<Spacer size={8} display="inline-block" />
+												<Checkbox
+													checked={structure.isCity}
+													onChange={() => onChangeStructureIsCity(index)}
+												/>
+											</Row>
+											<Row gap="15px" alignItems="center">
+												<Text variant="body2">Connect to postal code</Text>
+												<Switch
+													defaultChecked={false}
+													onChange={() => onChangeStructurePostalCode(index)}
+												/>
+											</Row>
 										</Row>
 										<Spacer size={20} />
 										<Divider />
@@ -556,5 +593,37 @@ const Card = styled.div`
 	border-radius: 16px;
 	padding: 16px;
 `;
+
+const CustomFormInput = styled(FormInput)`
+  input {
+    height: 48px !important;
+  }
+	.ant-input-number-input {
+		border-radius: 0px;
+
+	}
+
+	.ant-input-number {
+		border: 1px solid #AAAAAA;
+	}
+
+	.ant-input-number-group-addon {
+		width: 72px;
+		border-radius: 8px 0px 0px 8px;
+		border: 1px solid #AAAAAA;
+		border-right: none;
+	}
+
+	.ant-input-number-handler-wrap {
+		display: none;
+	}
+`
+
+const Label = styled.div`
+	font-weight: bold;
+	font-size: 16px;
+	line-height: 24px;
+	color: #000000;
+`
 
 export default CreateCountries;

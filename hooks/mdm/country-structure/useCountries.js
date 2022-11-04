@@ -135,6 +135,18 @@ const useUploadFileCountries = ({ options }) => {
   );
 };
 
+const fetchAvailableName = async ({ name }) => {
+  return mdmService(`/country/name/available/${name}`).then((data) => data);
+}
+
+const useCheckCountryName = ({ name, options }) => {
+  return useQuery(["country-name", name], () => fetchAvailableName({ name }), {
+    ...options,
+  });
+};
+
+
+
 export {
   useDataCountries,
   useDeleteDataCountries,
@@ -144,5 +156,6 @@ export {
   useUpdateCountry,
   useFetchCountriesStructure,
   useCountryInfiniteLists,
-  useCountryStructureInfiniteLists
+  useCountryStructureInfiniteLists,
+  useCheckCountryName
 };

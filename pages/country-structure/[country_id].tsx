@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import _ from "lodash";
 import Router, { useRouter } from "next/router";
 import {
@@ -13,6 +13,8 @@ import {
 	Switch,
 	FileUploaderExcel,
 	Spin,
+	Checkbox,
+	FormInput
 } from "pink-lava-ui";
 
 import ArrowLeft from "../../assets/icons/arrow-left.svg";
@@ -21,7 +23,8 @@ import { useCurrenciesMDM } from "../../hooks/mdm/country-structure/useCurrencyM
 import {
 	useFetchDetailCountry,
 	useUpdateCountry,
-	useDeleteDataCountries
+	useDeleteDataCountries,
+	useCheckCountryName
 } from "../../hooks/mdm/country-structure/useCountries";
 import { ModalManageDataEdit } from "../../components/elements/Modal/ModalManageDataEdit";
 
@@ -59,7 +62,12 @@ const CreateConfig = () => {
 	const [showManageData, setShowManageData] = useState({
 		visible: false,
 		index: null,
+		update: false
 	});
+
+	const [checkCountryName, setCheckCountryName] = useState(false);
+	const [isCountryNameDuplicate, setIsCountryNameDuplicate] = useState(false)
+	const [isCountryNameFocused, setIsCountryNameFocused] = useState(false)
 
 	const onUploadStructure = (data: any) => {
 		let idsCountryStructure = countryStructure.map((data: any) => data.id);
@@ -71,6 +79,7 @@ const CreateConfig = () => {
 			name: data,
 			level: index + 1,
 			connectPostalCode: "N",
+			isCity: false
 		}));
 		updateCountryStructureClone.addNew.push(...datas)
 		setUpdateCountryStructure(updateCountryStructureClone)
@@ -101,8 +110,10 @@ const CreateConfig = () => {
 	};
 
 	const onSubmit = () => {
+		const { name, ...rest } = countryBasic
 		const data: any = {
-			...countryBasic,
+			...rest,
+			name,
 			delete: {
 				structure: updateCountryStructure.delete,
 				structureElements: Object.values(updateAllStructure.delete).flat() || []
@@ -132,7 +143,20 @@ const CreateConfig = () => {
 				})) || []
 			}
 		};
+		
+		if(countryBasic.countryCode){
+			data.countryCode = countryBasic.countryCode
+		}
+		if(countryBasic.phoneCode){
+			data.phoneCode = countryBasic.phoneCode
+		}
+		if(countryBasic.currencyId){
+			data.currencyId = countryBasic.currencyId
+		}
 		if (!validateRequired(data)) {
+			if(name === country?.name){
+				delete data.name;
+			}
 			updateCountry(data);
 		}
 	};
@@ -174,6 +198,7 @@ const CreateConfig = () => {
 			level: countryStructure.length + 1,
 			connectPostalCode: "N",
 			name: "",
+			isCity: countryStructure.length === 0,
 		});
 		setCountryStructure(newStructure);
 
@@ -243,6 +268,36 @@ const CreateConfig = () => {
 		}
 	};
 
+	const onChangeStructureIsCity = (index: any) => {
+		let newStructure: any = _.cloneDeep(countryStructure).map((data:any) => ({
+			...data,
+			isCity: false,
+		}));
+		newStructure[index].isCity = !newStructure[index].isCity;
+		setCountryStructure(newStructure);
+		if(newStructure[index].id){
+			let structureInUpdateIndex = updateCountryStructure.update.findIndex((update: any) => update.id === newStructure[index].id)
+			let updateCountryStructureClone: any = _.cloneDeep(updateCountryStructure);
+			if(structureInUpdateIndex > 0){
+				updateCountryStructureClone.update[structureInUpdateIndex].isCity = !updateCountryStructureClone.update[structureInUpdateIndex].isCity
+				setUpdateCountryStructure(updateCountryStructureClone)
+			} else {
+				updateCountryStructureClone.update.push({
+					id: newStructure[index].id,
+					connectPostalCode: newStructure[index].connectPostalCode,
+					name: newStructure[index].name,
+					isCity: newStructure[index].isCity,
+				})
+				setUpdateCountryStructure(updateCountryStructureClone)
+			}
+		} else if(updateCountryStructure.addNew.some((add: any) => add.level === index+1)){
+			let updateCountryStructureClone: any = _.cloneDeep(updateCountryStructure);
+			let structureInUpdateIndex: any = updateCountryStructureClone.addNew.findIndex((add: any) => add.level === index+1)
+			updateCountryStructureClone.addNew[structureInUpdateIndex].isCity = newStructure[index].isCity;
+			setUpdateCountryStructure(updateCountryStructureClone)
+		}
+	};
+
 	const { data: currencies, isLoading: isLoadingCurrencies } = useCurrenciesMDM({
 		query: {
 			limit: 10000,
@@ -260,8 +315,15 @@ const CreateConfig = () => {
 		newUpdateAllStructure.addNew[level-1] = tempUpdateAllStructure.addNew
 		newUpdateAllStructure.delete[level-1] = tempUpdateAllStructure.delete
 		setUpdateAllStructure(newUpdateAllStructure);
-		setShowManageData({ visible: false, index: null });
+		setShowManageData({ visible: false, index: null, update: true });
 	};
+
+	useEffect(() => {
+		if(showManageData.update){
+			onSubmit()
+			setShowManageData(prev => ({...prev, update: false}))
+		}
+	}, [showManageData.update])
 	
 	const [isLoading, setIsLoading] = useState(true);
 
@@ -281,6 +343,7 @@ const CreateConfig = () => {
 						level: index + 1,
 						id: data.id,
 						connectPostalCode: data.connectPostalCode === "N" ? "N" : "Y",
+						isCity: data.isCity
 					}))
 				);
 
@@ -303,6 +366,26 @@ const CreateConfig = () => {
 		delete newErrors[e.target.name];
 		setErrors(newErrors);
 	};
+
+	useCheckCountryName({
+		name: countryBasic.name,
+		options: {
+			onSuccess: (data: any) => {
+				if(data && countryBasic.name !== country.name){
+					const newErrors: any = _.cloneDeep(errors);
+					newErrors["name"] = "The Country name you are using already exists";
+					setErrors(newErrors)
+					setIsCountryNameDuplicate(true)
+				} else {
+					setIsCountryNameDuplicate(false)
+				}
+
+				setCheckCountryName(false)
+				setIsCountryNameFocused(false)
+			},
+			enabled: checkCountryName
+		}
+	});
 
 	return (
 		<>
@@ -328,7 +411,7 @@ const CreateConfig = () => {
 									>
 										Delete
 									</Button>
-									<Button size="big" variant={"primary"} onClick={onSubmit}>
+									<Button disabled={errors?.name || isCountryNameFocused} size="big" variant={"primary"} onClick={onSubmit}>
 										Save
 									</Button>
 								</Row>
@@ -349,70 +432,53 @@ const CreateConfig = () => {
 										label="Country Name"
 										height="48px"
 										placeholder={"e.g Indonesia"}
-										defaultValue={country?.currency?.name}
+										defaultValue={country?.name}
 										onChange={(e: any) => setCountryBasic({ ...countryBasic, name: e.target.value })}
 										error={errors?.name}
 										required
-										onFocus={() =>
+										onFocus={() => {
+											setIsCountryNameFocused(true)
 											onFocusRemoveValidation({
 												target: {
 													name: "name",
 												},
 											})
-										}
-									/>
-									<Dropdown
-										label="Country Code"
-										width={"100%"}
-										defaultValue={country?.countryCode}
-										items={COUNTRY_CODE
-											.filter(data => data.includes(searchCountryCode))
-												.map(data => ({
-													value: data,
-													id: data
-												})
-										)}
-										placeholder={"Select"}
-										onSearch={(search: any) => setSearchCountryCode(search)}
-										handleChange={(value: any) => {
-											onFocusRemoveValidation({
-												target: {
-													name: "country",
-												},
-											});
-											setCountryBasic({ ...countryBasic, countryCode: value });
 										}}
+										onBlur={() => {
+											setCheckCountryName(true)
+										}}
+									/>
+									<Input
+										width="100%"
+										name="Country Code"
+										label="Country Code"
+										height="48px"
+										placeholder={"e.g ID"}
+										value={countryBasic.countryCode}
+										onChange={(e: any) => setCountryBasic({ ...countryBasic, countryCode: e.target.value })}
 									/>
 								</Row>
 
 								<Spacer size={20} />
 
 								<Row width="100%" gap="20px" noWrap>
-									<Dropdown
-										label="Phone Code"
-										width={"100%"}
-										defaultValue={country?.phoneCode}
-										items={PHONE_CODE
-											.filter(data => data.includes(searchPhoneCode))
-												.map(data => ({
-													value: data,
-													id: data
-												})
-										)}
-										placeholder={"Select"}
-										onSearch={(search: any) => setSearchPhoneCode(search)}
-										handleChange={(value: any) => {
-											onFocusRemoveValidation({
-												target: {
-													name: "phone",
-												},
-											});
-											setCountryBasic({ ...countryBasic, phoneCode: value });
-										}}
-									/>
+									<Col width="100%">
+										<Label> Phone Code </Label>
+										<Spacer size={4} />
+										<CustomFormInput
+											defaultValue={countryBasic?.phoneCode}
+											style={{ height: 48, width: '100%' }}
+											placeholder={`e.g 62`}
+											size={"large"}
+											width={"100%"}
+											addonBefore={"+"}
+											onChange={(e: any) => setCountryBasic({ ...countryBasic, phoneCode: e.target.value })}
+										/>
+									</Col>
 									<Dropdown
 										label="Currency"
 										width={"100%"}
+										defaultValue={country?.currency?.currencyName}
 										items={currencyList}
 										placeholder={"Select"}
 										onSearch={(search: any) => setSearchCurrency(search)}
@@ -513,12 +579,22 @@ const CreateConfig = () => {
 											</Row>
 										</Row>
 										<Spacer size={8} />
-										<Row gap="15px" alignItems="center">
-											<Text variant="body2">Connect to postal code</Text>
-											<Switch
-												checked={structure.connectPostalCode === "Y"}
-												onChange={() => onChangeStructurePostalCode(index)}
-											/>
+										<Row>
+											<Row alignItems="center">
+												<Text variant="body2">Is City</Text>
+												<Spacer size={8} display="inline-block" />
+												<Checkbox
+													checked={structure.isCity}
+													onChange={() => onChangeStructureIsCity(index)}
+												/>
+											</Row>
+											<Row gap="15px" alignItems="center">
+												<Text variant="body2">Connect to postal code</Text>
+												<Switch
+													checked={structure.connectPostalCode === "Y"}
+													onChange={() => onChangeStructurePostalCode(index)}
+												/>
+											</Row>
 										</Row>
 										<Spacer size={20} />
 										<Divider />
@@ -613,5 +689,30 @@ const Card = styled.div`
 	border-radius: 16px;
 	padding: 16px;
 `;
+
+const CustomFormInput = styled(FormInput)`
+  input {
+    height: 48px !important;
+  }
+	.ant-input {
+		border-radius: 8px;
+		border: 1px solid #AAAAAA;
+	}
+
+	.ant-input-group-addon {
+		width: 72px;
+		border-radius: 8px 0px 0px 8px;
+		border: 1px solid #AAAAAA;
+		border-right: none;
+	}
+`
+
+const Label = styled.div`
+	font-weight: bold;
+	font-size: 16px;
+	line-height: 24px;
+	color: #000000;
+`
+
 
 export default CreateConfig;

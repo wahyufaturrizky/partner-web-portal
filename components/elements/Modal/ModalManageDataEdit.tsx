@@ -446,6 +446,8 @@ export const ModalManageDataEdit = ({
 		updateStructureClone.delete.push(...tempAllStructure.map((data: any) => data.id))
 		updateStructureClone.addNew = newData
 		setUpdateStructure(updateStructureClone)
+
+		onReplaceStructure()
 	};
 
 
