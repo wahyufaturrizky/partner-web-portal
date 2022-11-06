@@ -31,34 +31,10 @@ import { queryClient } from "../../_app";
 import { useForm, Controller } from "react-hook-form";
 import { ICDownload, ICUpload } from "../../../assets/icons";
 import { mdmDownloadService } from "../../../lib/client";
-
-const downloadFile = (params: any) =>
-  mdmDownloadService("/salesman-group/template/download", { params }).then((res) => {
-    let dataUrl = window.URL.createObjectURL(new Blob([res.data]));
-    let tempLink = document.createElement("a");
-    tempLink.href = dataUrl;
-    tempLink.setAttribute("download", `salesman_group_${new Date().getTime()}.xlsx`);
-    tempLink.click();
-  });
-
-const renderConfirmationText = (type: any, data: any) => {
-  switch (type) {
-    case "selection":
-      return data.selectedRowKeys.length > 1
-        ? `Are you sure to delete ${data.selectedRowKeys.length} items ?`
-        : `Are you sure to delete ${
-            data?.salesmanGroupDatas?.data.find((el: any) => el.key === data.selectedRowKeys[0])
-              ?.name
-          } ?`;
-    case "detail":
-      return `Are you sure to delete ${data.name} ?`;
-
-    default:
-      break;
-  }
-};
+import { lang } from "lang";
 
 const SalesmanGroup = () => {
+  const t = localStorage.getItem("lan") || "en-US";
   const pagination = usePagination({
     page: 1,
     itemsPerPage: 20,
@@ -110,8 +86,33 @@ const SalesmanGroup = () => {
     },
   });
 
+  const downloadFile = (params: any) =>
+    mdmDownloadService("/salesman-group/template/download", { params }).then((res) => {
+      let dataUrl = window.URL.createObjectURL(new Blob([res.data]));
+      let tempLink = document.createElement("a");
+      tempLink.href = dataUrl;
+      tempLink.setAttribute("download", `salesman_group_${new Date().getTime()}.xlsx`);
+      tempLink.click();
+    });
+
+  const renderConfirmationText = (type: any, data: any) => {
+    switch (type) {
+      case "selection":
+        return data.selectedRowKeys.length > 1
+          ? `${lang[t].salesmanGroup.areYouSureToDelete} ${data.selectedRowKeys.length} items ?`
+          : `${lang[t].salesmanGroup.areYouSureToDelete} ${
+              data?.salesmanGroupDatas?.data.find((el: any) => el.key === data.selectedRowKeys[0])
+                ?.name
+            } ?`;
+      case "detail":
+        return `${lang[t].salesmanGroup.areYouSureToDelete} ${data.name} ?`;
+
+      default:
+        break;
+    }
+  };
+
   const {
-    data: salesmanGroupData,
     isLoading: isLoadingSalesmanGroup,
     isFetching: isFetchingSalesmanGroup,
     refetch: refetchSalesmanGroup,
@@ -180,7 +181,7 @@ const SalesmanGroup = () => {
                   }}
                   variant="tertiary"
                 >
-                  View Detail
+                  {lang[t].salesmanGroup.tertier.viewDetail}
                 </Button>
               </div>
             ),
@@ -237,19 +238,19 @@ const SalesmanGroup = () => {
 
   const columns = [
     {
-      title: "Salesman Group ID",
+      title: lang[t].salesmanGroup.salesmanGroupId,
       dataIndex: "id",
     },
     {
-      title: "Salesman Group Name",
+      title: lang[t].salesmanGroup.salesmanGroupName,
       dataIndex: "name",
     },
     {
-      title: "Parent",
+      title: lang[t].salesmanGroup.parent,
       dataIndex: "parent",
     },
     {
-      title: "Action",
+      title: lang[t].salesmanGroup.salesmanGroup,
       dataIndex: "action",
       width: "15%",
       align: "left",
@@ -292,14 +293,14 @@ const SalesmanGroup = () => {
   return (
     <>
       <Col>
-        <Text variant={"h4"}>Salesman Group</Text>
+        <Text variant={"h4"}>{lang[t].salesmanGroup.title}</Text>
         <Spacer size={20} />
       </Col>
       <Card>
         <Row justifyContent="space-between">
           <Search
             width="340px"
-            placeholder="Search Salesman Group ID, Name."
+            placeholder={lang[t].salesmanGroup.searchSalesman}
             onChange={(e: any) => {
               setSearch(e.target.value);
             }}
@@ -317,10 +318,10 @@ const SalesmanGroup = () => {
               }
               disabled={rowSelection.selectedRowKeys?.length === 0}
             >
-              Delete
+              {lang[t].salesmanGroup.tertier.delete}
             </Button>
             <DropdownMenu
-              title={"More"}
+              title={lang[t].salesmanGroup.tertier.more}
               buttonVariant={"secondary"}
               buttonSize={"big"}
               textVariant={"button"}
@@ -349,7 +350,7 @@ const SalesmanGroup = () => {
                   value: (
                     <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
                       <ICDownload />
-                      <p style={{ margin: "0" }}>Download Template</p>
+                      <p style={{ margin: "0" }}>{lang[t].salesmanGroup.ghost.downloadTemplate}</p>
                     </div>
                   ),
                 },
@@ -358,7 +359,7 @@ const SalesmanGroup = () => {
                   value: (
                     <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
                       <ICUpload />
-                      <p style={{ margin: "0" }}>Upload Template</p>
+                      <p style={{ margin: "0" }}>{lang[t].salesmanGroup.ghost.uploadTemplate}</p>
                     </div>
                   ),
                 },
@@ -367,7 +368,7 @@ const SalesmanGroup = () => {
                   value: (
                     <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
                       <ICDownload />
-                      <p style={{ margin: "0" }}>Download Data</p>
+                      <p style={{ margin: "0" }}>{lang[t].salesmanGroup.ghost.downloadData}</p>
                     </div>
                   ),
                 },
@@ -381,7 +382,7 @@ const SalesmanGroup = () => {
                 setModalForm({ open: true, typeForm: "create", data: {} });
               }}
             >
-              Create
+              {lang[t].salesmanGroup.primary.create}
             </Button>
           </Row>
         </Row>
@@ -410,9 +411,9 @@ const SalesmanGroup = () => {
           }}
           title={
             modalForm.typeForm === "create"
-              ? "Create Salesman Group"
+              ? lang[t].salesmanGroup.createSalesmanGroup
               : !isLoadingSalesmanGroup || !isFetchingSalesmanGroup
-              ? "Salesman Group"
+              ? lang[t].salesmanGroup.title
               : ""
           }
           footer={null}
@@ -434,7 +435,7 @@ const SalesmanGroup = () => {
                   <Input
                     defaultValue={salesmanGroupFormData?.name ?? ""}
                     width="100%"
-                    label="Salesman Group Name"
+                    label={lang[t].salesmanGroup.salesmanGroupName}
                     height="40px"
                     placeholder={"e.g Motoris"}
                     {...register("name", {
@@ -452,7 +453,9 @@ const SalesmanGroup = () => {
                     render={({ field: { onChange } }) => (
                       <>
                         <span>
-                          <Label style={{ display: "inline" }}>Parent</Label>{" "}
+                          <Label style={{ display: "inline" }}>
+                            {lang[t].salesmanGroup.parent}
+                          </Label>{" "}
                           <span>{"(Optional)"}</span>
                         </span>
 
@@ -493,7 +496,7 @@ const SalesmanGroup = () => {
                   <Input
                     defaultValue={salesmanGroupFormData?.externalCode ?? ""}
                     width="100%"
-                    label="External Code"
+                    label={lang[t].salesmanGroup.externalCode}
                     height="40px"
                     placeholder={""}
                     {...register("external_code", {
@@ -522,13 +525,13 @@ const SalesmanGroup = () => {
                         setSalesmanGroupFormData({});
                       }}
                     >
-                      Cancel
+                      {lang[t].salesmanGroup.tertier.cancel}
                     </Button>
 
                     <Button full onClick={handleSubmit(onSubmit)} variant="primary" size="big">
                       {isLoadingCreateSalesmanGroup || isLoadingUpdateSalesmanGroup
                         ? "Loading..."
-                        : "Save"}
+                        : lang[t].salesmanGroup.primary.save}
                     </Button>
                   </div>
                 </div>
@@ -544,7 +547,7 @@ const SalesmanGroup = () => {
           centered
           visible={isShowDelete.open}
           onCancel={() => setShowDelete({ open: false, type: "", data: {} })}
-          title={"Confirm Delete"}
+          title={lang[t].salesmanGroup.confirmDelete}
           footer={null}
           content={
             <div
@@ -572,7 +575,7 @@ const SalesmanGroup = () => {
                   type="primary"
                   onClick={() => setShowDelete({ open: false, type: "", data: {} })}
                 >
-                  Cancel
+                  {lang[t].salesmanGroup.tertier.cancel}
                 </Button>
                 <Button
                   variant="primary"
