@@ -150,6 +150,10 @@ const CreateConfig = () => {
 		if(isFromUploadManageData){
 			delete data.name;
 			updateCountry(data);
+			setUpdateAllStructure({
+				addNew: {},
+				delete: {}
+			})
 		} else {
 			if(countryBasic.countryCode){
 				data.countryCode = countryBasic.countryCode

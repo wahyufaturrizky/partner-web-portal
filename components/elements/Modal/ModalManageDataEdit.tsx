@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
 	Button,
 	Spacer,
@@ -386,6 +386,7 @@ export const ModalManageDataEdit = ({
 	};
 
 	const [showUploadTemplate, setShowUploadTemplate] = useState(false);
+	const [upload, setUploadData] = useState(false);
 
 	const onUploadStructure = (data: any) => {
 		const newData: any = [];
@@ -394,13 +395,20 @@ export const ModalManageDataEdit = ({
 				let newEntries = Object.entries(data);
 				const currentLevel = newEntries[level];
 				const currentData = currentLevel[1];
-				const currentParentLevel = newEntries[level - 1];
-				const currentParentIds = newEntries[level - 2];
+				const currentParentLevel = newEntries[level - 2];
+				const currentParentIds = newEntries[level - 1];
+
 				let currentParentData;
-				let currentParentId;
+				let currentParentId: any;
 				if (currentParentLevel) {
 					currentParentData = currentParentLevel[1];
 					currentParentId = currentParentIds[1];
+
+					if(isNaN(currentParentId)){
+						let temp = currentParentId;
+						currentParentId = currentParentData;
+						currentParentData = temp
+					}
 				}
 
 				const newSingleData: any = {
@@ -447,8 +455,16 @@ export const ModalManageDataEdit = ({
 		updateStructureClone.addNew = newData
 		setUpdateStructure(updateStructureClone)
 
-		onReplaceStructure()
+		setUploadData(true)
 	};
+
+	useEffect(() => {
+		if(upload){
+			onReplaceStructure()
+		} else {
+			setUploadData(false);
+		}
+	}, [upload])
 
 
 	const donwloadStructure = async(value: any) => {
