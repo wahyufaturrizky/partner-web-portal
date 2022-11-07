@@ -311,6 +311,30 @@ export const lang = {
         },
       },
     },
+    jobPosition: {
+      tertier: {
+        viewDetail: "View Detail",
+        delete: "Delete",
+        cancel: "Cancel",
+      },
+      jobPositionId: "Job Position ID",
+      jobPositionName: "Job Position Name",
+      jobPositionName: "Job Position Name",
+      action: "Action",
+      title: "Job Position",
+      palceholderSearch: "Search Job Position ID, Name.",
+      ghost: {
+        downloadTemplate: "Download Template",
+        uploadTemplate: "Upload Template",
+        downloadData: "Download Data",
+      },
+      primary: {
+        create: "Create",
+      },
+      createJobPosition: "Create Job Position",
+      confirmDelete: "Confirm Delete",
+      areYouSureToDelete: "Are you sure to delete",
+    },
   },
   "id-ID": {
     productGroup: {
@@ -631,6 +655,29 @@ export const lang = {
           },
         },
       },
+    },
+    jobPosition: {
+      tertier: {
+        viewDetail: "Lihat Detail",
+        delete: "Menghapus",
+        cancel: "Membatalkan",
+      },
+      jobPositionId: "ID Posisi Pekerjaan",
+      jobPositionName: "Nama Posisi Pekerjaan",
+      action: "Tindakan",
+      title: "Posisi pekerjaan",
+      palceholderSearch: "Search Job Position ID, Name.",
+      ghost: {
+        downloadTemplate: "Unduh Template",
+        uploadTemplate: "Unggah Template",
+        downloadData: "Unduh Data",
+      },
+      primary: {
+        create: "Membuat",
+      },
+      createJobPosition: "Buat Posisi Pekerjaan",
+      confirmDelete: "Confirm Delete",
+      areYouSureToDelete: "Apakah Anda yakin untuk menghapus?",
     },
   },
 };

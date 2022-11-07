@@ -27,33 +27,10 @@ import { queryClient } from "../_app";
 import { useForm } from "react-hook-form";
 import { ICDownload, ICUpload } from "../../assets/icons";
 import { mdmDownloadService } from "../../lib/client";
-
-const downloadFile = (params: any) =>
-  mdmDownloadService("/job-position/download", { params }).then((res) => {
-    let dataUrl = window.URL.createObjectURL(new Blob([res.data]));
-    let tempLink = document.createElement("a");
-    tempLink.href = dataUrl;
-    tempLink.setAttribute("download", `job_position_${new Date().getTime()}.xlsx`);
-    tempLink.click();
-  });
-
-const renderConfirmationText = (type: any, data: any) => {
-  switch (type) {
-    case "selection":
-      return data.selectedRowKeys.length > 1
-        ? `Are you sure to delete ${data.selectedRowKeys.length} items ?`
-        : `Are you sure to delete ${
-            data?.jobPositionData?.data.find((el: any) => el.key === data.selectedRowKeys[0])?.name
-          } ?`;
-    case "detail":
-      return `Are you sure to delete ${data.name} ?`;
-
-    default:
-      break;
-  }
-};
+import { lang } from "lang";
 
 const JobPosition = () => {
+  const t = localStorage.getItem("lan") || "en-US";
   const pagination = usePagination({
     page: 1,
     itemsPerPage: 20,
@@ -75,6 +52,32 @@ const JobPosition = () => {
   const debounceSearch = useDebounce(search, 1000);
 
   const { register, handleSubmit } = useForm();
+
+  const downloadFile = (params: any) =>
+    mdmDownloadService("/job-position/download", { params }).then((res) => {
+      let dataUrl = window.URL.createObjectURL(new Blob([res.data]));
+      let tempLink = document.createElement("a");
+      tempLink.href = dataUrl;
+      tempLink.setAttribute("download", `job_position_${new Date().getTime()}.xlsx`);
+      tempLink.click();
+    });
+
+  const renderConfirmationText = (type: any, data: any) => {
+    switch (type) {
+      case "selection":
+        return data.selectedRowKeys.length > 1
+          ? `${lang[t].jobPosition.areYouSureToDelete} ${data.selectedRowKeys.length} items ?`
+          : `${lang[t].jobPosition.areYouSureToDelete} ${
+              data?.jobPositionData?.data.find((el: any) => el.key === data.selectedRowKeys[0])
+                ?.name
+            } ?`;
+      case "detail":
+        return `${lang[t].jobPosition.areYouSureToDelete} ${data.name} ?`;
+
+      default:
+        break;
+    }
+  };
 
   const {
     data: jobPositionsData,
@@ -106,7 +109,7 @@ const JobPosition = () => {
                   }}
                   variant="tertiary"
                 >
-                  View Detail
+                  {lang[t].jobPosition.tertier.viewDetail}
                 </Button>
               </div>
             ),
@@ -167,15 +170,15 @@ const JobPosition = () => {
 
   const columns = [
     {
-      title: "Job Position ID",
+      title: lang[t].jobPosition.tertier.viewDetail,
       dataIndex: "id",
     },
     {
-      title: "Job Position Name",
+      title: lang[t].jobPosition.jobPositionName,
       dataIndex: "name",
     },
     {
-      title: "Action",
+      title: lang[t].jobPosition.action,
       dataIndex: "action",
       width: "15%",
       align: "left",
@@ -218,14 +221,14 @@ const JobPosition = () => {
   return (
     <>
       <Col>
-        <Text variant={"h4"}>Job Position</Text>
+        <Text variant={"h4"}>{lang[t].jobPosition.title}</Text>
         <Spacer size={20} />
       </Col>
       <Card>
         <Row justifyContent="space-between">
           <Search
             width="340px"
-            placeholder="Search Job Position ID, Name."
+            placeholder={lang[t].jobPosition.palceholderSearch}
             onChange={(e: any) => {
               setSearch(e.target.value);
             }}
@@ -243,7 +246,7 @@ const JobPosition = () => {
               }
               disabled={rowSelection.selectedRowKeys?.length === 0}
             >
-              Delete
+              {lang[t].jobPosition.tertier.delete}
             </Button>
             <DropdownMenu
               title={"More"}
@@ -275,7 +278,7 @@ const JobPosition = () => {
                   value: (
                     <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
                       <ICDownload />
-                      <p style={{ margin: "0" }}>Download Template</p>
+                      <p style={{ margin: "0" }}>{lang[t].jobPosition.ghost.downloadTemplate}</p>
                     </div>
                   ),
                 },
@@ -284,7 +287,7 @@ const JobPosition = () => {
                   value: (
                     <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
                       <ICUpload />
-                      <p style={{ margin: "0" }}>Upload Template</p>
+                      <p style={{ margin: "0" }}>{lang[t].jobPosition.ghost.uploadTemplate}</p>
                     </div>
                   ),
                 },
@@ -293,7 +296,7 @@ const JobPosition = () => {
                   value: (
                     <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
                       <ICDownload />
-                      <p style={{ margin: "0" }}>Download Data</p>
+                      <p style={{ margin: "0" }}>{lang[t].jobPosition.ghost.downloadData}</p>
                     </div>
                   ),
                 },
@@ -304,7 +307,7 @@ const JobPosition = () => {
               variant="primary"
               onClick={() => setModalForm({ open: true, typeForm: "create", data: {} })}
             >
-              Create
+              {lang[t].jobPosition.primary.create}
             </Button>
           </Row>
         </Row>
@@ -328,7 +331,11 @@ const JobPosition = () => {
           centered
           visible={modalForm.open}
           onCancel={() => setModalForm({ open: false, data: {}, typeForm: "" })}
-          title={modalForm.typeForm === "create" ? "Create Job Position" : modalForm.data?.name}
+          title={
+            modalForm.typeForm === "create"
+              ? lang[t].jobPosition.createJobPosition
+              : modalForm.data?.name
+          }
           footer={null}
           content={
             <div
@@ -342,7 +349,7 @@ const JobPosition = () => {
               <Input
                 defaultValue={modalForm.data?.name}
                 width="100%"
-                label="Job Position"
+                label={lang[t].jobPosition.title}
                 height="48px"
                 placeholder={"e.g Staff"}
                 {...register("name", {
@@ -367,7 +374,7 @@ const JobPosition = () => {
                     type="primary"
                     onClick={() => setModalForm({ open: false, data: {}, typeForm: "" })}
                   >
-                    Cancel
+                    {lang[t].jobPosition.tertier.cancel}
                   </Button>
                 ) : (
                   <Button
@@ -380,7 +387,7 @@ const JobPosition = () => {
                       setShowDelete({ open: true, type: "detail", data: modalForm.data });
                     }}
                   >
-                    Delete
+                    {lang[t].jobPosition.tertier.delete}
                   </Button>
                 )}
 
@@ -399,7 +406,7 @@ const JobPosition = () => {
           centered
           visible={isShowDelete.open}
           onCancel={() => setShowDelete({ open: false, type: "", data: {} })}
-          title={"Confirm Delete"}
+          title={lang[t].jobPosition.confirmDelete}
           footer={null}
           content={
             <div
@@ -427,7 +434,7 @@ const JobPosition = () => {
                   type="primary"
                   onClick={() => setShowDelete({ open: false, type: "", data: {} })}
                 >
-                  Cancel
+                  {lang[t].jobPosition.tertier.cancel}
                 </Button>
                 <Button
                   variant="primary"
