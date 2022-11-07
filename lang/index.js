@@ -223,6 +223,55 @@ export const lang = {
         },
       },
     },
+    userList: {
+      list: {
+        headerTitle: "User List",
+        button: {
+          create: "Create",
+          more: "More",
+          delete: "Delete",
+          detail: "View Detail",
+          save: "Save",
+          cancel: "Cancel",
+          download: "Download Template",
+          upload: "Upload Template",
+        },
+        field: {
+          searchBar: "Search UserList, User List ID,User List Name",
+        },
+        table: {
+          employeeId: "Employee ID",
+          name: "Name",
+          status: "Status",
+          action: "Action",
+        },
+      },
+      create: {
+        template: {
+          headerTitle: "Create User",
+          button: {
+            active: "Active",
+            inActive: "Inactive",
+          },
+          accordion: {
+            employeeInformation : "Employee Information",
+            generalInformation : "General Information",
+            companyAccess : "Company Access",
+          },
+          field: {
+            title : "Title",
+            fullname : "Fullname",
+            associatedEmployee : "Associated Employee",
+            phonenumber : "Phone Number",
+            email : "Email",
+            timezone : "Timezone",
+            language : "Language",
+            password : "Password",
+            confirmPassword : "Confirm Password",
+          },
+        },
+      },
+    },
   },
   "id-ID": {
     productGroup: {
@@ -447,6 +496,55 @@ export const lang = {
       detail: {
         button: {
           save: "Save",
+        },
+      },
+    },
+    userList: {
+      list: {
+        headerTitle: "Daftar Pengguna",
+        button: {
+          create: "Membuat",
+          more: "Lebih",
+          delete: "Menghapus",
+          detail: "Lihat Detail",
+          save: "Menyimpan",
+          cancel: "Membatalkan",
+          download: "Unduh Template",
+          upload: "Unggah Template",
+        },
+        field: {
+          searchBar: "Cari Daftar Pengguna, ID Daftar Pengguna, Nama Daftar Pengguna",
+        },
+        table: {
+          employeeId: "ID Pengguna",
+          name: "Nama",
+          status: "Status",
+          action: "Tindakan",
+        },
+      },
+      create: {
+        template: {
+          headerTitle: "Buat User",
+          button: {
+            active: "Aktif",
+            inActive: "Tidak Aktif",
+          },
+          accordion: {
+            employeeInformation : "Informasi User",
+            generalInformation : "Informasi Umum",
+            companyAccess : "Akses Perusahaan",
+          },
+          field: {
+            title : "Panggilan",
+            fullname : "Nama Lengkap",
+            associatedEmployee : "Karyawan Terkait",
+            phonenumber : "Nomor Telepon",
+            email : "Surel",
+            timezone : "Zona Waktu",
+            language : "Bahasa",
+            password : "Kata Sandi",
+            confirmPassword : "Konfirmasi Kata Sandi",
+          },
         },
       },
     },
