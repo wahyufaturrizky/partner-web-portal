@@ -15,6 +15,7 @@ import { useLanguages } from "../../hooks/languages/useLanguages";
 import { useTimezoneInfiniteLists } from "hooks/mdm/branch/useBranch";
 import useDebounce from "lib/useDebounce";
 import { useEmployeeInfiniteLists } from "hooks/mdm/employee-list/useEmployeeListMDM";
+import { lang } from "lang";
 
 const phoneRegex = /^(\+?\d{0,4})?\s?-?\s?(\(?\d{3}\)?)\s?-?\s?(\(?\d{3}\)?)\s?-?\s?(\(?\d{4}\)?)?$/
 const schema = yup
@@ -39,6 +40,7 @@ const personTitle = [{
 const UpdateUserConfig: any = () => {
     const router = useRouter();
     const { user_id } = router.query;
+	const t = localStorage.getItem("lan") || "en-US";
 
 	const [defaultValues, setDefaultValues] = useState({})
 
@@ -180,8 +182,8 @@ const UpdateUserConfig: any = () => {
 	const language = languageData?.rows?.map((row) => ({ id: row.id, value: row.name })) ?? [];
 
 	const active_status = [
-		{ id: "ACTIVE", value: '<div key="1" style="color:green;">Active</div>' },
-		{ id: "INACTIVE", value: '<div key="2" style="color:red;">Non Active</div>' },
+		{ id: "ACTIVE", value: `<div key="1" style="color:green;">${lang[t].userList.create.template.button.active}</div>` },
+		{ id: "INACTIVE", value: `<div key="2" style="color:red;">${lang[t].userList.create.template.button.inActive}</div>` },
 	];
 
 	const onSubmit = (data: any) => {
@@ -227,10 +229,10 @@ const UpdateUserConfig: any = () => {
 						<Row>
 							<Row gap="16px">
 								<Button size="big" variant={"tertiary"} onClick={() => deleteUser({ids: [user_id]})}>
-									Delete
+									{lang[t].userList.list.button.delete}
 								</Button>
 								<Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
-									Save
+									{lang[t].userList.list.button.save}
 								</Button>
 							</Row>
 						</Row>
@@ -241,12 +243,12 @@ const UpdateUserConfig: any = () => {
 
 				<Accordion>
 					<Accordion.Item key={1}>
-						<Accordion.Header variant="blue">Employee Information</Accordion.Header>
+						<Accordion.Header variant="blue">{lang[t].userList.create.template.accordion.employeeInformation}</Accordion.Header>
 						<Accordion.Body>
 								<Row width="100%" noWrap>
 									<Col width="8%">
 										<Dropdown
-											label="Title"
+											label={lang[t].userList.create.template.field.title}
 											width={"100%"}
 											items={personTitle}
 											noSearch
@@ -260,7 +262,7 @@ const UpdateUserConfig: any = () => {
 									<Col width="41%">
 										<Input
 											width="180%"
-											label="Full Name"
+											label={lang[t].userList.create.template.field.fullname}
 											height="48px"
 											required
 											error={errors?.fullname?.message}
@@ -277,7 +279,7 @@ const UpdateUserConfig: any = () => {
 											name="employee_id"
 											render={({ field: { onChange } }) => (
 												<>
-												<Label>Associated Employee</Label>
+												<Label>{lang[t].userList.create.template.field.associatedEmployee}</Label>
 												<Spacer size={4}/>
 												<FormSelect
 													style={{ width: "100%"}}
@@ -324,13 +326,13 @@ const UpdateUserConfig: any = () => {
 
 				<Accordion>
 					<Accordion.Item key={1}>
-						<Accordion.Header variant="blue">General Information</Accordion.Header>
+					<Accordion.Header variant="blue">{lang[t].userList.create.template.accordion.generalInformation}</Accordion.Header>
 						<Accordion.Body>
 							<Col width="100%" gap="20px">
 								<Row width="100%" gap="20px" noWrap>
 									<Input
 										width="100%"
-										label="Email"
+										label={lang[t].userList.create.template.field.email}
 										height="48px"
 										required
 										defaultValue={defaultValues?.email}
@@ -340,7 +342,7 @@ const UpdateUserConfig: any = () => {
 									/>
 									<Input
 										width="100%"
-										label="Phone Number"
+										label={lang[t].userList.create.template.field.phonenumber}
 										height="48px"
 										required
 										defaultValue={defaultValues?.phone_number}
@@ -356,7 +358,7 @@ const UpdateUserConfig: any = () => {
 									name="timezone"
 									render={({ field: { onChange } }) => (
 										<>
-										<Label>Timezone</Label>
+										<Label>{lang[t].userList.create.template.field.timezone}</Label>
 										<Spacer size={4}/>
 										<FormSelect
 											style={{ width: "100%"}}
@@ -391,7 +393,7 @@ const UpdateUserConfig: any = () => {
 									/>
 								</Col>
 									<Dropdown
-										label="Language"
+										label={lang[t].userList.create.template.field.language}
 										items={language}
 										width={"100%"}
 										defaultValue={defaultValues?.language}

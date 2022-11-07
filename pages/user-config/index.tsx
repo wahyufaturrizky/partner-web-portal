@@ -19,9 +19,11 @@ import {
 import { ModalDeleteConfirmation } from "../../components/elements/Modal/ModalConfirmationDelete";
 import { useUsers, useDeleteUser } from "../../hooks/user-config/useUser";
 import { STATUS_APPROVAL_VARIANT, STATUS_APPROVAL_TEXT } from "../../utils/constant";
+import { lang } from "lang";
 
 const UserConfigUser: any = () => {
 	const router = useRouter();
+	const t = localStorage.getItem("lan") || "en-US";
 
 	const pagination = usePagination({
 		page: 1,
@@ -64,22 +66,22 @@ const UserConfigUser: any = () => {
 
 	const columns = [
 		{
-			title: "Employee ID",
+			title: lang[t].userList.list.table.employeeId,
 			dataIndex: "key",
 		},
 		{
-			title: "Name",
+			title: lang[t].userList.list.table.name,
 			dataIndex: "name",
 		},
 		{
-			title: "Status",
+			title: lang[t].userList.list.table.status,
 			dataIndex: "status",
 			render: (text: any) => (
 				<Lozenge variant={STATUS_APPROVAL_VARIANT[text]}>{STATUS_APPROVAL_TEXT[text]}</Lozenge>
 			),
 		},
 		{
-			title: "Action",
+			title: lang[t].userList.list.table.action,
 			dataIndex: "action",
 			width: "20%",
 		},
@@ -99,7 +101,7 @@ const UserConfigUser: any = () => {
 					onClick={() => router.push(`/user-config/${user.id}`)}
 					variant="tertiary"
 				>
-					View Detail
+					{lang[t].userList.list.button.detail}
 				</Button>
 			),
 		});
@@ -120,13 +122,13 @@ const UserConfigUser: any = () => {
 	return (
 		<>
 			<Col>
-				<Text variant={"h4"}>User List</Text>
+				<Text variant={"h4"}>{lang[t].userList.list.headerTitle}</Text>
 				<Spacer size={20} />
 				<Card>
 					<Row justifyContent="space-between">
 						<Search
 							width="380px"
-							placeholder="Search Name, Role, Status"
+							placeholder={lang[t].userList.list.field.searchBar}
 							onChange={(e: any) => setSearch(e.target.value)}
 						/>
 						<Row gap="16px">
@@ -136,10 +138,10 @@ const UserConfigUser: any = () => {
 								onClick={() => setModalDelete({ open: true })}
 								disabled={rowSelection.selectedRowKeys?.length === 0}
 							>
-								Delete
+								{lang[t].userList.list.button.delete}
 							</Button>
 							<DropdownMenu
-								title="More"
+								title={lang[t].userList.list.button.more}
 								buttonVariant="secondary"
 								buttonSize="big"
 								textVariant="button"
@@ -150,7 +152,7 @@ const UserConfigUser: any = () => {
 									value: (
 										<div style={{ display: "flex", alignItems: "center", gap: 5 }}>
 											<DownloadSvg />
-											<p style={{ margin: "0" }}>Download Template</p>
+											<p style={{ margin: "0" }}>{lang[t].userList.list.button.download}</p>
 										</div>
 									),
 								},
@@ -159,7 +161,7 @@ const UserConfigUser: any = () => {
 									value: (
 										<div style={{ display: "flex", alignItems: "center", gap: 5 }}>
 											<UploadSvg />
-											<p style={{ margin: "0" }}>Upload Template</p>
+											<p style={{ margin: "0" }}>{lang[t].userList.list.button.upload}</p>
 										</div>
 									),
 								}]}
@@ -169,7 +171,7 @@ const UserConfigUser: any = () => {
 								variant={"primary"}
 								onClick={() => router.push("/user-config/create")}
 							>
-								Create
+								{lang[t].userList.list.button.create}
 							</Button>
 						</Row>
 					</Row>
