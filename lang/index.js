@@ -385,6 +385,13 @@ export const lang = {
       confirmDelete: "Confirm Delete",
       yes: "Yes",
     },
+    trainingType: {
+      tertier: {
+        viewDetail: "View Detail",
+      },
+      trainingTypeId: "Training Type ID",
+      trainingTypeName: "Training Type Name",
+    },
   },
   "id-ID": {
     productGroup: {
@@ -775,6 +782,13 @@ export const lang = {
       },
       confirmDelete: "Konfirmasi Hapus",
       yes: "Iya",
+    },
+    trainingType: {
+      tertier: {
+        viewDetail: "Lihat Detail",
+      },
+      trainingTypeId: "ID Jenis Pelatihan",
+      trainingTypeName: "Nama Jenis Pelatihan",
     },
   },
 };

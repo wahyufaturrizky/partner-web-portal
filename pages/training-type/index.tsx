@@ -27,6 +27,7 @@ import { queryClient } from "../_app";
 import { useForm } from "react-hook-form";
 import { ICDownload, ICUpload } from "../../assets/icons";
 import { mdmDownloadService } from "../../lib/client";
+import { lang } from "lang";
 
 const downloadFile = (params: any) =>
   mdmDownloadService("/training-type/download", { params }).then((res) => {
@@ -54,6 +55,7 @@ const renderConfirmationText = (type: any, data: any) => {
 };
 
 const TrainingType = () => {
+  const t = localStorage.getItem("lan") || "en-US";
   const pagination = usePagination({
     page: 1,
     itemsPerPage: 20,
@@ -106,7 +108,7 @@ const TrainingType = () => {
                   }}
                   variant="tertiary"
                 >
-                  View Detail
+                  {lang[t].trainingType.tertier.viewDetail}
                 </Button>
               </div>
             ),
@@ -164,7 +166,7 @@ const TrainingType = () => {
 
   const columns = [
     {
-      title: "Training Type ID",
+      title: lang[t].trainingType.trainingTypeId,
       dataIndex: "id",
     },
     {
