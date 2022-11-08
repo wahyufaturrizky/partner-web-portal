@@ -218,8 +218,8 @@ const JobPosition = () => {
       <Card>
         <Row justifyContent="space-between">
           <Search
-            width="340px"
-            placeholder="Search Department ID, Name."
+            width="360px"
+            placeholder="Search Department ID,  Department Name"
             onChange={(e: any) => {
               setSearch(e.target.value);
             }}

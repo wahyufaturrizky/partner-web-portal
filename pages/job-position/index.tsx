@@ -227,7 +227,7 @@ const JobPosition = () => {
       <Card>
         <Row justifyContent="space-between">
           <Search
-            width="340px"
+            width="360px"
             placeholder={lang[t].jobPosition.palceholderSearch}
             onChange={(e: any) => {
               setSearch(e.target.value);

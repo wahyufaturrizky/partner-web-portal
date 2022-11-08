@@ -218,8 +218,8 @@ const JobPosition = () => {
       <Card>
         <Row justifyContent="space-between">
           <Search
-            width="340px"
-            placeholder="Search Job Level ID, Name."
+            width="360px"
+            placeholder="Search Job Level ID,  Job Level Name"
             onChange={(e: any) => {
               setSearch(e.target.value);
             }}
@@ -336,7 +336,7 @@ const JobPosition = () => {
               <Input
                 defaultValue={modalForm.data?.name}
                 width="100%"
-                label="Job Level"
+                label="Job Level Name"
                 height="48px"
                 placeholder={"e.g Manager"}
                 {...register("name", {
