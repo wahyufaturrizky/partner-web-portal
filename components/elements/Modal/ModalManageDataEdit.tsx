@@ -390,17 +390,18 @@ export const ModalManageDataEdit = ({
 
 	const onUploadStructure = (data: any) => {
 		const newData: any = [];
+		const errors = [];
 		if (level > 1) {
 			data.forEach((data: any) => {
 				let newEntries = Object.entries(data);
-				const currentLevel = newEntries[level];
+				const currentLevel = newEntries[newEntries.length - 1];
 				const currentData = currentLevel?.[1];
 				if(!currentData){
-					console.log("error")
+					errors.push(currentLevel)
 					return;
 				}
-				const currentParentLevel = newEntries[level - 2];
-				const currentParentIds = newEntries[level - 1];
+				const currentParentLevel = newEntries[newEntries.length - 2];
+				const currentParentIds = newEntries[newEntries.length - 1];
 
 				let currentParentData;
 				let currentParentId: any;
@@ -433,7 +434,7 @@ export const ModalManageDataEdit = ({
 		} else {
 			data.forEach((data: any) => {
 				let newEntries = Object.entries(data);
-				const currentLevel = newEntries[level - 1];
+				const currentLevel = newEntries[newEntries.length - 1];
 				const currentData = currentLevel[1];
 
 				const newSingleData = {
@@ -446,6 +447,8 @@ export const ModalManageDataEdit = ({
 				newData.push(newSingleData);
 			});
 		}
+
+		console.log("errors", errors)
 
 		const tempAddClone: any = _.cloneDeep(tempAdd);
 		tempAddClone.push(newData);
