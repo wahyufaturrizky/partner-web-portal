@@ -31,6 +31,8 @@ import { queryClient } from "../_app";
 import { mdmDownloadService } from "../../lib/client";
 import { useRouter } from "next/router";
 import ModalCalculation from "components/elements/Modal/ModalCalculation";
+import { useCalculations } from "hooks/calculation-config/useCalculation";
+import IDR_formatter from "hooks/number-formatter/useNumberFormatter";
 
 const downloadFile = (params: any) =>
   mdmDownloadService("/branch/download", { params }).then((res) => {
@@ -59,6 +61,7 @@ const renderConfirmationText = (type: any, data: any) => {
 
 const Calculation = () => {
   const router = useRouter();
+
   const pagination = usePagination({
     page: 1,
     itemsPerPage: 20,
@@ -68,16 +71,19 @@ const Calculation = () => {
     totalItems: 100,
   });
 
-  const { register, control, handleSubmit } = useForm();
+  const { register, control, handleSubmit, setValue } = useForm();
 
   const [search, setSearch] = useState("");
   const [isShowDelete, setShowDelete] = useState({ open: false, type: "selection", data: {} });
   const [isShowCreate, setShowCreate] = useState({ open: false, title: ''})
+  const [isShowEdit, setShowEdit] = useState({ open: false, title: '', data: {} })
   const [isShowUpload, setShowUpload] = useState(false);
 
   const [paymentButton, setPaymentButton] = useState({
-    monthly: true,
-    yearly: false
+    oneMonth: true,
+    threeMonths: false,
+    sixMonths: false,
+    twelveMonths: false,
   })
 
   const [modalForm, setModalForm] = useState({
@@ -85,30 +91,39 @@ const Calculation = () => {
     data: {},
     typeForm: "create",
   });
+
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const debounceSearch = useDebounce(search, 1000);
 
   const {
-    data: branchData,
-    isLoading: isLoadingBranch,
-    isFetching: isFetchingBranch,
-  } = useBranchList({
+    data: calculationData,
+    isLoading: isLoadingCalculation,
+    isFetching: isFetchingCalculation,
+  } = useCalculations({
     query: {
       search: debounceSearch,
       page: pagination.page,
       limit: pagination.itemsPerPage,
-      company_id: "KSNI"
+      // company_id: "KSNI"
     },
     options: {
       onSuccess: (data: any) => {
         pagination.setTotalItems(data.totalRow);
       },
       select: (data: any) => {
+        let payment = 0
         const mappedData = data?.rows?.map((element: any) => {
+            payment += +element?.totalPayment
             return {
-              key: element.branchId,
-              id: element.branchId,
-              branchName: element.name,
+              key: element.id,
+              id: element.id,
+              role_name: element?.userRole?.name,
+              total_user: element?.totalUser,
+              menu_name: element?.menus?.map((e: { name: string; }) => e?.name)?.slice()?.join(', '),
+              company_name: element?.company?.name,
+              branch : element.branch,
+              fee: 'IDR ' + IDR_formatter.format(element?.fee?.split('.')[0])?.split('Rp')[1],
+              total_fee: 'IDR ' + IDR_formatter.format(element?.totalFee?.split('.')[0])?.split('Rp')[1],
               action: (
                 <div style={{ display: "flex", justifyContent: "left" }}>
                     <EditOutlined
@@ -122,6 +137,7 @@ const Calculation = () => {
                   }}
                   onClick={() => {
                     console.log('masuk edit')
+                    setShowEdit({open: true, title: "Edit Roles, Menu, etc", data: element})
                   }}
                 />
                 <Spacer size={5} />
@@ -142,7 +158,11 @@ const Calculation = () => {
               ),
             };
           });
-        return { data: mappedData, totalRow: data.totalRow };
+
+          paymentButton?.threeMonths? payment = payment - payment * 0.1 :
+          paymentButton?.sixMonths? payment = payment - payment * 0.25 :
+          paymentButton?.twelveMonths? payment = payment - payment * 0.5 : payment
+        return { data: mappedData, totalRow: data.totalRow, payment };
       },
     },
   });
@@ -181,31 +201,31 @@ const Calculation = () => {
     },
     {
       title: "Role Name",
-      dataIndex: "id",
+      dataIndex: "role_name",
     },
     {
       title: "Total User",
-      dataIndex: "branchName",
+      dataIndex: "total_user",
     },
     {
       title: "Menu Name",
-      dataIndex: "id",
+      dataIndex: "menu_name",
     },
     {
       title: "Company",
-      dataIndex: "branchName",
+      dataIndex: "company_name",
     },
     {
       title: "Branch",
-      dataIndex: "id",
+      dataIndex: "branch",
     },
     {
       title: "Fee",
-      dataIndex: "branchName",
+      dataIndex: "fee",
     },
     {
       title: "Total Fee",
-      dataIndex: "branchName",
+      dataIndex: "total_fee",
     },
     
   ];
@@ -224,7 +244,6 @@ const Calculation = () => {
 
     uploadFileBranch(formData);
   };
-  console.log(isShowCreate, "<<<<<<payment")
 
   return (
     <>
@@ -235,29 +254,70 @@ const Calculation = () => {
       <Card>
         <Text variant={"headingLarge"} style={{color: 'rgb(33, 145, 155)'}}>Choose the plan that's right for you</Text>
         <Spacer size={20} />
-
         <Row>
             <Button size="big" variant="tertiary"
                 style={{ 
-                    color: paymentButton.monthly? '#BC006F': '#DDDDDD',
-                    border: paymentButton.monthly? '2px solid #EB008B': '2px solid #DDDDDD',
-                    width: '20%',
+                    color: paymentButton.oneMonth? '#BC006F': '#DDDDDD',
+                    border: paymentButton.oneMonth? '2px solid #EB008B': '2px solid #DDDDDD',
+                    width: '23.5%',
                     borderRadius: '5px',
                 }}
-                onClick={() => setPaymentButton({monthly: true, yearly: false})}>
-              Monthly
+                onClick={() => setPaymentButton({
+                  oneMonth: true, 
+                  threeMonths: false,
+                  sixMonths: false,
+                  twelveMonths: false,
+                  })}>
+              1 Month 
+            </Button>
+            <Spacer size={20} />
+            <Button size="big" variant="tertiary"
+                style={{ 
+                    color: paymentButton.threeMonths? '#BC006F': '#DDDDDD',
+                    border: paymentButton.threeMonths? '2px solid #EB008B': '2px solid #DDDDDD',
+                    width: '23.5%',
+                    borderRadius: '5px',
+                }}
+                onClick={() => setPaymentButton({
+                  oneMonth: false, 
+                  threeMonths: true,
+                  sixMonths: false,
+                  twelveMonths: false,
+                })}>
+              3 Months <PlanSaveText>Save 10%</PlanSaveText>
+            </Button>
+            <Spacer size={20} />
+            <Button size="big" variant="tertiary"
+                style={{ 
+                    color: paymentButton.sixMonths? '#BC006F': '#DDDDDD',
+                    border: paymentButton.sixMonths? '2px solid #EB008B': '2px solid #DDDDDD',
+                    width: '23.5%',
+                    borderRadius: '5px',
+                }}
+                onClick={() => setPaymentButton({
+                  oneMonth: false, 
+                  threeMonths: false,
+                  sixMonths: true,
+                  twelveMonths: false,
+                })}>
+              6 Months <PlanSaveText>Save 25%</PlanSaveText>
             </Button>
             <Spacer size={20} />
 
             <Button size="big" variant="tertiary" 
                 style={{ 
-                    color: paymentButton.yearly? '#BC006F': '#DDDDDD',
-                    border: paymentButton.yearly? '2px solid #EB008B': '2px solid #DDDDDD',
-                    width: '20%',
+                    color: paymentButton.twelveMonths? '#BC006F': '#DDDDDD',
+                    border: paymentButton.twelveMonths? '2px solid #EB008B': '2px solid #DDDDDD',
+                    width: '23.5%',
                     borderRadius: '5px',
                 }}
-                onClick={() => setPaymentButton({monthly: false, yearly: true})}>
-              Yearly
+                onClick={() => setPaymentButton({
+                  oneMonth: false, 
+                  threeMonths: false,
+                  sixMonths: false,
+                  twelveMonths: true,
+                })}>
+              12 Months <PlanSaveBestValueText>Best Value Save 50%</PlanSaveBestValueText>
             </Button>
           
         </Row>
@@ -290,9 +350,9 @@ const Calculation = () => {
 
         <Col gap={"60px"}>
           <Table
-            loading={isLoadingBranch || isFetchingBranch}
+            loading={isLoadingCalculation || isFetchingCalculation}
             columns={columns}
-            data={branchData?.data}
+            data={calculationData?.data}
             // rowSelection={rowSelection}
           />
           <Pagination pagination={pagination} />
@@ -323,7 +383,7 @@ const Calculation = () => {
             }}>
                 <Text variant={"subHeading"}>Total Payment</Text>
                 <Spacer size={10} />
-                <Text variant={"headingLarge"}>IDR 550.000</Text>
+                <Text variant={"headingLarge"}>IDR {IDR_formatter.format(calculationData?.payment)?.split('Rp')[1]}/mo</Text>
             </div>
         </Col>
         <Spacer size={20} />
@@ -423,4 +483,25 @@ const Separator = styled.div`
   border-bottom: 1px dashed #aaaaaa;
 `;
 
+const PlanSaveText = styled.p`
+  background: #ebebeb;
+  padding: .1rem .2rem;
+  border-radius: 10px;
+  line-height: .85rem;
+  color: #232323;
+  font-size: 8px;
+  margin-left: .3rem;
+  margin-bottom: .2rem;
+`
+
+const PlanSaveBestValueText = styled.p`
+  background: #ffd8d8;
+  padding: .01rem .2rem;
+  line-height: .85rem;
+  border-radius: 20px;
+  color: #ff4646;
+  font-size: 9px;
+  margin-left: .3rem;
+  margin-bottom: .2rem;
+`
 export default Calculation;
