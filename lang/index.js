@@ -359,6 +359,32 @@ export const lang = {
       confirmDelete: "Confirm Delete",
       areYouSureToDelete: "Are you sure to delete",
     },
+    department: {
+      areYouSureToDelete: "Are you sure to delete",
+      tertier: {
+        viewDetail: "View Detail",
+      },
+      departmentID: "Department ID",
+      departmentName: "Department Name",
+      action: "Action",
+      title: "Department",
+      palceholderSearch: "Search Department ID,  Department Name",
+      tertier: {
+        delete: "Delete",
+        cancel: "Cancel",
+      },
+      ghost: {
+        downloadTemplate: "Download Template",
+        uploadTemplate: "Upload Template",
+        downloadData: "Download Data",
+      },
+      primary: {
+        create: "Create",
+        save: "Menyimpan",
+      },
+      confirmDelete: "Confirm Delete",
+      yes: "Yes",
+    },
   },
   "id-ID": {
     productGroup: {
@@ -724,6 +750,31 @@ export const lang = {
       createJobLevel: "Buat Tingkat Pekerjaan",
       confirmDelete: "Konfirmasi Hapus",
       areYouSureToDelete: "Apakah Anda yakin untuk menghapus?",
+    },
+    department: {
+      areYouSureToDelete: "Apakah Anda yakin untuk menghapus?",
+      tertier: {
+        viewDetail: "Lihat Detail",
+      },
+      departmentName: "Nama Departemen",
+      action: "Tindakan",
+      title: "Departemen",
+      palceholderSearch: "Cari ID Departemen, Nama Departemen",
+      tertier: {
+        delete: "Menghapus",
+        cancel: "Membatalkan",
+      },
+      ghost: {
+        downloadTemplate: "Unduh Template",
+        uploadTemplate: "Unggah Template",
+        downloadData: "Unggah Template",
+      },
+      primary: {
+        create: "Membuat",
+        save: "Menyimpan",
+      },
+      confirmDelete: "Konfirmasi Hapus",
+      yes: "Iya",
     },
   },
 };
