@@ -21,6 +21,19 @@ const useMenuDesignLists = ({ query = {}, options } = {}) => {
   });
 };
 
+function filterModuleConfig({ options }) {
+  return useMutation(
+    (data) =>
+      client(`/menu/design/hierarchy`, {
+        method: "POST",
+        data,
+      }),
+    {
+      ...options,
+    }
+  );
+}
+
 function useCreateMenuDesignList({ options }) {
   return useMutation(
     (updates) =>
@@ -60,24 +73,20 @@ function useCreateSubMenuDesignList({ options }) {
   );
 }
 
-const fetchMenuDesignList = async ({ menu_design_list_id }) => {
-  return client(`/menu/design/${menu_design_list_id}`).then((data) => data);
+const fetchMenuDesignList = async ({ id }) => {
+  return client(`/menu/design/${id}`).then((data) => data);
 };
 
-const useMenuDesignList = ({ menu_design_list_id, options }) => {
-  return useQuery(
-    ["menu/design", menu_design_list_id],
-    () => fetchMenuDesignList({ menu_design_list_id }),
-    {
-      ...options,
-    }
-  );
+const useMenuDesignList = ({ id, options }) => {
+  return useQuery(["menu/design/detail"], () => fetchMenuDesignList({ id }), {
+    ...options,
+  });
 };
 
-function useUpdateMenuDesignList({ menuDesignListId, options }) {
+function useUpdateMenuDesignList({ id, options }) {
   return useMutation(
     (updates) =>
-      client(`/menu/design/${menuDesignListId}`, {
+      client(`/menu/design/${id}`, {
         method: "PUT",
         data: updates,
       }),
@@ -103,6 +112,7 @@ const useDeleteMenuDesignList = ({ options }) => {
 export {
   useMenuDesignLists,
   useMenuDesignList,
+  filterModuleConfig,
   useCreateMenuDesignList,
   useUpdateMenuDesignList,
   useDeleteMenuDesignList,

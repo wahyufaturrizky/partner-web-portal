@@ -221,8 +221,8 @@ const TrainingType = () => {
       <Card>
         <Row justifyContent="space-between">
           <Search
-            width="340px"
-            placeholder="Search Job Training Type ID, Name."
+            width="370px"
+            placeholder="Search Training Type ID,  Training Type Name"
             onChange={(e: any) => {
               setSearch(e.target.value);
             }}

@@ -1,11 +1,5 @@
-import React from 'react'
-import {
-  Dropdown2,
-  Spacer,
-  Row,
-  Col,
-  Input,
-} from 'pink-lava-ui'
+import React from "react";
+import { Dropdown2, Spacer, Row, Col, Input } from "pink-lava-ui";
 
 const Forms = ({
   queryDivision,
@@ -13,16 +7,23 @@ const Forms = ({
   forms,
   setDivision,
   salesDivision,
-  setSearch
+  setSearch,
+  salesmanName,
+  branch,
+  idCard,
+  externalCode,
+  divisionName,
+  mobileNumber,
+  email,
 }: any) => {
   return (
     <Row width="100%" gap="12px">
       <Col width="48%">
         <Input
           width="100%"
-          label="Salesman Name"
+          label={salesmanName}
           height="50px"
-          placeholder="Salesman Name"
+          placeholder={salesmanName}
           required
           value={forms?.name}
           disabled
@@ -30,9 +31,9 @@ const Forms = ({
         <Spacer size={10} />
         <Input
           width="100%"
-          label="Branch"
+          label={branch}
           height="50px"
-          placeholder="Branch"
+          placeholder={branch}
           required
           value={forms?.branch}
           disabled
@@ -40,9 +41,9 @@ const Forms = ({
         <Spacer size={10} />
         <Input
           width="100%"
-          label="ID Card"
+          label={idCard}
           height="50px"
-          placeholder="ID Card"
+          placeholder={idCard}
           required
           value={forms?.idCard}
           disabled
@@ -50,9 +51,9 @@ const Forms = ({
         <Spacer size={10} />
         <Input
           width="100%"
-          label="External Code"
+          label={externalCode}
           height="50px"
-          placeholder="External Code"
+          placeholder={externalCode}
           required
           value={forms?.externalCode}
           disabled
@@ -61,15 +62,15 @@ const Forms = ({
       <Col width="48%">
         <Dropdown2
           width="100%"
-          label="Division Name"
+          label={divisionName}
           height="50px"
-          placeholder="Division Name"
+          placeholder={divisionName}
           required
           items={salesDivision?.map((item: any) => {
             return {
               id: item?.code,
               value: item?.divisiName,
-            }
+            };
           })}
           handleChange={(value: any) => setDivision(value)}
           defaultValue={queryDivision}
@@ -79,7 +80,7 @@ const Forms = ({
         <Spacer size={10} />
         <Input
           width="100%"
-          label="Mobile Number"
+          label={mobileNumber}
           height="50px"
           value={forms?.mobileNumber}
           placeholder="External Code"
@@ -89,16 +90,16 @@ const Forms = ({
         <Spacer size={10} />
         <Input
           width="100%"
-          label="Email"
+          label={email}
           height="50px"
-          placeholder="Email"
+          placeholder={email}
           required
           value={forms?.email}
           disabled
         />
       </Col>
     </Row>
-  )
-}
+  );
+};
 
-export default Forms
+export default Forms;

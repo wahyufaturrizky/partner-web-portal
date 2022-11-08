@@ -113,7 +113,7 @@ const CreateConfig = () => {
 		return isError;
 	};
 
-	const onSubmit = (isFromUploadManageData=false) => {
+	const onSubmit = ({ isFromUploadManageData = false }) => {
 		const { name } = countryBasic
 		const data: any = {
 			name,
@@ -332,7 +332,7 @@ const CreateConfig = () => {
 
 	useEffect(() => {
 		if(showManageData.update){
-			onSubmit(true)
+			onSubmit({ isFromUploadManageData: true })
 		}
 	}, [showManageData.update])
 	

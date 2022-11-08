@@ -2,7 +2,6 @@ import usePagination from "@lucasmogari/react-pagination";
 import {
   Button,
   Col,
-  Dropdown,
   Pagination,
   Row,
   Search,
@@ -11,6 +10,8 @@ import {
   Text,
   DropdownMenu,
   FileUploadModal,
+  Spin,
+  DropdownMenuOptionGroupCustom,
 } from "pink-lava-ui";
 import React, { useState } from "react";
 import styled from "styled-components";
@@ -26,12 +27,12 @@ import {
   useDeletePostalCode,
   usePostalCodes,
   useUploadFilePostalCodesMDM,
+  usePostalCodesFilter,
 } from "../../../hooks/mdm/postal-code/usePostalCode";
 
 import useDebounce from "lib/useDebounce";
 import { mdmDownloadService } from "lib/client";
 import { queryClient } from "pages/_app";
-import { useCountries } from "hooks/company-list/useCompany";
 
 const downloadFile = (params: any) =>
   mdmDownloadService("/postal-code/download", { params }).then((res) => {
@@ -51,17 +52,16 @@ const CountryPostalCode = () => {
     arrows: true,
     totalItems: 100,
   });
-  const [selectedCountry, setSelectedCountry] = useState("");
-  const [searchCountry, setSearchCountry] = useState("");
   const [modalDelete, setModalDelete] = useState({ open: false });
   const [isShowUpload, setShowUpload] = useState(false);
   const [search, setSearch] = useState("");
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+  const [filterCountry, setFilterCountry] = useState("");
   const [modalCreate, setModalCreate] = useState({ open: false });
-  const [modalDetail, setModalDetail] = useState({ open: false, dataDetail: null });
-
+  const [modalDetail, setModalDetail] = useState<any>({ open: false, dataDetail: null });
+  const [listCountry, setListCountry] = useState([]);
   const debounceSearch = useDebounce(search, 1000);
-  const debounceSearchCountry = useDebounce(searchCountry, 1000);
+  const debounceFilter = useDebounce(filterCountry, 1000);
 
   const columns = [
     {
@@ -82,64 +82,71 @@ const CountryPostalCode = () => {
     },
   ];
 
-  const { data: countries, isLoading: isLoadingCountries } = useCountries({
+  const { isLoading: isLoadingFilter } = usePostalCodesFilter({
+    query: {},
     options: {
-      onSuccess: () => {},
+      onSuccess: (data: any) => {
+        const mappingFilter = data?.map((el: any) => {
+          return {
+            label: el.name,
+            value: el.id,
+          };
+        });
+        setListCountry(mappingFilter);
+      },
     },
-    query: {
-      search: debounceSearchCountry,
-    },
-  });
-
-  const dataCountries: any = [];
-  countries?.rows?.map((item: any) => {
-    dataCountries.push({
-      id: item?.id,
-      value: item?.name,
-    });
   });
 
   const {
-    data: fields,
-    isLoading,
+    data: postalCodeData,
+    isLoading: isLoadingPostalCode,
+    isRefetching: isRefetchingPostalCode,
     refetch: refetchPostalCode,
   } = usePostalCodes({
+    query: {
+      search: debounceSearch,
+      country: debounceFilter,
+      page: pagination.page,
+      limit: pagination.itemsPerPage,
+    },
     options: {
       onSuccess: (data: any) => {
         pagination.setTotalItems(data?.totalRow);
       },
-    },
-    query: {
-      search: debounceSearch,
-      page: pagination.page,
-      limit: pagination.itemsPerPage,
-      country: selectedCountry,
+      select: (data: any) => {
+        const mappedData = data?.rows?.map((element: any) => {
+          return {
+            key: element.id,
+            postal_code_id: element?.codeText,
+            postal_code: element?.code,
+            country_name: element?.countryRecord?.name,
+            action: (
+              <Button
+                size="small"
+                onClick={() => setModalDetail({ open: true, dataDetail: element })}
+                variant="tertiary"
+              >
+                View Detail
+              </Button>
+            ),
+          };
+        });
+
+        return { data: mappedData, totalRow: data.totalRow };
+      },
     },
   });
-
-  const data: any = [];
-  fields?.rows?.map((field: any) => {
-    data.push({
-      key: field.id,
-      postal_code_id: field?.code,
-      postal_code: field?.country,
-      country_name: field?.countryRecord?.name,
-      action: (
-        <Button
-          size="small"
-          onClick={() => setModalDetail({ open: true, dataDetail: field })}
-          variant="tertiary"
-        >
-          View Detail
-        </Button>
-      ),
-    });
-  });
-
-  const paginateField = data;
 
   const onSelectChange = (selectedRowKeys: any) => {
     setSelectedRowKeys(selectedRowKeys);
+  };
+
+  const onChangeFilterPostalCode = (filter: any) => {
+    setFilterCountry(filter?.join(","));
+  };
+
+  const onHandleClear = () => {
+    setFilterCountry("");
   };
 
   const rowSelection = {
@@ -147,16 +154,24 @@ const CountryPostalCode = () => {
     onChange: onSelectChange,
   };
 
-  const { mutate: mutateDeletePostalCode } = useDeletePostalCode({
+  const { mutate: mutateDeletePostalCode }: any = useDeletePostalCode({
     options: {
       onSuccess: () => {
         refetchPostalCode();
         setModalDelete({ open: false });
+        setSelectedRowKeys([]);
       },
     },
   });
 
-  const { mutate: uploadFilePostalCodesMDM } = useUploadFilePostalCodesMDM({
+  const listFilterCountry = [
+    {
+      label: "By Country",
+      list: listCountry,
+    },
+  ];
+
+  const { mutate: uploadFilePostalCodesMDM }: any = useUploadFilePostalCodesMDM({
     options: {
       onSuccess: () => {
         queryClient.invalidateQueries(["postal-code"]);
@@ -171,6 +186,8 @@ const CountryPostalCode = () => {
 
     uploadFilePostalCodesMDM(formData);
   };
+
+  console.log(filterCountry);
 
   return (
     <>
@@ -188,17 +205,22 @@ const CountryPostalCode = () => {
                   setSearch(target.value)
                 }
               />
-              <Dropdown
-                width="200px"
-                allowClear
-                items={dataCountries}
-                placeholder={"Country"}
-                noSearch
-                rounded
-                loading={isLoadingCountries}
-                handleChange={(value: any) => setSelectedCountry(value)}
-                onSearch={(search: any) => setSearch(search)}
-              />
+              {isLoadingFilter ? (
+                <Spin tip={""} />
+              ) : (
+                <DropdownMenuOptionGroupCustom
+                  showSearch={false}
+                  showClearButton
+                  handleClearValue={onHandleClear}
+                  handleChangeValue={onChangeFilterPostalCode}
+                  listItems={listFilterCountry}
+                  label=""
+                  width={194}
+                  roundedSelector={true}
+                  defaultValue={""}
+                  placeholder="Country"
+                />
+              )}
             </Row>
             <Row gap="16px">
               <Button
@@ -283,25 +305,27 @@ const CountryPostalCode = () => {
         <Card>
           <Col gap="60px">
             <Table
-              loading={isLoading}
+              loading={isLoadingPostalCode || isRefetchingPostalCode}
               rowSelection={rowSelection}
               columns={columns}
-              data={data || []}
+              data={postalCodeData?.data}
             />
             <Pagination pagination={pagination} />
           </Col>
         </Card>
       </Col>
 
-      <ModalDeleteConfirmation
-        totalSelected={selectedRowKeys?.length}
-        itemTitle={
-          paginateField?.find((menu: any) => menu.key === selectedRowKeys[0])?.country_name
-        }
-        visible={modalDelete.open}
-        onCancel={() => setModalDelete({ open: false })}
-        onOk={() => mutateDeletePostalCode({ ids: selectedRowKeys })}
-      />
+      {modalDelete.open && (
+        <ModalDeleteConfirmation
+          totalSelected={selectedRowKeys?.length}
+          itemTitle={
+            postalCodeData?.data?.find((menu: any) => menu.key === selectedRowKeys[0])?.country_name
+          }
+          visible={modalDelete.open}
+          onCancel={() => setModalDelete({ open: false })}
+          onOk={() => mutateDeletePostalCode({ ids: selectedRowKeys })}
+        />
+      )}
 
       {modalCreate.open && (
         <ModalCreatePostalCode

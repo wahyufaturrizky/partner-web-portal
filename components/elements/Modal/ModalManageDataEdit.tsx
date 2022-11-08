@@ -394,7 +394,11 @@ export const ModalManageDataEdit = ({
 			data.forEach((data: any) => {
 				let newEntries = Object.entries(data);
 				const currentLevel = newEntries[level];
-				const currentData = currentLevel[1];
+				const currentData = currentLevel?.[1];
+				if(!currentData){
+					console.log("error")
+					return;
+				}
 				const currentParentLevel = newEntries[level - 2];
 				const currentParentIds = newEntries[level - 1];
 
@@ -410,18 +414,21 @@ export const ModalManageDataEdit = ({
 						currentParentData = temp
 					}
 				}
-
-				const newSingleData: any = {
-					id: self?.crypto?.randomUUID(),
-					name: currentData,
-					parent: {
-						id: currentParentId,
-						name: currentParentData
-					},
-					isNewParent: false,
-					structureId: structure.id
-				};
-				newData.push(newSingleData);
+				if(currentData){
+					const newSingleData: any = {
+						id: self?.crypto?.randomUUID(),
+						name: currentData,
+						parent: {
+							id: currentParentId,
+							name: currentParentData
+						},
+						isNewParent: false,
+						structureId: structure.id
+					};
+					newData.push(newSingleData);
+				} else {
+					console.log("error")
+				}
 			});
 		} else {
 			data.forEach((data: any) => {
