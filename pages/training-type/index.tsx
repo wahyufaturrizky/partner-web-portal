@@ -170,11 +170,11 @@ const TrainingType = () => {
       dataIndex: "id",
     },
     {
-      title: "Training Type Name",
+      title: lang[t].trainingType.trainingTypeName,
       dataIndex: "name",
     },
     {
-      title: "Action",
+      title: lang[t].trainingType.action,
       dataIndex: "action",
       width: "15%",
       align: "left",
@@ -217,14 +217,14 @@ const TrainingType = () => {
   return (
     <>
       <Col>
-        <Text variant={"h4"}>Training Type</Text>
+        <Text variant={"h4"}>{lang[t].trainingType.title}</Text>
         <Spacer size={20} />
       </Col>
       <Card>
         <Row justifyContent="space-between">
           <Search
             width="370px"
-            placeholder="Search Training Type ID,  Training Type Name"
+            placeholder={lang[t].trainingType.palceholderSearch}
             onChange={(e: any) => {
               setSearch(e.target.value);
             }}
@@ -242,7 +242,7 @@ const TrainingType = () => {
               }
               disabled={rowSelection.selectedRowKeys?.length === 0}
             >
-              Delete
+              {lang[t].trainingType.palceholderSearch}
             </Button>
             <DropdownMenu
               title={"More"}

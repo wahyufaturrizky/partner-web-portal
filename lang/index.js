@@ -391,6 +391,9 @@ export const lang = {
       },
       trainingTypeId: "Training Type ID",
       trainingTypeName: "Training Type Name",
+      action: "Action",
+      title: "Training Type",
+      palceholderSearch: "Search Training Type ID,  Training Type Name",
     },
   },
   "id-ID": {
@@ -789,6 +792,9 @@ export const lang = {
       },
       trainingTypeId: "ID Jenis Pelatihan",
       trainingTypeName: "Nama Jenis Pelatihan",
+      action: "Tindakan",
+      title: "Jenis Pelatihan",
+      palceholderSearch: "Cari ID Jenis Pelatihan, Nama Jenis Pelatihan",
     },
   },
 };
