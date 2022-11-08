@@ -30,6 +30,7 @@ const ModalAddMenu = ({ show, onCancel, selectedRowKeys, onAddMenu }: any) => {
       search: useDebounceSearch,
       page: pagination.page,
       limit: pagination.itemsPerPage,
+      selected: selectedRowKeys.join(","),
     },
     options: {
       refetchOnWindowFocus: "always",
