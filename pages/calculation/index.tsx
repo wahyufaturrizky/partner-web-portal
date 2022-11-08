@@ -111,6 +111,7 @@ const Calculation = () => {
         pagination.setTotalItems(data.totalRow);
       },
       select: (data: any) => {
+        console.log(data, '<<<<<<data nya')
         let payment = 0
         const mappedData = data?.rows?.map((element: any) => {
             payment += +element?.totalPayment

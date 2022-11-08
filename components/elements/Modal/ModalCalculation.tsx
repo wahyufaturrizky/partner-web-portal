@@ -21,11 +21,9 @@ import styled from "styled-components";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { Controller, useForm } from 'react-hook-form';
-import { useCountryInfiniteLists } from 'hooks/mdm/country-structure/useCountries';
 import useDebounce from 'lib/useDebounce';
 import { useCompanyInfiniteLists, useMenuDesignLists } from 'hooks/company-list/useCompany';
 import { useBranchInfiniteLists } from 'hooks/mdm/branch/useBranch';
-import { useMenuLists } from 'hooks/menu-config/useMenuConfig';
 import { useUsers } from 'hooks/user-config/useUser';
 import usePagination from '@lucasmogari/react-pagination';
 import { useCalculationModules } from 'hooks/calculation-config/useCalculation';
@@ -211,7 +209,7 @@ const ModalCalculation = ({
 
 
     const [moduleSelected, setModuleSelected] = useState(1)
-    const [checkedState, setCheckedState] = useState([]);
+    const [calculationData, setCalculationData] = useState([]);
     
     // FETCH MODULE
     const {
@@ -220,50 +218,60 @@ const ModalCalculation = ({
         isFetching: isFetchingCalculationModules,
       } = useCalculationModules({
         options: {
+            onSuccess: (data: { testData: React.SetStateAction<never[]>; }) => {
+                setCalculationData(data.testData)
+            },
           select: (data: any) => {
-            const dataModules = data?.map((e: any) => ({
-                key: e.moduleId,
-                value: e.moduleName
-            }))
-
-            const modulesMenu = data?.filter((e: { moduleId: number; }) => e.moduleId === moduleSelected)[0]?.menu
-
-            // checkbox index
-            const indexSubmit: any[] = []
-            checkedState?.forEach((e,i) => {
-                if(e === true) indexSubmit.push(i)
+            const testData = data?.map((e: { moduleId: any; moduleName: any; menu: any[]; }) => {
+                return {
+                    id: e.moduleId,
+                    name: e.moduleName,
+                    menu: e.menu?.map(el => {
+                        return {
+                            id: el.id,
+                            name: el.name,
+                            checked: false
+                        }
+                    })
+                }
             })
-
-            // checkbox data
-            const submitModule: any[] = []
-            modulesMenu?.forEach((element: any, index: any) => {
-                indexSubmit.forEach(el => {
-                    if(el === index) submitModule.push(element)
-                })
-            });
             
-            return { data: dataModules, totalRow: data.totalRow, menu: modulesMenu };
+            return { 
+                totalRow: data.totalRow, 
+                testData
+            };
           },
         },
       });
-    
-    useEffect(() => {
-        setCheckedState(new Array(calculationDataModules?.menu?.length).fill(false))
-    }, [calculationDataModules?.menu])
-    
-    const handleCheckboxChange = (position: number) => {
-        const updatedCheckedState = checkedState.map((item, index) =>
-            index === position ? !item : item
-        );
 
-        setCheckedState(updatedCheckedState);
+      const changeValueCheckbox = (value: any, checked: React.Key | null | undefined) => {
+        const newData = [...calculationData]
+        const updatedData = newData?.map(el => {
+            if(el.id === moduleSelected){
+                return {
+                    ...el,
+                    menu: el.menu?.map(e => {
+                        if(e.id === checked){
+                            return {
+                                ...e,
+                                checked: value
+                            }
+                        } else {
+                            return e
+                        }
+                    })
+                }
+            } else {
+                return el
+            }
+        })
+        setCalculationData(updatedData)
     }
 
     const onAdd = (data: any) => {
         console.log(data, '<<<<< test')
     }
 
-    // console.log(radioValue, '<<<<radio')
   return (
     <Modal
         width={750}
@@ -433,18 +441,16 @@ const ModalCalculation = ({
             <Spacer size={20}/>
 
             <Row gap={"1rem"}>
-                {!isLoadingCalculationModules && 
-                !isFetchingCalculationModules &&
-                calculationDataModules?.data?.map((e: { key: React.Key | null | undefined; value: any; }) => (
+                {calculationData?.map(e => (
                     <Button 
-                    key={e.key} 
+                    key={e.id} 
                     size={"small"} 
-                    variant={moduleSelected === e.key ? "primary" : "tertiary"}
+                    variant={moduleSelected === e.id ? "primary" : "tertiary"}
                     onClick={() => {
-                        setModuleSelected(e?.key)
+                        setModuleSelected(e?.id)
                     }}
                     >
-                        {e.value}
+                        {e.name}
                     </Button>
                 ))}
             </Row>
@@ -452,9 +458,9 @@ const ModalCalculation = ({
             <Spacer size={20}/>
             
             <Row gap={'1rem'}>
-                {calculationDataModules?.menu?.map((e,i )=> (
+                {calculationData?.filter((e: { id: number; }) => e.id === moduleSelected)[0]?.menu?.map((el: { id: React.Key | null | undefined; checked: any; name: string}) => (
                     <Row 
-                    key={e.id}
+                    key={el.id}
                     style={{
                         border: '1px solid gray',
                         borderRadius: '8px',
@@ -462,12 +468,12 @@ const ModalCalculation = ({
                         width: '160px'
                     }}>
                         <Checkbox
-                            checked={checkedState[i]}
-                            onChange={() => handleCheckboxChange(i)}
+                            checked={el.checked}
+                            onChange={(value) => changeValueCheckbox(value, el.id)}
                             stopPropagation={true}
                         />
                         <Col>
-                            <Text variant={"headingSmall"} >{e.name}</Text>
+                            <Text variant={"headingSmall"} >{el?.name}</Text>
                             <Text variant={"text"} >10.000 / Month</Text>
                         </Col>
                     </Row>
