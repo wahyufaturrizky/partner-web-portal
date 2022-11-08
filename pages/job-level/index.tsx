@@ -300,7 +300,7 @@ const JobPosition = () => {
               variant="primary"
               onClick={() => setModalForm({ open: true, typeForm: "create", data: {} })}
             >
-              {lang[t].jobLevel.ghost.downloadData}
+              {lang[t].jobLevel.primary.create}
             </Button>
           </Row>
         </Row>
