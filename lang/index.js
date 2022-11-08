@@ -335,6 +335,30 @@ export const lang = {
       confirmDelete: "Confirm Delete",
       areYouSureToDelete: "Are you sure to delete",
     },
+    jobLevel: {
+      tertier: {
+        viewDetail: "View Detail",
+        delete: "Delete",
+        cancel: "Cancel",
+      },
+      jobLevelId: "Job Level ID",
+      jobLevelName: "Job Level Name",
+      action: "Action",
+      title: "Job Level",
+      palceholderSearch: "Search Job Level ID,  Job Level Name",
+      ghost: {
+        downloadTemplate: "Download Template",
+        uploadTemplate: "Upload Template",
+        downloadData: "Download Data",
+      },
+      primary: {
+        create: "Create",
+        save: "Save",
+      },
+      createJobLevel: "Create Job Level",
+      confirmDelete: "Confirm Delete",
+      areYouSureToDelete: "Are you sure to delete",
+    },
   },
   "id-ID": {
     productGroup: {
@@ -677,6 +701,28 @@ export const lang = {
       },
       createJobPosition: "Buat Posisi Pekerjaan",
       confirmDelete: "Confirm Delete",
+      areYouSureToDelete: "Apakah Anda yakin untuk menghapus?",
+    },
+    jobLevel: {
+      tertier: {
+        viewDetail: "View Detail",
+        delete: "Menghapus",
+      },
+      jobLevelId: "ID Tingkat Pekerjaan",
+      action: "Tindakan",
+      title: "Tingkat Pekerjaan",
+      palceholderSearch: "Cari ID Tingkat Pekerjaan, Nama Tingkat Pekerjaan",
+      ghost: {
+        downloadTemplate: "Unduh Template",
+        uploadTemplate: "Unggah Template",
+        downloadData: "Unduh Data",
+      },
+      primary: {
+        create: "Membuat",
+        save: "Menyimpan",
+      },
+      createJobLevel: "Buat Tingkat Pekerjaan",
+      confirmDelete: "Konfirmasi Hapus",
       areYouSureToDelete: "Apakah Anda yakin untuk menghapus?",
     },
   },
