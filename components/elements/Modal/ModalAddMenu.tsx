@@ -54,12 +54,8 @@ const ModalAddMenu = ({ show, onCancel, selectedRowKeys, onAddMenu }: any) => {
 
   const columnsMenuLists = [
     {
-      title: "Field Name",
+      title: "Menu Name",
       dataIndex: "field_name",
-    },
-    {
-      title: "Key",
-      dataIndex: "field_key",
     },
   ];
 

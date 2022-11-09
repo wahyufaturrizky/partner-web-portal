@@ -438,7 +438,7 @@ const CreateMenuDesignList: any = () => {
                     label="Name"
                     height="48px"
                     defaultValue={menuDesignData?.name}
-                    placeholder={"e.g Shipment and Delivery"}
+                    placeholder={"e.g Menu Design - FMCG Manufacture"}
                     {...register("name")}
                   />
                 </Col>

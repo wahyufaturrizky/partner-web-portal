@@ -323,7 +323,7 @@ const CreateMenuDesignList: any = () => {
                     width="100%"
                     label="Name"
                     height="48px"
-                    placeholder={"e.g Shipment and Delivery"}
+                    placeholder={"e.g Menu Design - FMCG Manufacture"}
                     {...register("name")}
                   />
                 </Col>

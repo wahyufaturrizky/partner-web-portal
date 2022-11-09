@@ -47,15 +47,17 @@ const ModalAddModule = ({
             field_name: element.name,
             field_key: element.key,
             action: (
-              <Button
-                size="small"
-                onClick={() => {
-                  window.open(`/config/${element.id}`, "_blank");
-                }}
-                variant="tertiary"
-              >
-                View Detail
-              </Button>
+              <Row justifyContent={"center"}>
+                <Button
+                  size="small"
+                  onClick={() => {
+                    window.open(`/config/${element.id}`, "_blank");
+                  }}
+                  variant="tertiary"
+                >
+                  View Detail
+                </Button>
+              </Row>
             ),
           };
         });
@@ -79,12 +81,10 @@ const ModalAddModule = ({
       dataIndex: "field_name",
     },
     {
-      title: "Key",
-      dataIndex: "field_key",
-    },
-    {
       title: "Action",
       dataIndex: "action",
+      width: "20%",
+      align: "center",
     },
   ];
 
