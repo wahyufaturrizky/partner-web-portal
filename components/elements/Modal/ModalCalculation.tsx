@@ -176,6 +176,7 @@ const ModalCalculation = ({
 		},
 	});
 
+    console.log(users, '<<<< list of users')
     const columns = [
 		{
 			title: "Name",
@@ -238,7 +239,7 @@ const ModalCalculation = ({
                     })
                 }
             })
-            
+            console.log(testData, '<<<<<< ini data modules')
             return { 
                 totalRow: data.totalRow, 
                 testData
