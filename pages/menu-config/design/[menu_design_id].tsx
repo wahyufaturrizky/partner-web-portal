@@ -14,7 +14,7 @@ import TreeMenuDesign from "components/pages/MenuDesign/Tree";
 import { DragOutlined } from "@ant-design/icons";
 import { ModalDeleteConfirmation } from "components/elements/Modal/ModalConfirmationDelete";
 import { queryClient } from "pages/_app";
-import ArrowLeft from "../../assets/arrow-left.svg";
+import ArrowLeft from "assets/icons/arrow-left.svg";
 
 const CreateMenuDesignList: any = () => {
   const router = useRouter();
