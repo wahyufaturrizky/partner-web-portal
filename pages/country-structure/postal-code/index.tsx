@@ -209,6 +209,7 @@ const CountryPostalCode = () => {
                 <Spin tip={""} />
               ) : (
                 <DropdownMenuOptionGroupCustom
+                  showArrow={true}
                   showSearch={false}
                   showClearButton
                   handleClearValue={onHandleClear}
