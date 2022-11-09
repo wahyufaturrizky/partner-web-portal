@@ -26,32 +26,6 @@ import { mdmDownloadService } from "../../lib/client";
 import { useRouter } from "next/router";
 import { lang } from "lang";
 
-const downloadFile = (params: any) =>
-  mdmDownloadService("/product-group/download", { params }).then((res) => {
-    let dataUrl = window.URL.createObjectURL(new Blob([res.data]));
-    let tempLink = document.createElement("a");
-    tempLink.href = dataUrl;
-    tempLink.setAttribute("download", `product_group_${new Date().getTime()}.xlsx`);
-    tempLink.click();
-  });
-
-const renderConfirmationText = (type: any, data: any) => {
-  switch (type) {
-    case "selection":
-      return data.selectedRowKeys.length > 1
-        ? `Are you sure to delete ${data.selectedRowKeys.length} items ?`
-        : `Are you sure to delete Product Grouping ${
-            data?.productsGroupData?.data.find((el: any) => el.key === data.selectedRowKeys[0])
-              ?.productGroupName
-          } ?`;
-    case "detail":
-      return `Are you sure to delete Product Grouping ${data.name} ?`;
-
-    default:
-      break;
-  }
-};
-
 const ProductGroup = () => {
   const t = localStorage.getItem("lan") || "en-US";
 
@@ -70,6 +44,32 @@ const ProductGroup = () => {
   const [isShowUpload, setShowUpload] = useState(false);
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const debounceSearch = useDebounce(search, 1000);
+
+  const downloadFile = (params: any) =>
+    mdmDownloadService("/product-group/download", { params }).then((res) => {
+      let dataUrl = window.URL.createObjectURL(new Blob([res.data]));
+      let tempLink = document.createElement("a");
+      tempLink.href = dataUrl;
+      tempLink.setAttribute("download", `product_group_${new Date().getTime()}.xlsx`);
+      tempLink.click();
+    });
+
+  const renderConfirmationText = (type: any, data: any) => {
+    switch (type) {
+      case "selection":
+        return data.selectedRowKeys.length > 1
+          ? `Are you sure to delete ${data.selectedRowKeys.length} items ?`
+          : `Are you sure to delete Product Grouping ${
+              data?.productsGroupData?.data.find((el: any) => el.key === data.selectedRowKeys[0])
+                ?.productGroupName
+            } ?`;
+      case "detail":
+        return `Are you sure to delete Product Grouping ${data.name} ?`;
+
+      default:
+        break;
+    }
+  };
 
   const {
     data: productsGroupData,
