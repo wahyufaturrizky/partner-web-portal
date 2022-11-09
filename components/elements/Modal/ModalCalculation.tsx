@@ -51,7 +51,7 @@ const ModalCalculation = ({
 
     const [companyList, setCompanyList] = useState([])
     const [totalRowsCompanyList, setTotalRowsCompanyList] = useState(0)
-    const [searchCompany, setSearchCompany] = useState("");
+    const [searchCompany, setSearchCompany] = useState(" ");
     const debounceFetchCompany = useDebounce(searchCompany, 1000);
 
     const [branchList, setBranchList] = useState([])
@@ -69,7 +69,7 @@ const ModalCalculation = ({
 	.object({
 		role_name: yup.string().required("Role Name is Required"),
 		total_user: yup.number().required("Total User is Required"),
-		company: yup.string().required("Company is Required"),
+		company_id: yup.string().required("Company is Required"),
 		user_name: yup.array().of(yup.string()).min(1, 'User Name cannot be empty').length(minUser, `List of User needs to be exactly ${minUser}`),
 	})
 	.required();
@@ -81,7 +81,7 @@ const ModalCalculation = ({
 		formState: { errors },
 		setValue,
 	} = useForm({
-		// defaultValues: defaultValue,
+		defaultValues: defaultValue,
 		resolver: yupResolver(schema),
 	});
 
@@ -100,11 +100,10 @@ const ModalCalculation = ({
         options: {
           onSuccess: (data: any) => {
             setTotalRowsCompanyList(data.pages[0].totalRow);
-
             const mappedData = data?.pages?.map((group: any) => {
               return group.rows?.map((element: any) => {
                 return {
-                  value: element.code,
+                  value: element.id,
                   label: element.name,
                 };
               });
@@ -210,7 +209,8 @@ const ModalCalculation = ({
 
     const [moduleSelected, setModuleSelected] = useState(1)
     const [calculationData, setCalculationData] = useState([]);
-    
+    const [count, setCount] = useState(0)
+
     // FETCH MODULE
     const {
         data: calculationDataModules,
@@ -219,9 +219,11 @@ const ModalCalculation = ({
       } = useCalculationModules({
         options: {
             onSuccess: (data: { testData: React.SetStateAction<never[]>; }) => {
+                setModuleSelected(data.testData[0]?.id)
                 setCalculationData(data.testData)
             },
           select: (data: any) => {
+            console.log(data, '<<<<<data module')
             const testData = data?.map((e: { moduleId: any; moduleName: any; menu: any[]; }) => {
                 return {
                     id: e.moduleId,
@@ -230,6 +232,7 @@ const ModalCalculation = ({
                         return {
                             id: el.id,
                             name: el.name,
+                            price: el.fee,
                             checked: false
                         }
                     })
@@ -244,6 +247,9 @@ const ModalCalculation = ({
         },
       });
 
+      useEffect(() => {
+        setInputWithTagsValue(defaultValue?.users?.map(e => e.fullname))
+      }, [defaultValue])
       const changeValueCheckbox = (value: any, checked: React.Key | null | undefined) => {
         const newData = [...calculationData]
         const updatedData = newData?.map(el => {
@@ -269,6 +275,26 @@ const ModalCalculation = ({
     }
 
     const onAdd = (data: any) => {
+        // {
+        //     "company_id": "1",
+        //     "role_id": "2",
+        //     "module_ids": ["18"],
+        //     "menu_ids": ["20","21","22"],
+        //     "period": "12",
+        //     "branch": "bandung",
+        //     "total_user": 2,
+        //     "fee": 14000,
+        //     "user_ids": ["1"],
+        //     "total_fee": 123000,
+        //     "total_payment": "40000",
+        //     "assign_payment": "holding"
+        // }
+        // {
+        //     "company_id": "8",
+        //     "role_name": "asd",
+        //     "branch": "BRA-0000002",
+        //     "total_user": 2
+        //   } 
         console.log(data, '<<<<< test')
     }
 
@@ -324,6 +350,7 @@ const ModalCalculation = ({
                         <Input
                             width="100%"
                             height="40px"
+                            defaultValue={defaultValue?.userRole?.name}
                             placeholder="e.g Sales Admin"
                             label="Role Name" 
                             required
@@ -336,6 +363,7 @@ const ModalCalculation = ({
                             width="100%"
                             height="40px"
                             placeholder="e.g 3"
+                            defaultValue={defaultValue?.totalUser}
                             label="Total User" 
                             required
                             error={errors?.total_user?.message}
@@ -353,8 +381,8 @@ const ModalCalculation = ({
                     <Controller
                         control={control}
                         defaultValue={""}
-                        name="company"
-                        render={({ field: { onChange, value }, formState: { errors } }) => (
+                        name="company_id"
+                        render={({ field: { onChange }, formState: { errors } }) => (
                             <Col>
                             <div style={{
                             display: 'flex'
@@ -364,7 +392,7 @@ const ModalCalculation = ({
                             </div>
                             <Spacer size={6} />
                             <FormSelect
-                                // defaultValue={value}
+                                defaultValue={defaultValue?.company?.name}
                                 style={{ width: "340px"}}
                                 size={"large"}
                                 placeholder={"Select"}
@@ -373,7 +401,7 @@ const ModalCalculation = ({
                                 withSearch
                                 required
                                 error={errors?.company?.message}
-                                isLoading={isFetchingCompany}
+                                isLoading={isFetchingCompany || isLoadingCompany}
                                 isLoadingMore={isFetchingMoreCompany}
                                 fetchMore={() => {
                                 if (hasNextPageCompany) {
@@ -385,7 +413,8 @@ const ModalCalculation = ({
                                 onChange(value);
                                 }}
                                 onSearch={(value: any) => {
-                                setSearchCompany(value);
+                                    value === '' ? value = ' ' : value
+                                    setSearchCompany(value);
                                 }}
                             />
                             </Col>
@@ -402,7 +431,7 @@ const ModalCalculation = ({
                             <Text variant="headingRegular">Branch</Text>
                             <Spacer size={6} />
                             <FormSelect
-                                // defaultValue={workingCalendarData?.company?.branch ?? ""}
+                                defaultValue={defaultValue?.branch}
                                 style={{ width: "340px" }}
                                 size={"large"}
                                 placeholder={"Select"}
@@ -434,7 +463,7 @@ const ModalCalculation = ({
             <Separator/>
             <Spacer size={20}/>
 
-            <Text variant={"headingSmall"} style={{color: 'rgb(33, 145, 155)'}}>1 Selected Menu</Text>
+            <Text variant={"headingSmall"} style={{color: 'rgb(33, 145, 155)'}}>{count} Selected Menu</Text>
             
             <Spacer size={20}/>
             <Text variant={"headingSmall"} >Module</Text>
@@ -458,23 +487,27 @@ const ModalCalculation = ({
             <Spacer size={20}/>
             
             <Row gap={'1rem'}>
-                {calculationData?.filter((e: { id: number; }) => e.id === moduleSelected)[0]?.menu?.map((el: { id: React.Key | null | undefined; checked: any; name: string}) => (
+                {calculationData?.filter((e: { id: number; }) => e.id === moduleSelected)[0]?.menu?.map((el: { id: React.Key | null | undefined; checked: any; name: string; price: any;}) => (
                     <Row 
                     key={el.id}
                     style={{
                         border: '1px solid gray',
                         borderRadius: '8px',
                         padding: '.3rem .6rem',
-                        width: '160px'
+                        // width: '160px'
                     }}>
                         <Checkbox
                             checked={el.checked}
-                            onChange={(value) => changeValueCheckbox(value, el.id)}
+                            onChange={(value) => {
+                                changeValueCheckbox(value, el.id)
+                                if(value) setCount(count => count + 1)
+                                else setCount(count => count -1)
+                            }}
                             stopPropagation={true}
                         />
                         <Col>
                             <Text variant={"headingSmall"} >{el?.name}</Text>
-                            <Text variant={"text"} >10.000 / Month</Text>
+                            <Text variant={"text"} >{el?.price ? el?.price : 10000} / Month</Text>
                         </Col>
                     </Row>
                 ))}
