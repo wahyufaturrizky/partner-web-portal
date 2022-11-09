@@ -564,6 +564,7 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
   const createdAtDate = moment(productDetail?.createdAt)
   const isNewProduct = currentDate.diff(createdAtDate, `days`) <= 0
 
+  console.log("productDetail", productDetail)
   return (
     <Col>
       {
@@ -870,6 +871,7 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
                       onChange={(date: any, dateString: any) => onChange(dateString)}
                       label="Discontinue Date"
                       format={"DD/MM/YYYY"}
+                      defaultValue={productDetail?.expiredDate ? moment(productDetail?.expiredDate) : undefined}
                     />
                   )}
                 />
