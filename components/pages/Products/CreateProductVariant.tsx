@@ -668,7 +668,7 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
           <Accordion.Header variant="blue">General</Accordion.Header>
           <Accordion.Body>
             <Row width="100%" noWrap>
-              <UploadImage control={control} productForm={productForm} />
+              <UploadImage control={control} productForm={productForm} setIsImageChange={setIsImageChange}/>
               {productDetail?.product && 
                 <Col width="100%">
                   <Text variant="subtitle1" color="black.regular">Product Master</Text>
@@ -869,6 +869,7 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
                       placeholder="Select"
                       onChange={(date: any, dateString: any) => onChange(dateString)}
                       label="Discontinue Date"
+                      format={"DD/MM/YYYY"}
                     />
                   )}
                 />
@@ -953,7 +954,7 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
   )
 }
 
-const UploadImage = ({ control, productForm }: { control: Control<FormValues>, productForm: any }) => {
+const UploadImage = ({ control, productForm, setIsImageChange }: { control: Control<FormValues>, productForm: any, setIsImageChange: any }) => {
   return (
     <Controller
       control={control}
