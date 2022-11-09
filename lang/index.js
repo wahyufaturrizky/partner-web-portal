@@ -388,12 +388,27 @@ export const lang = {
     trainingType: {
       tertier: {
         viewDetail: "View Detail",
+        cancel: "Cancel",
+        delete: "Delete",
       },
       trainingTypeId: "Training Type ID",
       trainingTypeName: "Training Type Name",
       action: "Action",
       title: "Training Type",
       palceholderSearch: "Search Training Type ID,  Training Type Name",
+      ghost: {
+        downloadTemplate: "Download Template",
+        uploadTemplate: "Upload Template",
+        downloadData: "Download Data",
+      },
+      primary: {
+        create: "Create",
+        save: "Save",
+        yes: "Yes",
+      },
+      createTrainingType: "Create Training Type",
+      confirmDelete: "Confirm Delete",
+      areYouSureToDelete: "Are you sure to delete",
     },
   },
   "id-ID": {
@@ -789,12 +804,26 @@ export const lang = {
     trainingType: {
       tertier: {
         viewDetail: "Lihat Detail",
+        cancel: "Membatalkan",
       },
       trainingTypeId: "ID Jenis Pelatihan",
       trainingTypeName: "Nama Jenis Pelatihan",
       action: "Tindakan",
       title: "Jenis Pelatihan",
       palceholderSearch: "Cari ID Jenis Pelatihan, Nama Jenis Pelatihan",
+      ghost: {
+        downloadTemplate: "Unduh Template",
+        uploadTemplate: "Unggah Template",
+        downloadData: "Unggah Template",
+      },
+      primary: {
+        create: "Membuat",
+        save: "Menyimpan",
+        yes: "Iya",
+      },
+      createTrainingType: "Buat Jenis Pelatihan",
+      confirmDelete: "Konfirmasi Hapus",
+      areYouSureToDelete: "Apakah Anda yakin untuk menghapus?",
     },
   },
 };

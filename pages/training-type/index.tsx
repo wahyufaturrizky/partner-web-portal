@@ -29,31 +29,6 @@ import { ICDownload, ICUpload } from "../../assets/icons";
 import { mdmDownloadService } from "../../lib/client";
 import { lang } from "lang";
 
-const downloadFile = (params: any) =>
-  mdmDownloadService("/training-type/download", { params }).then((res) => {
-    let dataUrl = window.URL.createObjectURL(new Blob([res.data]));
-    let tempLink = document.createElement("a");
-    tempLink.href = dataUrl;
-    tempLink.setAttribute("download", `training_type_${new Date().getTime()}.xlsx`);
-    tempLink.click();
-  });
-
-const renderConfirmationText = (type: any, data: any) => {
-  switch (type) {
-    case "selection":
-      return data.selectedRowKeys.length > 1
-        ? `Are you sure to delete ${data.selectedRowKeys.length} items ?`
-        : `Are you sure to delete ${
-            data?.trainingTypeData?.data.find((el: any) => el.key === data.selectedRowKeys[0])?.name
-          } ?`;
-    case "detail":
-      return `Are you sure to delete ${data.name} ?`;
-
-    default:
-      break;
-  }
-};
-
 const TrainingType = () => {
   const t = localStorage.getItem("lan") || "en-US";
   const pagination = usePagination({
@@ -77,6 +52,32 @@ const TrainingType = () => {
   const debounceSearch = useDebounce(search, 1000);
 
   const { register, handleSubmit } = useForm();
+
+  const downloadFile = (params: any) =>
+    mdmDownloadService("/training-type/download", { params }).then((res) => {
+      let dataUrl = window.URL.createObjectURL(new Blob([res.data]));
+      let tempLink = document.createElement("a");
+      tempLink.href = dataUrl;
+      tempLink.setAttribute("download", `training_type_${new Date().getTime()}.xlsx`);
+      tempLink.click();
+    });
+
+  const renderConfirmationText = (type: any, data: any) => {
+    switch (type) {
+      case "selection":
+        return data.selectedRowKeys.length > 1
+          ? `${lang[t].areYouSureToDelete} ${data.selectedRowKeys.length} items ?`
+          : `${lang[t].areYouSureToDelete} ${
+              data?.trainingTypeData?.data.find((el: any) => el.key === data.selectedRowKeys[0])
+                ?.name
+            } ?`;
+      case "detail":
+        return `${lang[t].areYouSureToDelete} ${data.name} ?`;
+
+      default:
+        break;
+    }
+  };
 
   const {
     data: trainingTypesData,
@@ -274,7 +275,7 @@ const TrainingType = () => {
                   value: (
                     <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
                       <ICDownload />
-                      <p style={{ margin: "0" }}>Download Template</p>
+                      <p style={{ margin: "0" }}>{lang[t].trainingType.ghost.downloadTemplate}</p>
                     </div>
                   ),
                 },
@@ -283,7 +284,7 @@ const TrainingType = () => {
                   value: (
                     <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
                       <ICUpload />
-                      <p style={{ margin: "0" }}>Upload Template</p>
+                      <p style={{ margin: "0" }}>{lang[t].trainingType.ghost.uploadTemplate}</p>
                     </div>
                   ),
                 },
@@ -292,7 +293,7 @@ const TrainingType = () => {
                   value: (
                     <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
                       <ICDownload />
-                      <p style={{ margin: "0" }}>Download Data</p>
+                      <p style={{ margin: "0" }}>{lang[t].trainingType.ghost.downloadData}</p>
                     </div>
                   ),
                 },
@@ -303,7 +304,7 @@ const TrainingType = () => {
               variant="primary"
               onClick={() => setModalForm({ open: true, typeForm: "create", data: {} })}
             >
-              Create
+              {lang[t].trainingType.primary.create}
             </Button>
           </Row>
         </Row>
@@ -327,7 +328,11 @@ const TrainingType = () => {
           centered
           visible={modalForm.open}
           onCancel={() => setModalForm({ open: false, data: {}, typeForm: "" })}
-          title={modalForm.typeForm === "create" ? "Create Training Type" : modalForm.data?.name}
+          title={
+            modalForm.typeForm === "create"
+              ? lang[t].trainingType.createTrainingType
+              : modalForm.data?.name
+          }
           footer={null}
           content={
             <div
@@ -341,7 +346,7 @@ const TrainingType = () => {
               <Input
                 defaultValue={modalForm.data?.name}
                 width="100%"
-                label="Training Type"
+                label={lang[t].trainingType.title}
                 height="48px"
                 placeholder={"e.g Team Training"}
                 {...register("name", {
@@ -366,7 +371,7 @@ const TrainingType = () => {
                     type="primary"
                     onClick={() => setModalForm({ open: false, data: {}, typeForm: "" })}
                   >
-                    Cancel
+                    {lang[t].trainingType.tertier.delete}
                   </Button>
                 ) : (
                   <Button
@@ -379,14 +384,14 @@ const TrainingType = () => {
                       setShowDelete({ open: true, type: "detail", data: modalForm.data });
                     }}
                   >
-                    Delete
+                    {lang[t].trainingType.tertier.delete}
                   </Button>
                 )}
 
                 <Button full onClick={handleSubmit(onSubmit)} variant="primary" size="big">
                   {isLoadingCreateTrainingType || isLoadingUpdateTrainingType
                     ? "Loading..."
-                    : "Save"}
+                    : lang[t].trainingType.primary.save}
                 </Button>
               </div>
             </div>
@@ -399,7 +404,7 @@ const TrainingType = () => {
           centered
           visible={isShowDelete.open}
           onCancel={() => setShowDelete({ open: false, type: "", data: {} })}
-          title={"Confirm Delete"}
+          title={lang[t].trainingType.confirmDelete}
           footer={null}
           content={
             <div
@@ -427,7 +432,7 @@ const TrainingType = () => {
                   type="primary"
                   onClick={() => setShowDelete({ open: false, type: "", data: {} })}
                 >
-                  Cancel
+                  {lang[t].trainingType.tertier.cancel}
                 </Button>
                 <Button
                   variant="primary"
@@ -443,7 +448,7 @@ const TrainingType = () => {
                     }
                   }}
                 >
-                  {isLoadingDeleteTrainingType ? "loading..." : "Yes"}
+                  {isLoadingDeleteTrainingType ? "loading..." : lang[t].trainingType.primary.yes}
                 </Button>
               </div>
             </div>
