@@ -69,6 +69,11 @@ export default function CreateCustomers({
   getValues,
   router,
   editBankAccount,
+  addMoreAddress,
+  newAddress,
+  primary,
+  setPrimary,
+  deleteLabel,
 }: any) {
   const dataWatchCustomer = useWatch({
     control,
@@ -357,6 +362,11 @@ export default function CreateCustomers({
             setSearchPostalCode={setSearchPostalCode}
             getValues={getValues}
             formType={detailCustomer ? "edit" : "add"}
+            addMoreAddress={addMoreAddress}
+            newAddress={newAddress}
+            primary={primary}
+            setPrimary={setPrimary}
+            deleteLabel={deleteLabel}
           />
         );
       case "Sales":

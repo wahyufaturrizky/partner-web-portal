@@ -185,7 +185,13 @@ export default function PageCreateCustomer() {
     setValue,
     getValues,
     router,
-    editBankAccount: lang[t].areYouSureToDelete,
+    editBankAccount: lang[t].customer.editBankAccount,
+    addMoreAddress: lang[t].customer.addMoreAddress,
+    newAddress: lang[t].customer.newAddress,
+    primary: lang[t].customer.primary,
+    setPrimary: lang[t].customer.setPrimary,
+    deleteLabel: lang[t].customer.tertier.delete,
+    addressTypeLabel: lang[t].customer.tertier.addressTypeLabel,
   };
 
   return <CreateCustomers {...propsDropdownField} />;

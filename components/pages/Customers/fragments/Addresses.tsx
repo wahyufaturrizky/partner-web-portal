@@ -29,6 +29,11 @@ const Addresses = ({
   fetchNextPagePostalCode,
   postalCodeList,
   setSearchPostalCode,
+  addMoreAddress,
+  newAddress,
+  primary,
+  setPrimary,
+  deleteLabel,
 }: any) => {
   const { register, control, setValue } = useFormContext();
 
@@ -179,7 +184,7 @@ const Addresses = ({
             }
           }}
         >
-          <ICPlusWhite /> Add More Address
+          <ICPlusWhite /> {addMoreAddress}
         </Button>
       </Row>
 
@@ -216,7 +221,7 @@ const Addresses = ({
             <Spacer size={10} />
 
             <Text variant="headingRegular" color="blue.dark">
-              New Address
+              {newAddress}
             </Text>
 
             <Spacer size={10} />
@@ -225,7 +230,7 @@ const Addresses = ({
               {address.is_primary ? (
                 <>
                   <AddressLabel>
-                    <CheckOutlined /> Primary
+                    <CheckOutlined /> {primary}
                   </AddressLabel>{" "}
                   |
                 </>
@@ -246,7 +251,7 @@ const Addresses = ({
                       update(addressIndex, { ...address, is_primary: true });
                     }}
                   >
-                    Set Primary
+                    {setPrimary}
                   </Text>{" "}
                   |
                 </>
@@ -261,7 +266,7 @@ const Addresses = ({
                   remove(addressIndex);
                 }}
               >
-                Delete
+                {deleteLabel}
               </Text>
             </Row>
 

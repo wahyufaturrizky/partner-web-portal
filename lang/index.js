@@ -415,6 +415,11 @@ export const lang = {
       title: "Custoemr",
       palceholderSearch: "Search Customer, Salesman, etc",
       editBankAccount: "Edit Bank Account",
+      addMoreAddress: "Add More Address",
+      newAddress: "New Address",
+      primary: "Primary",
+      setPrimary: "Set Primary",
+      addressTypeLabel: "Address Type",
     },
     productList: {
       list: {
@@ -1001,6 +1006,11 @@ export const lang = {
       title: "Pelanggan",
       palceholderSearch: "Cari Pelanggan, Penjual, dll",
       editBankAccount: "Sunting Rekening Bank",
+      addMoreAddress: "Tambahkan Alamat Lainnya",
+      newAddress: "Alamat baru",
+      primary: "Utama",
+      setPrimary: "Set Primary",
+      addressTypeLabel: "Tipe Alamat",
     },
     productList: {
       list: {
