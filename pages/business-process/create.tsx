@@ -23,10 +23,10 @@ import DraggableTable from "../../components/pages/BusinessProcess/DraggableTabl
 import DraggableGrids from "../../components/pages/BusinessProcess/DraggableGrid";
 
 import styled from "styled-components";
-
+import { lang } from "lang";
 const CreateBusinessProcess = () => {
+  const t = localStorage.getItem("lan") || "en-US";
   const router = useRouter();
-
   const [showAddProcessModal, setShowAddProcessModal] = useState(false);
   const [showEditProcessModal, setShowEditProcessModal] = useState(false);
 
@@ -173,7 +173,7 @@ const CreateBusinessProcess = () => {
     <>
       <Col>
         <Row gap="4px">
-          <Text variant="h4">Create Business Process</Text>
+          <Text variant="h4">{lang[t].businessProcess.modalTitleCreate.businessProcess}</Text>
         </Row>
         <Spacer size={20} />
 
@@ -189,8 +189,8 @@ const CreateBusinessProcess = () => {
                   width="185px"
                   noSearch
                   items={[
-                    { id: "DRAFT", value: "Draft" },
-                    { id: "PUBLISH", value: "Published" },
+                    { id: "DRAFT", value: lang[t].businessProcess.ghost.draft },
+                    { id: "PUBLISH", value: lang[t].businessProcess.ghost.published },
                   ]}
                   defaultValue="DRAFT"
                   placeholder={"Select"}
@@ -203,10 +203,10 @@ const CreateBusinessProcess = () => {
 
             <Row gap="16px">
               <Button size="big" variant={"tertiary"} onClick={() => router.back()}>
-                Cancel
+                {lang[t].businessProcess.tertier.cancel}
               </Button>
               <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
-                {isLoadingCreateBusinessProcess ? "Loading..." : "Save"}
+                {isLoadingCreateBusinessProcess ? "Loading..." : lang[t].businessProcess.primary.save}
               </Button>
             </Row>
           </Row>
@@ -216,15 +216,15 @@ const CreateBusinessProcess = () => {
 
         <Accordion>
           <Accordion.Item key={1}>
-            <Accordion.Header variant="blue">General</Accordion.Header>
+            <Accordion.Header variant="blue">{lang[t].businessProcess.accordion.general}</Accordion.Header>
             <Accordion.Body>
               <Row width="100%">
                 <Input
                   id="name"
                   width="100%"
-                  label="Name"
+                  label={lang[t].businessProcess.emptyState.name}
                   height="48px"
-                  placeholder={"e.g  Order to Cash"}
+                  placeholder={lang[t].businessProcess.pageTitle.ordertoCash}
                   {...register("name")}
                 />
               </Row>
@@ -236,7 +236,7 @@ const CreateBusinessProcess = () => {
 
         <Accordion>
           <Accordion.Item key={1}>
-            <Accordion.Header variant="blue">Processes</Accordion.Header>
+            <Accordion.Header variant="blue">{lang[t].businessProcess.accordion.processes}</Accordion.Header>
             <Accordion.Body>
               {!!processList.length ? (
                 <>
