@@ -20,8 +20,10 @@ import useDebounce from "../../lib/useDebounce";
 import { useUOMCategoryInfiniteLists } from "../../hooks/mdm/unit-of-measure-category/useUOMCategory";
 import { ModalDeleteConfirmation } from "../../components/elements/Modal/ModalConfirmationDelete";
 import ArrowLeft from "../../assets/icons/arrow-left.svg";
+import { lang } from "lang";
 
 const UOMDetail = () => {
+  const t = localStorage.getItem("lan") || "en-US";
   const router = useRouter();
   const { uom_id } = router.query;
 
@@ -147,10 +149,10 @@ const UOMDetail = () => {
 
             <Row gap="16px">
               <Button size="big" variant={"tertiary"} onClick={() => setShowDeleteModal(true)}>
-                Delete
+                {lang[t].unitOfMeasure.tertier.delete}
               </Button>
               <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
-                {isLoadingUpdateUom ? "Loading..." : "Save"}
+                {isLoadingUpdateUom ? "Loading..." : lang[t].unitOfMeasure.primary.save}
               </Button>
             </Row>
           </Row>
@@ -160,7 +162,7 @@ const UOMDetail = () => {
 
         <Accordion>
           <Accordion.Item key={1}>
-            <Accordion.Header variant="blue">General</Accordion.Header>
+            <Accordion.Header variant="blue">{lang[t].unitOfMeasure.accordion.general}</Accordion.Header>
             <Accordion.Body>
               <Row width="100%" noWrap>
                 <Col width={"100%"}>

@@ -17,8 +17,10 @@ import { useCreateUOM } from "../../hooks/mdm/unit-of-measure/useUOM";
 import { queryClient } from "../_app";
 import useDebounce from "../../lib/useDebounce";
 import { useUOMCategoryInfiniteLists } from "../../hooks/mdm/unit-of-measure-category/useUOMCategory";
+import { lang } from "lang";
 
 const UOMCreate = () => {
+  const t = localStorage.getItem("lan") || "en-US";
   const router = useRouter();
 
   const [listUomCategory, setListUomCategory] = useState<any[]>([]);
@@ -83,7 +85,7 @@ const UOMCreate = () => {
   return (
     <Col>
       <Row gap="4px">
-        <Text variant={"h4"}>Create Unit of Measure</Text>
+        <Text variant={"h4"}>{lang[t].unitOfMeasure.pageTitle.create}</Text>
       </Row>
 
       <Spacer size={20} />
@@ -113,10 +115,10 @@ const UOMCreate = () => {
 
           <Row gap="16px">
             <Button size="big" variant={"tertiary"} onClick={() => router.back()}>
-              Cancel
+              {lang[t].unitOfMeasure.tertier.cancel}
             </Button>
             <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
-              {isLoadingCreateUom ? "Loading..." : "Save"}
+              {isLoadingCreateUom ? "Loading..." : lang[t].unitOfMeasure.primary.save}
             </Button>
           </Row>
         </Row>
@@ -126,7 +128,7 @@ const UOMCreate = () => {
 
       <Accordion>
         <Accordion.Item key={1}>
-          <Accordion.Header variant="blue">General</Accordion.Header>
+          <Accordion.Header variant="blue">{lang[t].unitOfMeasure.accordion.general}</Accordion.Header>
           <Accordion.Body>
             <Row width="100%" noWrap>
               <Col width={"100%"}>
