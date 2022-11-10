@@ -24,6 +24,7 @@ import { queryClient } from "../_app";
 import { ICDownload, ICUpload } from "../../assets/icons";
 import { mdmDownloadService } from "../../lib/client";
 import { useRouter } from "next/router";
+import { lang } from "lang";
 
 const downloadFile = (params: any) =>
   mdmDownloadService("/top/download", { params }).then((res) => {
@@ -51,6 +52,7 @@ const renderConfirmationText = (type: any, data: any) => {
 };
 
 const TermOfPayment = () => {
+  const t = localStorage.getItem("lan") || "en-US";
   const router = useRouter();
   const pagination = usePagination({
     page: 1,
@@ -130,15 +132,15 @@ const TermOfPayment = () => {
 
   const columns = [
     {
-      title: "Term of Payment ID",
+      title: lang[t].termOfPayment.termofPaymentID,
       dataIndex: "id",
     },
     {
-      title: "Payment Term",
+      title: lang[t].termOfPayment.paymentTerm,
       dataIndex: "topTerm",
     },
     {
-      title: "Action",
+      title: lang[t].termOfPayment.termofPaymentAction,
       dataIndex: "action",
       width: "15%",
       align: "left",
@@ -163,14 +165,14 @@ const TermOfPayment = () => {
   return (
     <>
       <Col>
-        <Text variant={"h4"}>Term of Payment</Text>
+        <Text variant={"h4"}>{lang[t].termOfPayment.pageTitle.termOfPayment}</Text>
         <Spacer size={20} />
       </Col>
       <Card>
         <Row justifyContent="space-between">
           <Search
             width="340px"
-            placeholder="Search Term of Payment ID, Term."
+            placeholder={lang[t].termOfPayment.searchBar.termOfPayment}
             onChange={(e: any) => {
               setSearch(e.target.value);
             }}
@@ -188,10 +190,10 @@ const TermOfPayment = () => {
               }
               disabled={rowSelection.selectedRowKeys?.length === 0}
             >
-              Delete
+              {lang[t].termOfPayment.tertier.delete}
             </Button>
             <DropdownMenu
-              title={"More"}
+              title={lang[t].termOfPayment.secondary.more}
               buttonVariant={"secondary"}
               buttonSize={"big"}
               textVariant={"button"}
@@ -220,7 +222,7 @@ const TermOfPayment = () => {
                   value: (
                     <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
                       <ICDownload />
-                      <p style={{ margin: "0" }}>Download Template</p>
+                      <p style={{ margin: "0" }}>{lang[t].termOfPayment.ghost.downloadTemplate}</p>
                     </div>
                   ),
                 },
@@ -229,7 +231,7 @@ const TermOfPayment = () => {
                   value: (
                     <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
                       <ICUpload />
-                      <p style={{ margin: "0" }}>Upload Template</p>
+                      <p style={{ margin: "0" }}>{lang[t].termOfPayment.ghost.uploadTemplate}</p>
                     </div>
                   ),
                 },
@@ -238,7 +240,7 @@ const TermOfPayment = () => {
                   value: (
                     <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
                       <ICDownload />
-                      <p style={{ margin: "0" }}>Download Data</p>
+                      <p style={{ margin: "0" }}>{lang[t].termOfPayment.ghost.downloadData}</p>
                     </div>
                   ),
                 },
@@ -249,7 +251,7 @@ const TermOfPayment = () => {
               variant="primary"
               onClick={() => router.push("/term-of-payment/create")}
             >
-              Create
+              {lang[t].termOfPayment.primary.create}
             </Button>
           </Row>
         </Row>

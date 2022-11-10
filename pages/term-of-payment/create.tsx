@@ -12,8 +12,10 @@ import { queryClient } from "../_app";
 import ModalAddTerm from "../../components/elements/Modal/ModalAddTerm";
 import DraggableTable from "../../components/pages/TermOfPayment/DraggableTable";
 import { ExclamationCircleOutlined } from "@ant-design/icons";
+import { lang } from "lang";
 
 const TermOfPaymentCreate = () => {
+  const t = localStorage.getItem("lan") || "en-US";
   const router = useRouter();
 
   const [showTermForm, setShowTermForm] = useState({ type: "", open: false, data: {} });
@@ -137,7 +139,7 @@ const TermOfPaymentCreate = () => {
     <>
       <Col>
         <Row gap="4px">
-          <Text variant={"h4"}>Create Term of Payment</Text>
+          <Text variant={"h4"}>{lang[t].termOfPayment.modalTitleCreate.termOfPayment}</Text>
         </Row>
 
         <Spacer size={20} />
@@ -146,10 +148,10 @@ const TermOfPaymentCreate = () => {
           <Row justifyContent="flex-end" alignItems="center" nowrap>
             <Row gap="16px">
               <Button size="big" variant={"tertiary"} onClick={() => router.back()}>
-                Cancel
+                {lang[t].termOfPayment.tertier.cancel}
               </Button>
               <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
-                {isLoadingTermOfPayment ? "Loading..." : "Save"}
+                {isLoadingTermOfPayment ? "Loading..." : lang[t].termOfPayment.primary.save}
               </Button>
             </Row>
           </Row>
@@ -162,7 +164,7 @@ const TermOfPaymentCreate = () => {
             <Row width="50%">
               <Input
                 width="50%"
-                label="Payment Term"
+                label={lang[t].termOfPayment.paymentTerm}
                 height="40px"
                 placeholder={"e.g 3 Days"}
                 {...register("name")}
