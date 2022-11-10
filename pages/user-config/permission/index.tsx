@@ -20,9 +20,11 @@ import {
   usePartnerConfigPermissionLists,
   useDeletePartnerConfigPermissionList,
 } from "../../../hooks/user-config/usePermission";
+import { lang } from "lang";
 
 const UserConfigPermission: any = () => {
   const router = useRouter();
+  const t = localStorage.getItem("lan") || "en-US";
   const pagination = usePagination({
     page: 1,
     itemsPerPage: 20,
@@ -77,21 +79,21 @@ const UserConfigPermission: any = () => {
 
   const columns = [
     {
-      title: "Permission Name",
+      title: lang[t].permissionList.permissionListName,
       dataIndex: "field_name",
     },
     {
-      title: "Associated Menu",
+      title: lang[t].permissionList.permissionList.associated,
       dataIndex: "field_menu",
       render: (text: any) => text.name,
     },
     {
-      title: "System Config",
+      title: lang[t].permissionList.permissionList.systemConfig,
       dataIndex: "field_is_system_config",
       render: (text: any) => `${text}`,
     },
     {
-      title: "Action",
+      title: lang[t].permissionList.permissionList.action,
       dataIndex: "action",
     },
   ];
@@ -112,7 +114,7 @@ const UserConfigPermission: any = () => {
           }}
           variant="tertiary"
         >
-          View Detail
+          {lang[t].permissionList.tertier.viewDetail}
         </Button>
       ),
     });
@@ -140,13 +142,13 @@ const UserConfigPermission: any = () => {
   return (
     <>
       <Col>
-        <Text variant={"h4"}>Permission List</Text>
+        <Text variant={"h4"}>{lang[t].permissionList.pageTitle.permissionList}</Text>
         <Spacer size={20} />
         <HeaderFilter>
           <Row alignItems="center" noWrap>
             <Search
               width="360px"
-              placeholder="Search Permission Name"
+              placeholder={lang[t].permissionList.searchBar.permissionList}
               onChange={(e: any) => setSearch(e.target.value)}
             />
 
@@ -162,7 +164,7 @@ const UserConfigPermission: any = () => {
                 fieldsMenuList &&
                 fieldsMenuList?.rows.map((data: any) => ({ id: data.id, value: data.name }))
               }
-              placeholder={"Menu"}
+              placeholder={lang[t].permissionList.filterbar.menu}
               handleChange={handleChangeDropdownMenu}
               noSearch
               rounded
@@ -176,7 +178,7 @@ const UserConfigPermission: any = () => {
               allowClear
               onClear={handleClearDropdownIsSystemConfig}
               items={valueIsSystemConfig}
-              placeholder={"Is System Config"}
+              placeholder={lang[t].permissionList.filterbar.systemBar}
               handleChange={handleChangeDropdownIsSystemConfig}
               noSearch
               rounded
@@ -192,7 +194,7 @@ const UserConfigPermission: any = () => {
                 router.push("/user-config/permission/create");
               }}
             >
-              Create
+              {lang[t].permissionList.primary.create}
             </Button>
           </Row>
         </HeaderFilter>
