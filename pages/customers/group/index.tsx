@@ -31,6 +31,7 @@ import {
   useUpdateCustomerGroupMDM,
   useUploadFileCustomerGroupMDM,
 } from "../../../hooks/mdm/customers/useCustomersGroupMDM";
+import { lang } from "lang";
 
 const downloadFile = (params: any) =>
   mdmDownloadService("/customer-group/download", { params }).then((res) => {
@@ -60,6 +61,7 @@ const renderConfirmationText = (type: any, data: any) => {
 };
 
 const CustomerGroupMDM = () => {
+  const t = localStorage.getItem("lan") || "en-US";
   const router = useRouter();
   const pagination = usePagination({
     page: 1,
@@ -115,7 +117,7 @@ const CustomerGroupMDM = () => {
                   onClick={() => router.push(`/customers/group/${element.id}`)}
                   variant="tertiary"
                 >
-                  View Detail
+                  {lang[t].customerGroup.tertier.viewDetail}
                 </Button>
               </div>
             ),
@@ -174,15 +176,15 @@ const CustomerGroupMDM = () => {
 
   const columns = [
     {
-      title: "Customer Group ID",
+      title: lang[t].customerGroup.customergroupID,
       dataIndex: "customerGroupCode",
     },
     {
-      title: "Customer Group Name",
+      title: lang[t].customerGroup.customergroupName,
       dataIndex: "name",
     },
     {
-      title: "Parent",
+      title: lang[t].customerGroup.customergroupParent,
       dataIndex: "parent",
     },
     {
@@ -190,7 +192,7 @@ const CustomerGroupMDM = () => {
       dataIndex: "company",
     },
     {
-      title: "Action",
+      title: lang[t].customerGroup.customergroupAction,
       dataIndex: "action",
       width: "15%",
       align: "left",
@@ -228,14 +230,14 @@ const CustomerGroupMDM = () => {
   return (
     <>
       <Col>
-        <Text variant={"h4"}>Customer Group</Text>
+        <Text variant={"h4"}>{lang[t].customerGroup.pageTitle.customergroup}</Text>
         <Spacer size={20} />
       </Col>
       <Card>
         <Row justifyContent="space-between">
           <Search
             width="340px"
-            placeholder="Search Cosutomer Group ID, Name, Parent"
+            placeholder={lang[t].customerGroup.searchBar.customergroup}
             onChange={(e: any) => {
               setSearch(e.target.value);
             }}
@@ -253,10 +255,10 @@ const CustomerGroupMDM = () => {
               }
               disabled={rowSelection.selectedRowKeys?.length === 0}
             >
-              Delete
+              {lang[t].customerGroup.tertier.delete}
             </Button>
             <DropdownMenu
-              title={"More"}
+              title={lang[t].customerGroup.secondary.more}
               buttonVariant={"secondary"}
               buttonSize={"big"}
               textVariant={"button"}
@@ -285,7 +287,7 @@ const CustomerGroupMDM = () => {
                   value: (
                     <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
                       <ICDownload />
-                      <p style={{ margin: "0" }}>Download Template</p>
+                      <p style={{ margin: "0" }}>{lang[t].customerGroup.ghost.downloadTemplate}</p>
                     </div>
                   ),
                 },
@@ -294,7 +296,7 @@ const CustomerGroupMDM = () => {
                   value: (
                     <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
                       <ICUpload />
-                      <p style={{ margin: "0" }}>Upload Template</p>
+                      <p style={{ margin: "0" }}>{lang[t].customerGroup.ghost.uploadTemplate}</p>
                     </div>
                   ),
                 },
@@ -303,7 +305,7 @@ const CustomerGroupMDM = () => {
                   value: (
                     <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
                       <ICDownload />
-                      <p style={{ margin: "0" }}>Download Data</p>
+                      <p style={{ margin: "0" }}>{lang[t].customerGroup.ghost.downloadData}</p>
                     </div>
                   ),
                 },
@@ -316,7 +318,7 @@ const CustomerGroupMDM = () => {
                 setModalCustomerGroupForm({ open: true, typeForm: "create", data: {} })
               }
             >
-              Create
+              {lang[t].customerGroup.primary.create}
             </Button>
           </Row>
         </Row>
@@ -341,7 +343,7 @@ const CustomerGroupMDM = () => {
           closable={false}
           visible={modalCustomerGroupForm.open}
           onCancel={() => setModalCustomerGroupForm({ open: false, data: {}, typeForm: "" })}
-          title={"Customer Group"}
+          title={lang[t].customerGroup.pageTitle.customergroup}
           footer={null}
           content={
             <div
@@ -353,7 +355,7 @@ const CustomerGroupMDM = () => {
             >
               <Input
                 width="100%"
-                label="Customer Group Name"
+                label={lang[t].customerGroup.customergroupName}
                 height="48px"
                 required
                 placeholder={"e.g RTL-Retail Large"}
@@ -367,7 +369,7 @@ const CustomerGroupMDM = () => {
               ) : (
                 <>
                   <Dropdown
-                    label="Parent"
+                    label={lang[t].customerGroup.customergroupParent}
                     isOptional
                     width="100%"
                     items={dataParentCustomerGroupMDM.map((data) => ({
@@ -385,7 +387,7 @@ const CustomerGroupMDM = () => {
 
               <Input
                 width="100%"
-                label="External Code"
+                label={lang[t].customerGroup.emptyState.code}
                 height="48px"
                 required
                 placeholder={"e.g 400000"}
@@ -411,13 +413,13 @@ const CustomerGroupMDM = () => {
                   type="primary"
                   onClick={() => setModalCustomerGroupForm({ open: false, data: {}, typeForm: "" })}
                 >
-                  Cancel
+                  {lang[t].customerGroup.tertier.cancel}
                 </Button>
 
                 <Button onClick={handleSubmit(onSubmit)} variant="primary" size="big">
                   {isLoadingCreateCustomerGroupMDM || isLoadingUpdateCustomerGroupMDM
                     ? "Loading..."
-                    : "Save"}
+                    : lang[t].customerGroup.primary.save}
                 </Button>
               </div>
             </div>
