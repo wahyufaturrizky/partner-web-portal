@@ -1,4 +1,5 @@
 import usePagination from "@lucasmogari/react-pagination";
+import { lang } from "lang";
 import Router from "next/router";
 import {
   Accordion,
@@ -33,6 +34,7 @@ import { useFilterListPermissions } from "../../hooks/permission/usePermission";
 import { usePartnerConfigPermissionLists } from "../../hooks/user-config/usePermission";
 
 const DetailMenuList: any = () => {
+  const t = localStorage.getItem("lan") || "en-US";
   const [isLoading, setIsLoading] = useState(true);
   const [searchTableField, setSearchTableField] = useState("");
   const [searchTablePermission, setSearchTablePermission] = useState("");
@@ -484,10 +486,10 @@ const DetailMenuList: any = () => {
                   variant={"tertiary"}
                   onClick={() => setModalDelete({ open: true })}
                 >
-                  Delete
+                  {lang[t].purchaseOrg.tertier.delete}
                 </Button>
                 <Button size="big" variant={"primary"} onClick={handleUpdateMenuList}>
-                  {isLoadingUpdatePurchaseOrganization ? "loading..." : "Save"}
+                  {isLoadingUpdatePurchaseOrganization ? "loading..." : lang[t].purchaseOrg.primary.save}
                 </Button>
               </Row>
             </Row>
@@ -498,13 +500,13 @@ const DetailMenuList: any = () => {
 
         <Accordion>
           <Accordion.Item key={1}>
-            <Accordion.Header variant="blue">General</Accordion.Header>
+            <Accordion.Header variant="blue">{lang[t].purchaseOrg.accordion.purchaseOrg}</Accordion.Header>
             <Accordion.Body>
               <Row width="100%" gap="20px" noWrap>
                 <Input
                   id="name"
                   width="100%"
-                  label="Name"
+                  label={lang[t].purchaseOrg.emptyState.purchaseGroupName}
                   value={name}
                   height="48px"
                   placeholder={"e.g Shipment and Delivery"}
@@ -516,7 +518,7 @@ const DetailMenuList: any = () => {
                 ) : (
                   <>
                     <Dropdown
-                      label="Parent"
+                      label={lang[t].purchaseOrg.filterbar.parent}
                       isOptional
                       defaultValue={parent}
                       width="100%"
@@ -541,7 +543,7 @@ const DetailMenuList: any = () => {
                     setStateModal({
                       ...stateModal,
                       isShowModal: true,
-                      titleModal: "Product Category",
+                      titleModal: lang[t].purchaseOrg.filterbar.productCategory,
                       widthModal: 1000,
                     })
                   }
@@ -551,7 +553,7 @@ const DetailMenuList: any = () => {
                     dataAssociatedPermissionsField?.map((data) => data.key)
                   }
                   handleChangeValue={handleChangeInputAssociatePermission}
-                  label="Product Category"
+                  label={lang[t].purchaseOrg.filterbar.productCategory}
                   listItems={datFieldPermission}
                 />
               ) : (
