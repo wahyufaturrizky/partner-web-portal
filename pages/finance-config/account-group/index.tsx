@@ -13,6 +13,7 @@ import {
   useUpdateAccountGroup,
 } from "../../../hooks/finance-config/useAccountGroup";
 import useDebounce from "lib/useDebounce";
+import { lang } from "lang";
 
 const FinanceConfigAccountGroud: any = () => {
   const pagination = usePagination({
@@ -30,22 +31,23 @@ const FinanceConfigAccountGroud: any = () => {
   const [modalCreate, setModalCreate] = useState({ open: false });
   const [modalDelete, setModalDelete] = useState({ open: false });
   const useDebounceSearchAccountGroup = useDebounce(search, 1000);
+  const t = localStorage.getItem("lan") || "en-US";
 
   const columns = [
     {
-      title: "Account Group ID",
+      title: lang[t].accountGroup.checkBoxAccountGroupID,
       dataIndex: "account_group_id",
     },
     {
-      title: "Account Group Name",
+      title: lang[t].accountGroup.accountGroupName,
       dataIndex: "account_group_name",
     },
     {
-      title: "Parent",
+      title: lang[t].accountGroup.accountGroupParent,
       dataIndex: "parent",
     },
     {
-      title: "Action",
+      title: lang[t].accountGroup.accountGroupAction,
       dataIndex: "action",
       width: 160,
     },
@@ -88,7 +90,7 @@ const FinanceConfigAccountGroud: any = () => {
                 onClick={() => setModalDetail({ open: true, data: element, id: element.id })}
                 variant="tertiary"
               >
-                View Detail
+                {lang[t].accountGroup.tertier.viewDetail}
               </Button>
             ),
           };
@@ -143,14 +145,14 @@ const FinanceConfigAccountGroud: any = () => {
   return (
     <>
       <Col>
-        <Text variant={"h4"}>Account Group</Text>
+        <Text variant={"h4"}>{lang[t].accountGroup.pageTitle.accountGroup}</Text>
         <Spacer size={20} />
         <Card>
           <Row justifyContent="space-between">
             <Row alignItems="center">
               <Search
                 width="380px"
-                placeholder="Search Account Group ID, Name, Parent"
+                placeholder={lang[t].accountGroup.search}
                 onChange={(e: any) => setSearch(e.target.value)}
               />
               <Spacer size={16} />
@@ -162,10 +164,10 @@ const FinanceConfigAccountGroud: any = () => {
                 onClick={() => setModalDelete({ open: true })}
                 disabled={rowSelection.selectedRowKeys?.length === 0}
               >
-                Delete
+                {lang[t].accountGroup.tertier.delete}
               </Button>
               <Button size="big" variant={"primary"} onClick={() => setModalCreate({ open: true })}>
-                Create
+                {lang[t].accountGroup.primary.create}
               </Button>
             </Row>
           </Row>
