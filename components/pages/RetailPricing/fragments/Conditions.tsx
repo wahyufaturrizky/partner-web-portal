@@ -78,7 +78,82 @@ const Conditions = ({
 
   return (
     <>
-      {fields.map((item: any, index) => {
+      {fields.length === 0 && (
+        <Row key={0}>
+        <Spacer size={10} />
+          <Row width="100%" noWrap>
+              <Controller
+                control={control}
+                name={`availability.${0}.based_on`}
+                render={({ field: { onChange, value }, fieldState: { error } }) => {
+                  return (
+                    <Col width={"100%"}>
+                      <Label>
+                        Based On
+                        <Spacer size={5} display="inline-block" />
+                        <Tooltip
+                          overlayInnerStyle={{ width: "fit-content" }}
+                          title={`Based On`}
+                          color={"#F4FBFC"}
+                        >
+                          <ExclamationCircleOutlined />
+                        </Tooltip>
+                      </Label>
+                      <Spacer size={3} />
+                      <CustomFormSelect
+                        height="48px"
+                        style={{ width: "100%" }}
+                        placeholder={"Select"}
+                        borderColor={error?.message ? "#ED1C24" : "#AAAAAA"}
+                        arrowColor={"#000"}
+                        size={"large"}
+                        items={groupingOption}
+                        onChange={(value: any) => {
+                          handleGroupChange(value, 0);
+                        }}
+                        error={error?.message}
+                      />
+                    </Col>
+                  )
+                }}
+              />
+
+              <Spacer size={20} />
+
+              <div style={{ visibility: "hidden", width: "100%" }}>
+                <Input
+                  label="Hide"
+                  height="48px"
+                  placeholder={"e.g 10000000"}
+                />
+              </div>
+            </Row>
+
+            <Spacer size={20} />
+
+            <Row width="100%">
+              {(availabilityWatch[0]?.based_on === "COUNTRY") && (
+                <CountryCondition country={availabilityWatch[0]} control={control} index={0} setValue={setValue} />
+              )}
+            </Row>
+
+            <Row width="100%">
+              {(availabilityWatch[0]?.based_on === "BRANCH" ) && (
+                <BranchCondition selectAll={availabilityWatch[0]?.select_all} control={control} index={0} setValue={setValue} />
+              )}
+            </Row>
+
+            <Row width="100%">
+              {(availabilityWatch[0]?.based_on === "SALES ORGANIZATION") && (
+                <SalesOrganizationCondition salesOrganization={availabilityWatch[0]} setValue={setValue} control={control} index={0} selectAll={availabilityWatch[0].select_all}/>
+              )}
+            </Row>
+
+            <Spacer size={10} />
+        </Row>
+      )}
+      
+      {fields.length > 0 && fields.map((item: any, index) => {
         return (
         <Row key={index}>
           {index > 0 && (

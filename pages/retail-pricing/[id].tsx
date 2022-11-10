@@ -47,7 +47,7 @@ const DetailRetailPricing: any = () => {
     defaultValues: {
       rules: [],
       name: "",
-      availability: [{ based_on: "COUNTRY" }],
+      availability: [],
     }
   });
 
@@ -197,7 +197,9 @@ const DetailRetailPricing: any = () => {
 	});
 
   const onSubmit = (data:any) => {
-    data.availability = data.availability.map((data:any) => {
+    data.availability = data?.availability?.filter((data:any) => {
+      Object.keys(data).length === 0;
+    }).map((data:any) => {
       let newData:any = {
         based_on: data.based_on
       }
@@ -316,10 +318,18 @@ const DetailRetailPricing: any = () => {
     data.forEach((data:any) => {
       let valid_date_split = data.validateDate ? data.validateDate.split(' ') : null;
 
-      let newRule: any = {
-        apply_on: data.applyOn.toUpperCase(),
-        price_computation: data.priceComputation.toUpperCase(),
-        min_qty: data.minimumQuantity,
+      let newRule: any = {};
+
+      if(data.applyOn){
+        newRule.apply_on = data.applyOn.toUpperCase()
+      }
+
+      if(data.priceComputation){
+        newRule.price_computation = data.priceComputation.toUpperCase()
+      }
+
+      if(data.minimumQuantity){
+        newRule.min_qty = data.minimumQuantity
       }
 
       if(valid_date_split){
