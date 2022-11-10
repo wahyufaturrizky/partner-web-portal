@@ -32,6 +32,7 @@ import useDebounce from "lib/useDebounce";
 import { mdmDownloadService } from "lib/client";
 import { queryClient } from "pages/_app";
 import { useCountries } from "hooks/company-list/useCompany";
+import { lang } from "lang";
 
 const downloadFile = (params: any) =>
   mdmDownloadService("/postal-code/download", { params }).then((res) => {
@@ -43,6 +44,7 @@ const downloadFile = (params: any) =>
   });
 
 const CountryPostalCode = () => {
+  const t = localStorage.getItem("lan") || "en-US";
   const pagination = usePagination({
     page: 1,
     itemsPerPage: 20,
@@ -65,19 +67,19 @@ const CountryPostalCode = () => {
 
   const columns = [
     {
-      title: "Postal Code ID",
+      title: lang[t].postalCode.postalCodeID,
       dataIndex: "postal_code",
     },
     {
-      title: "Postal Code",
+      title: lang[t].postalCode.postalCode,
       dataIndex: "postal_code_id",
     },
     {
-      title: "Country Name",
+      title: lang[t].postalCode.postalCountryName,
       dataIndex: "country_name",
     },
     {
-      title: "Action",
+      title: lang[t].postalCode.postalAction,
       dataIndex: "action",
     },
   ];
@@ -130,7 +132,7 @@ const CountryPostalCode = () => {
           onClick={() => setModalDetail({ open: true, dataDetail: field })}
           variant="tertiary"
         >
-          View Detail
+          {lang[t].postalCode.tertier.viewDetail}
         </Button>
       ),
     });
@@ -175,7 +177,7 @@ const CountryPostalCode = () => {
   return (
     <>
       <Col>
-        <Text variant={"h4"}>Postal Code</Text>
+        <Text variant={"h4"}>{lang[t].postalCode.pageTitle.postalCode}</Text>
         <Spacer size={20} />
         <Card className="">
           <Row justifyContent="space-between">
@@ -183,7 +185,7 @@ const CountryPostalCode = () => {
               <Search
                 width="380px"
                 nameIcon="SearchOutlined"
-                placeholder="Search Postal Code ID. Postal Code, etc"
+                placeholder={lang[t].postalCode.searchBar.postalCode}
                 onChange={({ target }: React.ChangeEvent<HTMLInputElement>) =>
                   setSearch(target.value)
                 }
@@ -207,10 +209,10 @@ const CountryPostalCode = () => {
                 onClick={() => setModalDelete({ open: true })}
                 disabled={!(selectedRowKeys.length > 0)}
               >
-                Delete
+                {lang[t].postalCode.tertier.delete}
               </Button>
               <DropdownMenu
-                title={"More"}
+                title={lang[t].postalCode.secondary.more}
                 buttonVariant={"secondary"}
                 buttonSize={"big"}
                 textVariant={"button"}
@@ -240,7 +242,7 @@ const CountryPostalCode = () => {
                     value: (
                       <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
                         <DownloadSvg />
-                        <p style={{ margin: "0" }}>Download Template</p>
+                        <p style={{ margin: "0" }}>{lang[t].postalCode.ghost.downloadTemplate}</p>
                       </div>
                     ),
                   },
@@ -249,7 +251,7 @@ const CountryPostalCode = () => {
                     value: (
                       <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
                         <UploadSvg />
-                        <p style={{ margin: "0" }}>Upload Template</p>
+                        <p style={{ margin: "0" }}>{lang[t].postalCode.ghost.uploadTemplate}</p>
                       </div>
                     ),
                   },
@@ -258,7 +260,7 @@ const CountryPostalCode = () => {
                     value: (
                       <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
                         <DownloadSvg />
-                        <p style={{ margin: "0" }}>Download Data</p>
+                        <p style={{ margin: "0" }}>{lang[t].postalCode.ghost.downloadData}</p>
                       </div>
                     ),
                   },
@@ -274,7 +276,7 @@ const CountryPostalCode = () => {
                 ]}
               />
               <Button size="big" variant="primary" onClick={() => setModalCreate({ open: true })}>
-                Create
+                {lang[t].postalCode.primary.create}
               </Button>
             </Row>
           </Row>
