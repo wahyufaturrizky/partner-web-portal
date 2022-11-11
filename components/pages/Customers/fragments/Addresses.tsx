@@ -31,9 +31,21 @@ const Addresses = ({
   setSearchPostalCode,
   addMoreAddress,
   newAddress,
-  primary,
+  primaryLabel,
   setPrimary,
   deleteLabel,
+  addressTypeLabel,
+  storePhotoLabel,
+  dimensionMinimumLabel,
+  fileSizeLabel,
+  streetLabel,
+  countryLabel,
+  provinceLabel,
+  cityLabel,
+  districtLabel,
+  zoneLabel,
+  postalCodeLabel,
+  longitudeLabel,
 }: any) => {
   const { register, control, setValue } = useFormContext();
 
@@ -199,7 +211,7 @@ const Addresses = ({
               render={({ field: { value } }) => {
                 return (
                   <FileUploaderAllFiles
-                    label="Store Photo"
+                    label={storePhotoLabel}
                     onSubmit={(file: any) => {
                       setindexStorePhoto(addressIndex);
                       handleUploadStorePhotoAddress(file);
@@ -209,10 +221,7 @@ const Addresses = ({
                     withCrop
                     sizeImagePhoto="125px"
                     removeable
-                    textPhoto={[
-                      "Dimension Minimum 72 x 72, Optimal size 300 x 300",
-                      "File Size Max. 5MB",
-                    ]}
+                    textPhoto={[dimensionMinimumLabel, fileSizeLabel]}
                   />
                 );
               }}
@@ -230,7 +239,7 @@ const Addresses = ({
               {address.is_primary ? (
                 <>
                   <AddressLabel>
-                    <CheckOutlined /> {primary}
+                    <CheckOutlined /> {primaryLabel}
                   </AddressLabel>{" "}
                   |
                 </>
@@ -279,7 +288,7 @@ const Addresses = ({
                 name={`address.${addressIndex}.address_type`}
                 render={({ field: { onChange, value }, formState: { errors } }) => (
                   <Col width="50%">
-                    <Text variant="headingRegular">Address Type</Text>
+                    <Text variant="headingRegular">{addressTypeLabel}</Text>
                     <Spacer size={5} />
                     <FormSelect
                       defaultValue={value}
@@ -328,7 +337,7 @@ const Addresses = ({
                       required
                       error={errors?.["address"]?.[addressIndex]?.["street"]?.["message"]}
                       placeholder="e.g Front Groceries No. 5"
-                      label="Street"
+                      label={streetLabel}
                     />
                   )}
                 />
@@ -350,7 +359,7 @@ const Addresses = ({
                       </Center>
                     ) : (
                       <>
-                        <Text variant="headingRegular">Country</Text>
+                        <Text variant="headingRegular">{countryLabel}</Text>
                         <Spacer size={5} />
                         <FormSelect
                           defaultValue={""}
@@ -387,7 +396,7 @@ const Addresses = ({
                 name={`address.${addressIndex}.province`}
                 render={({ field: { onChange, value }, formState: { errors } }) => (
                   <Col width="50%">
-                    <Text variant="headingRegular">Province</Text>
+                    <Text variant="headingRegular">{provinceLabel}</Text>
                     <Spacer size={5} />
                     <FormSelect
                       defaultValue={value}
@@ -416,7 +425,7 @@ const Addresses = ({
                 name={`address.${addressIndex}.city`}
                 render={({ field: { onChange, value }, formState: { errors } }) => (
                   <Col width="50%">
-                    <Text variant="headingRegular">City</Text>
+                    <Text variant="headingRegular">{cityLabel}</Text>
                     <Spacer size={5} />
                     <FormSelect
                       defaultValue={value}
@@ -441,7 +450,7 @@ const Addresses = ({
                 name={`address.${addressIndex}.district`}
                 render={({ field: { onChange, value }, formState: { errors } }) => (
                   <Col width="50%">
-                    <Text variant="headingRegular">District</Text>
+                    <Text variant="headingRegular">{districtLabel}</Text>
                     <Spacer size={5} />
                     <FormSelect
                       defaultValue={value}
@@ -470,7 +479,7 @@ const Addresses = ({
                 name={`address.${addressIndex}.zone`}
                 render={({ field: { onChange, value }, formState: { errors } }) => (
                   <Col width="50%">
-                    <Text variant="headingRegular">Zone</Text>
+                    <Text variant="headingRegular">{zoneLabel}</Text>
                     <Spacer size={5} />
                     <FormSelect
                       defaultValue={value}
@@ -492,7 +501,7 @@ const Addresses = ({
                 name={`address.${addressIndex}.postal_code`}
                 render={({ field: { onChange, value } }) => (
                   <Col width="50%">
-                    <Text variant="headingRegular">Postal Code</Text>
+                    <Text variant="headingRegular">{postalCodeLabel}</Text>
                     <Spacer size={5} />
                     <FormSelect
                       defaultValue={value}
@@ -530,7 +539,7 @@ const Addresses = ({
               <Col width="50%">
                 <Input
                   width="100%"
-                  label="Longitude"
+                  label={longitudeLabel}
                   height="40px"
                   defaultValue={""}
                   placeholder={"e.g 38.8951"}

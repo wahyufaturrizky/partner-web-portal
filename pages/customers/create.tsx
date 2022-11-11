@@ -188,10 +188,21 @@ export default function PageCreateCustomer() {
     editBankAccount: lang[t].customer.editBankAccount,
     addMoreAddress: lang[t].customer.addMoreAddress,
     newAddress: lang[t].customer.newAddress,
-    primary: lang[t].customer.primary,
+    primaryLabel: lang[t].customer.primaryLabel,
     setPrimary: lang[t].customer.setPrimary,
     deleteLabel: lang[t].customer.tertier.delete,
     addressTypeLabel: lang[t].customer.tertier.addressTypeLabel,
+    storePhotoLabel: lang[t].customer.tertier.storePhotoLabel,
+    dimensionMinimumLabel: lang[t].customer.tertier.dimensionMinimumLabel,
+    fileSizeLabel: lang[t].customer.tertier.fileSizeLabel,
+    streetLabel: lang[t].customer.tertier.streetLabel,
+    countryLabel: lang[t].customer.tertier.countryLabel,
+    provinceLabel: lang[t].customer.tertier.provinceLabel,
+    cityLabel: lang[t].customer.tertier.cityLabel,
+    districtLabel: lang[t].customer.tertier.districtLabel,
+    zoneLabel: lang[t].customer.tertier.zoneLabel,
+    postalCodeLabel: lang[t].customer.tertier.postalCodeLabel,
+    longitudeLabel: lang[t].customer.tertier.longitudeLabel,
   };
 
   return <CreateCustomers {...propsDropdownField} />;

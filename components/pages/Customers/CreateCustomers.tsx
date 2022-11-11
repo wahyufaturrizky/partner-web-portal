@@ -74,6 +74,19 @@ export default function CreateCustomers({
   primary,
   setPrimary,
   deleteLabel,
+  addressTypeLabel,
+  primaryLabel,
+  storePhotoLabel,
+  dimensionMinimumLabel,
+  fileSizeLabel,
+  streetLabel,
+  countryLabel,
+  provinceLabel,
+  cityLabel,
+  districtLabel,
+  zoneLabel,
+  postalCodeLabel,
+  longitudeLabel,
 }: any) {
   const dataWatchCustomer = useWatch({
     control,
@@ -367,6 +380,19 @@ export default function CreateCustomers({
             primary={primary}
             setPrimary={setPrimary}
             deleteLabel={deleteLabel}
+            addressTypeLabel={addressTypeLabel}
+            primaryLabel={primaryLabel}
+            storePhotoLabel={storePhotoLabel}
+            dimensionMinimumLabel={dimensionMinimumLabel}
+            fileSizeLabel={fileSizeLabel}
+            streetLabel={streetLabel}
+            countryLabel={countryLabel}
+            provinceLabel={provinceLabel}
+            cityLabel={cityLabel}
+            districtLabel={districtLabel}
+            zoneLabel={zoneLabel}
+            postalCodeLabel={postalCodeLabel}
+            longitudeLabel={longitudeLabel}
           />
         );
       case "Sales":
