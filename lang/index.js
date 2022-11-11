@@ -123,6 +123,7 @@ export const lang = {
         active: "Active",
         nonActive: "Non Active",
         cancel: "Cancel",
+        upload: "Upload",
       },
       primary: {
         addNewCompany: "+ Add New Company",
@@ -164,6 +165,7 @@ export const lang = {
       menuDesign: "Menu Design",
       companyUseAdvancePricing: "Company Use Advance Pricing",
       usingApproval: "Using Approval",
+      corporate: "Coorporate",
     },
     coaTemplate: {
       list: {
@@ -541,6 +543,7 @@ export const lang = {
         active: "Aktif",
         nonActive: "Tidak Aktif",
         cancel: "Membatalkan",
+        upload: "Unggah",
       },
       primary: {
         addNewCompany: "+ Tambahkan Perusahaan Baru",
@@ -557,13 +560,13 @@ export const lang = {
       country: "Negara",
       industry: "Industri",
       numberOfEmployee: "Jumlah Karyawan",
-      sector: "Sector",
+      sector: "Sektor",
       taxID: "Id pajak",
       copyFromTemplate: "Salin dari Template",
       none: "Tidak ada",
       otherCompany: "Perusahaan lain",
       generalSetup: "Pengaturan Umum",
-      companyType: "Company Type",
+      companyType: "Tipe Perusahaan",
       corporate: "Perusahaan",
       currency: "Mata uang",
       sourceExchangeRate: "Nilai Tukar Sumber",
@@ -585,6 +588,7 @@ export const lang = {
       divisionName: "Division Name",
       mobileNumber: "Mobile Number",
       email: "Email",
+      corporate: "Perusahaan",
     },
     coaTemplate: {
       list: {
