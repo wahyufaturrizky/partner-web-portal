@@ -1,39 +1,45 @@
-import { yupResolver } from "@hookform/resolvers/yup";
-import usePagination from "@lucasmogari/react-pagination";
-import { useLanguages } from "hooks/languages/useLanguages";
-import { lang } from "lang";
-import moment from "moment";
-import Router, { useRouter } from "next/router";
+import React, { useState } from "react";
 import {
-  Accordion,
-  Button,
+  Text,
   Col,
-  DatePickerInput,
-  Dropdown,
-  FileUploaderAllFiles,
-  Input,
-  Radio,
   Row,
   Spacer,
-  Spin,
+  Dropdown,
+  Button,
+  Accordion,
+  Input,
+  TextArea,
+  DatePickerInput,
+  Dropdown2,
   Switch,
-  Text,
+  FileUploaderAllFiles,
+  Spin,
+  Radio,
+  Tooltip,
 } from "pink-lava-ui";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { ExclamationCircleOutlined } from "@ant-design/icons";
 import styled from "styled-components";
-import * as yup from "yup";
+import Router, { useRouter } from "next/router";
 import ArrowLeft from "../../assets/icons/arrow-left.svg";
+import * as yup from "yup";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { Controller, useForm } from "react-hook-form";
+import usePagination from "@lucasmogari/react-pagination";
 import {
   useCoa,
   useCountries,
   useCreateCompany,
   useCurrenciesMDM,
   useDateFormatLists,
+  useMenuDesignLists,
   useNumberFormatLists,
   useTimezones,
   useUploadLogoCompany,
 } from "../../hooks/company-list/useCompany";
+import { useTimezone } from "../../hooks/timezone/useTimezone";
+import { useLanguages } from "hooks/languages/useLanguages";
+import moment from "moment";
+import { lang } from "lang";
 
 const CompanyTypeDataFake = [
   {
@@ -368,8 +374,8 @@ const defaultValue = {
 };
 
 const CreateCompany: any = () => {
-  const t = localStorage.getItem("lan") || "en-US";
   const router = useRouter();
+  const t = localStorage.getItem("lan") || "en-US";
 
   const pagination = usePagination({
     page: 1,
@@ -414,14 +420,8 @@ const CreateCompany: any = () => {
   });
 
   const activeStatus = [
-    {
-      id: "Active",
-      value: `<div key="1" style="color:green;">${lang[t].companyList.tertier.active}</div>`,
-    },
-    {
-      id: "Unactive",
-      value: `<div key="2" style="color:red;">${lang[t].companyList.tertier.nonActive}</div>`,
-    },
+    { id: "Active", value: `<div key="1" style="color:green;">${lang[t].companyList.tertier.active}</div>` },
+    { id: "Unactive", value: `<div key="2" style="color:red;">${lang[t].companyList.tertier.nonActive}</div>` },
   ];
 
   const { data: dateFormatData, isLoading: isLoadingDateFormatList } = useDateFormatLists({
@@ -549,7 +549,7 @@ const CreateCompany: any = () => {
       retail_pricing: data.retailPricing,
       pricing_structure: data.pricingStructure,
       chart_of_account: data.chart_of_account,
-      fiscal_year: data.fiscal_year,
+      fiscal_year: `${data.fiscal_year}`,
       external_code: data.external_code,
       status: data.activeStatus,
     };
@@ -950,22 +950,49 @@ const CreateCompany: any = () => {
               </Row>
               <Spacer size={20} />
               <Row width="100%" gap="20px" noWrap>
-                <Row width="100%" gap="20px" noWrap>
-                  <Text variant="body1">{lang[t].companyList.companyUseAdvanceApproval}</Text>
+                <Row width="100%" noWrap style={{ alignItems: "center" }}>
+                  <Text variant="body1">
+                    {lang[t].companyList.companyUseAdvanceApproval}{""}
+                    <Tooltip
+                      overlayInnerStyle={{ width: "fit-content" }}
+                      title={`Advance Approval`}
+                      color={"#F4FBFC"}
+                    >
+                      <ExclamationCircleOutlined />
+                    </Tooltip>
+                  </Text>
                   <Switch
                     defaultChecked={false}
                     onChange={(value) => setValue("advanceApproval", value)}
                   />
                 </Row>
-                <Row justifyContent="center" width="100%" gap="20px" noWrap>
-                  <Text variant="body1">{lang[t].companyList.companyUseRetailPricing}</Text>
+                <Row justifyContent="center" width="100%" noWrap style={{ alignItems: "center" }}>
+                  <Text variant="body1">
+                    {lang[t].companyList.companyUseRetailPricing}{""}
+                    <Tooltip
+                      overlayInnerStyle={{ width: "fit-content" }}
+                      title={`Retail Pricing`}
+                      color={"#F4FBFC"}
+                    >
+                      <ExclamationCircleOutlined />
+                    </Tooltip>
+                  </Text>
                   <Switch
                     defaultChecked={false}
                     onChange={(value) => setValue("retailPricing", value)}
                   />
                 </Row>
-                <Row width="100%" justifyContent="end" gap="20px" noWrap>
-                  <Text variant="body1">{lang[t].companyList.companyUsePricingStructure}</Text>
+                <Row width="100%" justifyContent="end" noWrap style={{ alignItems: "center" }}>
+                  <Text variant="body1">
+                    {lang[t].companyList.companyUsePricingStructure}{""}
+                    <Tooltip
+                      overlayInnerStyle={{ width: "fit-content" }}
+                      title={`Pricing Structure`}
+                      color={"#F4FBFC"}
+                    >
+                      <ExclamationCircleOutlined />
+                    </Tooltip>
+                  </Text>
                   <Switch
                     defaultChecked={false}
                     onChange={(value) => setValue("pricingStructure", value)}
@@ -1010,7 +1037,6 @@ const CreateCompany: any = () => {
                     }
                     label={lang[t].companyList.fiscalYear}
                     picker="year"
-                    defaultValue={moment(2022)}
                     // format="YYYY"
                   />
                 </Col>

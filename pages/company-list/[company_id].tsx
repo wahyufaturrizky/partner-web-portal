@@ -1,31 +1,35 @@
-import { yupResolver } from "@hookform/resolvers/yup";
-import usePagination from "@lucasmogari/react-pagination";
-import { lang } from "lang";
-import Router, { useRouter } from "next/router";
+import React, { useState } from "react";
 import {
-  Accordion,
-  Button,
+  Text,
   Col,
-  Dropdown,
-  Dropdown2,
-  FileUploaderAllFiles,
-  Input,
   Row,
   Spacer,
-  Spin,
-  Switch,
-  Text,
+  Dropdown,
+  Button,
+  Accordion,
+  Input,
   TextArea,
+  DatePickerInput,
+  Dropdown2,
+  Switch,
+  FileUploaderAllFiles,
+  Spin,
+  Radio,
+  Tooltip,
 } from "pink-lava-ui";
-import { useState } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { ExclamationCircleOutlined } from "@ant-design/icons";
 import styled from "styled-components";
-import * as yup from "yup";
+import Router, { useRouter } from "next/router";
 import ArrowLeft from "../../assets/icons/arrow-left.svg";
+import * as yup from "yup";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { Controller, useForm} from "react-hook-form";
+import usePagination from "@lucasmogari/react-pagination";
 import {
   useCoa,
   useCompany,
   useCountries,
+  useCreateCompany,
   useCurrenciesMDM,
   useDateFormatLists,
   useMenuDesignLists,
@@ -34,6 +38,10 @@ import {
   useUpdateCompany,
   useUploadLogoCompany,
 } from "../../hooks/company-list/useCompany";
+import { useTimezone } from "../../hooks/timezone/useTimezone";
+import { useLanguages } from "hooks/languages/useLanguages";
+import moment from "moment";
+import { lang } from "lang";
 
 const CompanyTypeDataFake = [
   {
@@ -332,40 +340,45 @@ const schema = yup
   .object({
     name: yup.string().required("Name is Required"),
     code: yup.string().required("Company code is Required"),
-    email: yup.string().email("Email not validated").required("Email is Required"),
-    address: yup.string(),
-    taxId: yup.string(),
+    email: yup.string().email("Email not validated"),
+    address: yup.string().default(""),
+    taxId: yup.string().default(""),
+    language: yup.string().required("Language is Required"),
+    source_exchange: yup.string().default(""),
     country: yup.string().required("Country is Required"),
-    industry: yup.string().required("Industry is Required"),
-    numberOfEmployee: yup.string(),
-    sector: yup.string().required("Sector is Required"),
-    menuDesign: yup.string(),
-    companyType: yup.string().required("Company Type is Required"),
-    corporate: yup.string(),
+    industry: yup.string().default(""),
+    numberOfEmployee: yup.string().default(""),
+    sector: yup.string().default(""),
+    fromTemplate: yup.string().default("none"),
+    companyType: yup.string().default(""),
+    corporate: yup.string().default(""),
     currency: yup.string().required("Currency is Required"),
-    coaTemplate: yup.string().required("CoA Template is Required"),
-    formatDate: yup.string().required("Format Date is Required"),
-    numberFormat: yup.string().required("Number Format is Required"),
-    timezone: yup.string(),
+    coaTemplate: yup.string().default(""),
+    formatDate: yup.string().default(""),
+    numberFormat: yup.string().default(""),
+    timezone: yup.string().default(""),
     isPkp: yup.boolean(),
-    advancePricing: yup.boolean(),
+    advanceApproval: yup.boolean(),
+    retailPricing: yup.boolean(),
     pricingStructure: yup.boolean(),
-    usingApproval: yup.boolean(),
   })
   .required();
 
-// const defaultValue = {
-//   activeStatus: "Y",
-//   isPkp: false,
-//   advancePricing: false,
-//   pricingStructure: false,
-//   usingApproval: false,
-//   country: ''
-// };
+const defaultValue = {
+  activeStatus: "Active",
+  isPkp: false,
+  advanceApproval: false,
+  retailPricing: false,
+  pricingStructure: false,
+  chart_of_account: "",
+  external_code: "",
+  fiscal_year: 0,
+};
 
 const DetailCompany: any = () => {
-  const t = localStorage.getItem("lan") || "en-US";
   const router = useRouter();
+  const t = localStorage.getItem("lan") || "en-US";
+
   const { company_id } = router.query;
 
   const pagination = usePagination({
@@ -381,7 +394,7 @@ const DetailCompany: any = () => {
 
   const [searchCurrency, setSearchCurrency] = useState("");
 
-  const [searchMenuDesign, setSearchMenuDesign] = useState("");
+  const [searchFromTemplate, setSearchFromTemplate] = useState("");
 
   const [searchTimezone, setSearchTimezone] = useState();
 
@@ -391,30 +404,24 @@ const DetailCompany: any = () => {
   const [sectorList, setSectorList] = useState([]);
 
   const [address, setAddress] = useState("");
+  const [search, setSearch] = useState({
+    language: "",
+    sourceExchange: "",
+  });
 
   const [foto, setFoto] = useState("");
+  const [fromTemplate, setFromTemplate] = useState("none");
 
   const {
     register,
     handleSubmit,
     setValue,
-    control,
     formState: { errors },
+    control,
   } = useForm({
     resolver: yupResolver(schema),
-    // defaultValues: defaultValue,
+    defaultValues: defaultValue,
   });
-
-  const activeStatus = [
-    {
-      id: "Active",
-      value: `<div key="1" style="color:green;">${lang[t].companyList.tertier.active}</div>`,
-    },
-    {
-      id: "Unactive",
-      value: `<div key="2" style="color:red;">${lang[t].companyList.tertier.nonActive}</div>`,
-    },
-  ];
 
   const {
     data: companyData,
@@ -426,19 +433,40 @@ const DetailCompany: any = () => {
       onSuccess: (data: any) => {
         setAddress(data.address);
         setFoto(data.logo);
+        setFromTemplate(data.fromTemplate);
+        setValue("name", data.name);
+        setValue("code", data.code);
+        setValue("email", data.email);
+        setValue("address", data.address);
+        setValue("taxId", data.taxId);
+        setValue("language", data.language);
+        setValue("source_exchange", data.sourceExchange);
+        setValue("country", data.country);
+        setValue("industry", data.industry);
+        setValue("numberOfEmployee", data.employees);
+        setValue("sector", data.sector);
+        setValue("fromTemplate", data.fromTemplate);
+        setValue("companyType", data.companyType);
+        setValue("corporate", data.corporate);
+        setValue("currency", data.currency);
+        setValue("coaTemplate", data.coa);
+        setValue("formatDate", data.formatDate);
+        setValue("numberFormat", data.formatNumber);
+        setValue("timezone", data.timezone);
+        setValue("isPkp", data.pkp);
+        setValue("advanceApproval", data.advanceApproval);
+        setValue("retailPricing", data.retailPricing);
+        setValue("pricingStructure", data.pricingStructure);
+        setValue("external_code", data.externalCode);
+        setValue("fiscal_year", data.fiscalYear);
       },
     },
   });
 
-  const { mutate: updateCompany, isLoading: isLoadingUpdateCompany } = useUpdateCompany({
-    id: company_id,
-    options: {
-      onSuccess: () => {
-        alert("Update Success!");
-        router.push("/company-list");
-      },
-    },
-  });
+  const activeStatus = [
+    { id: "Active", value: `<div key="1" style="color:green;">${lang[t].companyList.tertier.active}</div>` },
+    { id: "Unactive", value: `<div key="2" style="color:red;">${lang[t].companyList.tertier.nonActive}</div>` },
+  ];
 
   const { data: dateFormatData, isLoading: isLoadingDateFormatList } = useDateFormatLists({
     options: {
@@ -461,14 +489,14 @@ const DetailCompany: any = () => {
     },
   });
 
-  const { data: menuDesignData, isLoading: isLoadingMenuDesignList } = useMenuDesignLists({
-    options: {
-      onSuccess: (data) => {},
-    },
-    query: {
-      search: searchMenuDesign,
-    },
-  });
+  // const { data: menuDesignData, isLoading: isLoadingMenuDesignList } = useMenuDesignLists({
+  //   options: {
+  //     onSuccess: (data) => {},
+  //   },
+  //   query: {
+  //     search: searchMenuDesign,
+  //   },
+  // });
 
   const { data: currencyData, isLoading: isLoadingCurrencyList } = useCurrenciesMDM({
     options: {
@@ -497,6 +525,11 @@ const DetailCompany: any = () => {
     },
   });
 
+  const { data: listLanguage } = useLanguages({
+    options: { onSuccess: () => {} },
+    query: {},
+  });
+
   const handleSearchIndustry = (value) => {
     const newIndustry = IndustryDataFake.filter((tz) => tz.value.includes(value));
     setIndustryList(newIndustry);
@@ -507,6 +540,16 @@ const DetailCompany: any = () => {
     const filterIndustry = industryList.filter((tz) => tz.value.includes(value));
     setSectorList(filterIndustry[0].data);
   };
+
+  const { mutate: updateCompany, isLoading: isLoadingUpdateCompany } = useUpdateCompany({
+    id: company_id,
+    options: {
+      onSuccess: () => {
+        alert("Update Success!");
+        router.push("/company-list");
+      },
+    },
+  });
 
   const { mutate: uploadLogo, isLoading: isLoadingUploadLogo } = useUploadLogoCompany({
     options: {
@@ -524,67 +567,69 @@ const DetailCompany: any = () => {
   };
 
   const onSubmit = (data) => {
-    const payload = {
+    const payload: any = {
       account_id: "0",
       name: data.name,
       code: data.code,
       email: data.email,
       address: address,
-      country: data.country,
+      country: data.country || "",
       industry: data.industry,
       employees: data.numberOfEmployee,
       sector: data.sector,
-      menu_design: data.menuDesign,
+      from_template: fromTemplate,
       tax_id: data.taxId,
       pkp: data.isPkp,
       logo: foto,
       company_type: data.companyType,
       corporate: data.corporate,
       currency: data.currency,
+      source_exchange: data.source_exchange || "",
+      language: data.language,
       coa: data.coaTemplate,
       format_date: data.formatDate,
       format_number: data.numberFormat,
-      timezone: data.timezone,
-      advance_pricing: data.advancePricing,
+      timezone: data.timezone || "",
+      advance_approval: data.advanceApproval,
+      retail_pricing: data.retailPricing,
       pricing_structure: data.pricingStructure,
-      use_approval: data.usingApproval,
+      chart_of_account: data.chart_of_account,
+      fiscal_year: `${data.fiscal_year}`,
+      external_code: data.external_code,
       status: data.activeStatus,
     };
-
+    // console.log(payload);
     updateCompany(payload);
   };
+
+  if (isLoadingCompanyData)
+    return (
+      <Center>
+        <Spin tip="Loading data..." />
+      </Center>
+    );
 
   return (
     <>
       <Col>
         <Row gap="4px" alignItems="center">
           <ArrowLeft style={{ cursor: "pointer" }} onClick={() => Router.push("/company-list")} />
-          <Text variant={"h4"}>{lang[t].companyList.addNewCompany}</Text>
+          <Text variant={"h4"}>{companyData.name}</Text>
         </Row>
         <Spacer size={12} />
         <Card padding="20px">
           <Row justifyContent="space-between" alignItems="center" nowrap>
-            {!isLoadingCompanyData && !isFetchingCompanyData && (
-              <Controller
-                control={control}
-                name="activeStatus"
-                defaultValue={companyData.country}
-                render={({ field: { onChange } }) => (
-                  <Dropdown
-                    label=""
-                    isHtml
-                    width={"185px"}
-                    items={activeStatus}
-                    placeholder={"Status"}
-                    handleChange={(value: any) => {
-                      onChange(value);
-                    }}
-                    noSearch
-                    defaultValue={companyData.isActive ? "Y" : "N"}
-                  />
-                )}
-              />
-            )}
+            <Dropdown
+              label=""
+              isHtml
+              width={"185px"}
+              items={activeStatus}
+              placeholder={"Status"}
+              handleChange={(text) => setValue("activeStatus", text)}
+              defaultValue={companyData.status}
+              noSearch
+              defaultValue="Active"
+            />
             <Row>
               <Row gap="16px">
                 <Button
@@ -603,503 +648,497 @@ const DetailCompany: any = () => {
         </Card>
 
         <Spacer size={20} />
-        {!isLoadingCompanyData && !isFetchingCompanyData && (
-          <Accordion>
-            <Accordion.Item key={1}>
-              <Accordion.Header variant="blue">
-                {lang[t].companyList.companyProfile}
-              </Accordion.Header>
-              <Accordion.Body>
-                <Row width="100%" gap="20px" noWrap>
-                  <Input
-                    width="100%"
-                    label={lang[t].companyList.name}
-                    height="48px"
-                    placeholder={"e.g PT. Kaldu Sari Nabati Indonesia"}
-                    error={errors?.name?.message}
-                    {...register("name", { required: true })}
-                    defaultValue={companyData.name}
-                  />
-                  <Input
-                    width="100%"
-                    label={lang[t].companyList.companyCode}
-                    height="48px"
-                    placeholder={"e.g KSNI"}
-                    error={errors?.code?.message}
-                    {...register("code", { required: true })}
-                    defaultValue={companyData.code}
-                  />
-                </Row>
-                <Row width="100%" gap="20px" noWrap>
-                  <Col width="50%">
-                    <Input
-                      width="100%"
-                      label={lang[t].companyList.email}
-                      height="48px"
-                      placeholder={"e.g karina@nabatisnack.co.id"}
-                      error={errors?.email?.message}
-                      {...register("email", { required: true })}
-                      defaultValue={companyData.email}
-                    />
-                  </Col>
-                  <Col width="50%">
-                    <TextArea
-                      width="100%"
-                      rows={1}
-                      label={
-                        <Text placeholder="e.g JL. Soekarno Hatta">
-                          {lang[t].companyList.address}
-                        </Text>
-                      }
-                      {...register("address")}
-                      onChange={(e) => setAddress(e.target.value)}
-                      defaultValue={companyData.address}
-                    />
-                  </Col>
-                </Row>
-                <Row width="100%" gap="20px" noWrap>
-                  <Col width="50%">
-                    {isLoadingCountryList ? (
-                      <Spin tip="Loading data..." />
-                    ) : (
-                      <Controller
-                        control={control}
-                        name="country"
-                        defaultValue={companyData.country}
-                        render={({ field: { onChange } }) => (
-                          <Dropdown2
-                            label={lang[t].companyList.country}
-                            width={"100%"}
-                            items={countryData.rows.map((data) => ({
-                              id: data.id, // id
-                              value: data.name, // id
-                            }))}
-                            placeholder={"Select"}
-                            handleChange={(value: any) => {
-                              onChange(value);
-                            }}
-                            // handleChange={(value) => setValue("country", value)}
-                            onSearch={(search) => setSearchCountry(search)}
-                            required
-                            error={errors?.country?.message}
-                            defaultValue={companyData.country}
-                          />
-                        )}
-                      />
-                    )}
-                  </Col>
-                  <Col width="50%">
-                    <Controller
-                      control={control}
-                      name={lang[t].companyList.industry}
-                      defaultValue={companyData.industry}
-                      render={({ field: { onChange } }) => (
-                        <Dropdown
-                          label="Industry"
-                          width={"100%"}
-                          items={industryList}
-                          placeholder={"Select"}
-                          handleChange={(value: any) => {
-                            onChange(value);
-                          }}
-                          onSearch={(search) => handleSearchIndustry(search)}
-                          required
-                          error={errors?.industry?.message}
-                          {...register("industry", { required: true })}
-                          defaultValue={companyData.industry}
-                        />
-                      )}
-                    />
-                  </Col>
-                </Row>
-                <Row width="100%" gap="20px" noWrap>
-                  <Col width="50%">
-                    <Controller
-                      control={control}
-                      name="numberOfEmployee"
-                      defaultValue={companyData.employees}
-                      render={({ field: { onChange } }) => (
-                        <Dropdown
-                          label={lang[t].companyList.numberOfEmployee}
-                          width={"100%"}
-                          items={NumberOfEmployeeDataFake}
-                          placeholder={"Select"}
-                          handleChange={(value: any) => {
-                            onChange(value);
-                          }}
-                          {...register("numberOfEmployee")}
-                          noSearch
-                          defaultValue={companyData.employees}
-                        />
-                      )}
-                    />
-                  </Col>
-                  <Col width="50%">
-                    <Controller
-                      control={control}
-                      name="sector"
-                      defaultValue={companyData.sector}
-                      render={({ field: { onChange } }) => (
-                        <Dropdown
-                          label={lang[t].companyList.sector}
-                          width={"100%"}
-                          items={sectorList}
-                          placeholder={"Select"}
-                          handleChange={(value: any) => {
-                            onChange(value);
-                          }}
-                          required
-                          noSearch
-                          error={errors?.sector?.message}
-                          {...register("sector", { required: true })}
-                          defaultValue={companyData.sector}
-                        />
-                      )}
-                    />
-                  </Col>
-                </Row>
-                <Row width="100%" gap="20px" noWrap>
-                  <Col width="50%">
-                    {isLoadingMenuDesignList ? (
-                      <Spin tip="Loading data..." />
-                    ) : (
-                      <Controller
-                        control={control}
-                        name="menuDesign"
-                        defaultValue={companyData.menuDesign}
-                        render={({ field: { onChange } }) => (
-                          <Dropdown2
-                            label={lang[t].companyList.menuDesign}
-                            width={"100%"}
-                            items={menuDesignData.rows.map((data) => ({
-                              id: data.id,
-                              value: data.name,
-                            }))}
-                            placeholder={"Select"}
-                            handleChange={(value: any) => {
-                              onChange(value);
-                            }}
-                            onSearch={(search) => setSearchMenuDesign(search)}
-                            required
-                            error={errors?.menuDesign?.message}
-                            {...register("menuDesign", { required: true })}
-                            defaultValue={companyData.menuDesign}
-                          />
-                        )}
-                      />
-                    )}
-                    <FileUploaderAllFiles
-                      label={lang[t].companyList.companyLogo}
-                      // onSubmit={(file) => setFoto(file)}
-                      onSubmit={(file) => handleUploadLogo(file)}
-                      defaultFile={foto}
-                      withCrop={true}
-                      removeable
-                    />
-                  </Col>
-                  <Col width="50%">
-                    <Input
-                      width="100%"
-                      label={lang[t].companyList.taxID}
-                      height="48px"
-                      placeholder={"e.g 10"}
-                      {...register("taxId")}
-                      defaultValue={companyData.taxId}
-                    />
-                    <Row>
-                      <Text variant="body1">PKP ? </Text>
-                      <Controller
-                        control={control}
-                        name="isPkp"
-                        defaultValue={companyData.useApproval}
-                        render={({ field: { onChange } }) => (
-                          <Switch
-                            defaultChecked={companyData.pkp}
-                            checked={companyData.pkp}
-                            handleChange={(value: any) => {
-                              onChange(value);
-                            }}
-                          />
-                        )}
-                      />
-                    </Row>
-                  </Col>
-                </Row>
-              </Accordion.Body>
-            </Accordion.Item>
-          </Accordion>
-        )}
-        <Spacer size={20} />
-        {!isLoadingCompanyData && !isFetchingCompanyData && (
-          <Accordion>
-            <Accordion.Item key={1}>
-              <Accordion.Header variant="blue">{lang[t].companyList.generalSetup}</Accordion.Header>
-              <Accordion.Body>
-                <Row width="100%" gap="20px" noWrap>
-                  <Col width="50%">
-                    <Controller
-                      control={control}
-                      name="companyType"
-                      defaultValue={companyData.companyType}
-                      render={({ field: { onChange } }) => (
-                        <Dropdown
-                          label={lang[t].companyList.companyType}
-                          width={"100%"}
-                          items={CompanyTypeDataFake}
-                          placeholder={"Select"}
-                          handleChange={(value: any) => {
-                            onChange(value);
-                          }}
-                          required
-                          noSearch
-                          error={errors?.companyType?.message}
-                          {...register("companyType", { required: true })}
-                          defaultValue={companyData.companyType}
-                        />
-                      )}
-                    />
-                  </Col>
-                  <Col width="50%">
-                    <Controller
-                      control={control}
-                      name="corporate"
-                      defaultValue={companyData.corporate}
-                      render={({ field: { onChange } }) => (
-                        <Dropdown
-                          label={lang[t].companyList.corporate}
-                          width={"100%"}
-                          items={CorporateDataFake}
-                          placeholder={"Select"}
-                          handleChange={(value: any) => {
-                            onChange(value);
-                          }}
-                          {...register("corporate")}
-                          noSearch
-                          defaultValue={companyData.corporate}
-                        />
-                      )}
-                    />
-                  </Col>
-                </Row>
-                <Row width="100%" gap="20px" noWrap>
-                  <Col width="50%">
-                    {isLoadingCurrencyList ? (
-                      <Spin tip="Loading data..." />
-                    ) : (
-                      <Controller
-                        control={control}
-                        name="currency"
-                        defaultValue={companyData.currency}
-                        render={({ field: { onChange } }) => (
-                          <Dropdown2
-                            label={lang[t].companyList.currency}
-                            width={"100%"}
-                            items={currencyData.rows.map((data) => ({
-                              value: `${data.currency} - ${data.currencyName}`,
-                              id: `${data.currency} - ${data.currencyName}`,
-                            }))}
-                            placeholder={"Select"}
-                            handleChange={(value: any) => {
-                              onChange(value);
-                            }}
-                            onSearch={(search) => setSearchCurrency(search)}
-                            required
-                            error={errors?.currency?.message}
-                            {...register("currency", { required: true })}
-                            defaultValue={companyData.currency}
-                          />
-                        )}
-                      />
-                    )}
-                  </Col>
-                  <Col width="50%">
-                    {isLoadingCoaList ? (
-                      <Spin tip="Loading data..." />
-                    ) : (
-                      <Controller
-                        control={control}
-                        name="coaTemplate"
-                        defaultValue={companyData.coa}
-                        render={({ field: { onChange } }) => (
-                          <Dropdown2
-                            label={lang[t].companyList.coaTemplate}
-                            width={"100%"}
-                            items={coaData.rows.map((data) => ({
-                              id: data.name,
-                              value: data.name,
-                            }))}
-                            placeholder={"Select"}
-                            handleChange={(value: any) => {
-                              onChange(value);
-                            }}
-                            onSearch={(search) => setSearchCoa(search)}
-                            required
-                            error={errors?.coaTemplate?.message}
-                            {...register("coaTemplate", { required: true })}
-                            defaultValue={companyData.coa}
-                          />
-                        )}
-                      />
-                    )}
-                  </Col>
-                </Row>
-                <Row width="100%" gap="20px" noWrap>
-                  <Col width="50%">
-                    {isLoadingDateFormatList ? (
-                      <Spin tip="Loading data..." />
-                    ) : (
-                      <Controller
-                        control={control}
-                        name="formatDate"
-                        defaultValue={companyData.formatDate}
-                        render={({ field: { onChange } }) => (
-                          <Dropdown
-                            label={lang[t].companyList.formatDate}
-                            width={"100%"}
-                            items={dateFormatData.rows.map((data) => ({
-                              value: data.format,
-                              id: data.format,
-                            }))}
-                            placeholder={"Select"}
-                            handleChange={(value: any) => {
-                              onChange(value);
-                            }}
-                            required
-                            error={errors?.formatDate?.message}
-                            {...register("formatDate", { required: true })}
-                            noSearch
-                            defaultValue={companyData.formatDate}
-                          />
-                        )}
-                      />
-                    )}
-                  </Col>
-                  <Col width="50%">
-                    {isLoadingNumberFormatList ? (
-                      <Spin tip="Loading data..." />
-                    ) : (
-                      <Controller
-                        control={control}
-                        name="numberFormat"
-                        defaultValue={companyData.formatNumber}
-                        render={({ field: { onChange } }) => (
-                          <Dropdown
-                            label={lang[t].companyList.numberFormat}
-                            width={"100%"}
-                            items={numberFormatData.rows.map((data) => ({
-                              value: data.format,
-                              id: data.format,
-                            }))}
-                            placeholder={"Select"}
-                            handleChange={(value: any) => {
-                              onChange(value);
-                            }}
-                            required
-                            error={errors?.numberFormat?.message}
-                            {...register("numberFormat", { required: true })}
-                            noSearch
-                            defaultValue={companyData.formatNumber}
-                          />
-                        )}
-                      />
-                    )}
-                  </Col>
-                </Row>
-                <Row width="100%" gap="20px" noWrap>
-                  <Col width="50%">
-                    {isLoadingTimezoneList ? (
-                      <Spin tip="Loading data..." />
-                    ) : (
-                      <Controller
-                        control={control}
-                        name="timezone"
-                        defaultValue={companyData.timezone}
-                        render={({ field: { onChange } }) => (
-                          <Dropdown2
-                            label={lang[t].companyList.timezone}
-                            width={"100%"}
-                            items={timezoneData.rows.map((data) => ({
-                              value: `${data.utc} ${data.name}`,
-                              id: `${data.utc} ${data.name}`,
-                            }))}
-                            placeholder={"Select"}
-                            handleChange={(value: any) => {
-                              onChange(value);
-                            }}
-                            onSearch={(search) => setSearchTimezone(search)}
-                            required
-                            error={errors?.timezone?.message}
-                            {...register("timezone", { required: true })}
-                            defaultValue={companyData.timezone}
-                          />
-                        )}
-                      />
-                    )}
-                  </Col>
 
-                  <Col width="50%">
-                    <Spacer size={20} />
-                    <Row width="100%" gap="20px" noWrap>
-                      <Text variant="body1">{lang[t].companyList.companyUseAdvancePricing}</Text>
-                      <Controller
-                        control={control}
-                        name="advancePricing"
-                        defaultValue={companyData.advancePricing}
-                        render={({ field: { onChange } }) => (
-                          <Switch
-                            defaultChecked={companyData.advancePricing}
-                            checked={companyData.advancePricing}
-                            // onChange={(value) => setValue("advancePricing", value)}
-                            handleChange={(value: any) => {
-                              onChange(value);
-                            }}
-                          />
-                        )}
-                      />
-                    </Row>
-                    <Spacer size={20} />
-                    <Row width="100%" gap="20px" noWrap>
-                      <Text variant="body1">{lang[t].companyList.companyUsePricingStructure}</Text>
-                      <Controller
-                        control={control}
-                        name="pricingStructure"
-                        defaultValue={companyData.pricingStructure}
-                        render={({ field: { onChange } }) => (
-                          <Switch
-                            defaultChecked={!companyData.pricingStructure}
-                            checked={companyData.pricingStructure}
-                            handleChange={(value: any) => {
-                              onChange(value);
-                            }}
-                          />
-                        )}
-                      />
-                    </Row>
-                    <Spacer size={20} />
-                    <Row width="100%" gap="20px" noWrap>
-                      <Text variant="body1">{lang[t].companyList.usingApproval}</Text>
-                      <Controller
-                        control={control}
-                        name="usingApproval"
-                        defaultValue={companyData.useApproval}
-                        render={({ field: { onChange } }) => (
-                          <Switch
-                            defaultChecked={companyData.useApproval}
-                            checked={companyData.useApproval}
-                            handleChange={(value: any) => {
-                              onChange(value);
-                            }}
-                          />
-                        )}
-                      />
-                    </Row>
-                  </Col>
-                </Row>
-              </Accordion.Body>
-            </Accordion.Item>
-          </Accordion>
-        )}
+        <Accordion>
+          <Accordion.Item key={1}>
+            <Accordion.Header variant="blue">{lang[t].companyList.companyProfile}</Accordion.Header>
+            <Accordion.Body>
+              <Row width="100%" gap="20px" noWrap>
+                <FileUploaderAllFiles
+                  label={lang[t].companyList.companyLogo}
+                  // onSubmit={(file) => setFoto(file)}
+                  onSubmit={(file) => handleUploadLogo(file)}
+                  //   defaultFile="/placeholder-employee-photo.svg"
+                  defaultFile={foto ? foto : `/placeholder-employee-photo.svg`}
+                  withCrop={true}
+                  removeable
+                  textPhoto={[
+                    "Format .JPG .JPEG .PNG and Dimension Minimum 72 x 72, Optimal size 300 x 300",
+                    "File Size Max. 5MB",
+                  ]}
+                />
+              </Row>
+
+              <Row width="100%" gap="20px" noWrap>
+                <Input
+                  width="100%"
+                  label={lang[t].companyList.name}
+                  height="48px"
+                  placeholder={"e.g PT. Kaldu Sari Nabati Indonesia"}
+                  defaultValue={companyData.name}
+                  error={errors?.name?.message}
+                  required
+                  {...register("name", { required: true })}
+                />
+                <Input
+                  width="100%"
+                  label={lang[t].companyList.companyCode}
+                  height="48px"
+                  placeholder={"e.g KSNI"}
+                  defaultValue={companyData.code}
+                  error={errors?.code?.message}
+                  required
+                  {...register("code", { required: true })}
+                />
+              </Row>
+              <Row width="100%" gap="20px" noWrap>
+                <Col width="50%">
+                  <Input
+                    width="100%"
+                    label={lang[t].companyList.email}
+                    height="48px"
+                    placeholder={"e.g karina@nabatisnack.co.id"}
+                    defaultValue={companyData.email}
+                    error={errors?.email?.message}
+                    {...register("email", { required: true })}
+                  />
+                </Col>
+                <Col width="50%">
+                  {/* <TextArea
+                    width="100%"
+                    rows={1}
+                    label={<Text placeholder="e.g JL. Soekarno Hatta">Address</Text>}
+                    {...register("address")}
+                    onChange={(e) => setAddress(e.target.value)}
+                  /> */}
+                  <Input
+                    width="100%"
+                    label={lang[t].companyList.address}
+                    height="48px"
+                    placeholder={"e.g JL. Soekarno Hatta"}
+                    defaultValue={companyData.address}
+                    {...register("address")}
+                    onChange={(e) => setAddress(e.target.value)}
+                  />
+                </Col>
+              </Row>
+              <Row width="100%" gap="20px" noWrap>
+                <Col width="50%">
+                  {isLoadingCountryList ? (
+                    <Spin tip="Loading data..." />
+                  ) : (
+                    <Dropdown
+                      label={lang[t].companyList.country}
+                      width={"100%"}
+                      items={countryData.rows.map((data) => ({
+                        id: data.name,
+                        value: data.name,
+                      }))}
+                      placeholder={"Select"}
+                      handleChange={(value) => setValue("country", value)}
+                      onSearch={(search) => setSearchCountry(search)}
+                      required
+                      defaultValue={companyData.country}
+                      error={errors?.country?.message}
+                      {...register("country")}
+                    />
+                  )}
+                </Col>
+                <Col width="50%">
+                  <Dropdown
+                    label={lang[t].companyList.industry}
+                    width={"100%"}
+                    items={industryList}
+                    placeholder={"Select"}
+                    handleChange={(value: any) => handleSelectIndustry(value)}
+                    onSearch={(search) => handleSearchIndustry(search)}
+                    defaultValue={companyData.industry}
+                    error={errors?.industry?.message}
+                    {...register("industry", { required: true })}
+                  />
+                </Col>
+              </Row>
+              <Row width="100%" gap="20px" noWrap>
+                <Col width="50%">
+                  <Dropdown
+                    label={lang[t].companyList.numberOfEmployee}
+                    width={"100%"}
+                    items={NumberOfEmployeeDataFake}
+                    placeholder={"Select"}
+                    handleChange={(value: any) => setValue("numberOfEmployee", value)}
+                    required
+                    defaultValue={companyData.employees}
+                    {...register("numberOfEmployee", { required: true })}
+                    noSearch
+                  />
+                </Col>
+                <Col width="50%">
+                  <Dropdown
+                    label={lang[t].companyList.sector}
+                    width={"100%"}
+                    items={sectorList}
+                    placeholder={"Select"}
+                    handleChange={(value) => setValue("sector", value)}
+                    noSearch
+                    defaultValue={companyData.sector}
+                    error={errors?.sector?.message}
+                    {...register("sector", { required: true })}
+                  />
+                </Col>
+              </Row>
+              {/* <Row width="100%" gap="20px" noWrap>
+                <Col width="50%">
+                  <Dropdown
+                    label="Menu Design"
+                    width={"100%"}
+                    items={[]}
+                    placeholder={"Select"}
+                    handleChange={(value) => setValue("fromTemplate", value)}
+                    // onSearch={(search) => setSearchMenuDesign(search)}
+                    {...register("fromTemplate")}
+                  />
+                </Col>
+              </Row> */}
+              <Row width="100%" gap="20px" noWrap>
+                <Col width="50%">
+                  <Input
+                    width="100%"
+                    label={lang[t].companyList.taxID}
+                    height="48px"
+                    placeholder={"e.g 10"}
+                    defaultValue={companyData.taxId}
+                    {...register("taxId")}
+                  />
+                  <Row>
+                    <Text variant="body1">PKP ? </Text>
+                    <Switch
+                      defaultChecked={companyData.pkp}
+                      onChange={(value) => setValue("isPkp", value)}
+                    />
+                  </Row>
+                </Col>
+                <Col width="50%">
+                  <Row width="100%" gap={20} noWrap>
+                    <Span>{lang[t].companyList.copyFromTemplate}</Span>
+                  </Row>
+                  <Row width="100%" noWrap>
+                    <Flex>
+                      <Radio
+                        value={"companyInternal"}
+                        checked={fromTemplate == "none"}
+                        onChange={(e: any) => setFromTemplate("none")}
+                      >
+                        <SpanAlign>{lang[t].companyList.none}</SpanAlign>
+                      </Radio>
+                      <Radio
+                        value={"companyInternal"}
+                        checked={fromTemplate == "edot"}
+                        onChange={(e: any) => setFromTemplate("eDot")}
+                      >
+                        eDOT
+                      </Radio>
+                      <Radio
+                        value={"companyInternal"}
+                        checked={fromTemplate == "other company"}
+                        onChange={(e: any) => setFromTemplate("Other Company")}
+                      >
+                        {lang[t].companyList.otherCompany}
+                      </Radio>
+                    </Flex>
+                  </Row>
+                </Col>
+              </Row>
+            </Accordion.Body>
+          </Accordion.Item>
+        </Accordion>
+
         <Spacer size={20} />
+
+        <Accordion>
+          <Accordion.Item key={1}>
+            <Accordion.Header variant="blue">{lang[t].companyList.generalSetup}</Accordion.Header>
+            <Accordion.Body>
+              <Row width="100%" gap="20px" noWrap>
+                <Col width="50%">
+                  <Dropdown
+                    label={lang[t].companyList.companyType}
+                    width={"100%"}
+                    items={CompanyTypeDataFake}
+                    placeholder={"Select"}
+                    handleChange={(value) => setValue("companyType", value)}
+                    noSearch
+                    defaultValue={companyData.companyType}
+                    error={errors?.companyType?.message}
+                    {...register("companyType")}
+                  />
+                </Col>
+                <Col width="50%">
+                  <Dropdown
+                    label={lang[t].companyList.corporate}
+                    width={"100%"}
+                    items={CorporateDataFake}
+                    placeholder={"Select"}
+                    handleChange={(value) => setValue("corporate", value)}
+                    defaultValue={companyData.corporate}
+                    {...register("corporate")}
+                    noSearch
+                  />
+                </Col>
+              </Row>
+              <Spacer size={10} />
+              <Row width="100%" gap="20px" noWrap>
+                <Col width="50%">
+                  {isLoadingCurrencyList ? (
+                    <Spin tip="Loading data..." />
+                  ) : (
+                    <Dropdown
+                      label={lang[t].companyList.currency}
+                      width={"100%"}
+                      items={currencyData.rows.map((data) => ({
+                        value: `${data.currency} - ${data.currencyName}`,
+                        id: `${data.currency} - ${data.currencyName}`,
+                      }))}
+                      placeholder={"Select"}
+                      handleChange={(value) => setValue("currency", value)}
+                      onSearch={(search) => setSearchCurrency(search)}
+                      required
+                      defaultValue={companyData.currency}
+                      error={errors?.currency?.message}
+                      {...register("currency", { required: true })}
+                    />
+                  )}
+                </Col>
+                <Col width="50%">
+                  <Dropdown
+                    label={lang[t].companyList.sourceExchangeRate}
+                    width="100%"
+                    items={[]}
+                    placeholder={"Select"}
+                    handleChange={(value: string) => setValue("source_exchange", value)}
+                    onSearch={(value: string) => setSearch({ ...search, sourceExchange: value })}
+                    defaultValue={companyData.sourceExchange}
+                    {...register("source_exchange", { required: true })}
+                  />
+                </Col>
+              </Row>
+              <Spacer size={10} />
+              <Row width="100%" gap="20px" noWrap>
+                <Col width="50%">
+                  {isLoadingDateFormatList ? (
+                    <Spin tip="Loading data..." />
+                  ) : (
+                    <Dropdown
+                      label={lang[t].companyList.formatDate}
+                      width={"100%"}
+                      items={dateFormatData.rows.map((data) => ({
+                        value: data.format,
+                        id: data.format,
+                      }))}
+                      placeholder={"Select"}
+                      handleChange={(value) => setValue("formatDate", value)}
+                      defaultValue={companyData.formatDate}
+                      error={errors?.formatDate?.message}
+                      {...register("formatDate")}
+                      noSearch
+                    />
+                  )}
+                </Col>
+                <Col width="50%">
+                  {isLoadingCoaList ? (
+                    <Spin tip="Loading data..." />
+                  ) : (
+                    <Dropdown
+                      label={lang[t].companyList.coaTemplate}
+                      width={"100%"}
+                      items={coaData.rows.map((data) => ({
+                        value: data.name,
+                        id: data.id,
+                      }))}
+                      placeholder={"Select"}
+                      handleChange={(value) => setValue("coaTemplate", value)}
+                      onSearch={(search) => setSearchCoa(search)}
+                      defaultValue={companyData.coa}
+                      error={errors?.coaTemplate?.message}
+                      {...register("coaTemplate")}
+                    />
+                  )}
+                </Col>
+              </Row>
+              <Spacer size={10} />
+              <Row width="100%" gap="20px" noWrap>
+                <Col width="50%">
+                  {isLoadingTimezoneList ? (
+                    <Spin tip="Loading data..." />
+                  ) : (
+                    <Dropdown
+                      label={lang[t].companyList.timezone}
+                      width={"100%"}
+                      items={timezoneData?.rows.map((data) => ({
+                        value: `${data.utc} ${data.name}`,
+                        id: `${data.utc} ${data.name}`,
+                      }))}
+                      placeholder={"Select"}
+                      handleChange={(value) => setValue("timezone", value)}
+                      onSearch={(search) => setSearchTimezone(search)}
+                      defaultValue={companyData.timezone}
+                      error={errors?.timezone?.message}
+                      {...register("timezone")}
+                    />
+                  )}
+                  <Dropdown
+                    label={lang[t].companyList.language}
+                    width="100%"
+                    items={listLanguage?.rows.map((data: any) => ({
+                      id: data?.id,
+                      value: data?.name,
+                    }))}
+                    placeholder={"Select"}
+                    handleChange={(value: string) => setValue("language", value)}
+                    onSearch={(search: string) => setSearch(search)}
+                    required
+                    defaultValue={companyData.language}
+                    error={errors?.language?.message}
+                    {...register("language", { required: true })}
+                  />
+                </Col>
+
+                <Col width="50%">
+                  {isLoadingNumberFormatList ? (
+                    <Spin tip="Loading data..." />
+                  ) : (
+                    <Dropdown
+                      label={lang[t].companyList.numberFormat}
+                      width={"100%"}
+                      items={numberFormatData.rows.map((data) => ({
+                        value: data.format,
+                        id: data.format,
+                      }))}
+                      placeholder={"Select"}
+                      handleChange={(value) => setValue("numberFormat", value)}
+                      defaultValue={companyData.formatNumber}
+                      error={errors?.numberFormat?.message}
+                      {...register("numberFormat")}
+                      noSearch
+                    />
+                  )}
+                </Col>
+              </Row>
+              <Spacer size={20} />
+              <Row width="100%" gap="20px" noWrap>
+                <Row width="100%" noWrap style={{ alignItems: "center" }}>
+                  <Text variant="body1">
+                    {lang[t].companyList.companyUseAdvanceApproval}{" "}
+                    <Tooltip
+                      overlayInnerStyle={{ width: "fit-content" }}
+                      title={`Advance Approval`}
+                      color={"#F4FBFC"}
+                    >
+                      <ExclamationCircleOutlined />
+                    </Tooltip>
+                  </Text>
+                  <Switch
+                    defaultChecked={companyData.advanceApproval}
+                    onChange={(value) => setValue("advanceApproval", value)}
+                  />
+                </Row>
+                <Row justifyContent="center" width="100%" noWrap style={{ alignItems: "center" }}>
+                  <Text variant="body1">
+                    {lang[t].companyList.companyUseRetailPricing}{" "}
+                    <Tooltip
+                      overlayInnerStyle={{ width: "fit-content" }}
+                      title={`Retail Pricing`}
+                      color={"#F4FBFC"}
+                    >
+                      <ExclamationCircleOutlined />
+                    </Tooltip>
+                  </Text>
+                  <Switch
+                    defaultChecked={companyData.retailPricing}
+                    onChange={(value) => setValue("retailPricing", value)}
+                  />
+                </Row>
+                <Row width="100%" justifyContent="end" noWrap style={{ alignItems: "center" }}>
+                  <Text variant="body1">
+                    {lang[t].companyList.companyUsePricingStructure}{" "}
+                    <Tooltip
+                      overlayInnerStyle={{ width: "fit-content" }}
+                      title={`Pricing Structure`}
+                      color={"#F4FBFC"}
+                    >
+                      <ExclamationCircleOutlined />
+                    </Tooltip>
+                  </Text>
+                  <Switch
+                    defaultChecked={companyData.pricingStructure}
+                    onChange={(value) => setValue("pricingStructure", value)}
+                  />
+                </Row>
+              </Row>
+            </Accordion.Body>
+          </Accordion.Item>
+        </Accordion>
+
+        <Spacer size={20} />
+
+        <Accordion>
+          <Accordion.Item key={1}>
+            <Accordion.Header variant="blue">{lang[t].companyList.financeSetup}</Accordion.Header>
+            <Accordion.Body>
+              <Row width="100%" gap="20px" noWrap>
+                <Col width="50%">
+                  <Dropdown
+                    label={lang[t].companyList.chartOfAccount}
+                    width="100%"
+                    items={[]}
+                    placeholder={"Select"}
+                    handleChange={(value: any) => setValue("chart_of_account", value)}
+                    defaultValue={companyData.chartOfAccount}
+                    {...register("chart_of_account")}
+                    noSearch
+                  />
+                  <Input
+                    width="100%"
+                    label={lang[t].companyList.externalCode}
+                    height="48px"
+                    placeholder="e.g 3221114810"
+                    defaultValue={companyData.externalCode}
+                    {...register("external_code")}
+                  />
+                </Col>
+                <Col width="48%">
+                  <Controller
+                    control={control}
+                    name={`fiscal_year`}
+                    render={({ field: { onChange } }) => (
+                      <DatePickerInput
+                        fullWidth
+                        picker="year"
+                        placeholder="YYYY"
+                        onChange={(date: any, dateString: any) =>
+                          setValue("fiscal_year", Number(dateString))
+                        }
+                        label={lang[t].companyList.fiscalYear}
+                        defaultValue={moment(companyData.fiscalYear, 'YYYY')}
+                        format={"YYYY"}
+                      />
+                    )}
+                  />
+                  {/* <DatePickerInput
+                    fullWidth
+                    placeholder="YYYY"
+                    onChange={(date: any, dateString: any) =>
+                      setValue("fiscal_year", Number(dateString))
+                    }
+                    label="Fiscal Year"
+                    picker="year"
+                    defaultValue={moment(toString(companyData.fiscalYear))}
+                    format={"YYYY"}
+                  /> */}
+                </Col>
+              </Row>
+            </Accordion.Body>
+          </Accordion.Item>
+        </Accordion>
       </Col>
     </>
   );
@@ -1109,6 +1148,29 @@ const Card = styled.div`
   background: #ffffff;
   border-radius: 16px;
   padding: ${(p) => (p.padding ? p.padding : "16px")};
+`;
+
+const Flex = styled.div`
+  width: 100%;
+  display: flex:
+  text-align: center;
+  align-items: center;
+  font-weight: 700;
+  margin-top: 20px;
+`;
+
+const Span = styled.span`
+  font-weight: 700;
+`;
+
+const SpanAlign = styled.span`
+  margin: auto;
+`;
+
+const Center = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
 `;
 
 export default DetailCompany;
