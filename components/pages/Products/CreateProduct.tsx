@@ -171,7 +171,8 @@ export default function CreateProduct({ isCreateProductVariant = true }) {
               levelId: data?.level_id,
               qty: data?.qty,
               uomConversionItemId: data.conversion_id,
-              name: data.name
+              name: data.name,
+              uomName: data?.uom_name
             })))
           } else if(key === 'registrations') {
             setValue('registration', data[key])
@@ -348,10 +349,11 @@ export default function CreateProduct({ isCreateProductVariant = true }) {
     payload.uom_conversion = [];
 
     if (data?.uom?.length > 0 && payload.use_unit_leveling) {
+      console.log("data?.uom", data?.uom)
       payload.uom_conversion = data?.uom?.map((data) => ({
         level_id: data?.levelId || null,
-        uom_conversion_item_id: 39,
-        conversion_id: "MCM-0000017",
+        uom_conversion_item_id: data?.id,
+        conversion_id: data?.uomConversionItemId,
       }));
     } else {
       payload.uom_conversion = [];
@@ -601,6 +603,7 @@ export default function CreateProduct({ isCreateProductVariant = true }) {
     isLoadingProduct,
   };
 
+  console.log("productData", productData)
   return (
     <Col>
       {isLoadingProduct ? (
@@ -884,10 +887,11 @@ export default function CreateProduct({ isCreateProductVariant = true }) {
                       render={({ field: { onChange } }) => (
                         <DatePickerInput
                           fullWidth
+                          placeholder="Select"
                           onChange={(date: any, dateString: any) => onChange(dateString)}
                           label="Discontinue Date"
-                          defaultValue={moment(productForm.expired_date)}
                           format={"DD/MM/YYYY"}
+                          defaultValue={productData?.expiredDate ? moment(productData?.expiredDate) : undefined}
                         />
                       )}
                     />

@@ -68,6 +68,7 @@ export default function CreateCustomers({
   setValue,
   getValues,
   router,
+  editBankAccount,
 }: any) {
   const dataWatchCustomer = useWatch({
     control,
@@ -85,7 +86,7 @@ export default function CreateCustomers({
     data: null;
   }>({
     open: false,
-    typeForm: "Edit Bank Account",
+    typeForm: editBankAccount,
     data: null,
   });
 
@@ -276,7 +277,7 @@ export default function CreateCustomers({
   };
 
   const onHandleBankSubmit = (data: any) => {
-    if (visibleModalBankAccount.typeForm === "Edit Bank Account") {
+    if (visibleModalBankAccount.typeForm === editBankAccount) {
       let tempEdit = fieldsBank.map((mapDataItem) => {
         if (mapDataItem.id === visibleModalBankAccount?.data?.id) {
           mapDataItem.bank_name = data.bank_name;

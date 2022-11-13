@@ -123,6 +123,7 @@ export const lang = {
         active: "Active",
         nonActive: "Non Active",
         cancel: "Cancel",
+        upload: "Upload",
       },
       primary: {
         addNewCompany: "+ Add New Company",
@@ -164,6 +165,7 @@ export const lang = {
       menuDesign: "Menu Design",
       companyUseAdvancePricing: "Company Use Advance Pricing",
       usingApproval: "Using Approval",
+      corporate: "Coorporate",
     },
     coaTemplate: {
       list: {
@@ -388,27 +390,31 @@ export const lang = {
     trainingType: {
       tertier: {
         viewDetail: "View Detail",
-        cancel: "Cancel",
-        delete: "Delete",
       },
       trainingTypeId: "Training Type ID",
       trainingTypeName: "Training Type Name",
       action: "Action",
       title: "Training Type",
       palceholderSearch: "Search Training Type ID,  Training Type Name",
+    },
+    customer: {
+      custoemrId: "Custoemr Id",
+      customerName: "Nama Pelanggan",
+      customerGroup: "Custoemr Group",
+      salesman: "Salesman",
+      action: "Action",
+      tertier: {
+        viewDetail: "View Detail",
+        delete: "Delete",
+      },
       ghost: {
         downloadTemplate: "Download Template",
         uploadTemplate: "Upload Template",
         downloadData: "Download Data",
       },
-      primary: {
-        create: "Create",
-        save: "Save",
-        yes: "Yes",
-      },
-      createTrainingType: "Create Training Type",
-      confirmDelete: "Confirm Delete",
-      areYouSureToDelete: "Are you sure to delete",
+      title: "Custoemr",
+      palceholderSearch: "Search Customer, Salesman, etc",
+      editBankAccount: "Edit Bank Account",
     },
   },
   "id-ID": {
@@ -537,6 +543,7 @@ export const lang = {
         active: "Aktif",
         nonActive: "Tidak Aktif",
         cancel: "Membatalkan",
+        upload: "Unggah",
       },
       primary: {
         addNewCompany: "+ Tambahkan Perusahaan Baru",
@@ -553,13 +560,13 @@ export const lang = {
       country: "Negara",
       industry: "Industri",
       numberOfEmployee: "Jumlah Karyawan",
-      sector: "Sector",
+      sector: "Sektor",
       taxID: "Id pajak",
       copyFromTemplate: "Salin dari Template",
       none: "Tidak ada",
       otherCompany: "Perusahaan lain",
       generalSetup: "Pengaturan Umum",
-      companyType: "Company Type",
+      companyType: "Tipe Perusahaan",
       corporate: "Perusahaan",
       currency: "Mata uang",
       sourceExchangeRate: "Nilai Tukar Sumber",
@@ -581,6 +588,7 @@ export const lang = {
       divisionName: "Division Name",
       mobileNumber: "Mobile Number",
       email: "Email",
+      corporate: "Perusahaan",
     },
     coaTemplate: {
       list: {
@@ -805,6 +813,7 @@ export const lang = {
       tertier: {
         viewDetail: "Lihat Detail",
         cancel: "Membatalkan",
+        cancel: "Membatalkan",
       },
       trainingTypeId: "ID Jenis Pelatihan",
       trainingTypeName: "Nama Jenis Pelatihan",
@@ -824,6 +833,25 @@ export const lang = {
       createTrainingType: "Buat Jenis Pelatihan",
       confirmDelete: "Konfirmasi Hapus",
       areYouSureToDelete: "Apakah Anda yakin untuk menghapus?",
+    },
+    customer: {
+      custoemrId: "ID Pelanggan",
+      customerName: "Nama Pelanggan",
+      customerGroup: "Grup Pelanggan",
+      salesman: "Salesman",
+      action: "Tindakan",
+      tertier: {
+        viewDetail: "Lihat Detail",
+        delete: "Menghapus",
+      },
+      ghost: {
+        downloadTemplate: "Unduh Template",
+        uploadTemplate: "Unggah Template",
+        downloadData: "Unduh Data",
+      },
+      title: "Pelanggan",
+      palceholderSearch: "Cari Pelanggan, Penjual, dll",
+      editBankAccount: "Sunting Rekening Bank",
     },
   },
 };

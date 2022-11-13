@@ -1,4 +1,5 @@
 import usePagination from "@lucasmogari/react-pagination";
+import { lang } from "lang";
 import { mdmDownloadService } from "lib/client";
 import { useRouter } from "next/router";
 import { queryClient } from "pages/_app";
@@ -34,6 +35,7 @@ const downloadFile = (params: any) =>
   });
 
 export default function Customer() {
+  const t = localStorage.getItem("lan") || "en-US";
   const pagination = usePagination({
     page: 1,
     itemsPerPage: 20,
@@ -50,30 +52,30 @@ export default function Customer() {
 
   const columns = [
     {
-      title: "Customer ID",
+      title: lang[t].customer.custoemrId,
       dataIndex: "id",
     },
     {
-      title: "Customer Name",
+      title: lang[t].customer.customerName,
       dataIndex: "name",
     },
     {
-      title: "Customer Group",
+      title: lang[t].customer.customerGroup,
       dataIndex: "group",
     },
     {
-      title: "Salesman",
+      title: lang[t].customer.salesman,
       dataIndex: "salesman",
     },
     {
-      title: "Action",
+      title: lang[t].customer.action,
       dataIndex: "id",
       width: "15%",
       align: "left",
       render: (id: any) => (
         <div style={{ display: "flex", justifyContent: "left" }}>
           <Button size="small" onClick={() => router.push(`/customers/${id}`)} variant="tertiary">
-            View Detail
+            {lang[t].customer.tertier.viewDetail}
           </Button>
         </div>
       ),
@@ -125,7 +127,7 @@ export default function Customer() {
       value: (
         <ButtonAction>
           <ICDownload />
-          <p style={{ margin: "0" }}>Download Template</p>
+          <p style={{ margin: "0" }}>{lang[t].customer.ghost.downloadTemplate}</p>
         </ButtonAction>
       ),
     },
@@ -134,7 +136,7 @@ export default function Customer() {
       value: (
         <ButtonAction disabled>
           <ICUpload />
-          <p style={{ margin: "0" }}>Upload Template</p>
+          <p style={{ margin: "0" }}>{lang[t].customer.ghost.uploadTemplate}</p>
         </ButtonAction>
       ),
     },
@@ -143,7 +145,7 @@ export default function Customer() {
       value: (
         <ButtonAction>
           <ICDownload />
-          <p style={{ margin: "0" }}>Download Data</p>
+          <p style={{ margin: "0" }}>{lang[t].customer.ghost.downloadData}</p>
         </ButtonAction>
       ),
     },
@@ -175,14 +177,14 @@ export default function Customer() {
   return (
     <div>
       <Col>
-        <Text variant={"h4"}>Customer</Text>
+        <Text variant={"h4"}>{lang[t].customer.title}</Text>
         <Spacer size={20} />
       </Col>
       <Card>
         <Row justifyContent="space-between">
           <Search
             width="340px"
-            placeholder="Search Customer, Salesman, etc"
+            placeholder={lang[t].customer.palceholderSearch}
             onChange={({ target }: any) => setSearch(target.value)}
           />
           <Row gap="16px">
@@ -192,7 +194,7 @@ export default function Customer() {
               onClick={() => setVisible(true)}
               disabled={itemsSelected?.length < 1}
             >
-              Delete
+              {lang[t].customer.tertier.delete}
             </Button>
             <DropdownMenu
               title={"More"}
@@ -219,7 +221,7 @@ export default function Customer() {
               menuList={actDrowpdown}
             />
             <Button size="big" variant="primary" onClick={() => router.push("/customers/create")}>
-              Create
+              {lang[t].customer.primary.create}
             </Button>
           </Row>
         </Row>
