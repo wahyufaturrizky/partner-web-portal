@@ -143,9 +143,9 @@ const Calculation = () => {
             };
           });
 
-          paymentButton?.threeMonths? payment = payment - payment * 0.1 :
-          paymentButton?.sixMonths? payment = payment - payment * 0.25 :
-          paymentButton?.twelveMonths? payment = payment - payment * 0.5 : payment
+          paymentButton?.threeMonths? payment = (payment * 3) - (payment * 3 * 0.1) :
+          paymentButton?.sixMonths? payment = (payment * 6) - (payment * 6 * 0.25) :
+          paymentButton?.twelveMonths? payment = (payment * 12) - (payment * 12 * 0.5) : payment
         return { data: mappedData, totalRow: data.totalRow, payment };
       },
     },
@@ -250,6 +250,13 @@ const Calculation = () => {
 
     uploadFileCalculation(formData);
   };
+
+  const onCreate = (data: any) => {
+    console.log(data, '<<<<create dari index')
+  }
+  const onEdit = (data: any) => {
+    console.log(data, '<<<<edit dari index')
+  }
 
   return (
     <>
@@ -408,6 +415,7 @@ const Calculation = () => {
             visible={isShowCreate.open}
             title={isShowCreate.title}
             onCancel={() => setShowCreate({open: false, title: ''})}
+            onOk={onCreate}
         />
       )}
 
@@ -416,6 +424,7 @@ const Calculation = () => {
             visible={isShowEdit.open}
             title={isShowEdit.title}
             defaultValue={isShowEdit.data}
+            onOk={onEdit}
             onCancel={() => setShowEdit({open: false, title: '', data: {}})}
         />
       )}

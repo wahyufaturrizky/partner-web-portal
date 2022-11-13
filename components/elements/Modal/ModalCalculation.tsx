@@ -13,6 +13,7 @@ import {
     Search,
     Pagination,
     Table,
+    DropdownWithTags,
     Input,
     Button,
     Checkbox
@@ -27,6 +28,7 @@ import { useBranchInfiniteLists } from 'hooks/mdm/branch/useBranch';
 import { useUsers } from 'hooks/user-config/useUser';
 import usePagination from '@lucasmogari/react-pagination';
 import { useCalculationModules } from 'hooks/calculation-config/useCalculation';
+import { useRolePermissions } from 'hooks/role/useRole';
 
 
 
@@ -65,14 +67,27 @@ const ModalCalculation = ({
 
     const [radioValue, setRadioValue] = useState("new")
     const [minUser, setMinUser] = useState(1)
-    const schema = yup
-	.object({
-		role_name: yup.string().required("Role Name is Required"),
-		total_user: yup.number().required("Total User is Required"),
-		company_id: yup.string().required("Company is Required"),
-		user_name: yup.array().of(yup.string()).min(1, 'User Name cannot be empty').length(minUser, `List of User needs to be exactly ${minUser}`),
-	})
-	.required();
+
+    let schema;
+    if(radioValue === "new") {
+        schema = yup
+        .object({
+            role_name: yup.string().required("Role Name is Required"),
+            total_user: yup.number().required("Total User is Required"),
+            company_id: yup.string().required("Company is Required"),
+            user_name: yup.array(yup.string().required('User Name cannot be empty')).of(yup.string()).min(1, 'User Name cannot be empty').length(minUser, `List of User needs to be exactly ${minUser}`),
+        })
+        .required();
+    } else {
+        schema = yup
+        .object({
+            role_id: yup.string().required("Role Name is Required"),
+            total_user: yup.number().required("Total User is Required"),
+            // company_id: yup.string().required("Company is Required"),
+            user_name: yup.array(yup.string().required('User Name cannot be empty')).of(yup.string()).min(1, 'User Name cannot be empty').length(minUser, `List of User needs to be exactly ${minUser}`),
+        })
+        .required();
+    }
 
     const {
 		register,
@@ -85,6 +100,39 @@ const ModalCalculation = ({
 		resolver: yupResolver(schema),
 	});
 
+    const [companyFromRole, setCompanyFromRole] = useState("PT. Kaldu Sari Nabati")
+    // FETCH ROLE
+    const {
+		data: roleData,
+		refetch: refetchRole,
+        isFetching: isFetchingRole,
+		isLoading: isLoadingRole,
+	} = useRolePermissions({
+		options: {
+			onSuccess: (data: any) => {
+				pagination.setTotalItems(data.totalRow);
+			},
+            select: (data: any) => {
+                const mappedData = data?.rows?.map((element: { name: any; id: any; }) => ({
+                    label: element.name,
+                    value: element.id,
+                    company: "PT. Kaldu Sari Nabati"
+                }))
+                const flattenArray = [].concat(...mappedData);
+
+                return {
+                    data: flattenArray,
+                    totalRow: data?.totalRow
+                }
+            }
+		},
+		query: {
+			// search,
+			page: pagination.page,
+			limit: pagination.itemsPerPage,
+		},
+	});
+
     // FETCH COMPANY
     const {
         isLoading: isLoadingCompany,
@@ -95,7 +143,7 @@ const ModalCalculation = ({
       } = useCompanyInfiniteLists({
         query: {
           search: debounceFetchCompany,
-          limit: 10,
+          limit: 10000,
         },
         options: {
           onSuccess: (data: any) => {
@@ -140,7 +188,7 @@ const ModalCalculation = ({
             const mappedData = data?.pages?.map((group: any) => {
               return group.rows?.map((element: any) => {
                 return {
-                  value: element.branchId,
+                  value: element.name,
                   label: element.name,
                 };
               });
@@ -176,7 +224,7 @@ const ModalCalculation = ({
 		},
 	});
 
-    console.log(users, '<<<< list of users')
+    // console.log(users, '<<<< list of users')
     const columns = [
 		{
 			title: "Name",
@@ -224,7 +272,7 @@ const ModalCalculation = ({
                 setCalculationData(data.testData)
             },
           select: (data: any) => {
-            console.log(data, '<<<<<data module')
+            // console.log(data, '<<<<<data module')
             const testData = data?.map((e: { moduleId: any; moduleName: any; menu: any[]; }) => {
                 return {
                     id: e.moduleId,
@@ -239,7 +287,7 @@ const ModalCalculation = ({
                     })
                 }
             })
-            console.log(testData, '<<<<<< ini data modules')
+            // console.log(testData, '<<<<<< ini data modules')
             return { 
                 totalRow: data.totalRow, 
                 testData
@@ -251,6 +299,7 @@ const ModalCalculation = ({
       useEffect(() => {
         setInputWithTagsValue(defaultValue?.users?.map(e => e.fullname))
       }, [defaultValue])
+
       const changeValueCheckbox = (value: any, checked: React.Key | null | undefined) => {
         const newData = [...calculationData]
         const updatedData = newData?.map(el => {
@@ -276,9 +325,35 @@ const ModalCalculation = ({
     }
 
     const onAdd = (data: any) => {
+        const newCalculationData = calculationData.map(e=> e.menu.filter(el => el.checked === true))
+        const menu_ids = newCalculationData[0]?.map(element => element.id)
+        const array_of_fee = newCalculationData[0]?.map(el => el?.fee ? el?.fee : 10000)
+        let fee = []
+        let total_fee
+        // ini harus di cek ulang terutama kalo data module nya lebih dari satu
+        const module_ids = calculationData?.filter(e => e.menu.map(e => e.name === newCalculationData[0][0]?.name))?.map(el => el.id)
+        
+        // ini untuk fee
+        if(array_of_fee.length >= 1){
+            fee = array_of_fee?.reduce((a, b) => a + b)
+            // ini untuk total fee
+            total_fee = fee * data?.total_user
+        }        
+        const newDataCreate = {
+            ...data,
+            company_id: radioValue === "new"? data?.company_id : companyList?.filter(el => el.label === companyFromRole)[0]?.value,
+            menu_ids,
+            module_ids,
+            fee,
+            total_fee,
+            total_payment: total_fee,
+            assign_payment: 'holding'
+        }
+        onOk(newDataCreate)
         // {
         //     "company_id": "1",
-        //     "role_id": "2",
+        //     "role_id": "2", '<<<<<
+        //     "role_name": "new role",
         //     "module_ids": ["18"],
         //     "menu_ids": ["20","21","22"],
         //     "period": "12",
@@ -287,17 +362,70 @@ const ModalCalculation = ({
         //     "fee": 14000,
         //     "user_ids": ["1"],
         //     "total_fee": 123000,
-        //     "total_payment": "40000",
+        //     "total_payment": "123000",
         //     "assign_payment": "holding"
         // }
         // {
         //     "company_id": "8",
         //     "role_name": "asd",
         //     "branch": "BRA-0000002",
-        //     "total_user": 2
+        //     "total_user": 2,
+        //     "module_ids": ["18"],
+        //     "menu_ids": ["20", "21", "22"]
         //   } 
-        console.log(data, '<<<<< test')
     }
+
+    const onEdit = (data: any) => {
+        const newCalculationData = calculationData.map(e=> e.menu.filter(el => el.checked === true))
+        const menu_ids = newCalculationData[0]?.map(element => element.id)
+        const array_of_fee = newCalculationData[0]?.map(el => el?.fee ? el?.fee : 10000)
+        let fee = []
+        let total_fee
+        // ini harus di cek ulang terutama kalo data module nya lebih dari satu
+        const module_ids = calculationData?.filter(e => e.menu.map(e => e.name === newCalculationData[0][0]?.name))?.map(el => el.id)
+        
+        // ini untuk fee
+        if(array_of_fee.length >= 1){
+            fee = array_of_fee?.reduce((a, b) => a + b)
+            // ini untuk total fee
+            total_fee = fee * data?.total_user
+        }        
+        const newDataEdit = {
+            ...data,
+            company_id: radioValue === "new"? data?.company_id : companyList?.filter(el => el.label === companyFromRole)[0]?.value,
+            menu_ids,
+            module_ids,
+            fee,
+            total_fee,
+            total_payment: total_fee,
+            assign_payment: 'holding'
+        }
+        onOk(newDataEdit)
+        // {
+        //     "company_id": "1",
+        //     "role_id": "2", '<<<<<
+        //     "role_name": "new role",
+        //     "module_ids": ["18"],
+        //     "menu_ids": ["20","21","22"],
+        //     "period": "12",
+        //     "branch": "bandung",
+        //     "total_user": 2,
+        //     "fee": 14000,
+        //     "user_ids": ["1"],
+        //     "total_fee": 123000,
+        //     "total_payment": "123000",
+        //     "assign_payment": "holding"
+        // }
+        // {
+        //     "company_id": "8",
+        //     "role_name": "asd",
+        //     "branch": "BRA-0000002",
+        //     "total_user": 2,
+        //     "module_ids": ["18"],
+        //     "menu_ids": ["20", "21", "22"]
+        //   } 
+    }
+
 
   return (
     <Modal
@@ -312,8 +440,8 @@ const ModalCalculation = ({
                 <Button size="big" variant="tertiary" onClick={onCancel}>
                     Cancel
                 </Button>
-                <Button size="big" variant="primary" onClick={handleSubmit(onAdd)}>
-                    Add
+                <Button size="big" variant="primary" onClick={defaultValue? handleSubmit(onEdit) : handleSubmit(onAdd)}>
+                    {defaultValue? "Save": "Add"}
                 </Button>
                 </Row>
             </Row>
@@ -348,7 +476,8 @@ const ModalCalculation = ({
             <Col>
                 <Row justifyContent={"space-between"}>
                     <div style={{width: '340px'}}>
-                        <Input
+                        {radioValue === "new" ? (
+                            <Input
                             width="100%"
                             height="40px"
                             defaultValue={defaultValue?.userRole?.name}
@@ -358,6 +487,49 @@ const ModalCalculation = ({
                             error={errors?.role_name?.message}
                             {...register('role_name', {required: true})}
                         />
+                        ) : (
+                        <Controller
+                            control={control}
+                            defaultValue={""}
+                            name="role_id"
+                            render={({ field: { onChange }, formState: { errors } }) => (
+                                <Col>
+                                <div style={{
+                                display: 'flex'
+                                }}>
+                                <Text variant="headingRegular">Role Name</Text>
+                                <Span>&#42;</Span>
+                                </div>
+                                <Spacer size={6} />
+                                <FormSelect
+                                    defaultValue={defaultValue?.userRole?.name}
+                                    style={{ width: "340px"}}
+                                    size={"large"}
+                                    placeholder={"Select"}
+                                    borderColor={"#AAAAAA"}
+                                    arrowColor={"#000"}
+                                    withSearch
+                                    required
+                                    error={errors?.role_name?.message}
+                                    isLoading={isLoadingRole || isFetchingRole}
+                                    isLoadingMore={isFetchingRole}
+                                    items={isFetchingRole ? [] : roleData?.data}
+                                    onChange={(value: any) => {
+                                        setCompanyFromRole(roleData?.data?.filter(e => e.value === value)[0]?.company)
+                                        onChange(value);
+                                    }}
+                                    onSearch={(value: any) => {
+                                        value === '' ? value = ' ' : value
+                                        setSearchCompany(value);
+                                    }}
+                                />
+                                </Col>
+                            )
+                            }
+                        />
+                        )}
+                        
+                        
                     </div>
                     <div style={{width: '340px'}}>
                         <Input
@@ -379,7 +551,8 @@ const ModalCalculation = ({
                 <Spacer size={10} />
 
                 <Row justifyContent={"space-between"}>
-                    <Controller
+                    {radioValue === "new" ? (
+                        <Controller
                         control={control}
                         defaultValue={""}
                         name="company_id"
@@ -401,7 +574,7 @@ const ModalCalculation = ({
                                 arrowColor={"#000"}
                                 withSearch
                                 required
-                                error={errors?.company?.message}
+                                error={errors?.company_id?.message}
                                 isLoading={isFetchingCompany || isLoadingCompany}
                                 isLoadingMore={isFetchingMoreCompany}
                                 fetchMore={() => {
@@ -411,7 +584,7 @@ const ModalCalculation = ({
                                 }}
                                 items={isFetchingCompany && !isFetchingMoreCompany ? [] : companyList}
                                 onChange={(value: any) => {
-                                onChange(value);
+                                    onChange(value);
                                 }}
                                 onSearch={(value: any) => {
                                     value === '' ? value = ' ' : value
@@ -422,6 +595,23 @@ const ModalCalculation = ({
                         )
                         }
                     />
+                    ) : (
+                    <div style={{width: '340px'}}>
+                        <Input
+                            width="100%"
+                            height="40px"
+                            defaultValue={defaultValue?.company?.name}
+                            value={companyFromRole}
+                            placeholder="e.g Sales Admin"
+                            label="Company" 
+                            disabled
+                            required
+                            error={errors?.company_id?.message}
+                            {...register('company_id', {required: true})}
+                        />
+                        </div>
+                    )}
+                    
                     <Spacer size={1}/>
                     <Controller
                         control={control}
@@ -525,17 +715,30 @@ const ModalCalculation = ({
                     required
                     value={inputWithTagsValue? inputWithTagsValue : []}
                     height="40px"
+                    mode={"multiple"}
+                    dropdownStyle={""}
+                    options={users?.rows?.map(e => ({value: e.fullname, label: e.fullname}))}
                     error={errors?.user_name?.message}
                     placeholder={`Type with separate comma or by pressing "Enter"`}
                     onChange={(value) => {
                         setInputWithTagsValue(value)
                         setValue("user_name", value)
                     }}
-                    // {...register("user_name", { required: "Please enter Conversion Number." })}
                 />
+                {/* 
+                ini karena yup nya ga jalan ketika array [] empty 
+                padahal udah min 1 
+                */}
+                {!inputWithTagsValue ? (
+                    <ErrorText>
+                    {"User Name cannot be empty"}
+                    </ErrorText>
+                ):(
                 <ErrorText>
                 {errors?.user_name?.message}
                 </ErrorText>
+                )}
+                
             </Col>
             <Button 
             style={{
