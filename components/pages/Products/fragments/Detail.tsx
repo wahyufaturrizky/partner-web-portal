@@ -252,12 +252,12 @@ export default function Detail(props: any) {
             baseUom: data?.baseUom?.name,
             qty: uomConversion.qty,
             index: index,
-            uomConversionItemId: uomConversion.uom?.uomId,
+            uomConversionItemId: uomConversion?.uomConversionId
           });
 
           listUom.push({
             value: uomConversion.uom?.name,
-            id: uomConversion.uom?.uomId,
+            id: uomConversion?.uomConversionId,
             conversionNumber: uomConversion.conversionNumber,
           });
 
@@ -266,7 +266,9 @@ export default function Detail(props: any) {
             id: uomConversion.id,
             qty: uomConversion.qty,
             conversion_number: uomConversion.conversionNumber,
+            uomConversionItemId: uomConversion?.uomConversionId,
             baseUom: data?.baseUom?.name,
+            uomName: uomConversion?.uom?.name
           });
         });
         return {
@@ -430,7 +432,7 @@ export default function Detail(props: any) {
             setValue={setValue}
             onSelectUom={(data: any, newUom: any, indexData: any) => {
               const uomConversation = UomData?.mappedUomConversion;
-              const uomData = uomConversation.find((uom) => uom.uomId === newUom);
+              const uomData = uomConversation.find((uom) => uom.uomConversionItemId === newUom);
               const newData = {
                 id: data.id,
                 key: data.key,
@@ -439,6 +441,7 @@ export default function Detail(props: any) {
                 qty: uomData.qty,
                 index: data?.index,
                 levelId: data?.levelId,
+                uomName: uomData?.uomName
               };
 
               const uom = detailForm?.uom;
