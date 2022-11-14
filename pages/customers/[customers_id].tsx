@@ -152,29 +152,35 @@ export default function CustomersDetail() {
           }))
         );
 
-        setValue("invoicing.credit_limit", dataCustomerDetail.customerInvoicing.creditLimit);
-        setValue("invoicing.credit_balance", dataCustomerDetail.customerInvoicing.creditBalance);
-        setValue("invoicing.credit_used", dataCustomerDetail.customerInvoicing.creditUsed);
-        setValue("invoicing.income_account", dataCustomerDetail.customerInvoicing.incomeAccount);
-        setValue("invoicing.expense_account", dataCustomerDetail.customerInvoicing.expenseAccount);
-        setValue("invoicing.tax_name", dataCustomerDetail.customerInvoicing.taxName);
-        setValue("invoicing.tax_city", dataCustomerDetail.customerInvoicing.taxCity);
-        setValue("invoicing.tax_address", dataCustomerDetail.customerInvoicing.taxAddress);
-        setValue("invoicing.currency", dataCustomerDetail.customerInvoicing.currency);
-        setValue("invoicing.id", dataCustomerDetail.customerInvoicing.id);
+        setValue("invoicing.credit_limit", dataCustomerDetail.customerInvoicing?.creditLimit);
+        setValue("invoicing.credit_balance", dataCustomerDetail.customerInvoicing?.creditBalance);
+        setValue("invoicing.credit_used", dataCustomerDetail.customerInvoicing?.creditUsed);
+        setValue("invoicing.income_account", dataCustomerDetail.customerInvoicing?.incomeAccount);
+        setValue("invoicing.expense_account", dataCustomerDetail.customerInvoicing?.expenseAccount);
+        setValue("invoicing.tax_name", dataCustomerDetail.customerInvoicing?.taxName);
+        setValue("invoicing.tax_city", dataCustomerDetail.customerInvoicing?.taxCity);
+        setValue("invoicing.tax_address", dataCustomerDetail.customerInvoicing?.taxAddress);
+        setValue("invoicing.currency", dataCustomerDetail.customerInvoicing?.currency);
+        setValue("invoicing.id", dataCustomerDetail.customerInvoicing?.id);
 
-        setValue("purchasing.term_of_payment", dataCustomerDetail.customerPurchasing.termOfPayment);
-        setValue("purchasing.id", dataCustomerDetail.customerPurchasing.id);
+        setValue(
+          "purchasing.term_of_payment",
+          dataCustomerDetail.customerPurchasing?.termOfPayment
+        );
+        setValue("purchasing.id", dataCustomerDetail.customerPurchasing?.id);
 
-        setValue("sales.branch", dataCustomerDetail.customerSales.branch);
-        setValue("sales.id", dataCustomerDetail.customerSales.id);
-        setValue("sales.salesman", dataCustomerDetail.customerSales.salesman);
-        setValue("sales.term_payment", dataCustomerDetail.customerSales.termPayment);
-        setValue("sales.sales_order_blocking", dataCustomerDetail.customerSales.salesOrderBlocking);
-        setValue("sales.billing_blocking", dataCustomerDetail.customerSales.billingBlocking);
+        setValue("sales.branch", dataCustomerDetail.customerSales?.branch);
+        setValue("sales.id", dataCustomerDetail.customerSales?.id);
+        setValue("sales.salesman", dataCustomerDetail.customerSales?.salesman);
+        setValue("sales.term_payment", dataCustomerDetail.customerSales?.termPayment);
+        setValue(
+          "sales.sales_order_blocking",
+          dataCustomerDetail.customerSales?.salesOrderBlocking
+        );
+        setValue("sales.billing_blocking", dataCustomerDetail.customerSales?.billingBlocking);
         setValue(
           "sales.delivery_order_blocking",
-          dataCustomerDetail.customerSales.deliveryOrderBlocking
+          dataCustomerDetail.customerSales?.deliveryOrderBlocking
         );
       },
     },
