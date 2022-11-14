@@ -23,7 +23,7 @@ import {
   Spin,
 } from "pink-lava-ui";
 import { useState } from "react";
-import { Controller, useFieldArray, useForm } from "react-hook-form";
+import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form";
 import styled from "styled-components";
 import { ICCheckPrimary, ICDelete, ICEdit, ICPlusWhite, ICView } from "../../assets";
 import ArrowLeft from "../../assets/icons/arrow-left.svg";
@@ -800,6 +800,7 @@ const EmployeeDetail = () => {
           attachments: [data.attachments],
         })),
       },
+      languages: [formData.languages],
     });
   };
 
