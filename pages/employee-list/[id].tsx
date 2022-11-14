@@ -93,13 +93,9 @@ const EmployeeDetail = () => {
   const [totalRowsReportToList, setTotalRowsReportToList] = useState(0);
   const [searchReportTo, setSearchReportTo] = useState("");
 
-  const [typePhoto, setTypePhoto] = useState("");
-
   const [countryId, setCountryId] = useState();
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-
-  const [isPhoto, setIsPhoto] = useState("");
 
   const [modalChannelForm, setModalChannelForm] = useState({
     open: false,
@@ -123,9 +119,116 @@ const EmployeeDetail = () => {
     1000
   );
 
+  const {
+    register,
+    control,
+    handleSubmit,
+    formState: { errors },
+    setValue,
+  } = useForm({
+    shouldUseNativeValidation: true,
+    defaultValues: {
+      type: "",
+      photo: "",
+      title: "",
+      name: "",
+      nik: "",
+      department: "",
+      job_position: "",
+      job_level: "",
+      is_salesman: false,
+      report_to: "",
+      branch: "",
+      date_join: null,
+      date_resign: null,
+      languages: [],
+      tax: "",
+      external_code: "",
+      personal: {
+        pob: "",
+        dob: "",
+        nationality: "",
+        martial: "",
+        blood: "",
+        religion: "",
+        insurance: "",
+        email: "",
+        phone: "",
+        mobile: "",
+        visa: "",
+        visa_expire: null,
+      },
+      address: [],
+      bank: [],
+      education: [],
+      family: [],
+      development: {
+        certification: [],
+        training: [],
+      },
+    },
+  });
+
   const { data: dataEmployee, isLoading: isLoadingEmployee } = useEmployeeListMDM({
     options: {
-      onSuccess: () => {},
+      onSuccess: (data: any) => {
+        setValue("type", data.type);
+        setValue("photo", data.photo);
+        setValue("title", data.title);
+        setValue("name", data.name);
+        setValue("nik", data.nik);
+        setValue("department", data.department);
+        setValue("job_position", data.jobPosition);
+        setValue("job_level", data.jobLevel);
+        setValue("is_salesman", data.isSalesman);
+        setValue("report_to", data.reportTo);
+        setValue("branch", data.branch);
+        setValue("date_join", data.dateJoin);
+        setValue("date_resign", data.dateResign);
+        setValue("languages", data.languages);
+        setValue("tax", data.tax);
+        setValue("external_code", data.externalCode);
+        setValue("personal.pob", data.personal.pob);
+        setValue("personal.dob", data.personal.dob);
+        setValue("personal.nationality", data.personal.nationality);
+        setValue("personal.martial", data.personal.martial);
+        setValue("personal.blood", data.personal.blood);
+        setValue("personal.religion", data.personal.religion);
+        setValue("personal.email", data.personal.email);
+        setValue("personal.phone", data.personal.phone);
+        setValue("personal.mobile", data.personal.mobile);
+        setValue("personal.visa", data.personal.visa);
+        setValue("personal.visa_expire", data.personal.visaExpire);
+        setValue("address", data.address);
+        setValue("bank", data.bank);
+        setValue("education", data.education);
+        setValue("family", data.family);
+        setValue("development", data.development);
+
+        replaceTraining(
+          data.development.training.map((data: any) => ({
+            id: data.id,
+            type: data.type,
+            name: data.name,
+            status: data.status,
+            start: data.start,
+            end: data.end,
+            description: data.description,
+            attachments: data.attachments,
+          }))
+        );
+
+        replaceCertification(
+          data.development.certification.map((data: any) => ({
+            id: data.id,
+            name: data.name,
+            institution: data.institution,
+            number: data.number,
+            date: data.date,
+            attachments: data.attachments,
+          }))
+        );
+      },
     },
     id: idEmployee,
   });
@@ -145,54 +248,6 @@ const EmployeeDetail = () => {
     lat: "",
     key: 0,
   };
-
-  const {
-    register,
-    control,
-    handleSubmit,
-    formState: { errors },
-    getValues,
-    setValue,
-  } = useForm({
-    shouldUseNativeValidation: true,
-    defaultValues: {
-      type: dataEmployee?.type,
-      photo: dataEmployee?.photo,
-      title: dataEmployee?.title,
-      name: dataEmployee?.name,
-      nik: dataEmployee?.nik,
-      department: dataEmployee?.department,
-      job_position: dataEmployee?.jobPosition,
-      job_level: dataEmployee?.jobLevel,
-      is_salesman: dataEmployee?.isSalesman,
-      report_to: dataEmployee?.reportTo,
-      branch: dataEmployee?.branch,
-      date_join: dataEmployee?.dateJoin,
-      date_resign: dataEmployee?.dateResign,
-      languages: dataEmployee?.languages,
-      tax: dataEmployee?.tax,
-      external_code: dataEmployee?.externalCode,
-      personal: {
-        pob: dataEmployee?.pob,
-        dob: dataEmployee?.dob,
-        nationality: dataEmployee?.nationality,
-        martial: dataEmployee?.martial,
-        blood: dataEmployee?.blood,
-        religion: dataEmployee?.religion,
-        insurance: dataEmployee?.insurance,
-        email: dataEmployee?.email,
-        phone: dataEmployee?.phone,
-        mobile: dataEmployee?.mobile,
-        visa: dataEmployee?.visa,
-        visa_expire: dataEmployee?.visaExpire,
-      },
-      address: dataEmployee?.address,
-      bank: dataEmployee?.bank,
-      education: dataEmployee?.education,
-      family: dataEmployee?.family,
-      development: dataEmployee?.development,
-    },
-  });
 
   const {
     register: registerBankAccount,
@@ -239,29 +294,52 @@ const EmployeeDetail = () => {
     shouldUseNativeValidation: true,
   });
 
-  const { mutate: uploadFilePhoto, isLoading: isLoadingFilePhoto } = useUploadFilePhotoEmployeeMDM({
-    options: {
-      onSuccess: (data: any) => {
-        if (typePhoto === "photo") {
+  const { mutate: uploadFilePhotoEmployee, isLoading: isLoadingFilePhotoFilePhotoEmployee } =
+    useUploadFilePhotoEmployeeMDM({
+      options: {
+        onSuccess: (data: any) => {
           setValue("photo", data);
-        } else if (typePhoto === "certification") {
-          setValueCertification("attachments", data);
-        } else {
-          setValueTraining("attachments", data);
-        }
-        setIsPhoto("");
-        alert("Upload Success");
+          alert("Upload Success");
+        },
       },
-    },
-  });
+    });
 
-  const handleUploadPhotoFile = (file: any, type: string) => {
+  const { mutate: uploadFilePhotoCertificate, isLoading: isLoadingFilePhotoFilePhotoCertificate } =
+    useUploadFilePhotoEmployeeMDM({
+      options: {
+        onSuccess: (data: any) => {
+          setValueCertification("attachments", data);
+          alert("Upload Success");
+        },
+      },
+    });
+
+  const { mutate: uploadFilePhotoTraining, isLoading: isLoadingFilePhotoFilePhotoTraining } =
+    useUploadFilePhotoEmployeeMDM({
+      options: {
+        onSuccess: (data: any) => {
+          setValueTraining("attachments", data);
+          alert("Upload Success");
+        },
+      },
+    });
+
+  const handleUploadPhotoEmployeeFile = (file: any) => {
     const formData = new FormData();
     formData.append("upload_file", file);
-    setTypePhoto(type);
-    if (isPhoto || type === "photo") {
-      uploadFilePhoto(formData);
-    }
+    uploadFilePhotoEmployee(formData);
+  };
+
+  const handleUploadPhotoTrainingFile = (file: any) => {
+    const formData = new FormData();
+    formData.append("upload_file", file);
+    uploadFilePhotoTraining(formData);
+  };
+
+  const handleUploadPhotoCertificateFile = (file: any) => {
+    const formData = new FormData();
+    formData.append("upload_file", file);
+    uploadFilePhotoCertificate(formData);
   };
 
   const {
@@ -710,7 +788,19 @@ const EmployeeDetail = () => {
       ...data,
     };
 
-    updateEmployeeList(formData);
+    updateEmployeeList({
+      ...formData,
+      development: {
+        certification: formData.development.certification.map((data: any) => ({
+          ...data,
+          attachments: [data.attachments],
+        })),
+        training: formData.development.training.map((data: any) => ({
+          ...data,
+          attachments: [data.attachments],
+        })),
+      },
+    });
   };
 
   const { data: languageData } = useLanguages();
@@ -1363,10 +1453,10 @@ const EmployeeDetail = () => {
               <Col>
                 <FileUploaderAllFiles
                   label="Employee Photo"
-                  onSubmit={(file: any) => handleUploadPhotoFile(file, "photo")}
+                  onSubmit={(file: any) => handleUploadPhotoEmployeeFile(file)}
                   defaultFile={dataEmployee?.photo || "/placeholder-employee-photo.svg"}
                   withCrop
-                  disabled={isLoadingFilePhoto}
+                  disabled={isLoadingFilePhotoFilePhotoEmployee}
                   sizeImagePhoto="125px"
                   removeable
                   textPhoto={[
@@ -2960,11 +3050,8 @@ const EmployeeDetail = () => {
                   <Spacer size={16} />
 
                   <FileUploaderAllFilesDragger
-                    disabled={isLoadingFilePhoto}
-                    onSubmit={(file: any) => {
-                      setIsPhoto(file);
-                      handleUploadPhotoFile(file, "training");
-                    }}
+                    disabled={isLoadingFilePhotoFilePhotoTraining}
+                    onSubmit={(file: any) => handleUploadPhotoTrainingFile(file)}
                     defaultFileList={
                       modalChannelForm.data?.attachments ? [modalChannelForm.data?.attachments] : []
                     }
@@ -3096,11 +3183,8 @@ const EmployeeDetail = () => {
                   <Spacer size={16} />
 
                   <FileUploaderAllFilesDragger
-                    disabled={isLoadingFilePhoto}
-                    onSubmit={(file: any) => {
-                      setIsPhoto(file);
-                      handleUploadPhotoFile(file, "certification");
-                    }}
+                    disabled={isLoadingFilePhotoFilePhotoCertificate}
+                    onSubmit={(file: any) => handleUploadPhotoCertificateFile(file)}
                     defaultFileList={
                       modalChannelForm.data?.attachments ? [modalChannelForm.data?.attachments] : []
                     }

@@ -88,11 +88,7 @@ const EmployeeListCreate = () => {
   const [totalRowsReportToList, setTotalRowsReportToList] = useState(0);
   const [searchReportTo, setSearchReportTo] = useState("");
 
-  const [typePhoto, setTypePhoto] = useState("");
-
   const [countryId, setCountryId] = useState();
-
-  const [isPhoto, setIsPhoto] = useState("");
 
   const [modalChannelForm, setModalChannelForm] = useState({
     open: false,
@@ -227,29 +223,52 @@ const EmployeeListCreate = () => {
     shouldUseNativeValidation: true,
   });
 
-  const { mutate: uploadFilePhoto, isLoading: isLoadingFilePhoto } = useUploadFilePhotoEmployeeMDM({
-    options: {
-      onSuccess: (data: any) => {
-        if (typePhoto === "photo") {
+  const { mutate: uploadFilePhotoEmployee, isLoading: isLoadingFilePhotoFilePhotoEmployee } =
+    useUploadFilePhotoEmployeeMDM({
+      options: {
+        onSuccess: (data: any) => {
           setValue("photo", data);
-        } else if (typePhoto === "certification") {
-          setValueCertification("attachments", data);
-        } else {
-          setValueTraining("attachments", data);
-        }
-        setIsPhoto("");
-        alert("Upload Success");
+          alert("Upload Success");
+        },
       },
-    },
-  });
+    });
 
-  const handleUploadPhotoFile = (file: any, type: string) => {
+  const { mutate: uploadFilePhotoCertificate, isLoading: isLoadingFilePhotoFilePhotoCertificate } =
+    useUploadFilePhotoEmployeeMDM({
+      options: {
+        onSuccess: (data: any) => {
+          setValueCertification("attachments", data);
+          alert("Upload Success");
+        },
+      },
+    });
+
+  const { mutate: uploadFilePhotoTraining, isLoading: isLoadingFilePhotoFilePhotoTraining } =
+    useUploadFilePhotoEmployeeMDM({
+      options: {
+        onSuccess: (data: any) => {
+          setValueTraining("attachments", data);
+          alert("Upload Success");
+        },
+      },
+    });
+
+  const handleUploadPhotoEmployeeFile = (file: any) => {
     const formData = new FormData();
     formData.append("upload_file", file);
-    setTypePhoto(type);
-    if (isPhoto || type === "photo") {
-      uploadFilePhoto(formData);
-    }
+    uploadFilePhotoEmployee(formData);
+  };
+
+  const handleUploadPhotoTrainingFile = (file: any) => {
+    const formData = new FormData();
+    formData.append("upload_file", file);
+    uploadFilePhotoTraining(formData);
+  };
+
+  const handleUploadPhotoCertificateFile = (file: any) => {
+    const formData = new FormData();
+    formData.append("upload_file", file);
+    uploadFilePhotoCertificate(formData);
   };
 
   const {
@@ -690,11 +709,23 @@ const EmployeeListCreate = () => {
     });
 
     const formData = {
-      company: "KSNI",
       ...data,
+      company: "KSNI",
     };
 
-    createEmployeeList(formData);
+    createEmployeeList({
+      ...formData,
+      development: {
+        certification: formData.development.certification.map((data: any) => ({
+          ...data,
+          attachments: [data.attachments],
+        })),
+        training: formData.development.training.map((data: any) => ({
+          ...data,
+          attachments: [data.attachments],
+        })),
+      },
+    });
   };
 
   const { data: languageData } = useLanguages();
@@ -1324,10 +1355,10 @@ const EmployeeListCreate = () => {
               <Col>
                 <FileUploaderAllFiles
                   label="Employee Photo"
-                  onSubmit={(file: any) => handleUploadPhotoFile(file, "photo")}
+                  onSubmit={(file: any) => handleUploadPhotoEmployeeFile(file, "photo")}
                   defaultFile={"/placeholder-employee-photo.svg"}
                   withCrop
-                  disabled={isLoadingFilePhoto}
+                  disabled={isLoadingFilePhotoFilePhotoEmployee}
                   sizeImagePhoto="125px"
                   removeable
                   textPhoto={[
@@ -2898,11 +2929,8 @@ const EmployeeListCreate = () => {
                   <Spacer size={16} />
 
                   <FileUploaderAllFilesDragger
-                    disabled={isLoadingFilePhoto}
-                    onSubmit={(file: any) => {
-                      setIsPhoto(file);
-                      handleUploadPhotoFile(file, "training");
-                    }}
+                    disabled={isLoadingFilePhotoFilePhotoTraining}
+                    onSubmit={(file: any) => handleUploadPhotoTrainingFile(file)}
                     defaultFileList={
                       modalChannelForm.data?.attachments ? [modalChannelForm.data?.attachments] : []
                     }
@@ -3034,11 +3062,8 @@ const EmployeeListCreate = () => {
                   <Spacer size={16} />
 
                   <FileUploaderAllFilesDragger
-                    disabled={isLoadingFilePhoto}
-                    onSubmit={(file: any) => {
-                      setIsPhoto(file);
-                      handleUploadPhotoFile(file, "certification");
-                    }}
+                    disabled={isLoadingFilePhotoFilePhotoCertificate}
+                    onSubmit={(file: any) => handleUploadPhotoCertificateFile(file)}
                     defaultFileList={
                       modalChannelForm.data?.attachments ? [modalChannelForm.data?.attachments] : []
                     }
