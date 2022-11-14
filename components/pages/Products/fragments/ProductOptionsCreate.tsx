@@ -14,8 +14,10 @@ import { useProductOptionsInfiniteLists } from '../../../../hooks/mdm/product-op
 import useDebounce from '../../../../lib/useDebounce';
 import { ICDelete } from '../../../../assets';
 import { Controller, useFieldArray, useWatch } from 'react-hook-form';
+import { lang } from 'lang';
 
 export default function ProductOptionsCreate({control, setValue }: any) {
+  const t = localStorage.getItem("lan") || "en-US";
 
   // useFieldArray Product Option
   const {
@@ -99,6 +101,29 @@ export default function ProductOptionsCreate({control, setValue }: any) {
     },
   });
 
+  const TableHeader  = () => {
+    return (
+      <>
+      <Row style={{background: "#F4F4F4", borderRadius: "8px 8px 0px 0px", height:"55px"}} 
+        justifyContent="center"
+        alignItems="center"
+        width="100%" noWrap>
+        <Row width="20px" gap="16px" alignItems="center" nowrap></Row>
+  
+        <Row width="360px">
+          <Text variant="headingRegular">{lang[t].productList.create.table.optionsName}</Text>
+        </Row>
+  
+        <Spacer size={32} />
+           
+        <Row width="616px">
+          <Text variant="headingRegular">{lang[t].productList.create.table.optionsValue}</Text>
+        </Row>
+      </Row>
+    </>
+    )
+  }
+
   return (
     <Col>
         <Text variant="headingMedium" color="blue.darker">Options</Text>
@@ -106,7 +131,7 @@ export default function ProductOptionsCreate({control, setValue }: any) {
         <Row>
           <Button variant="primary" size="big" onClick={handleAddMoreProductOption}>
             +
-            Add New
+            {lang[t].productList.list.button.addNew}
           </Button>
         </Row>
         <Spacer size={12} />
@@ -135,29 +160,6 @@ export default function ProductOptionsCreate({control, setValue }: any) {
           </Col>
         }
     </Col>
-  )
-}
-
-const TableHeader  = () => {
-  return (
-    <>
-    <Row style={{background: "#F4F4F4", borderRadius: "8px 8px 0px 0px", height:"55px"}} 
-      justifyContent="center"
-      alignItems="center"
-      width="100%" noWrap>
-      <Row width="20px" gap="16px" alignItems="center" nowrap></Row>
-
-      <Row width="360px">
-        <Text variant="headingRegular">Option Name</Text>
-      </Row>
-
-      <Spacer size={32} />
-         
-      <Row width="616px">
-        <Text variant="headingRegular">Option Value</Text>
-      </Row>
-    </Row>
-  </>
   )
 }
 
