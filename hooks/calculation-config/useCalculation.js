@@ -1,5 +1,5 @@
-import { useInfiniteQuery, useQuery } from "react-query";
-import { client } from "../../lib/client";
+import { useInfiniteQuery, useMutation, useQuery } from "react-query";
+import { client, mdmService } from "../../lib/client";
 
 const fetchCalculations = async ({ query = {} }) => {
   return client(`/calculation`, {
@@ -29,7 +29,7 @@ const fetchInfiniteeCalculationLists = async ({ pageParam = 1, queryKey }) => {
       limit: 10,
       page: pageParam,
       sortBy: "id",
-      sortOrder: "ASC",
+      sortOrder: "desc",
       ...queryKey[1],
     },
   }).then((data) => data);
@@ -46,7 +46,7 @@ const fetchCalculationModules = async ({ query = {} }) => {
   return client(`/calculation/module`, {
     params: {
       search: "",
-      limit: 10000,
+      // limit: 10000,
       page: 1,
       sortBy: "id",
       sortOrder: "asc",
@@ -62,4 +62,64 @@ const useCalculationModules = ({ query = {}, options } = {}) => {
   });
 };
 
-export { useCalculations, useCalculationInfiniteLists, useCalculationModules };
+function useCreateCalculation({ options }) {
+  return useMutation(
+    (data) =>
+      client(`/calculation`, {
+        method: "POST",
+        data,
+      }),
+    {
+      ...options,
+    }
+  );
+}
+
+function useUpdateCalculation({ id, options }) {
+  return useMutation(
+    (data) =>
+      client(`/calculation/${id}`, {
+        method: "PUT",
+        data,
+      }),
+    {
+      ...options,
+    }
+  );
+}
+
+const useDeleteCalculation = ({ options }) => {
+  return useMutation(
+    (data) =>
+      client(`/calculation`, {
+        method: "DELETE",
+        data,
+      }),
+    {
+      ...options,
+    }
+  );
+};
+
+const useUploadFileCalculation = ({ options }) => {
+  return useMutation(
+    (data) =>
+      client(`/calculation/upload`, {
+        method: "POST",
+        data,
+      }),
+    {
+      ...options,
+    }
+  );
+};
+
+export {
+  useCalculations,
+  useCalculationInfiniteLists,
+  useCalculationModules,
+  useCreateCalculation,
+  useDeleteCalculation,
+  useUpdateCalculation,
+  useUploadFileCalculation,
+};

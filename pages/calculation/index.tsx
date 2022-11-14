@@ -15,6 +15,7 @@ import {
   DropdownMenu,
   FileUploadModal,
   Label,
+  Span,
   FormSelect,
   Dropdown
 } from "pink-lava-ui";
@@ -31,8 +32,9 @@ import { queryClient } from "../_app";
 import { mdmDownloadService } from "../../lib/client";
 import { useRouter } from "next/router";
 import ModalCalculation from "components/elements/Modal/ModalCalculation";
-import { useCalculations } from "hooks/calculation-config/useCalculation";
+import { useCalculations, useDeleteCalculation, useUploadFileCalculation } from "hooks/calculation-config/useCalculation";
 import IDR_formatter from "hooks/number-formatter/useNumberFormatter";
+import { useCompanyInfiniteLists } from "hooks/company-list/useCompany";
 
 const downloadFile = (params: any) =>
   mdmDownloadService("/branch/download", { params }).then((res) => {
@@ -42,22 +44,6 @@ const downloadFile = (params: any) =>
     tempLink.setAttribute("download", `branch_${new Date().getTime()}.xlsx`);
     tempLink.click();
   });
-
-const renderConfirmationText = (type: any, data: any) => {
-  switch (type) {
-    case "selection":
-      return data.selectedRowKeys.length > 1
-        ? `Are you sure to delete ${data.selectedRowKeys.length} items ?`
-        : `Are you sure to delete Branch Name ${
-            data?.uomData?.data.find((el: any) => el.key === data.selectedRowKeys[0])?.uomName
-          } ?`;
-    case "detail":
-      return `Are you sure to delete Branch Name ${data.uomName} ?`;
-
-    default:
-      break;
-  }
-};
 
 const Calculation = () => {
   const router = useRouter();
@@ -74,7 +60,7 @@ const Calculation = () => {
   const { register, control, handleSubmit, setValue } = useForm();
 
   const [search, setSearch] = useState("");
-  const [isShowDelete, setShowDelete] = useState({ open: false, type: "selection", data: {} });
+  const [isShowDelete, setShowDelete] = useState({ open: false, id: "", name: "" });
   const [isShowCreate, setShowCreate] = useState({ open: false, title: ''})
   const [isShowEdit, setShowEdit] = useState({ open: false, title: '', data: {} })
   const [isShowUpload, setShowUpload] = useState(false);
@@ -86,14 +72,12 @@ const Calculation = () => {
     twelveMonths: false,
   })
 
-  const [modalForm, setModalForm] = useState({
-    open: false,
-    data: {},
-    typeForm: "create",
-  });
-
-  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const debounceSearch = useDebounce(search, 1000);
+
+  const [companyList, setCompanyList] = useState([])
+  const [totalRowsCompanyList, setTotalRowsCompanyList] = useState(0)
+  const [searchCompany, setSearchCompany] = useState("");
+  const debounceFetchCompany = useDebounce(searchCompany, 1000);
 
   const {
     data: calculationData,
@@ -104,14 +88,13 @@ const Calculation = () => {
       search: debounceSearch,
       page: pagination.page,
       limit: pagination.itemsPerPage,
-      // company_id: "KSNI"
     },
     options: {
       onSuccess: (data: any) => {
         pagination.setTotalItems(data.totalRow);
       },
       select: (data: any) => {
-        console.log(data, '<<<<<<data nya')
+        // console.log(data, '<<<<<<data nya')
         let payment = 0
         const mappedData = data?.rows?.map((element: any) => {
             payment += +element?.totalPayment
@@ -137,7 +120,6 @@ const Calculation = () => {
                     fontSize: "18px",
                   }}
                   onClick={() => {
-                    console.log('masuk edit')
                     setShowEdit({open: true, title: "Edit Roles, Menu, etc", data: element})
                   }}
                 />
@@ -153,6 +135,7 @@ const Calculation = () => {
                   }}
                   onClick={() => {
                     console.log('masuk delete')
+                   setShowDelete({ open: true, id: element.id, name: element.userRole?.name })
                   }}
                 />
                 </div>
@@ -160,38 +143,67 @@ const Calculation = () => {
             };
           });
 
-          paymentButton?.threeMonths? payment = payment - payment * 0.1 :
-          paymentButton?.sixMonths? payment = payment - payment * 0.25 :
-          paymentButton?.twelveMonths? payment = payment - payment * 0.5 : payment
+          paymentButton?.threeMonths? payment = (payment * 3) - (payment * 3 * 0.1) :
+          paymentButton?.sixMonths? payment = (payment * 6) - (payment * 6 * 0.25) :
+          paymentButton?.twelveMonths? payment = (payment * 12) - (payment * 12 * 0.5) : payment
         return { data: mappedData, totalRow: data.totalRow, payment };
       },
     },
   });
 
-  const { mutate: deleteBranch, isLoading: isLoadingDeleteBranch } = useDeleteBranch({
+  const {
+    isLoading: isLoadingCompany,
+    isFetching: isFetchingCompany,
+    isFetchingNextPage: isFetchingMoreCompany,
+    hasNextPage: hasNextPageCompany,
+    fetchNextPage: fetchNextPageCompany,
+  } = useCompanyInfiniteLists({
+    query: {
+      search: debounceFetchCompany,
+      limit: 10,
+    },
     options: {
-      onSuccess: () => {
-        setShowDelete({ open: false, data: {}, type: "" });
-        setSelectedRowKeys([]);
-        queryClient.invalidateQueries(["branch-list"]);
+      onSuccess: (data: any) => {
+        setTotalRowsCompanyList(data.pages[0].totalRow);
+        const mappedData = data?.pages?.map((group: any) => {
+          return group.rows?.map((element: any) => {
+            return {
+              id: element.code,
+              value: element.name + ' - ' + element.companyType,
+            };
+          });
+        });
+        const flattenArray = [].concat(...mappedData);
+        setCompanyList(flattenArray);
+      },
+      getNextPageParam: (_lastPage: any, pages: any) => {
+        if (companyList.length < totalRowsCompanyList) {
+          return pages.length + 1;
+        } else {
+          return undefined;
+        }
       },
     },
   });
 
-  const { mutate: uploadFileBranch, isLoading: isLoadingUploadFileBranch } = useUploadFileBranch({
+  const { mutate: deleteCalculation, isLoading: isLoadingDeleteCalculation } = useDeleteCalculation({
     options: {
       onSuccess: () => {
-        queryClient.invalidateQueries(["branch-list"]);
+        setShowDelete({ open: false, id: "", name: "" });
+        // setSelectedRowKeys([]);
+        queryClient.invalidateQueries(["calculations"]);
+      },
+    },
+  });
+
+  const { mutate: uploadFileCalculation, isLoading: isLoadingUploadFileCalculation } = useUploadFileCalculation({
+    options: {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["calculations"]);
         setShowUpload(false);
       },
     },
   });
-
-  const [listZone, setListZone] = useState([
-    { value: 1, label: 'Andir' },
-    { value: 2, label: 'Arcamanik' },
-    { value: 3, label: 'Baleendah' },
-  ])
 
   const columns = [
     {
@@ -231,20 +243,20 @@ const Calculation = () => {
     
   ];
 
-  const rowSelection = {
-    selectedRowKeys,
-    onChange: (selectedRowKeys: any) => {
-      setSelectedRowKeys(selectedRowKeys);
-    },
-  };
-
   const onSubmitFile = (file: any) => {
     const formData = new FormData();
     formData.append("company_id", "KSNI");
     formData.append("file", file);
 
-    uploadFileBranch(formData);
+    uploadFileCalculation(formData);
   };
+
+  const onCreate = (data: any) => {
+    console.log(data, '<<<<create dari index')
+  }
+  const onEdit = (data: any) => {
+    console.log(data, '<<<<edit dari index')
+  }
 
   return (
     <>
@@ -369,15 +381,14 @@ const Calculation = () => {
         <Col width="100%" style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}>
             <Dropdown
                 label="Assign Payment"
-                items={listZone}
-                width={"50%"}
+                items={companyList}
+                width={"70%"}
                 // value={employeeLanguages && employeeLanguages}
                 placeholder={"Select"}
-                handleChange={(value) => setValue("language", value)}
-                onSearch={(value) => console.log(value)}
+                handleChange={(value) => setValue("company", value)}
+                onSearch={(value) => setSearchCompany(value)}
                 // noSearch
             />
-
             <div style={{
                 paddingRight: '1rem',
                 textAlign: 'right'
@@ -404,14 +415,26 @@ const Calculation = () => {
             visible={isShowCreate.open}
             title={isShowCreate.title}
             onCancel={() => setShowCreate({open: false, title: ''})}
+            onOk={onCreate}
         />
       )}
+
+      {isShowEdit.open && (
+        <ModalCalculation
+            visible={isShowEdit.open}
+            title={isShowEdit.title}
+            defaultValue={isShowEdit.data}
+            onOk={onEdit}
+            onCancel={() => setShowEdit({open: false, title: '', data: {}})}
+        />
+      )}
+
       {isShowDelete.open && (
         <Modal
           closable={false}
           centered
           visible={isShowDelete.open}
-          onCancel={() => setShowDelete({ open: false, type: "", data: {} })}
+          onCancel={() => setShowDelete({ open: false, id: "", name: "" })}
           title={"Confirm Delete"}
           footer={null}
           content={
@@ -423,7 +446,7 @@ const Calculation = () => {
               }}
             >
               <Spacer size={4} />
-              {renderConfirmationText(isShowDelete.type, isShowDelete.data)}
+              <Text>Are you sure you want to delete Role Name - {isShowDelete.name}</Text>
               <Spacer size={20} />
               <div
                 style={{
@@ -438,7 +461,7 @@ const Calculation = () => {
                   variant="tertiary"
                   key="submit"
                   type="primary"
-                  onClick={() => setShowDelete({ open: false, type: "", data: {} })}
+                  onClick={() => setShowDelete({ open: false, id: "", name: "" })}
                 >
                   Cancel
                 </Button>
@@ -446,14 +469,10 @@ const Calculation = () => {
                   variant="primary"
                   size="big"
                   onClick={() => {
-                    if (isShowDelete.type === "selection") {
-                      deleteBranch({ ids: selectedRowKeys, company_id: "KSNI" });
-                    } else {
-                      deleteBranch({ ids: [modalForm.data.id], company_id: "KSNI" });
-                    }
+                    deleteCalculation({ ids: [isShowDelete.id] });
                   }}
                 >
-                  {isLoadingDeleteBranch ? "loading..." : "Yes"}
+                  {isLoadingDeleteCalculation ? "loading..." : "Yes"}
                 </Button>
               </div>
             </div>
@@ -488,21 +507,21 @@ const PlanSaveText = styled.p`
   background: #ebebeb;
   padding: .1rem .2rem;
   border-radius: 10px;
-  line-height: .85rem;
+  /* line-height: .85rem; */
   color: #232323;
-  font-size: 8px;
+  font-size: 12px;
   margin-left: .3rem;
-  margin-bottom: .2rem;
+  /* margin-bottom: .2rem; */
 `
 
 const PlanSaveBestValueText = styled.p`
   background: #ffd8d8;
   padding: .01rem .2rem;
-  line-height: .85rem;
+  /* line-height: .85rem; */
   border-radius: 20px;
   color: #ff4646;
-  font-size: 9px;
+  font-size: 12px;
   margin-left: .3rem;
-  margin-bottom: .2rem;
+  /* margin-bottom: .2rem; */
 `
 export default Calculation;
