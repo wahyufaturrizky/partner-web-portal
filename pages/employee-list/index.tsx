@@ -91,8 +91,8 @@ const EmployeeList = () => {
       select: (data: any) => {
         const mappedData = data?.rows?.map((element: any) => {
           return {
-            key: element.id,
-            id: element.id,
+            key: element.code,
+            id: element.code,
             name: element.name,
             jobPosition: element.jobPosition,
             employeeType: element.employeeType,
