@@ -239,7 +239,9 @@ const ModalCalculation = ({
     const [selectedRowKeys, setSelectedRowKeys] = useState([]);
     const [selectedRows, setSelectedRows] = useState([])
 	const [inputWithTagsValue, setInputWithTagsValue] = useState(null)
+
     const onSelectChange = (selectedRowKeys: any, selectedRows: any) => {
+        // console.log(selectedRowKeys, selectedRows, '<<<<<')
         setSelectedRows(selectedRows)
 		setSelectedRowKeys(selectedRowKeys);
 	};
@@ -321,10 +323,10 @@ const ModalCalculation = ({
       });
 
       useEffect(() => {
-        // setCalculationData(defaultValue?.modules)
         const moduleIdFromDefaultValue = defaultValue?.modules?.map((module: { id: any; }) => module.id)
-
-        setInputWithTagsValue(defaultValue?.users?.map(e => e.fullname))
+        console.log(defaultValue, '<<<<<default')
+        setInputWithTagsValue(defaultValue?.users?.map(e => e.name))
+        setSelectedRowKeys(defaultValue?.users?.map(e => e.id))
         setModuleSelected(moduleIdFromDefaultValue)
         
       }, [defaultValue])
@@ -354,13 +356,13 @@ const ModalCalculation = ({
     }
 
     const onAdd = (data: any) => {
-        const newCalculationData = calculationData.map(e=> e.menu.filter(el => el.checked === true))
-        const menu_ids = newCalculationData[0]?.map(element => element.id)
+        const newCalculationData = calculationData.map(e => e.menu.filter(el => el.checked === true))
+        const menu_ids = newCalculationData[0]?.map(element => element.id?.toString())
         const array_of_fee = newCalculationData[0]?.map(el => el?.fee ? el?.fee : 10000)
         let fee = []
         let total_fee
         // ini harus di cek ulang terutama kalo data module nya lebih dari satu
-        const module_ids = calculationData?.filter(e => e.menu.map(e => e.name === newCalculationData[0][0]?.name))?.map(el => el.id)
+        const module_ids = calculationData?.filter(e => e.menu.map(e => e.name === newCalculationData[0][0]?.name))?.map(el => el.id?.toString())
         
         // ini untuk fee
         if(array_of_fee.length >= 1){
@@ -375,33 +377,14 @@ const ModalCalculation = ({
             module_ids,
             fee,
             total_fee,
+            user_ids: selectedRowKeys,
+            period: "1",
+            role_id: data?.role_id?? "1",
             total_payment: total_fee,
             assign_payment: 'holding'
         }
         onOk(newDataCreate)
-        // {
-        //     "company_id": "1",
-        //     "role_id": "2", '<<<<<
-        //     "role_name": "new role",
-        //     "module_ids": ["18"],
-        //     "menu_ids": ["20","21","22"],
-        //     "period": "12",
-        //     "branch": "bandung",
-        //     "total_user": 2,
-        //     "fee": 14000,
-        //     "user_ids": ["1"],
-        //     "total_fee": 123000,
-        //     "total_payment": "123000",
-        //     "assign_payment": "holding"
-        // }
-        // {
-        //     "company_id": "8",
-        //     "role_name": "asd",
-        //     "branch": "BRA-0000002",
-        //     "total_user": 2,
-        //     "module_ids": ["18"],
-        //     "menu_ids": ["20", "21", "22"]
-        //   } 
+        
     }
 
     const onEdit = (data: any) => {
@@ -431,28 +414,20 @@ const ModalCalculation = ({
         }
         onOk(newDataEdit)
         // {
-        //     "company_id": "1",
-        //     "role_id": "2", '<<<<<
-        //     "role_name": "new role",
+        //     "company_id": "8",
+        //     "role_id": "1",
+        //     "role_name":"role 1",
         //     "module_ids": ["18"],
-        //     "menu_ids": ["20","21","22"],
+        //     "menu_ids": ["20"],
         //     "period": "12",
         //     "branch": "bandung",
         //     "total_user": 2,
-        //     "fee": 14000,
-        //     "user_ids": ["1"],
+        //     "fee": 123,
+        //     "user_ids": ["11"],
         //     "total_fee": 123000,
-        //     "total_payment": "123000",
+        //     "total_payment": "40000",
         //     "assign_payment": "holding"
         // }
-        // {
-        //     "company_id": "8",
-        //     "role_name": "asd",
-        //     "branch": "BRA-0000002",
-        //     "total_user": 2,
-        //     "module_ids": ["18"],
-        //     "menu_ids": ["20", "21", "22"]
-        //   } 
     }
 
 
@@ -749,9 +724,16 @@ const ModalCalculation = ({
                     options={users?.rows?.map(e => ({value: e.fullname, label: e.fullname}))}
                     error={errors?.user_name?.message}
                     placeholder={`Type with separate comma or by pressing "Enter"`}
-                    onChange={(value) => {
+                    onChange={(value: string | any[] | React.SetStateAction<null>) => {
+                        const userChoosen = value[value.length -1]
+                        const userId = users?.rows?.filter((user: { fullname: any; }) => user.fullname === userChoosen)[0]?.id
+                        if(selectedRowKeys?.length > 1){
+                            setSelectedRowKeys(prev => [...prev, userId])
+                        } else {
+                            setSelectedRowKeys([userId])
+                        }
                         setInputWithTagsValue(value)
-                        setValue("user_name", value)
+                        // setValue("user_name", value)
                     }}
                 />
                 {/* 

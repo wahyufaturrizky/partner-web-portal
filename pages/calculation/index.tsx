@@ -32,7 +32,7 @@ import { queryClient } from "../_app";
 import { mdmDownloadService } from "../../lib/client";
 import { useRouter } from "next/router";
 import ModalCalculation from "components/elements/Modal/ModalCalculation";
-import { useCalculations, useDeleteCalculation, useUploadFileCalculation } from "hooks/calculation-config/useCalculation";
+import { useCalculations, useCreateCalculation, useDeleteCalculation, useUploadFileCalculation } from "hooks/calculation-config/useCalculation";
 import IDR_formatter from "hooks/number-formatter/useNumberFormatter";
 import { useCompanyInfiniteLists } from "hooks/company-list/useCompany";
 
@@ -199,6 +199,16 @@ const Calculation = () => {
     },
   });
 
+  const { mutate: createCalculation, isLoading: isLoadingCreateCalculation } = useCreateCalculation({
+    options: {
+      onSuccess: () => {
+        // setShowDelete({ open: false, id: "", name: "" });
+        // setSelectedRowKeys([]);
+        queryClient.invalidateQueries(["calculations"]);
+      },
+    },
+  });
+
   const { mutate: uploadFileCalculation, isLoading: isLoadingUploadFileCalculation } = useUploadFileCalculation({
     options: {
       onSuccess: () => {
@@ -255,6 +265,7 @@ const Calculation = () => {
   };
 
   const onCreate = (data: any) => {
+    createCalculation(data)
     console.log(data, '<<<<create dari index')
   }
   const onEdit = (data: any) => {
