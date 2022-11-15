@@ -180,8 +180,7 @@ const EmployeeList = () => {
 
   const onSubmitFile = (file: any) => {
     const formData = new FormData();
-    formData.append("company", "KSNI");
-    formData.append("file", file);
+    formData.append("upload_file", file);
 
     uploadFileEmployee(formData);
   };
@@ -290,13 +289,13 @@ const EmployeeList = () => {
               onClick={(e: any) => {
                 switch (parseInt(e.key)) {
                   case 1:
-                    downloadFile({ with_data: "N", company: "KSNI" });
+                    downloadFile({ with_data: "N", company_id: "KSNI" });
                     break;
                   case 2:
                     setShowUpload(true);
                     break;
                   case 3:
-                    downloadFile({ with_data: "Y", company: "KSNI" });
+                    downloadFile({ with_data: "Y", company_id: "KSNI" });
                     break;
                   case 4:
                     break;
