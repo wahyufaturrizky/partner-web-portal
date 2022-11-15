@@ -69,7 +69,7 @@ const ModalCalculation = ({
     const [minUser, setMinUser] = useState(1)
 
     let schema;
-    if(radioValue === "new") {
+    if(radioValue === "new" && !defaultValue) {
         schema = yup
         .object({
             role_name: yup.string().required("Role Name is Required"),
@@ -78,7 +78,16 @@ const ModalCalculation = ({
             user_name: yup.array(yup.string().required('User Name cannot be empty')).of(yup.string()).min(1, 'User Name cannot be empty').length(minUser, `List of User needs to be exactly ${minUser}`),
         })
         .required();
-    } else {
+    } else if (defaultValue){
+        schema = yup
+        .object({
+            // role_id: yup.string().required("Role Name is Required"),
+            // total_user: yup.number().required("Total User is Required"),
+            // // company_id: yup.string().required("Company is Required"),
+            // user_name: yup.array(yup.string().required('User Name cannot be empty')).of(yup.string()).min(1, 'User Name cannot be empty').length(minUser, `List of User needs to be exactly ${minUser}`),
+        })
+        .required();
+    }else {
         schema = yup
         .object({
             role_id: yup.string().required("Role Name is Required"),
@@ -285,7 +294,7 @@ const ModalCalculation = ({
                         return {
                             id: el.id,
                             name: el.name,
-                            price: el.fee,
+                            price: el.fee ?? 10000,
                             checked: false
                         }
                     })
@@ -324,7 +333,6 @@ const ModalCalculation = ({
 
       useEffect(() => {
         const moduleIdFromDefaultValue = defaultValue?.modules?.map((module: { id: any; }) => module.id)
-        console.log(defaultValue, '<<<<<default')
         setInputWithTagsValue(defaultValue?.users?.map(e => e.name))
         setSelectedRowKeys(defaultValue?.users?.map(e => e.id))
         setModuleSelected(moduleIdFromDefaultValue)
@@ -358,7 +366,7 @@ const ModalCalculation = ({
     const onAdd = (data: any) => {
         const newCalculationData = calculationData.map(e => e.menu.filter(el => el.checked === true))
         const menu_ids = newCalculationData[0]?.map(element => element.id?.toString())
-        const array_of_fee = newCalculationData[0]?.map(el => el?.fee ? el?.fee : 10000)
+        const array_of_fee = newCalculationData[0]?.map(el => el?.price)
         let fee = []
         let total_fee
         // ini harus di cek ulang terutama kalo data module nya lebih dari satu
@@ -388,46 +396,40 @@ const ModalCalculation = ({
     }
 
     const onEdit = (data: any) => {
-        const newCalculationData = calculationData.map(e=> e.menu.filter(el => el.checked === true))
+        const newCalculationData = calculationData.map(e=> e?.menu?.filter(el => el?.checked === true))
         const menu_ids = newCalculationData[0]?.map(element => element.id)
-        const array_of_fee = newCalculationData[0]?.map(el => el?.fee ? el?.fee : 10000)
+        const array_of_fee = newCalculationData[0]?.map(el => el?.price)
         let fee = []
         let total_fee
+        console.log(newCalculationData, '<<<<')
         // ini harus di cek ulang terutama kalo data module nya lebih dari satu
         const module_ids = calculationData?.filter(e => e.menu.map(e => e.name === newCalculationData[0][0]?.name))?.map(el => el.id)
         
-        // ini untuk fee
         if(array_of_fee.length >= 1){
             fee = array_of_fee?.reduce((a, b) => a + b)
-            // ini untuk total fee
-            total_fee = fee * data?.total_user
-        }        
+            if(data?.total_user){
+                total_fee = fee * data?.total_user
+            } else {
+                total_fee = fee * data?.totalUser
+            }
+        }
+
         const newDataEdit = {
-            ...data,
-            company_id: radioValue === "new"? data?.company_id : companyList?.filter(el => el.label === companyFromRole)[0]?.value,
-            menu_ids,
-            module_ids,
+            company_id: radioValue === "new" && data?.company_id === "" ? data?.companyId : radioValue === "new" && data?.company_id !== "" ? data?.company_id : companyList?.filter(el => el.label === companyFromRole)[0]?.value,
+            role_id: data?.role_id ?? data?.roleId,
+            role_name: data?.role_name,
+            period: "1",
+            branch: data?.branch,
+            total_user: data?.total_user?? data?.totalUser,
             fee,
+            user_ids: selectedRowKeys,
             total_fee,
             total_payment: total_fee,
+            menu_ids,
+            module_ids,
             assign_payment: 'holding'
         }
         onOk(newDataEdit)
-        // {
-        //     "company_id": "8",
-        //     "role_id": "1",
-        //     "role_name":"role 1",
-        //     "module_ids": ["18"],
-        //     "menu_ids": ["20"],
-        //     "period": "12",
-        //     "branch": "bandung",
-        //     "total_user": 2,
-        //     "fee": 123,
-        //     "user_ids": ["11"],
-        //     "total_fee": 123000,
-        //     "total_payment": "40000",
-        //     "assign_payment": "holding"
-        // }
     }
 
 

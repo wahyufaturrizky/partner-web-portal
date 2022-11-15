@@ -32,7 +32,7 @@ import { queryClient } from "../_app";
 import { mdmDownloadService } from "../../lib/client";
 import { useRouter } from "next/router";
 import ModalCalculation from "components/elements/Modal/ModalCalculation";
-import { useCalculations, useCreateCalculation, useDeleteCalculation, useUploadFileCalculation } from "hooks/calculation-config/useCalculation";
+import { useCalculations, useCreateCalculation, useDeleteCalculation, useUpdateCalculation, useUploadFileCalculation } from "hooks/calculation-config/useCalculation";
 import IDR_formatter from "hooks/number-formatter/useNumberFormatter";
 import { useCompanyInfiniteLists } from "hooks/company-list/useCompany";
 
@@ -62,7 +62,7 @@ const Calculation = () => {
   const [search, setSearch] = useState("");
   const [isShowDelete, setShowDelete] = useState({ open: false, id: "", name: "" });
   const [isShowCreate, setShowCreate] = useState({ open: false, title: ''})
-  const [isShowEdit, setShowEdit] = useState({ open: false, title: '', data: {} })
+  const [isShowEdit, setShowEdit] = useState({ open: false, title: '', data: {}, id: 0 })
   const [isShowUpload, setShowUpload] = useState(false);
 
   const [paymentButton, setPaymentButton] = useState({
@@ -94,7 +94,6 @@ const Calculation = () => {
         pagination.setTotalItems(data.totalRow);
       },
       select: (data: any) => {
-        console.log(data, '<<<<<<data nya')
         let payment = 0
         const mappedData = data?.rows?.map((element: any) => {
           const companyName = companyList.filter(el => el.companyId === element.companyId)[0]?.value?.split(' - ')[0]
@@ -122,7 +121,7 @@ const Calculation = () => {
                     fontSize: "18px",
                   }}
                   onClick={() => {
-                    setShowEdit({open: true, title: "Edit Roles, Menu, etc", data: {...element, companyName}})
+                    setShowEdit({open: true, title: "Edit Roles, Menu, etc", data: {...element, companyName}, id: element?.id})
                   }}
                 />
                 <Spacer size={5} />
@@ -136,7 +135,6 @@ const Calculation = () => {
                     fontSize: "18px",
                   }}
                   onClick={() => {
-                    console.log('masuk delete')
                    setShowDelete({ open: true, id: element.id, name: element.userRole?.name })
                   }}
                 />
@@ -193,7 +191,6 @@ const Calculation = () => {
     options: {
       onSuccess: () => {
         setShowDelete({ open: false, id: "", name: "" });
-        // setSelectedRowKeys([]);
         queryClient.invalidateQueries(["calculations"]);
       },
     },
@@ -202,8 +199,17 @@ const Calculation = () => {
   const { mutate: createCalculation, isLoading: isLoadingCreateCalculation } = useCreateCalculation({
     options: {
       onSuccess: () => {
-        // setShowDelete({ open: false, id: "", name: "" });
-        // setSelectedRowKeys([]);
+        setShowCreate({open: false, title: ''})
+        queryClient.invalidateQueries(["calculations"]);
+      },
+    },
+  });
+
+  const { mutate: updateCalculation, isLoading: isLoadingUpdateCalculation } = useUpdateCalculation({
+    id: isShowEdit?.id,
+    options: {
+      onSuccess: () => {
+        setShowEdit({open: false, title: '', data: {}, id: 0})
         queryClient.invalidateQueries(["calculations"]);
       },
     },
@@ -270,6 +276,7 @@ const Calculation = () => {
   }
   const onEdit = (data: any) => {
     console.log(data, '<<<<edit dari index')
+    updateCalculation(data)
   }
 
   return (
@@ -439,7 +446,7 @@ const Calculation = () => {
             title={isShowEdit.title}
             defaultValue={isShowEdit.data}
             onOk={onEdit}
-            onCancel={() => setShowEdit({open: false, title: '', data: {}})}
+            onCancel={() => setShowEdit({open: false, title: '', data: {}, id: 0})}
         />
       )}
 
