@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useInfiniteQuery } from "react-query";
-import { client } from "../../lib/client";
+import { client, mdmService } from "../../lib/client";
 
 const fetchUsers = async ({ query = {} }) => {
   return mdmService(`/user`, {
@@ -133,5 +133,5 @@ export {
   useCreateUser,
   useUpdateUser,
   useDeleteUser,
-  useUserInfiniteList
+  useUserInfiniteList,
 };
