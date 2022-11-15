@@ -270,10 +270,12 @@ const ModalCalculation = ({
             onSuccess: (data: { testData: React.SetStateAction<never[]>; }) => {
                 setModuleSelected(data.testData[0]?.id)
                 setCalculationData(data.testData)
+                setCount(count => count + data.countData)
             },
           select: (data: any) => {
             // console.log(data, '<<<<<data module')
-            const testData = data?.map((e: { moduleId: any; moduleName: any; menu: any[]; }) => {
+            let data2mapped: string | any[] = []
+            let testData = data?.map((e: { moduleId: any; moduleName: any; menu: any[]; }) => {
                 return {
                     id: e.moduleId,
                     name: e.moduleName,
@@ -287,17 +289,44 @@ const ModalCalculation = ({
                     })
                 }
             })
+
+            if(defaultValue){
+                data2mapped = defaultValue?.modules?.map((module: { menus: any; }) => module.menus).map((menu: any[]) => menu.map(el => el.menu.id))?.flatMap((e: any) => e)
+                testData = testData?.map(el => {
+                    return {
+                        ...el,
+                        menu: el?.menu?.map(e => {
+                        for(let i = 0; i < data2mapped.length; i++){
+                            if(data2mapped[i] === e.id){
+                            return {
+                                ...e,
+                                checked:true
+                            }
+                            } else {
+                            return e
+                            }
+                        }
+                        })
+                    }
+                    })
+            }
             // console.log(testData, '<<<<<< ini data modules')
             return { 
                 totalRow: data.totalRow, 
-                testData
+                testData,
+                countData: data2mapped.length
             };
           },
         },
       });
 
       useEffect(() => {
+        // setCalculationData(defaultValue?.modules)
+        const moduleIdFromDefaultValue = defaultValue?.modules?.map((module: { id: any; }) => module.id)
+
         setInputWithTagsValue(defaultValue?.users?.map(e => e.fullname))
+        setModuleSelected(moduleIdFromDefaultValue)
+        
       }, [defaultValue])
 
       const changeValueCheckbox = (value: any, checked: React.Key | null | undefined) => {
@@ -480,7 +509,7 @@ const ModalCalculation = ({
                             <Input
                             width="100%"
                             height="40px"
-                            defaultValue={defaultValue?.userRole?.name}
+                            defaultValue={defaultValue?.roleName}
                             placeholder="e.g Sales Admin"
                             label="Role Name" 
                             required
@@ -502,7 +531,7 @@ const ModalCalculation = ({
                                 </div>
                                 <Spacer size={6} />
                                 <FormSelect
-                                    defaultValue={defaultValue?.userRole?.name}
+                                    defaultValue={defaultValue?.roleName}
                                     style={{ width: "340px"}}
                                     size={"large"}
                                     placeholder={"Select"}
@@ -566,7 +595,7 @@ const ModalCalculation = ({
                             </div>
                             <Spacer size={6} />
                             <FormSelect
-                                defaultValue={defaultValue?.company?.name}
+                                defaultValue={defaultValue?.companyName}
                                 style={{ width: "340px"}}
                                 size={"large"}
                                 placeholder={"Select"}

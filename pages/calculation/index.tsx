@@ -94,17 +94,19 @@ const Calculation = () => {
         pagination.setTotalItems(data.totalRow);
       },
       select: (data: any) => {
-        // console.log(data, '<<<<<<data nya')
+        console.log(data, '<<<<<<data nya')
         let payment = 0
         const mappedData = data?.rows?.map((element: any) => {
+          const companyName = companyList.filter(el => el.companyId === element.companyId)[0]?.value?.split(' - ')[0]
+          const newMenu = element.modules?.map(el => el)?.map(e => e.menus)[0]?.map(e => e.menu.name)?.slice()?.join(', ')
             payment += +element?.totalPayment
             return {
               key: element.id,
               id: element.id,
-              role_name: element?.userRole?.name,
+              role_name: element?.roleName,
               total_user: element?.totalUser,
-              menu_name: element?.menus?.map((e: { name: string; }) => e?.name)?.slice()?.join(', '),
-              company_name: element?.company?.name,
+              menu_name: newMenu,
+              company_name: companyName,
               branch : element.branch,
               fee: 'IDR ' + IDR_formatter.format(element?.fee?.split('.')[0])?.split('Rp')[1],
               total_fee: 'IDR ' + IDR_formatter.format(element?.totalFee?.split('.')[0])?.split('Rp')[1],
@@ -120,7 +122,7 @@ const Calculation = () => {
                     fontSize: "18px",
                   }}
                   onClick={() => {
-                    setShowEdit({open: true, title: "Edit Roles, Menu, etc", data: element})
+                    setShowEdit({open: true, title: "Edit Roles, Menu, etc", data: {...element, companyName}})
                   }}
                 />
                 <Spacer size={5} />
@@ -170,6 +172,7 @@ const Calculation = () => {
             return {
               id: element.code,
               value: element.name + ' - ' + element.companyType,
+              companyId: element.id
             };
           });
         });
