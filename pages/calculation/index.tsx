@@ -135,7 +135,7 @@ const Calculation = () => {
                     fontSize: "18px",
                   }}
                   onClick={() => {
-                   setShowDelete({ open: true, id: element.id, name: element.userRole?.name })
+                   setShowDelete({ open: true, id: element.id, name: element.roleName })
                   }}
                 />
                 </div>
