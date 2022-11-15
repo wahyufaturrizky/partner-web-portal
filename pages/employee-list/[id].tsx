@@ -3275,13 +3275,53 @@ const EmployeeDetail = () => {
       )}
 
       {showDeleteModal && (
-        <ModalDeleteConfirmation
-          totalSelected={1}
-          itemTitle={dataEmployee.name}
+        <Modal
+          closable={false}
+          centered
           visible={showDeleteModal}
-          isLoading={isLoadingEmployee}
           onCancel={() => setShowDeleteModal(false)}
-          onOk={() => deleteEmployeeList({ ids: [idEmployee] })}
+          title={"Confirm Delete"}
+          footer={null}
+          content={
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
+              }}
+            >
+              <Spacer size={4} />
+              Are you sure to delete Product Name {dataEmployee?.name}
+              <Spacer size={20} />
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  gap: "10px",
+                  marginBottom: "20px",
+                }}
+              >
+                <Button
+                  size="big"
+                  variant="tertiary"
+                  key="submit"
+                  type="primary"
+                  onClick={() => setShowDeleteModal(false)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="primary"
+                  size="big"
+                  onClick={() => {
+                    deleteEmployeeList({ ids: [idEmployee] });
+                  }}
+                >
+                  {isLoadingDeleteEmployeeList ? "Loading..." : "Yes"}
+                </Button>
+              </div>
+            </div>
+          }
         />
       )}
     </Col>
