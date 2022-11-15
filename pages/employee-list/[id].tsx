@@ -3281,7 +3281,7 @@ const EmployeeDetail = () => {
           visible={showDeleteModal}
           isLoading={isLoadingEmployee}
           onCancel={() => setShowDeleteModal(false)}
-          onOk={() => deleteEmployeeList({ ids: [id] })}
+          onOk={() => deleteEmployeeList({ ids: [idEmployee] })}
         />
       )}
     </Col>
