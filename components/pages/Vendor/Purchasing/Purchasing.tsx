@@ -46,6 +46,7 @@ const Purchasing = () => {
     options: {
       onSuccess: (data: any) => {
         setTotalRowsTop(data?.pages[0].totalRow);
+        console.log(data);
         const mappedData = data?.pages?.map((group: any) => {
           return group.rows?.map((element: any) => {
             return {

@@ -170,7 +170,7 @@ const Contacts = ({ formType }: any) => {
                   setShowFormContact({ type: "", open: false, data: {}, index: 0 });
                   break;
                 case "edit":
-                  update(showFormContact.index, { ...contactObject });
+                  update(showFormContact.index, { ...showFormContact.data, ...contactObject });
                   setShowFormContact({ type: "", open: false, data: {}, index: 0 });
                   break;
                 default:
@@ -183,7 +183,7 @@ const Contacts = ({ formType }: any) => {
                   setShowFormContact({ type: "", open: false, data: {}, index: 0 });
                   break;
                 case "edit":
-                  update(showFormContact.index, { ...contactObject });
+                  update(showFormContact.index, { ...showFormContact.data, ...contactObject });
                   setShowFormContact({ type: "", open: false, data: {}, index: 0 });
                   break;
                 default:

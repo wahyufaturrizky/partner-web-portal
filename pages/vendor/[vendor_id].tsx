@@ -47,7 +47,7 @@ export default function VendorDetail() {
 
   const methods = useForm({
     defaultValues: {
-      status: "inactive",
+      status: "Inactive",
       customer_id: "",
       name: "",
       group: 1,
@@ -352,17 +352,18 @@ export default function VendorDetail() {
             <Controller
               control={control}
               name={"status"}
-              defaultValue={"inactive"}
-              render={({ field: { onChange } }) => (
+              defaultValue={"Active"}
+              render={({ field: { onChange, value } }) => (
                 <Dropdown
                   label=""
+                  isHtml
                   width="185px"
                   noSearch
                   items={[
-                    { id: "active", value: "Active" },
-                    { id: "inactive", value: "Inactive" },
+                    { id: "Active", value: '<div key="1" style="color:green;">Active</div>' },
+                    { id: "Inactive", value: '<div key="2" style="color:red;">Inactive</div>' },
                   ]}
-                  defaultValue="inactive"
+                  defaultValue={value}
                   handleChange={(value: any) => {
                     onChange(value);
                   }}

@@ -31,8 +31,11 @@ import {
   useUOMConversionInfiniteLists,
 } from "hooks/mdm/unit-of-measure-conversion/useUOMConversion";
 import DraggableTable from "components/pages/Products/fragments/DraggableTable";
+import { lang } from "lang";
 
 export default function Detail(props: any) {
+  const t = localStorage.getItem("lan") || "en-US";
+  // lang[t].companyList.companyName
   const {
     variantsForm,
     control,
@@ -49,31 +52,31 @@ export default function Detail(props: any) {
 
   const columsVariant = [
     {
-      title: "Variant Name",
+      title: lang[t].productList.create.table.variantName,
       dataIndex: "name",
     },
     {
-      title: "Cost",
+      title: lang[t].productList.create.table.cost,
       dataIndex: "cost",
     },
     {
-      title: "Price",
+      title: lang[t].productList.create.table.price,
       dataIndex: "price",
     },
     {
-      title: "SKU",
+      title: lang[t].productList.create.table.SKU,
       dataIndex: "sku",
     },
     {
-      title: "Barcode",
+      title: lang[t].productList.create.table.barcode,
       dataIndex: "barcode",
     },
     {
-      title: "Active",
+      title: lang[t].productList.create.table.active,
       dataIndex: "active",
     },
     {
-      title: "Action",
+      title: lang[t].productList.create.table.action,
       dataIndex: "action",
     },
   ];
@@ -195,7 +198,7 @@ export default function Detail(props: any) {
           disabled={!isUpdate}
           variant="tertiary"
         >
-          View Detail
+          {lang[t].productList.list.button.detail}
         </Button>
       ),
     };
@@ -252,12 +255,12 @@ export default function Detail(props: any) {
             baseUom: data?.baseUom?.name,
             qty: uomConversion.qty,
             index: index,
-            uomConversionItemId: uomConversion.uom?.uomId,
+            uomConversionItemId: uomConversion?.uomConversionId
           });
 
           listUom.push({
             value: uomConversion.uom?.name,
-            id: uomConversion.uom?.uomId,
+            id: uomConversion?.uomConversionId,
             conversionNumber: uomConversion.conversionNumber,
           });
 
@@ -266,7 +269,9 @@ export default function Detail(props: any) {
             id: uomConversion.id,
             qty: uomConversion.qty,
             conversion_number: uomConversion.conversionNumber,
+            uomConversionItemId: uomConversion?.uomConversionId,
             baseUom: data?.baseUom?.name,
+            uomName: uomConversion?.uom?.name
           });
         });
         return {
@@ -321,7 +326,7 @@ export default function Detail(props: any) {
           render={({ field: { onChange } }) => (
             <Col width="100%">
               <span>
-                <Label style={{ display: "inline" }}>UOM Conversion Name</Label> <span></span>
+                <Label style={{ display: "inline" }}>{lang[t].productList.create.field.detail.uomConversionName}</Label> <span></span>
               </span>
 
               <Spacer size={3} />
@@ -360,7 +365,7 @@ export default function Detail(props: any) {
           render={({ field: { onChange } }) => (
             <Col width="100%">
               <span>
-                <Label style={{ display: "inline" }}>Purchase of Unit Measure</Label> <span></span>
+                <Label style={{ display: "inline" }}>{lang[t].productList.create.field.detail.purchaseOfUnitMeasure}</Label> <span></span>
               </span>
 
               <Spacer size={3} />
@@ -395,7 +400,7 @@ export default function Detail(props: any) {
       <Spacer size={38} />
 
       <Col gap="6px">
-        <Text variant="body1">Use Unit of Measure Leveling?</Text>
+        <Text variant="body1">{lang[t].productList.create.field.detail.useUnitOfMeasureLeveling}</Text>
         <Controller
           control={control}
           name="use_unit_leveling"
@@ -419,7 +424,7 @@ export default function Detail(props: any) {
             size="big"
             onClick={onHandleAdd}
           >
-            + Add New
+            + {lang[t].productList.list.button.addNew}
           </Button>
           <Spacer size={20} />
           <DraggableTable
@@ -430,7 +435,7 @@ export default function Detail(props: any) {
             setValue={setValue}
             onSelectUom={(data: any, newUom: any, indexData: any) => {
               const uomConversation = UomData?.mappedUomConversion;
-              const uomData = uomConversation.find((uom) => uom.uomId === newUom);
+              const uomData = uomConversation.find((uom) => uom.uomConversionItemId === newUom);
               const newData = {
                 id: data.id,
                 key: data.key,
@@ -439,6 +444,7 @@ export default function Detail(props: any) {
                 qty: uomData.qty,
                 index: data?.index,
                 levelId: data?.levelId,
+                uomName: uomData?.uomName
               };
 
               const uom = detailForm?.uom;
@@ -477,7 +483,7 @@ export default function Detail(props: any) {
         <Col width="48%">
           <Col width={"100%"}>
             <Text variant="headingRegular">
-              Packaging size
+              {lang[t].productList.create.field.detail.packagingSize}
             </Text>
             <Spacer size={3} />
             <Controller
@@ -502,7 +508,7 @@ export default function Detail(props: any) {
           <Spacer size={20} />
           <Col width={"100%"}>
             <Text variant="headingRegular">
-              Cost of Product
+              {lang[t].productList.create.field.detail.costOfProduct}
             </Text>
             <Spacer size={3} />
             <Controller
@@ -529,7 +535,7 @@ export default function Detail(props: any) {
         <Col width="48%" justifyContent="flex-end">
           <Col width={"100%"}>
             <Text variant="headingRegular">
-              Sales Price
+              {lang[t].productList.create.field.detail.salesPrice}
             </Text>
             <Spacer size={3} />
             <Controller
@@ -571,11 +577,11 @@ export default function Detail(props: any) {
 
           <Col>
             <Text variant="headingMedium" color="blue.darker">
-              Variant
+              {lang[t].productList.create.field.detail.variant}
             </Text>
             <Spacer size={26} />
             <Search
-              placeholder={`Search Variant Name, SKU Code `}
+              placeholder={lang[t].productList.create.field.detail.searchBarVariant}
               onChange={(e: any) => setSearchVariant(e.target.value)}
               width="360px"
               height="48px"

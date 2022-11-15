@@ -27,6 +27,7 @@ import { mdmDownloadService } from "../../lib/client";
 import useDebounce from "../../lib/useDebounce";
 import { queryClient } from "../_app";
 import { useProductCategoryInfiniteLists } from 'hooks/mdm/product-category/useProductCategory';
+import { lang } from "lang";
 
 const downloadFile = (params: any) =>
   mdmDownloadService("/product/download", { params }).then((res) => {
@@ -56,6 +57,8 @@ const renderConfirmationText = (type: any, data: any) => {
 
 const Product = () => {
   const router = useRouter();
+  const t = localStorage.getItem("lan") || "en-US";
+  // lang[t].companyList.companyName
   const pagination = usePagination({
     page: 1,
     itemsPerPage: 20,
@@ -112,7 +115,7 @@ const Product = () => {
                   }}
                   variant="tertiary"
                 >
-                  View Detail
+                  {lang[t].productList.list.button.detail}
                 </Button>
               </div>
             ),
@@ -148,23 +151,23 @@ const Product = () => {
 
   const columns = [
     {
-      title: "Product ID",
+      title: lang[t].productList.list.table.productId,
       dataIndex: "id",
     },
     {
-      title: "Product Name",
+      title: lang[t].productList.list.table.productName,
       dataIndex: "name",
     },
     {
-      title: "Product Variant",
+      title: lang[t].productList.list.table.productVariant,
       dataIndex: "variant",
     },
     {
-      title: "Product Category Name",
+      title: lang[t].productList.list.table.productCategoryName,
       dataIndex: "productCategoryName",
     },
     {
-      title: "Status",
+      title: lang[t].productList.list.table.status,
       dataIndex: "status",
       render: (status: any) => (
         <Lozenge variant={status === "active" ? "green" : "black"}>
@@ -173,7 +176,7 @@ const Product = () => {
       ),
     },  
     {
-      title: "Action",
+      title: lang[t].productList.list.table.action,
       dataIndex: "action",
       width: "15%",
     },
@@ -242,7 +245,7 @@ const Product = () => {
   return (
     <>
       <Col>
-        <Text variant={"h4"}>Product List</Text>
+        <Text variant={"h4"}>{lang[t].productList.list.headerTitle}</Text>
         <Spacer size={20} />
       </Col>
       <Card>
@@ -250,7 +253,7 @@ const Product = () => {
           <Row Row gap="16px">
             <Search
               width="360px"
-              placeholder="Search Product ID, Name, Category, Status"
+              placeholder={lang[t].productList.list.field.searchBar}
               onChange={(e: any) => {
                 setSearch(e.target.value);
               }}
@@ -259,7 +262,7 @@ const Product = () => {
               <CustomFormSelect
                 style={{ width: "100%", height: '48px' }}
                 size={"large"}
-                placeholder={"Product Category"}
+                placeholder={lang[t].productList.list.field.productCategory}
                 borderColor={"#AAAAAA"}
                 arrowColor={"#000"}
                 withSearch
@@ -286,7 +289,7 @@ const Product = () => {
           </Row>
           <Row gap="16px">
             <DropdownMenu
-              title={"More"}
+              title={lang[t].productList.list.button.more}
               buttonVariant={"secondary"}
               buttonSize={"big"}
               textVariant={"button"}
@@ -315,7 +318,7 @@ const Product = () => {
                   value: (
                     <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
                       <ICDownload />
-                      <p style={{ margin: "0" }}>Download Template</p>
+                      <p style={{ margin: "0" }}>{lang[t].productList.list.button.download}</p>
                     </div>
                   ),
                 },
@@ -324,7 +327,7 @@ const Product = () => {
                   value: (
                     <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
                       <ICUpload />
-                      <p style={{ margin: "0" }}>Upload Template</p>
+                      <p style={{ margin: "0" }}>{lang[t].productList.list.button.upload}</p>
                     </div>
                   ),
                 },
@@ -333,7 +336,7 @@ const Product = () => {
                   value: (
                     <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
                       <ICDownload />
-                      <p style={{ margin: "0" }}>Download Data</p>
+                      <p style={{ margin: "0" }}>{lang[t].productList.list.button.downloadData}</p>
                     </div>
                   ),
                 },
@@ -344,7 +347,7 @@ const Product = () => {
               variant="primary"
               onClick={() => router.push("/product-list/create")}
             >
-              Create
+              {lang[t].productList.list.button.create}
             </Button>
           </Row>
         </Row>
@@ -408,7 +411,7 @@ const Product = () => {
                     }
                   }}
                 >
-                  {isLoadingDeleteProductList ? "loading..." : "Yes"}
+                  {isLoadingDeleteProductList ? "loading..." : lang[t].productList.list.button.yes}
                 </Button>
               </div>
             </div>

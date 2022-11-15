@@ -428,6 +428,7 @@ const Invoicing = () => {
               height="40px"
               defaultValue={""}
               placeholder={""}
+              disabled={true}
               {...register("invoicing.tax_type")}
             />
           </Col>
@@ -438,6 +439,7 @@ const Invoicing = () => {
               height="40px"
               defaultValue={""}
               placeholder={""}
+              disabled={true}
               {...register("invoicing.tax_code")}
             />
           </Col>

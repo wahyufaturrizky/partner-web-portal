@@ -12,8 +12,10 @@ import {
 
 import styled from 'styled-components';
 import moment from 'moment';
+import { lang } from 'lang';
 
 export default function Registration(props: any) {
+  const t = localStorage.getItem("lan") || "en-US";
   const {
     fieldsRegistration,
     appendRegistration,
@@ -45,14 +47,14 @@ export default function Registration(props: any) {
 
   return (
     <div>
-      <Text variant="headingMedium" color="blue.darker">Registration</Text>
+      <Text variant="headingMedium" color="blue.darker">{lang[t].productList.create.field.registration.title}</Text>
       <Spacer size={14} />
       <Button
         size="big"
         variant="primary"
         onClick={handleAddMoreRegistrations}
       >
-        Add New Registration
+        {lang[t].productList.list.button.newRegistration}
       </Button>
       <Spacer size={20} />
       {

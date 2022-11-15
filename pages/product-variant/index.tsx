@@ -27,6 +27,7 @@ import { mdmDownloadService } from "../../lib/client";
 import useDebounce from "../../lib/useDebounce";
 import { queryClient } from "../_app";
 import { useProductCategoryInfiniteLists } from 'hooks/mdm/product-category/useProductCategory';
+import { lang } from "lang";
 
 const downloadFile = (params: any) =>
   mdmDownloadService("/product-variant/download", { params }).then((res) => {
@@ -56,6 +57,7 @@ const renderConfirmationText = (type: any, data: any) => {
 
 const ProductVariant = () => {
   const router = useRouter();
+  const t = localStorage.getItem("lan") || "en-US";
   const pagination = usePagination({
     page: 1,
     itemsPerPage: 20,
@@ -112,7 +114,7 @@ const ProductVariant = () => {
                   }}
                   variant="tertiary"
                 >
-                  View Detail
+                  {lang[t].productList.list.button.detail}
                 </Button>
               </div>
             ),
@@ -148,19 +150,19 @@ const ProductVariant = () => {
 
   const columns = [
     {
-      title: "Product ID",
+      title: lang[t].productVariant.list.table.productId,
       dataIndex: "id",
     },
     {
-      title: "Product Variant Name",
+      title: lang[t].productVariant.list.table.productVariantName,
       dataIndex: "name",
     },
     {
-      title: "Product Category Name",
+      title: lang[t].productVariant.list.table.productCategoryName,
       dataIndex: "productCategoryName",
     },
     {
-      title: "status",
+      title: lang[t].productVariant.list.table.status,
       dataIndex: "status",
       render: (status: any) => (
         <Lozenge variant={status === "active" ? "green" : "black"}>
@@ -169,7 +171,7 @@ const ProductVariant = () => {
       ),
     },  
     {
-      title: "Action",
+      title: lang[t].productList.list.table.action,
       dataIndex: "action",
       width: "15%",
     },
@@ -227,7 +229,7 @@ const ProductVariant = () => {
   return (
     <>
       <Col>
-        <Text variant={"h4"}>Product Variant</Text>
+        <Text variant={"h4"}>{lang[t].productVariant.list.headerTitle}</Text>
         <Spacer size={20} />
       </Col>
       <Card>
@@ -235,7 +237,7 @@ const ProductVariant = () => {
           <Row Row gap="16px">
             <Search
               width="360px"
-              placeholder="Search Product ID, Name, Category, Status"
+              placeholder={lang[t].productVariant.list.field.searchBar}
               onChange={(e: any) => {
                 setSearch(e.target.value);
               }}
@@ -271,7 +273,7 @@ const ProductVariant = () => {
           </Row>
           <Row gap="16px">
             <DropdownMenu
-              title={"More"}
+              title={lang[t].productVariant.list.button.more}
               buttonVariant={"secondary"}
               buttonSize={"big"}
               textVariant={"button"}
@@ -300,7 +302,7 @@ const ProductVariant = () => {
                   value: (
                     <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
                       <ICDownload />
-                      <p style={{ margin: "0" }}>Download Template</p>
+                      <p style={{ margin: "0" }}>{lang[t].productVariant.list.button.download}</p>
                     </div>
                   ),
                 },
@@ -309,7 +311,7 @@ const ProductVariant = () => {
                   value: (
                     <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
                       <ICUpload />
-                      <p style={{ margin: "0" }}>Upload Template</p>
+                      <p style={{ margin: "0" }}>{lang[t].productVariant.list.button.upload}</p>
                     </div>
                   ),
                 },
@@ -318,7 +320,7 @@ const ProductVariant = () => {
                   value: (
                     <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
                       <ICDownload />
-                      <p style={{ margin: "0" }}>Download Data</p>
+                      <p style={{ margin: "0" }}>{lang[t].productVariant.list.button.downloadData}</p>
                     </div>
                   ),
                 },
@@ -329,7 +331,7 @@ const ProductVariant = () => {
               variant="primary"
               onClick={() => router.push("/product-variant/create")}
             >
-              Create
+              {lang[t].productVariant.list.button.create}
             </Button>
           </Row>
         </Row>

@@ -52,7 +52,7 @@ export default function Customer() {
 
   const columns = [
     {
-      title: lang[t].customer.custoemrId,
+      title: lang[t].customer.customerId,
       dataIndex: "id",
     },
     {
@@ -197,7 +197,7 @@ export default function Customer() {
               {lang[t].customer.tertier.delete}
             </Button>
             <DropdownMenu
-              title={"More"}
+              title={lang[t].customer.tertier.more}
               buttonVariant={"secondary"}
               buttonSize={"big"}
               textVariant={"button"}

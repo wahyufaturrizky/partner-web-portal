@@ -2,8 +2,10 @@ import React, { useState } from 'react'
 import { Spacer, Text, Button, Col, Row, AccordionCheckbox, Checkbox, Search } from 'pink-lava-ui'
 import { useBranchGroupList } from 'hooks/mdm/branch/useBranch';
 import { useRouter } from 'next/router';
+import { lang } from 'lang';
 
 export default function Branch({ setValue, branch=[], isUpdate}: { setValue: any, branch: any, isUpdate: any}) {
+  const t = localStorage.getItem("lan") || "en-US";
 
   const router = useRouter();
   const [searchBranch, setSearchBranch] = useState("")
@@ -19,7 +21,7 @@ export default function Branch({ setValue, branch=[], isUpdate}: { setValue: any
 
   return (
     <div>
-      <Text variant="headingMedium" color="blue.darker">Branch</Text>
+      <Text variant="headingMedium" color="blue.darker">{lang[t].productList.create.field.branch.title}</Text>
       <Spacer size={14} />
       <Row width="100%" justifyContent="space-between" noWrap>
         <Row>
@@ -30,12 +32,12 @@ export default function Branch({ setValue, branch=[], isUpdate}: { setValue: any
               window.open(`/branch/create`, "_blank")
             }}
           >
-            Create New Branch
+            {lang[t].productList.list.button.newBranch}
           </Button>
         </Row>
         <Search
           width="486px"
-          placeholder={`Search Branch`}
+          placeholder={lang[t].productList.create.field.branch.searchBarBranch}
           onChange={(e: any) => setSearchBranch(e.target.value)}
         />
       </Row>

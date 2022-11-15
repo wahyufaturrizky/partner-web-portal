@@ -1,4 +1,5 @@
 import usePagination from "@lucasmogari/react-pagination";
+import { useJobPositions } from "hooks/mdm/job-position/useJobPositon";
 import { useRouter } from "next/router";
 import {
   Button,
@@ -12,6 +13,8 @@ import {
   Spacer,
   Table,
   Text,
+  DropdownMenuOptionGroupCustom,
+  Spin,
 } from "pink-lava-ui";
 import { useState } from "react";
 import styled from "styled-components";
@@ -26,7 +29,7 @@ import useDebounce from "../../lib/useDebounce";
 import { queryClient } from "../_app";
 
 const downloadFile = (params: any) =>
-  mdmDownloadService("/employee-list/download", { params }).then((res) => {
+  mdmDownloadService("/employee/template/download", { params }).then((res) => {
     let dataUrl = window.URL.createObjectURL(new Blob([res.data]));
     let tempLink = document.createElement("a");
     tempLink.href = dataUrl;
@@ -65,6 +68,10 @@ const EmployeeList = () => {
   const [search, setSearch] = useState("");
   const [isShowDelete, setShowDelete] = useState({ open: false, type: "selection", data: {} });
   const [isShowUpload, setShowUpload] = useState(false);
+  const [filterJobPosition, setFilterJobPosition] = useState("");
+  const [filterTypeJob, setFilterTypeJob] = useState("");
+  const debounceFilterJobPosition = useDebounce(filterJobPosition, 1000);
+  const debounceFiltefilterTypeJob = useDebounce(filterTypeJob, 1000);
   const [modalForm, setModalForm] = useState({
     open: false,
     data: {},
@@ -83,6 +90,8 @@ const EmployeeList = () => {
       page: pagination.page,
       limit: pagination.itemsPerPage,
       company: "KSNI",
+      position: debounceFilterJobPosition,
+      type: debounceFiltefilterTypeJob,
     },
     options: {
       onSuccess: (data: any) => {
@@ -91,8 +100,8 @@ const EmployeeList = () => {
       select: (data: any) => {
         const mappedData = data?.rows?.map((element: any) => {
           return {
-            key: element.id,
-            id: element.id,
+            key: element.code,
+            id: element.code,
             name: element.name,
             jobPosition: element.jobPosition,
             employeeType: element.employeeType,
@@ -171,10 +180,53 @@ const EmployeeList = () => {
 
   const onSubmitFile = (file: any) => {
     const formData = new FormData();
-    formData.append("company", "KSNI");
-    formData.append("file", file);
+    formData.append("upload_file", file);
 
     uploadFileEmployee(formData);
+  };
+
+  const { data: jobPositionsData, isLoading: isLoadingJobPositions } = useJobPositions({
+    query: {
+      limit: 10000,
+      company_id: "KSNI",
+    },
+    options: {
+      onSuccess: () => {},
+    },
+  });
+
+  const listFilterEmployeeList = [
+    {
+      label: "By Position",
+      list: jobPositionsData?.rows?.map((data: any) => ({
+        label: data.name,
+        value: data.jobPositionId,
+      })),
+    },
+    {
+      label: "By Employee Type",
+      list: [
+        {
+          label: "Full Time",
+          value: "Full Time",
+        },
+        {
+          label: "Contract",
+          value: "Contract",
+        },
+      ],
+    },
+  ];
+
+  const onHandleClear = () => {
+    setFilterJobPosition("");
+    setFilterTypeJob("");
+  };
+
+  const onChangeFilterPostalCode = (filter: any) => {
+    setFilterJobPosition(filter.filter((filtering: any) => filtering.includes("MJP")).join(","));
+
+    setFilterTypeJob(filter.filter((filtering: any) => !filtering.includes("MJP")).join(","));
   };
 
   return (
@@ -185,13 +237,33 @@ const EmployeeList = () => {
       </Col>
       <Card>
         <Row justifyContent="space-between">
-          <Search
-            width="340px"
-            placeholder="Search Employee ID, Name, etc"
-            onChange={(e: any) => {
-              setSearch(e.target.value);
-            }}
-          />
+          <Row gap="16px">
+            <Search
+              width="340px"
+              placeholder="Search Employee ID, Name, etc"
+              onChange={(e: any) => {
+                setSearch(e.target.value);
+              }}
+            />
+            {isLoadingJobPositions ? (
+              <Spin tip={"Loading filter..."} />
+            ) : (
+              <DropdownMenuOptionGroupCustom
+                showArrow={true}
+                showSearch={false}
+                showClearButton
+                handleClearValue={onHandleClear}
+                handleChangeValue={onChangeFilterPostalCode}
+                listItems={listFilterEmployeeList}
+                label=""
+                width={194}
+                roundedSelector={true}
+                defaultValue={""}
+                placeholder="Filter"
+              />
+            )}
+          </Row>
+
           <Row gap="16px">
             <Button
               size="big"
@@ -217,13 +289,13 @@ const EmployeeList = () => {
               onClick={(e: any) => {
                 switch (parseInt(e.key)) {
                   case 1:
-                    downloadFile({ with_data: "N", company: "KSNI" });
+                    downloadFile({ with_data: "N", company_id: "KSNI" });
                     break;
                   case 2:
                     setShowUpload(true);
                     break;
                   case 3:
-                    downloadFile({ with_data: "Y", company: "KSNI" });
+                    downloadFile({ with_data: "Y", company_id: "KSNI" });
                     break;
                   case 4:
                     break;

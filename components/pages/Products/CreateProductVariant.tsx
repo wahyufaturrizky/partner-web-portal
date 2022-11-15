@@ -181,7 +181,9 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
                 key: data.id,
                 levelId: data?.level?.id,
                 qty: data?.qty,
-                uomConversionItemId: data.conversion_id
+                uomConversionItemId: data.conversion_id,
+                name: data.name,
+                uomName: data?.uom_name
               })))
             } else if(key === 'registrations') {
               setValue('registration', data[key])
@@ -361,8 +363,8 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
     if (data?.uom?.length > 0 && payload.use_unit_leveling) {
       payload.uom_conversion = data?.uom?.map(data => ({
         level_id: data?.levelId,
-        uom_conversion_item_id: 39,
-        conversion_id: "MCM-0000017"
+        uom_conversion_item_id: data?.id,
+        conversion_id: data?.uomConversionItemId,
       }))
     } else {
       payload.uom_conversion = [];

@@ -13,9 +13,11 @@ import useDebounce from '../../../../lib/useDebounce'
 import { useUOMInfiniteLists } from '../../../../hooks/mdm/unit-of-measure/useUOM'
 import { Controller, useWatch } from 'react-hook-form'
 import { useTransportationInfiniteLists } from 'hooks/mdm/transportation-group/useTransportationGroup'
+import { lang } from 'lang'
 
 export default function Inventory(props: any) {
   const { setValue, register, control, errors } = props
+  const t = localStorage.getItem("lan") || "en-US";
 
   const inventoryForm = useWatch({
     control: control,
@@ -136,13 +138,13 @@ export default function Inventory(props: any) {
   return (
     <div>
       <Col>
-        <HeaderLabel>Weight Management</HeaderLabel>
+        <HeaderLabel>{lang[t].productList.create.field.inventory.weightManagement}</HeaderLabel>
         <Spacer size={20} />
         <Row gap="20px" width="100%">
           <Col width="48%">
             <Input
               width="100%"
-              label="Net Weight"
+              label={lang[t].productList.create.field.inventory.netWeight}
               height="48px"
               placeholder={"e.g 100"}
               {...register("inventory.weight.net", {
@@ -158,7 +160,7 @@ export default function Inventory(props: any) {
               render={({ field: { onChange } }) => (
                 <Col width="100%">
                   <span>
-                    <Label style={{ display: "inline" }}>Weight Unit of Measure</Label>{" "}
+                    <Label style={{ display: "inline" }}>{lang[t].productList.create.field.inventory.weightUnitOfMeasure}</Label>{" "}
                     <span></span>
                   </span>
 
@@ -197,7 +199,7 @@ export default function Inventory(props: any) {
           <Col width="48%">
             <Input
               width="100%"
-              label="Gross Weight"
+              label={lang[t].productList.create.field.inventory.grossWeight}
               height="48px"
               placeholder={"e.g 200"}
               {...register("inventory.weight.gross")}
@@ -207,11 +209,11 @@ export default function Inventory(props: any) {
         <Spacer size={32} />
       </Col>
       <Col>
-        <Label>Volume Management</Label>
+        <Label>{lang[t].productList.create.field.inventory.volumeManagement}</Label>
         <Spacer size={20} />
         <Row gap="20px" width="100%" noWrap>
           <Col gap="4px" width="100%" noWrap>
-            <LabelDimension>Dimension (Length x Width x Height)</LabelDimension>
+            <LabelDimension>{lang[t].productList.create.field.inventory.dimension} (Length x Width x Height)</LabelDimension>
             <Row gap="4px" width="100%" noWrap>
               <CustomInput
                 label=""
@@ -267,7 +269,7 @@ export default function Inventory(props: any) {
               render={({ field: { onChange } }) => (
                 <Col width="100%">
                   <span>
-                    <Label style={{ display: "inline" }}>Volume Unit of Measure</Label>{" "}
+                    <Label style={{ display: "inline" }}>{lang[t].productList.create.field.inventory.volumeUnitOfMeasure}</Label>{" "}
                     <span></span>
                   </span>
 
@@ -307,7 +309,7 @@ export default function Inventory(props: any) {
         <Row gap="20px" width="calc((100%/2) - 10px)" noWrap>
           <Input
             width="100%"
-            label="Volume"
+            label={lang[t].productList.create.field.inventory.volume}
             height="48px"
             placeholder={"e.g 7"}
             value={length * height * width}
@@ -318,12 +320,12 @@ export default function Inventory(props: any) {
         <Spacer size={32} />
       </Col>
       <Col>
-        <Label>Storage Management</Label>
+        <Label>{lang[t].productList.create.field.inventory.storageManagement}</Label>
         <Spacer size={20} />
         <Row gap="20px" width="100%" noWrap>
           <Dropdown2
             labelBold
-            label="Storage Condition"
+            label={lang[t].productList.create.field.inventory.storageCondition}
             width="100%"
             items={storageCondition}
             handleChange={(value: string) => setValue("inventory.storage_management.condition", value)}
@@ -332,7 +334,7 @@ export default function Inventory(props: any) {
           />
           <Input
               width="100%"
-              label="Temperature Condition"
+              label={lang[t].productList.create.field.inventory.temperatureCondition}
               height="48px"
               placeholder={"e.g 30 Degree Celcius"}
               {...register("inventory.storage_management.temperature")}
@@ -347,7 +349,7 @@ export default function Inventory(props: any) {
               render={({ field: { onChange } }) => (
                 <Col width="100%">
                   <span>
-                    <Label style={{ display: "inline" }}>Transportation Group</Label>{" "}
+                    <Label style={{ display: "inline" }}>{lang[t].productList.create.field.inventory.transportationGroup}</Label>{" "}
                     <span></span>
                   </span>
 
@@ -389,7 +391,7 @@ export default function Inventory(props: any) {
               render={({ field: { onChange } }) => (
                 <Col width="100%">
                   <span>
-                    <Label style={{ display: "inline" }}>Transportation Type</Label>{" "}
+                    <Label style={{ display: "inline" }}>{lang[t].productList.create.field.inventory.transportaionType}</Label>{" "}
                     <span></span>
                   </span>
 
@@ -429,14 +431,14 @@ export default function Inventory(props: any) {
         <Row gap="20px" width="100%" noWrap>
           <Input
             width="100%"
-            label="Shelf Life"
+            label={lang[t].productList.create.field.inventory.shelfLife}
             height="48px"
             placeholder={"e.g 7"}
             {...register("inventory.storage_management.self_life")}
           />
           <Dropdown2
             labelBold
-            label="Shelf Life Unit"
+            label={lang[t].productList.create.field.inventory.shelfLifeUnit}
             width="100%"
             items={shelfLifeUnit}
             handleChange={(value: string) => setValue("inventory.storage_management.self_life_unit", value)}
