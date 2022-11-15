@@ -29,7 +29,7 @@ import useDebounce from "../../lib/useDebounce";
 import { queryClient } from "../_app";
 
 const downloadFile = (params: any) =>
-  mdmDownloadService("/employee-list/download", { params }).then((res) => {
+  mdmDownloadService("/employee/template/download", { params }).then((res) => {
     let dataUrl = window.URL.createObjectURL(new Blob([res.data]));
     let tempLink = document.createElement("a");
     tempLink.href = dataUrl;
