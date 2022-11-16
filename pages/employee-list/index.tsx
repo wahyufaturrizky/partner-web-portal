@@ -105,7 +105,7 @@ const EmployeeList = () => {
     },
     options: {
       onSuccess: (data: any) => {
-        pagination.setTotalItems(data.totalRow);
+        pagination.setTotalItems(data?.totalRow);
       },
       select: (data: any) => {
         const mappedData = data?.rows?.map((element: any) => {
