@@ -35,6 +35,9 @@ import { lang } from "lang";
 
 const SalesmanGroup = () => {
   const t = localStorage.getItem("lan") || "en-US";
+  const companyId = localStorage.getItem("companyId")
+  const companyCode = localStorage.getItem("companyCode")
+
   const pagination = usePagination({
     page: 1,
     itemsPerPage: 20,
@@ -68,7 +71,7 @@ const SalesmanGroup = () => {
   } = useSalesmanGroupParent({
     dataId: {
       id: salesmanGroupParentId,
-      companyId: "KSNI",
+      companyId: companyCode,
     },
     options: {
       enabled: false,
@@ -157,7 +160,7 @@ const SalesmanGroup = () => {
       search: debounceSearch,
       page: pagination.page,
       limit: pagination.itemsPerPage,
-      company: "KSNI",
+      company: companyCode,
     },
     options: {
       onSuccess: (data: any) => {
@@ -266,7 +269,7 @@ const SalesmanGroup = () => {
 
   const onSubmit = (data: any) => {
     const formData = {
-      company: "KSNI",
+      company: companyCode,
       parent: data.parent ?? "",
       ...data,
     };
@@ -330,13 +333,13 @@ const SalesmanGroup = () => {
               onClick={(e: any) => {
                 switch (parseInt(e.key)) {
                   case 1:
-                    downloadFile({ with_data: "N", company_id: "KSNI" });
+                    downloadFile({ with_data: "N", company_id: companyCode });
                     break;
                   case 2:
                     setShowUpload(true);
                     break;
                   case 3:
-                    downloadFile({ with_data: "Y", company_id: "KSNI" });
+                    downloadFile({ with_data: "Y", company_id: companyCode });
                     break;
                   case 4:
                     break;
@@ -581,7 +584,7 @@ const SalesmanGroup = () => {
                   variant="primary"
                   size="big"
                   onClick={() => {
-                    deleteSalesmanGroup({ ids: selectedRowKeys, company_id: "KSNI" });
+                    deleteSalesmanGroup({ ids: selectedRowKeys, company_id: companyCode });
                   }}
                 >
                   {isLoadingDeleteSalesmanGroup ? "loading..." : "Yes"}

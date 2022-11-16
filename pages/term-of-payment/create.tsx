@@ -15,7 +15,8 @@ import { ExclamationCircleOutlined } from "@ant-design/icons";
 
 const TermOfPaymentCreate = () => {
   const router = useRouter();
-
+  const companyId = localStorage.getItem("companyId")
+  const companyCode = localStorage.getItem("companyCode")
   const [showTermForm, setShowTermForm] = useState({ type: "", open: false, data: {} });
   const [showDisableTerm, setShowDisableTerm] = useState(false);
   const [termList, setTermList] = useState<any[]>([]);
@@ -125,7 +126,7 @@ const TermOfPaymentCreate = () => {
     });
 
     const formData = {
-      company_id: "KSNI",
+      company_id: companyCode,
       items: mappedTermListRequest,
       ...data,
     };

@@ -20,7 +20,8 @@ import { useUOMCategoryInfiniteLists } from "../../hooks/mdm/unit-of-measure-cat
 
 const UOMCreate = () => {
   const router = useRouter();
-
+  const companyId = localStorage.getItem("companyId")
+  const companyCode = localStorage.getItem("companyCode")
   const [listUomCategory, setListUomCategory] = useState<any[]>([]);
   const [totalRows, setTotalRows] = useState(0);
   const [search, setSearch] = useState("");
@@ -36,7 +37,7 @@ const UOMCreate = () => {
   } = useUOMCategoryInfiniteLists({
     query: {
       search: debounceFetch,
-      company_id: "KSNI",
+      company_id: companyCode,
       limit: 10,
     },
     options: {
@@ -74,7 +75,7 @@ const UOMCreate = () => {
 
   const onSubmit = (data: any) => {
     const formData = {
-      company_id: "KSNI",
+      company_id: companyCode,
       ...data,
     };
     createUom(formData);

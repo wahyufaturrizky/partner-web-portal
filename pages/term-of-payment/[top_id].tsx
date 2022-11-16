@@ -19,6 +19,8 @@ import { ExclamationCircleOutlined } from "@ant-design/icons";
 
 const TermOfPaymentEdit = () => {
   const router = useRouter();
+  const companyId = localStorage.getItem("companyId")
+  const companyCode = localStorage.getItem("companyCode")
   const { top_id } = router.query;
 
   const [showTermForm, setShowTermForm] = useState({ type: "", open: false, data: {} });
@@ -32,7 +34,7 @@ const TermOfPaymentEdit = () => {
   const { mutate: updateTermOfPayment, isLoading: isLoadingUpdateTermOfPayment } =
     useUpdateTermOfPayment({
       id: top_id,
-      companyId: "KSNI",
+      companyId: companyCode,
       options: {
         onSuccess: () => {
           router.back();
@@ -57,7 +59,7 @@ const TermOfPaymentEdit = () => {
     isFetching: isFetchingTopData,
   } = useTermOfPayment({
     id: top_id,
-    companyId: "KSNI",
+    companyId: companyCode,
     options: {
       onSuccess: (data: any) => {
         const mappedToListTermList = data.items.map((element: any, index: any) => {
@@ -334,7 +336,7 @@ const TermOfPaymentEdit = () => {
           visible={showDeleteModal}
           isLoading={isLoadingDeleteBP}
           onCancel={() => setShowDeleteModal(false)}
-          onOk={() => deleteBusinessProcess({ ids: [top_id], company_id: "KSNI" })}
+          onOk={() => deleteBusinessProcess({ ids: [top_id], company_id: companyCode })}
         />
       )}
     </>

@@ -35,6 +35,8 @@ const downloadFile = (params: any) =>
 
 
 export default function Salesman() {
+  const companyId = localStorage.getItem("companyId")
+  const companyCode = localStorage.getItem("companyCode")
   const [tabActived, setTabActived] = useState('Active')
   const [search, setSearch] = useState('')
   const [visible, setVisible] = useState(false)
@@ -140,6 +142,7 @@ export default function Salesman() {
   }
 
   const { data, isLoading, refetch } = useFetchListSalesman({
+    company_id: companyCode,
     options: { onSuccess: (items: any) => {
       pagination.setTotalItems(items?.totalRow);
     } },
@@ -160,6 +163,7 @@ export default function Salesman() {
   })
 
   const { data: countTabItems } = useFetchCountTabItems({
+    company_id: companyCode,
     options: { onSuccess: () => { } },
     query: {}
   })

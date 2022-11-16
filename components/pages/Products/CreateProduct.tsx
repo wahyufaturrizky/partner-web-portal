@@ -41,7 +41,9 @@ import { lang } from "lang";
 export default function CreateProduct({ isCreateProductVariant = true }) {
   const router = useRouter();
   const t = localStorage.getItem("lan") || "en-US";
-  // lang[t].companyList.companyName
+  const companyId = localStorage.getItem("companyId")
+  const companyCode = localStorage.getItem("companyCode")
+
   const { id } = router.query;
   const isUpdate = !!id;
 
@@ -110,8 +112,8 @@ export default function CreateProduct({ isCreateProductVariant = true }) {
     shouldUseNativeValidation: true,
     defaultValues: {
       image: "",
-      company_id: "KSNI",
-      company_code: "KSNI",
+      company_id: companyId,
+      company_code: companyCode,
       product_type: "",
       name: "",
       status: "active",
@@ -209,7 +211,7 @@ export default function CreateProduct({ isCreateProductVariant = true }) {
   } = useProductBrandInfiniteLists({
     query: {
       search: debounceFetchProductBrand,
-      company: "KSNI",
+      company: companyCode,
       limit: 10,
     },
     options: {
@@ -244,7 +246,7 @@ export default function CreateProduct({ isCreateProductVariant = true }) {
   } = useProductCategoryInfiniteLists({
     query: {
       search: debounceFetchProductCategory,
-      company_id: "KSNI",
+      company_id: companyCode,
       limit: 10,
     },
     options: {
@@ -285,7 +287,7 @@ export default function CreateProduct({ isCreateProductVariant = true }) {
         if (getValues("image")) {
           const formData: any = new FormData();
           formData.append("image", getValues("image"));
-          formData.append("company_id", "KSNI");
+          formData.append("company_id", companyCode);
           formData.append("product_id", data?.productId);
 
           uploadImage(formData);
@@ -308,7 +310,7 @@ export default function CreateProduct({ isCreateProductVariant = true }) {
         if (getValues("image") && getFieldState("image").isDirty) {
           const formData: any = new FormData();
           formData.append("image", getValues("image"));
-          formData.append("company_id", "KSNI");
+          formData.append("company_id", companyCode);
           formData.append("product_id", id);
 
           uploadImage(formData);
@@ -380,7 +382,7 @@ export default function CreateProduct({ isCreateProductVariant = true }) {
       options_values: data?.option_items?.map((data) => data?.value || data?.id) || [],
     }));
 
-    payload.company_code = "KSNI";
+    payload.company_code = companyCode;
     payload.inventory = {
       weight: {
         net: data?.inventory?.weight?.net,

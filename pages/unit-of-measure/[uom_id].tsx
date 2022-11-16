@@ -23,6 +23,8 @@ import ArrowLeft from "../../assets/icons/arrow-left.svg";
 
 const UOMDetail = () => {
   const router = useRouter();
+  const companyId = localStorage.getItem("companyId")
+  const companyCode = localStorage.getItem("companyCode")
   const { uom_id } = router.query;
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -41,7 +43,7 @@ const UOMDetail = () => {
   } = useUOMCategoryInfiniteLists({
     query: {
       search: debounceFetch,
-      company_id: "KSNI",
+      company_id: companyCode,
       limit: 10,
     },
     options: {
@@ -74,14 +76,14 @@ const UOMDetail = () => {
     isFetching: isFetchingUom,
   } = useUOMDetail({
     id: uom_id,
-    companyId: "KSNI",
+    companyId: companyCode,
     options: {
       onSuccess: (data: any) => {},
     },
   });
 
   const { mutate: updateUom, isLoading: isLoadingUpdateUom } = useUpdateUOM({
-    companyId: "KSNI",
+    companyId: companyCode,
     id: uom_id,
     options: {
       onSuccess: () => {
@@ -248,7 +250,7 @@ const UOMDetail = () => {
           visible={showDeleteModal}
           isLoading={isLoadingDeleteUOM}
           onCancel={() => setShowDeleteModal(false)}
-          onOk={() => deleteUOM({ ids: [uom_id], company_id: "KSNI" })}
+          onOk={() => deleteUOM({ ids: [uom_id], company_id: companyCode })}
         />
       )}
     </>

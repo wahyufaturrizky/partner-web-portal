@@ -28,7 +28,8 @@ import { lang } from "lang";
 
 const ProductGroup = () => {
   const t = localStorage.getItem("lan") || "en-US";
-
+  const companyId = localStorage.getItem("companyId")
+  const companyCode = localStorage.getItem("companyCode")
   const router = useRouter();
   const pagination = usePagination({
     page: 1,
@@ -81,7 +82,7 @@ const ProductGroup = () => {
       search: debounceSearch,
       page: pagination.page,
       limit: pagination.itemsPerPage,
-      company_id: "KSNI",
+      company_id: companyCode,
     },
     options: {
       onSuccess: (data: any) => {
@@ -161,7 +162,7 @@ const ProductGroup = () => {
 
   const onSubmitFile = (file: any) => {
     const formData = new FormData();
-    formData.append("company_id", "KSNI");
+    formData.append("company_id", companyCode);
     formData.append("file", file);
 
     uploadFileProductGroup(formData);
@@ -211,13 +212,13 @@ const ProductGroup = () => {
               onClick={(e: any) => {
                 switch (parseInt(e.key)) {
                   case 1:
-                    downloadFile({ with_data: "N", company_id: "KSNI" });
+                    downloadFile({ with_data: "N", company_id: companyCode });
                     break;
                   case 2:
                     setShowUpload(true);
                     break;
                   case 3:
-                    downloadFile({ with_data: "Y", company_id: "KSNI" });
+                    downloadFile({ with_data: "Y", company_id: companyCode });
                     break;
                   case 4:
                     break;
@@ -322,7 +323,7 @@ const ProductGroup = () => {
                   variant="primary"
                   size="big"
                   onClick={() => {
-                    deleteProductGroup({ ids: selectedRowKeys, company_id: "KSNI" });
+                    deleteProductGroup({ ids: selectedRowKeys, company_id: companyCode });
                   }}
                 >
                   {isLoadingDeleteProductGroup ? "loading..." : "Yes"}

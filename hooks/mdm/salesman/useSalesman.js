@@ -1,10 +1,10 @@
 import { mdmService } from "lib/client";
 import { useMutation, useQuery } from "react-query";
 
-const fetchListSalesman = async ({ query }) => {
+const fetchListSalesman = async ({ query, company_id }) => {
   return mdmService(`/salesman`, {
     params: {
-      company: "KSNI",
+      company: company_id,
       sortOrder: "ASC",
       limit: 10,
       page: 1,
@@ -13,9 +13,9 @@ const fetchListSalesman = async ({ query }) => {
   }).then((data) => data);
 };
 
-const fetchCountTabItems = async () => {
+const fetchCountTabItems = async ({company_id}) => {
   return mdmService("/salesman/count/stats", {
-    params: { company: "KSNI" },
+    params: { company: company_id },
   }).then((data) => data);
 };
 
@@ -23,8 +23,8 @@ const fetchDetailSalesman = async ({ id }) => {
   return mdmService(`/salesman/${id}`).then((data) => data);
 };
 
-const useFetchListSalesman = ({ query, options }) => {
-  return useQuery(["list-salesman", query], () => fetchListSalesman({ query }), {
+const useFetchListSalesman = ({ query, options, company_id }) => {
+  return useQuery(["list-salesman", query], () => fetchListSalesman({ query, company_id }), {
     keepPreviousData: true,
     ...options,
   });
@@ -82,8 +82,8 @@ const useUploadDocumentSalesman = ({ options }) => {
   );
 };
 
-const useFetchCountTabItems = ({ query, options }) => {
-  return useQuery(["count-tab-items", query], () => fetchCountTabItems({ query }), {
+const useFetchCountTabItems = ({ query, options, company_id }) => {
+  return useQuery(["count-tab-items", query], () => fetchCountTabItems({ query, company_id }), {
     keepPreviousData: true,
     ...options,
   });

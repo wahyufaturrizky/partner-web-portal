@@ -8,6 +8,8 @@ import { useCreateProductOptionMDM } from "../../hooks/mdm/product-option/usePro
 import { queryClient } from "../_app";
 
 const ProductOptionCreate = () => {
+  const companyId = localStorage.getItem("companyId")
+  const companyCode = localStorage.getItem("companyCode")
   const [dataItem, setDataItem] = useState([]);
   const [modalChannelForm, setModalChannelForm] = useState({
     open: false,
@@ -31,7 +33,7 @@ const ProductOptionCreate = () => {
   const onSubmit = (data: any) => {
     if (dataItem.length > 0) {
       const formData = {
-        company_id: "KSNI",
+        company_id: companyCode,
         items: dataItem.map((mapData) => mapData.name),
         ...data,
       };

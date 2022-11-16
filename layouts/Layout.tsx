@@ -582,11 +582,22 @@ const AdminLayout = (props: any) => {
 
         setCompanies(res.data.data.rows)
       })
-      .catch((err) => {
-        alert('Failed get Companies')
-      })
+      // .catch((err) => {
+      //   alert('Failed get Companies')
+      //   // if(err.response.status == 401) {
+      //   //   Router.push("/")
+      //   // }
+      //   setCompanies([])
+
+      // })
     }
-    getCompanyList()
+    const companyId = localStorage.getItem('companyId')
+    const companyCode = localStorage.getItem('companyCode')
+    console.log(companyId, companyCode)
+    // if(!companyId || !companyCode) getCompanyList()
+    localStorage.setItem('companyId', "2")
+    localStorage.setItem('companyCode', "KSNI")
+    // getCompanyList()
   }, []);
 
   const menuConfigFunc = (companies) => {

@@ -18,6 +18,8 @@ import { ModalDeleteConfirmation } from "../../components/elements/Modal/ModalCo
 
 const ProductOptionDetail = () => {
   const router = useRouter();
+  const companyId = localStorage.getItem("companyId")
+  const companyCode = localStorage.getItem("companyCode")
   const { id } = router.query;
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [dataItem, setDataItem] = useState([]);
@@ -103,7 +105,7 @@ const ProductOptionDetail = () => {
     } else {
       createProductOptionItem({
         product_option_id: dataProductOption.productOptionId,
-        company_id: "KSNI",
+        company_id: companyCode,
         name: data.items,
       });
     }
@@ -310,7 +312,7 @@ const ProductOptionDetail = () => {
           visible={showDeleteModal}
           isLoading={isLoadingDeleteProductOption}
           onCancel={() => setShowDeleteModal(false)}
-          onOk={() => deleteProductOption({ ids: [id], company_id: "KSNI" })}
+          onOk={() => deleteProductOption({ ids: [id], company_id: companyCode })}
         />
       )}
     </>

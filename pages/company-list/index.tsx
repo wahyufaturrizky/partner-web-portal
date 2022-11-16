@@ -8,6 +8,8 @@ import { lang } from "lang";
 
 const CompanyList: any = () => {
   const router = useRouter();
+  const companyId = localStorage.getItem("companyId")
+  const companyCode = localStorage.getItem("companyCode")
   const t = localStorage.getItem("lan") || "en-US";
   const pagination = usePagination({
     page: 1,
