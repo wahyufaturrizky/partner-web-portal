@@ -30,6 +30,7 @@ import {
   useUpdateMenuDesignList,
 } from "../../../hooks/menu-config/useMenuDesign";
 import { useMenuLists } from "../../../hooks/menu-config/useMenuConfig";
+import { lang } from "lang";
 
 const x = 3;
 const y = 2;
@@ -77,6 +78,7 @@ const generateData: any = (_level: any, _preKey: any, _tns: any) => {
 generateData(z);
 
 const DetailMenuDesignList: any = () => {
+  const t = localStorage.getItem("lan") || "en-US";
   const router = useRouter();
   const { menu_design_id } = router.query;
 
@@ -533,10 +535,10 @@ const DetailMenuDesignList: any = () => {
             )}
             <Row gap="16px">
               <Button size="big" variant={"tertiary"} onClick={() => Router.back()}>
-                Cancel
+                {lang[t].menuDesign.tertier.cancel}
               </Button>
               <Button size="big" variant={"primary"} onClick={handleUpdateMenuDesign}>
-                {isLoadingUpdateMenuDesignList ? "loading..." : "Save"}
+                {isLoadingUpdateMenuDesignList ? "loading..." : lang[t].menuDesign.primary.save}
               </Button>
             </Row>
           </Row>
@@ -546,7 +548,7 @@ const DetailMenuDesignList: any = () => {
 
         <Accordion>
           <Accordion.Item key={1}>
-            <Accordion.Header variant="blue">General</Accordion.Header>
+            <Accordion.Header variant="blue">{lang[t].menuDesign.accordion.general}</Accordion.Header>
             <Accordion.Body>
               <Row width="50%" gap="20px" noWrap>
                 <Col width="100%">
@@ -575,7 +577,7 @@ const DetailMenuDesignList: any = () => {
           <Accordion.Item key={1}>
             <Accordion.Header variant="blue">
               <Row gap="8px" alignItems="baseline">
-                Hirarchy Menu
+                {lang[t].menuDesign.accordion.hyrarchyMenu}
               </Row>
             </Accordion.Header>
             <Accordion.Body>
@@ -588,17 +590,17 @@ const DetailMenuDesignList: any = () => {
                       ...stateModal,
                       isShowModal: true,
                       widthModal: 1000,
-                      titleModal: "Add Module",
+                      titleModal: lang[t].menuDesign.modalCreate.addModule,
                     })
                   }
                 >
-                  Add Module
+                  {lang[t].menuDesign.primary.addModule}
                 </Button>
 
                 <Spacer size={16} />
 
                 <Button size="big" variant={"secondary"} onClick={() => removeModuleAndMenu()}>
-                  Remove
+                  {lang[t].menuDesign.tertier.remove}
                 </Button>
               </Row>
 
@@ -637,7 +639,7 @@ const DetailMenuDesignList: any = () => {
                                       title: (
                                         <span>
                                           {subChildrenMainMenu.module.name} <br />
-                                          <span style={{ color: "#EB008B" }}>+ add menu</span>
+                                          <span style={{ color: "#EB008B" }}>+ {lang[t].menuDesign.button.addMenu}</span>
                                         </span>
                                       ),
                                       children: subChildrenMainMenu.menuDesignToMenus.map(
@@ -702,7 +704,7 @@ const DetailMenuDesignList: any = () => {
               }}
             >
               <Button onClick={() => setModalDelete({ open: true })} variant="tertiary" size="big">
-                Delete
+                {lang[t].menuDesign.tertier.delete}
               </Button>
               <Button
                 disabled={isLoading}
@@ -712,7 +714,7 @@ const DetailMenuDesignList: any = () => {
                 variant="primary"
                 size="big"
               >
-                {isLoading ? "Loading..." : "Add"}
+                {isLoading ? "Loading..." : lang[t].menuDesign.primary.add}
               </Button>
             </div>
           }
