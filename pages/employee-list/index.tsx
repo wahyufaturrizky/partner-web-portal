@@ -38,8 +38,6 @@ const downloadFile = (params: any) =>
   });
 
 const renderConfirmationText = (type: any, data: any) => {
-  console.log("@data", data);
-
   switch (type) {
     case "selection":
       return data.selectedRowKeys.length > 1
@@ -105,7 +103,7 @@ const EmployeeList = () => {
             id: element.code,
             name: element.name,
             jobPosition: element.jobPosition,
-            employeeType: element.employeeType,
+            employeeType: element.type,
             action: (
               <div style={{ display: "flex", justifyContent: "left" }}>
                 <Button
