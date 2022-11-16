@@ -19,10 +19,12 @@ import { useConfigs } from "../../../hooks/config/useConfig";
 import { useCreatePartnerConfigApprovalList } from "../../../hooks/user-config/useApproval";
 import { usePermissions } from "../../../hooks/permission/usePermission";
 import { useProcessLists } from "../../../hooks/business-process/useProcess";
+import { lang } from "lang";
 
 export interface ConfigModuleList {}
 
 const CreatePartnerConfigApproval: any = () => {
+	const t = localStorage.getItem("lan") || "en-US";
 	const [dataListDropdownModul, setDataListDropdownModul] = useState(null);
 	const [dataListDropdownProcess, setDataListDropdownProcess] = useState(null);
 	const [dataListDropdownPermission, setDataListDropdownPermission] = useState(null);
@@ -178,7 +180,7 @@ const CreatePartnerConfigApproval: any = () => {
 		<>
 			<Col>
 				<Row gap="4px">
-					<Text variant="h4">Create Approval</Text>
+					<Text variant="h4">{lang[t].approvalList.modalTitleCreate.approvalList}</Text>
 				</Row>
 				<Card>
 					<Row justifyContent="space-between" alignItems="center" nowrap>
@@ -192,17 +194,17 @@ const CreatePartnerConfigApproval: any = () => {
 								style={{ cursor: "pointer" }}
 								onClick={() => setisSendEmailNotif(!isSendEmailNotif)}
 							>
-								<Text variant={"h6"}>Email Notification</Text>
+								<Text variant={"h6"}>{lang[t].approvalList.toggle.emailNotification}</Text>
 							</div>
 						</Row>
 
 						<Row>
 							<Row gap="16px">
 								<Button size="big" variant={"tertiary"} onClick={() => Router.back()}>
-									Cancel
+									{lang[t].approvalList.tertier.cancel}
 								</Button>
 								<Button size="big" variant={"primary"} onClick={handleCreateProcessList}>
-									{isLoadingCreatePartnerConfigApprovalList ? "loading..." : "Save"}
+									{isLoadingCreatePartnerConfigApprovalList ? "loading..." : lang[t].approvalList.primary.save}
 								</Button>
 							</Row>
 						</Row>
@@ -213,7 +215,7 @@ const CreatePartnerConfigApproval: any = () => {
 
 				<Accordion>
 					<Accordion.Item key={1}>
-						<Accordion.Header variant="blue">General</Accordion.Header>
+						<Accordion.Header variant="blue">{lang[t].approvalList.accordion.general}</Accordion.Header>
 						<Accordion.Body>
 							<Row width="100%" gap="20px" noWrap>
 								{/* TODO: HIDE AFTER INCLUDING IN SPRINT */}
@@ -229,7 +231,7 @@ const CreatePartnerConfigApproval: any = () => {
 									<Input
 										id="name"
 										width="100%"
-										label="Name"
+										label={lang[t].approvalList.approvalName}
 										height="48px"
 										placeholder={"e.g Shipment and Delivery"}
 										onChange={handleChangeInput}
@@ -238,7 +240,7 @@ const CreatePartnerConfigApproval: any = () => {
 								<Col width="100%">
 									<Dropdown
 										width="100%"
-										label="Module"
+										label={lang[t].approvalList.filterbar.module}
 										id="Module"
 										loading={isLoadingConfigModule}
 										items={
@@ -269,7 +271,7 @@ const CreatePartnerConfigApproval: any = () => {
 								<Col width="100%">
 									<Dropdown
 										width="100%"
-										label="Process"
+										label={lang[t].approvalList.filterbar.process}
 										loading={isLoadingFieldListProcess}
 										items={
 											fieldsListProcess &&
@@ -292,7 +294,7 @@ const CreatePartnerConfigApproval: any = () => {
 								<Col width="100%">
 									<Dropdown
 										width="100%"
-										label="Permission"
+										label={lang[t].approvalList.filterbar.permission}
 										loading={isLoadingFieldsPermissionList}
 										items={
 											fieldsPermissionList &&
@@ -326,7 +328,7 @@ const CreatePartnerConfigApproval: any = () => {
 
 				<Accordion>
 					<Accordion.Item key={1}>
-						<Accordion.Header variant="blue">Approval</Accordion.Header>
+						<Accordion.Header variant="blue">{lang[t].approvalList.accordion.approval}</Accordion.Header>
 						<Accordion.Body>
 							<Row width="100%" gap="20px" noWrap>
 								{/* TODO: HIDE AFTER INCLUDING IN SPRINT */}
@@ -342,7 +344,7 @@ const CreatePartnerConfigApproval: any = () => {
 									<Input
 										id="numberOfApprovalStage"
 										width="100%"
-										label="How Many Approval Stage?"
+										label={lang[t].approvalList.emptyState.approval}
 										height="48px"
 										defaultValue={numberOfApprovalStage}
 										placeholder={"e.g 1"}
@@ -404,7 +406,7 @@ const CreatePartnerConfigApproval: any = () => {
 
 				<Accordion>
 					<Accordion.Item key={1}>
-						<Accordion.Header variant="blue">Associated Roles</Accordion.Header>
+						<Accordion.Header variant="blue">{lang[t].approvalList.accordion.associatedRole}</Accordion.Header>
 						<Accordion.Body>
 							<Table
 								data={[
