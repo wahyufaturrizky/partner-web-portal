@@ -1,4 +1,5 @@
 import { yupResolver } from "@hookform/resolvers/yup";
+import { lang } from "lang";
 import { Button, Dropdown, Input, Modal, Spacer, Spin, Row } from "pink-lava-ui";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -46,7 +47,7 @@ export const ModalCreatePostalCode: any = ({
   const [selectedCountry, setSelectedCountry] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [selectedCountryStructures, setSelectedCountryStructures] = useState([]);
-
+  const t = localStorage.getItem("lan") || "en-US";
   const { data: countries, isLoading: isLoadingCountries } = useCountries({
     options: {
       onSuccess: (data: any) => {},
@@ -100,7 +101,7 @@ export const ModalCreatePostalCode: any = ({
     <Modal
       visible={visible}
       onCancel={onCancel}
-      title={"Create Postal Code"}
+      title={lang[t].postalCode.modalTitleCreate.postalCode}
       footer={
         !isLoadingCountries && (
           <div
@@ -118,7 +119,7 @@ export const ModalCreatePostalCode: any = ({
               variant="primary"
               size="big"
             >
-              {isLoading ? "Loading" : "Save"}
+              {isLoading ? "Loading" : lang[t].postalCode.primary.save}
             </Button>
           </div>
         )
@@ -133,7 +134,7 @@ export const ModalCreatePostalCode: any = ({
           ) : (
             <>
               <Dropdown
-                label="Country"
+                label={lang[t].postalCode.postalCountryName}
                 width="100%"
                 items={dataCountries}
                 placeholder={"Select"}
@@ -168,7 +169,7 @@ export const ModalCreatePostalCode: any = ({
               <Input
                 error={errors?.code?.message}
                 {...register("code", { required: true })}
-                label="Postal Code"
+                label={lang[t].postalCode.postalCode}
                 placeholder={"e.g 40551"}
               />
               <Spacer size={20} />
