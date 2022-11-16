@@ -391,6 +391,7 @@ export const lang = {
     trainingType: {
       tertier: {
         viewDetail: "View Detail",
+        more: "More",
       },
       trainingTypeId: "Training Type ID",
       trainingTypeName: "Training Type Name",
@@ -402,6 +403,7 @@ export const lang = {
         uploadTemplate: "Upload Template",
         downloadData: "Download Data",
       },
+      primary: { create: "Membuat", save: "Menyimpan", yes: "Iya" },
     },
     customer: {
       customerId: "Customer Id",
@@ -989,7 +991,7 @@ export const lang = {
       tertier: {
         viewDetail: "Lihat Detail",
         cancel: "Membatalkan",
-        cancel: "Membatalkan",
+        more: "Lebih",
       },
       trainingTypeId: "ID Jenis Pelatihan",
       trainingTypeName: "Nama Jenis Pelatihan",
