@@ -105,7 +105,7 @@ const EmployeeList = () => {
     },
     options: {
       onSuccess: (data: any) => {
-        pagination.setTotalItems(data.totalRow);
+        pagination.setTotalItems(data?.totalRow);
       },
       select: (data: any) => {
         const mappedData = data?.rows?.map((element: any) => {
@@ -149,14 +149,16 @@ const EmployeeList = () => {
       },
     });
 
-  const { mutate: uploadFileEmployee } = useUploadFileEmployeeListMDM({
-    options: {
-      onSuccess: () => {
-        queryClient.invalidateQueries(["employee-list"]);
-        setShowUpload(false);
+  const { mutate: uploadFileEmployee, isLoading: isLoadingUploadFileEmployeeListMDM } =
+    useUploadFileEmployeeListMDM({
+      options: {
+        onSuccess: () => {
+          queryClient.invalidateQueries(["employee-list"]);
+          setShowUpload(false);
+          window.alert("success upload");
+        },
       },
-    },
-  });
+    });
 
   const columns = [
     {
@@ -349,7 +351,12 @@ const EmployeeList = () => {
       <Card style={{ padding: "16px 20px" }}>
         <Col gap={"60px"}>
           <Table
-            loading={isLoadingEmployeeList || isFetchinggEmployeeList || isLoadingJobPositions}
+            loading={
+              isLoadingEmployeeList ||
+              isFetchinggEmployeeList ||
+              isLoadingJobPositions ||
+              isLoadingUploadFileEmployeeListMDM
+            }
             columns={columns}
             data={employeeListData?.data}
             rowSelection={rowSelection}
