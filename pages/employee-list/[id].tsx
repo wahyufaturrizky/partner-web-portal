@@ -27,7 +27,6 @@ import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form";
 import styled from "styled-components";
 import { ICCheckPrimary, ICDelete, ICEdit, ICPlusWhite, ICView } from "../../assets";
 import ArrowLeft from "../../assets/icons/arrow-left.svg";
-import { ModalDeleteConfirmation } from "../../components/elements/Modal/ModalConfirmationDelete";
 import { useCityInfiniteLists } from "../../hooks/city/useCity";
 import { useLanguages } from "../../hooks/languages/useLanguages";
 import { useCountryInfiniteLists } from "../../hooks/mdm/country-structure/useCountries";
@@ -199,7 +198,24 @@ const EmployeeDetail = () => {
         setValue("personal.mobile", data.personal.mobile);
         setValue("personal.visa", data.personal.visa);
         setValue("personal.visa_expire", data.personal.visaExpire);
-        setValue("address", data.address);
+        setValue(
+          "address",
+          data.address.map((data: any) => ({
+            primary: data.primary,
+            type: data.type,
+            street: data.street,
+            country: data.country,
+            country_levels: data.countryLevels || [],
+            province: data.province || "",
+            city: data.city || "",
+            district: data.district || "",
+            zone: data.zone,
+            postal_code: data.postalCode,
+            lon: data.lon,
+            lat: data.lat,
+            key: data.id,
+          }))
+        );
         setValue("bank", data.bank);
         setValue("education", data.education);
         setValue("family", data.family);
