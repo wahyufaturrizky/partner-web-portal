@@ -44,11 +44,11 @@ const renderConfirmationText = (type: any, data: any) => {
     case "selection":
       return data.selectedRowKeys.length > 1
         ? `Are you sure to delete ${data.selectedRowKeys.length} employee ID ?`
-        : `Are you sure to delete Uom Name ${
+        : `Are you sure to delete employee name ${
             data?.employeeListData?.data.find((el: any) => el.key === data.selectedRowKeys[0])?.name
           } ?`;
     case "detail":
-      return `Are you sure to delete Uom Name ${data.name} ?`;
+      return `Are you sure to delete employee name ${data.name} ?`;
 
     default:
       break;
