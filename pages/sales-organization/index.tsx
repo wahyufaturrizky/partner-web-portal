@@ -10,6 +10,7 @@ import _ from "lodash";
 import { useSalesOrganization, useUpdateSalesOrganization, useCreateSalesOrganization } from "../../hooks/sales-organization/useSalesOrganization";
 import { ModalManageDataEdit } from "../../components/elements/Modal/ModalManageDataSalesOrganization";
 import axios from "axios";
+import { lang } from "lang";
 
 const COMPANY_CODE = 'KSNI';
 
@@ -21,6 +22,7 @@ if (typeof window !== "undefined") {
 }
 
 const CreateConfig = () => {
+    const t = localStorage.getItem("lan") || "en-US";
 	const [countryStructure, setCountryStructure] = useState([]);
 	const [modalDelete, setModalDelete] = useState({ index: -1, open: false, structure: {} });
 	const [showUploadStructure, setShowUploadStructure] = useState();
@@ -218,7 +220,7 @@ const CreateConfig = () => {
 			) : (
 				<Col>
 					<Row gap="4px" alignItems="center" justifyContent="space-between">
-						<Text variant={"h4"}>Sales Organization</Text>
+						<Text variant={"h4"}>{lang[t].salesOrganization.pageTitle.salesOrganization}</Text>
                         <Button size="big" variant={"primary"} onClick={() => {
                             if(isEditMode){
                                 onSubmit();
@@ -227,7 +229,7 @@ const CreateConfig = () => {
                                 setIsEditMode(true)
                              }
                         }}>
-							{isEditMode ? 'Save' : 'Edit'}
+							{isEditMode ? lang[t].salesOrganization.primary.save : lang[t].salesOrganization.primary.edit}
 						</Button>
 					</Row>
 
@@ -236,22 +238,22 @@ const CreateConfig = () => {
 					<Card>
                         <Row width="100%" gap="20px" noWrap>
                             <DownloadUploadContainer>
-                                <Text variant="headingMedium">Download and fill in excel file </Text>
+                                <Text variant="headingMedium">{lang[t].salesOrganization.salesOrganizationDownloadandFill}</Text>
                                 <Spacer size={4} />
                                 <Text variant="body2" color="black.dark">
-                                    Use this template to add structure level
+                                    {lang[t].salesOrganization.emptyState.labelTemplate}
                                 </Text>
                                 <Spacer size={10} />
                                 <Button variant="tertiary" size="big" disabled={isDisabled} onClick={donwloadStructure}>
-                                    Download Template
+                                    {lang[t].salesOrganization.ghost.downloadTemplate}
                                 </Button>
                             </DownloadUploadContainer>
 
                             <DownloadUploadContainer>
-                                <Text variant="headingMedium">Upload template excel file </Text>
+                                <Text variant="headingMedium">{lang[t].salesOrganization.salesOrganizationUploadTemplate}</Text>
                                 <Spacer size={4} />
                                 <Text variant="body2" color="black.dark">
-                                    Select or drop your Excel(.xlsx) file here.
+                                    {lang[t].salesOrganization.emptyState.labelUpload}
                                 </Text>
                                 <Spacer size={10} />
                                 <Button
@@ -260,7 +262,7 @@ const CreateConfig = () => {
                                     onClick={() => setShowUploadStructure(true)}
                                     disabled={isDisabled}
                                 >
-                                    Upload Template
+                                    {lang[t].salesOrganization.ghost.uploadTemplate}
                                 </Button>
                             </DownloadUploadContainer>
                         </Row>
@@ -276,7 +278,7 @@ const CreateConfig = () => {
                                 <Row key={index} width="100%" gap="16px" alignItems="flex-end" noWrap>
                                     <Input
                                         width="100%"
-                                        label={`${stringifyNumber(index)} Level Name`}
+                                        label={`${t == "en-US" ? stringifyNumber(index) : ""} ${lang[t].salesOrganization.emptyState.levelName} ${t == "id-ID" ? stringifyNumber(index).substring(0, stringifyNumber(index).length - 2) : ""}`}
                                         height="48px"
                                         placeholder={`Type ${stringifyNumber(index)} Level Name`}
                                         value={structure.name || ""}
@@ -290,7 +292,7 @@ const CreateConfig = () => {
                                             onClick={() => setModalDelete({ open: true, index: index, structure })}
                                             disabled={isDisabled}
                                         >
-                                            Delete
+                                            {lang[t].salesOrganization.tertier.delete}
                                         </Button>
                                         <Spacer size={16} />
                                         <Button
@@ -302,7 +304,7 @@ const CreateConfig = () => {
                                             }}
                                             disabled={isDisabled}
                                         >
-                                            Manage Data
+                                            {lang[t].salesOrganization.primary.manageData}
                                         </Button>
                                     </Row>
                                 </Row>
@@ -313,7 +315,7 @@ const CreateConfig = () => {
                         ))}
                         {countryStructure.length < 20 && (
                             <Button disabled={isDisabled} variant="ghost" size="big" onClick={() => addStructure()}>
-                                + Add Structure Level
+                                + {lang[t].salesOrganization.buttonAdd.structureLevel}
                             </Button>
                         )}
 					</Card>

@@ -22,6 +22,7 @@ import {
   useSalesOrganizationHirarcy,
 } from "../../../hooks/sales-organization/useSalesOrganization";
 import axios from "axios";
+import { lang } from "lang";
 
 const COMPANY_CODE = "KSNI";
 
@@ -92,6 +93,7 @@ export const ModalManageDataEdit = ({
   parentId,
   countryStructure,
 }) => {
+  const t = localStorage.getItem("lan") || "en-US";
   const level = structure.level;
   const [name, setName] = useState();
   const [parent, setParent] = useState(null);
@@ -334,14 +336,14 @@ export const ModalManageDataEdit = ({
 
   const lists = [
     {
-      name: "Download Template",
+      name: lang[t].salesOrganization.ghost.downloadTemplate,
       icon: DownloadFile,
       onClick: () => {
         donwloadStructure();
       },
     },
     {
-      name: "Upload Template",
+      name: lang[t].salesOrganization.ghost.uploadTemplate,
       icon: UploadFile,
       onClick: () => {
         setShowUploadTemplate(true);
@@ -366,10 +368,10 @@ export const ModalManageDataEdit = ({
           }}
         >
           <Button size="big" variant="secondary" key="submit" type="primary" onClick={onCancel}>
-            Cancel
+            {lang[t].salesOrganization.tertier.cancel}
           </Button>
           <Button variant="primary" size="big" onClick={onSaveHirarcy}>
-            {"Save"}
+            {`${lang[t].salesOrganization.primary.save}`}
           </Button>
         </div>
       }
@@ -379,7 +381,16 @@ export const ModalManageDataEdit = ({
           <Row width="100%" gap="16px" noWrap alignItems="flex-end" style={{ marginBottom: "5px" }}>
             <Input
               width="100%"
-              label={`${stringifyNumber(structure.level - 1)} Level Name`}
+              label={`${t == "en-US" ? stringifyNumberSpecial(structure.level - 1) : ""} ${
+                lang[t].salesOrganization.emptyState.levelName
+              } ${
+                t == "id-ID"
+                  ? stringifyNumberSpecial(structure.level - 1).substring(
+                      0,
+                      stringifyNumberSpecial(structure.level - 1).length - 2
+                    )
+                  : ""
+              }`}
               height="48px"
               placeholder={`e.g ${structure.name} Name`}
               onChange={(e) => setName(e.target.value)}
@@ -388,7 +399,16 @@ export const ModalManageDataEdit = ({
             />
             {level > 1 && (
               <Dropdown
-                label={`${stringifyNumber(structure.level - 2)} Level Name`}
+                label={`${t == "en-US" ? stringifyNumberSpecial(structure.level - 2) : ""} ${
+                  lang[t].salesOrganization.emptyState.levelName
+                } ${
+                  t == "id-ID"
+                    ? stringifyNumberSpecial(structure.level - 2).substring(
+                        0,
+                        stringifyNumberSpecial(structure.level - 2).length - 2
+                      )
+                    : ""
+                }`}
                 width={"100%"}
                 key={dataTable.length}
                 items={parentData}
@@ -398,7 +418,7 @@ export const ModalManageDataEdit = ({
               />
             )}
             <Button disabled={!name} variant="primary" size="big" onClick={() => onAddStructure()}>
-              Add
+              {lang[t].salesOrganization.primary.add}
             </Button>
           </Row>
 
@@ -410,7 +430,7 @@ export const ModalManageDataEdit = ({
 
           <Row width="100%" noWrap alignItems="center" gap="16px">
             <Search
-              placeholder={`Search ${structure.name} Name`}
+              placeholder={`${lang[t].salesOrganization.searchBar.salesChannel} ${structure.name} Name`}
               onChange={(e) => setSearchTable(e.target.value)}
             />
             <ActionButton lists={lists} />
@@ -420,7 +440,7 @@ export const ModalManageDataEdit = ({
               onClick={deleteDataInStructure}
               disabled={rowSelection.selectedRowKeys?.length === 0}
             >
-              Delete
+              {lang[t].salesOrganization.tertier.delete}
             </Button>
           </Row>
 

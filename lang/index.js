@@ -789,10 +789,10 @@ export const lang = {
         delete: "Delete",
         cancel: "Cancel",
       },
-      emptySate: {
-        levelName1: "1st Level Name",
-        levelName2: "2nd Level Name",
-        levelName3: "3rd Level Name",
+      emptyState: {
+        levelName: "Level Name",
+        labelTemplate: "Use this template to add structure level",
+        labelUpload: "Select or drop your Excel(.xlsx) file here.",
       },
       salesOrganizationDownloadandFill: "Download and Fill inExcel File",
       salesOrganizationUploadTemplate: "Upload Template Excel File",
@@ -987,6 +987,156 @@ export const lang = {
       currencyCode: "Currency Code",
       currencyName: "Currency Name",
       currencyAction: "Action",
+    },
+    approvalList: {
+      pageTitle: {
+        approvalList: "Approval List",
+        createApproval: "Create Approval",
+      },
+      searchBar: {
+        approvalName: "Search Approval  Name",
+      },
+      modalTitleCreate: {
+        approvalList: "Create Approval List",
+      },
+      modalTitleUpdate: {
+        approvalList: "Approval List",
+      },
+      filterbar: {
+        module: "Module",
+        process: "Process",
+        permission: "Permission",
+      },
+      ghost: {
+        payment: "Payment",
+        npl: "NPL",
+        finance: "Finance",
+        sales: "Sales",
+        humanResource: "Human Resource",
+        payment: "Payment",
+        deliveryOrder: "Delivery Order",
+        approvalPayment: "Approval Payment",
+        createPayment: "Create Payment",
+        wharehouse: "Wharehouse",
+      },
+      tertier: {
+        delete: "Delete",
+        viewDetail: "View Detail",
+        cancel: "Cancel",
+      },
+      primary: {
+        create: "Create",
+        save: "Save",
+      },
+
+      approvalListName: "Approval Name",
+      approvalListModul: "Modul",
+      approvalListProses: "Proses",
+      approvalListAction: "Action",
+
+      secondary: {
+        button: "Button",
+      },
+      toggle: {
+        emailNotification: "Email Notification",
+      },
+      accordion: {
+        general: "General",
+        approval: "Approval",
+        associatedRole: "Associated Role & User",
+      },
+      approvalName: "Name",
+      emptyState: {
+        approval: "How Many Approval Stage",
+      },
+      checkBox: {
+        selectHaveApprove: "Select Stage User Have to Appprove",
+      },
+    },
+    notification: {
+      pageTitle: {
+        notification: "Sales Channel",
+      },
+      primary: {
+        NewNotification: "New Notification",
+      },
+      notificationReviewApproval: "You Need Review a Approval",
+    },
+    menuDesign: {
+      searchBar: {
+        menuDesign: "Search Menu Design Name",
+      },
+      tertier: {
+        viewDetail: "View Detail",
+        cancel: "Cancel",
+        remove: "Remove",
+        createModule: "Create Module",
+        createMenu: "Create Menu",
+      },
+      menuDesignName: "Menu Design Name",
+      menuDesignAction: "Action",
+
+      pageTitle: {
+        menuDesign: "Menu Design",
+      },
+      primary: {
+        addModule: "Add Module",
+        save: "Save",
+        saveAndContinue: "Save & Continue",
+        add: "Add",
+      },
+      secondary: {
+        button: "Button",
+      },
+      accordion: {
+        general: "General",
+        hyrarchyMenu: "Hierarchy Menu",
+      },
+      menuDesignMenuName: "Menu Name",
+      modalCreate: {
+        addModule: "Add Module",
+        titleConfirmation: "Do you want to leave this Page?",
+      },
+      search: {
+        moduleName: "Search Module Name",
+        menuName: "Menu Name",
+      },
+      checkBox: {
+        moduleName: "Module Name",
+        dashboard: "Dashboard",
+        ordertoCash: "Order to Cash",
+        menuName: "Menu Name",
+        marketing: "Marketing",
+        sfa: "SFA",
+        report: "Report",
+      },
+      subtitle: {
+        sales: "Sales",
+        marketing: "Marketing",
+      },
+      button: {
+        addMenu: "Add Menu",
+      },
+      modalUpdate: {
+        addMenu: "Add Menu",
+      },
+      treecheckbox: {
+        newPromotion: "New Promotion",
+        promotion: "Promotion",
+        pricingStructure: "Pricing Struture",
+        aPandClaim: "AP & Claim",
+        quotation: "Quotation",
+        salesOrder: "Sales Order",
+        deliveryOrder: "Delivery Order",
+        shipment: "Shipment",
+        billing: "Billing",
+        collection: "Collection",
+        undeliverd: "Undeliverd",
+        approval: "Approval",
+      },
+      modalUpdate: {
+        addMenu: "Add Menu",
+      },
     },
   },
   "id-ID": {
@@ -1782,10 +1932,10 @@ export const lang = {
         delete: "Menghapus",
         cancel: "Membatalkan",
       },
-      emptySate: {
-        LevelName1: "Nama Tingkat 1",
-        LevelName2: "Nama Tingkat 2",
-        LevelName3: "Nama Tingkat 3",
+      emptyState: {
+        levelName: "Nama Level",
+        labelTemplate: "Gunakan template ini untuk menambahkan level struktur",
+        labelUpload: "Pilih atau jatuhkan file Excel(.xlsx) Anda di sini.",
       },
       salesOrganizationDownloadandFill: "Unduh dan Isi File Excel",
       salesOrganizationUploadTemplate: "Unggah File Template Excel",
@@ -1795,7 +1945,7 @@ export const lang = {
       },
 
       buttonAdd: {
-        structureLevel: "Tingkat Struktur",
+        structureLevel: "Tambah Tingkat Struktur",
       },
       salesOrganizationSubtitle: "Nama Tingkat 1",
       primary: {
@@ -1980,6 +2130,156 @@ export const lang = {
       currencyCode: "Kode mata uang",
       currencyName: "Nama Mata Uang",
       currencyAction: "Tindakan",
+    },
+    approvalList: {
+      pageTitle: {
+        approvalList: "Daftar Persetujuan",
+        createApproval: "Buat Persetujuan",
+      },
+      searchBar: {
+        approvalName: "Cari Nama Persetujuan",
+      },
+      modalTitleCreate: {
+        approvalList: "Buat Daftar Persetujuan",
+      },
+      modalTitleUpdate: {
+        approvalList: "Daftar Persetujuan",
+      },
+      filterbar: {
+        module: "Modul",
+        process: "Proses",
+        permission: "Izin",
+      },
+      ghost: {
+        payment: "Pembayaran",
+        npl: "NPL",
+        finance: "Keuangan",
+        sales: "Penjualan",
+        humanResource: "Sumber daya manusia",
+        payment: "Pembayaran",
+        deliveryOrder: "Pesan antar",
+        approvalPayment: "Pembayaran Persetujuan",
+        createPayment: "Buat Pembayaran",
+        wharehouse: "Gudang",
+      },
+      tertier: {
+        delete: "Menghapus",
+        viewDetail: "Lihat Detail",
+        cancel: "Membatalkan",
+      },
+      primary: {
+        create: "Membuat",
+        save: "Menyimpan",
+      },
+
+      approvalListName: "Nama Persetujuan",
+      approvalListModul: "Modul",
+      approvalListProses: "Proses",
+      approvalListAction: "Tindakan",
+
+      secondary: {
+        button: "Tombol",
+      },
+      toggle: {
+        emailNotification: "Pemberitahuan Email",
+      },
+      accordion: {
+        general: "Umum",
+        approval: "Persetujuan",
+        associatedRole: "Peran & Pengguna Terkait",
+      },
+      approvalName: "Nama",
+      emptyState: {
+        approval: "Berapa Banyak Tahap Persetujuan",
+      },
+      checkBox: {
+        selectHaveApprove: "Pilih Tahap Pengguna Harus Menyetujui",
+      },
+    },
+    notification: {
+      pageTitle: {
+        notification: "Saluran penjualan",
+      },
+      primary: {
+        NewNotification: "Notifikasi Baru",
+      },
+      notificationReviewApproval: "Kamu membutuhkan Persetujuan Tinjauan",
+    },
+    menuDesign: {
+      searchBar: {
+        menuDesign: "Cari Nama Desain Menu",
+      },
+      tertier: {
+        viewDetail: "Lihat Detail",
+        cancel: "Membatalkan",
+        remove: "Menghapus",
+        createModule: "Buat Modul",
+        createMenu: "Buat Menu",
+      },
+      menuDesignName: "Nama Desain Menu",
+      menuDesignAction: "Tindakan",
+
+      pageTitle: {
+        menuDesign: "Desain Menu",
+      },
+      primary: {
+        addModule: "Tambah Modul",
+        save: "Menyimpan",
+        saveAndContinue: "Simpan & Lanjutkan",
+        add: "Tambahkan",
+      },
+      secondary: {
+        button: "Tombol",
+      },
+      accordion: {
+        general: "Umum",
+        hyrarchyMenu: "Menu Hirarki",
+      },
+      menuDesignMenuName: "Nama Menu",
+      modalCreate: {
+        addModule: "Tambahkan Modul",
+        titleConfirmation: "Apakah Anda ingin meninggalkan Halaman ini?",
+      },
+      search: {
+        moduleName: "Cari Nama Modul",
+        menuName: "Nama Menu",
+      },
+      checkBox: {
+        moduleName: "Nama Modul",
+        dashboard: "Dasbor",
+        ordertoCash: "Pesan ke Tunai",
+        menuName: "Nama Menu",
+        marketing: "Pemasaran",
+        sfa: "SFA",
+        report: "Laporan",
+      },
+      subtitle: {
+        sales: "Penjualan",
+        marketing: "Pemasaran",
+      },
+      button: {
+        addMenu: "Tambahkan Menu",
+      },
+      modalUpdate: {
+        addMenu: "Tambahkan Menu",
+      },
+      treecheckbox: {
+        newPromotion: "Promosi Baru",
+        promotion: "Promosi",
+        pricingStructure: "Struktur Harga",
+        aPandClaim: "AP & Klaim",
+        quotation: "Menambahkan",
+        salesOrder: "Order penjualan",
+        deliveryOrder: "Pesan antar",
+        shipment: "Pengiriman",
+        billing: "Penagihan",
+        collection: "Koleksi",
+        undeliverd: "Tidak terkirim",
+        approval: "Persetujuan",
+      },
+      modalUpdate: {
+        addMenu: "Tambahkan Menu",
+      },
     },
   },
 };
