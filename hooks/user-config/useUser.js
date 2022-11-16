@@ -1,4 +1,4 @@
-import { useQuery, useMutation } from "react-query";
+import { useQuery, useMutation, useInfiniteQuery } from "react-query";
 import { client, mdmService } from "../../lib/client";
 
 const fetchUsers = async ({ query = {} }) => {
@@ -29,6 +29,26 @@ const fetchApprovalUsers = async ({ query = {} }) => {
 
 const useUsers = ({ query = {}, options } = {}) => {
   return useQuery(["users", query], () => fetchUsers({ query }), {
+    keepPreviousData: true,
+    ...options,
+  });
+};
+
+const fetchInfiniteUsers = async ({ pageParam = 1, queryKey }) => {
+  const searchQuery = queryKey[1].search;
+  return client(`/partner-role`, {
+    params: {
+      search: "",
+      limit: 10,
+      page: 1,
+      sortBy: "id",
+      sortOrder: "asc",
+    },
+  }).then((data) => data);
+};
+
+const useUserInfiniteList = ({ query = {}, options }) => {
+  return useInfiniteQuery(["user/infinite", query], fetchInfiniteUsers, {
     keepPreviousData: true,
     ...options,
   });
@@ -113,4 +133,5 @@ export {
   useCreateUser,
   useUpdateUser,
   useDeleteUser,
+  useUserInfiniteList,
 };

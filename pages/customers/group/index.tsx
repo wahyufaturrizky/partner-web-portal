@@ -63,6 +63,8 @@ const renderConfirmationText = (type: any, data: any) => {
 const CustomerGroupMDM = () => {
   const t = localStorage.getItem("lan") || "en-US";
   const router = useRouter();
+  const companyId = localStorage.getItem("companyId")
+  const companyCode = localStorage.getItem("companyCode")
   const pagination = usePagination({
     page: 1,
     itemsPerPage: 20,
@@ -96,6 +98,7 @@ const CustomerGroupMDM = () => {
       search: debounceSearch,
       page: pagination.page,
       limit: pagination.itemsPerPage,
+      company: companyCode,
     },
     options: {
       onSuccess: (data: any) => {
@@ -209,10 +212,10 @@ const CustomerGroupMDM = () => {
   const onSubmit = (data: any) => {
     switch (modalCustomerGroupForm.typeForm) {
       case "create":
-        createCustomerGroupMDM({ ...data, company: "KSNI" });
+        createCustomerGroupMDM({ ...data, company: companyCode });
         break;
       case "edit":
-        updateCustomerGrouMDM({ ...data, company: "KSNI" });
+        updateCustomerGrouMDM({ ...data, company: companyCode });
         break;
       default:
         setModalCustomerGroupForm({ open: false, typeForm: "", data: {} });
@@ -267,13 +270,13 @@ const CustomerGroupMDM = () => {
               onClick={(e: any) => {
                 switch (parseInt(e.key)) {
                   case 1:
-                    downloadFile({ with_data: "N", company: "KSNI" });
+                    downloadFile({ with_data: "N", company: companyCode });
                     break;
                   case 2:
                     setShowUpload(true);
                     break;
                   case 3:
-                    downloadFile({ with_data: "Y", company: "KSNI" });
+                    downloadFile({ with_data: "Y", company: companyCode });
                     break;
                   case 4:
                     break;

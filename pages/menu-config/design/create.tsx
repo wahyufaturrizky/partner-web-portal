@@ -1,525 +1,269 @@
-import { DownOutlined, DragOutlined } from "@ant-design/icons";
-import usePagination from "@lucasmogari/react-pagination";
-import Router from "next/router";
-import {
-  Accordion,
-  Button,
-  Col,
-  Dropdown,
-  Input,
-  Modal,
-  Pagination,
-  Row,
-  Search,
-  Spacer,
-  Table,
-  Text,
-  Tree,
-} from "pink-lava-ui";
 import React, { useState } from "react";
+import ModalAddMenu from "components/elements/Modal/ModalAddMenu";
+import ModalAddModule from "components/elements/Modal/ModalAddModule";
+import Router from "next/router";
+import { Accordion, Button, Col, Dropdown, Input, Row, Spacer, Text } from "pink-lava-ui";
 import styled from "styled-components";
-
-import {
-  useCreateMenuDesignList,
-  useCreateModuleMenuDesignList,
-  useCreateSubMenuDesignList,
-  useMenuDesignList,
-  useUpdateMenuDesignList,
-} from "../../../hooks/menu-config/useMenuDesign";
-import { useConfigs } from "../../../hooks/config/useConfig";
-import { useMenuLists } from "../../../hooks/menu-config/useMenuConfig";
-
-const x = 3;
-const y = 2;
-const z = 1;
-const defaultData: any = [];
-
-const generateData: any = (_level: any, _preKey: any, _tns: any) => {
-  const preKey = _preKey || "0";
-  const tns = _tns || defaultData;
-  const children = [];
-
-  for (let i = 0; i < x; i++) {
-    const key = `${preKey}-${i}`;
-    tns.push({
-      title: key,
-      key,
-      icon: (
-        <DragOutlined
-          style={{
-            borderRadius: 3,
-            backgroundColor: "#D5FAFD",
-            color: "#2BBECB",
-            padding: 4,
-          }}
-        />
-      ),
-    });
-
-    if (i < y) {
-      children.push(key);
-    }
-  }
-
-  if (_level < 0) {
-    return tns;
-  }
-
-  const level: any = _level - 1;
-  children.forEach((key, index) => {
-    tns[index].children = [];
-    return generateData(level, key, tns[index].children);
-  });
-};
-
-generateData(z);
+import { useCreateMenuDesignList } from "hooks/menu-config/useMenuDesign";
+import { useForm, Controller } from "react-hook-form";
+import TreeMenuDesign from "components/pages/MenuDesign/Tree";
+import { DragOutlined } from "@ant-design/icons";
 
 const CreateMenuDesignList: any = () => {
-  const [dataListStatus, setDataListStatus] = useState("Y");
-  const [selectedRowKeysModuleConfig, setSelectedRowKeysModuleConfig] = useState([]);
-  const [selectedRowKeysMenuLists, setSelectedRowKeysMenuLists] = useState([]);
-  const [removeMenu, setRemoveMenu] = useState([]);
-  const [removeModule, setRemoveModule] = useState([]);
-  const [dataCeratedNewMenuDesign, setdataCeratedNewMenuDesign] = useState(null);
-  const [stateModuleId, setStateModuleId] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [searchModuleConfig, setSearchModuleConfig] = useState("");
-  const [searchMenuLists, setSearchMenuLists] = useState("");
-  const [stateFieldInput, setStateFieldInput] = useState({
-    name: "",
-  });
-  const { name } = stateFieldInput;
-  const [stateModal, setStateModal] = useState({
-    isShowModal: false,
-    titleModal: "",
-    dataModal: null,
-    widthModal: null,
-  });
-  const { isShowModal, titleModal, widthModal } = stateModal;
-  const paginationModuleConfig = usePagination({
-    page: 1,
-    itemsPerPage: 20,
-    maxPageItems: Infinity,
-    numbers: true,
-    arrows: true,
-    totalItems: 100,
-  });
-  const paginationMenuLists = usePagination({
-    page: 1,
-    itemsPerPage: 20,
-    maxPageItems: Infinity,
-    numbers: true,
-    arrows: true,
-    totalItems: 100,
+  const { register, handleSubmit, control } = useForm();
+
+  const [showModuleConfig, setShowModuleConfig] = useState(false);
+  const [showMenuConfig, setShowMenuConfig] = useState({
+    show: false,
+    moduleIndex: null,
+    subModuleIndex: null,
+    selectedRowKeyMenu: [],
   });
 
-  const [gData, setGData] = useState(defaultData);
+  const [selectedRowKeysModule, setSelectedRowKeysModule] = useState([]);
+  const [selectedRowKeyTree, setSelectedRowKeyTree] = useState<any>([]);
 
-  const onDragEnter = (info: any) => {};
-
-  const onDrop = (info: any) => {
-    const dropKey = info.node.key;
-    const dragKey = info.dragNode.key;
-    const dropPos = info.node.pos.split("-");
-    const dropPosition = info.dropPosition - Number(dropPos[dropPos.length - 1]);
-
-    const loop = (data: any, key: any, callback: any) => {
-      for (let i = 0; i < data.length; i++) {
-        if (data[i].key === key) {
-          return callback(data[i], i, data);
-        }
-
-        if (data[i].children) {
-          loop(data[i].children, key, callback);
-        }
-      }
-    };
-
-    const data = [...gData]; // Find dragObject
-
-    let dragObj: any;
-    loop(data, dragKey, (item: any, index: any, arr: any) => {
-      arr.splice(index, 1);
-      dragObj = item;
-    });
-
-    if (!info.dropToGap) {
-      // Drop on the content
-      loop(data, dropKey, (item: any) => {
-        item.children = item.children || []; // where to insert 示例添加到头部，可以是随意位置
-
-        item.children.unshift(dragObj);
-      });
-    } else if (
-      (info.node.props.children || []).length > 0 && // Has children
-      info.node.props.expanded && // Is expanded
-      dropPosition === 1 // On the bottom gap
-    ) {
-      loop(data, dropKey, (item: any) => {
-        item.children = item.children || []; // where to insert 示例添加到头部，可以是随意位置
-
-        item.children.unshift(dragObj); // in previous version, we use item.children.push(dragObj) to insert the
-        // item to the tail of the children
-      });
-    } else {
-      let ar: any = [];
-      let i;
-      loop(data, dropKey, (_item: any, index: any, arr: any) => {
-        ar = arr;
-        i = index;
-      });
-
-      if (dropPosition === -1) {
-        ar.splice(i, 0, dragObj);
-      } else {
-        ar.splice(i + 1, 0, dragObj);
-      }
-    }
-
-    setGData(data);
-  };
-
-  const handleChangeInput = (e: any) => {
-    setStateFieldInput({
-      ...stateFieldInput,
-      [e.target.id]: e.target.value,
-    });
-  };
+  const [hierarchyData, setHierarchyData] = useState<any>([]);
 
   const { mutate: createMenuDesign, isLoading: isLoadingCreateMenuDesign } =
     useCreateMenuDesignList({
       options: {
         onSuccess: (data: any) => {
-          if (data) {
-            setdataCeratedNewMenuDesign(data);
-          }
-        },
-        onError: (error: any) => {
-          if (error?.data) {
-            window.alert(error.data.errors && error.data.errors[0].message);
-          } else {
-            window.alert(error.data.message);
-          }
+          Router.back();
         },
       },
     });
 
-  const { mutate: createModuleMenuDesignList } = useCreateModuleMenuDesignList({
-    options: {
-      onSuccess: (data: any) => {
-        if (data) {
-          setIsLoading(false);
-          refetchMenuDesignById();
-          setStateModal({
-            ...stateModal,
-            isShowModal: false,
-          });
-        }
-      },
-      onError: (error: any) => {
-        setIsLoading(false);
-        if (error?.message) {
-          window.alert(error?.message);
-          setStateModal({
-            ...stateModal,
-            isShowModal: false,
-          });
-        } else if (error?.data) {
-          window.alert(error.data.errors && error.data.errors[0].message);
-        } else {
-          window.alert(error.data.message);
-        }
-      },
-    },
-  });
-
-  const { mutate: createSubMenuDesignList } = useCreateSubMenuDesignList({
-    options: {
-      onSuccess: (data: any) => {
-        if (data) {
-          refetchMenuDesignById();
-          setIsLoading(false);
-          setStateModal({
-            ...stateModal,
-            isShowModal: false,
-          });
-        }
-      },
-      onError: (error: any) => {
-        setIsLoading(false);
-        if (error?.message) {
-          window.alert(error?.message);
-          setStateModal({
-            ...stateModal,
-            isShowModal: false,
-          });
-        } else if (error?.data) {
-          window.alert(error.data.errors && error.data.errors[0].message);
-        } else {
-          window.alert(error.data.message);
-        }
-      },
-    },
-  });
-
-  const { mutate: updateMenuDesignList, isLoading: isLoadingUpdateMenuDesignList } =
-    useUpdateMenuDesignList({
-      options: {
-        onSuccess: (data: any) => {
-          if (removeMenu.length > 0 || removeModule.length > 0) {
-            window.alert("Success remove module and menu");
-          } else if (data) {
-            Router.back();
-          }
-        },
-        onSettled: (data: any, error: any) => {
-          window.alert(error.data.message);
-        },
-      },
-      menuDesignListId: dataCeratedNewMenuDesign?.id,
-    });
-
-  const { data: dataMenuDesignById, refetch: refetchMenuDesignById } = useMenuDesignList({
-    options: {
-      onSuccess: (data: any) => {
-        setStateModal({
-          ...stateModal,
-          isShowModal: false,
-        });
-      },
-      enabled: dataCeratedNewMenuDesign?.id ? true : false,
-    },
-    menu_design_list_id: dataCeratedNewMenuDesign?.id,
-  });
-
-  let filterByIdParentAndGroup: any = [];
-
-  filterByIdParentAndGroup = dataMenuDesignById?.menuDesignToModules?.map((mapping: any) => {
-    if (mapping.isParent) {
-      delete mapping.menuDesignToMenus;
+  const handleOnDrop = (subModulesChange: any) => {
+    const mappingHierarchy = hierarchyData.map((module: any, moduleIndex: any) => {
       return {
-        ...mapping,
-        childrenMainMenu: dataMenuDesignById?.menuDesignToModules?.filter(
-          (filtering: any) => filtering.group === mapping.group && !filtering.isParent
-        ),
+        ...module,
+        subModules: subModulesChange.map((subModule: any, subModuleIndex: any) => {
+          return {
+            ...subModule,
+            title: (
+              <span>
+                {subModule?.title?.props?.children[0] || subModule?.title}
+                <br />
+                <span
+                  style={{ color: "#EB008B" }}
+                  onClick={() => {
+                    setShowMenuConfig({
+                      show: true,
+                      moduleIndex,
+                      subModuleIndex,
+                      selectedRowKeyMenu: [],
+                    });
+                  }}
+                >
+                  + add menu
+                </span>
+              </span>
+            ),
+          };
+        }),
       };
-    }
-  });
+    });
+    setHierarchyData(mappingHierarchy);
+  };
 
-  const handleCreateModule = () => {
-    if (dataCeratedNewMenuDesign) {
-      setIsLoading(true);
-      const dataModule: any = {
-        id: dataCeratedNewMenuDesign?.id,
-        module: selectedRowKeysModuleConfig,
-      };
-      createModuleMenuDesignList(dataModule);
-    } else {
-      const isEmptyField = Object.keys(stateFieldInput).find(
-        (thereIsEmptyField) => stateFieldInput && stateFieldInput[thereIsEmptyField] === ""
+  const handleAddModule = (modules: any) => {
+    const mappingHierarchy = modules?.map((module: any, moduleIndex: any) => {
+      const moduleObject = hierarchyData?.filter(
+        (filterModule: any) => filterModule?.moduleId === module?.module?.moduleId
       );
 
-      if (!isEmptyField) {
-        if (selectedRowKeysModuleConfig.length > 0) {
-          const data: any = {
-            name: name,
-            module: selectedRowKeysModuleConfig,
-            status: dataListStatus,
-          };
-          createMenuDesign(data);
-        } else {
-          window.alert("Please choose module!");
-        }
-      } else {
-        window.alert(`field ${isEmptyField} must be fill!`);
-      }
-    }
-  };
-
-  const handleCreateSubMenu = () => {
-    setIsLoading(true);
-    const dataMenu: any = {
-      module_id: stateModuleId,
-      menu: selectedRowKeysMenuLists,
-    };
-    createSubMenuDesignList(dataMenu);
-  };
-
-  const handleUpdateMenuDesign = () => {
-    const isEmptyField = Object.keys(stateFieldInput).find(
-      (thereIsEmptyField) => stateFieldInput && stateFieldInput[thereIsEmptyField] === ""
-    );
-
-    const mappingMpdules = filterByIdParentAndGroup
-      ?.filter((filtering: any) => filtering !== undefined)
-      .map((data: any) =>
-        data.childrenMainMenu.map((data: any) => ({ id: data.id, module_index: data.moduleIndex }))
-      )
-      .filter((filtering: any) => filtering.length !== 0)
-      .map((data: any) => data[0]);
-
-    const mappingMenus = filterByIdParentAndGroup
-      ?.filter((filtering: any) => filtering !== undefined)
-      .map((data: any) =>
-        data.childrenMainMenu.map((data: any) =>
-          data.menuDesignToMenus.map((data: any) => ({ id: data.id, menu_index: data.menuIndex }))
-        )
-      )
-      .filter((filtering: any) => filtering.length !== 0)
-      .map((data: any) => data[0])
-      .filter((filtering: any) => filtering.length !== 0);
-
-    if (!isEmptyField) {
-      if (selectedRowKeysModuleConfig.length > 0) {
-        const data: any = {
-          del_modules: [],
-          del_menus: [],
-          menus: mappingMenus[0],
-          modules: mappingMpdules,
-          menu_design: {
-            name: name,
-            id: dataCeratedNewMenuDesign.data.id,
-            status: dataListStatus,
-          },
+      if (moduleObject.length > 0) {
+        return {
+          ...moduleObject[0],
         };
-        // console.log("data",data)
-        // updateMenuDesignList(data);
       } else {
-        window.alert("Please choose module!");
+        return {
+          moduleId: module?.module?.moduleId,
+          name: module?.module?.moduleName,
+          subModules: module?.subModules?.map((subModule: any, subModuleIndex: any) => {
+            return {
+              key: `subModule-${subModule?.subModule?.moduleId}`,
+              title: (
+                <span>
+                  {subModule?.subModule?.moduleName} <br />
+                  <span
+                    style={{ color: "#EB008B" }}
+                    onClick={() => {
+                      console.log(subModuleIndex);
+                      setShowMenuConfig({
+                        show: true,
+                        moduleIndex,
+                        subModuleIndex,
+                        selectedRowKeyMenu: [],
+                      });
+                    }}
+                  >
+                    + add menu
+                  </span>
+                </span>
+              ),
+              icon: (
+                <DragOutlined
+                  style={{
+                    borderRadius: 3,
+                    backgroundColor: "#D5FAFD",
+                    color: "#2BBECB",
+                    padding: 4,
+                  }}
+                />
+              ),
+              children: [],
+            };
+          }),
+        };
       }
-    } else {
-      window.alert(`field ${isEmptyField} must be fill!`);
-    }
+    });
+    setHierarchyData(mappingHierarchy);
+    setShowModuleConfig(false);
   };
 
-  const removeModuleAndMenu = () => {
-    const data: any = {
-      del_modules: removeModule,
-      del_menus: removeMenu,
-      menu_design: {
-        id: dataCeratedNewMenuDesign.data.id,
-      },
+  const handleAddMenu = (menus: any) => {
+    setHierarchyData((prevHierarchy: any) => {
+      const mappingHierarcyMenu = prevHierarchy?.map((module: any, moduleIndex: any) => {
+        if (moduleIndex === showMenuConfig.moduleIndex) {
+          return {
+            ...module,
+            subModules: module?.subModules?.map((subModule: any, subModuleIndex: any) => {
+              if (subModuleIndex === showMenuConfig.subModuleIndex) {
+                return {
+                  ...subModule,
+                  title: (
+                    <span>
+                      {subModule?.title?.props?.children[0]} <br />
+                      <span
+                        style={{ color: "#EB008B" }}
+                        onClick={() => {
+                          const getMenuId = menus?.map((menu: any) => menu.key);
+                          setShowMenuConfig({
+                            show: true,
+                            moduleIndex,
+                            subModuleIndex,
+                            selectedRowKeyMenu: getMenuId,
+                          });
+                        }}
+                      >
+                        + add menu
+                      </span>
+                    </span>
+                  ),
+                  children: menus?.map((menu: any) => {
+                    return {
+                      key: `menu-${menu.key}-${subModuleIndex}`,
+                      checkable: false,
+                      title: menu.field_name,
+                      icon: (
+                        <div style={{ marginLeft: 5, marginRight: 3 }}>
+                          <DragOutlined
+                            style={{
+                              borderRadius: 3,
+                              backgroundColor: "#D5FAFD",
+                              color: "#2BBECB",
+                              padding: 4,
+                            }}
+                          />
+                        </div>
+                      ),
+                    };
+                  }),
+                };
+              } else {
+                return subModule;
+              }
+            }),
+          };
+        } else {
+          return module;
+        }
+      });
+
+      return mappingHierarcyMenu;
+    });
+
+    setShowMenuConfig({
+      show: false,
+      moduleIndex: null,
+      subModuleIndex: null,
+      selectedRowKeyMenu: [],
+    });
+  };
+
+  const handleRemoveMenu = () => {
+    const filterHierarchyData = hierarchyData.map((module: any) => {
+      return {
+        ...module,
+        subModules: module?.subModules?.filter((subModule: any) => {
+          return !selectedRowKeyTree?.includes(subModule?.key);
+        }),
+      };
+    });
+    const mappingHierarchy = filterHierarchyData.map((module: any, moduleIndex: any) => {
+      return {
+        ...module,
+        subModules: module?.subModules?.map((subModule: any, subModuleIndex: any) => {
+          return {
+            ...subModule,
+            title: (
+              <span>
+                {subModule?.title?.props?.children[0]} <br />
+                <span
+                  style={{ color: "#EB008B" }}
+                  onClick={() => {
+                    const getMenuId = subModule?.children?.map((menu: any) =>
+                      parseInt(menu?.key?.split("-")[1])
+                    );
+                    setShowMenuConfig({
+                      show: true,
+                      moduleIndex,
+                      subModuleIndex,
+                      selectedRowKeyMenu: getMenuId ?? [],
+                    });
+                  }}
+                >
+                  + add menu
+                </span>
+              </span>
+            ),
+          };
+        }),
+      };
+    });
+    setHierarchyData(mappingHierarchy);
+  };
+
+  const submit = (data: any) => {
+    const mappingHierarchiesPayload = hierarchyData?.map((module: any) => {
+      return {
+        module: {
+          module_id: module.moduleId,
+        },
+        sub_modules: module.subModules.map((subModule: any) => {
+          return {
+            sub_module: {
+              module_id: parseInt(subModule?.key?.split("-")[1]),
+            },
+            menus: subModule?.children.map((menu: any) => {
+              return {
+                menu_id: parseInt(menu.key?.split("-")[1]),
+              };
+            }),
+          };
+        }),
+      };
+    });
+
+    const formData = {
+      ...data,
+      hierarchies: mappingHierarchiesPayload,
     };
-    updateMenuDesignList(data);
-  };
 
-  const handleChangeDropdownStatus = (value: any) => {
-    setDataListStatus(value);
-  };
-
-  const columnsModuleConfig = [
-    {
-      title: "Field Name",
-      dataIndex: "field_name",
-    },
-    {
-      title: "Key",
-      dataIndex: "field_key",
-    },
-  ];
-
-  const columnsMenuLists = [
-    {
-      title: "Field Name",
-      dataIndex: "field_name",
-    },
-    {
-      title: "Key",
-      dataIndex: "field_key",
-    },
-  ];
-
-  const { data: dataTableFieldModuleConfig, isLoading: isLoadingModuleConfig } = useConfigs({
-    options: {
-      onSuccess: (data: any) => {
-        paginationModuleConfig.setTotalItems(data.totalRow);
-      },
-      refetchOnWindowFocus: "always",
-    },
-    query: {
-      search: searchModuleConfig,
-      page: paginationModuleConfig.page,
-      limit: paginationModuleConfig.itemsPerPage,
-    },
-  });
-
-  const dataTableModuleConfig: any = [];
-  dataTableFieldModuleConfig?.rows?.map((field: any) => {
-    dataTableModuleConfig.push({
-      key: field.id,
-      field_id: field.id,
-      field_name: field.name,
-      field_key: field.key,
-    });
-  });
-
-  const paginateModuleConfig = dataTableModuleConfig;
-
-  const onSelectChangeTableModuleConfig = (value: any) => {
-    setSelectedRowKeysModuleConfig(value);
-  };
-
-  const rowSelectionModuleConfig = {
-    selectedRowKeys: selectedRowKeysModuleConfig,
-    onChange: onSelectChangeTableModuleConfig,
-  };
-
-  const { data: dataMenuLists, isLoading: isLoadingMenuLists } = useMenuLists({
-    options: {
-      onSuccess: (data: any) => {
-        paginationMenuLists.setTotalItems(data.totalRow);
-      },
-    },
-    query: {
-      search: searchMenuLists,
-      page: paginationMenuLists.page,
-      limit: paginationMenuLists.itemsPerPage,
-    },
-  });
-
-  const dataTableMenuLists: any = [];
-  dataMenuLists?.rows?.map((field: any) => {
-    dataTableMenuLists.push({
-      key: field.id,
-      field_id: field.id,
-      field_name: field.name,
-      field_key: field.key,
-    });
-  });
-
-  const paginateMenuLists = dataTableMenuLists;
-
-  const onSelectChangeTableMenuLists = (value: any) => {
-    setSelectedRowKeysMenuLists(value);
-  };
-
-  const rowSelectionMenuLists = {
-    selectedRowKeys: selectedRowKeysMenuLists,
-    onChange: onSelectChangeTableMenuLists,
-  };
-
-  const onCheckTree = (checkedKeys: any, info: any) => {
-    setRemoveMenu(
-      info.checkedNodes
-        .filter((filtering: any) => "children" in filtering === false)
-        .map((dataRemoveMenu: any) => dataRemoveMenu.key)
-    );
-
-    setRemoveModule(
-      info.checkedNodes
-        .filter((filtering) => "children" in filtering === true)
-        .map((dataRemoveMenu) => dataRemoveMenu.key)
-    );
-  };
-
-  const onSelectTree = (selectedKeys: any, info: any) => {
-    setStateModuleId(selectedKeys[0]);
-    setStateModal({
-      ...stateModal,
-      isShowModal: true,
-      widthModal: 1000,
-      titleModal: "Add Menu",
-    });
+    createMenuDesign(formData);
+    // console.log(formData);
   };
 
   return (
@@ -530,25 +274,37 @@ const CreateMenuDesignList: any = () => {
         </Row>
         <Card padding="20px">
           <Row justifyContent="space-between" alignItems="center" nowrap>
-            <Dropdown
-              width="185px"
-              label=""
-              allowClear
-              items={[
-                { id: "Y", value: "Active" },
-                { id: "N", value: "InActive" },
-              ]}
-              defaultValue="Active"
-              placeholder={"Select"}
-              handleChange={handleChangeDropdownStatus}
-              noSearch
+            <Controller
+              control={control}
+              defaultValue={"Y"}
+              name="status"
+              render={({ field: { onChange, value }, formState: { errors } }) => (
+                <>
+                  <Dropdown
+                    width="185px"
+                    label=""
+                    isHtml
+                    items={[
+                      { id: "Y", value: '<div key="1" style="color:green;">Active</div>' },
+                      { id: "N", value: '<div key="2" style="color:red;">Non Active</div>' },
+                    ]}
+                    defaultValue={value}
+                    placeholder={"Select"}
+                    handleChange={(value: any) => {
+                      onChange(value);
+                    }}
+                    noSearch
+                  />
+                </>
+              )}
             />
+
             <Row gap="16px">
               <Button size="big" variant={"tertiary"} onClick={() => Router.back()}>
                 Cancel
               </Button>
-              <Button size="big" variant={"primary"} onClick={handleUpdateMenuDesign}>
-                {isLoadingUpdateMenuDesignList ? "loading..." : "Save"}
+              <Button size="big" variant={"primary"} onClick={handleSubmit(submit)}>
+                {isLoadingCreateMenuDesign ? "loading..." : "Save"}
               </Button>
             </Row>
           </Row>
@@ -567,8 +323,8 @@ const CreateMenuDesignList: any = () => {
                     width="100%"
                     label="Name"
                     height="48px"
-                    placeholder={"e.g Shipment and Delivery"}
-                    onChange={handleChangeInput}
+                    placeholder={"e.g Menu Design - FMCG Manufacture"}
+                    {...register("name")}
                   />
                 </Col>
               </Row>
@@ -587,217 +343,88 @@ const CreateMenuDesignList: any = () => {
             </Accordion.Header>
             <Accordion.Body>
               <Row>
-                <Button
-                  size="big"
-                  variant={"primary"}
-                  onClick={() =>
-                    setStateModal({
-                      ...stateModal,
-                      isShowModal: true,
-                      widthModal: 1000,
-                      titleModal: "Add Module",
-                    })
-                  }
-                >
+                <Button size="big" variant={"primary"} onClick={() => setShowModuleConfig(true)}>
                   Add Module
                 </Button>
 
                 <Spacer size={16} />
 
-                <Button size="big" variant={"secondary"} onClick={() => removeModuleAndMenu()}>
+                <Button
+                  size="big"
+                  variant={"secondary"}
+                  disabled={selectedRowKeyTree?.length === 0}
+                  onClick={handleRemoveMenu}
+                >
                   Remove
                 </Button>
               </Row>
 
               <Spacer size={16} />
 
-              {filterByIdParentAndGroup?.length > 0 &&
-                filterByIdParentAndGroup.map(
-                  (subfilterByIdParentAndGroup, indexSubfilterByIdParentAndGroup) => {
-                    if (subfilterByIdParentAndGroup) {
-                      return (
-                        <div key={indexSubfilterByIdParentAndGroup}>
-                          <Accordion>
-                            <Accordion.Item key={1}>
-                              <Accordion.Header>
-                                <Text variant={"headingMedium"}>
-                                  {subfilterByIdParentAndGroup.module.name}
-                                </Text>
-                              </Accordion.Header>
-                              <Accordion.Body padding="0px">
-                                <Tree
-                                  draggable
-                                  blockNode
-                                  onSelect={onSelectTree}
-                                  onCheck={onCheckTree}
-                                  showIcon
-                                  onDrop={onDrop}
-                                  onDragEnter={onDragEnter}
-                                  switcherIcon={<DownOutlined />}
-                                  checkable
-                                  treeData={subfilterByIdParentAndGroup.childrenMainMenu.map(
-                                    (subChildrenMainMenu: any) => ({
-                                      key: subChildrenMainMenu.id,
-                                      title: (
-                                        <span>
-                                          {subChildrenMainMenu.module.name} <br />
-                                          <span style={{ color: "#EB008B" }}>+ add menu</span>
-                                        </span>
-                                      ),
-                                      children: subChildrenMainMenu.menuDesignToMenus.map(
-                                        (subMenuDesignToMenus: any) => ({
-                                          key: subMenuDesignToMenus.id,
-                                          title: subMenuDesignToMenus.menu.name,
-                                          icon: (
-                                            <DragOutlined
-                                              style={{
-                                                borderRadius: 3,
-                                                backgroundColor: "#D5FAFD",
-                                                color: "#2BBECB",
-                                                padding: 4,
-                                              }}
-                                            />
-                                          ),
-                                        })
-                                      ),
-                                      icon: (
-                                        <DragOutlined
-                                          style={{
-                                            borderRadius: 3,
-                                            backgroundColor: "#D5FAFD",
-                                            color: "#2BBECB",
-                                            padding: 4,
-                                          }}
-                                        />
-                                      ),
-                                    })
-                                  )}
-                                />
-                              </Accordion.Body>
-                            </Accordion.Item>
-                          </Accordion>
-
-                          <Spacer size={16} />
-                        </div>
-                      );
-                    }
-                  }
-                )}
+              {hierarchyData?.map((module: any, index: any) => (
+                <Accordion key={module.moduleId} style={{ marginBottom: 10 }}>
+                  <Accordion.Item key={index}>
+                    <Accordion.Header>
+                      <Text variant={"headingMedium"}>{module.name}</Text>
+                    </Accordion.Header>
+                    <Accordion.Body padding="10px">
+                      <TreeMenuDesign
+                        subModuleData={module.subModules}
+                        onCheck={(checkedValue: any, info: any) => {
+                          setSelectedRowKeyTree(checkedValue);
+                        }}
+                        onSelect={(selectedKey: any, info: any) => {
+                          // console.log(selectedKey);
+                          // console.log(info);
+                        }}
+                        onDropMenu={handleOnDrop}
+                      />
+                    </Accordion.Body>
+                  </Accordion.Item>
+                </Accordion>
+              ))}
             </Accordion.Body>
           </Accordion.Item>
         </Accordion>
       </Col>
 
-      {isShowModal && (
-        <Modal
-          width={widthModal}
-          visible={isShowModal}
-          onCancel={() => setStateModal({ ...stateModal, isShowModal: false })}
-          title={titleModal}
-          footer={
-            <div
-              style={{
-                display: "flex",
-                marginBottom: "12px",
-                marginRight: "12px",
-                justifyContent: "flex-end",
-                gap: "12px",
-              }}
-            >
-              <Button
-                onClick={() => setStateModal({ ...stateModal, isShowModal: false })}
-                variant="tertiary"
-                size="big"
-              >
-                Cancel
-              </Button>
-              <Button
-                disabled={isLoadingCreateMenuDesign || isLoading}
-                onClick={() =>
-                  titleModal === "Add Module" ? handleCreateModule() : handleCreateSubMenu()
-                }
-                variant="primary"
-                size="big"
-              >
-                {isLoadingCreateMenuDesign || isLoading ? "Loading..." : "Add"}
-              </Button>
-            </div>
-          }
-          content={
-            <>
-              <Spacer size={48} />
-              <Row alignItems="flex-end" justifyContent="space-between">
-                <Search
-                  width="380px"
-                  placeholder={`Search ${titleModal === "Add Module" ? "Module" : "Menu"} Name`}
-                  onChange={(e: any) =>
-                    titleModal === "Add Module"
-                      ? setSearchModuleConfig(e.target.value)
-                      : setSearchMenuLists(e.target.value)
-                  }
-                />
-              </Row>
-              <Spacer size={10} />
-              <Row gap="16px">
-                <Button
-                  size="big"
-                  variant={"tertiary"}
-                  onClick={() =>
-                    window.open(
-                      `/${titleModal === "Add Module" ? "module-config" : "menu-config"}/create`,
-                      "_blank"
-                    )
-                  }
-                >
-                  {titleModal === "Add Module" ? "Create Module" : titleModal}
-                </Button>
-              </Row>
-              <Spacer size={10} />
-              <Table
-                loading={isLoadingModuleConfig || isLoadingMenuLists}
-                columns={
-                  titleModal === "Add Module"
-                    ? columnsModuleConfig.filter((filtering) => filtering.dataIndex !== "field_key")
-                    : columnsMenuLists.filter((filtering) => filtering.dataIndex !== "field_key")
-                }
-                data={titleModal === "Add Module" ? paginateModuleConfig : paginateMenuLists}
-                rowSelection={
-                  titleModal === "Add Module" ? rowSelectionModuleConfig : rowSelectionMenuLists
-                }
-              />
-              <Pagination
-                pagination={
-                  titleModal === "Add Module" ? paginationModuleConfig : paginationMenuLists
-                }
-              />
-              <Spacer size={14} />
-            </>
-          }
+      {showModuleConfig && (
+        <ModalAddModule
+          show={showModuleConfig}
+          onCancel={() => {
+            setShowModuleConfig(false);
+          }}
+          selectedRowKeys={selectedRowKeysModule}
+          setSelectedRowKeys={(value: any) => {
+            setSelectedRowKeysModule(value);
+          }}
+          onSuccess={handleAddModule}
+        />
+      )}
+
+      {showMenuConfig.show && (
+        <ModalAddMenu
+          show={showMenuConfig.show}
+          onCancel={() => {
+            setShowMenuConfig({
+              show: false,
+              moduleIndex: null,
+              subModuleIndex: null,
+              selectedRowKeyMenu: [],
+            });
+          }}
+          selectedRowKeys={showMenuConfig.selectedRowKeyMenu}
+          onAddMenu={handleAddMenu}
         />
       )}
     </>
   );
 };
 
-const Span = styled.div`
-  font-size: 14px;
-  line-height: 18px;
-  font-weight: normal;
-  color: #ffe12e;
-`;
-
-const Record = styled.div`
-  height: 54px;
-  padding: 0px 20px;
-  display: flex;
-  align-items: center;
-  border-top: ${(p) => (p.borderTop ? "0.5px solid #AAAAAA" : "none")};
-`;
-
-const Card = styled.div`
+const Card: any = styled.div`
   background: #ffffff;
   border-radius: 16px;
-  padding: ${(p) => (p.padding ? p.padding : "16px")};
+  padding: ${(p: any) => (p.padding ? p.padding : "16px")};
 `;
 
 export default CreateMenuDesignList;

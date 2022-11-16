@@ -41,6 +41,7 @@ const Contacts = ({ formType }: any) => {
   const { fields, append, remove, update }: any = useFieldArray<any>({
     control,
     name: "contacts",
+    keyName: "key",
   });
 
   const [showFormContact, setShowFormContact] = useState<any>({
@@ -93,7 +94,7 @@ const Contacts = ({ formType }: any) => {
 
             {fields.map((contact: any, contactIndex: any) => {
               return (
-                <ContactCard key={contact.id} filtered={contact.filtered}>
+                <ContactCard key={contact.key} filtered={contact.filtered}>
                   <IconAvatar />
                   <Spacer size={10} />
                   <Col width="100%">
@@ -170,7 +171,7 @@ const Contacts = ({ formType }: any) => {
                   setShowFormContact({ type: "", open: false, data: {}, index: 0 });
                   break;
                 case "edit":
-                  update(showFormContact.index, { ...contactObject });
+                  update(showFormContact.index, { ...showFormContact.data, ...contactObject });
                   setShowFormContact({ type: "", open: false, data: {}, index: 0 });
                   break;
                 default:
@@ -183,7 +184,7 @@ const Contacts = ({ formType }: any) => {
                   setShowFormContact({ type: "", open: false, data: {}, index: 0 });
                   break;
                 case "edit":
-                  update(showFormContact.index, { ...contactObject });
+                  update(showFormContact.index, { ...showFormContact.data, ...contactObject });
                   setShowFormContact({ type: "", open: false, data: {}, index: 0 });
                   break;
                 default:

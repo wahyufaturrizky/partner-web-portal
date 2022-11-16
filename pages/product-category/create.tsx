@@ -47,7 +47,8 @@ const costingMethodData = [
 
 const CreateProductCategory: any = () => {
   const router = useRouter();
-
+  const companyId = localStorage.getItem("companyId")
+  const companyCode = localStorage.getItem("companyCode")
   const [automate, setAutomate] = useState("");
   const [searchProductCategory, setSearchProductCategory] = useState("");
   const [searchCoa, setSearchCoa] = useState("");
@@ -78,6 +79,7 @@ const CreateProductCategory: any = () => {
 
   const { data: coaListPayable, isLoading: isLoadingCoaListPayable } = useCoaList({
     status: "payable",
+    company_id: companyCode,
     query: {
       search: searchPayable,
     },
@@ -88,6 +90,7 @@ const CreateProductCategory: any = () => {
 
   const { data: coaListReceivable, isLoading: isLoadingCoaListReceivable } = useCoaListReceive({
     status: "receivable",
+    company_id: companyCode,
     query: {
       search: searchReceivable,
     },
@@ -97,6 +100,7 @@ const CreateProductCategory: any = () => {
   });
 
   const { data: coaListAll, isLoading: isLoadingCoaListAll } = useCoaListAll({
+    company_id: companyCode,
     query: {
       search: searchAllCoa,
     },
@@ -125,7 +129,7 @@ const CreateProductCategory: any = () => {
 
   const onSubmit = (data) => {
     const payload = {
-      company_id: "KSNI",
+      company_id: companyCode,
       name: data.name,
       parent: data.parent || "",
       costing_method: data.costing_method || "",

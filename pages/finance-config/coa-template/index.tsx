@@ -12,7 +12,7 @@ import { lang } from "lang";
 const FinanceConfigCoATemplate: any = () => {
   const router = useRouter();
   const t = localStorage.getItem("lan") || "en-US";
-  console.log(t)
+
   const pagination = usePagination({
     page: 1,
     itemsPerPage: 20,

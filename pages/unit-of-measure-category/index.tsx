@@ -57,6 +57,8 @@ const renderConfirmationText = (type: any, data: any) => {
 
 const UOMCategory = () => {
   const t = localStorage.getItem("lan") || "en-US";
+  const companyId = localStorage.getItem("companyId")
+  const companyCode = localStorage.getItem("companyCode")
   const pagination = usePagination({
     page: 1,
     itemsPerPage: 20,
@@ -88,7 +90,7 @@ const UOMCategory = () => {
       search: debounceSearch,
       page: pagination.page,
       limit: pagination.itemsPerPage,
-      company_id: "KSNI",
+      company_id: companyCode,
     },
     options: {
       onSuccess: (data: any) => {
@@ -135,7 +137,7 @@ const UOMCategory = () => {
   const { mutate: updateUomCategory, isLoading: isLoadingUpdateUomCategory } = useUpdateUOMCategory(
     {
       id: modalForm?.data?.uomCategoryId,
-      companyId: "KSNI",
+      companyId: companyCode,
       options: {
         onSuccess: () => {
           setModalForm({ open: false, typeForm: "", data: {} });
@@ -194,7 +196,7 @@ const UOMCategory = () => {
     switch (modalForm.typeForm) {
       case "create":
         const formData = {
-          company_id: "KSNI",
+          company_id: companyCode,
           ...data,
         };
         createUomCategory(formData);
@@ -210,7 +212,7 @@ const UOMCategory = () => {
 
   const onSubmitFile = (file: any) => {
     const formData = new FormData();
-    formData.append("company_id", "KSNI");
+    formData.append("company_id", companyCode);
     formData.append("file", file);
 
     uploadFileUomCategory(formData);
@@ -256,13 +258,13 @@ const UOMCategory = () => {
               onClick={(e: any) => {
                 switch (parseInt(e.key)) {
                   case 1:
-                    downloadFile({ with_data: "N", company_id: "KSNI" });
+                    downloadFile({ with_data: "N", company_id: companyCode });
                     break;
                   case 2:
                     setShowUpload(true);
                     break;
                   case 3:
-                    downloadFile({ with_data: "Y", company_id: "KSNI" });
+                    downloadFile({ with_data: "Y", company_id: companyCode });
                     break;
                   case 4:
                     break;
@@ -435,11 +437,11 @@ const UOMCategory = () => {
                   size="big"
                   onClick={() => {
                     if (isShowDelete.type === "selection") {
-                      deleteUomCategory({ ids: selectedRowKeys, company_id: "KSNI" });
+                      deleteUomCategory({ ids: selectedRowKeys, company_id: companyCode });
                     } else {
                       deleteUomCategory({
                         ids: [modalForm.data.uomCategoryId],
-                        company_id: "KSNI",
+                        company_id: companyCode,
                       });
                     }
                   }}

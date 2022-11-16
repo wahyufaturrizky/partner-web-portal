@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import usePagination from "@lucasmogari/react-pagination";
 import { yupResolver } from "@hookform/resolvers/yup";
 import Router, { useRouter } from "next/router";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import styled from "styled-components";
 import {
 	Text,
@@ -18,6 +18,7 @@ import {
 	Modal,
 	Search,
 	Pagination,
+    FormSelect,
 	AccordionCheckbox,
 } from "pink-lava-ui";
 
@@ -25,6 +26,8 @@ import { ModalDeleteConfirmation } from "../../../components/elements/Modal/Moda
 import ArrowLeft from "../../../assets/icons/arrow-left.svg";
 import {useDeletePermission, useMenuPermissionLists} from "../../../hooks/permission/usePermission";
 import { useCreatePermission } from "../../../hooks/user-config/useRole";
+import { useCompanyInfiniteLists } from "hooks/company-list/useCompany";
+import useDebounce from "lib/useDebounce";
 import { lang } from "lang";
 
 const schema = yup
@@ -72,11 +75,54 @@ const CreateRole: any = () => {
 		register,
 		handleSubmit,
 		setValue,
+		control,
 		formState: { errors },
 	} = useForm({
 		resolver: yupResolver(schema),
 		defaultValues: defaultValue,
 	});
+
+	const [companyList, setCompanyList] = useState([])
+    const [totalRowsCompanyList, setTotalRowsCompanyList] = useState(0)
+    const [searchCompany, setSearchCompany] = useState(" ");
+    const debounceFetchCompany = useDebounce(searchCompany, 1000);
+
+	
+    // FETCH COMPANY
+    const {
+        isLoading: isLoadingCompany,
+        isFetching: isFetchingCompany,
+        isFetchingNextPage: isFetchingMoreCompany,
+        hasNextPage: hasNextPageCompany,
+        fetchNextPage: fetchNextPageCompany,
+      } = useCompanyInfiniteLists({
+        query: {
+          search: debounceFetchCompany,
+          limit: 10,
+        },
+        options: {
+          onSuccess: (data: any) => {
+            setTotalRowsCompanyList(data.pages[0].totalRow);
+            const mappedData = data?.pages?.map((group: any) => {
+              return group.rows?.map((element: any) => {
+                return {
+                  value: element.id,
+                  label: element.name,
+                };
+              });
+            });
+            const flattenArray = [].concat(...mappedData);
+            setCompanyList(flattenArray);
+          },
+          getNextPageParam: (_lastPage: any, pages: any) => {
+            if (companyList.length < totalRowsCompanyList) {
+              return pages.length + 1;
+            } else {
+              return undefined;
+            }
+          },
+        },
+      });
 
 	const { mutate: deletePermission } = useDeletePermission({
 		options: {
@@ -241,15 +287,59 @@ const CreateRole: any = () => {
 					<Accordion.Item key={1}>
 						<Accordion.Header variant="blue">{lang[t].roleList.accordion.general}</Accordion.Header>
 						<Accordion.Body>
-							<Row width="50%" gap="20px" noWrap>
+							<Row gap="20px" width="100%" noWrap>
 								<Input
 									width="100%"
 									label={lang[t].roleList.roleList.roleName}
-									height="48px"
+									height="38px"
 									placeholder={"e.g Sales Admin"}
 									{...register("name", { required: true })}
 								/>
+								<Controller
+									control={control}
+									defaultValue={""}
+									name="company_id"
+									render={({ field: { onChange }, formState: { errors } }) => (
+										<Col>
+										<div style={{
+										display: 'flex'
+										}}>
+										<Text variant="headingRegular">Company</Text>
+										<Span>&#42;</Span>
+										</div>
+										<Spacer size={6} />
+										<FormSelect
+											defaultValue={defaultValue?.company?.name}
+											style={{ width: "700px"}}
+											size={"large"}
+											placeholder={"Select"}
+											borderColor={"#AAAAAA"}
+											arrowColor={"#000"}
+											withSearch
+											required
+											error={errors?.company_id?.message}
+											isLoading={isFetchingCompany || isLoadingCompany}
+											isLoadingMore={isFetchingMoreCompany}
+											fetchMore={() => {
+											if (hasNextPageCompany) {
+												fetchNextPageCompany();
+											}
+											}}
+											items={isFetchingCompany && !isFetchingMoreCompany ? [] : companyList}
+											onChange={(value: any) => {
+											onChange(value);
+											}}
+											onSearch={(value: any) => {
+												value === '' ? value = ' ' : value
+												setSearchCompany(value);
+											}}
+										/>
+										</Col>
+									)
+									}
+								/>
 							</Row>
+								
 						</Accordion.Body>
 					</Accordion.Item>
 				</Accordion>
@@ -399,6 +489,12 @@ const Card = styled.div`
 	background: #ffffff;
 	border-radius: 16px;
 	padding: ${(p) => (p.padding ? p.padding : "16px")};
+`;
+
+const Span = styled.span`
+  color: #ed1c24;
+  margin-left: 5px;
+  font-weight: bold;
 `;
 
 export default CreateRole;

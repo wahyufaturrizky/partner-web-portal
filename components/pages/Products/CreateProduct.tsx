@@ -36,9 +36,14 @@ import _ from "lodash";
 import ArrowLeft from "../../../assets/icons/arrow-left.svg";
 import { queryClient } from "../../../pages/_app";
 import { useProductCategoryInfiniteLists } from "hooks/mdm/product-category/useProductCategory";
+import { lang } from "lang";
 
 export default function CreateProduct({ isCreateProductVariant = true }) {
   const router = useRouter();
+  const t = localStorage.getItem("lan") || "en-US";
+  const companyId = localStorage.getItem("companyId")
+  const companyCode = localStorage.getItem("companyCode")
+
   const { id } = router.query;
   const isUpdate = !!id;
 
@@ -107,8 +112,8 @@ export default function CreateProduct({ isCreateProductVariant = true }) {
     shouldUseNativeValidation: true,
     defaultValues: {
       image: "",
-      company_id: "KSNI",
-      company_code: "KSNI",
+      company_id: companyCode,
+      company_code: companyCode,
       product_type: "",
       name: "",
       status: "active",
@@ -171,7 +176,8 @@ export default function CreateProduct({ isCreateProductVariant = true }) {
               levelId: data?.level_id,
               qty: data?.qty,
               uomConversionItemId: data.conversion_id,
-              name: data.name
+              name: data.name,
+              uomName: data?.uom_name
             })))
           } else if(key === 'registrations') {
             setValue('registration', data[key])
@@ -205,7 +211,7 @@ export default function CreateProduct({ isCreateProductVariant = true }) {
   } = useProductBrandInfiniteLists({
     query: {
       search: debounceFetchProductBrand,
-      company: "KSNI",
+      company: companyCode,
       limit: 10,
     },
     options: {
@@ -240,7 +246,7 @@ export default function CreateProduct({ isCreateProductVariant = true }) {
   } = useProductCategoryInfiniteLists({
     query: {
       search: debounceFetchProductCategory,
-      company_id: "KSNI",
+      company_id: companyCode,
       limit: 10,
     },
     options: {
@@ -281,7 +287,7 @@ export default function CreateProduct({ isCreateProductVariant = true }) {
         if (getValues("image")) {
           const formData: any = new FormData();
           formData.append("image", getValues("image"));
-          formData.append("company_id", "KSNI");
+          formData.append("company_id", companyCode);
           formData.append("product_id", data?.productId);
 
           uploadImage(formData);
@@ -304,7 +310,7 @@ export default function CreateProduct({ isCreateProductVariant = true }) {
         if (getValues("image") && getFieldState("image").isDirty) {
           const formData: any = new FormData();
           formData.append("image", getValues("image"));
-          formData.append("company_id", "KSNI");
+          formData.append("company_id", companyCode);
           formData.append("product_id", id);
 
           uploadImage(formData);
@@ -348,10 +354,11 @@ export default function CreateProduct({ isCreateProductVariant = true }) {
     payload.uom_conversion = [];
 
     if (data?.uom?.length > 0 && payload.use_unit_leveling) {
+      console.log("data?.uom", data?.uom)
       payload.uom_conversion = data?.uom?.map((data) => ({
         level_id: data?.levelId || null,
-        uom_conversion_item_id: 39,
-        conversion_id: "MCM-0000017",
+        uom_conversion_item_id: data?.id,
+        conversion_id: data?.uomConversionItemId,
       }));
     } else {
       payload.uom_conversion = [];
@@ -375,7 +382,7 @@ export default function CreateProduct({ isCreateProductVariant = true }) {
       options_values: data?.option_items?.map((data) => data?.value || data?.id) || [],
     }));
 
-    payload.company_code = "KSNI";
+    payload.company_code = companyCode;
     payload.inventory = {
       weight: {
         net: data?.inventory?.weight?.net,
@@ -601,6 +608,7 @@ export default function CreateProduct({ isCreateProductVariant = true }) {
     isLoadingProduct,
   };
 
+  console.log("productData", productData)
   return (
     <Col>
       {isLoadingProduct ? (
@@ -609,7 +617,7 @@ export default function CreateProduct({ isCreateProductVariant = true }) {
         <>
           {!isUpdate ? (
             <Row gap="4px">
-              <Text variant={"h4"}>Create Product</Text>
+              <Text variant={"h4"}>{lang[t].productList.create.headerTitle}</Text>
             </Row>
           ) : (
             <Row gap="4px">
@@ -631,7 +639,7 @@ export default function CreateProduct({ isCreateProductVariant = true }) {
                   style={{ cursor: "pointer" }}
                   onClick={() => setCanBePurchased(!canBePurchased)}
                 >
-                  <Text variant={"h6"}>Can Be Purchased</Text>
+                  <Text variant={"h6"}>{lang[t].productList.create.checkbox.canBePurchased}</Text>
                 </div>
               </Row>
             </Col>
@@ -643,7 +651,7 @@ export default function CreateProduct({ isCreateProductVariant = true }) {
                   onChange={() => setCanBeSold(!canBeSold)}
                 />
                 <div style={{ cursor: "pointer" }} onClick={() => setCanBeSold(!canBeSold)}>
-                  <Text variant={"h6"}>Can Be Sold</Text>
+                  <Text variant={"h6"}>{lang[t].productList.create.checkbox.canBeSold}</Text>
                 </div>
               </Row>
             </Col>
@@ -655,7 +663,7 @@ export default function CreateProduct({ isCreateProductVariant = true }) {
                   onChange={() => setCanExpensed(!canBeExpensed)}
                 />
                 <div style={{ cursor: "pointer" }} onClick={() => setCanExpensed(!canBeExpensed)}>
-                  <Text variant={"h6"}>Can Be Expensed</Text>
+                  <Text variant={"h6"}>{lang[t].productList.create.checkbox.canBeExpensed}</Text>
                 </div>
               </Row>
             </Col>
@@ -670,7 +678,7 @@ export default function CreateProduct({ isCreateProductVariant = true }) {
                   style={{ cursor: "pointer" }}
                   onClick={() => setCanManufacture(!canBeManufacture)}
                 >
-                  <Text variant={"h6"}>Can Be Manufacture</Text>
+                  <Text variant={"h6"}>{lang[t].productList.create.checkbox.canBeManufacture}</Text>
                 </div>
               </Row>
             </Col>
@@ -703,7 +711,7 @@ export default function CreateProduct({ isCreateProductVariant = true }) {
                   <></>
                 ) : (
                   <Button size="big" variant={"tertiary"} onClick={() => router.back()}>
-                    Cancel
+                    {lang[t].productList.list.button.cancel}
                   </Button>
                 )}
                 <Button size="big" variant={"primary"} onClick={(e: any) => {
@@ -716,7 +724,7 @@ export default function CreateProduct({ isCreateProductVariant = true }) {
                 }}>
                   {isLoadingCreateProduct || isLoadingUploadImage || isLoadingUpdateProduct
                     ? "Loading..."
-                    : "Save"}
+                    : lang[t].productList.list.button.save}
                 </Button>
               </Row>
             </Row>
@@ -726,7 +734,7 @@ export default function CreateProduct({ isCreateProductVariant = true }) {
 
           <Accordion>
             <Accordion.Item key={1}>
-              <Accordion.Header variant="blue">General</Accordion.Header>
+              <Accordion.Header variant="blue">{lang[t].productList.create.accordion.general}</Accordion.Header>
               <Accordion.Body>
                 <UploadImage control={control} productForm={productForm} />
                 <Spacer size={20} />
@@ -734,7 +742,7 @@ export default function CreateProduct({ isCreateProductVariant = true }) {
                   <Col width={"100%"}>
                     <Input
                       width="100%"
-                      label="Product Name"
+                      label={lang[t].productList.create.field.productName}
                       height="48px"
                       placeholder={"e.g Nabati Cheese"}
                       {...register("name", {
@@ -753,7 +761,7 @@ export default function CreateProduct({ isCreateProductVariant = true }) {
                       render={({ field: { onChange } }) => (
                         <Dropdown2
                           defaultValue={productForm?.product_type}
-                          label="Product Type"
+                          label={lang[t].productList.create.field.productType}
                           labelBold={true}
                           width="100%"
                           noSearch
@@ -778,7 +786,7 @@ export default function CreateProduct({ isCreateProductVariant = true }) {
                       render={({ field: { onChange } }) => (
                         <Col width="100%">
                           <span>
-                            <Label style={{ display: "inline" }}>Product Category </Label>{" "}
+                            <Label style={{ display: "inline" }}>{lang[t].productList.create.field.productCategory}</Label>{" "}
                             <span></span>
                           </span>
 
@@ -825,7 +833,7 @@ export default function CreateProduct({ isCreateProductVariant = true }) {
                       render={({ field: { onChange } }) => (
                         <>
                           <span>
-                            <Label style={{ display: "inline" }}>Product Brand</Label> <span></span>
+                            <Label style={{ display: "inline" }}>{lang[t].productList.create.field.productBrand}</Label> <span></span>
                           </span>
 
                           <Spacer size={3} />
@@ -868,7 +876,7 @@ export default function CreateProduct({ isCreateProductVariant = true }) {
                   <Col width="100%">
                     <Input
                       width="100%"
-                      label="External Code"
+                      label={lang[t].productList.create.field.externalCode}
                       height="48px"
                       placeholder={"e.g 413111"}
                       {...register("external_code")}
@@ -884,10 +892,11 @@ export default function CreateProduct({ isCreateProductVariant = true }) {
                       render={({ field: { onChange } }) => (
                         <DatePickerInput
                           fullWidth
+                          placeholder="Select"
                           onChange={(date: any, dateString: any) => onChange(dateString)}
-                          label="Discontinue Date"
-                          defaultValue={moment(productForm.expired_date)}
+                          label={lang[t].productList.create.field.discontinueDate}
                           format={"DD/MM/YYYY"}
+                          defaultValue={productData?.expiredDate ? moment(productData?.expiredDate) : undefined}
                         />
                       )}
                     />
@@ -902,7 +911,7 @@ export default function CreateProduct({ isCreateProductVariant = true }) {
 
           <Accordion>
             <Accordion.Item key={1}>
-              <Accordion.Header variant="blue">Product Information</Accordion.Header>
+              <Accordion.Header variant="blue">{lang[t].productList.create.accordion.productInformation}</Accordion.Header>
               <Accordion.Body>
                 <Tabs
                   activeKey={tabAktived}

@@ -10,6 +10,7 @@ import {
   Spacer,
   Text,
 } from "pink-lava-ui";
+import { useEffect } from "react";
 import { useState } from "react";
 import styled from "styled-components";
 import {
@@ -38,6 +39,7 @@ import ICSalesman from "../assets/icons/ic-salesman.svg";
 import ICAccountSetting from "../assets/icons/ic-setting.svg";
 import ICTransportation from "../assets/icons/ic-transportation.svg";
 import { lang } from "lang";
+import axios from "axios";
 
 const menuConfig = [
   { type: "title", title: "Overview" },
@@ -550,7 +552,8 @@ const flexStyles = {
 const AdminLayout = (props: any) => {
   const [current, setCurrent] = useState("0");
   const [isChangeLang, setIsChangeLang] = useState(false);
-
+  const [companies, setCompanies] = useState([])
+  
   const handleCLickTabNav = (e: any) => {
     setCurrent(e.key);
     Router.push("/dashboard");
@@ -561,11 +564,92 @@ const AdminLayout = (props: any) => {
     window.location.href = "/login";
   };
 
+  useEffect(() => {
+    async function getCompanyList() {
+      let token = localStorage.getItem("token");
+      let apiURL = process.env.NEXT_PUBLIC_API_BASE;
+
+      await axios.get(`${apiURL}/hermes/company`, {
+        params: {
+          account_id: 0,
+          search: "",
+          limit: 1000,
+          sortBy: "id",
+          sortOrder: "ASC",
+        },
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((res) => {
+        const defaultCompany = res.data.data.rows[0]
+        localStorage.setItem('companyId', defaultCompany.id)
+        localStorage.setItem('companyCode', defaultCompany.code)
+
+        setCompanies(res.data.data.rows)
+      })
+      // .catch((err) => {
+      //   alert('Failed get Companies')
+      //   // if(err.response.status == 401) {
+      //   //   Router.push("/")
+      //   // }
+      //   setCompanies([])
+
+      // })
+    }
+    const companyId = localStorage.getItem('companyId')
+    const companyCode = localStorage.getItem('companyCode')
+    console.log(companyId, companyCode)
+    // if(!companyId || !companyCode) getCompanyList()
+    localStorage.setItem('companyId', "2")
+    localStorage.setItem('companyCode', "KSNI")
+    // getCompanyList()
+  }, []);
+
+  const menuConfigFunc = (companies) => {
+
+    const handleChangeCompany = (value) => {
+      const selectedCompany = companies.filter((comp) => comp.name == value)
+      localStorage.setItem('companyId', selectedCompany[0].id)
+      localStorage.setItem('companyCode', selectedCompany[0].code)
+    }
+  
+    return [
+      { 
+        type: "dropdown",
+        items: companies,
+        onChange: (value) => handleChangeCompany(value),
+        default: companies[0]
+      },
+      ...menuConfig
+    ]
+  }
+
+  const menuMdmFunc = (companies) => {
+
+    const handleChangeCompany = (value) => {
+      const selectedCompany = companies.filter((comp) => comp.name == value)
+      localStorage.setItem('companyId', selectedCompany[0].id)
+      localStorage.setItem('companyCode', selectedCompany[0].code)
+    }
+  
+    return [
+      { 
+        type: "dropdown",
+        items: companies,
+        onChange: (value) => handleChangeCompany(value),
+        default: companies[0]
+      },
+      ...menuMdm
+    ]
+  }
+
   return (
     <Layout style={{ height: "100vh" }}>
       <Sidebar
         logo="/icons/logo-nabati.svg"
-        menu={current === "0" ? menuConfig : menuMdm}
+        // menu={current === "0" ? menuConfig : menuMdm}
+        menu={current === "0" ? menuConfigFunc(companies) : menuMdmFunc(companies)}
         defaultMenu={"dashboard"}
       />
       <Layout

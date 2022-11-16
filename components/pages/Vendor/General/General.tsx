@@ -23,7 +23,11 @@ import { VendorContext } from "context/VendorContext";
 import styled from "styled-components";
 
 const General = ({ type, formType }: any) => {
-  const { register, control } = useFormContext();
+  const {
+    register,
+    control,
+    formState: { errors },
+  } = useFormContext();
 
   const [isPKP, setIsPKP] = useState(false);
 
@@ -350,23 +354,23 @@ const General = ({ type, formType }: any) => {
               <Controller
                 control={control}
                 name="individu.title"
-                defaultValue={"mr"}
+                defaultValue={"Mr."}
                 rules={{
                   required: true,
                 }}
                 render={({ field: { onChange, value }, fieldState: { error } }) => (
                   <Col width={"10%"}>
-                    <Text variant="headingRegular">
+                    <Label>
                       Title<span style={{ color: "#EB008B" }}>*</span>
-                    </Text>
+                    </Label>
                     <Spacer size={6} />
                     <FormSelect
                       width="100%"
                       size="large"
                       defaultValue={value}
                       items={[
-                        { id: "mr", value: "Mr." },
-                        { id: "ms", value: "Ms." },
+                        { id: "Mr.", value: "Mr." },
+                        { id: "Ms.", value: "Ms." },
                       ]}
                       handleChange={(value: any) => {
                         onChange(value);
@@ -385,6 +389,7 @@ const General = ({ type, formType }: any) => {
                   height="40px"
                   required
                   defaultValue={""}
+                  error={errors?.name?.type === "required" && "This field is required"}
                   placeholder={"e.g Jane Doe"}
                   {...register("name", {
                     required: true,
@@ -472,9 +477,13 @@ const General = ({ type, formType }: any) => {
               width="100%"
               label={"Name"}
               height="40px"
+              required
               defaultValue={""}
+              error={errors?.name?.type === "required" && "This field is required"}
               placeholder={"e.g PT Indo Log"}
-              {...register("name")}
+              {...register("name", {
+                required: true,
+              })}
             />
           </Col>
         )}
@@ -482,7 +491,7 @@ const General = ({ type, formType }: any) => {
           <Col width={"100%"}>
             <Controller
               control={control}
-              defaultValue={""}
+              defaultValue={null}
               name="individu.job"
               render={({ field: { onChange, value }, formState: { errors } }) =>
                 isLoadingJobPosition ? (
@@ -491,7 +500,7 @@ const General = ({ type, formType }: any) => {
                   </Center>
                 ) : (
                   <>
-                    <Text variant="headingRegular">Job Position</Text>
+                    <Label>Job Position</Label>
                     <Spacer size={6} />
                     <FormSelect
                       defaultValue={value}
@@ -528,7 +537,7 @@ const General = ({ type, formType }: any) => {
         <Col width={"100%"}>
           <Controller
             control={control}
-            defaultValue={""}
+            defaultValue={null}
             name="group"
             render={({ field: { onChange, value }, formState: { errors } }) =>
               isLoadingVendor ? (
@@ -537,7 +546,7 @@ const General = ({ type, formType }: any) => {
                 </Center>
               ) : (
                 <>
-                  <Text variant="headingRegular">Vendor Group</Text>
+                  <Label>Vendor Group</Label>
                   <Spacer size={6} />
                   <FormSelect
                     defaultValue={value}
@@ -589,7 +598,7 @@ const General = ({ type, formType }: any) => {
         {type === "individu" && (
           <Controller
             control={control}
-            defaultValue={""}
+            defaultValue={null}
             name="individu.company"
             render={({ field: { onChange, value }, formState: { errors } }) =>
               isLoadingCompany ? (
@@ -598,7 +607,7 @@ const General = ({ type, formType }: any) => {
                 </Center>
               ) : (
                 <Col width={"100%"}>
-                  <Text variant="headingRegular">Company</Text>
+                  <Label>Company</Label>
                   <Spacer size={6} />
                   <FormSelect
                     defaultValue={value}
@@ -647,7 +656,7 @@ const General = ({ type, formType }: any) => {
         <Col width={"100%"}>
           <Controller
             control={control}
-            defaultValue={""}
+            defaultValue={null}
             name="language"
             render={({ field: { onChange, value }, formState: { errors } }) =>
               isLoiadingLanguages ? (
@@ -656,8 +665,7 @@ const General = ({ type, formType }: any) => {
                 </Center>
               ) : (
                 <>
-                  {" "}
-                  <Text variant="headingRegular">Language</Text>
+                  <Label>Language</Label>
                   <Spacer size={6} />
                   <FormSelect
                     defaultValue={value}
@@ -770,6 +778,13 @@ const General = ({ type, formType }: any) => {
     </div>
   );
 };
+
+const Label = styled.div`
+  font-weight: bold;
+  font-size: 16px;
+  line-height: 24px;
+  color: #000000;
+`;
 
 const CustomerContainer = styled.div`
   background: #d5fafd;

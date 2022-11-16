@@ -323,7 +323,7 @@ const DraggableTable = ({ control, conversionList, uom, isLoading, onDrag, onDel
                 render={({ field: { onChange }}) => (
                   <Dropdown2
                     label=""
-                    defaultValue={props.data.baseUom}
+                    defaultValue={props.data.uomName}
                     width="100%"
                     noSearch
                     items={uom?.map((uom:any) => ({

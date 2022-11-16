@@ -7,8 +7,10 @@ import { useCompanyList, useStatusCompany } from "../../hooks/company-list/useCo
 import { lang } from "lang";
 
 const CompanyList: any = () => {
-  const t = localStorage.getItem("lan") || "en-US";
   const router = useRouter();
+  const companyId = localStorage.getItem("companyId")
+  const companyCode = localStorage.getItem("companyCode")
+  const t = localStorage.getItem("lan") || "en-US";
   const pagination = usePagination({
     page: 1,
     itemsPerPage: 20,
@@ -161,7 +163,7 @@ const CompanyList: any = () => {
                   router.push("/company-list/create");
                 }}
               >
-                {lang[t].companyList.primary.addNewCompany}
+                {lang[t].companyList.addNewCompany}
               </Button>
             </Row>
           </Row>

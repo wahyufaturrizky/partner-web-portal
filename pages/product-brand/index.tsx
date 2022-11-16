@@ -61,6 +61,8 @@ const renderConfirmationText = (type: any, data: any) => {
 };
 
 const ProductBrandMDM = () => {
+  const companyId = localStorage.getItem("companyId")
+  const companyCode = localStorage.getItem("companyCode")
   const t = localStorage.getItem("lan") || "en-US";
   const pagination = usePagination({
     page: 1,
@@ -95,6 +97,7 @@ const ProductBrandMDM = () => {
       search: debounceSearch,
       page: pagination.page,
       limit: pagination.itemsPerPage,
+      company: companyCode
     },
     options: {
       onSuccess: (data: any) => {
@@ -211,10 +214,10 @@ const ProductBrandMDM = () => {
   const onSubmit = (data: any) => {
     switch (modalProductBrandForm.typeForm) {
       case "create":
-        createProductBrandMDM({ ...data, company: "KSNI" });
+        createProductBrandMDM({ ...data, company: companyCode });
         break;
       case "edit":
-        updateProductBrandMDM({ ...data, company: "KSNI" });
+        updateProductBrandMDM({ ...data, company: companyCode });
         break;
       default:
         setModalProductBrandForm({ open: false, typeForm: "", data: {} });
@@ -269,13 +272,13 @@ const ProductBrandMDM = () => {
               onClick={(e: any) => {
                 switch (parseInt(e.key)) {
                   case 1:
-                    downloadFile({ with_data: "N", company_id: "KSNI" });
+                    downloadFile({ with_data: "N", company_id: companyCode });
                     break;
                   case 2:
                     setShowUpload(true);
                     break;
                   case 3:
-                    downloadFile({ with_data: "Y", company_id: "KSNI" });
+                    downloadFile({ with_data: "Y", company_id: companyCode });
                     break;
                   case 4:
                     break;

@@ -68,6 +68,25 @@ export default function CreateCustomers({
   setValue,
   getValues,
   router,
+  editBankAccount,
+  addMoreAddress,
+  newAddress,
+  primary,
+  setPrimary,
+  deleteLabel,
+  addressTypeLabel,
+  primaryLabel,
+  storePhotoLabel,
+  dimensionMinimumLabel,
+  fileSizeLabel,
+  streetLabel,
+  countryLabel,
+  provinceLabel,
+  cityLabel,
+  districtLabel,
+  zoneLabel,
+  postalCodeLabel,
+  longitudeLabel,
 }: any) {
   const dataWatchCustomer = useWatch({
     control,
@@ -85,7 +104,7 @@ export default function CreateCustomers({
     data: null;
   }>({
     open: false,
-    typeForm: "Edit Bank Account",
+    typeForm: editBankAccount,
     data: null,
   });
 
@@ -276,7 +295,7 @@ export default function CreateCustomers({
   };
 
   const onHandleBankSubmit = (data: any) => {
-    if (visibleModalBankAccount.typeForm === "Edit Bank Account") {
+    if (visibleModalBankAccount.typeForm === editBankAccount) {
       let tempEdit = fieldsBank.map((mapDataItem) => {
         if (mapDataItem.id === visibleModalBankAccount?.data?.id) {
           mapDataItem.bank_name = data.bank_name;
@@ -356,6 +375,24 @@ export default function CreateCustomers({
             setSearchPostalCode={setSearchPostalCode}
             getValues={getValues}
             formType={detailCustomer ? "edit" : "add"}
+            addMoreAddress={addMoreAddress}
+            newAddress={newAddress}
+            primary={primary}
+            setPrimary={setPrimary}
+            deleteLabel={deleteLabel}
+            addressTypeLabel={addressTypeLabel}
+            primaryLabel={primaryLabel}
+            storePhotoLabel={storePhotoLabel}
+            dimensionMinimumLabel={dimensionMinimumLabel}
+            fileSizeLabel={fileSizeLabel}
+            streetLabel={streetLabel}
+            countryLabel={countryLabel}
+            provinceLabel={provinceLabel}
+            cityLabel={cityLabel}
+            districtLabel={districtLabel}
+            zoneLabel={zoneLabel}
+            postalCodeLabel={postalCodeLabel}
+            longitudeLabel={longitudeLabel}
           />
         );
       case "Sales":

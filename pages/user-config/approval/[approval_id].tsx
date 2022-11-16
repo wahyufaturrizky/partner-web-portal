@@ -25,7 +25,6 @@ import {
 	usePartnerConfigApprovalList,
 	useUpdatePartnerConfigApprovalList,
 } from "../../../hooks/user-config/useApproval";
-import ArrowLeft from "../../assets/arrow-left.svg";
 import { lang } from "lang";
 
 export interface ConfigModuleList {}
@@ -216,7 +215,7 @@ const DetailUserConfigApproval: any = () => {
 		<>
 			<Col>
 				<Row gap="4px" alignItems="center">
-					<ArrowLeft style={{ cursor: "pointer" }} onClick={() => Router.back()} />
+					
 					<Text variant={"h4"}>
 						Approval Partner Detail - {dataPartnerConfigApprovalList?.name || "Unknown"}
 					</Text>

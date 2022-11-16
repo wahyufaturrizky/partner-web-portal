@@ -14,6 +14,8 @@ import { lang } from "lang";
 
 const ProductGroupCreate = () => {
   const t = localStorage.getItem("lan") || "en-US";
+  const companyId = localStorage.getItem("companyId")
+  const companyCode = localStorage.getItem("companyCode")
   const router = useRouter();
   const pagination = usePagination({
     page: 1,
@@ -107,7 +109,7 @@ const ProductGroupCreate = () => {
 
   const onSubmit = (data: any) => {
     const formData = {
-      company_id: "KSNI",
+      company_id: companyCode,
       ...data,
     };
 

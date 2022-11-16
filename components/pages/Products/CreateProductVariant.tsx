@@ -42,6 +42,8 @@ import { useProductCategoryInfiniteLists } from 'hooks/mdm/product-category/useP
 
 export default function CreateProductVariant({ isCreateProductVariant = true}) {
   const router = useRouter();
+  const companyId = localStorage.getItem("companyId")
+  const companyCode = localStorage.getItem("companyCode")
   const { id } = router.query;
   const isUpdate = !!id;
 
@@ -113,8 +115,8 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
       sku: "",
       barcode: "",
       image: "",
-      company_id: "KSNI",
-      company_code: "KSNI",
+      company_id: companyCode,
+      company_code: companyCode,
       product_type: "",
       name: "",
       status: "active",
@@ -181,7 +183,9 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
                 key: data.id,
                 levelId: data?.level?.id,
                 qty: data?.qty,
-                uomConversionItemId: data.conversion_id
+                uomConversionItemId: data.conversion_id,
+                name: data.name,
+                uomName: data?.uom_name
               })))
             } else if(key === 'registrations') {
               setValue('registration', data[key])
@@ -218,7 +222,7 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
   } = useProductBrandInfiniteLists({
     query: {
       search: debounceFetchProductBrand,
-      company: "KSNI",
+      company: companyCode,
       limit: 10,
     },
     options: {
@@ -253,7 +257,7 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
   } = useProductCategoryInfiniteLists({
     query: {
       search: debounceFetchProductCategory,
-      company_id: "KSNI",
+      company_id: companyCode,
       limit: 10,
     },
     options: {
@@ -294,7 +298,7 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
         if( getValues('image')){
           const formData:any = new FormData();
           formData.append("image", getValues('image'));
-          formData.append("company_id", "KSNI");
+          formData.append("company_id", companyCode);
           formData.append("product_variant_id", data.productId);
   
           uploadImage(formData);
@@ -313,7 +317,7 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
         if( getValues('image') && isImageChange){
           const formData:any = new FormData();
           formData.append("image", getValues('image'));
-          formData.append("company_id", "KSNI");
+          formData.append("company_id", companyCode);
           formData.append("product_variant_id", id);
   
           uploadImage(formData);
@@ -361,8 +365,8 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
     if (data?.uom?.length > 0 && payload.use_unit_leveling) {
       payload.uom_conversion = data?.uom?.map(data => ({
         level_id: data?.levelId,
-        uom_conversion_item_id: 39,
-        conversion_id: "MCM-0000017"
+        uom_conversion_item_id: data?.id,
+        conversion_id: data?.uomConversionItemId,
       }))
     } else {
       payload.uom_conversion = [];
@@ -381,7 +385,7 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
     payload.product_brand_id = data.brand.id;
     payload.base_uom_id = data.base_uom.uom_id;
     payload.purchase_uom_id = data.purchase_uom.uom_id;
-    payload.company_code = 'KSNI'
+    payload.company_code = companyCode
     payload.inventory = {
       weight: {
           net: data?.inventory?.weight?.net,
@@ -564,6 +568,7 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
   const createdAtDate = moment(productDetail?.createdAt)
   const isNewProduct = currentDate.diff(createdAtDate, `days`) <= 0
 
+  console.log("productDetail", productDetail)
   return (
     <Col>
       {
@@ -668,7 +673,7 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
           <Accordion.Header variant="blue">General</Accordion.Header>
           <Accordion.Body>
             <Row width="100%" noWrap>
-              <UploadImage control={control} productForm={productForm} />
+              <UploadImage control={control} productForm={productForm} setIsImageChange={setIsImageChange}/>
               {productDetail?.product && 
                 <Col width="100%">
                   <Text variant="subtitle1" color="black.regular">Product Master</Text>
@@ -869,6 +874,8 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
                       placeholder="Select"
                       onChange={(date: any, dateString: any) => onChange(dateString)}
                       label="Discontinue Date"
+                      format={"DD/MM/YYYY"}
+                      defaultValue={productDetail?.expiredDate ? moment(productDetail?.expiredDate) : undefined}
                     />
                   )}
                 />
@@ -953,7 +960,7 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
   )
 }
 
-const UploadImage = ({ control, productForm }: { control: Control<FormValues>, productForm: any }) => {
+const UploadImage = ({ control, productForm, setIsImageChange }: { control: Control<FormValues>, productForm: any, setIsImageChange: any }) => {
   return (
     <Controller
       control={control}

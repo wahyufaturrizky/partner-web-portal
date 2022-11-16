@@ -51,6 +51,8 @@ const renderConfirmationText = (type: any, data: any) => {
 const UOM = () => {
   const t = localStorage.getItem("lan") || "en-US";
   const router = useRouter();
+  const companyId = localStorage.getItem("companyId")
+  const companyCode = localStorage.getItem("companyCode")
   const pagination = usePagination({
     page: 1,
     itemsPerPage: 20,
@@ -80,7 +82,7 @@ const UOM = () => {
       search: debounceSearch,
       page: pagination.page,
       limit: pagination.itemsPerPage,
-      company_id: "KSNI",
+      company_id: companyCode,
     },
     options: {
       onSuccess: (data: any) => {
@@ -173,7 +175,7 @@ const UOM = () => {
 
   const onSubmitFile = (file: any) => {
     const formData = new FormData();
-    formData.append("company_id", "KSNI");
+    formData.append("company_id", companyCode);
     formData.append("file", file);
 
     uploadFileUom(formData);
@@ -219,13 +221,13 @@ const UOM = () => {
               onClick={(e: any) => {
                 switch (parseInt(e.key)) {
                   case 1:
-                    downloadFile({ with_data: "N", company_id: "KSNI" });
+                    downloadFile({ with_data: "N", company_id: companyCode });
                     break;
                   case 2:
                     setShowUpload(true);
                     break;
                   case 3:
-                    downloadFile({ with_data: "Y", company_id: "KSNI" });
+                    downloadFile({ with_data: "Y", company_id: companyCode });
                     break;
                   case 4:
                     break;
@@ -327,9 +329,9 @@ const UOM = () => {
                   size="big"
                   onClick={() => {
                     if (isShowDelete.type === "selection") {
-                      deleteUom({ ids: selectedRowKeys, company_id: "KSNI" });
+                      deleteUom({ ids: selectedRowKeys, company_id: companyCode });
                     } else {
-                      deleteUom({ ids: [modalForm.data.id], company_id: "KSNI" });
+                      deleteUom({ ids: [modalForm.data.id], company_id: companyCode });
                     }
                   }}
                 >

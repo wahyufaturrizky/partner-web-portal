@@ -26,6 +26,8 @@ import {
 
 const CustomerGroupDetail = () => {
   const router = useRouter();
+  const companyId = localStorage.getItem("companyId")
+  const companyCode = localStorage.getItem("companyCode")
   const { group_id: id } = router.query;
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -72,14 +74,14 @@ const CustomerGroupDetail = () => {
     isLoading: isLoadingParentCustomerGroupMDM,
     isFetching: isFetchingParentCustomerGroupMDM,
   } = useParentCustomerGroupMDM({
-    id: Number(id) + "/KSNI",
+    id: Number(id) + `/${companyCode}`,
     options: {
       onSuccess: (data: any) => { },
     },
   });
 
   const onSubmit = (data: any) => {
-    updateCreateCustomerGroup({ ...data, company: "KSNI" });
+    updateCreateCustomerGroup({ ...data, company: companyCode });
   };
 
   if (
@@ -245,7 +247,7 @@ const CustomerGroupDetail = () => {
           visible={showDeleteModal}
           isLoading={isLoadingDeleteCustomerGroup}
           onCancel={() => setShowDeleteModal(false)}
-          onOk={() => deleteCustomerGroup({ ids: [id], company_id: "KSNI" })}
+          onOk={() => deleteCustomerGroup({ ids: [id], company_id: companyCode })}
         />
       )}
     </>

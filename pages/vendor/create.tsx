@@ -1,4 +1,4 @@
-import React, { useState, createContext, useContext } from "react";
+import React, { useState } from "react";
 import { Text, Col, Row, Spacer, Dropdown, Button, Accordion, Radio, Tabs } from "pink-lava-ui";
 import styled from "styled-components";
 import { useRouter } from "next/router";
@@ -26,7 +26,7 @@ export default function VendorCreate() {
   const router = useRouter();
 
   const methods = useForm({
-    defaultValues: { status: "active", purchasing: {}, invoicing: {}, customer_id: "" },
+    defaultValues: { status: "Active", purchasing: {}, invoicing: {}, customer_id: "" },
   });
   const { control, handleSubmit } = methods;
 
@@ -77,7 +77,7 @@ export default function VendorCreate() {
     const contactsPayload =
       data?.contacts?.map((contact: any) => {
         delete contact?.filtered;
-        delete contact?.id;
+        delete contact?.key;
         return contact;
       }) ?? [];
 
@@ -173,15 +173,16 @@ export default function VendorCreate() {
           <Controller
             control={control}
             name={"status"}
-            defaultValue={"inactive"}
+            defaultValue={"Active"}
             render={({ field: { onChange, value } }) => (
               <Dropdown
                 label=""
                 width="185px"
                 noSearch
+                isHtml
                 items={[
-                  { id: "active", value: "Active" },
-                  { id: "inactive", value: "Inactive" },
+                  { id: "Active", value: '<div key="1" style="color:green;">Active</div>' },
+                  { id: "Inactive", value: '<div key="2" style="color:red;">Inactive</div>' },
                 ]}
                 defaultValue={value}
                 handleChange={(value: any) => {

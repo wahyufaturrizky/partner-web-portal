@@ -1,5 +1,6 @@
 import { useLanguages } from "hooks/languages/useLanguages";
 import { usePostalCodeInfiniteLists } from "hooks/mdm/postal-code/usePostalCode";
+import { lang } from "lang";
 import useDebounce from "lib/useDebounce";
 import { useRouter } from "next/router";
 import { useState } from "react";
@@ -8,6 +9,7 @@ import CreateCustomers from "../../components/pages/Customers/CreateCustomers";
 import { useInfiniteCustomerGroupsLists } from "../../hooks/mdm/customers/useCustomersGroupMDM";
 
 export default function PageCreateCustomer() {
+  const t = localStorage.getItem("lan") || "en-US";
   const router = useRouter();
   const [search, setSearch] = useState({
     languages: "",
@@ -183,6 +185,24 @@ export default function PageCreateCustomer() {
     setValue,
     getValues,
     router,
+    editBankAccount: lang[t].customer.editBankAccount,
+    addMoreAddress: lang[t].customer.addMoreAddress,
+    newAddress: lang[t].customer.newAddress,
+    primaryLabel: lang[t].customer.primaryLabel,
+    setPrimary: lang[t].customer.setPrimary,
+    deleteLabel: lang[t].customer.tertier.delete,
+    addressTypeLabel: lang[t].customer.tertier.addressTypeLabel,
+    storePhotoLabel: lang[t].customer.tertier.storePhotoLabel,
+    dimensionMinimumLabel: lang[t].customer.tertier.dimensionMinimumLabel,
+    fileSizeLabel: lang[t].customer.tertier.fileSizeLabel,
+    streetLabel: lang[t].customer.tertier.streetLabel,
+    countryLabel: lang[t].customer.tertier.countryLabel,
+    provinceLabel: lang[t].customer.tertier.provinceLabel,
+    cityLabel: lang[t].customer.tertier.cityLabel,
+    districtLabel: lang[t].customer.tertier.districtLabel,
+    zoneLabel: lang[t].customer.tertier.zoneLabel,
+    postalCodeLabel: lang[t].customer.tertier.postalCodeLabel,
+    longitudeLabel: lang[t].customer.tertier.longitudeLabel,
   };
 
   return <CreateCustomers {...propsDropdownField} />;

@@ -10,8 +10,10 @@ import { Controller, useWatch } from 'react-hook-form'
 import styled from 'styled-components';
 import useDebounce from '../../../../lib/useDebounce';
 import { useCoaInfiniteLists } from '../../../../hooks/finance-config/useCoaTemplate';
+import { lang } from 'lang';
 
 export default function Accounting({ control, setValue }: any) {
+  const t = localStorage.getItem("lan") || "en-US";
 
   const [totalRowsCoaTemplateReceivable, setTotalRowsCoaTemplateReceivable] = useState(0);
   const [searchCoaTemplateReceivable, setSearchCoaTemplateReceivable] = useState("");
@@ -103,11 +105,11 @@ export default function Accounting({ control, setValue }: any) {
   return (
     <Row width="100%" noWrap>
       <Col width={"50%"}>
-        <Text variant="headingMedium" color="blue.darker">Account Receivable</Text>
+        <Text variant="headingMedium" color="blue.darker">{lang[t].productList.create.field.accounting.accountReceivable}</Text>
         <Spacer size={20} />
         <>
           <span>
-            <Label style={{ display: "inline" }}>Income Account</Label>{" "}
+            <Label style={{ display: "inline" }}>{lang[t].productList.create.field.accounting.incomeAccount}</Label>{" "}
             <span></span>
           </span>
 
@@ -143,11 +145,11 @@ export default function Accounting({ control, setValue }: any) {
           />
         </>
         <Spacer size={73} />
-        <Text variant="headingMedium" color="blue.darker">Account Payable</Text>
+        <Text variant="headingMedium" color="blue.darker">{lang[t].productList.create.field.accounting.accountPayable}</Text>
         <Spacer size={20} />
         <>
           <span>
-            <Label style={{ display: "inline" }}>Expense Account</Label>{" "}
+            <Label style={{ display: "inline" }}>{lang[t].productList.create.field.accounting.expenseAccount}</Label>{" "}
             <span></span>
           </span>
 

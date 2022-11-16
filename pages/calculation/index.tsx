@@ -15,6 +15,7 @@ import {
   DropdownMenu,
   FileUploadModal,
   Label,
+  Span,
   FormSelect,
   Dropdown
 } from "pink-lava-ui";
@@ -31,6 +32,9 @@ import { queryClient } from "../_app";
 import { mdmDownloadService } from "../../lib/client";
 import { useRouter } from "next/router";
 import ModalCalculation from "components/elements/Modal/ModalCalculation";
+import { useCalculations, useCreateCalculation, useDeleteCalculation, useUpdateCalculation, useUploadFileCalculation } from "hooks/calculation-config/useCalculation";
+import IDR_formatter from "hooks/number-formatter/useNumberFormatter";
+import { useCompanyInfiniteLists } from "hooks/company-list/useCompany";
 
 const downloadFile = (params: any) =>
   mdmDownloadService("/branch/download", { params }).then((res) => {
@@ -41,24 +45,9 @@ const downloadFile = (params: any) =>
     tempLink.click();
   });
 
-const renderConfirmationText = (type: any, data: any) => {
-  switch (type) {
-    case "selection":
-      return data.selectedRowKeys.length > 1
-        ? `Are you sure to delete ${data.selectedRowKeys.length} items ?`
-        : `Are you sure to delete Branch Name ${
-            data?.uomData?.data.find((el: any) => el.key === data.selectedRowKeys[0])?.uomName
-          } ?`;
-    case "detail":
-      return `Are you sure to delete Branch Name ${data.uomName} ?`;
-
-    default:
-      break;
-  }
-};
-
 const Calculation = () => {
   const router = useRouter();
+
   const pagination = usePagination({
     page: 1,
     itemsPerPage: 20,
@@ -68,47 +57,58 @@ const Calculation = () => {
     totalItems: 100,
   });
 
-  const { register, control, handleSubmit } = useForm();
+  const { register, control, handleSubmit, setValue } = useForm();
 
   const [search, setSearch] = useState("");
-  const [isShowDelete, setShowDelete] = useState({ open: false, type: "selection", data: {} });
+  const [isShowDelete, setShowDelete] = useState({ open: false, id: "", name: "" });
   const [isShowCreate, setShowCreate] = useState({ open: false, title: ''})
+  const [isShowEdit, setShowEdit] = useState({ open: false, title: '', data: {}, id: 0 })
   const [isShowUpload, setShowUpload] = useState(false);
 
   const [paymentButton, setPaymentButton] = useState({
-    monthly: true,
-    yearly: false
+    oneMonth: true,
+    threeMonths: false,
+    sixMonths: false,
+    twelveMonths: false,
   })
 
-  const [modalForm, setModalForm] = useState({
-    open: false,
-    data: {},
-    typeForm: "create",
-  });
-  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const debounceSearch = useDebounce(search, 1000);
 
+  const [companyList, setCompanyList] = useState([])
+  const [totalRowsCompanyList, setTotalRowsCompanyList] = useState(0)
+  const [searchCompany, setSearchCompany] = useState("");
+  const debounceFetchCompany = useDebounce(searchCompany, 1000);
+
   const {
-    data: branchData,
-    isLoading: isLoadingBranch,
-    isFetching: isFetchingBranch,
-  } = useBranchList({
+    data: calculationData,
+    isLoading: isLoadingCalculation,
+    isFetching: isFetchingCalculation,
+  } = useCalculations({
     query: {
       search: debounceSearch,
       page: pagination.page,
       limit: pagination.itemsPerPage,
-      company_id: "KSNI"
     },
     options: {
       onSuccess: (data: any) => {
         pagination.setTotalItems(data.totalRow);
       },
       select: (data: any) => {
+        let payment = 0
         const mappedData = data?.rows?.map((element: any) => {
+          const companyName = companyList.filter(el => el.companyId === element.companyId)[0]?.value?.split(' - ')[0]
+          const newMenu = element.modules?.map(el => el)?.map(e => e.menus)[0]?.map(e => e.menu.name)?.slice()?.join(', ')
+            payment += +element?.totalPayment
             return {
-              key: element.branchId,
-              id: element.branchId,
-              branchName: element.name,
+              key: element.id,
+              id: element.id,
+              role_name: element?.roleName,
+              total_user: element?.totalUser,
+              menu_name: newMenu,
+              company_name: companyName,
+              branch : element.branch,
+              fee: 'IDR ' + IDR_formatter.format(element?.fee?.split('.')[0])?.split('Rp')[1],
+              total_fee: 'IDR ' + IDR_formatter.format(element?.totalFee?.split('.')[0])?.split('Rp')[1],
               action: (
                 <div style={{ display: "flex", justifyContent: "left" }}>
                     <EditOutlined
@@ -121,7 +121,7 @@ const Calculation = () => {
                     fontSize: "18px",
                   }}
                   onClick={() => {
-                    console.log('masuk edit')
+                    setShowEdit({open: true, title: "Edit Roles, Menu, etc", data: {...element, companyName}, id: element?.id})
                   }}
                 />
                 <Spacer size={5} />
@@ -135,42 +135,94 @@ const Calculation = () => {
                     fontSize: "18px",
                   }}
                   onClick={() => {
-                    console.log('masuk delete')
+                   setShowDelete({ open: true, id: element.id, name: element.roleName })
                   }}
                 />
                 </div>
               ),
             };
           });
-        return { data: mappedData, totalRow: data.totalRow };
+
+          paymentButton?.threeMonths? payment = (payment * 3) - (payment * 3 * 0.1) :
+          paymentButton?.sixMonths? payment = (payment * 6) - (payment * 6 * 0.25) :
+          paymentButton?.twelveMonths? payment = (payment * 12) - (payment * 12 * 0.5) : payment
+        return { data: mappedData, totalRow: data.totalRow, payment };
       },
     },
   });
 
-  const { mutate: deleteBranch, isLoading: isLoadingDeleteBranch } = useDeleteBranch({
+  const {
+    isLoading: isLoadingCompany,
+    isFetching: isFetchingCompany,
+    isFetchingNextPage: isFetchingMoreCompany,
+    hasNextPage: hasNextPageCompany,
+    fetchNextPage: fetchNextPageCompany,
+  } = useCompanyInfiniteLists({
+    query: {
+      search: debounceFetchCompany,
+      limit: 10,
+    },
     options: {
-      onSuccess: () => {
-        setShowDelete({ open: false, data: {}, type: "" });
-        setSelectedRowKeys([]);
-        queryClient.invalidateQueries(["branch-list"]);
+      onSuccess: (data: any) => {
+        setTotalRowsCompanyList(data.pages[0].totalRow);
+        const mappedData = data?.pages?.map((group: any) => {
+          return group.rows?.map((element: any) => {
+            return {
+              id: element.code,
+              value: element.name + ' - ' + element.companyType,
+              companyId: element.id
+            };
+          });
+        });
+        const flattenArray = [].concat(...mappedData);
+        setCompanyList(flattenArray);
+      },
+      getNextPageParam: (_lastPage: any, pages: any) => {
+        if (companyList.length < totalRowsCompanyList) {
+          return pages.length + 1;
+        } else {
+          return undefined;
+        }
       },
     },
   });
 
-  const { mutate: uploadFileBranch, isLoading: isLoadingUploadFileBranch } = useUploadFileBranch({
+  const { mutate: deleteCalculation, isLoading: isLoadingDeleteCalculation } = useDeleteCalculation({
     options: {
       onSuccess: () => {
-        queryClient.invalidateQueries(["branch-list"]);
+        setShowDelete({ open: false, id: "", name: "" });
+        queryClient.invalidateQueries(["calculations"]);
+      },
+    },
+  });
+
+  const { mutate: createCalculation, isLoading: isLoadingCreateCalculation } = useCreateCalculation({
+    options: {
+      onSuccess: () => {
+        setShowCreate({open: false, title: ''})
+        queryClient.invalidateQueries(["calculations"]);
+      },
+    },
+  });
+
+  const { mutate: updateCalculation, isLoading: isLoadingUpdateCalculation } = useUpdateCalculation({
+    id: isShowEdit?.id,
+    options: {
+      onSuccess: () => {
+        setShowEdit({open: false, title: '', data: {}, id: 0})
+        queryClient.invalidateQueries(["calculations"]);
+      },
+    },
+  });
+
+  const { mutate: uploadFileCalculation, isLoading: isLoadingUploadFileCalculation } = useUploadFileCalculation({
+    options: {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["calculations"]);
         setShowUpload(false);
       },
     },
   });
-
-  const [listZone, setListZone] = useState([
-    { value: 1, label: 'Andir' },
-    { value: 2, label: 'Arcamanik' },
-    { value: 3, label: 'Baleendah' },
-  ])
 
   const columns = [
     {
@@ -181,50 +233,51 @@ const Calculation = () => {
     },
     {
       title: "Role Name",
-      dataIndex: "id",
+      dataIndex: "role_name",
     },
     {
       title: "Total User",
-      dataIndex: "branchName",
+      dataIndex: "total_user",
     },
     {
       title: "Menu Name",
-      dataIndex: "id",
+      dataIndex: "menu_name",
     },
     {
       title: "Company",
-      dataIndex: "branchName",
+      dataIndex: "company_name",
     },
     {
       title: "Branch",
-      dataIndex: "id",
+      dataIndex: "branch",
     },
     {
       title: "Fee",
-      dataIndex: "branchName",
+      dataIndex: "fee",
     },
     {
       title: "Total Fee",
-      dataIndex: "branchName",
+      dataIndex: "total_fee",
     },
     
   ];
-
-  const rowSelection = {
-    selectedRowKeys,
-    onChange: (selectedRowKeys: any) => {
-      setSelectedRowKeys(selectedRowKeys);
-    },
-  };
 
   const onSubmitFile = (file: any) => {
     const formData = new FormData();
     formData.append("company_id", "KSNI");
     formData.append("file", file);
 
-    uploadFileBranch(formData);
+    uploadFileCalculation(formData);
   };
-  console.log(isShowCreate, "<<<<<<payment")
+
+  const onCreate = (data: any) => {
+    createCalculation(data)
+    console.log(data, '<<<<create dari index')
+  }
+  const onEdit = (data: any) => {
+    console.log(data, '<<<<edit dari index')
+    updateCalculation(data)
+  }
 
   return (
     <>
@@ -235,29 +288,70 @@ const Calculation = () => {
       <Card>
         <Text variant={"headingLarge"} style={{color: 'rgb(33, 145, 155)'}}>Choose the plan that's right for you</Text>
         <Spacer size={20} />
-
         <Row>
             <Button size="big" variant="tertiary"
                 style={{ 
-                    color: paymentButton.monthly? '#BC006F': '#DDDDDD',
-                    border: paymentButton.monthly? '2px solid #EB008B': '2px solid #DDDDDD',
-                    width: '20%',
+                    color: paymentButton.oneMonth? '#BC006F': '#DDDDDD',
+                    border: paymentButton.oneMonth? '2px solid #EB008B': '2px solid #DDDDDD',
+                    width: '23.5%',
                     borderRadius: '5px',
                 }}
-                onClick={() => setPaymentButton({monthly: true, yearly: false})}>
-              Monthly
+                onClick={() => setPaymentButton({
+                  oneMonth: true, 
+                  threeMonths: false,
+                  sixMonths: false,
+                  twelveMonths: false,
+                  })}>
+              1 Month 
+            </Button>
+            <Spacer size={20} />
+            <Button size="big" variant="tertiary"
+                style={{ 
+                    color: paymentButton.threeMonths? '#BC006F': '#DDDDDD',
+                    border: paymentButton.threeMonths? '2px solid #EB008B': '2px solid #DDDDDD',
+                    width: '23.5%',
+                    borderRadius: '5px',
+                }}
+                onClick={() => setPaymentButton({
+                  oneMonth: false, 
+                  threeMonths: true,
+                  sixMonths: false,
+                  twelveMonths: false,
+                })}>
+              3 Months <PlanSaveText>Save 10%</PlanSaveText>
+            </Button>
+            <Spacer size={20} />
+            <Button size="big" variant="tertiary"
+                style={{ 
+                    color: paymentButton.sixMonths? '#BC006F': '#DDDDDD',
+                    border: paymentButton.sixMonths? '2px solid #EB008B': '2px solid #DDDDDD',
+                    width: '23.5%',
+                    borderRadius: '5px',
+                }}
+                onClick={() => setPaymentButton({
+                  oneMonth: false, 
+                  threeMonths: false,
+                  sixMonths: true,
+                  twelveMonths: false,
+                })}>
+              6 Months <PlanSaveText>Save 25%</PlanSaveText>
             </Button>
             <Spacer size={20} />
 
             <Button size="big" variant="tertiary" 
                 style={{ 
-                    color: paymentButton.yearly? '#BC006F': '#DDDDDD',
-                    border: paymentButton.yearly? '2px solid #EB008B': '2px solid #DDDDDD',
-                    width: '20%',
+                    color: paymentButton.twelveMonths? '#BC006F': '#DDDDDD',
+                    border: paymentButton.twelveMonths? '2px solid #EB008B': '2px solid #DDDDDD',
+                    width: '23.5%',
                     borderRadius: '5px',
                 }}
-                onClick={() => setPaymentButton({monthly: false, yearly: true})}>
-              Yearly
+                onClick={() => setPaymentButton({
+                  oneMonth: false, 
+                  threeMonths: false,
+                  sixMonths: false,
+                  twelveMonths: true,
+                })}>
+              12 Months <PlanSaveBestValueText>Best Value Save 50%</PlanSaveBestValueText>
             </Button>
           
         </Row>
@@ -290,9 +384,9 @@ const Calculation = () => {
 
         <Col gap={"60px"}>
           <Table
-            loading={isLoadingBranch || isFetchingBranch}
+            loading={isLoadingCalculation || isFetchingCalculation}
             columns={columns}
-            data={branchData?.data}
+            data={calculationData?.data}
             // rowSelection={rowSelection}
           />
           <Pagination pagination={pagination} />
@@ -308,22 +402,21 @@ const Calculation = () => {
         <Col width="100%" style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}>
             <Dropdown
                 label="Assign Payment"
-                items={listZone}
-                width={"50%"}
+                items={companyList}
+                width={"70%"}
                 // value={employeeLanguages && employeeLanguages}
                 placeholder={"Select"}
-                handleChange={(value) => setValue("language", value)}
-                onSearch={(value) => console.log(value)}
+                handleChange={(value) => setValue("company", value)}
+                onSearch={(value) => setSearchCompany(value)}
                 // noSearch
             />
-
             <div style={{
                 paddingRight: '1rem',
                 textAlign: 'right'
             }}>
                 <Text variant={"subHeading"}>Total Payment</Text>
                 <Spacer size={10} />
-                <Text variant={"headingLarge"}>IDR 550.000</Text>
+                <Text variant={"headingLarge"}>IDR {IDR_formatter.format(calculationData?.payment)?.split('Rp')[1]}/mo</Text>
             </div>
         </Col>
         <Spacer size={20} />
@@ -343,14 +436,26 @@ const Calculation = () => {
             visible={isShowCreate.open}
             title={isShowCreate.title}
             onCancel={() => setShowCreate({open: false, title: ''})}
+            onOk={onCreate}
         />
       )}
+
+      {isShowEdit.open && (
+        <ModalCalculation
+            visible={isShowEdit.open}
+            title={isShowEdit.title}
+            defaultValue={isShowEdit.data}
+            onOk={onEdit}
+            onCancel={() => setShowEdit({open: false, title: '', data: {}, id: 0})}
+        />
+      )}
+
       {isShowDelete.open && (
         <Modal
           closable={false}
           centered
           visible={isShowDelete.open}
-          onCancel={() => setShowDelete({ open: false, type: "", data: {} })}
+          onCancel={() => setShowDelete({ open: false, id: "", name: "" })}
           title={"Confirm Delete"}
           footer={null}
           content={
@@ -362,7 +467,7 @@ const Calculation = () => {
               }}
             >
               <Spacer size={4} />
-              {renderConfirmationText(isShowDelete.type, isShowDelete.data)}
+              <Text>Are you sure you want to delete Role Name - {isShowDelete.name}</Text>
               <Spacer size={20} />
               <div
                 style={{
@@ -377,7 +482,7 @@ const Calculation = () => {
                   variant="tertiary"
                   key="submit"
                   type="primary"
-                  onClick={() => setShowDelete({ open: false, type: "", data: {} })}
+                  onClick={() => setShowDelete({ open: false, id: "", name: "" })}
                 >
                   Cancel
                 </Button>
@@ -385,14 +490,10 @@ const Calculation = () => {
                   variant="primary"
                   size="big"
                   onClick={() => {
-                    if (isShowDelete.type === "selection") {
-                      deleteBranch({ ids: selectedRowKeys, company_id: "KSNI" });
-                    } else {
-                      deleteBranch({ ids: [modalForm.data.id], company_id: "KSNI" });
-                    }
+                    deleteCalculation({ ids: [isShowDelete.id] });
                   }}
                 >
-                  {isLoadingDeleteBranch ? "loading..." : "Yes"}
+                  {isLoadingDeleteCalculation ? "loading..." : "Yes"}
                 </Button>
               </div>
             </div>
@@ -423,4 +524,25 @@ const Separator = styled.div`
   border-bottom: 1px dashed #aaaaaa;
 `;
 
+const PlanSaveText = styled.p`
+  background: #ebebeb;
+  padding: .1rem .2rem;
+  border-radius: 10px;
+  /* line-height: .85rem; */
+  color: #232323;
+  font-size: 12px;
+  margin-left: .3rem;
+  /* margin-bottom: .2rem; */
+`
+
+const PlanSaveBestValueText = styled.p`
+  background: #ffd8d8;
+  padding: .01rem .2rem;
+  /* line-height: .85rem; */
+  border-radius: 20px;
+  color: #ff4646;
+  font-size: 12px;
+  margin-left: .3rem;
+  /* margin-bottom: .2rem; */
+`
 export default Calculation;

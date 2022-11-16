@@ -2,9 +2,11 @@ import React from 'react'
 import { Table, Pagination, Col, Spacer, Text } from 'pink-lava-ui'
 import usePagination from '@lucasmogari/react-pagination';
 import { useWatch } from 'react-hook-form';
+import { lang } from 'lang';
 
 export default function ProductOptions({control} : any) {
-
+  const t = localStorage.getItem("lan") || "en-US";
+  // lang[t].companyList.companyName
   const columsProductOptions = [
     {
       title: "Option Name",
@@ -39,7 +41,7 @@ export default function ProductOptions({control} : any) {
   
   return (
     <Col>
-        <Text variant="headingMedium" color="blue.darker">Options</Text>
+        <Text variant="headingMedium" color="blue.darker">{lang[t].productList.create.field.detail.options}</Text>
         <Spacer size={12} />
         <Col gap="20px">
           <Table

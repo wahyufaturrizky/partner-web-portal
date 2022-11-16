@@ -1,29 +1,32 @@
-import React, { useState } from "react";
 import { useRouter } from "next/router";
 import {
   Accordion,
-  Dropdown,
-  Spacer,
-  Modal,
-  Text,
-  Row,
-  Table,
   Button,
+  Dropdown,
+  Modal,
+  Row,
+  Spacer,
+  Table,
+  Text,
   TextArea,
 } from "pink-lava-ui";
+import { useState } from "react";
 import styled from "styled-components";
-import usePagination from "@lucasmogari/react-pagination";
 
 import ArrowLeft from "assets/icons/arrow-left.svg";
 import { ModalConfirmation } from "components/elements/Modal/ModalConfirmation";
 import { useFetchDetailSalesman, useUpdateSalesman } from "hooks/mdm/salesman/useSalesman";
 import { useFetchSalesmanDivision } from "hooks/mdm/salesman/useSalesmanDivision";
 import { dropdownStatus } from "./constants";
-import ContentDetailCustomer from "./fragments/ContentDetailCustomers";
 import ActionButton from "./fragments/ActionButton";
+import ContentDetailCustomer from "./fragments/ContentDetailCustomers";
 import Forms from "./fragments/Forms";
+import { lang } from "lang";
 
 export default function ComponentDetailSalesman({ listCustomers, isLoading }: any) {
+  const t = localStorage.getItem("lan") || "en-US";
+  const companyId = localStorage.getItem("companyId")
+  const companyCode = localStorage.getItem("companyCode")
   const router = useRouter();
   const { status, salesman_id, name, idCard, division: queryDivision }: any = router.query || {};
   const [search, setSearch] = useState<string>("");
@@ -74,19 +77,19 @@ export default function ComponentDetailSalesman({ listCustomers, isLoading }: an
 
   const columns = [
     {
-      title: "Customer",
+      title: lang[t].salesmanGroup.customer,
       dataIndex: "name",
       width: "80%",
     },
     {
-      title: "Action",
+      title: lang[t].salesmanGroup.action,
       render: (items: any) => (
         <Button
           size="small"
           variant="tertiary"
           onClick={() => setModalCustomer({ ...modalCustomer, visible: true, data: items })}
         >
-          View Detail
+          {lang[t].salesmanGroup.tertier.viewDetail}
         </Button>
       ),
     },
@@ -245,7 +248,7 @@ export default function ComponentDetailSalesman({ listCustomers, isLoading }: an
       <Card>
         <Accordion>
           <Accordion.Item key={1}>
-            <Accordion.Header variant="blue">General</Accordion.Header>
+            <Accordion.Header variant="blue">{lang[t].salesmanGroup.general}</Accordion.Header>
             <Accordion.Body>
               <Forms
                 queryDivision={queryDivision}
@@ -254,6 +257,13 @@ export default function ComponentDetailSalesman({ listCustomers, isLoading }: an
                 status={status}
                 setDivision={setDivision}
                 setSearch={setSearch}
+                salesmanName={lang[t].salesmanGroup.salesmanName}
+                branch={lang[t].salesmanGroup.branch}
+                idCard={lang[t].salesmanGroup.idCard}
+                externalCode={lang[t].salesmanGroup.externalCode}
+                divisionName={lang[t].salesmanGroup.divisionName}
+                mobileNumber={lang[t].salesmanGroup.mobileNumber}
+                email={lang[t].salesmanGroup.email}
               />
             </Accordion.Body>
           </Accordion.Item>
@@ -263,10 +273,10 @@ export default function ComponentDetailSalesman({ listCustomers, isLoading }: an
       <Card>
         <Accordion>
           <Accordion.Item key={1}>
-            <Accordion.Header variant="blue">Customer</Accordion.Header>
+            <Accordion.Header variant="blue">{lang[t].salesmanGroup.customer}</Accordion.Header>
             <Accordion.Body>
               <Spacer size={20} />
-              <TextWarning> *Auto added from Customer</TextWarning>
+              <TextWarning> {lang[t].salesmanGroup.autoAddedFromCustomer}</TextWarning>
               <Spacer size={20} />
               <Table loading={isLoading} columns={columns} data={listCustomers} />
             </Accordion.Body>
@@ -282,7 +292,8 @@ export default function ComponentDetailSalesman({ listCustomers, isLoading }: an
             modal.confirmation === true && modal.reason === false ? (
               <>
                 <TextConfirmation>
-                  Are you sure to {modalActive} this salesman?
+                  {lang[t].salesmanGroup.areYouSureTo} {modalActive}{" "}
+                  {lang[t].salesmanGroup.thisSalesman}
                   <Spacer size={30} />
                 </TextConfirmation>
               </>
@@ -324,7 +335,7 @@ export default function ComponentDetailSalesman({ listCustomers, isLoading }: an
       {/* modal confirmation rejected */}
       {modalConfirmation.Rejected && (
         <ModalConfirmation
-          title="Are you sure to reject?"
+          title={lang[t].salesmanGroup.areYouSureToReject}
           visible={modalConfirmation.Rejected}
           content={[
             <>
@@ -332,7 +343,7 @@ export default function ComponentDetailSalesman({ listCustomers, isLoading }: an
               <TextArea
                 rows={5}
                 label={false}
-                placeholder="Write your remarks here..."
+                placeholder={lang[t].salesmanGroup.placeholderRemark}
                 onChange={({ target }: any) => setRemarks(target.value)}
               />
               <Spacer size={20} />
@@ -354,7 +365,7 @@ export default function ComponentDetailSalesman({ listCustomers, isLoading }: an
           footer={
             <Row justifyContent="end">
               <Button onClick={() => window.open(`/customers/${modalCustomer?.data?.id}`)}>
-                Open Customer Page
+                {lang[t].salesmanGroup.openCustomerPage}
               </Button>
             </Row>
           }

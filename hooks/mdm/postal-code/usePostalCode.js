@@ -135,6 +135,21 @@ const useUploadFilePostalCodesMDM = ({ options }) => {
   );
 };
 
+const fetchCountryFilter = async ({ query = {} }) => {
+  return mdmService(`/postal-code/country/filter/`, {
+    params: {
+      ...query,
+    },
+  }).then((data) => data);
+};
+
+const usePostalCodesFilter = ({ query = {}, options } = {}) => {
+  return useQuery(["postal-code-filter", query], () => fetchCountryFilter({ query }), {
+    keepPreviousData: true,
+    ...options,
+  });
+};
+
 export {
   usePostalCodes,
   usePostalCode,
@@ -145,4 +160,5 @@ export {
   useCountryStructures,
   usePostalCodeInfiniteLists,
   useUploadFilePostalCodesMDM,
+  usePostalCodesFilter,
 };
