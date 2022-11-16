@@ -182,7 +182,7 @@ const ProductVariant = () => {
 
   const onSubmitFile = (file: any) => {
     const formData = new FormData();
-    formData.append("company_id", companyId);
+    formData.append("company_id", companyCode);
     formData.append("company_code", companyCode);
     formData.append("file", file);
 

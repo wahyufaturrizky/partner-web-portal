@@ -112,7 +112,7 @@ export default function CreateProduct({ isCreateProductVariant = true }) {
     shouldUseNativeValidation: true,
     defaultValues: {
       image: "",
-      company_id: companyId,
+      company_id: companyCode,
       company_code: companyCode,
       product_type: "",
       name: "",
