@@ -123,6 +123,7 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
       status: "active",
       can_be_sold: false,
       can_be_purchased: false,
+      can_be_shareable: false,
       expired_date: "",
       external_code: "",
       use_unit_leveling: false,

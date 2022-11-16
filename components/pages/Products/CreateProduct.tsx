@@ -121,6 +121,7 @@ export default function CreateProduct({ isCreateProductVariant = true }) {
       can_be_sold: false,
       can_be_purchased: false,
       can_be_expensed: false,
+      can_be_shareable: false,
       expired_date: moment().utc().toString(),
       external_code: "",
       use_unit_leveling: false,
