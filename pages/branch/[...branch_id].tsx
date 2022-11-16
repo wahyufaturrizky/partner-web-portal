@@ -110,6 +110,7 @@ const BranchDetail = () => {
     },
   });
 
+  console.log(branchDetailData, '<<<detail')
   const {
     data: branchParentData,
     isLoading: isLoadingBranchParentData,
@@ -895,9 +896,9 @@ const BranchDetail = () => {
                     width="100%"
                     label="Longitude"
                     height="40px"
-                    defaultValue={branchDetailData?.longtitude}
+                    defaultValue={branchDetailData?.longtitude ?? branchDetailData?.longitude}
                     placeholder={"e.g 110.41677"}
-                    {...register("longtitude", { required: "Please enter longitude." })}
+                    {...register("longitude", { required: "Please enter longitude." })}
                 />
               </Col>
             </Row>
