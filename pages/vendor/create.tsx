@@ -1,4 +1,4 @@
-import React, { useState, createContext, useContext } from "react";
+import React, { useState } from "react";
 import { Text, Col, Row, Spacer, Dropdown, Button, Accordion, Radio, Tabs } from "pink-lava-ui";
 import styled from "styled-components";
 import { useRouter } from "next/router";
@@ -77,7 +77,7 @@ export default function VendorCreate() {
     const contactsPayload =
       data?.contacts?.map((contact: any) => {
         delete contact?.filtered;
-        delete contact?.id;
+        delete contact?.key;
         return contact;
       }) ?? [];
 

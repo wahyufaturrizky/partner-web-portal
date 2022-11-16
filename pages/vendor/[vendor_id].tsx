@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useState } from "react";
 import {
   Text,
   Col,
@@ -248,6 +248,7 @@ export default function VendorDetail() {
     const contactsPayload =
       data?.contacts?.map((contact: any) => {
         delete contact?.filtered;
+        delete contact?.key;
         return contact;
       }) ?? [];
 
