@@ -610,7 +610,7 @@ const AdminLayout = (props: any) => {
   
     return [
       { 
-        type: "dropdown", 
+        type: "dropdown",
         items: companies,
         onChange: (value) => handleChangeCompany(value),
         default: companies[0]
@@ -619,12 +619,31 @@ const AdminLayout = (props: any) => {
     ]
   }
 
+  const menuMdmFunc = (companies) => {
+
+    const handleChangeCompany = (value) => {
+      const selectedCompany = companies.filter((comp) => comp.name == value)
+      localStorage.setItem('companyId', selectedCompany[0].id)
+      localStorage.setItem('companyCode', selectedCompany[0].code)
+    }
+  
+    return [
+      { 
+        type: "dropdown",
+        items: companies,
+        onChange: (value) => handleChangeCompany(value),
+        default: companies[0]
+      },
+      ...menuMdm
+    ]
+  }
+
   return (
     <Layout style={{ height: "100vh" }}>
       <Sidebar
         logo="/icons/logo-nabati.svg"
         // menu={current === "0" ? menuConfig : menuMdm}
-        menu={current === "0" ? menuConfigFunc(companies) : menuMdm}
+        menu={current === "0" ? menuConfigFunc(companies) : menuMdmFunc(companies)}
         defaultMenu={"dashboard"}
       />
       <Layout
