@@ -79,6 +79,17 @@ const EmployeeList = () => {
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const debounceSearch = useDebounce(search, 1000);
 
+  const { data: jobPositionsData, isLoading: isLoadingJobPositions } = useJobPositions({
+    query: {
+      limit: pagination.totalItems,
+      company_id: "KSNI",
+    },
+    options: {
+      onSuccess: () => {},
+      enabled: !!pagination.totalItems,
+    },
+  });
+
   const {
     data: employeeListData,
     isLoading: isLoadingEmployeeList,
@@ -102,7 +113,9 @@ const EmployeeList = () => {
             key: element.code,
             id: element.code,
             name: element.name,
-            jobPosition: element.jobPosition,
+            jobPosition: jobPositionsData.rows.find((findingJobPosition: any) =>
+              findingJobPosition.jobPositionId.includes(element.jobPosition)
+            ).name,
             employeeType: element.type,
             action: (
               <div style={{ display: "flex", justifyContent: "left" }}>
@@ -183,16 +196,6 @@ const EmployeeList = () => {
 
     uploadFileEmployee(formData);
   };
-
-  const { data: jobPositionsData, isLoading: isLoadingJobPositions } = useJobPositions({
-    query: {
-      limit: 10000,
-      company_id: "KSNI",
-    },
-    options: {
-      onSuccess: () => {},
-    },
-  });
 
   const listFilterEmployeeList = [
     {
@@ -346,7 +349,7 @@ const EmployeeList = () => {
       <Card style={{ padding: "16px 20px" }}>
         <Col gap={"60px"}>
           <Table
-            loading={isLoadingEmployeeList || isFetchinggEmployeeList}
+            loading={isLoadingEmployeeList || isFetchinggEmployeeList || isLoadingJobPositions}
             columns={columns}
             data={employeeListData?.data}
             rowSelection={rowSelection}

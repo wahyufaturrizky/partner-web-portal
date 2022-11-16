@@ -214,7 +214,7 @@ const JobPosition = () => {
   return (
     <>
       <Col>
-        <Text variant={"h4"}>{lang[t].department.action}</Text>
+        <Text variant={"h4"}>{lang[t].department.title}</Text>
         <Spacer size={20} />
       </Col>
       <Card>

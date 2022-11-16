@@ -246,7 +246,7 @@ const TrainingType = () => {
               {lang[t].trainingType.palceholderSearch}
             </Button>
             <DropdownMenu
-              title={"More"}
+              title={lang[t].trainingType.tertier.more}
               buttonVariant={"secondary"}
               buttonSize={"big"}
               textVariant={"button"}

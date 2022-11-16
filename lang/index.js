@@ -97,7 +97,8 @@ export const lang = {
       newUser: "New user?",
       createAnAccount: "Create an account",
     },
-    currency: {
+    currencyFormat: {
+      currencyFormatCode: "Currency Code",
       currencyFormat: "Currency Format",
       currency: "Currency",
       currencyName: "Currency Name",
@@ -1289,6 +1290,7 @@ export const lang = {
       tertier: {
         delete: "Delete",
         cancel: "Cancel",
+        viewDetail: "View Detail",
       },
       ghost: {
         downloadTemplate: "Download Template",
@@ -1305,12 +1307,19 @@ export const lang = {
     trainingType: {
       tertier: {
         viewDetail: "View Detail",
+        more: "More",
       },
       trainingTypeId: "Training Type ID",
       trainingTypeName: "Training Type Name",
       action: "Action",
       title: "Training Type",
       palceholderSearch: "Search Training Type ID,  Training Type Name",
+      ghost: {
+        downloadTemplate: "Download Template",
+        uploadTemplate: "Upload Template",
+        downloadData: "Download Data",
+      },
+      primary: { create: "Membuat", save: "Menyimpan", yes: "Iya" },
     },
     customer: {
       customerId: "Customer Id",
@@ -1601,7 +1610,8 @@ export const lang = {
       newUser: "Pengguna baru?",
       createAnAccount: "Buat pengguna baru",
     },
-    currency: {
+    currencyFormat: {
+      currencyFormatCode: "Kode mata uang",
       currencyFormat: "Format Mata Uang",
       currency: "Mata Uang",
       currencyName: "Nama Mata Uang",
@@ -2796,6 +2806,7 @@ export const lang = {
       tertier: {
         delete: "Menghapus",
         cancel: "Membatalkan",
+        viewDetail: "Lihat Detail",
       },
       ghost: {
         downloadTemplate: "Unduh Template",
@@ -2813,7 +2824,7 @@ export const lang = {
       tertier: {
         viewDetail: "Lihat Detail",
         cancel: "Membatalkan",
-        cancel: "Membatalkan",
+        more: "Lebih",
       },
       trainingTypeId: "ID Jenis Pelatihan",
       trainingTypeName: "Nama Jenis Pelatihan",

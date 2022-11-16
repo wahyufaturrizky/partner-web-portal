@@ -38,17 +38,17 @@ export default function FormatingCurrency() {
 
   const columns = [
     {
-      title: lang[t].currency.currencyFormat,
+      title: lang[t].currencyFormat.currencyFormatCode,
       dataIndex: "currencyCode",
       width: "35%",
     },
     {
-      title: lang[t].currency.currencyName,
+      title: lang[t].currencyFormat.currencyName,
       dataIndex: "currency",
       width: "35%",
     },
     {
-      title: lang[t].currency.currencyFormat,
+      title: lang[t].currencyFormat.currencyFormat,
       dataIndex: "currencyFormat",
     },
   ];
@@ -65,13 +65,13 @@ export default function FormatingCurrency() {
 
   return (
     <Col>
-      <Text variant={"h4"}>{lang[t].currency.currencyFormat}</Text>
+      <Text variant={"h4"}>{lang[t].currencyFormat.currencyFormat}</Text>
       <Spacer size={20} />
       <Card>
         <Row justifyContent="flex-start">
           <Search
             width="380px"
-            placeholder={lang[t].currency.searchCurrencyPlaceholder}
+            placeholder={lang[t].currencyFormat.searchCurrencyPlaceholder}
             onChange={({ target }: any) => setSearch(target.value)}
           />
         </Row>
