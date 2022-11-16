@@ -1616,7 +1616,7 @@ const EmployeeDetail = () => {
                       <Label>Job Position</Label>
                       <Spacer size={3} />
                       <FormSelect
-                        defaultValue={dataEmployee?.job_position}
+                        defaultValue={dataEmployee?.jobPosition}
                         height="48px"
                         style={{ width: "100%" }}
                         size={"large"}
@@ -1674,7 +1674,7 @@ const EmployeeDetail = () => {
                       <Label>Job Level</Label>
                       <Spacer size={3} />
                       <FormSelect
-                        defaultValue={dataEmployee?.job_level}
+                        defaultValue={dataEmployee?.jobLevel}
                         height="48px"
                         style={{ width: "100%" }}
                         size={"large"}
