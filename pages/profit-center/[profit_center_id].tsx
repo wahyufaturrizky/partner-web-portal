@@ -5,6 +5,8 @@ import ProfitCenterCreate from './create';
 
 export default function ProfitCenterDetail() {
   const router = useRouter()
+  const companyId = localStorage.getItem("companyId")
+  const companyCode = localStorage.getItem("companyCode")
   const { profit_center_id } = router.query;
 
   const { 
@@ -14,7 +16,7 @@ export default function ProfitCenterDetail() {
     options: {
       onSuccess: () => {}
     },
-    companyId: "KSNI",
+    companyId: companyCode,
     id: profit_center_id
   }) 
    

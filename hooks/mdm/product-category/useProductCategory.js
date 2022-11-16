@@ -67,12 +67,12 @@ const useCreateProductCategory = ({ options }) => {
   );
 };
 
-const fetchOneProductCategory = async ({ id }) => {
-  return mdmService(`/product-category/KSNI/${id}`).then((data) => data);
+const fetchOneProductCategory = async ({ id, company_id }) => {
+  return mdmService(`/product-category/${company_id}/${id}`).then((data) => data);
 };
 
 const useProductCategory = ({ id, options }) => {
-  return useQuery(["product-category", id], () => fetchOneProductCategory({ id }), {
+  return useQuery(["product-category", id], () => fetchOneProductCategory({ id, company_id }), {
     ...options,
   });
 };
@@ -90,8 +90,8 @@ const useUpdateProductCategory = ({ id, options }) => {
   );
 };
 
-const fetchCoaList = async ({ query = {}, status }) => {
-  return client(`/coa-list?company_code=KSNI&account_type=${status}`, {
+const fetchCoaList = async ({ query = {}, status, company_id }) => {
+  return client(`/coa-list?company_code=${company_id}&account_type=${status}`, {
     params: {
       // search: "",
       // page: 1,
@@ -103,13 +103,14 @@ const fetchCoaList = async ({ query = {}, status }) => {
   }).then((data) => data);
 };
 
-const useCoaList = ({ query = {}, options, status }) => {
-  return useQuery(["coa-list", query], () => fetchCoaList({ query, status }), {
+const useCoaList = ({ query = {}, options, status, company_id }) => {
+  return useQuery(["coa-list", query], () => fetchCoaList({ query, status, company_id }), {
     ...options,
   });
 };
-const useCoaListReceive = ({ query = {}, options, status }) => {
-  return useQuery(["coa-list-receive", query], () => fetchCoaList({ query, status }), {
+
+const useCoaListReceive = ({ query = {}, options, status, company_id }) => {
+  return useQuery(["coa-list-receive", query], () => fetchCoaList({ query, status, company_id }), {
     ...options,
   });
 };
@@ -122,16 +123,16 @@ const fetchAllCoaList = async ({ query = {} }) => {
   }).then((data) => data);
 };
 
-const useCoaListAll = ({ query = {}, options }) => {
-  return useQuery(["coa-list-all", query], () => fetchAllCoaList({ query }), {
+const useCoaListAll = ({ query = {}, options, company_id }) => {
+  return useQuery(["coa-list-all", query], () => fetchAllCoaList({ query, company_id }), {
     ...options,
   });
 };
 
-const useUploadFileProductCategory = ({ options }) => {
+const useUploadFileProductCategory = ({ options, company_id }) => {
   return useMutation(
     (data) =>
-      mdmService("/product-category/upload?company_id=KSNI", {
+      mdmService(`/product-category/upload?company_id=${company_id}`, {
         method: "POST",
         data,
       }),

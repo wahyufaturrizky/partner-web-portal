@@ -53,6 +53,8 @@ const renderConfirmationText = (type: any, data: any) => {
 
 const ProductOption = () => {
   const router = useRouter();
+  const companyId = localStorage.getItem("companyId")
+  const companyCode = localStorage.getItem("companyCode")
   const pagination = usePagination({
     page: 1,
     itemsPerPage: 20,
@@ -82,7 +84,7 @@ const ProductOption = () => {
       search: debounceSearch,
       page: pagination.page,
       limit: pagination.itemsPerPage,
-      company_id: "KSNI",
+      company_id: companyCode,
     },
     options: {
       onSuccess: (data: any) => {
@@ -166,7 +168,7 @@ const ProductOption = () => {
 
   const onSubmitFile = (file: any) => {
     const formData: any = new FormData();
-    formData.append("company_id", "KSNI");
+    formData.append("company_id", companyCode);
     formData.append("file", file);
 
     uploadFileProductOption(formData);
@@ -212,13 +214,13 @@ const ProductOption = () => {
               onClick={(e: any) => {
                 switch (parseInt(e.key)) {
                   case 1:
-                    downloadFile({ with_data: "N", company_id: "KSNI" });
+                    downloadFile({ with_data: "N", company_id: companyCode });
                     break;
                   case 2:
                     setShowUpload(true);
                     break;
                   case 3:
-                    downloadFile({ with_data: "Y", company_id: "KSNI" });
+                    downloadFile({ with_data: "Y", company_id: companyCode });
                     break;
                   case 4:
                     break;
@@ -320,9 +322,9 @@ const ProductOption = () => {
                   size="big"
                   onClick={() => {
                     if (isShowDelete.type === "selection") {
-                      deleteProductOption({ ids: selectedRowKeys, company_id: "KSNI" });
+                      deleteProductOption({ ids: selectedRowKeys, company_id: companyCode });
                     } else {
-                      deleteProductOption({ ids: [modalForm.data.id], company_id: "KSNI" });
+                      deleteProductOption({ ids: [modalForm.data.id], company_id: companyCode });
                     }
                   }}
                 >

@@ -25,6 +25,8 @@ import { lang } from "lang";
 
 export default function ComponentDetailSalesman({ listCustomers, isLoading }: any) {
   const t = localStorage.getItem("lan") || "en-US";
+  const companyId = localStorage.getItem("companyId")
+  const companyCode = localStorage.getItem("companyCode")
   const router = useRouter();
   const { status, salesman_id, name, idCard, division: queryDivision }: any = router.query || {};
   const [search, setSearch] = useState<string>("");

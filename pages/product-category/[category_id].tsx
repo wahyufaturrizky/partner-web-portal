@@ -48,6 +48,8 @@ const costingMethodData = [
 
 const UpdateProductCategory: any = () => {
   const router = useRouter();
+  const companyId = localStorage.getItem("companyId")
+  const companyCode = localStorage.getItem("companyCode")
   const { category_id } = router.query;
 
   const [automate, setAutomate] = useState("");
@@ -145,6 +147,7 @@ const UpdateProductCategory: any = () => {
   const { mutate: updateProductCategory, isLoading: isLoadingUpdateProductCategory } =
     useUpdateProductCategory({
       id: category_id,
+      company_id: companyCode,
       options: {
         onSuccess: () => {
           alert("Update Success!");
@@ -155,7 +158,7 @@ const UpdateProductCategory: any = () => {
 
   const onSubmit = (data) => {
     const payload = {
-      company_id: "KSNI",
+      company_id: companyCode,
       name: data.name,
       parent: data.parent || "",
       costing_method: data.costing_method || "",

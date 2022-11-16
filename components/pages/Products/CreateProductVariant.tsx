@@ -42,6 +42,8 @@ import { useProductCategoryInfiniteLists } from 'hooks/mdm/product-category/useP
 
 export default function CreateProductVariant({ isCreateProductVariant = true}) {
   const router = useRouter();
+  const companyId = localStorage.getItem("companyId")
+  const companyCode = localStorage.getItem("companyCode")
   const { id } = router.query;
   const isUpdate = !!id;
 
@@ -113,8 +115,8 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
       sku: "",
       barcode: "",
       image: "",
-      company_id: "KSNI",
-      company_code: "KSNI",
+      company_id: companyCode,
+      company_code: companyCode,
       product_type: "",
       name: "",
       status: "active",
@@ -220,7 +222,7 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
   } = useProductBrandInfiniteLists({
     query: {
       search: debounceFetchProductBrand,
-      company: "KSNI",
+      company: companyCode,
       limit: 10,
     },
     options: {
@@ -255,7 +257,7 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
   } = useProductCategoryInfiniteLists({
     query: {
       search: debounceFetchProductCategory,
-      company_id: "KSNI",
+      company_id: companyCode,
       limit: 10,
     },
     options: {
@@ -296,7 +298,7 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
         if( getValues('image')){
           const formData:any = new FormData();
           formData.append("image", getValues('image'));
-          formData.append("company_id", "KSNI");
+          formData.append("company_id", companyCode);
           formData.append("product_variant_id", data.productId);
   
           uploadImage(formData);
@@ -315,7 +317,7 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
         if( getValues('image') && isImageChange){
           const formData:any = new FormData();
           formData.append("image", getValues('image'));
-          formData.append("company_id", "KSNI");
+          formData.append("company_id", companyCode);
           formData.append("product_variant_id", id);
   
           uploadImage(formData);
@@ -383,7 +385,7 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
     payload.product_brand_id = data.brand.id;
     payload.base_uom_id = data.base_uom.uom_id;
     payload.purchase_uom_id = data.purchase_uom.uom_id;
-    payload.company_code = 'KSNI'
+    payload.company_code = companyCode
     payload.inventory = {
       weight: {
           net: data?.inventory?.weight?.net,

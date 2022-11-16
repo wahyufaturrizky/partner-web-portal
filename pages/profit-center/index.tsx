@@ -52,6 +52,8 @@ const renderConfirmationText = (type: any, data: any) => {
 
 const ProfitCenter = () => {
   const router = useRouter();
+  const companyId = localStorage.getItem("companyId")
+  const companyCode = localStorage.getItem("companyCode")
   const pagination = usePagination({
     page: 1,
     itemsPerPage: 20,
@@ -76,7 +78,7 @@ const ProfitCenter = () => {
       search: debounceSearch,
       page: pagination.page,
       limit: pagination.itemsPerPage,
-      company_id: "KSNI",
+      company_id: companyCode,
     },
     options: {
       onSuccess: (data: any) => {        
@@ -159,7 +161,7 @@ const ProfitCenter = () => {
 
   const onSubmitFile = (file: any) => {
     const formData = new FormData();
-    formData.append("company_id", "KSNI");
+    formData.append("company_id", companyCode);
     formData.append("file", file);
 
     uploadFileProfit(formData);
@@ -205,13 +207,13 @@ const ProfitCenter = () => {
               onClick={(e: any) => {
                 switch (parseInt(e.key)) {
                   case 1:
-                    downloadFile({ with_data: "N", company_id: "KSNI" });
+                    downloadFile({ with_data: "N", company_id: companyCode });
                     break;
                   case 2:
                     setShowUpload(true);
                     break;
                   case 3:
-                    downloadFile({ with_data: "Y", company_id: "KSNI" });
+                    downloadFile({ with_data: "Y", company_id: companyCode });
                     break;
                   case 4:
                     break;
@@ -312,7 +314,7 @@ const ProfitCenter = () => {
                   variant="primary"
                   size="big"
                   onClick={() => {
-                    deleteProfit({ profit_center_ids: selectedRowKeys, company_ids: ["KSNI"] });
+                    deleteProfit({ profit_center_ids: selectedRowKeys, company_ids: [companyCode] });
                   }}
                 >
                   {isLoadingDeleteProfit ? "loading..." : "Yes"}

@@ -35,6 +35,8 @@ const downloadFile = (params: any) =>
 
 const DetailRetailPricing: any = () => {
   const router = useRouter();
+  const companyId = localStorage.getItem("companyId")
+  const companyCode = localStorage.getItem("companyCode")
   const { id } = router.query;
 
   const {
@@ -432,7 +434,7 @@ const DetailRetailPricing: any = () => {
                     Use this template to add rules structure
                   </Text>
                   <Spacer size={10} />
-                  <Button variant="tertiary" size="big" onClick={() => downloadFile({ with_data: "N", type: 'rule', company_id: "KSNI" })}>
+                  <Button variant="tertiary" size="big" onClick={() => downloadFile({ with_data: "N", type: 'rule', company_id: companyCode })}>
                     Download Template
                   </Button>
                 </DownloadUploadContainer>
