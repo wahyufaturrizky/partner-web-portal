@@ -11,6 +11,7 @@ import {
 } from "pink-lava-ui";
 import { useForm, useWatch, Controller } from "react-hook-form";
 import moment from "moment";
+import { lang } from "lang";
 
 const ModalAddTerm = ({
   formType,
@@ -23,7 +24,7 @@ const ModalAddTerm = ({
   isLoading,
 }: any) => {
   const { handleSubmit, control } = useForm();
-
+  const t = localStorage.getItem("lan") || "en-US";
   const [daysList, setDaysList] = useState(
     formType === "add" ? [] : formData.option === 3 ? formData.optionValue : []
   );
@@ -50,7 +51,7 @@ const ModalAddTerm = ({
     <Modal
       visible={visible}
       onCancel={onCancel}
-      title={"Add New Term"}
+      title={lang[t].termOfPayment.modalTitleCreate.addNewTerm}
       footer={
         <div
           style={{
@@ -61,10 +62,10 @@ const ModalAddTerm = ({
           }}
         >
           <Button onClick={onCancel} variant="tertiary" size="big">
-            Cancel
+            {lang[t].termOfPayment.tertier.cancel}
           </Button>
           <Button onClick={handleSubmit(onSubmit)} variant="primary" size="big">
-            Save
+            {lang[t].termOfPayment.primary.save}
           </Button>
         </div>
       }
