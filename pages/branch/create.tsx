@@ -248,20 +248,23 @@ const BranchCreate = () => {
     )
   }
   const onSubmit = (data: any) => {
+    console.log(data, '<<<<data submit')
     const formData = {
       company_id: "KSNI",
       ...data,
+      timezone: data?.timezone?.toString(),
+      calendar_id: data?.calendar_id?.toString(),
       // external_code: +data?.external_code,
       // parent_id: '1',
       start_working_day: data?.start_working_day? data?.start_working_day : calendarDetailData?.start,
       end_working_day: data?.end_working_day? data?.end_working_day : calendarDetailData?.end,
-      province_id: 1,
-      city_id: 1,
-      district_id: 1,
-      zone_id: 1,
-      postal_code_id: 1,
-      longtitude: 123.123,
-      latitude: -67.2123
+      province_id: "1",
+      city_id: "1",
+      district_id: "1",
+      zone_id: "1",
+      postal_code_id: "1",
+      longitude: "123.123",
+      latitude: "-67.2123"
     };
     createBranch(formData);
   };

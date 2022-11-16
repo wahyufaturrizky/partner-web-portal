@@ -38,16 +38,17 @@ const downloadFile = (params: any) =>
   });
 
 const renderConfirmationText = (type: any, data: any) => {
+  console.log("@data", data);
+
   switch (type) {
     case "selection":
       return data.selectedRowKeys.length > 1
-        ? `Are you sure to delete ${data.selectedRowKeys.length} items ?`
-        : `Are you sure to delete Uom Name ${
-            data?.employeeListData?.data.find((el: any) => el.key === data.selectedRowKeys[0])
-              ?.uomName
+        ? `Are you sure to delete ${data.selectedRowKeys.length} employee ID ?`
+        : `Are you sure to delete employee name ${
+            data?.employeeListData?.data.find((el: any) => el.key === data.selectedRowKeys[0])?.name
           } ?`;
     case "detail":
-      return `Are you sure to delete Uom Name ${data.uomName} ?`;
+      return `Are you sure to delete employee name ${data.name} ?`;
 
     default:
       break;
