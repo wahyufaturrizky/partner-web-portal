@@ -374,6 +374,7 @@ export const lang = {
       tertier: {
         delete: "Delete",
         cancel: "Cancel",
+        viewDetail: "View Detail",
       },
       ghost: {
         downloadTemplate: "Download Template",
@@ -396,6 +397,11 @@ export const lang = {
       action: "Action",
       title: "Training Type",
       palceholderSearch: "Search Training Type ID,  Training Type Name",
+      ghost: {
+        downloadTemplate: "Download Template",
+        uploadTemplate: "Upload Template",
+        downloadData: "Download Data",
+      },
     },
     customer: {
       customerId: "Customer Id",
@@ -476,7 +482,7 @@ export const lang = {
           canBeExpensed: "Can Be Expensed",
           canBeManufacture: "Can Be Manufacture",
         },
-        field : {
+        field: {
           active: "Active",
           nonActive: "Non Active",
           productPhoto: "Product Photo",
@@ -496,7 +502,7 @@ export const lang = {
             salesPrice: "Sales Price",
             options: "Options",
             variant: "Variant",
-            searchBarVariant: "Search Variant Name, SKU Code",       
+            searchBarVariant: "Search Variant Name, SKU Code",
           },
           inventory: {
             title: "Inventory",
@@ -534,7 +540,7 @@ export const lang = {
           },
           registration: {
             title: "Registration",
-          }
+          },
         },
         table: {
           optionsName: "Options Name",
@@ -553,7 +559,7 @@ export const lang = {
           general: "General",
           productInformation: "Product Information",
         },
-      }
+      },
     },
     productVariant: {
       list: {
@@ -584,7 +590,7 @@ export const lang = {
           action: "Action",
         },
       },
-    }
+    },
   },
   "id-ID": {
     productGroup: {
@@ -965,6 +971,7 @@ export const lang = {
       tertier: {
         delete: "Menghapus",
         cancel: "Membatalkan",
+        viewDetail: "Lihat Detail",
       },
       ghost: {
         downloadTemplate: "Unduh Template",
@@ -1082,7 +1089,7 @@ export const lang = {
           canBeExpensed: "Bisa Dibelanjakan",
           canBeManufacture: "Dapat Diproduksi",
         },
-        field : {
+        field: {
           active: "Aktif",
           nonActive: "Non Aktif",
           productPhoto: "Foto Produk",
@@ -1102,7 +1109,7 @@ export const lang = {
             salesPrice: "Harga Jual",
             options: "Opsi",
             variant: "Varian",
-            searchBarVariant: "Cari Kode SKU Nama Varian",       
+            searchBarVariant: "Cari Kode SKU Nama Varian",
           },
           inventory: {
             title: "Inventaris",
@@ -1140,7 +1147,7 @@ export const lang = {
           },
           registration: {
             title: "Pendaftaran",
-          }
+          },
         },
         table: {
           optionsName: "Nama Opsi",
@@ -1159,7 +1166,7 @@ export const lang = {
           general: "Umum",
           productInformation: "Informasi Produk",
         },
-      }
+      },
     },
     productVariant: {
       list: {
@@ -1190,6 +1197,6 @@ export const lang = {
           action: "Tindakan",
         },
       },
-    }
+    },
   },
 };

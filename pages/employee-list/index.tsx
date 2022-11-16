@@ -86,6 +86,7 @@ const EmployeeList = () => {
     },
     options: {
       onSuccess: () => {},
+      enabled: !!pagination.totalItems,
     },
   });
 
