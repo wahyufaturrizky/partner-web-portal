@@ -63,6 +63,7 @@ export default function CreateProduct({ isCreateProductVariant = true }) {
   const [canBeSold, setCanBeSold] = useState(false);
   const [canBeExpensed, setCanExpensed] = useState(false);
   const [canBeManufacture, setCanManufacture] = useState(false);
+  const [canBeShareable, setCanBeShareable] = useState(false);
 
   const [isShowDelete, setShowDelete] = useState({ open: false });
 
@@ -197,6 +198,7 @@ export default function CreateProduct({ isCreateProductVariant = true }) {
           setCanBePurchased(data.can_be_purchased);
           setCanBeSold(data.can_be_sold);
           setCanManufacture(data.can_be_manufactured);
+          setCanBeShareable(data.can_be_shareable)
         });
         return data;
       },
@@ -369,6 +371,7 @@ export default function CreateProduct({ isCreateProductVariant = true }) {
     payload.can_be_purchased = canBePurchased;
     payload.can_be_expensed = canBeExpensed;
     payload.can_be_manufactured = canBeManufacture;
+    payload.can_be_shareable = canBeShareable;
 
     payload.expired_date = data?.expired_date?.includes("/")
       ? moment(data.expired_date, "DD/MM/YYYY").utc().toString()
@@ -679,6 +682,21 @@ export default function CreateProduct({ isCreateProductVariant = true }) {
                   onClick={() => setCanManufacture(!canBeManufacture)}
                 >
                   <Text variant={"h6"}>{lang[t].productList.create.checkbox.canBeManufacture}</Text>
+                </div>
+              </Row>
+            </Col>
+            <Col>
+              <Row alignItems="center">
+                <Checkbox
+                  size="small"
+                  checked={canBeShareable}
+                  onChange={() => setCanBeShareable(!canBeShareable)}
+                />
+                <div
+                  style={{ cursor: "pointer" }}
+                  onClick={() => setCanBeShareable(!canBeShareable)}
+                >
+                  <Text variant={"h6"}>{lang[t].productList.create.checkbox.canBeManufacture || "Is Shareable"}</Text>
                 </div>
               </Row>
             </Col>

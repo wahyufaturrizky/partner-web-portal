@@ -62,6 +62,7 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
   const [canBePurchased, setCanBePurchased] = useState(false);
   const [canBeSold, setCanBeSold] = useState(false);
   const [canBeManufacture, setCanManufacture] = useState(false);
+  const [canBeShareable, setCanBeShareable] = useState(false);
 
   const [isShowDelete, setShowDelete] = useState({ open: false });
 
@@ -209,6 +210,7 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
             setCanBePurchased(data.can_be_purchased);
             setCanBeSold(data.can_be_sold);
             setCanManufacture(data.can_be_manufactured);
+            setCanBeShareable(data.can_be_shareable)
           })
       return data;
     }
@@ -376,6 +378,7 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
     payload.can_be_sold = canBeSold;
     payload.can_be_purchased = canBePurchased;
     payload.can_be_manufactured = canBeManufacture;
+    payload.can_be_shareable = canBeShareable;
 
     if(data.expired_date){
       payload.expired_date = data?.expired_date?.includes("/")
@@ -616,6 +619,14 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
           <Checkbox size="small" checked={canBeManufacture} onChange={()=>setCanManufacture(!canBeManufacture)}/>
           <div style={{ cursor: "pointer" }} onClick={()=>setCanManufacture(!canBeManufacture)}>
             <Text variant={"h6"}>Can Be Manufacture</Text>
+          </div>
+        </Row>
+      </Col>
+      <Col>
+        <Row alignItems="center">
+          <Checkbox size="small" checked={canBeShareable} onChange={()=>setCanBeShareable(!canBeShareable)}/>
+          <div style={{ cursor: "pointer" }} onClick={()=>setCanBeShareable(!canBeShareable)}>
+            <Text variant={"h6"}>Is Shareable</Text>
           </div>
         </Row>
       </Col>
