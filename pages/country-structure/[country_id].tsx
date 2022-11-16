@@ -140,6 +140,7 @@ const CreateConfig = () => {
 				}).map((data: any) => ({
 					id: data.id,
 					isNewParent: data.isNewParent,
+					isReplace: !!data.isReplace,
 					name: data.name,
 					...( data?.parent && {parent: data?.parent?.id}),
 					structureId: data.structureId

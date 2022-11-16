@@ -134,8 +134,16 @@ const CreateBusinessProcess = () => {
         };
       }
     });
-    setProcessList(mappedProcessList);
+    let newProcessList = 
+      [...processList, ...mappedProcessList].map((data, index) => 
+        ({ ...data, index }));
+
+    setProcessList(newProcessList);
     setShowAddProcessModal(false);
+    setMandatory("Is Mandatory")
+    setIsActive("Active")
+    setValue([])
+  
   };
 
   const editProcessList = () => {
@@ -316,6 +324,7 @@ const CreateBusinessProcess = () => {
 
       {showAddProcessModal && (
         <ModalAddBusinessProcess
+          processList={processList}
           visible={showAddProcessModal}
           onCancel={() => setShowAddProcessModal(false)}
           onSave={addProcessList}

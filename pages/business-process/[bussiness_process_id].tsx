@@ -102,12 +102,6 @@ const BussinessProcessDetail = () => {
     id: bp_id,
     options: {
       onSuccess: (data: any) => {
-        const mappedToDropdownValue = data.businessProcessToProcesses.map((element: any) => {
-          return {
-            label: element.process.name,
-            value: element.process.id,
-          };
-        });
         const mappedToListProcessList = data.businessProcessToProcesses.map(
           (element: any, index: any) => {
             return {
@@ -121,7 +115,6 @@ const BussinessProcessDetail = () => {
             };
           }
         );
-        setValue(mappedToDropdownValue);
         setProcessList(mappedToListProcessList);
         setProcessListTemp(mappedToListProcessList);
       },
@@ -188,8 +181,16 @@ const BussinessProcessDetail = () => {
         };
       }
     });
-    setProcessList(mappedProcessList);
+    let newProcessList = 
+    [...processList, ...mappedProcessList].map((data, index) => 
+      ({ ...data, index }));
+
+    setProcessList(newProcessList);
     setShowAddProcessModal(false);
+    setMandatory("Is Mandatory")
+    setIsActive("Active")
+    setValue([])
+
   };
 
   const editProcessList = () => {
