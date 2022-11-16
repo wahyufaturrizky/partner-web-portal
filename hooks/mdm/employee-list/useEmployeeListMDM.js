@@ -145,7 +145,7 @@ const useDeleteEmployeeListMDM = ({ options }) => {
 const useUploadFileEmployeeListMDM = ({ options }) => {
   return useMutation(
     (data) =>
-      mdmService(`/employee/upload`, {
+      mdmService(`/employee/file/upload`, {
         method: "POST",
         data,
       }),
