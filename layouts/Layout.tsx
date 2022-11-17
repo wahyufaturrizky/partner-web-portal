@@ -553,7 +553,8 @@ const AdminLayout = (props: any) => {
   const [current, setCurrent] = useState("0");
   const [isChangeLang, setIsChangeLang] = useState(false);
   const [companies, setCompanies] = useState([])
-  
+  const [isLoading, setIsLoading] = useState(false)
+
   const handleCLickTabNav = (e: any) => {
     setCurrent(e.key);
     Router.push("/dashboard");
@@ -568,7 +569,7 @@ const AdminLayout = (props: any) => {
     async function getCompanyList() {
       let token = localStorage.getItem("token");
       let apiURL = process.env.NEXT_PUBLIC_API_BASE;
-
+      setIsLoading(true)
       await axios.get(`${apiURL}/hermes/company`, {
         params: {
           account_id: 0,
@@ -585,25 +586,20 @@ const AdminLayout = (props: any) => {
         const defaultCompany = res.data.data.rows[0]
         localStorage.setItem('companyId', defaultCompany.id)
         localStorage.setItem('companyCode', defaultCompany.code)
-
         setCompanies(res.data.data.rows)
+        setIsLoading(false)
       })
-      // .catch((err) => {
-      //   alert('Failed get Companies')
-      //   // if(err.response.status == 401) {
-      //   //   Router.push("/")
-      //   // }
-      //   setCompanies([])
-
-      // })
+      .catch((err) => {
+        console.log(err.response.status)
+        localStorage.setItem('companyId', "2")
+        localStorage.setItem('companyCode', "KSNI")
+        setCompanies([])
+        setIsLoading(false)
+      })
     }
-    const companyId = localStorage.getItem('companyId')
-    const companyCode = localStorage.getItem('companyCode')
-    console.log(companyId, companyCode)
-    // if(!companyId || !companyCode) getCompanyList()
-    localStorage.setItem('companyId', "2")
-    localStorage.setItem('companyCode', "KSNI")
-    // getCompanyList()
+    // localStorage.setItem('companyId', "2")
+    // localStorage.setItem('companyCode', "KSNI")
+    getCompanyList()
   }, []);
 
   const menuConfigFunc = (companies) => {
@@ -649,7 +645,7 @@ const AdminLayout = (props: any) => {
       <Sidebar
         logo="/icons/logo-nabati.svg"
         // menu={current === "0" ? menuConfig : menuMdm}
-        menu={current === "0" ? menuConfigFunc(companies) : menuMdmFunc(companies)}
+        menu={!isLoading && current === "0" ? menuConfigFunc(companies) : menuMdmFunc(companies)}
         defaultMenu={"dashboard"}
       />
       <Layout
