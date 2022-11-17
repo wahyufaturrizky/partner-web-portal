@@ -1,4 +1,5 @@
 import usePagination from "@lucasmogari/react-pagination";
+import { lang } from "lang";
 import Router from "next/router";
 import {
   Accordion,
@@ -29,6 +30,7 @@ import { useFilterListPermissions } from "../../hooks/permission/usePermission";
 import { usePartnerConfigPermissionLists } from "../../hooks/user-config/usePermission";
 
 const CreateMenuList: any = () => {
+  const t = localStorage.getItem("lan") || "en-US";
   const [isLoading, setLoading] = useState(true);
   const [searchTableField, setSearchTableField] = useState("");
   const [searchTablePermission, setSearchTablePermission] = useState("");
@@ -372,7 +374,7 @@ const CreateMenuList: any = () => {
     <>
       <Col>
         <Row gap="4px">
-          <Text variant={"h4"}>Create Purchase Organization</Text>
+          <Text variant={"h4"}>{lang[t].purchaseOrg.pageTitle.createPurchaseOrganization}</Text>
         </Row>
         <Spacer size={12} />
         <Card padding="20px">
@@ -380,10 +382,10 @@ const CreateMenuList: any = () => {
             <Row>
               <Row gap="16px">
                 <Button size="big" variant={"tertiary"} onClick={() => Router.back()}>
-                  Cancel
+                  {lang[t].purchaseOrg.tertier.cancel}
                 </Button>
                 <Button size="big" variant={"primary"} onClick={handleCreateMenuList}>
-                  {isLoading ? "loading..." : "Save"}
+                  {isLoading ? "loading..." : lang[t].purchaseOrg.primary.save}
                 </Button>
               </Row>
             </Row>
@@ -394,13 +396,13 @@ const CreateMenuList: any = () => {
 
         <Accordion>
           <Accordion.Item key={1}>
-            <Accordion.Header variant="blue">Purchase Organization</Accordion.Header>
+            <Accordion.Header variant="blue">{lang[t].purchaseOrg.accordion.purchaseOrg}</Accordion.Header>
             <Accordion.Body>
               <Row width="100%" gap="20px" noWrap>
                 <Input
                   id="name"
                   width="100%"
-                  label="Purchase Group Name"
+                  label={lang[t].purchaseOrg.emptyState.purchaseGroupName}
                   height="48px"
                   placeholder={"e.g Packaging Material"}
                   onChange={handleChangeInput}
@@ -411,7 +413,7 @@ const CreateMenuList: any = () => {
                 ) : (
                   <>
                     <Dropdown
-                      label="Parent"
+                      label={lang[t].purchaseOrg.filterbar.parent}
                       isOptional
                       width="100%"
                       items={dataParentPurchaseOrganization.map((data) => ({
@@ -433,7 +435,7 @@ const CreateMenuList: any = () => {
                   setStateModal({
                     ...stateModal,
                     isShowModal: true,
-                    titleModal: "Product Category",
+                    titleModal: lang[t].purchaseOrg.filterbar.productCategory,
                     widthModal: 1000,
                   })
                 }
@@ -443,7 +445,7 @@ const CreateMenuList: any = () => {
                   dataAssociatedPermissionsField &&
                   dataAssociatedPermissionsField?.map((data) => data.key)
                 }
-                label="Product Category"
+                label={lang[t].purchaseOrg.filterbar.productCategory}
                 listItems={datFieldPermission}
               />
 
@@ -453,13 +455,13 @@ const CreateMenuList: any = () => {
                   setStateModal({
                     ...stateModal,
                     isShowModal: true,
-                    titleModal: "Product Category",
+                    titleModal: lang[t].purchaseOrg.filterbar.productCategory,
                     widthModal: 1000,
                   })
                 }
               >
                 <Text variant="headingSmall" color="pink.regular">
-                  Advance View
+                  {lang[t].purchaseOrg.button.advanceView}
                 </Text>
               </div>
             </Accordion.Body>

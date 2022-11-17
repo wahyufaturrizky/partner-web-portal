@@ -5,6 +5,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { Button, Spacer, Modal, Input, Dropdown } from "pink-lava-ui";
 
 import { useAccountGroups } from "../../../hooks/finance-config/useAccountGroup";
+import { lang } from "lang";
 
 const schema = yup
 	.object({
@@ -34,7 +35,7 @@ export const ModalCreateAccountGroup: any = ({
 		defaultValues: defaultValue,
 		resolver: yupResolver(schema),
 	});
-
+	const t = localStorage.getItem("lan") || "en-US";
 	const errorsApi = error?.errors;
 	const onSubmit = (data: any) => onOk(data);
 
@@ -57,7 +58,7 @@ export const ModalCreateAccountGroup: any = ({
 		<Modal
 			visible={visible && !isLoading}
 			onCancel={onCancel}
-			title={"Create Account Group"}
+			title={lang[t].accountGroup.modalTitleCreate.accountGroup}
 			footer={
 				<div
 					style={{
@@ -69,7 +70,7 @@ export const ModalCreateAccountGroup: any = ({
 					}}
 				>
 					<Button onClick={handleSubmit(onSubmit)} variant="primary" size="big">
-						Save
+						{lang[t].accountGroup.primary.save}
 					</Button>
 				</div>
 			}
@@ -79,12 +80,12 @@ export const ModalCreateAccountGroup: any = ({
 					<Input
 						error={errors?.groupName?.message}
 						{...register("groupName", { required: true })}
-						label="Name"
+						label={lang[t].accountGroup.emptyState.name}
 						placeholder={"e.g Receivable"}
 					/>
 					<Spacer size={20} />
 					<Dropdown
-						label="Parent (optional)"
+						label={`${lang[t].accountGroup.filterBar.parent} (optional)`}
 						width={"100%"}
 						items={parents}
 						placeholder={"Select"}

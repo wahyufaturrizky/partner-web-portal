@@ -1,4 +1,5 @@
 import usePagination from "@lucasmogari/react-pagination";
+import { lang } from "lang";
 import { useRouter } from "next/router";
 import {
   Button,
@@ -52,6 +53,7 @@ const renderConfirmationText = (type: any, data: any) => {
 };
 
 const ChannelMDM = () => {
+  const t = localStorage.getItem("lan") || "en-US";
   const router = useRouter();
   const pagination = usePagination({
     page: 1,
@@ -104,7 +106,7 @@ const ChannelMDM = () => {
                   onClick={() => router.push(`purchase-organization/${element.id}`)}
                   variant="tertiary"
                 >
-                  View Detail
+                  {lang[t].purchaseOrg.tertier.viewDetail}
                 </Button>
               </div>
             ),
@@ -139,19 +141,19 @@ const ChannelMDM = () => {
 
   const columns = [
     {
-      title: "Purchase Org ID",
+      title: lang[t].purchaseOrg.purchaseOrgID,
       dataIndex: "code",
     },
     {
-      title: "Purchase Org Name",
+      title: lang[t].purchaseOrg.purchaseOrgName,
       dataIndex: "name",
     },
     {
-      title: "Parent",
+      title: lang[t].purchaseOrg.purchaseOrgParent,
       dataIndex: "parent",
     },
     {
-      title: "Action",
+      title: lang[t].purchaseOrg.purchaseOrgAction,
       dataIndex: "action",
       width: "15%",
       align: "left",
@@ -175,14 +177,14 @@ const ChannelMDM = () => {
   return (
     <>
       <Col>
-        <Text variant={"h4"}>Purchase Organization</Text>
+        <Text variant={"h4"}>{lang[t].purchaseOrg.pageTitle.purchaseOrganization}</Text>
         <Spacer size={20} />
       </Col>
       <Card>
         <Row justifyContent="space-between">
           <Search
             width="340px"
-            placeholder="Search Purchase Org ID,  Name, Parent"
+            placeholder={lang[t].purchaseOrg.search}
             onChange={(e: any) => {
               setSearch(e.target.value);
             }}
@@ -200,10 +202,10 @@ const ChannelMDM = () => {
               }
               disabled={rowSelection.selectedRowKeys?.length === 0}
             >
-              Delete
+              {lang[t].purchaseOrg.tertier.delete}
             </Button>
             <DropdownMenu
-              title={"More"}
+              title={lang[t].purchaseOrg.secondary.more}
               buttonVariant={"secondary"}
               buttonSize={"big"}
               textVariant={"button"}
@@ -232,7 +234,7 @@ const ChannelMDM = () => {
                   value: (
                     <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
                       <ICDownload />
-                      <p style={{ margin: "0" }}>Download Template</p>
+                      <p style={{ margin: "0" }}>{lang[t].purchaseOrg.ghost.downloadTemplate}</p>
                     </div>
                   ),
                 },
@@ -241,7 +243,7 @@ const ChannelMDM = () => {
                   value: (
                     <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
                       <ICUpload />
-                      <p style={{ margin: "0" }}>Upload Template</p>
+                      <p style={{ margin: "0" }}>{lang[t].purchaseOrg.ghost.uploadTemplate}</p>
                     </div>
                   ),
                 },
@@ -250,7 +252,7 @@ const ChannelMDM = () => {
                   value: (
                     <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
                       <ICDownload />
-                      <p style={{ margin: "0" }}>Download Data</p>
+                      <p style={{ margin: "0" }}>{lang[t].purchaseOrg.ghost.downloadData}</p>
                     </div>
                   ),
                 },
@@ -261,7 +263,7 @@ const ChannelMDM = () => {
               variant="primary"
               onClick={() => router.push("purchase-organization/create")}
             >
-              Create
+              {lang[t].purchaseOrg.primary.create}
             </Button>
           </Row>
         </Row>

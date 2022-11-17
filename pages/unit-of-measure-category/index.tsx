@@ -27,6 +27,7 @@ import { queryClient } from "../_app";
 import { useForm } from "react-hook-form";
 import { ICDownload, ICUpload } from "../../assets/icons";
 import { mdmDownloadService } from "../../lib/client";
+import { lang } from "lang";
 
 const downloadFile = (params: any) =>
   mdmDownloadService("/uom-category/download", { params }).then((res) => {
@@ -55,6 +56,7 @@ const renderConfirmationText = (type: any, data: any) => {
 };
 
 const UOMCategory = () => {
+  const t = localStorage.getItem("lan") || "en-US";
   const companyId = localStorage.getItem("companyId")
   const companyCode = localStorage.getItem("companyCode")
   const pagination = usePagination({
@@ -109,7 +111,7 @@ const UOMCategory = () => {
                   }}
                   variant="tertiary"
                 >
-                  View Detail
+                  {lang[t].uomCategory.tertier.viewDetail}
                 </Button>
               </div>
             ),
@@ -168,15 +170,15 @@ const UOMCategory = () => {
 
   const columns = [
     {
-      title: "Uom Category ID",
+      title: lang[t].uomCategory.uoMCategoryID,
       dataIndex: "id",
     },
     {
-      title: "Uom Category Name",
+      title: lang[t].uomCategory.uoMCategoryName,
       dataIndex: "uomCategoryName",
     },
     {
-      title: "Action",
+      title: lang[t].uomCategory.uoMCategoryAction,
       dataIndex: "action",
       width: "15%",
       align: "left",
@@ -219,14 +221,14 @@ const UOMCategory = () => {
   return (
     <>
       <Col>
-        <Text variant={"h4"}>Unit of Measure Category</Text>
+        <Text variant={"h4"}>{lang[t].uomCategory.pageTitle.uoMCategory}</Text>
         <Spacer size={20} />
       </Col>
       <Card>
         <Row justifyContent="space-between">
           <Search
             width="340px"
-            placeholder="Search Uom Category ID, Name."
+            placeholder={lang[t].uomCategory.searchBar.uoMCategory}
             onChange={(e: any) => {
               setSearch(e.target.value);
             }}
@@ -244,10 +246,10 @@ const UOMCategory = () => {
               }
               disabled={rowSelection.selectedRowKeys?.length === 0}
             >
-              Delete
+              {lang[t].uomCategory.tertier.delete}
             </Button>
             <DropdownMenu
-              title={"More"}
+              title={lang[t].uomCategory.secondary.more}
               buttonVariant={"secondary"}
               buttonSize={"big"}
               textVariant={"button"}
@@ -305,7 +307,7 @@ const UOMCategory = () => {
               variant="primary"
               onClick={() => setModalForm({ open: true, typeForm: "create", data: {} })}
             >
-              Create
+              {lang[t].uomCategory.primary.create}
             </Button>
           </Row>
         </Row>
@@ -329,7 +331,7 @@ const UOMCategory = () => {
           centered
           visible={modalForm.open}
           onCancel={() => setModalForm({ open: false, data: {}, typeForm: "" })}
-          title={modalForm.typeForm === "create" ? "Create Uom Category" : "UoM Category"}
+          title={modalForm.typeForm === "create" ? lang[t].uomCategory.modalTitleCreate.uoMCategory : lang[t].uomCategory.modalTitleUpdate.uoMCategory}
           footer={null}
           content={
             <div
@@ -343,7 +345,7 @@ const UOMCategory = () => {
               <Input
                 defaultValue={modalForm.data?.name}
                 width="100%"
-                label="UoM Category Name"
+                label={lang[t].uomCategory.uoMCategoryName}
                 height="48px"
                 placeholder={"e.g Weight"}
                 {...register("name", {
@@ -381,12 +383,12 @@ const UOMCategory = () => {
                       setShowDelete({ open: true, type: "detail", data: modalForm.data });
                     }}
                   >
-                    Delete
+                    {lang[t].uomCategory.tertier.delete}
                   </Button>
                 )}
 
                 <Button full onClick={handleSubmit(onSubmit)} variant="primary" size="big">
-                  {isLoadingCreateUomCategory || isLoadingUpdateUomCategory ? "Loading..." : "Save"}
+                  {isLoadingCreateUomCategory || isLoadingUpdateUomCategory ? "Loading..." : lang[t].uomCategory.primary.save}
                 </Button>
               </div>
             </div>

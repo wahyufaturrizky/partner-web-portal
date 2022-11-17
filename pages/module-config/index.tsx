@@ -1,4 +1,5 @@
 import usePagination from "@lucasmogari/react-pagination";
+import { lang } from "lang";
 import { useRouter } from "next/router";
 import { Button, Col, Dropdown, Pagination, Row, Search, Spacer, Table, Text } from "pink-lava-ui";
 import React, { useState } from "react";
@@ -20,7 +21,7 @@ const ModuleConfig: any = () => {
 	const [search, setSearch] = useState("");
 	const [modalDelete, setModalDelete] = useState({ open: false });
 	const [parent, setParent] = useState("");
-
+	const t = localStorage.getItem("lan") || "en-US";
 	const {
 		data: configs,
 		refetch: refetchConfig,
@@ -58,15 +59,15 @@ const ModuleConfig: any = () => {
 
 	const columns = [
 		{
-			title: "Module Name",
+			title: lang[t].moduleConfig.modulConfigName,
 			dataIndex: "module_name",
 		},
 		{
-			title: "Parent",
+			title: lang[t].moduleConfig.modulConfigParent,
 			dataIndex: "parent",
 		},
 		{
-			title: "Action",
+			title: lang[t].moduleConfig.modulConfigAction,
 			dataIndex: "action",
 			width: 160,
 		},
@@ -80,7 +81,7 @@ const ModuleConfig: any = () => {
 			parent: config.parentName || "-",
 			action: (
 				<Button size="small" onClick={() => router.push(`/module-config/${config.id}`)} variant="tertiary">
-					View Detail
+					{lang[t].moduleConfig.tertier.viewDetail}
 				</Button>
 			),
 		});
@@ -113,7 +114,7 @@ const ModuleConfig: any = () => {
 						<Row alignItems="center">
 							<Search
 								width="380px"
-								placeholder="Search Module Name, Parent"
+								placeholder={lang[t].moduleConfig.searchBar.moduleConfig}
 								onChange={(e: any) => setSearch(e.target.value)}
 							/>
 							<Spacer size={8} />
@@ -121,7 +122,7 @@ const ModuleConfig: any = () => {
 								width="200px"
 								defaultValue=""
 								items={parents}
-								placeholder="Parent"
+								placeholder={lang[t].moduleConfig.filterBar.parent}
 								handleChange={(value: any) => setParent(value)}
 								noSearch
 								rounded

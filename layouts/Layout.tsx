@@ -38,6 +38,7 @@ import ICPercent from "../assets/icons/ic-percent.svg";
 import ICSalesman from "../assets/icons/ic-salesman.svg";
 import ICAccountSetting from "../assets/icons/ic-setting.svg";
 import ICTransportation from "../assets/icons/ic-transportation.svg";
+import { lang } from "lang";
 import axios from "axios";
 
 const menuConfig = [
@@ -505,6 +506,11 @@ const menuMdm = [
   },
 ];
 
+let t;
+if (typeof window !== "undefined") {
+	t = localStorage.getItem("lan") || "en-US";
+}
+
 const itemsMenu = [{ label: "Config" }, { label: "Master Data Management" }];
 
 const notifItems = [
@@ -530,7 +536,7 @@ const notifItems = [
   },
   {
     isRead: true,
-    content: <p style={{ fontWeight: "600", marginBottom: 0 }}>You need review a approval Here</p>,
+    content: <p style={{ fontWeight: "600", marginBottom: 0 }}>{lang[t]?.notification.notificationReviewApproval}</p>,
   },
 ];
 

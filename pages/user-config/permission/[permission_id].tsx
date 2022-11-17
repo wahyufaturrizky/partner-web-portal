@@ -14,6 +14,7 @@ import {
   useUpdatePartnerConfigPermissionList,
 } from "../../../hooks/user-config/usePermission";
 import { useRolePermissions } from "../../../hooks/role/useRole";
+import { lang } from "lang";
 
 const schema = yup
   .object({
@@ -29,7 +30,7 @@ const defaultValue = {
 
 const DetailPartnerConfigPermissionList: any = () => {
   const { permission_id } = Router.query;
-
+  const t = localStorage.getItem("lan") || "en-US";
   const {
     register,
     handleSubmit,
@@ -146,7 +147,7 @@ const DetailPartnerConfigPermissionList: any = () => {
                   Delete
                 </Button>
                 <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
-                  Save
+                  {lang[t].permissionList.primary.save}
                 </Button>
               </Row>
             </Row>
@@ -163,7 +164,7 @@ const DetailPartnerConfigPermissionList: any = () => {
 
         <Accordion>
           <Accordion.Item key={1}>
-            <Accordion.Header variant="blue">General</Accordion.Header>
+            <Accordion.Header variant="blue">{lang[t].permissionList.accordion.general}</Accordion.Header>
             {isLoadingPartnerConfigPermissionList ? (
               <Spin ip="Loading..." />
             ) : (
@@ -171,14 +172,14 @@ const DetailPartnerConfigPermissionList: any = () => {
                 <Row width="100%" gap="20px" noWrap>
                   <Input
                     width="100%"
-                    label="Name"
+                    label={lang[t].permissionList.emptyState.name}
                     height="48px"
                     defaultValue={dataPartnerConfigPermissionList?.name}
                     placeholder={"e.g View Shipment"}
                     {...register("name", { required: true })}
                   />
                   <Dropdown
-                    label="Associated Menu"
+                    label={lang[t].permissionList.permissionListAssociatedMenu}
                     handleClickActionLabel={handleAddNewAssociated}
                     isShowActionLabel
                     actionLabel="Add New Associated Menu"
@@ -192,7 +193,7 @@ const DetailPartnerConfigPermissionList: any = () => {
                 </Row>
                 <Row width="50%" gap="20px" noWrap>
                   <Dropdown
-                    label="Is System Config"
+                    label={lang[t].permissionList.permissionList.systemConfig}
                     width={"100%"}
                     items={valueIsSystemConfig}
                     placeholder={"Select"}
@@ -215,7 +216,7 @@ const DetailPartnerConfigPermissionList: any = () => {
               variant={"secondary"}
               onClick={() => window.open("/user-config/approval/create", "_self")}
             >
-              Create Approval Base on this permission
+              {lang[t].permissionList.secondary.createApproval}
             </Button>
           </Col>
         </Row>
@@ -226,13 +227,13 @@ const DetailPartnerConfigPermissionList: any = () => {
           <Accordion.Item key={1}>
             <Accordion.Header variant="blue">
               <Row gap="8px" alignItems="baseline">
-                Associated Role <Span>(Auto added from roles)</Span>
+                {lang[t].permissionList.accordion.associatedRole} <Span>(Auto added from roles)</Span>
               </Row>
             </Accordion.Header>
             <Accordion.Body>
               <Accordion>
                 <Accordion.Item key={1}>
-                  <Accordion.Header>Roles</Accordion.Header>
+                  <Accordion.Header>{lang[t].permissionList.permissionListRole}</Accordion.Header>
                   <Accordion.Body padding="0px">
                     {isLoadingFieldRole ? (
                       <Spin tip="Loading roles..." />
@@ -246,7 +247,7 @@ const DetailPartnerConfigPermissionList: any = () => {
                             onClick={() => Router.push(`/role/${data.id}`)}
                             variant="tertiary"
                           >
-                            View Detail
+                            {lang[t].permissionList.tertier.viewDetail}
                           </Button>
                         </Record>
                       ))

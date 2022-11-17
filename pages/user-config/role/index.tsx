@@ -8,8 +8,10 @@ import { useDeletePermission, useRolePermissions } from "../../../hooks/user-con
 import { STATUS_APPROVAL_TEXT, STATUS_APPROVAL_VARIANT } from "../../../utils/constant";
 
 import styled from "styled-components";
+import { lang } from "lang";
 
 const UserConfigRole: any = () => {
+	const t = localStorage.getItem("lan") || "en-US";
 	const router = useRouter();
 	const pagination = usePagination({
 		page: 1,
@@ -52,12 +54,12 @@ const UserConfigRole: any = () => {
 
 	const columns = [
 		{
-			title: "Role Name",
+			title: lang[t].roleList.roleList.roleName,
 			dataIndex: "field_name",
 			width: "43%",
 		},
 		{
-			title: "Company",
+			title: lang[t].roleList.roleList.company,
 			dataIndex: "company",
 			render: (text: any) => (
 				<Lozenge variant={STATUS_APPROVAL_VARIANT[text]}>{STATUS_APPROVAL_TEXT[text]}</Lozenge>
@@ -65,7 +67,7 @@ const UserConfigRole: any = () => {
 			width: "42%",
 		},
 		{
-			title: "Action",
+			title: lang[t].roleList.userListAction,
 			dataIndex: "action",
 			width: "15%",
 			align: "left",
@@ -87,7 +89,7 @@ const UserConfigRole: any = () => {
 						}}
 						variant="tertiary"
 					>
-						View Detail
+						{lang[t].roleList.tertier.viewDetail}
 					</Button>
 				</div>
 			),
@@ -109,13 +111,13 @@ const UserConfigRole: any = () => {
 	return (
 		<>
 			<Col>
-				<Text variant={"h4"}>Role List</Text>
+				<Text variant={"h4"}>{lang[t].roleList.pageTitle.roleList}</Text>
 				<Spacer size={20} />
 				<Card>
 					<Row justifyContent="space-between">
 						<Search
 							width="380px"
-							placeholder="Search Role Name"
+							placeholder={lang[t].roleList.searchBar.roleList}
 							onChange={(e: any) => setSearch(e.target.value)}
 						/>
 						<Row gap="16px">
@@ -125,7 +127,7 @@ const UserConfigRole: any = () => {
 								onClick={() => setModalDelete({ open: true })}
 								disabled={rowSelection.selectedRowKeys?.length === 0}
 							>
-								Delete
+								{lang[t].roleList.tertier.delete}
 							</Button>
 							<Button
 								size="big"
@@ -134,7 +136,7 @@ const UserConfigRole: any = () => {
 									router.push("/user-config/role/create");
 								}}
 							>
-								Create
+								{lang[t].roleList.primary.create}
 							</Button>
 						</Row>
 					</Row>

@@ -97,7 +97,8 @@ export const lang = {
       newUser: "New user?",
       createAnAccount: "Create an account",
     },
-    currency: {
+    currencyFormat: {
+      currencyFormatCode: "Currency Code",
       currencyFormat: "Currency Format",
       currency: "Currency",
       currencyName: "Currency Name",
@@ -223,6 +224,921 @@ export const lang = {
         button: {
           save: "Save",
         },
+      },
+    },
+    process: {
+      pageTitle: {
+        processList: "Process List",
+        processName: "Process Name",
+        createApproval: "Create Approval",
+      },
+      searchBar: {
+        processList: "Search Proces sList Name",
+      },
+      tertier: {
+        viewDetail: "View Detail",
+      },
+      permissionList: {
+        name: "Process List Name",
+        module: "Module",
+        action: "Action",
+      },
+      filterbar: {
+        module: "Module",
+      },
+      ghost: {
+        marketing: "Martketing",
+        logistic: "Logistic",
+        sales: "Sales",
+        finance: "Finance",
+        humanResource: "Human Resource",
+        viewDetailBusinessProcess: "",
+      },
+      primary: {
+        save: "Save",
+      },
+      secondary: {
+        createApproval: "Create Approval Based on Permission",
+      },
+      tertier: {
+        viewDetail: "View Detail",
+        cancel: "Cancel",
+      },
+      accordion: {
+        general: "General",
+        associatedBusiness: "Associated Business Process",
+        approval: "Approval",
+        associatedRole: "Associated Role & User",
+      },
+      processListName: "Name",
+      processListModule: "Module",
+      processListBusinessProcess: "Business Process Name",
+      toogle: {
+        emailNotification: "Email Notification",
+      },
+      emptyState: {
+        approvalStage: "Approval Stage",
+        name: "Name",
+      },
+      checkBox: {
+        selectHaveApprove: "Select Stage User Have to Appprove",
+      },
+    },
+    businessProcess: {
+      pageTitle: {
+        businessProcess: "Business Process",
+        ordertoCash: "Order to Cash",
+      },
+      searchBar: {
+        businessProcess: "Search Business Process Name",
+      },
+      modalTitleCreate: {
+        businessProcess: "Create Business Process",
+      },
+      modalTitleUpdate: {
+        businessProcess: "Business Process",
+        editProcess: "Edit Process",
+      },
+      primary: {
+        create: "Create",
+        save: "Save",
+      },
+      tertier: {
+        viewDetail: "View Detail",
+        cancel: "Cancel",
+      },
+      businessProcessStatus: "Status",
+      businessProcessAction: "Action",
+      businessProcessName: "Business Process Name",
+      businessProcessSequence: "Sequence",
+      businessProcessProcess: "Process",
+      businessProcessMandatory: "Mandatory",
+      ghost: {
+        published: "Published",
+        draft: "Draft",
+        mandatory: "Mandatory",
+        notMandatory: "Not Mandatory",
+        active: "Active",
+        inactive: "Inactive",
+      },
+      accordion: {
+        general: "General",
+        processes: "Processes",
+      },
+      emptyState: {
+        name: "Name",
+        process: "Process",
+      },
+      process: {
+        visualization: "process visualization",
+      },
+      filterbar: {
+        mandaroty: "Mandatory",
+        status: "Status",
+      },
+    },
+    uomCategory: {
+      pageTitle: {
+        uoMCategory: "UoM Category",
+      },
+      searchBar: {
+        uoMCategory: "Search UoM Category ID, UoM Category Name",
+      },
+      modalTitleCreate: {
+        uoMCategory: "Create UoM Category",
+      },
+      modalTitleUpdate: {
+        uoMCategory: "UoM Category",
+      },
+      tertier: {
+        delete: "Delete",
+        viewDetail: "View Detail",
+        cancel: "Cancel",
+      },
+      secondary: {
+        more: "More",
+      },
+      primary: {
+        create: "Create",
+        save: "Save",
+      },
+      ghost: {
+        downloadTemplate: "Download Template",
+        uploadTemplate: "Upload Template",
+        downloadData: "Download Data",
+      },
+      uoMCategoryID: "UoM Category ID",
+      uoMCategoryName: "UoM Category Name",
+      uoMCategoryAction: "Action",
+      uoMCategoryParet: "Parent",
+    },
+    unitOfMeasure: {
+      pageTitle: {
+        uoM: "Unit of Meansure",
+        create: "Create Unit of Meansure",
+      },
+      searchBar: {
+        uoM: "Search Unit of Meansure ID, Unit of MeansureName",
+      },
+      modalTitleCreate: {
+        uoM: "Create Unit of Meansure",
+      },
+      modalTitleUpdate: {
+        uoM: "Unit of Meansure",
+      },
+      tertier: {
+        delete: "Delete",
+        viewDetail: "View Detail",
+        cancel: "Cancel",
+      },
+      secondary: {
+        more: "More",
+      },
+      primary: {
+        create: "Create",
+        save: "Save",
+      },
+      ghost: {
+        downloadTemplate: "Download Template",
+        uploadTemplate: "Upload Template",
+        downloadData: "Download Data",
+        status: "Status",
+        category: "Uom Category",
+      },
+      uoMID: "Unit of Meansure ID",
+      uoMName: "Unit of Meansure Name",
+      uoMCategory: "Unit of Meansure Category",
+      uoMAction: "Action",
+
+      accordion: {
+        general: "Product Information",
+      },
+      emptyState: {
+        uoMName: "Cost of Product",
+        uoMFormat: "UoM Name",
+      },
+    },
+    productBrand: {
+      pageTitle: {
+        productBrand: "Product Brand",
+      },
+      searchBar: {
+        productBrand: "Search Product Brand ID, Product Brand Name",
+      },
+      modalTitleCreate: {
+        productBrand: "Create Product Brand",
+      },
+      modalTitleUpdate: {
+        productBrand: "Product Brand",
+      },
+      modalTitleUpdate: {
+        viewDetail: "View Detail",
+      },
+      tertier: {
+        viewDetail: "View Detail",
+        cancel: "Cancel",
+        delete: "Delete",
+      },
+      secondary: {
+        more: "More",
+      },
+      primary: {
+        create: "Create",
+        save: "Save",
+      },
+      ghost: {
+        downloadTemplate: "Download Template",
+        uploadTemplate: "Upload Template",
+        downloadData: "Download Data",
+      },
+      productBrandID: "Product Brandl ID",
+      productBrandName: "Product Brand Name",
+      productBrandParent: "Parent",
+      productBrandAction: "Action",
+    },
+    productOption: {
+      pageTitle: {
+        productOption: "Product Option",
+        productOptionName: "Product Option Name",
+        createProductOption: "Create Product Option",
+      },
+      searchBar: {
+        productOption: "Search Sales Channel ID, Sales Channel Name",
+      },
+      modalTitleCreate: {
+        productOption: "Create Sales Channel",
+        addProductOption: "Add Product Option",
+      },
+      modalTitleUpdate: {
+        productOption: "Product Optiion",
+      },
+      tertier: {
+        delete: "Delete",
+        viewDetail: "View Detail",
+        cancel: "Cancel",
+        addNew: "Add New",
+      },
+      secondary: {
+        more: "More",
+      },
+      primary: {
+        create: "Create",
+        save: "Save",
+      },
+      ghost: {
+        downloadTemplate: "Download Template",
+        uploadTemplate: "Upload Template",
+        downloadData: "Download Data",
+      },
+
+      productOptionID: "ProductOption ID",
+      productOptionName: "ProductOption Name",
+      productOptionAction: "Action",
+      productOptionItemName: "Item Name",
+
+      accordion: {
+        general: "General",
+        productOptionItem: "Product Option Item",
+      },
+      emptyState: {
+        productOptionName: "Product Option Name",
+        itemName: "Item Name",
+      },
+      button: {
+        editProductOption: "Edit Product Option",
+      },
+    },
+    customerGroup: {
+      pageTitle: {
+        customergroup: "Customer group",
+        editCustomergroup: "Edit Customer group",
+      },
+      searchBar: {
+        customergroup: "Search Customer group ID,  Customer group Name",
+      },
+      modalTitleCreate: {
+        customergroup: "Create Customer group",
+      },
+      modalTitleUpdate: {
+        customergroup: "Customer group",
+      },
+      tertier: {
+        delete: "Delete",
+        viewDetail: "View Detail",
+        cancel: "Cancel",
+      },
+      secondary: {
+        more: "More",
+      },
+      primary: {
+        create: "Create",
+        save: "Save",
+      },
+      ghost: {
+        downloadTemplate: "Download Template",
+        uploadTemplate: "Upload Template",
+        downloadData: "Download Data",
+      },
+
+      customergroupID: "Customer Group ID",
+      customergroupName: "Customer Group Name",
+      customergroupParent: "Parent",
+      customergroupAction: "Action",
+      customerGroupSubtitle: "General",
+      // customerGroupSubtitle : Associate Customer	Pelanggan Asosiasi
+      emptyState: {
+        name: "Customer group Name",
+        code: "External Code",
+      },
+    },
+    postalCode: {
+      pageTitle: {
+        postalCode: "Postal Code",
+      },
+      searchBar: {
+        postalCode: "Postal Code ID, Postal Code Name",
+      },
+      modalTitleCreate: {
+        postalCode: "Create Postal Code",
+      },
+      modalTitleUpdate: {
+        postalCode: "Postal Code",
+      },
+      tertier: {
+        delete: "Delete",
+        viewDetail: "View Detail",
+      },
+      secondary: {
+        more: "More",
+      },
+      primary: {
+        create: "Create",
+        save: "Save",
+        cancel: "Cancel",
+      },
+      ghost: {
+        downloadTemplate: "Download Template",
+        uploadTemplate: "Upload Template",
+        downloadData: "Download Data",
+      },
+
+      postalCodeID: "Postal Code ID",
+      postalCountryName: "Country Name",
+      postalCode: "Postal Code",
+      postalAction: "Action",
+    },
+    menuList: {
+      pageTitle: {
+        menuList: "Menu List",
+        shipment: "Shipment",
+      },
+      searchBar: {
+        menuList: "Search Menu List Name",
+        field: "Search Field",
+      },
+      tertier: {
+        viewDetail: "View Detail",
+      },
+      tabs: {
+        all: "All",
+        menu: "Menu",
+        process: "Process",
+      },
+      menuList: {
+        action: "Action",
+      },
+      checkBox: {
+        thisMenu: "This Menu Is Process",
+        allowedField: "Allowed Field",
+      },
+      accordion: {
+        general: "General",
+        field: "Field",
+      },
+      filterBar: {
+        associatedModule: "Associated Module",
+      },
+      ghost: {
+        sales: "Sales",
+        marketing: "Marketing",
+        finance: "Finance",
+        logistic: "Logistic",
+      },
+      menuListName: "Menu Name",
+      // menuListName : "Name",
+      menuListScreen: "Screen",
+      menuListFee: "Fee",
+      menuListProcessName: "Process Name",
+      menuListType: "Type",
+    },
+    moduleConfig: {
+      pageTitle: {
+        moduleConfig: "Module Config",
+        moduleName: "Modul Name",
+      },
+      searchBar: {
+        moduleConfig: "Search Modul Name, Search Parent",
+      },
+      filterBar: {
+        parent: "Parent",
+        parentModule: "Parent Module",
+      },
+      ghost: {
+        sales: "Sales",
+        marketing: "Marketing",
+        logistic: "Logistic",
+      },
+      button: {
+        clearFilter: "Clear Filter",
+      },
+      modulConfigName: "Config Name",
+      modulConfigParent: "Parent",
+      modulConfigAction: "Action",
+      tertier: {
+        viewDetail: "View Detail",
+      },
+      primary: {
+        save: "Save",
+      },
+      accordion: {
+        general: "General",
+        subModule: "Sub Module",
+      },
+      emptyState: {
+        name: "Name",
+      },
+      submodule: {
+        module: "Module",
+      },
+    },
+    roleList: {
+      pageTitle: {
+        roleList: "Role List",
+        createRole: "Create Role",
+      },
+      searchBar: {
+        roleList: "Search Role Name",
+        searchPermissions: "Search Permissions",
+      },
+      modalTitleCreate: {
+        roleList: "Create UserList",
+      },
+      tertier: {
+        delete: "Delete",
+        viewDetail: "View Detail",
+        cancel: "Cancel",
+      },
+      primary: {
+        create: "Create",
+        save: "Save",
+      },
+      roleList: {
+        roleName: "Role Name",
+        company: "Company",
+      },
+      userListStatus: "Status",
+      userListAction: "Action",
+      emptyState: {
+        roleList: "Role Name",
+        roleList: "Item Category",
+      },
+      filterBar: {
+        company: "Company",
+        menu: "Menu",
+        permissions: "Permissions",
+        filterName: "FIlter Name",
+      },
+      accordion: {
+        general: "General",
+        permissions: "Permissions",
+        manageField: "Manage Field",
+      },
+      checkBox: {
+        salesQuotation: "Sales Quotation",
+        salesOrder: "Sales Order",
+      },
+    },
+    permissionList: {
+      pageTitle: {
+        permissionList: "Permission List",
+        permissionName: "PermissionList Name",
+        createApproval: "Create Approval",
+      },
+      searchBar: {
+        permissionList: "Search Permission List Name",
+      },
+      tertier: {
+        viewDetail: "View Detail",
+        cancel: "Cancel",
+      },
+      permissionListName: "PermissionList Name",
+      // PermissionListName	Name Permission	Izin Nama
+
+      permissionList: {
+        action: "Action",
+        systemConfig: "System Config",
+        associated: "Associated Menu",
+      },
+      primary: {
+        save: "Save",
+      },
+      filterbar: {
+        menu: "menu",
+        systemBar: "System Bar",
+        module: "Module",
+      },
+      ghost: {
+        marketing: "Marketing",
+        logistic: "Logistic",
+        sales: "Sales",
+        false: "False",
+        true: "True",
+        finance: "Finance",
+        sales: "Sales",
+        humanResource: "Human Resource",
+      },
+      permissionListAssociatedMenu: "Associated Menu",
+      permissionListRole: "Role",
+      secondary: {
+        createApproval: "Create Approval Based on Permission",
+      },
+      toggle: {
+        EmailNotification: "Email Notification",
+      },
+      accordion: {
+        general: "General",
+        approval: "Approval",
+        associatedRole: "Associated Role & User",
+        associatedRole: "Associated Role",
+      },
+      emptyState: {
+        name: "Name",
+        approvalStage: "Approval Stage",
+      },
+      checkBox: {
+        selectHaveApprove: "Select Stage User Have to Appprove",
+      },
+    },
+    salesOrganization: {
+      pageTitle: {
+        salesOrganization: "Sales Organization",
+      },
+      tertier: {
+        downloadTemplate: "Download Template File",
+        browseFile: "Browse FIle",
+        delete: "Delete",
+        no: "No",
+        yes: "Yes",
+        delete: "Delete",
+        cancel: "Cancel",
+      },
+      emptyState: {
+        levelName: "Level Name",
+        labelTemplate: "Use this template to add structure level",
+        labelUpload: "Select or drop your Excel(.xlsx) file here.",
+      },
+      salesOrganizationDownloadandFill: "Download and Fill inExcel File",
+      salesOrganizationUploadTemplate: "Upload Template Excel File",
+      modalTitleUpdate: {
+        delete: "Confirm Delete",
+        manageSales: "Manage Sales Org",
+      },
+
+      buttonAdd: {
+        structureLevel: "Add Stucture Level",
+      },
+      salesOrganizationSubtitle: "1st Level Name",
+      primary: {
+        edit: "Edit",
+        add: "Add",
+        manageData: "Manage Data",
+        save: "Save",
+      },
+
+      searchBar: {
+        salesChannel: "Search",
+        levelName1: "Search",
+        levelName2: "Search 2nd Level Name",
+        levelName3: "Search 3rd Level Name",
+      },
+      ghost: {
+        uploadTemplate: "Upload Template",
+        downloadTemplate: "Download Template",
+        domestic: "Domestic",
+        export: "Export",
+        import: "Import",
+      },
+    },
+    accountGroup: {
+      pageTitle: {
+        accountGroup: "Account Group",
+      },
+      search: "Search Account Group ID, Name,Parent",
+      tertier: {
+        viewDetail: "View Detail",
+        delete: "Delete",
+      },
+      checkBoxAccountGroupID: "Account Group ID",
+      accountGroupParent: "Parent",
+      accountGroupName: "Account Group Name",
+      accountGroupAction: "Action",
+      modalTitleUpdate: {
+        accountGroup: "Account Group",
+      },
+      emptyState: {
+        name: "Name",
+      },
+      filterBar: {
+        parent: "Parent",
+      },
+      primary: {
+        save: "Save",
+        create: "Create",
+      },
+      modalTitleCreate: {
+        accountGroup: "Create Account Group",
+      },
+    },
+    purchaseOrg: {
+      pageTitle: {
+        purchaseOrganization: "Purchase Organization",
+        createPurchaseOrganization: "Create Purchase Organization",
+        purchaseOrgName: "Purchase Organization",
+      },
+      search: "Search Purchase Organizationl ID, Purchase Organization Name",
+      tertier: {
+        delete: "Delete",
+        no: "No",
+        viewDetail: "View Detail",
+        cancel: "Cancel",
+      },
+      primary: {
+        yes: "Yes",
+        create: "Create",
+        save: "Save",
+      },
+      modalTitleUpdate: {
+        delete: "Confirm Delete",
+      },
+      secondary: {
+        more: "More",
+      },
+      ghost: {
+        downloadTemplate: "Download Template",
+        uploadTemplate: "Upload Template",
+        downloadData: "Download Data",
+        check: "Check",
+        uncheck: "Uncheck",
+      },
+      purchaseOrgID: "Purchase Org ID",
+      purchaseOrgName: "Purchase Org Name",
+      purchaseOrgParent: "Parent",
+      purchaseOrgAction: "Action",
+
+      accordion: {
+        purchaseOrg: "Purchase Organization",
+      },
+      emptyState: {
+        productGroupName: "Product Group Name",
+        purchaseGroupName: "Purchase Group Name",
+      },
+      filterbar: {
+        productCategory: "Product Category",
+        parent: "Parent",
+      },
+      modalUpdate: {
+        advanceView: "Advance View",
+      },
+      button: {
+        advanceView: "Advance View",
+      },
+      modal: {
+        productCategory: "Product Category",
+      },
+      filter: {
+        check: "Check",
+      },
+      checkbox: {
+        category: "Category",
+      },
+    },
+    termOfPayment: {
+      pageTitle: {
+        termOfPayment: "Term of Payment",
+      },
+      searchBar: {
+        termOfPayment: "SearchTerm of Payment ID, Payment Term",
+      },
+      modalTitleCreate: {
+        termOfPayment: "Create Term of Payment",
+        addNewTerm: "Add New Term",
+      },
+      modalTitleUpdate: {
+        termOfPayment: "Term of Payment",
+        viewDetail: "View Detail",
+      },
+      tertier: {
+        delete: "Delete",
+        viewDetail: "View Detail",
+        cancel: "Cancel",
+      },
+      secondary: {
+        more: "More",
+      },
+      primary: {
+        create: "Create",
+        save: "Save",
+      },
+      ghost: {
+        downloadTemplate: "Download Template",
+        uploadTemplate: "Upload Template",
+        downloadData: "Download Data",
+      },
+      termofPaymentID: "Term of Payment ID",
+      paymentTerm: "Payment Term",
+      termofPaymentAction: "Action",
+    },
+    currency: {
+      pageTitle: {
+        currency: "Currency",
+      },
+      search: "Search Currency ID, Currency Name",
+      modalTitleCreate: {
+        currency: "Create Currency",
+      },
+      modalTitleUpdate: {
+        currency: "Currency",
+      },
+      tertier: {
+        delete: "Delete",
+        viewDetail: "View Detail",
+        cancel: "Cancel",
+      },
+      secondary: {
+        more: "More",
+      },
+      primary: {
+        create: "Create",
+        save: "Save",
+      },
+      ghost: {
+        downloadTemplate: "Download Template",
+        uploadTemplate: "Upload Template",
+        downloadData: "Download Data",
+      },
+      currencyID: "Currency ID",
+      currencyCode: "Currency Code",
+      currencyName: "Currency Name",
+      currencyAction: "Action",
+    },
+    approvalList: {
+      pageTitle: {
+        approvalList: "Approval List",
+        createApproval: "Create Approval",
+      },
+      searchBar: {
+        approvalName: "Search Approval  Name",
+      },
+      modalTitleCreate: {
+        approvalList: "Create Approval List",
+      },
+      modalTitleUpdate: {
+        approvalList: "Approval List",
+      },
+      filterbar: {
+        module: "Module",
+        process: "Process",
+        permission: "Permission",
+      },
+      ghost: {
+        payment: "Payment",
+        npl: "NPL",
+        finance: "Finance",
+        sales: "Sales",
+        humanResource: "Human Resource",
+        payment: "Payment",
+        deliveryOrder: "Delivery Order",
+        approvalPayment: "Approval Payment",
+        createPayment: "Create Payment",
+        wharehouse: "Wharehouse",
+      },
+      tertier: {
+        delete: "Delete",
+        viewDetail: "View Detail",
+        cancel: "Cancel",
+      },
+      primary: {
+        create: "Create",
+        save: "Save",
+      },
+
+      approvalListName: "Approval Name",
+      approvalListModul: "Modul",
+      approvalListProses: "Proses",
+      approvalListAction: "Action",
+
+      secondary: {
+        button: "Button",
+      },
+      toggle: {
+        emailNotification: "Email Notification",
+      },
+      accordion: {
+        general: "General",
+        approval: "Approval",
+        associatedRole: "Associated Role & User",
+      },
+      approvalName: "Name",
+      emptyState: {
+        approval: "How Many Approval Stage",
+      },
+      checkBox: {
+        selectHaveApprove: "Select Stage User Have to Appprove",
+      },
+    },
+    notification: {
+      pageTitle: {
+        notification: "Sales Channel",
+      },
+      primary: {
+        NewNotification: "New Notification",
+      },
+      notificationReviewApproval: "You Need Review a Approval",
+    },
+    menuDesign: {
+      searchBar: {
+        menuDesign: "Search Menu Design Name",
+      },
+      tertier: {
+        viewDetail: "View Detail",
+        cancel: "Cancel",
+        remove: "Remove",
+        createModule: "Create Module",
+        createMenu: "Create Menu",
+      },
+      menuDesignName: "Menu Design Name",
+      menuDesignAction: "Action",
+
+      pageTitle: {
+        menuDesign: "Menu Design",
+      },
+      primary: {
+        addModule: "Add Module",
+        save: "Save",
+        saveAndContinue: "Save & Continue",
+        add: "Add",
+      },
+      secondary: {
+        button: "Button",
+      },
+      accordion: {
+        general: "General",
+        hyrarchyMenu: "Hierarchy Menu",
+      },
+      menuDesignMenuName: "Menu Name",
+      modalCreate: {
+        addModule: "Add Module",
+        titleConfirmation: "Do you want to leave this Page?",
+      },
+      search: {
+        moduleName: "Search Module Name",
+        menuName: "Menu Name",
+      },
+      checkBox: {
+        moduleName: "Module Name",
+        dashboard: "Dashboard",
+        ordertoCash: "Order to Cash",
+        menuName: "Menu Name",
+        marketing: "Marketing",
+        sfa: "SFA",
+        report: "Report",
+      },
+      subtitle: {
+        sales: "Sales",
+        marketing: "Marketing",
+      },
+      button: {
+        addMenu: "Add Menu",
+      },
+      modalUpdate: {
+        addMenu: "Add Menu",
+      },
+      treecheckbox: {
+        newPromotion: "New Promotion",
+        promotion: "Promotion",
+        pricingStructure: "Pricing Struture",
+        aPandClaim: "AP & Claim",
+        quotation: "Quotation",
+        salesOrder: "Sales Order",
+        deliveryOrder: "Delivery Order",
+        shipment: "Shipment",
+        billing: "Billing",
+        collection: "Collection",
+        undeliverd: "Undeliverd",
+        approval: "Approval",
+      },
+      modalUpdate: {
+        addMenu: "Add Menu",
       },
     },
     salesmanGroup: {
@@ -694,7 +1610,8 @@ export const lang = {
       newUser: "Pengguna baru?",
       createAnAccount: "Buat pengguna baru",
     },
-    currency: {
+    currencyFormat: {
+      currencyFormatCode: "Kode mata uang",
       currencyFormat: "Format Mata Uang",
       currency: "Mata Uang",
       currencyName: "Nama Mata Uang",
@@ -823,6 +1740,922 @@ export const lang = {
         button: {
           save: "Save",
         },
+      },
+    },
+    process: {
+      pageTitle: {
+        processList: "Daftar Proses",
+        processName: "Nama proses",
+        createApproval: "Buat Persetujuan",
+      },
+      searchBar: {
+        processList: "Cari Nama Proses Bisnis",
+      },
+      tertier: {
+        viewDetail: "Lihat Detail",
+      },
+      permissionList: {
+        name: "Nama Daftar Proses",
+        module: "Modul",
+        action: "Tindakan",
+      },
+      filterbar: {
+        module: "Modul",
+      },
+      ghost: {
+        marketing: "Pemasaran",
+        logistic: "Logistik",
+        sales: "Penjualan",
+        finance: "Keuangan",
+        humanResource: "Sumber daya manusia",
+        viewDetailBusinessProcess: "Lihat Detail Proses Bisnis",
+      },
+      primary: {
+        save: "Menyimpan",
+      },
+      secondary: {
+        createApproval: "Buat Persetujuan Berdasarkan Izin",
+      },
+      tertier: {
+        viewDetail: "Lihat Detail",
+        cancel: "Membatalkan",
+      },
+      accordion: {
+        general: "Umum",
+        associatedBusiness: "Proses Bisnis Terkait",
+        approval: "Persetujuan",
+        associatedRole: "Peran & Pengguna Terkait",
+      },
+      processListName: "Nama",
+      processListModule: "Modul",
+      processListBusinessProcess: "Nama Proses Bisnis",
+      toogle: {
+        emailNotification: "Pemberitahuan Email",
+      },
+      emptyState: {
+        approvalStage: "Tahap Persetujuan",
+        name: "Nama",
+      },
+      checkBox: {
+        selectHaveApprove: "Pilih Tahap Pengguna Harus Menyetujui",
+      },
+    },
+    businessProcess: {
+      pageTitle: {
+        businessProcess: "Proses bisnis",
+        businessProcess: "Proses bisnis",
+        ordertoCash: "Pesan ke Tunai",
+      },
+      searchBar: {
+        businessProcess: "Cari Nama Proses Bisnis",
+      },
+      modalTitleCreate: {
+        businessProcess: "Buat Proses Bisnis",
+      },
+      modalTitleUpdate: {
+        businessProcess: "Proses bisnis",
+        editProcess: "Edit Proses",
+      },
+      primary: {
+        create: "Membuat",
+        save: "Menyimpan",
+      },
+      tertier: {
+        viewDetail: "Lihat Detail",
+        cancel: "Membatalkan",
+      },
+      businessProcessStatus: "Status",
+      businessProcessAction: "Tindakan",
+      businessProcessName: "Nama Proses Bisnis",
+      businessProcessSequence: "Urutan",
+      businessProcessProcess: "Proses",
+      businessProcessMandatory: "Wajib",
+      ghost: {
+        published: "Diterbitkan",
+        draft: "Konsep",
+        mandatory: "Wajib",
+        notMandatory: "Tidak wajib",
+        active: "Aktif",
+        inactive: "Tidak aktif",
+      },
+      accordion: {
+        general: "Umum",
+        processes: "Proses",
+      },
+      emptyState: {
+        name: "Nama",
+        process: "	Proses",
+      },
+      process: {
+        visualization: "visualisasi proses",
+      },
+      filterbar: {
+        mandaroty: "Wajib",
+        status: "Status",
+      },
+    },
+    uomCategory: {
+      pageTitle: {
+        uoMCategory: "Kategori UoM",
+      },
+      searchBar: {
+        uoMCategory: "Cari ID Kategori UoM, Nama Kategori UoM",
+      },
+      modalTitleCreate: {
+        uoMCategory: "Buat Kategori UoM",
+      },
+      modalTitleUpdate: {
+        uoMCategory: "Kategori UoM",
+      },
+      tertier: {
+        delete: "Menghapus",
+        viewDetail: "Melihat rincian",
+        cancel: "Membatalkan",
+      },
+      secondary: {
+        more: "Lebih",
+      },
+      primary: {
+        create: "Membuat",
+        save: "Menyimpan",
+      },
+      ghost: {
+        downloadTemplate: "Unduh Template",
+        uploadTemplate: "Unggah Template",
+        downloadData: "Unduh Data",
+      },
+      uoMCategoryID: "ID Kategori UoM",
+      uoMCategoryName: "Nama Kategori UoM",
+      uoMCategoryAction: "Tindakan",
+      uoMCategoryParet: "Induk",
+    },
+    unitOfMeasure: {
+      pageTitle: {
+        uoM: "Satuan Ukuran",
+        create: "Buat Satuan Ukuran",
+      },
+      searchBar: {
+        uoM: "Cari Unit Meansure ID, Unit MeansureName",
+      },
+      modalTitleCreate: {
+        uoM: "Buat Satuan Ukuran",
+      },
+      modalTitleUpdate: {
+        uoM: "Satuan Ukuran",
+      },
+      tertier: {
+        delete: "Menghapus",
+        viewDetail: "Lihat Detail",
+        cancel: "Membatalkan",
+      },
+      secondary: {
+        more: "Lebih",
+      },
+      primary: {
+        create: "Membuat",
+        save: "Menyimpan",
+      },
+      ghost: {
+        downloadTemplate: "Unduh Template",
+        uploadTemplate: "Unggah Template",
+        downloadData: "Unduh Data",
+        status: "Status",
+        category: "Kategori Uom",
+      },
+      uoMID: "Satuan Ukuran ID",
+      uoMName: "Satuan Nama Ukuran",
+      uoMCategory: "Kategori Unit Pengukuran",
+      uoMAction: "Tindakan",
+
+      accordion: {
+        general: "informasi produk",
+      },
+      emptyState: {
+        uoMName: "Biaya Produk",
+        uoMFormat: "Nama UoM",
+      },
+    },
+    productBrand: {
+      pageTitle: {
+        productBrand: "Merek Produk",
+      },
+      searchBar: {
+        productBrand: "Cari ID Merek Produk, Nama Merek Produk",
+      },
+      modalTitleCreate: {
+        productBrand: "Buat Merek Produk",
+      },
+      modalTitleUpdate: {
+        productBrand: "Merek Produk",
+      },
+      modalTitleUpdate: {
+        viewDetail: "Lihat Detail",
+      },
+      tertier: {
+        viewDetail: "Lihat Detail",
+        cancel: "Membatalkan",
+        delete: "Menghapus",
+      },
+      secondary: {
+        more: "Lebih",
+      },
+      primary: {
+        create: "Membuat",
+        save: "Menyimpan",
+      },
+      ghost: {
+        downloadTemplate: "Unduh Template",
+        uploadTemplate: "Unggah Template",
+        downloadData: "Unduh Data",
+      },
+      productBrandID: "ID Merek Produk",
+      productBrandName: "Nama Merek Produk",
+      productBrandParent: "Induk",
+      productBrandAction: "Tindakan",
+    },
+    productOption: {
+      pageTitle: {
+        productOption: "Opsi Produk",
+        productOptionName: "Buat Opsi Produk",
+        createProductOption: "Buat Opsi Produk",
+      },
+      searchBar: {
+        productOption: "Cari ID Saluran Penjualan, Nama Saluran Penjualan",
+      },
+      modalTitleCreate: {
+        productOption: "Buat Saluran Penjualan",
+        addProductOption: "Tambahkan Opsi Produk",
+      },
+      modalTitleUpdate: {
+        productOption: "Pilihan Produk",
+      },
+      tertier: {
+        delete: "Menghapus",
+        viewDetail: "Lihat Detail",
+        cancel: "Membatalkan",
+        addNew: "Tambah baru",
+      },
+      secondary: {
+        more: "Lebih",
+      },
+      primary: {
+        create: "Membuat",
+        save: "Menyimpan",
+      },
+      ghost: {
+        downloadTemplate: "Unduh Template",
+        uploadTemplate: "Unggah Template",
+        downloadData: "Unduh Data",
+      },
+
+      productOptionID: "ID Opsi Produk",
+      productOptionName: "Nama Opsi Produk",
+      productOptionAction: "Tindakan",
+      productOptionItemName: "Nama barang",
+
+      accordion: {
+        general: "Umum",
+        productOptionItem: "Item Opsi Produk",
+      },
+      emptyState: {
+        productOptionName: "Nama Opsi Produk",
+        itemName: "Nama barang",
+      },
+      button: {
+        editProductOption: "Sunting Opsi Produk",
+      },
+    },
+    customerGroup: {
+      pageTitle: {
+        customergroup: "Grup pelanggan",
+        editCustomergroup: "Ubah Grup pelanggan",
+      },
+      searchBar: {
+        customergroup: "Cari ID grup Pelanggan, Nama grup Pelanggan",
+      },
+      modalTitleCreate: {
+        customergroup: "Buat grup Pelanggan",
+      },
+      modalTitleUpdate: {
+        customergroup: "Grup pelanggan",
+      },
+      tertier: {
+        delete: "Menghapus",
+        viewDetail: "Lihat Detail",
+        cancel: "Membatalkan",
+      },
+      secondary: {
+        more: "Lebih",
+      },
+      primary: {
+        create: "Membuat",
+        save: "Menyimpan",
+      },
+      ghost: {
+        downloadTemplate: "Unduh Template",
+        uploadTemplate: "Unggah Template",
+        downloadData: "Unduh Data",
+      },
+
+      customergroupID: "ID Grup Pelanggan",
+      customergroupName: "Nama Grup Pelanggan",
+      customergroupParent: "Induk",
+      customergroupAction: "Tindakan",
+      customerGroupSubtitle: "Umum",
+      // customerGroupSubtitle : Associate Customer	Pelanggan Asosiasi
+      emptyState: {
+        name: "Nama grup pelanggan",
+        code: "Kode Eksternal",
+      },
+    },
+    postalCode: {
+      pageTitle: {
+        postalCode: "Kode Pos",
+      },
+      searchBar: {
+        postalCode: "ID Kode Pos, Nama Kode Pos",
+      },
+      modalTitleCreate: {
+        postalCode: "Buat Kode Pos",
+      },
+      modalTitleUpdate: {
+        postalCode: "Kode Pos",
+      },
+      tertier: {
+        delete: "Menghapus",
+        viewDetail: "Lihat Detail",
+      },
+      secondary: {
+        more: "Lebih",
+      },
+      primary: {
+        create: "Membuat",
+        save: "Menyimpan",
+        cancel: "Membatalkan",
+      },
+      ghost: {
+        downloadTemplate: "Unduh Template",
+        uploadTemplate: "Unggah Template",
+        downloadData: "Unduh Data",
+      },
+
+      postalCodeID: "ID Kode Pos",
+      postalCountryName: "Nama negara",
+      postalCode: "Kode Pos",
+      postalAction: "Tindakan",
+    },
+    menuList: {
+      pageTitle: {
+        menuList: "Daftar menu",
+        shipment: "Pengiriman",
+      },
+      searchBar: {
+        menuList: "Cari Nama Daftar Menu",
+        field: "Bidang Pencarian",
+      },
+      tertier: {
+        viewDetail: "Lihat Detail",
+      },
+      tabs: {
+        all: "Semua",
+        menu: "Menu",
+        process: "Proses",
+      },
+      menuList: {
+        action: "Tindakan",
+      },
+      checkBox: {
+        thisMenu: "Menu Ini Adalah Proses",
+        allowedField: "Bidang yang Diizinkan",
+      },
+      accordion: {
+        general: "Umum",
+        field: "Bidang",
+      },
+      filterBar: {
+        associatedModule: "Modul Terkait",
+      },
+      ghost: {
+        sales: "Penjualan",
+        marketing: "Pemasaran",
+        finance: "Keuangan",
+        logistic: "Logistik",
+      },
+      menuListName: "Nama Menu",
+      // menuListName : "Nama",
+      menuListScreen: "Layar",
+      menuListFee: "Biaya",
+      menuListProcessName: "Nama proses",
+      menuListType: "Jenis",
+    },
+    moduleConfig: {
+      pageTitle: {
+        moduleConfig: "Konfigurasi Modul",
+        moduleName: "Nama Modul",
+      },
+      searchBar: {
+        moduleConfig: "Cari Nama Modul, Cari Induk",
+      },
+      filterBar: {
+        parent: "Induk",
+        parentModule: "Modul Orang Tua",
+      },
+      ghost: {
+        sales: "Penjualan",
+        marketing: "Pemasaran",
+        logistic: "Logistik",
+      },
+      button: {
+        clearFilter: "Hapus Filter",
+      },
+      modulConfigName: "Nama Konfigurasi",
+      modulConfigParent: "Induk",
+      modulConfigAction: "Tindakan",
+      tertier: {
+        viewDetail: "Lihat Detail",
+      },
+      primary: {
+        save: "Menyimpan",
+      },
+      accordion: {
+        general: "Umum",
+        subModule: "Sub Modul",
+      },
+      emptyState: {
+        name: "Nama",
+      },
+      submodule: {
+        module: "Modul",
+      },
+    },
+    roleList: {
+      pageTitle: {
+        roleList: "Daftar Peran",
+        createRole: "Buat Peran",
+      },
+      searchBar: {
+        roleList: "Cari Nama Peran",
+        searchPermissions: "Izin Pencarian",
+      },
+      modalTitleCreate: {
+        roleList: "Buat Daftar Pengguna",
+      },
+      tertier: {
+        delete: "Menghapus",
+        viewDetail: "Lihat Detail",
+        cancel: "Membatalkan",
+      },
+      primary: {
+        create: "Membuat",
+        save: "Menyimpan",
+      },
+      roleList: {
+        roleName: "Nama peran",
+        company: "Perusahaan",
+      },
+      userListStatus: "Status",
+      userListAction: "Tindakan",
+      emptyState: {
+        roleList: "Nama peran",
+        roleList: "Kategori Barang",
+      },
+      filterBar: {
+        company: "Perusahaan",
+        menu: "Menu",
+        permissions: "Izin",
+        filterName: "Nama Filter",
+      },
+      accordion: {
+        general: "Umum",
+        permissions: "Izin",
+        manageField: "Kelola Bidang",
+      },
+      checkBox: {
+        salesQuotation: "Kutipan Penjualan",
+        salesOrder: "Order penjualan",
+      },
+    },
+    permissionList: {
+      pageTitle: {
+        permissionList: "Daftar Izin",
+        permissionName: "Nama Daftar Izin",
+        createApproval: "Buat Persetujuan",
+      },
+      searchBar: {
+        permissionList: "Cari Nama Daftar Izin",
+      },
+      tertier: {
+        viewDetail: "Lihat Detail",
+        cancel: "Membatalkan",
+      },
+      permissionListName: "Nama Daftar Izin",
+      // PermissionListName	Name Permission	Izin Nama
+
+      permissionList: {
+        action: "Tindakan",
+        systemConfig: "Konfigurasi Sistem",
+        associated: "Menu Terkait",
+      },
+      primary: {
+        save: "Menyimpan",
+      },
+      filterbar: {
+        menu: "Tidak bisa",
+        systemBar: "Bilah Sistem",
+        module: "Modul",
+      },
+      ghost: {
+        marketing: "Pemasaran",
+        logistic: "Logistik",
+        sales: "Penjualan",
+        false: "Salah",
+        true: "Benar",
+        finance: "Keuangan",
+        sales: "Penjualan",
+        humanResource: "Sumber daya manusia",
+      },
+      permissionListAssociatedMenu: "Menu Terkait",
+      permissionListRole: "Peran",
+      secondary: {
+        createApproval: "Buat Persetujuan Berdasarkan Izin",
+      },
+      toggle: {
+        EmailNotification: "pemberitahuan email",
+      },
+      accordion: {
+        general: "Umum",
+        approval: "Persetujuan",
+        associatedRole: "Peran & Pengguna Terkait",
+        associatedRole: "Peran Terkait",
+      },
+      emptyState: {
+        name: "Nama",
+        approvalStage: "Tahap Persetujuan",
+      },
+      checkBox: {
+        selectHaveApprove: "Pilih Tahap Pengguna Harus Menyetujui",
+      },
+    },
+    salesOrganization: {
+      pageTitle: {
+        salesOrganization: "Organisasi penjualan",
+      },
+      tertier: {
+        downloadTemplate: "Unduh Template",
+        browseFile: "Jelajahi FIle",
+        delete: "Menghapus",
+        no: "Tidak",
+        yes: "Ya",
+        delete: "Menghapus",
+        cancel: "Membatalkan",
+      },
+      emptyState: {
+        levelName: "Nama Level",
+        labelTemplate: "Gunakan template ini untuk menambahkan level struktur",
+        labelUpload: "Pilih atau jatuhkan file Excel(.xlsx) Anda di sini.",
+      },
+      salesOrganizationDownloadandFill: "Unduh dan Isi File Excel",
+      salesOrganizationUploadTemplate: "Unggah File Template Excel",
+      modalTitleUpdate: {
+        delete: "Confirm Hapus",
+        manageSales: "Kelola Organisasi Penjualan",
+      },
+
+      buttonAdd: {
+        structureLevel: "Tambah Tingkat Struktur",
+      },
+      salesOrganizationSubtitle: "Nama Tingkat 1",
+      primary: {
+        edit: "Sunting",
+        add: "Menambahkan",
+        manageData: "Kelola Data",
+        save: "Menyimpan",
+      },
+
+      searchBar: {
+        salesChannel: "Mencari",
+        levelName1: "Mencari",
+        levelName2: "Cari Nama Level 2",
+        levelName3: "Cari Nama Level 3",
+      },
+      ghost: {
+        uploadTemplate: "Unggah Template",
+        downloadTemplate: "Unduh Template",
+        domestic: "Lokal",
+        export: "Ekspor",
+        import: "Impor",
+      },
+    },
+    accountGroup: {
+      pageTitle: {
+        accountGroup: "Grup Akun",
+      },
+      search: "Cari ID Grup Akun, Nama, Orang Tua",
+      tertier: {
+        viewDetail: "Lihat Detail",
+        delete: "Menghapus",
+      },
+      checkBoxAccountGroupID: "ID Grup Akun",
+      accountGroupParent: "Induk",
+      accountGroupName: "Nama Grup Akun",
+      accountGroupAction: "Tindakan",
+      modalTitleUpdate: {
+        accountGroup: "Grup Akun",
+      },
+      emptyState: {
+        name: "Nama",
+      },
+      filterBar: {
+        parent: "Induk",
+      },
+      primary: {
+        save: "Menyimpan",
+        create: "Membuat",
+      },
+      modalTitleCreate: {
+        accountGroup: "Buat Grup Akun",
+      },
+    },
+    purchaseOrg: {
+      pageTitle: {
+        purchaseOrganization: "Organisasi Pembelian",
+        createPurchaseOrganization: "Buat Organisasi Pembelian",
+        purchaseOrgName: "Organisasi Pembelian",
+      },
+      search: "Cari ID Organisasi Pembelian, Nama Organisasi Pembelian",
+      tertier: {
+        delete: "Menghapus",
+        no: "Tidak",
+        viewDetail: "Lihat Detail",
+        cancel: "Membatalkan",
+      },
+      primary: {
+        yes: "Ya",
+        create: "Membuat",
+        save: "Menyimpan",
+      },
+      modalTitleUpdate: {
+        delete: "Konfirmasi Hapus",
+      },
+      secondary: {
+        more: "Lebih",
+      },
+      ghost: {
+        downloadTemplate: "Unduh Template",
+        uploadTemplate: "Unggah Template",
+        downloadData: "Unduh Data",
+        check: "Memeriksa",
+        uncheck: "Hapus centang",
+      },
+      purchaseOrgID: "Beli ID Organisasi",
+      purchaseOrgName: "Nama Organisasi Pembelian",
+      purchaseOrgParent: "Induk",
+      purchaseOrgAction: "Tindakan",
+
+      accordion: {
+        purchaseOrg: "Organisasi Pembelian",
+      },
+      emptyState: {
+        productGroupName: "Nama Grup Produk",
+        purchaseGroupName: "Nama Grup Pembelian",
+      },
+      filterbar: {
+        productCategory: "Kategori Produk",
+        parent: "Induk",
+      },
+      modalUpdate: {
+        advanceView: "Tampilan Lanjutan",
+      },
+      button: {
+        advanceView: "Tampilan Lanjutan",
+      },
+      modal: {
+        productCategory: "Kategori Produk",
+      },
+      filter: {
+        check: "Memeriksa",
+      },
+      checkbox: {
+        category: "Kategori",
+      },
+    },
+    termOfPayment: {
+      pageTitle: {
+        termOfPayment: "Jangka Waktu Pembayaran",
+      },
+      searchBar: {
+        termOfPayment: "Cari ID Jangka Waktu Pembayaran, Jangka waktu pembayaran",
+      },
+      modalTitleCreate: {
+        termOfPayment: "Buat Jangka Waktu Pembayaran",
+        addNewTerm: "Tambahkan Ketentuan Baru",
+      },
+      modalTitleUpdate: {
+        termOfPayment: "Jangka Waktu Pembayaran",
+        viewDetail: "Lihat Detail",
+      },
+      tertier: {
+        delete: "Menghapus",
+        viewDetail: "Lihat Detail",
+        cancel: "Membatalkan",
+      },
+      secondary: {
+        more: "Lebih",
+      },
+      primary: {
+        create: "Membuat",
+        save: "Menyimpan",
+      },
+      ghost: {
+        downloadTemplate: "Unduh Template",
+        uploadTemplate: "Unggah Template",
+        downloadData: "Unduh Data",
+      },
+      termofPaymentID: "ID Jangka waktu pembayaran",
+      paymentTerm: "Jangka waktu pembayaran",
+      termofPaymentAction: "Tindakan",
+    },
+    currency: {
+      pageTitle: {
+        currency: "Mata uang",
+      },
+      search: "Cari ID Mata Uang, Nama Mata Uang",
+      modalTitleCreate: {
+        currency: "Buat Mata Uang",
+      },
+      modalTitleUpdate: {
+        currency: "Mata uang",
+      },
+      tertier: {
+        delete: "Menghapus",
+        viewDetail: "Lihat Detail",
+        cancel: "Cancel",
+      },
+      secondary: {
+        more: "Lebih",
+      },
+      primary: {
+        create: "Membuat",
+        save: "Menyimpan",
+      },
+      ghost: {
+        downloadTemplate: "Unduh Template",
+        uploadTemplate: "Unggah Template",
+        downloadData: "Unduh Data",
+      },
+      currencyID: "ID mata uang",
+      currencyCode: "Kode mata uang",
+      currencyName: "Nama Mata Uang",
+      currencyAction: "Tindakan",
+    },
+    approvalList: {
+      pageTitle: {
+        approvalList: "Daftar Persetujuan",
+        createApproval: "Buat Persetujuan",
+      },
+      searchBar: {
+        approvalName: "Cari Nama Persetujuan",
+      },
+      modalTitleCreate: {
+        approvalList: "Buat Daftar Persetujuan",
+      },
+      modalTitleUpdate: {
+        approvalList: "Daftar Persetujuan",
+      },
+      filterbar: {
+        module: "Modul",
+        process: "Proses",
+        permission: "Izin",
+      },
+      ghost: {
+        payment: "Pembayaran",
+        npl: "NPL",
+        finance: "Keuangan",
+        sales: "Penjualan",
+        humanResource: "Sumber daya manusia",
+        payment: "Pembayaran",
+        deliveryOrder: "Pesan antar",
+        approvalPayment: "Pembayaran Persetujuan",
+        createPayment: "Buat Pembayaran",
+        wharehouse: "Gudang",
+      },
+      tertier: {
+        delete: "Menghapus",
+        viewDetail: "Lihat Detail",
+        cancel: "Membatalkan",
+      },
+      primary: {
+        create: "Membuat",
+        save: "Menyimpan",
+      },
+
+      approvalListName: "Nama Persetujuan",
+      approvalListModul: "Modul",
+      approvalListProses: "Proses",
+      approvalListAction: "Tindakan",
+
+      secondary: {
+        button: "Tombol",
+      },
+      toggle: {
+        emailNotification: "Pemberitahuan Email",
+      },
+      accordion: {
+        general: "Umum",
+        approval: "Persetujuan",
+        associatedRole: "Peran & Pengguna Terkait",
+      },
+      approvalName: "Nama",
+      emptyState: {
+        approval: "Berapa Banyak Tahap Persetujuan",
+      },
+      checkBox: {
+        selectHaveApprove: "Pilih Tahap Pengguna Harus Menyetujui",
+      },
+    },
+    notification: {
+      pageTitle: {
+        notification: "Saluran penjualan",
+      },
+      primary: {
+        NewNotification: "Notifikasi Baru",
+      },
+      notificationReviewApproval: "Kamu membutuhkan Persetujuan Tinjauan",
+    },
+    menuDesign: {
+      searchBar: {
+        menuDesign: "Cari Nama Desain Menu",
+      },
+      tertier: {
+        viewDetail: "Lihat Detail",
+        cancel: "Membatalkan",
+        remove: "Menghapus",
+        createModule: "Buat Modul",
+        createMenu: "Buat Menu",
+      },
+      menuDesignName: "Nama Desain Menu",
+      menuDesignAction: "Tindakan",
+
+      pageTitle: {
+        menuDesign: "Desain Menu",
+      },
+      primary: {
+        addModule: "Tambah Modul",
+        save: "Menyimpan",
+        saveAndContinue: "Simpan & Lanjutkan",
+        add: "Tambahkan",
+      },
+      secondary: {
+        button: "Tombol",
+      },
+      accordion: {
+        general: "Umum",
+        hyrarchyMenu: "Menu Hirarki",
+      },
+      menuDesignMenuName: "Nama Menu",
+      modalCreate: {
+        addModule: "Tambahkan Modul",
+        titleConfirmation: "Apakah Anda ingin meninggalkan Halaman ini?",
+      },
+      search: {
+        moduleName: "Cari Nama Modul",
+        menuName: "Nama Menu",
+      },
+      checkBox: {
+        moduleName: "Nama Modul",
+        dashboard: "Dasbor",
+        ordertoCash: "Pesan ke Tunai",
+        menuName: "Nama Menu",
+        marketing: "Pemasaran",
+        sfa: "SFA",
+        report: "Laporan",
+      },
+      subtitle: {
+        sales: "Penjualan",
+        marketing: "Pemasaran",
+      },
+      button: {
+        addMenu: "Tambahkan Menu",
+      },
+      modalUpdate: {
+        addMenu: "Tambahkan Menu",
+      },
+      treecheckbox: {
+        newPromotion: "Promosi Baru",
+        promotion: "Promosi",
+        pricingStructure: "Struktur Harga",
+        aPandClaim: "AP & Klaim",
+        quotation: "Menambahkan",
+        salesOrder: "Order penjualan",
+        deliveryOrder: "Pesan antar",
+        shipment: "Pengiriman",
+        billing: "Penagihan",
+        collection: "Koleksi",
+        undeliverd: "Tidak terkirim",
+        approval: "Persetujuan",
+      },
+      modalUpdate: {
+        addMenu: "Tambahkan Menu",
       },
     },
     salesmanGroup: {

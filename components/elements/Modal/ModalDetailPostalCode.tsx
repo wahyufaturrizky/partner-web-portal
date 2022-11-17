@@ -8,6 +8,7 @@ import {
   useCountryStructures,
   useUpdatePostalCode,
 } from "../../../hooks/mdm/postal-code/usePostalCode";
+import { lang } from "lang";
 
 const schema = yup
   .object({
@@ -44,7 +45,7 @@ export const ModalDetailPostalCode: any = ({
   const [selectedCountry, setSelectedCountry] = useState(dataModal.country);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedCountryStructures, setSelectedCountryStructures] = useState([]);
-
+  const t = localStorage.getItem("lan") || "en-US";
   const { data: countries, isLoading: isLoadingCountries } = useCountries({
     options: {
       onSuccess: () => {},
@@ -92,7 +93,7 @@ export const ModalDetailPostalCode: any = ({
     <Modal
       visible={visible}
       onCancel={onCancel}
-      title={"Postal Code"}
+      title={lang[t].postalCode.modalTitleUpdate.postalCode}
       footer={
         !isLoadingCountries && (
           <div
@@ -105,7 +106,7 @@ export const ModalDetailPostalCode: any = ({
             }}
           >
             <Button onClick={handleSubmit(onSubmit)} variant="primary" size="big">
-              {isLoading ? "Loading" : "Save"}
+              {isLoading ? "Loading" : lang[t].postalCode.primary.save}
             </Button>
           </div>
         )
@@ -120,7 +121,7 @@ export const ModalDetailPostalCode: any = ({
           ) : (
             <>
               <Dropdown
-                label="Country"
+                label={lang[t].postalCode.postalCountryName}
                 width={"100%"}
                 defaultValue={dataModal?.countryRecord?.name}
                 items={countries.rows.map((data: any) => ({ id: data.id, value: data.name }))}
@@ -162,7 +163,7 @@ export const ModalDetailPostalCode: any = ({
               <Input
                 error={errors?.code?.message}
                 {...register("code", { required: true })}
-                label="Postal Code"
+                label={lang[t].postalCode.postalCode}
                 defaultValue={dataModal?.code}
                 placeholder={"e.g 40551"}
               />

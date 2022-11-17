@@ -1,4 +1,5 @@
 import usePagination from "@lucasmogari/react-pagination";
+import { lang } from "lang";
 import Image from "next/image";
 import Router from "next/router";
 import {
@@ -33,6 +34,7 @@ import {
 import { useFilterListPermissions, usePermissions } from "../../hooks/permission/usePermission";
 
 const DetailMenuList: any = () => {
+	const t = localStorage.getItem("lan") || "en-US";
 	const [isLoading, setIsLoading] = useState(true);
 	const [searchAllowedField, setSearchAllowedField] = useState("");
 	const [searchTableField, setSearchTableField] = useState("");
@@ -308,7 +310,7 @@ const DetailMenuList: any = () => {
 
 	const columns = [
 		{
-			title: "Allowed Field",
+			title: lang[t].menuList.checkBox.allowedField,
 			dataIndex: "allowed_field",
 		},
 	];
@@ -588,7 +590,7 @@ const DetailMenuList: any = () => {
 								<Row alignItems="center">
 									<Checkbox disabled checked={isMenuProcess} onChange={onChangeIsMenuProcess} />
 									<div style={{ cursor: "pointer" }}>
-										<Text variant={"subtitle1"}>This menu is Process</Text>
+										<Text variant={"subtitle1"}>{lang[t].menuList.checkBox.thisMenu}</Text>
 									</div>
 								</Row>
 							</Col>
@@ -600,13 +602,13 @@ const DetailMenuList: any = () => {
 
 				<Accordion>
 					<Accordion.Item key={1}>
-						<Accordion.Header variant="blue">General</Accordion.Header>
+						<Accordion.Header variant="blue">{lang[t].menuList.accordion.general}</Accordion.Header>
 						<Accordion.Body>
 							<Row width="100%" gap="20px" noWrap>
 								<Input
 									id="name"
 									width="100%"
-									label="Name"
+									label={lang[t].menuList.menuListName}
 									value={name}
 									height="48px"
 									placeholder={"e.g Shipment and Delivery"}
@@ -616,7 +618,7 @@ const DetailMenuList: any = () => {
 								<Input
 									id="screen"
 									width="100%"
-									label="Screen"
+									label={lang[t].menuList.menuListScreen}
 									value={screen}
 									onChange={handleChangeInput}
 									height="48px"
@@ -630,7 +632,7 @@ const DetailMenuList: any = () => {
 									id="fee"
 									width="100%"
 									value={fee}
-									label="Permission Fee"
+									label={lang[t].menuList.menuListFee}
 									onChange={handleChangeInput}
 									height="48px"
 									placeholder={"e.g 10.000"}
@@ -653,7 +655,7 @@ const DetailMenuList: any = () => {
 							<Spacer size={20} />
 							<Row>
 							<Col>
-								<Text variant="headingRegular">Associated Module</Text>
+								<Text variant="headingRegular">{lang[t].menuList.filterBar.associatedModule}</Text>
 								<Spacer size={16} />
 								<Row>
 									{dataAssociatedPermissionsField?.map((data:any) => {
@@ -677,14 +679,14 @@ const DetailMenuList: any = () => {
 					<Accordion.Item key={1}>
 						<Accordion.Header variant="blue">
 							<Row gap="8px" alignItems="baseline">
-								Allowed Field
+								{lang[t].menuList.checkBox.allowedField}
 							</Row>
 						</Accordion.Header>
 						<Accordion.Body>
 							<Row justifyContent="space-between">
 								<Search
 									width="380px"
-									placeholder="Search Menu Name"
+									placeholder={lang[t].menuList.searchBar.menuList}
 									onChange={(e) => setSearchAllowedField(e.target.value)}
 								/>
 							</Row>

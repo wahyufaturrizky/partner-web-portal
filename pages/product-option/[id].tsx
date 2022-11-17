@@ -15,8 +15,10 @@ import {
 } from "../../hooks/mdm/product-option/useProductOptionMDM";
 import { queryClient } from "../_app";
 import { ModalDeleteConfirmation } from "../../components/elements/Modal/ModalConfirmationDelete";
+import { lang } from "lang";
 
 const ProductOptionDetail = () => {
+  const t = localStorage.getItem("lan") || "en-US";
   const router = useRouter();
   const companyId = localStorage.getItem("companyId")
   const companyCode = localStorage.getItem("companyCode")
@@ -123,7 +125,7 @@ const ProductOptionDetail = () => {
       dataIndex: "id",
     },
     {
-      title: "Action",
+      title: lang[t].productOption.productOptionAction,
       dataIndex: "action",
       width: "15%",
       align: "left",
@@ -149,7 +151,7 @@ const ProductOptionDetail = () => {
       },
     },
     {
-      title: "Item Name",
+      title: lang[t].productOption.productOptionItemName,
       dataIndex: "name",
     },
   ];
@@ -176,10 +178,10 @@ const ProductOptionDetail = () => {
           <Row justifyContent="flex-end" alignItems="center" nowrap>
             <Row gap="16px">
               <Button size="big" variant={"tertiary"} onClick={() => setShowDeleteModal(true)}>
-                Delete
+                {lang[t].productOption.tertier.delete}
               </Button>
               <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
-                {isLoadingUpdateProductOption ? "Loading..." : "Save"}
+                {isLoadingUpdateProductOption ? "Loading..." : lang[t].productOption.primary.save}
               </Button>
             </Row>
           </Row>
@@ -189,14 +191,14 @@ const ProductOptionDetail = () => {
 
         <Accordion>
           <Accordion.Item key={1}>
-            <Accordion.Header variant="blue">General</Accordion.Header>
+            <Accordion.Header variant="blue">{lang[t].productOption.accordion.general}</Accordion.Header>
             <Accordion.Body>
               <Row width="100%" noWrap>
                 <Col width={"50%"}>
                   <Input
                     width="100%"
                     defaultValue={dataProductOption?.name}
-                    label="Product Option Name"
+                    label={lang[t].productOption.emptyState.productOptionName}
                     height="40px"
                     placeholder={"e.g Flavour"}
                     {...register("name", { required: "Please enter name." })}
@@ -211,14 +213,14 @@ const ProductOptionDetail = () => {
 
         <Accordion>
           <Accordion.Item key={1}>
-            <Accordion.Header variant="blue">Product Options Item</Accordion.Header>
+            <Accordion.Header variant="blue">{lang[t].productOption.accordion.productOptionItem}</Accordion.Header>
             <Accordion.Body>
               <Button
                 size="big"
                 variant={"tertiary"}
                 onClick={() => setModalChannelForm({ open: true, typeForm: "create", data: {} })}
               >
-                <ICPlus /> Add New
+                <ICPlus /> {lang[t].productOption.tertier.addNew}
               </Button>
 
               <Spacer size={20} />
@@ -249,7 +251,7 @@ const ProductOptionDetail = () => {
             visible={modalChannelForm.open}
             onCancel={() => setModalChannelForm({ open: false, data: {}, typeForm: "" })}
             title={
-              modalChannelForm.typeForm === "create" ? "Add Product Option" : "Edit Product Option"
+              modalChannelForm.typeForm === "create" ? lang[t].productOption.modalTitleCreate.addProductOption : lang[t].productOption.modalTitleUpdate.productOption
             }
             footer={null}
             content={
@@ -265,7 +267,7 @@ const ProductOptionDetail = () => {
                 <Input
                   defaultValue={modalChannelForm.data?.name}
                   width="100%"
-                  label="Item Name"
+                  label={lang[t].productOption.emptyState.itemName}
                   height="48px"
                   required
                   placeholder={"e.g Strawberry"}
@@ -290,13 +292,13 @@ const ProductOptionDetail = () => {
                     type="primary"
                     onClick={() => setModalChannelForm({ open: false, data: {}, typeForm: "" })}
                   >
-                    Cancel
+                    {lang[t].productOption.tertier.cancel}
                   </Button>
 
                   <Button onClick={handleSubmit(handleAddItem)} variant="primary" size="big">
                     {isLoadingCreateProductOptionItem || isLoadingUpdateProductOptionItem
                       ? "Loading..."
-                      : "Save"}
+                      : lang[t].productOption.primary.save}
                   </Button>
                 </div>
               </div>

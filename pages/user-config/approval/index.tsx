@@ -8,6 +8,7 @@ import { ModalDeleteConfirmation } from "../../../components/elements/Modal/Moda
 import { useDeletePartnerConfigApprovalList, usePartnerConfigApprovalLists} from "../../../hooks/user-config/useApproval";
 import { useProcessLists } from "../../../hooks/business-process/useProcess";
 import { colors } from "../../../utils/color";
+import { lang } from "lang";
 
 const UserConfigApproval: any = () => {
 	const pagination = usePagination({
@@ -22,7 +23,7 @@ const UserConfigApproval: any = () => {
 	const [search, setSearch] = useState("");
 	const [dataListDropdownProcess, setDataListDropdownProcess] = useState(null);
 	const [modalDelete, setModalDelete] = useState({ open: false });
-
+	const t = localStorage.getItem("lan") || "en-US";
 	const { data: dataFieldsProcessLists, isLoading: isLoadingieldsProcessLists } = useProcessLists();
 
 	const {
@@ -56,19 +57,19 @@ const UserConfigApproval: any = () => {
 
 	const columns = [
 		{
-			title: "Approval Name",
+			title: lang[t].approvalList.approvalListName,
 			dataIndex: "field_name",
 		},
 		{
-			title: "Process",
+			title: lang[t].approvalList.approvalListProses,
 			dataIndex: "",
 		},
 		{
-			title: "Module",
+			title: lang[t].approvalList.approvalListModul,
 			dataIndex: "field_module",
 		},
 		{
-			title: "Action",
+			title: lang[t].approvalList.approvalListAction,
 			dataIndex: "action",
 		},
 	];
@@ -85,7 +86,7 @@ const UserConfigApproval: any = () => {
 					onClick={() => Router.push(`/partner-config-approval/${field.id}`)}
 					variant="tertiary"
 				>
-					View Detail
+					{lang[t].approvalList.tertier.viewDetail}
 				</Button>
 			),
 		});
@@ -114,7 +115,7 @@ const UserConfigApproval: any = () => {
 	return (
 		<>
 			<Col>
-				<Text variant={"h4"}>Approval List</Text>
+				<Text variant={"h4"}>{lang[t].approvalList.pageTitle.approvalList}</Text>
 				<Spacer size={20} />
 				<Card>
 					<Row justifyContent="space-between">
@@ -122,7 +123,7 @@ const UserConfigApproval: any = () => {
 							<Search
 								width="380px"
 								nameIcon="SearchOutlined"
-								placeholder="Search Approval Name"
+								placeholder={lang[t].approvalList.searchBar.approvalName}
 								colorIcon={colors.grey.regular}
 								onChange={(e: any) => setSearch(e.target.value)}
 							/>
@@ -136,7 +137,7 @@ const UserConfigApproval: any = () => {
 									dataFieldsProcessLists &&
 									dataFieldsProcessLists?.rows.map((data: any) => ({ id: data.id, value: data.name }))
 								}
-								placeholder="Process"
+								placeholder={lang[t].approvalList.filterbar.process}
 								handleChange={handleChangeDropdown}
 								noSearch
 								rounded
@@ -149,14 +150,14 @@ const UserConfigApproval: any = () => {
 								onClick={() => setModalDelete({ open: true })}
 								disabled={rowSelection.selectedRowKeys?.length === 0}
 							>
-								Delete
+								{lang[t].approvalList.tertier.delete}
 							</Button>
 							<Button
 								size="big"
 								variant={"primary"}
 								onClick={() => Router.push("/user-config/approval/create")}
 							>
-								Create
+								{lang[t].approvalList.primary.create}
 							</Button>
 						</Row>
 					</Row>

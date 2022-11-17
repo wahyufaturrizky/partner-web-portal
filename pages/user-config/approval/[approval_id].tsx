@@ -25,10 +25,12 @@ import {
 	usePartnerConfigApprovalList,
 	useUpdatePartnerConfigApprovalList,
 } from "../../../hooks/user-config/useApproval";
+import { lang } from "lang";
 
 export interface ConfigModuleList {}
 
 const DetailUserConfigApproval: any = () => {
+	const t = localStorage.getItem("lan") || "en-US";
 	const { approval_partner_id } = Router.query;
 	const [dataListDropdownModul, setDataListDropdownModul] = useState(null);
 	const [modalDelete, setModalDelete] = useState({ open: false });
@@ -233,7 +235,7 @@ const DetailUserConfigApproval: any = () => {
 									style={{ cursor: "pointer" }}
 									onClick={() => setisSendEmailNotif(!isSendEmailNotif)}
 								>
-									<Text variant={"h6"}>Email Notification</Text>
+									<Text variant={"h6"}>{lang[t].approvalList.toggle.emailNotification}</Text>
 								</div>
 							</Row>
 						)}
@@ -245,10 +247,10 @@ const DetailUserConfigApproval: any = () => {
 									variant={"tertiary"}
 									onClick={() => setModalDelete({ open: true })}
 								>
-									Delete
+									{lang[t].approvalList.tertier.delete}
 								</Button>
 								<Button size="big" variant={"primary"} onClick={handleCreateProcessList}>
-									{isLoadingUpdatePartnerConfigApprovalList ? "loading..." : "Save"}
+									{isLoadingUpdatePartnerConfigApprovalList ? "loading..." : lang[t].approvalList.primary.save}
 								</Button>
 							</Row>
 						</Row>
@@ -262,7 +264,7 @@ const DetailUserConfigApproval: any = () => {
 				) : (
 					<Accordion>
 						<Accordion.Item key={1}>
-							<Accordion.Header variant="blue">General</Accordion.Header>
+							<Accordion.Header variant="blue">{lang[t].approvalList.accordion.general}</Accordion.Header>
 							<Accordion.Body>
 								<Row width="100%" gap="20px" noWrap>
 									{/* TODO: HIDE AFTER INCLUDING IN SPRINT */}
@@ -279,7 +281,7 @@ const DetailUserConfigApproval: any = () => {
 											id="name"
 											defaultValue={name}
 											width="100%"
-											label="Name"
+											label={lang[t].approvalList.approvalName}
 											height="48px"
 											placeholder={"e.g Shipment and Delivery"}
 											onChange={handleChangeInput}
@@ -288,7 +290,7 @@ const DetailUserConfigApproval: any = () => {
 									<Col width="100%">
 										<Dropdown
 											width="100%"
-											label="Module"
+											label={lang[t].approvalList.filterbar.module}
 											id="Module"
 											loading={isLoadingConfigModule}
 											items={
@@ -320,7 +322,7 @@ const DetailUserConfigApproval: any = () => {
 									<Col width="100%">
 										<Dropdown
 											width="100%"
-											label="Process"
+											label={lang[t].approvalList.filterbar.process}
 											loading={isLoadingFieldListProcess}
 											items={
 												fieldsListProcess &&
@@ -344,7 +346,7 @@ const DetailUserConfigApproval: any = () => {
 									<Col width="100%">
 										<Dropdown
 											width="100%"
-											label="Permission"
+											label={lang[t].approvalList.filterbar.permission}
 											loading={isLoadingFieldsPermissionList}
 											items={
 												fieldsPermissionList &&
@@ -383,7 +385,7 @@ const DetailUserConfigApproval: any = () => {
 
 				<Accordion>
 					<Accordion.Item key={1}>
-						<Accordion.Header variant="blue">Approval</Accordion.Header>
+						<Accordion.Header variant="blue">{lang[t].approvalList.accordion.approval}</Accordion.Header>
 						<Accordion.Body>
 							<Row width="100%" gap="20px" noWrap>
 								{/* TODO: HIDE AFTER INCLUDING IN SPRINT */}
@@ -402,7 +404,7 @@ const DetailUserConfigApproval: any = () => {
 										<Input
 											id="numberOfApprovalStage"
 											width="100%"
-											label="How Many Approval Stage?"
+											label={lang[t].approvalList.emptyState.approval}
 											height="48px"
 											defaultValue={numberOfApprovalStage}
 											placeholder={"e.g 1"}
@@ -465,7 +467,7 @@ const DetailUserConfigApproval: any = () => {
 
 				<Accordion>
 					<Accordion.Item key={1}>
-						<Accordion.Header variant="blue">Associated Roles</Accordion.Header>
+						<Accordion.Header variant="blue">{lang[t].approvalList.accordion.associatedRole}</Accordion.Header>
 						<Accordion.Body>
 							<Table
 								data={[

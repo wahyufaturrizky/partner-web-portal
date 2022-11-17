@@ -24,6 +24,7 @@ import {
 import { mdmDownloadService } from "../../lib/client";
 import useDebounce from "../../lib/useDebounce";
 import { queryClient } from "../_app";
+import { lang } from "lang";
 
 const downloadFile = (params: any) =>
   mdmDownloadService("/product-option/download", { params }).then((res) => {
@@ -52,6 +53,7 @@ const renderConfirmationText = (type: any, data: any) => {
 };
 
 const ProductOption = () => {
+  const t = localStorage.getItem("lan") || "en-US";
   const router = useRouter();
   const companyId = localStorage.getItem("companyId")
   const companyCode = localStorage.getItem("companyCode")
@@ -106,7 +108,7 @@ const ProductOption = () => {
                   }}
                   variant="tertiary"
                 >
-                  View Detail
+                  {lang[t].productOption.tertier.viewDetail}
                 </Button>
               </div>
             ),
@@ -140,11 +142,11 @@ const ProductOption = () => {
 
   const columns = [
     {
-      title: "Product Options ID",
+      title: lang[t].productOption.productOptionID,
       dataIndex: "id",
     },
     {
-      title: "Product Options Name",
+      title: lang[t].productOption.productOptionName,
       dataIndex: "name",
     },
     {
@@ -152,7 +154,7 @@ const ProductOption = () => {
       dataIndex: "companyId",
     },
     {
-      title: "Action",
+      title: lang[t].productOption.productOptionAction,
       dataIndex: "action",
       width: "15%",
       align: "left",
@@ -177,14 +179,14 @@ const ProductOption = () => {
   return (
     <>
       <Col>
-        <Text variant={"h4"}>Product Option</Text>
+        <Text variant={"h4"}>{lang[t].productOption.pageTitle.productOption}</Text>
         <Spacer size={20} />
       </Col>
       <Card>
         <Row justifyContent="space-between">
           <Search
             width="340px"
-            placeholder="Search Product Options ID, Name"
+            placeholder={lang[t].productOption.searchBar.productOption}
             onChange={(e: any) => {
               setSearch(e.target.value);
             }}
@@ -202,10 +204,10 @@ const ProductOption = () => {
               }
               disabled={rowSelection.selectedRowKeys?.length === 0}
             >
-              Delete
+              {lang[t].productOption.tertier.delete}
             </Button>
             <DropdownMenu
-              title={"More"}
+              title={lang[t].productOption.secondary.more}
               buttonVariant={"secondary"}
               buttonSize={"big"}
               textVariant={"button"}
@@ -234,7 +236,7 @@ const ProductOption = () => {
                   value: (
                     <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
                       <ICDownload />
-                      <p style={{ margin: "0" }}>Download Template</p>
+                      <p style={{ margin: "0" }}>{lang[t].productOption.ghost.downloadTemplate}</p>
                     </div>
                   ),
                 },
@@ -243,7 +245,7 @@ const ProductOption = () => {
                   value: (
                     <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
                       <ICUpload />
-                      <p style={{ margin: "0" }}>Upload Template</p>
+                      <p style={{ margin: "0" }}>{lang[t].productOption.ghost.uploadTemplate}</p>
                     </div>
                   ),
                 },
@@ -252,7 +254,7 @@ const ProductOption = () => {
                   value: (
                     <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
                       <ICDownload />
-                      <p style={{ margin: "0" }}>Download Data</p>
+                      <p style={{ margin: "0" }}>{lang[t].productOption.ghost.downloadData}</p>
                     </div>
                   ),
                 },
@@ -263,7 +265,7 @@ const ProductOption = () => {
               variant="primary"
               onClick={() => router.push("/product-option/create")}
             >
-              Create
+              {lang[t].productOption.primary.create}
             </Button>
           </Row>
         </Row>

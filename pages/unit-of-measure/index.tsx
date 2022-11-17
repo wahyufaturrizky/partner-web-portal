@@ -21,6 +21,7 @@ import { queryClient } from "../_app";
 import { ICDownload, ICUpload } from "../../assets/icons";
 import { mdmDownloadService } from "../../lib/client";
 import { useRouter } from "next/router";
+import { lang } from "lang";
 
 const downloadFile = (params: any) =>
   mdmDownloadService("/uom/download", { params }).then((res) => {
@@ -48,6 +49,7 @@ const renderConfirmationText = (type: any, data: any) => {
 };
 
 const UOM = () => {
+  const t = localStorage.getItem("lan") || "en-US";
   const router = useRouter();
   const companyId = localStorage.getItem("companyId")
   const companyCode = localStorage.getItem("companyCode")
@@ -103,7 +105,7 @@ const UOM = () => {
                   }}
                   variant="tertiary"
                 >
-                  View Detail
+                  {lang[t].unitOfMeasure.tertier.viewDetail}
                 </Button>
               </div>
             ),
@@ -136,19 +138,19 @@ const UOM = () => {
 
   const columns = [
     {
-      title: "Uom ID",
+      title: lang[t].unitOfMeasure.uoMID,
       dataIndex: "id",
     },
     {
-      title: "Uom Name",
+      title: lang[t].unitOfMeasure.uoMName,
       dataIndex: "uomName",
     },
     {
-      title: "Uom Category",
+      title: lang[t].unitOfMeasure.uoMCategory,
       dataIndex: "uomCategoryName",
     },
     {
-      title: "status",
+      title: lang[t].unitOfMeasure.ghost.status,
       dataIndex: "status",
       render: (status: any) => (
         <Lozenge variant={status === "ACTIVE" ? "green" : "black"}>
@@ -157,7 +159,7 @@ const UOM = () => {
       ),
     },
     {
-      title: "Action",
+      title: lang[t].unitOfMeasure.uoMAction,
       dataIndex: "action",
       width: "15%",
       align: "left",
@@ -182,14 +184,14 @@ const UOM = () => {
   return (
     <>
       <Col>
-        <Text variant={"h4"}>Unit of Measure</Text>
+        <Text variant={"h4"}>{lang[t].unitOfMeasure.pageTitle.uoM}</Text>
         <Spacer size={20} />
       </Col>
       <Card>
         <Row justifyContent="space-between">
           <Search
             width="340px"
-            placeholder="Search Uom ID, Name."
+            placeholder={lang[t].unitOfMeasure.searchBar.uoM}
             onChange={(e: any) => {
               setSearch(e.target.value);
             }}
@@ -207,10 +209,10 @@ const UOM = () => {
               }
               disabled={rowSelection.selectedRowKeys?.length === 0}
             >
-              Delete
+              {lang[t].unitOfMeasure.tertier.delete}
             </Button>
             <DropdownMenu
-              title={"More"}
+              title={lang[t].unitOfMeasure.secondary.more}
               buttonVariant={"secondary"}
               buttonSize={"big"}
               textVariant={"button"}
@@ -239,7 +241,7 @@ const UOM = () => {
                   value: (
                     <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
                       <ICDownload />
-                      <p style={{ margin: "0" }}>Download Template</p>
+                      <p style={{ margin: "0" }}>{lang[t].unitOfMeasure.ghost.downloadTemplate}</p>
                     </div>
                   ),
                 },
@@ -248,7 +250,7 @@ const UOM = () => {
                   value: (
                     <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
                       <ICUpload />
-                      <p style={{ margin: "0" }}>Upload Template</p>
+                      <p style={{ margin: "0" }}>{lang[t].unitOfMeasure.ghost.uploadTemplate}</p>
                     </div>
                   ),
                 },
@@ -257,7 +259,7 @@ const UOM = () => {
                   value: (
                     <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
                       <ICDownload />
-                      <p style={{ margin: "0" }}>Download Data</p>
+                      <p style={{ margin: "0" }}>{lang[t].unitOfMeasure.ghost.downloadData}</p>
                     </div>
                   ),
                 },
@@ -268,7 +270,7 @@ const UOM = () => {
               variant="primary"
               onClick={() => router.push("/unit-of-measure/create")}
             >
-              Create
+              {lang[t].unitOfMeasure.primary.create}
             </Button>
           </Row>
         </Row>
