@@ -429,7 +429,9 @@ const CreateMenuDesignList: any = () => {
 
         <Accordion>
           <Accordion.Item key={1}>
-            <Accordion.Header variant="blue">{lang[t].menuDesign.accordion.general}</Accordion.Header>
+            <Accordion.Header variant="blue">
+              {lang[t].menuDesign.accordion.general}
+            </Accordion.Header>
             <Accordion.Body>
               <Row width="50%" gap="20px" noWrap>
                 <Col width="100%">
@@ -465,14 +467,11 @@ const CreateMenuDesignList: any = () => {
 
                 <Spacer size={16} />
 
-                <Button
-                  size="big"
-                  variant={"secondary"}
-                  disabled={selectedRowKeyTree?.length === 0}
-                  onClick={handleRemoveMenu}
-                >
-                  {lang[t].menuDesign.tertier.remove}
-                </Button>
+                {selectedRowKeyTree?.length > 0 && (
+                  <Button size="big" variant={"secondary"} onClick={handleRemoveMenu}>
+                    {lang[t].menuDesign.tertier.remove}
+                  </Button>
+                )}
               </Row>
 
               <Spacer size={16} />
