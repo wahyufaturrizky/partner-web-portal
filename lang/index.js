@@ -72,7 +72,7 @@ export const lang = {
       },
       channel: "Channel",
       byDeleting: "By deleting it will affect data that already uses Channel",
-      createChannel: "Create Channel",
+      createChannel: "Create Sales Channel",
       salesChannelName: "Sales Channel Name",
       placeHolder: { egModernTrade: "e.g Modern Trade" },
       tertier: { more: "More", viewDetail: "View Detail", delete: "Delete", cancel: "Cancel" },
