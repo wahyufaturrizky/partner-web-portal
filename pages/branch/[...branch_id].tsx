@@ -30,7 +30,7 @@ const BranchDetail = () => {
     totalItems: 100,
   });
   const { branch_id } = router.query;
-
+  console.log(branch_id, '<<< id nya')
   const [searchBranchParent, setSearchBranchParent] = useState("")
   const [searchSalesOrganization, setSearchSalesOrganization] = useState("");
   const [searchTimezone, setSearchTimezone] = useState("");
@@ -324,8 +324,8 @@ const BranchDetail = () => {
     };
     updateBranch(formData);
   };
-
-  if(isLoadingBranchDetailData ||isLoadingCountry || isLoadingSalesOrganizationData || isLoadingCalendar || isLoadingTimezone){
+  // || isLoadingSalesOrganizationData || isLoadingCalendar 
+  if(isLoadingBranchDetailData ||isLoadingCountry || isLoadingTimezone || isLoadingCalendar){
   return (
     <Center>
       <Spin tip="Loading data..." />
@@ -429,7 +429,8 @@ const BranchDetail = () => {
                         isLoading={isLoadingSalesOrganizationData}
                         isLoadingMore={isFetchingSalesOrganizationData}
                         fetchMore={() => {}}
-                        items={salesOrganizationData}
+                        // items={salesOrganizationData}
+                        items={isLoadingSalesOrganizationData  && isFetchingSalesOrganizationData ? [] : salesOrganizationData}
                         onChange={(value: any) => {
                           onChange(value);
                         }}

@@ -240,7 +240,8 @@ const BranchCreate = () => {
     },
   });
 
-  if( isLoadingCalendar || isLoadingSalesOrganizationData || isLoadingTimezone || isLoadingCountry){
+// isLoadingSalesOrganizationData
+  if( isLoadingCalendar || isLoadingTimezone || isLoadingCountry){
     return (
       <Center>
       <Spin tip="Loading data..." />
@@ -316,7 +317,6 @@ const BranchCreate = () => {
                     <>
                       <Label>Parent</Label>
                       <Spacer size={4} />
-
                       <FormSelect
                         style={{ width: "100%" }}
                         size={"large"}
@@ -354,24 +354,24 @@ const BranchCreate = () => {
                   render={({ field: { onChange } }) => (
                     <>
                       <Label>Company Internal Structure</Label>
-                      <FormSelect
-                        style={{ width: "100%" }}
-                        size={"large"}
-                        placeholder={"Select"}
-                        borderColor={"#AAAAAA"}
-                        arrowColor={"#000"}
-                        withSearch
-                        isLoading={isLoadingSalesOrganizationData}
-                        isLoadingMore={isFetchingSalesOrganizationData}
-                        fetchMore={() => {}}
-                        items={salesOrganizationData}
-                        onChange={(value: any) => {
-                          onChange(value);
-                        }}
-                        onSearch={(value: any) => {
-                          setSearchSalesOrganization(value)
-                        }}
-                      />
+                        <FormSelect
+                          style={{ width: "100%" }}
+                          size={"large"}
+                          placeholder={"Select"}
+                          borderColor={"#AAAAAA"}
+                          arrowColor={"#000"}
+                          withSearch
+                          isLoading={isLoadingSalesOrganizationData}
+                          isLoadingMore={isFetchingSalesOrganizationData}
+                          fetchMore={() => {}}
+                          items={isLoadingSalesOrganizationData  && isFetchingSalesOrganizationData ? [] : salesOrganizationData}
+                          onChange={(value: any) => {
+                            onChange(value);
+                          }}
+                          onSearch={(value: any) => {
+                            setSearchSalesOrganization(value)
+                          }}
+                        />
                     </>
                   )}
                 />
