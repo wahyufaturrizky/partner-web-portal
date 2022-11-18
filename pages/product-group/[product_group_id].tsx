@@ -256,7 +256,7 @@ const ProductGroupDetail = () => {
                   <Input
                     width="100%"
                     label={lang[t].productGroup.detail.emptyState.groupName}
-                    height="40px"
+                    height="48px"
                     placeholder={"e.g Wafer 1K"}
                     defaultValue={productGroupData?.name}
                     {...register("name", { required: true })}

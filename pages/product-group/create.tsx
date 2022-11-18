@@ -151,7 +151,7 @@ const ProductGroupCreate = () => {
 
         <Spacer size={20} />
 
-        <Accordion>
+        <Accordion style={{ position: "relative" }} id="area">
           <Accordion.Item key={1}>
             <Accordion.Header variant="blue">
               {lang[t].productGroup.create.accordion.general}
@@ -162,7 +162,7 @@ const ProductGroupCreate = () => {
                   <Input
                     width="100%"
                     label={lang[t].productGroup.create.emptyState.groupName}
-                    height="40px"
+                    height="48px"
                     placeholder={"e.g Wafer 1K"}
                     {...register("name", { required: true })}
                   />

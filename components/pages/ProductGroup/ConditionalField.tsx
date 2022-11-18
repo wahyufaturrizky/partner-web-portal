@@ -4,6 +4,7 @@ import { Controller, useFieldArray } from "react-hook-form";
 import styled from "styled-components";
 import { useProductBrandInfiniteLists } from "../../../hooks/mdm/product-brand/useProductBrandMDM";
 import useDebounce from "../../../lib/useDebounce";
+import { useProductCategoryInfiniteLists } from "hooks/mdm/product-category/useProductCategory";
 
 const getFilterOption = (group: any) => {
   switch (group) {
@@ -47,11 +48,19 @@ const ConditionalField = ({
   const [maxValue, setMaxValue] = useState("0");
   const debounceMax = useDebounce(maxValue, 1000);
 
+  const [indexPrice, setIndexPrice] = useState(0);
+
   const [searchProductBrand, setSearchProductBrand] = useState("");
   const debounceSearchProductBrand = useDebounce(searchProductBrand, 1000);
 
+  const [searchProductCategory, setSearchProductCategory] = useState("");
+  const debounceSearchProductCategory = useDebounce(searchProductCategory, 1000);
+
   const [totalRowsProductBrand, setTotalRowsProductBrand] = useState(0);
   const [listProductBrand, setListProductBrand] = useState([]);
+
+  const [totalRowsProductCategory, setTotalRowsProductCategory] = useState(0);
+  const [listProductCategory, setListProductCategory] = useState([]);
 
   const initialRender = useRef(true);
 
@@ -96,26 +105,71 @@ const ConditionalField = ({
     },
   });
 
+  const {
+    isLoading: isLoadingProductCategory,
+    isFetching: isFetchingProductCategory,
+    isFetchingNextPage: isFetchingMoreProductCategory,
+    hasNextPage: hasNextPageProductCategory,
+    fetchNextPage: fetchNextPageProductCategory,
+  } = useProductCategoryInfiniteLists({
+    query: {
+      search: debounceSearchProductCategory,
+      company_id: "KSNI",
+      limit: 10,
+    },
+    options: {
+      onSuccess: (data: any) => {
+        setTotalRowsProductCategory(data.pages[0].totalRow);
+        const mappedData = data?.pages?.map((group: any) => {
+          return group.rows?.map((element: any) => {
+            return {
+              label: element.name,
+              value: element.productCategoryId,
+            };
+          });
+        });
+        const flattenArray = [].concat(...mappedData);
+        setListProductCategory(flattenArray);
+      },
+      getNextPageParam: (_lastPage: any, pages: any) => {
+        if (listProductCategory.length < totalRowsProductCategory) {
+          return pages.length + 1;
+        } else {
+          return undefined;
+        }
+      },
+    },
+  });
+
   useEffect(() => {
     if (initialRender.current) {
       initialRender.current = false;
       return;
     }
 
-    const mapFilterProduct = itemsWatch.map((item: any) => {
-      return {
-        group: item.group,
-        condition: item.condition,
-        value_from: item.value_from === "" ? "0" : item.value_from,
-        value_to: item.value_to === "" ? "0" : item.value_to,
-        values: "0",
-      };
+    const mapFilterProduct = itemsWatch.map((el: any, index: any) => {
+      if (index === indexPrice) {
+        return {
+          group: el.group,
+          condition: el.condition,
+          value_from: el.value_from === "" ? "0" : el.value_from,
+          value_to: el.value_to === "" ? "0" : el.value_to,
+          values: "0",
+        };
+      } else {
+        return {
+          ...el,
+          condition: "",
+        };
+      }
     });
 
     const requestBody: any = {
       company_id: "KSNI",
       items: mapFilterProduct,
     };
+
+    console.log(requestBody);
 
     filterProduct(requestBody);
   }, [debounceMin, debounceMax]);
@@ -154,6 +208,7 @@ const ConditionalField = ({
       setValue(`items.${index}.values`, "0");
     }
     onChange(value);
+    console.log(value, "based on");
     const mapFilterProduct = itemsWatch.map((el: any, elIndex: any) => {
       if (index === elIndex) {
         return {
@@ -164,7 +219,10 @@ const ConditionalField = ({
           values: "0",
         };
       } else {
-        return el;
+        return {
+          ...el,
+          condition: el?.condition ?? "",
+        };
       }
     });
 
@@ -175,6 +233,8 @@ const ConditionalField = ({
       company_id: "KSNI",
       items: mapFilterProduct,
     };
+
+    console.log(requestBody);
 
     filterProduct(requestBody);
   };
@@ -195,7 +255,10 @@ const ConditionalField = ({
           values: "0",
         };
       } else {
-        return el;
+        return {
+          ...el,
+          condition: el?.condition ?? "",
+        };
       }
     });
 
@@ -214,13 +277,16 @@ const ConditionalField = ({
       if (index === elIndex) {
         return {
           group: el.group,
-          condition: el.condition,
+          condition: "",
           value_from: "0",
           value_to: "0",
           values: value?.toString(),
         };
       } else {
-        return el;
+        return {
+          ...el,
+          condition: el.group === "PRICE" ? el.condition : "",
+        };
       }
     });
 
@@ -228,6 +294,8 @@ const ConditionalField = ({
       company_id: "KSNI",
       items: mapFilterProduct,
     };
+
+    console.log(requestBody);
 
     filterProduct(requestBody);
   };
@@ -275,7 +343,8 @@ const ConditionalField = ({
                   <Col width={"100%"}>
                     <Label>{groupingBasedOnLable}</Label>
                     <Spacer size={3} />
-                    <FormSelect
+                    <CustomFormSelect
+                      getPopupContainer={() => document.getElementById("area")}
                       defaultValue={item?.group}
                       style={{ width: "100%" }}
                       size={"large"}
@@ -307,7 +376,8 @@ const ConditionalField = ({
                     <Col width="100%">
                       <Label>{conditionLable}</Label>
                       <Spacer size={3} />
-                      <FormSelect
+                      <CustomFormSelect
+                        getPopupContainer={() => document.getElementById("area")}
                         defaultValue={item?.condition}
                         style={{ width: "100%" }}
                         size={"large"}
@@ -348,16 +418,32 @@ const ConditionalField = ({
                     <Col width="100%">
                       <Label>Product Category Name</Label>
                       <Spacer size={3} />
-                      <FormSelect
-                        defaultValue={item?.values === "0" && null}
+                      <CustomFormSelect
+                        getPopupContainer={() => document.getElementById("area")}
+                        defaultValue={item?.values === "0" ? null : item?.values}
                         style={{ width: "100%" }}
                         size={"large"}
                         placeholder={"Select"}
                         borderColor={"#AAAAAA"}
+                        isLoading={isFetchingProductBrand}
+                        isLoadingMore={isFetchingMoreProductCategory}
+                        fetchMore={() => {
+                          if (hasNextPageProductCategory) {
+                            fetchNextPageProductCategory();
+                          }
+                        }}
                         arrowColor={"#000"}
-                        items={[]}
+                        items={
+                          isFetchingProductCategory && !isFetchingMoreProductCategory
+                            ? []
+                            : listProductCategory
+                        }
                         onChange={(value: any) => {
-                          onChange(value);
+                          handleCategoryChange(value, onChange, index);
+                          // onChange(value);
+                        }}
+                        onSearch={(value: any) => {
+                          setSearchProductCategory(value);
                         }}
                       />
                       {errors?.items?.[index]?.values?.type === "isNull" && (
@@ -385,7 +471,8 @@ const ConditionalField = ({
                     <Col width="100%">
                       <Label>Product Brand Name</Label>
                       <Spacer size={3} />
-                      <FormSelect
+                      <CustomFormSelect
+                        getPopupContainer={() => document.getElementById("area")}
                         defaultValue={type === "edit" ? parseInt(item?.values) : ""}
                         style={{ width: "100%" }}
                         size={"large"}
@@ -429,12 +516,13 @@ const ConditionalField = ({
                   <Input
                     width="100%"
                     label="Price"
-                    height="40px"
+                    height="48px"
                     defaultValue={item?.value_from}
                     placeholder={"e.g 1000"}
                     {...register(`items.${index}.value_from`, {
                       onChange: (e: any) => {
                         setMinValue(e.target.value);
+                        setIndexPrice(index);
                       },
                     })}
                   />
@@ -447,12 +535,13 @@ const ConditionalField = ({
                   <Input
                     width="100%"
                     label={minLable}
-                    height="40px"
+                    height="48px"
                     placeholder={"e.g 1000"}
                     defaultValue={item?.value_from}
                     {...register(`items.${index}.value_from`, {
                       onChange: (e: any) => {
                         setMinValue(e.target.value);
+                        setIndexPrice(index);
                       },
                     })}
                   />
@@ -460,12 +549,13 @@ const ConditionalField = ({
                   <Input
                     width="100%"
                     label={maxLable}
-                    height="40px"
+                    height="48px"
                     placeholder={"e.g 1000"}
                     defaultValue={item?.value_to}
                     {...register(`items.${index}.value_to`, {
                       onChange: (e: any) => {
                         setMaxValue(e.target.value);
+                        setIndexPrice(index);
                       },
                     })}
                   />
@@ -498,6 +588,25 @@ const Label = styled.div`
   font-size: 16px;
   line-height: 24px;
   color: #000000;
+`;
+
+const CustomFormSelect = styled(FormSelect)`
+  .ant-select-selection-placeholder {
+    line-height: 48px !important;
+  }
+
+  .ant-select-selection-search-input {
+    height: 48px !important;
+  }
+
+  .ant-select-selector {
+    height: 48px !important;
+  }
+
+  .ant-select-selection-item {
+    display: flex;
+    align-items: center;
+  }
 `;
 
 export default ConditionalField;
