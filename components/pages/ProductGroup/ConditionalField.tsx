@@ -344,7 +344,7 @@ const ConditionalField = ({
                     <Label>{groupingBasedOnLable}</Label>
                     <Spacer size={3} />
                     <CustomFormSelect
-                      getPopupContainer={() => document.getElementById("area")}
+                      containerId={"area"}
                       defaultValue={item?.group}
                       style={{ width: "100%" }}
                       size={"large"}
@@ -377,7 +377,7 @@ const ConditionalField = ({
                       <Label>{conditionLable}</Label>
                       <Spacer size={3} />
                       <CustomFormSelect
-                        getPopupContainer={() => document.getElementById("area")}
+                        containerId={"area"}
                         defaultValue={item?.condition}
                         style={{ width: "100%" }}
                         size={"large"}
@@ -419,7 +419,7 @@ const ConditionalField = ({
                       <Label>Product Category Name</Label>
                       <Spacer size={3} />
                       <CustomFormSelect
-                        getPopupContainer={() => document.getElementById("area")}
+                        containerId={"area"}
                         defaultValue={item?.values === "0" ? null : item?.values}
                         style={{ width: "100%" }}
                         size={"large"}
@@ -472,7 +472,7 @@ const ConditionalField = ({
                       <Label>Product Brand Name</Label>
                       <Spacer size={3} />
                       <CustomFormSelect
-                        getPopupContainer={() => document.getElementById("area")}
+                        containerId={"area"}
                         defaultValue={type === "edit" ? parseInt(item?.values) : ""}
                         style={{ width: "100%" }}
                         size={"large"}
