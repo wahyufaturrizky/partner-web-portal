@@ -72,6 +72,8 @@ const costCenterCategoryDropdown = [
 
 const CostCenterCreate = () => {
   const router = useRouter();
+  const companyId = localStorage.getItem("companyId")
+  const companyCode = localStorage.getItem("companyCode")
   const { cost_center_id } = router.query;
   const pagination = usePagination({
     page: 1,
@@ -148,7 +150,7 @@ const CostCenterCreate = () => {
       isFetching: isFetchingCompanyData,
       isLoading: isLoadingCompanyData,
   } = useCompany({
-      id: 'KSNI',
+      id: companyCode,
       options: {
       onSuccess: (data: CompanyList) => {
           setlistCompany([{

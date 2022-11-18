@@ -41,7 +41,9 @@ import { lang } from "lang";
 export default function CreateProduct({ isCreateProductVariant = true }) {
   const router = useRouter();
   const t = localStorage.getItem("lan") || "en-US";
-  // lang[t].companyList.companyName
+  const companyId = localStorage.getItem("companyId")
+  const companyCode = localStorage.getItem("companyCode")
+
   const { id } = router.query;
   const isUpdate = !!id;
 
@@ -61,6 +63,7 @@ export default function CreateProduct({ isCreateProductVariant = true }) {
   const [canBeSold, setCanBeSold] = useState(false);
   const [canBeExpensed, setCanExpensed] = useState(false);
   const [canBeManufacture, setCanManufacture] = useState(false);
+  const [canBeShareable, setCanBeShareable] = useState(false);
 
   const [isShowDelete, setShowDelete] = useState({ open: false });
 
@@ -110,14 +113,15 @@ export default function CreateProduct({ isCreateProductVariant = true }) {
     shouldUseNativeValidation: true,
     defaultValues: {
       image: "",
-      company_id: "KSNI",
-      company_code: "KSNI",
+      company_id: companyCode,
+      company_code: companyCode,
       product_type: "",
       name: "",
       status: "active",
       can_be_sold: false,
       can_be_purchased: false,
       can_be_expensed: false,
+      can_be_shareable: false,
       expired_date: moment().utc().toString(),
       external_code: "",
       use_unit_leveling: false,
@@ -195,6 +199,7 @@ export default function CreateProduct({ isCreateProductVariant = true }) {
           setCanBePurchased(data.can_be_purchased);
           setCanBeSold(data.can_be_sold);
           setCanManufacture(data.can_be_manufactured);
+          setCanBeShareable(data.can_be_shareable)
         });
         return data;
       },
@@ -209,7 +214,7 @@ export default function CreateProduct({ isCreateProductVariant = true }) {
   } = useProductBrandInfiniteLists({
     query: {
       search: debounceFetchProductBrand,
-      company: "KSNI",
+      company: companyCode,
       limit: 10,
     },
     options: {
@@ -244,7 +249,7 @@ export default function CreateProduct({ isCreateProductVariant = true }) {
   } = useProductCategoryInfiniteLists({
     query: {
       search: debounceFetchProductCategory,
-      company_id: "KSNI",
+      company_id: companyCode,
       limit: 10,
     },
     options: {
@@ -285,7 +290,7 @@ export default function CreateProduct({ isCreateProductVariant = true }) {
         if (getValues("image")) {
           const formData: any = new FormData();
           formData.append("image", getValues("image"));
-          formData.append("company_id", "KSNI");
+          formData.append("company_id", companyCode);
           formData.append("product_id", data?.productId);
 
           uploadImage(formData);
@@ -308,7 +313,7 @@ export default function CreateProduct({ isCreateProductVariant = true }) {
         if (getValues("image") && getFieldState("image").isDirty) {
           const formData: any = new FormData();
           formData.append("image", getValues("image"));
-          formData.append("company_id", "KSNI");
+          formData.append("company_id", companyCode);
           formData.append("product_id", id);
 
           uploadImage(formData);
@@ -367,6 +372,7 @@ export default function CreateProduct({ isCreateProductVariant = true }) {
     payload.can_be_purchased = canBePurchased;
     payload.can_be_expensed = canBeExpensed;
     payload.can_be_manufactured = canBeManufacture;
+    payload.can_be_shareable = canBeShareable;
 
     payload.expired_date = data?.expired_date?.includes("/")
       ? moment(data.expired_date, "DD/MM/YYYY").utc().toString()
@@ -380,7 +386,7 @@ export default function CreateProduct({ isCreateProductVariant = true }) {
       options_values: data?.option_items?.map((data) => data?.value || data?.id) || [],
     }));
 
-    payload.company_code = "KSNI";
+    payload.company_code = companyCode;
     payload.inventory = {
       weight: {
         net: data?.inventory?.weight?.net,
@@ -677,6 +683,21 @@ export default function CreateProduct({ isCreateProductVariant = true }) {
                   onClick={() => setCanManufacture(!canBeManufacture)}
                 >
                   <Text variant={"h6"}>{lang[t].productList.create.checkbox.canBeManufacture}</Text>
+                </div>
+              </Row>
+            </Col>
+            <Col>
+              <Row alignItems="center">
+                <Checkbox
+                  size="small"
+                  checked={canBeShareable}
+                  onChange={() => setCanBeShareable(!canBeShareable)}
+                />
+                <div
+                  style={{ cursor: "pointer" }}
+                  onClick={() => setCanBeShareable(!canBeShareable)}
+                >
+                  <Text variant={"h6"}>{lang[t].productList.create.checkbox.canBeManufacture || "Is Shareable"}</Text>
                 </div>
               </Row>
             </Col>

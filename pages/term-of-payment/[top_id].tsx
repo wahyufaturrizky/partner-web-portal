@@ -16,9 +16,13 @@ import { ModalDeleteConfirmation } from "../../components/elements/Modal/ModalCo
 import ModalAddTerm from "../../components/elements/Modal/ModalAddTerm";
 import DraggableTable from "../../components/pages/TermOfPayment/DraggableTable";
 import { ExclamationCircleOutlined } from "@ant-design/icons";
+import { lang } from "lang";
 
 const TermOfPaymentEdit = () => {
+  const t = localStorage.getItem("lan") || "en-US";
   const router = useRouter();
+  const companyId = localStorage.getItem("companyId")
+  const companyCode = localStorage.getItem("companyCode")
   const { top_id } = router.query;
 
   const [showTermForm, setShowTermForm] = useState({ type: "", open: false, data: {} });
@@ -32,7 +36,7 @@ const TermOfPaymentEdit = () => {
   const { mutate: updateTermOfPayment, isLoading: isLoadingUpdateTermOfPayment } =
     useUpdateTermOfPayment({
       id: top_id,
-      companyId: "KSNI",
+      companyId: companyCode,
       options: {
         onSuccess: () => {
           router.back();
@@ -57,7 +61,7 @@ const TermOfPaymentEdit = () => {
     isFetching: isFetchingTopData,
   } = useTermOfPayment({
     id: top_id,
-    companyId: "KSNI",
+    companyId: companyCode,
     options: {
       onSuccess: (data: any) => {
         const mappedToListTermList = data.items.map((element: any, index: any) => {
@@ -191,7 +195,7 @@ const TermOfPaymentEdit = () => {
       <Col>
         <Row gap="4px" alignItems={"center"}>
           <ArrowLeft style={{ cursor: "pointer" }} onClick={() => router.back()} />
-          <Text variant={"h4"}>Term of Payment</Text>
+          <Text variant={"h4"}>{lang[t].termOfPayment.pageTitle.termOfPayment}</Text>
         </Row>
 
         <Spacer size={20} />
@@ -200,10 +204,10 @@ const TermOfPaymentEdit = () => {
           <Row justifyContent="flex-end" alignItems="center" nowrap>
             <Row gap="16px">
               <Button size="big" variant={"tertiary"} onClick={() => setShowDeleteModal(true)}>
-                Delete
+                {lang[t].termOfPayment.tertier.delete}
               </Button>
               <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
-                {isLoadingUpdateTermOfPayment ? "Loading..." : "Save"}
+                {isLoadingUpdateTermOfPayment ? "Loading..." : lang[t].termOfPayment.primary.save}
               </Button>
             </Row>
           </Row>
@@ -216,7 +220,7 @@ const TermOfPaymentEdit = () => {
             <Row width="50%">
               <Input
                 width="50%"
-                label="Payment Term"
+                label={lang[t].termOfPayment.paymentTerm}
                 height="40px"
                 defaultValue={termOfPaymentData.name}
                 placeholder={"e.g 3 Days"}
@@ -334,7 +338,7 @@ const TermOfPaymentEdit = () => {
           visible={showDeleteModal}
           isLoading={isLoadingDeleteBP}
           onCancel={() => setShowDeleteModal(false)}
-          onOk={() => deleteBusinessProcess({ ids: [top_id], company_id: "KSNI" })}
+          onOk={() => deleteBusinessProcess({ ids: [top_id], company_id: companyCode })}
         />
       )}
     </>

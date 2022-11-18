@@ -30,6 +30,7 @@ import { useDeletePermission, useMenuPermissionLists } from "../../../hooks/perm
 import { useUpdateRole, useRole } from "../../../hooks/user-config/useRole";
 import { useCompanyInfiniteLists } from "hooks/company-list/useCompany";
 import useDebounce from "lib/useDebounce";
+import { lang } from "lang";
 
 const schema = yup
 	.object({
@@ -43,6 +44,7 @@ const defaultValue = {
 
 const DetailRoleConfig: any = () => {
 	const router = useRouter();
+	const t = localStorage.getItem("lan") || "en-US";
 	const { role_id } = router.query;
 	const [modalDelete, setModalDelete] = useState({ open: false });
 
@@ -291,10 +293,10 @@ const DetailRoleConfig: any = () => {
 								<Row>
 									<Row gap="16px">
 										<Button size="big" variant={"tertiary"} onClick={() => Router.push("/user-config/role")}>
-											Cancel
+											{lang[t].roleList.tertier.cancel}
 										</Button>
 										<Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
-											Save
+											{lang[t].roleList.primary.save}
 										</Button>
 									</Row>
 								</Row>
@@ -315,12 +317,12 @@ const DetailRoleConfig: any = () => {
 
 						<Accordion>
 							<Accordion.Item key={1}>
-								<Accordion.Header variant="blue">General</Accordion.Header>
+								<Accordion.Header variant="blue">{lang[t].roleList.accordion.general}</Accordion.Header>
 								<Accordion.Body>
 									<Row width="100%" gap="20px" noWrap>
 										<Input
 											width="100%"
-											label="Name"
+											label={lang[t].roleList.roleList.roleName}
 											height="38px"
 											placeholder={"e.g Sales Admin"}
 											{...register("name", { required: true })}
@@ -379,7 +381,7 @@ const DetailRoleConfig: any = () => {
 							<Accordion.Item key={1}>
 								<Accordion.Header variant="blue">
 									<Row gap="8px" alignItems="baseline">
-										Permissions
+										{lang[t].roleList.accordion.permissions}
 									</Row>
 								</Accordion.Header>
 								<Accordion.Body>
@@ -390,11 +392,11 @@ const DetailRoleConfig: any = () => {
 													width="300px"
 													label="Search"
 													height="48px"
-													placeholder={"Search permissions"}
+													placeholder={lang[t].roleList.searchBar.searchPermissions}
 													onChange={(e: any) => setSearch(e.target.value)}
 												/>
 												<Dropdown
-													label="Menu (Filter)"
+													label={lang[t].roleList.filterBar.menu}
 													width={"300px"}
 													items={menu}
 													placeholder={"Select"}
@@ -403,7 +405,7 @@ const DetailRoleConfig: any = () => {
 													defaultValue="All"
 												/>
 												<Dropdown
-													label="Permissions (Filter)"
+													label={lang[t].roleList.filterBar.permissions}
 													width={"300px"}
 													items={permissionFilter}
 													placeholder={"Select"}

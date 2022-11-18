@@ -29,6 +29,8 @@ import ModalUpdateSalesDivision from 'components/elements/Modal/ModalUpdateSales
 
 
 export default function ComponentSalesmanDivision() {
+  const companyId = localStorage.getItem("companyId")
+  const companyCode = localStorage.getItem("companyCode")
   const pagination = usePagination({
     page: 1,
     itemsPerPage: 20,
@@ -110,7 +112,7 @@ export default function ComponentSalesmanDivision() {
 
   const { data: { rows: listProducts } = {} } = useProductList({
     options: { onSuccess: () => {} },
-    query: { company_id: 'KSNI' }
+    query: { company_id: companyCode }
   })
 
   const { mutate: handleUploadDocuments } = useUploadDocumentSalesDivision({
@@ -127,7 +129,7 @@ export default function ComponentSalesmanDivision() {
     name: string, description?: string, itemSelected: string[]
   }) => {
     handleCreateSalesDivision({
-      company: 'KSNI',
+      company: companyCode,
       divisi_name: items?.name,
       short_desc: items?.description,
       product: items?.itemSelected
@@ -138,7 +140,7 @@ export default function ComponentSalesmanDivision() {
     name: string, description?: string, itemSelected: string[]
   }) => {
     handleUpdateSalesDivision({
-      company: 'KSNI',
+      company: companyCode,
       divisi_name: items?.name,
       short_desc: items?.description,
       product: items?.itemSelected
@@ -148,11 +150,11 @@ export default function ComponentSalesmanDivision() {
   const _handleDropdownMore = ({ key }: { key: string }) => {
     switch (key) {
       case '1':
-        return downloadFileSalesDivision({ company_id: 'KSNI', with_data: 'n' })
+        return downloadFileSalesDivision({ company_id: companyCode, with_data: 'n' })
       case '2':
         return setVisible({ ...visible, upload: true })
       case '3':
-        return downloadFileSalesDivision({ company_id: 'KSNI', with_data: 'y' })
+        return downloadFileSalesDivision({ company_id: companyCode, with_data: 'y' })
       default:
         return null
     }

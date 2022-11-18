@@ -25,6 +25,8 @@ import {
 import useDebounce from "../../lib/useDebounce";
 
 const ProductCategory = () => {
+  const companyId = localStorage.getItem("companyId")
+  const companyCode = localStorage.getItem("companyCode")
   const pagination = usePagination({
     page: 1,
     itemsPerPage: 20,
@@ -72,6 +74,7 @@ const ProductCategory = () => {
       search: debounceSearch,
       page: pagination.page,
       limit: pagination.itemsPerPage,
+      company_id: companyCode,
     },
     options: {
       onSuccess: (data: any) => {
@@ -155,7 +158,7 @@ const ProductCategory = () => {
   };
 
   const handleDownloadFile = (params) => {
-    mdmDownloadService(`/product-category/download?company_id=KSNI`, { params }).then((res) => {
+    mdmDownloadService(`/product-category/download?company_id=${companyCode}`, { params }).then((res) => {
       let dataUrl = window.URL.createObjectURL(new Blob([res?.data]));
       let tempLink = document.createElement("a");
       tempLink.href = dataUrl;
@@ -165,6 +168,7 @@ const ProductCategory = () => {
   };
 
   const { mutate: uploadFileProductCategory } = useUploadFileProductCategory({
+    company_id: companyCode,
     options: {
       onSuccess: () => {
         refetchProductCategory();
@@ -249,7 +253,7 @@ const ProductCategory = () => {
         }
         isLoading={loadingDelete}
         onCancel={() => setVisible({ delete: false, upload: false })}
-        onOk={() => deleteProductCategory({ product_category_ids: itemsSelected, company_id: ["KSNI"] })}
+        onOk={() => deleteProductCategory({ product_category_ids: itemsSelected, company_id: [companyCode] })}
       />
     </div>
   );

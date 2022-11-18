@@ -29,8 +29,10 @@ import ModalAddBusinessProcess from "../../components/elements/Modal/ModalAddBus
 import ModalEditProcess from "../../components/elements/Modal/ModalEditProcess";
 import DraggableTable from "../../components/pages/BusinessProcess/DraggableTable";
 import DraggableGrids from "../../components/pages/BusinessProcess/DraggableGrid";
+import { lang } from "lang";
 
 const BussinessProcessDetail = () => {
+  const t = localStorage.getItem("lan") || "en-US";
   const router = useRouter();
   const { bussiness_process_id: bp_id } = router.query;
 
@@ -102,12 +104,6 @@ const BussinessProcessDetail = () => {
     id: bp_id,
     options: {
       onSuccess: (data: any) => {
-        const mappedToDropdownValue = data.businessProcessToProcesses.map((element: any) => {
-          return {
-            label: element.process.name,
-            value: element.process.id,
-          };
-        });
         const mappedToListProcessList = data.businessProcessToProcesses.map(
           (element: any, index: any) => {
             return {
@@ -121,7 +117,6 @@ const BussinessProcessDetail = () => {
             };
           }
         );
-        setValue(mappedToDropdownValue);
         setProcessList(mappedToListProcessList);
         setProcessListTemp(mappedToListProcessList);
       },
@@ -188,8 +183,16 @@ const BussinessProcessDetail = () => {
         };
       }
     });
-    setProcessList(mappedProcessList);
+    let newProcessList = 
+    [...processList, ...mappedProcessList].map((data, index) => 
+      ({ ...data, index }));
+
+    setProcessList(newProcessList);
     setShowAddProcessModal(false);
+    setMandatory("Is Mandatory")
+    setIsActive("Active")
+    setValue([])
+
   };
 
   const editProcessList = () => {
@@ -306,8 +309,8 @@ const BussinessProcessDetail = () => {
                   noSearch
                   defaultValue={businessProcessData.status}
                   items={[
-                    { id: "DRAFT", value: "Draft" },
-                    { id: "PUBLISH", value: "Published" },
+                    { id: "DRAFT", value: lang[t].businessProcess.ghost.draft },
+                    { id: "PUBLISH", value: lang[t].businessProcess.ghost.published },
                   ]}
                   placeholder={"Select"}
                   handleChange={(value: any) => {
@@ -322,7 +325,7 @@ const BussinessProcessDetail = () => {
                 Delete
               </Button>
               <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
-                {isLoadingUpdateBusinessProcess ? "...Loading" : "Save"}
+                {isLoadingUpdateBusinessProcess ? "...Loading" : lang[t].businessProcess.primary.save}
               </Button>
             </Row>
           </Row>
@@ -332,16 +335,16 @@ const BussinessProcessDetail = () => {
 
         <Accordion>
           <Accordion.Item key={1}>
-            <Accordion.Header variant="blue">General</Accordion.Header>
+            <Accordion.Header variant="blue">{lang[t].businessProcess.accordion.general}</Accordion.Header>
             <Accordion.Body>
               <Row>
                 <Input
                   id="name"
                   width="100%"
-                  label="Name"
+                  label={lang[t].businessProcess.emptyState.name}
                   height="48px"
                   required
-                  placeholder={"e.g  Order to Cash"}
+                  placeholder={lang[t].businessProcess.pageTitle.ordertoCash}
                   defaultValue={businessProcessData.name}
                   {...register("name")}
                 />
@@ -354,7 +357,7 @@ const BussinessProcessDetail = () => {
 
         <Accordion>
           <Accordion.Item key={1}>
-            <Accordion.Header variant="blue">Processes</Accordion.Header>
+            <Accordion.Header variant="blue">{lang[t].businessProcess.accordion.processes}</Accordion.Header>
             <Accordion.Body>
               {!!processList.length ? (
                 <>
@@ -373,7 +376,7 @@ const BussinessProcessDetail = () => {
                   <Spacer size={20} />
 
                   <VisualizationContainer>
-                    <Text variant="h5">Visualization</Text>
+                    <Text variant="h5">{lang[t].businessProcess.process.visualization}</Text>
 
                     <Spacer size={20} />
 

@@ -30,6 +30,7 @@ import { mdmDownloadService } from "../../../lib/client";
 import DownloadSvg from "../../../assets/icons/ic-download.svg";
 import UploadSvg from "../../../assets/icons/ic-upload.svg";
 import SyncSvg from "../../../assets/icons/ic-sync.svg";
+import { lang } from "lang";
 
 const downloadFile = (params: any) =>
 	mdmDownloadService("/currency/download", { params }).then((res) => {
@@ -68,7 +69,7 @@ const CountryStructureCurrency = () => {
 		arrows: true,
 		totalItems: 100,
 	});
-
+	const t = localStorage.getItem("lan") || "en-US";
 	const [search, setSearch] = useState("");
 	const [isShowDelete, setShowDelete] = useState({ open: false, type: "selection", data: {} });
 	const [isShowUpload, setShowUpload] = useState(false);
@@ -113,7 +114,7 @@ const CountryStructureCurrency = () => {
 									}}
 									variant="tertiary"
 								>
-									View Detail
+									{lang[t].currency.tertier.viewDetail}
 								</Button>
 							</div>
 						),
@@ -175,19 +176,19 @@ const CountryStructureCurrency = () => {
 
 	const columns = [
 		{
-			title: "Currency ID",
+			title: lang[t].currency.currencyID,
 			dataIndex: "id",
 		},
 		{
-			title: "Currency Code",
+			title: lang[t].currency.currencyCode,
 			dataIndex: "currency",
 		},
 		{
-			title: "Currency Name",
+			title: lang[t].currency.currencyName,
 			dataIndex: "currencyName",
 		},
 		{
-			title: "Action",
+			title: lang[t].currency.currencyAction,
 			dataIndex: "action",
 			width: "15%",
 			align: "left",
@@ -225,14 +226,14 @@ const CountryStructureCurrency = () => {
 	return (
 		<>
 			<Col>
-				<Text variant={"h4"}>Currency</Text>
+				<Text variant={"h4"}>{lang[t].currency.pageTitle.currency}</Text>
 				<Spacer size={20} />
 			</Col>
 			<Card>
 				<Row justifyContent="space-between">
 					<Search
 						width="340px"
-						placeholder="Search Currency Code, Currency Name."
+						placeholder={lang[t].currency.search	}
 						onChange={(e: any) => {
 							setSearch(e.target.value);
 						}}
@@ -250,10 +251,10 @@ const CountryStructureCurrency = () => {
 							}
 							disabled={rowSelection.selectedRowKeys?.length === 0}
 						>
-							Delete
+							{lang[t].currency.tertier.delete}
 						</Button>
 						<DropdownMenu
-							title={"More"}
+							title={lang[t].currency.secondary.more}
 							buttonVariant={"secondary"}
 							buttonSize={"big"}
 							textVariant={"button"}
@@ -282,7 +283,7 @@ const CountryStructureCurrency = () => {
 									value: (
 										<div style={{ display: "flex", alignItems: "center", gap: 5 }}>
 											<DownloadSvg />
-											<p style={{ margin: "0" }}>Download Template</p>
+											<p style={{ margin: "0" }}>{lang[t].currency.ghost.downloadTemplate}</p>
 										</div>
 									),
 								},
@@ -291,7 +292,7 @@ const CountryStructureCurrency = () => {
 									value: (
 										<div style={{ display: "flex", alignItems: "center", gap: 5 }}>
 											<UploadSvg />
-											<p style={{ margin: "0" }}>Upload Template</p>
+											<p style={{ margin: "0" }}>{lang[t].currency.ghost.uploadTemplate}</p>
 										</div>
 									),
 								},
@@ -300,7 +301,7 @@ const CountryStructureCurrency = () => {
 									value: (
 										<div style={{ display: "flex", alignItems: "center", gap: 5 }}>
 											<DownloadSvg />
-											<p style={{ margin: "0" }}>Download Data</p>
+											<p style={{ margin: "0" }}>{lang[t].currency.ghost.downloadData}</p>
 										</div>
 									),
 								},
@@ -320,7 +321,7 @@ const CountryStructureCurrency = () => {
 							variant="primary"
 							onClick={() => setModalCurrencyForm({ open: true, typeForm: "create", data: {} })}
 						>
-							Create
+							{lang[t].currency.primary.create}
 						</Button>
 					</Row>
 				</Row>
@@ -345,7 +346,7 @@ const CountryStructureCurrency = () => {
 					closable={false}
 					visible={modalCurrencyForm.open}
 					onCancel={() => setModalCurrencyForm({ open: false, data: {}, typeForm: "" })}
-					title={modalCurrencyForm.typeForm === "create" ? "Create Currency" : "Currency"}
+					title={modalCurrencyForm.typeForm === "create" ? lang[t].currency.modalTitleCreate.currency : lang[t].currency.modalTitleUpdate.currency}
 					footer={null}
 					content={
 						<div
@@ -358,7 +359,7 @@ const CountryStructureCurrency = () => {
 							<Input
 								defaultValue={modalCurrencyForm.data?.currency}
 								width="100%"
-								label="Currency Code"
+								label={lang[t].currency.currencyCode}
 								height="48px"
 								placeholder={"e.g IDR"}
 								{...register("currency", {
@@ -369,7 +370,7 @@ const CountryStructureCurrency = () => {
 							<Input
 								defaultValue={modalCurrencyForm.data?.currencyName}
 								width="100%"
-								label="Currency Name"
+								label={lang[t].currency.currencyName}
 								height="48px"
 								placeholder={"e.g Indonesia Rupiah"}
 								{...register("currency_name", {
@@ -393,7 +394,7 @@ const CountryStructureCurrency = () => {
 										type="primary"
 										onClick={() => setModalCurrencyForm({ open: false, data: {}, typeForm: "" })}
 									>
-										Cancel
+										{lang[t].currency.tertier.cancel}
 									</Button>
 								) : (
 									<Button
@@ -405,12 +406,12 @@ const CountryStructureCurrency = () => {
 											setShowDelete({ open: true, type: "detail", data: modalCurrencyForm.data });
 										}}
 									>
-										Delete
+										{lang[t].currency.tertier.delete}
 									</Button>
 								)}
 
 								<Button onClick={handleSubmit(onSubmit)} variant="primary" size="big">
-									{isLoadingCreateCurrencyMDM || isLoadingUpdateCurrencyMDM ? "Loading..." : "Save"}
+									{isLoadingCreateCurrencyMDM || isLoadingUpdateCurrencyMDM ? "Loading..." : lang[t].currency.primary.save}
 								</Button>
 							</div>
 						</div>

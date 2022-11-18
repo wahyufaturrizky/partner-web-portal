@@ -10,8 +10,10 @@ import {
 	useProcessList,
 	useUpdateProcessList,
 } from "../../../hooks/business-process/useProcess";
+import { lang } from "lang";
 
 const DetailProcessList: any = () => {
+	const t = localStorage.getItem("lan") || "en-US";
 	const [isLoading, setIsLoading] = useState(false);
 	const [isApproval, setIsApproval] = useState(false);
 	const [modalDelete, setModalDelete] = useState({ open: false });
@@ -126,7 +128,7 @@ const DetailProcessList: any = () => {
 									Delete
 								</Button> */}
 								<Button size="big" variant={"primary"} onClick={handleUpdateProcessList}>
-									{isLoading ? "loading..." : "Save"}
+									{isLoading ? "loading..." : lang[t].process.primary.save}
 								</Button>
 							</Row>
 						</Row>
@@ -137,7 +139,7 @@ const DetailProcessList: any = () => {
 
 				<Accordion>
 					<Accordion.Item key={1}>
-						<Accordion.Header variant="blue">General</Accordion.Header>
+						<Accordion.Header variant="blue">{lang[t].process.accordion.general}</Accordion.Header>
 						<Accordion.Body>
 							<Row width="100%" gap="20px" noWrap>
 								{/* TODO: HIDE AFTER INCLUDING IN SPRINT */}
@@ -153,7 +155,7 @@ const DetailProcessList: any = () => {
 									<Input
 										id="name"
 										width="100%"
-										label="Name"
+										label={lang[t].process.processListName}
 										height="48px"
 										value={name}
 										placeholder={"e.g Shipment and Delivery"}
@@ -166,7 +168,7 @@ const DetailProcessList: any = () => {
 									) : (
 										<Dropdown
 											width="100%"
-											label="Modul"
+											label={lang[t].process.processListModule}
 											defaultValue={fieldProcessListById?.module?.name}
 											loading={isLoadingConfigModule}
 											items={

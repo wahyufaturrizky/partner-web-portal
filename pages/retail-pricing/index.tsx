@@ -31,6 +31,8 @@ const downloadFile = (params: any) =>
 
 const RetailPricing = () => {
   const router = useRouter();
+  const companyId = localStorage.getItem("companyId")
+  const companyCode = localStorage.getItem("companyCode")
   const pagination = usePagination({
     page: 1,
     itemsPerPage: 5,
@@ -52,7 +54,7 @@ const RetailPricing = () => {
       search: debounceSearch,
       page: pagination.page,
       limit: pagination.itemsPerPage,
-      company_id: "KSNI",
+      company_id: companyCode,
     },
     options: {
       onSuccess: (data: any) => {
@@ -132,7 +134,7 @@ const RetailPricing = () => {
               onClick={(e: any) => {
                 switch (parseInt(e.key)) {
                   case 1:
-                    downloadFile({ with_data: "Y", company_id: "KSNI" });
+                    downloadFile({ with_data: "Y", company_id: companyCode });
                     break;
                   case 4:
                     break;

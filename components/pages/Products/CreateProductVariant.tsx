@@ -42,6 +42,8 @@ import { useProductCategoryInfiniteLists } from 'hooks/mdm/product-category/useP
 
 export default function CreateProductVariant({ isCreateProductVariant = true}) {
   const router = useRouter();
+  const companyId = localStorage.getItem("companyId")
+  const companyCode = localStorage.getItem("companyCode")
   const { id } = router.query;
   const isUpdate = !!id;
 
@@ -60,6 +62,7 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
   const [canBePurchased, setCanBePurchased] = useState(false);
   const [canBeSold, setCanBeSold] = useState(false);
   const [canBeManufacture, setCanManufacture] = useState(false);
+  const [canBeShareable, setCanBeShareable] = useState(false);
 
   const [isShowDelete, setShowDelete] = useState({ open: false });
 
@@ -113,13 +116,14 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
       sku: "",
       barcode: "",
       image: "",
-      company_id: "KSNI",
-      company_code: "KSNI",
+      company_id: companyCode,
+      company_code: companyCode,
       product_type: "",
       name: "",
       status: "active",
       can_be_sold: false,
       can_be_purchased: false,
+      can_be_shareable: false,
       expired_date: "",
       external_code: "",
       use_unit_leveling: false,
@@ -207,6 +211,7 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
             setCanBePurchased(data.can_be_purchased);
             setCanBeSold(data.can_be_sold);
             setCanManufacture(data.can_be_manufactured);
+            setCanBeShareable(data.can_be_shareable)
           })
       return data;
     }
@@ -220,7 +225,7 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
   } = useProductBrandInfiniteLists({
     query: {
       search: debounceFetchProductBrand,
-      company: "KSNI",
+      company: companyCode,
       limit: 10,
     },
     options: {
@@ -255,7 +260,7 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
   } = useProductCategoryInfiniteLists({
     query: {
       search: debounceFetchProductCategory,
-      company_id: "KSNI",
+      company_id: companyCode,
       limit: 10,
     },
     options: {
@@ -296,7 +301,7 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
         if( getValues('image')){
           const formData:any = new FormData();
           formData.append("image", getValues('image'));
-          formData.append("company_id", "KSNI");
+          formData.append("company_id", companyCode);
           formData.append("product_variant_id", data.productId);
   
           uploadImage(formData);
@@ -315,7 +320,7 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
         if( getValues('image') && isImageChange){
           const formData:any = new FormData();
           formData.append("image", getValues('image'));
-          formData.append("company_id", "KSNI");
+          formData.append("company_id", companyCode);
           formData.append("product_variant_id", id);
   
           uploadImage(formData);
@@ -374,6 +379,7 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
     payload.can_be_sold = canBeSold;
     payload.can_be_purchased = canBePurchased;
     payload.can_be_manufactured = canBeManufacture;
+    payload.can_be_shareable = canBeShareable;
 
     if(data.expired_date){
       payload.expired_date = data?.expired_date?.includes("/")
@@ -383,7 +389,7 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
     payload.product_brand_id = data.brand.id;
     payload.base_uom_id = data.base_uom.uom_id;
     payload.purchase_uom_id = data.purchase_uom.uom_id;
-    payload.company_code = 'KSNI'
+    payload.company_code = companyCode
     payload.inventory = {
       weight: {
           net: data?.inventory?.weight?.net,
@@ -614,6 +620,14 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
           <Checkbox size="small" checked={canBeManufacture} onChange={()=>setCanManufacture(!canBeManufacture)}/>
           <div style={{ cursor: "pointer" }} onClick={()=>setCanManufacture(!canBeManufacture)}>
             <Text variant={"h6"}>Can Be Manufacture</Text>
+          </div>
+        </Row>
+      </Col>
+      <Col>
+        <Row alignItems="center">
+          <Checkbox size="small" checked={canBeShareable} onChange={()=>setCanBeShareable(!canBeShareable)}/>
+          <div style={{ cursor: "pointer" }} onClick={()=>setCanBeShareable(!canBeShareable)}>
+            <Text variant={"h6"}>Is Shareable</Text>
           </div>
         </Row>
       </Col>

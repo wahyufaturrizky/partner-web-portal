@@ -43,6 +43,8 @@ switch (type) {
 
 const UOMConversionDetail = () => {
   const router = useRouter();
+  const companyId = localStorage.getItem("companyId")
+  const companyCode = localStorage.getItem("companyCode")
   const pagination = usePagination({
     page: 1,
     itemsPerPage: 20,
@@ -78,7 +80,7 @@ const UOMConversionDetail = () => {
   } = useUOMInfiniteLists({
     query: {
       search: debounceFetch,
-      company_id: "KSNI",
+      company_id: companyCode,
       limit: 10,
     },
     options: {
@@ -114,7 +116,7 @@ const UOMConversionDetail = () => {
   } = useUOMInfiniteLists({
     query: {
       search: debounceFetchModal,
-      company_id: "KSNI",
+      company_id: companyCode,
       limit: 10,
     },
     options: {
@@ -147,7 +149,7 @@ const UOMConversionDetail = () => {
     isFetching: isFetchingUom,
   } = useUOMConversion({
     id: uom_conversion_id,
-    companyId: "KSNI",
+    companyId: companyCode,
     query: {
       page: pagination.page,
       limit: pagination.itemsPerPage
@@ -186,7 +188,7 @@ const UOMConversionDetail = () => {
   });
 
   const { mutate: updateUom, isLoading: isLoadingUpdateUom } = useUpdateUOMConversion({
-    companyId: "KSNI",
+    companyId: companyCode,
     id: uom_conversion_id,
     options: {
       onSuccess: () => {
@@ -556,7 +558,7 @@ const UOMConversionDetail = () => {
           visible={showDeleteModal}
           isLoading={isLoadingDeleteUOM}
           onCancel={() => setShowDeleteModal(false)}
-          onOk={() => deleteUOM({ ids: [uom_conversion_id], company_id: "KSNI" })}
+          onOk={() => deleteUOM({ ids: [uom_conversion_id], company_id: companyCode })}
         />
       )}
 

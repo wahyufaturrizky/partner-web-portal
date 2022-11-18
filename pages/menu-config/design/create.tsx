@@ -349,14 +349,11 @@ const CreateMenuDesignList: any = () => {
 
                 <Spacer size={16} />
 
-                <Button
-                  size="big"
-                  variant={"secondary"}
-                  disabled={selectedRowKeyTree?.length === 0}
-                  onClick={handleRemoveMenu}
-                >
-                  Remove
-                </Button>
+                {selectedRowKeyTree?.length > 0 && (
+                  <Button size="big" variant={"secondary"} onClick={handleRemoveMenu}>
+                    Remove
+                  </Button>
+                )}
               </Row>
 
               <Spacer size={16} />

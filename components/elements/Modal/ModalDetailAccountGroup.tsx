@@ -9,6 +9,7 @@ import {
   useAccountGroupsDetail,
 } from "../../../hooks/finance-config/useAccountGroup";
 import styled from "styled-components";
+import { lang } from "lang";
 
 const schema = yup
   .object({
@@ -31,7 +32,7 @@ export const ModalDetailAccountGroup: any = ({
   } = useForm({
     resolver: yupResolver(schema),
   });
-
+  const t = localStorage.getItem("lan") || "en-US";
   const onSubmit = (data: any) => onOk({ groupName: data.groupName, parentId: data.parentId });
 
   const { data: accountGroupParent } = useAccountGroupParent({
@@ -60,7 +61,7 @@ export const ModalDetailAccountGroup: any = ({
     <Modal
       visible={visible}
       onCancel={onCancel}
-      title={"Account Group"}
+      title={lang[t].accountGroup.modalTitleUpdate.accountGroup}
       footer={
         <div
           style={{
@@ -72,7 +73,7 @@ export const ModalDetailAccountGroup: any = ({
           }}
         >
           <Button onClick={handleSubmit(onSubmit)} variant="primary" size="big">
-            Save
+            {lang[t].accountGroup.primary.save}
           </Button>
         </div>
       }
@@ -89,7 +90,7 @@ export const ModalDetailAccountGroup: any = ({
                 error={errors?.groupName?.message}
                 defaultValue={accountGroup?.groupName}
                 {...register("groupName", { required: true })}
-                label="Name"
+                label={lang[t].accountGroup.emptyState.name}
                 placeholder="e.g Receivable"
               />
               <Spacer size={20} />
@@ -101,7 +102,7 @@ export const ModalDetailAccountGroup: any = ({
                 name="parentId"
                 render={({ field: { onChange, value }, formState: { errors } }) => (
                   <Dropdown
-                    label="Parent (optional)"
+                    label={`${lang[t].accountGroup.filterBar.parent} (optional)`}
                     placeholder="Select"
                     width="100%"
                     items={parents}

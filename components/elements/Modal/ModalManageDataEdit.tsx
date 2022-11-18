@@ -424,6 +424,7 @@ export const ModalManageDataEdit = ({
 							name: currentParentData
 						},
 						isNewParent: false,
+						isReplace: true,
 						structureId: structure.id
 					};
 					newData.push(newSingleData);
@@ -442,6 +443,7 @@ export const ModalManageDataEdit = ({
 					name: currentData,
 					parent: null,
 					isNewParent: false,
+					isReplace: true,
 					structureId: structure.id
 				};
 				newData.push(newSingleData);

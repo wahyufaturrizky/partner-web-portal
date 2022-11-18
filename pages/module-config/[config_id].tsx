@@ -24,6 +24,7 @@ import {
 	useConfigs,
 	useUpdateConfig,
 } from "../../hooks/config/useConfig";
+import { lang } from "lang";
 
 const schema = yup
 	.object({
@@ -36,7 +37,7 @@ const ConfigDetail: any = () => {
 	const { config_id } = router.query;
 
 	const [modalDelete, setModalDelete] = useState({ open: false });
-
+	const t = localStorage.getItem("lan") || "en-US";
 	const {
 		register,
 		handleSubmit,
@@ -89,7 +90,7 @@ const ConfigDetail: any = () => {
 			modules: field.name,
 			action: (
 				<Button size="small" onClick={() => router.push(`/module-config/${field.id}`)} variant="tertiary">
-					View Detail
+					{lang[t].moduleConfig.tertier.viewDetail}
 				</Button>
 			),
 		});
@@ -97,7 +98,7 @@ const ConfigDetail: any = () => {
 
 	const columns = [
 		{
-			title: "Modules",
+			title: lang[t].moduleConfig.submodule.module,
 			dataIndex: "modules",
 		},
 		{
@@ -142,7 +143,7 @@ const ConfigDetail: any = () => {
 										Delete
 									</Button> */}
 									<Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
-										Save
+										{lang[t].moduleConfig.primary.save}
 									</Button>
 								</Row>
 							</Row>
@@ -153,19 +154,19 @@ const ConfigDetail: any = () => {
 
 					<Accordion>
 						<Accordion.Item key={1}>
-							<Accordion.Header variant="blue">General</Accordion.Header>
+							<Accordion.Header variant="blue">{lang[t].moduleConfig.accordion.general}</Accordion.Header>
 							<Accordion.Body>
 								<Row width="100%" gap="20px" noWrap>
 									<Input
 										width="100%"
-										label="Name"
+										label={lang[t].moduleConfig.emptyState.name}
 										height="48px"
 										placeholder={"e.g Sales"}
 										defaultValue={config?.name}
 										{...register("name", { required: true })}
 									/>
 									<Dropdown
-										label="Parent Module"
+										label={lang[t].moduleConfig.filterBar.parentModule}
 										width={"100%"}
 										items={parents}
 										placeholder={"Select"}
@@ -184,7 +185,7 @@ const ConfigDetail: any = () => {
 						<Accordion.Item key={1}>
 							<Accordion.Header variant="blue">
 								<Row gap="8px" alignItems="baseline">
-									Sub Module
+									{lang[t].moduleConfig.accordion.subModule}
 								</Row>
 							</Accordion.Header>
 							<Accordion.Body>

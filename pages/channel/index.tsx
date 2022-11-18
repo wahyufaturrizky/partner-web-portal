@@ -219,8 +219,8 @@ const ChannelMDM = () => {
       <Card>
         <Row justifyContent="space-between">
           <Search
-            width="340px"
-            placeholder="Search Sales Channel ID"
+            width="400px"
+            placeholder="Search Sales Channel ID, Sales Channel Name"
             onChange={(e: any) => {
               setSearch(e.target.value);
             }}
@@ -319,9 +319,9 @@ const ChannelMDM = () => {
 
       {modalChannelForm.open && (
         <Modal
-          width={"350px"}
+          width={"400px"}
           centered
-          closable={false}
+          closable={true}
           visible={modalChannelForm.open}
           onCancel={() => setModalChannelForm({ open: false, data: {}, typeForm: "" })}
           title={

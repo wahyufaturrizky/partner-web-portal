@@ -33,6 +33,8 @@ const itemDefaultValue = [
 
 const ProductGroupDetail = () => {
   const t = localStorage.getItem("lan") || "en-US";
+  const companyId = localStorage.getItem("companyId")
+  const companyCode = localStorage.getItem("companyCode")
   const router = useRouter();
   const { product_group_id } = router.query;
 
@@ -71,7 +73,7 @@ const ProductGroupDetail = () => {
   const { mutate: updateProductGroup, isLoading: isLoadingUpdateProductGroup } =
     useUpdateProductGroup({
       id: product_group_id,
-      companyId: "KSNI",
+      companyId: companyCode,
       options: {
         onSuccess: () => {
           router.back();
@@ -133,7 +135,7 @@ const ProductGroupDetail = () => {
     isFetching: isFetchingProductGroup,
   } = useProductGroup({
     id: product_group_id,
-    companyId: "KSNI",
+    companyId: companyCode,
     options: {
       retry: true,
       onSuccess: (data: any) => {

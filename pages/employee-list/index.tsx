@@ -41,13 +41,12 @@ const renderConfirmationText = (type: any, data: any) => {
   switch (type) {
     case "selection":
       return data.selectedRowKeys.length > 1
-        ? `Are you sure to delete ${data.selectedRowKeys.length} items ?`
-        : `Are you sure to delete Uom Name ${
-            data?.employeeListData?.data.find((el: any) => el.key === data.selectedRowKeys[0])
-              ?.uomName
+        ? `Are you sure to delete ${data.selectedRowKeys.length} employee ID ?`
+        : `Are you sure to delete employee name ${
+            data?.employeeListData?.data.find((el: any) => el.key === data.selectedRowKeys[0])?.name
           } ?`;
     case "detail":
-      return `Are you sure to delete Uom Name ${data.uomName} ?`;
+      return `Are you sure to delete employee name ${data.name} ?`;
 
     default:
       break;
@@ -80,6 +79,17 @@ const EmployeeList = () => {
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const debounceSearch = useDebounce(search, 1000);
 
+  const { data: jobPositionsData, isLoading: isLoadingJobPositions } = useJobPositions({
+    query: {
+      limit: pagination.totalItems,
+      company_id: "KSNI",
+    },
+    options: {
+      onSuccess: () => {},
+      enabled: !!pagination.totalItems,
+    },
+  });
+
   const {
     data: employeeListData,
     isLoading: isLoadingEmployeeList,
@@ -95,7 +105,7 @@ const EmployeeList = () => {
     },
     options: {
       onSuccess: (data: any) => {
-        pagination.setTotalItems(data.totalRow);
+        pagination.setTotalItems(data?.totalRow);
       },
       select: (data: any) => {
         const mappedData = data?.rows?.map((element: any) => {
@@ -103,8 +113,10 @@ const EmployeeList = () => {
             key: element.code,
             id: element.code,
             name: element.name,
-            jobPosition: element.jobPosition,
-            employeeType: element.employeeType,
+            jobPosition: jobPositionsData.rows.find((findingJobPosition: any) =>
+              findingJobPosition.jobPositionId.includes(element.jobPosition)
+            ).name,
+            employeeType: element.type,
             action: (
               <div style={{ display: "flex", justifyContent: "left" }}>
                 <Button
@@ -137,14 +149,16 @@ const EmployeeList = () => {
       },
     });
 
-  const { mutate: uploadFileEmployee } = useUploadFileEmployeeListMDM({
-    options: {
-      onSuccess: () => {
-        queryClient.invalidateQueries(["employee-list"]);
-        setShowUpload(false);
+  const { mutate: uploadFileEmployee, isLoading: isLoadingUploadFileEmployeeListMDM } =
+    useUploadFileEmployeeListMDM({
+      options: {
+        onSuccess: () => {
+          queryClient.invalidateQueries(["employee-list"]);
+          setShowUpload(false);
+          window.alert("success upload");
+        },
       },
-    },
-  });
+    });
 
   const columns = [
     {
@@ -184,16 +198,6 @@ const EmployeeList = () => {
 
     uploadFileEmployee(formData);
   };
-
-  const { data: jobPositionsData, isLoading: isLoadingJobPositions } = useJobPositions({
-    query: {
-      limit: 10000,
-      company_id: "KSNI",
-    },
-    options: {
-      onSuccess: () => {},
-    },
-  });
 
   const listFilterEmployeeList = [
     {
@@ -347,7 +351,12 @@ const EmployeeList = () => {
       <Card style={{ padding: "16px 20px" }}>
         <Col gap={"60px"}>
           <Table
-            loading={isLoadingEmployeeList || isFetchinggEmployeeList}
+            loading={
+              isLoadingEmployeeList ||
+              isFetchinggEmployeeList ||
+              isLoadingJobPositions ||
+              isLoadingUploadFileEmployeeListMDM
+            }
             columns={columns}
             data={employeeListData?.data}
             rowSelection={rowSelection}

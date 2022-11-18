@@ -30,6 +30,7 @@ import {
   useUpdateProductBrandMDM,
   useUploadFileProductBrandMDM,
 } from "../../hooks/mdm/product-brand/useProductBrandMDM";
+import { lang } from "lang";
 
 const downloadFile = (params: any) =>
   mdmDownloadService("/product-brand/template/download", { params }).then((res) => {
@@ -60,6 +61,9 @@ const renderConfirmationText = (type: any, data: any) => {
 };
 
 const ProductBrandMDM = () => {
+  const companyId = localStorage.getItem("companyId")
+  const companyCode = localStorage.getItem("companyCode")
+  const t = localStorage.getItem("lan") || "en-US";
   const pagination = usePagination({
     page: 1,
     itemsPerPage: 20,
@@ -93,6 +97,7 @@ const ProductBrandMDM = () => {
       search: debounceSearch,
       page: pagination.page,
       limit: pagination.itemsPerPage,
+      company: companyCode
     },
     options: {
       onSuccess: (data: any) => {
@@ -177,15 +182,15 @@ const ProductBrandMDM = () => {
 
   const columns = [
     {
-      title: "Product Brand ID",
+      title: lang[t].productBrand.productBrandID,
       dataIndex: "productBrandCode",
     },
     {
-      title: "Product Brand Name",
+      title: lang[t].productBrand.productBrandName,
       dataIndex: "brand",
     },
     {
-      title: "Parent",
+      title: lang[t].productBrand.productBrandParent,
       dataIndex: "parent",
     },
     {
@@ -193,7 +198,7 @@ const ProductBrandMDM = () => {
       dataIndex: "company",
     },
     {
-      title: "Action",
+      title: lang[t].productBrand.productBrandAction,
       dataIndex: "action",
       width: 160,
     },
@@ -209,10 +214,10 @@ const ProductBrandMDM = () => {
   const onSubmit = (data: any) => {
     switch (modalProductBrandForm.typeForm) {
       case "create":
-        createProductBrandMDM({ ...data, company: "KSNI" });
+        createProductBrandMDM({ ...data, company: companyCode });
         break;
       case "edit":
-        updateProductBrandMDM({ ...data, company: "KSNI" });
+        updateProductBrandMDM({ ...data, company: companyCode });
         break;
       default:
         setModalProductBrandForm({ open: false, typeForm: "", data: {} });
@@ -230,14 +235,14 @@ const ProductBrandMDM = () => {
   return (
     <>
       <Col>
-        <Text variant={"h4"}>Product Brand</Text>
+        <Text variant={"h4"}>{lang[t].productBrand.pageTitle.productBrand}</Text>
         <Spacer size={20} />
       </Col>
       <Card>
         <Row justifyContent="space-between">
           <Search
             width="340px"
-            placeholder="Search Product Brand ID, Name, c"
+            placeholder={lang[t].productBrand.searchBar.productBrand}
             onChange={(e: any) => {
               setSearch(e.target.value);
             }}
@@ -255,10 +260,10 @@ const ProductBrandMDM = () => {
               }
               disabled={rowSelection.selectedRowKeys?.length === 0}
             >
-              Delete
+              {lang[t].productBrand.tertier.delete}
             </Button>
             <DropdownMenu
-              title={"More"}
+              title={lang[t].productBrand.secondary.more}
               buttonVariant={"secondary"}
               buttonSize={"big"}
               textVariant={"button"}
@@ -267,13 +272,13 @@ const ProductBrandMDM = () => {
               onClick={(e: any) => {
                 switch (parseInt(e.key)) {
                   case 1:
-                    downloadFile({ with_data: "N", company_id: "KSNI" });
+                    downloadFile({ with_data: "N", company_id: companyCode });
                     break;
                   case 2:
                     setShowUpload(true);
                     break;
                   case 3:
-                    downloadFile({ with_data: "Y", company_id: "KSNI" });
+                    downloadFile({ with_data: "Y", company_id: companyCode });
                     break;
                   case 4:
                     break;
@@ -287,7 +292,7 @@ const ProductBrandMDM = () => {
                   value: (
                     <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
                       <ICDownload />
-                      <p style={{ margin: "0" }}>Download Template</p>
+                      <p style={{ margin: "0" }}>{lang[t].productBrand.ghost.downloadTemplate}</p>
                     </div>
                   ),
                 },
@@ -296,7 +301,7 @@ const ProductBrandMDM = () => {
                   value: (
                     <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
                       <ICUpload />
-                      <p style={{ margin: "0" }}>Upload Template</p>
+                      <p style={{ margin: "0" }}>{lang[t].productBrand.ghost.uploadTemplate}</p>
                     </div>
                   ),
                 },
@@ -305,7 +310,7 @@ const ProductBrandMDM = () => {
                   value: (
                     <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
                       <ICDownload />
-                      <p style={{ margin: "0" }}>Download Data</p>
+                      <p style={{ margin: "0" }}>{lang[t].productBrand.ghost.downloadData}</p>
                     </div>
                   ),
                 },
@@ -316,7 +321,7 @@ const ProductBrandMDM = () => {
               variant="primary"
               onClick={() => setModalProductBrandForm({ open: true, typeForm: "create", data: {} })}
             >
-              Create
+              {lang[t].productBrand.primary.create}
             </Button>
           </Row>
         </Row>
@@ -341,7 +346,7 @@ const ProductBrandMDM = () => {
           visible={modalProductBrandForm.open}
           onCancel={() => setModalProductBrandForm({ open: false, data: {}, typeForm: "" })}
           title={
-            modalProductBrandForm.typeForm === "create" ? "Create Product Brand" : "Product Brand"
+            modalProductBrandForm.typeForm === "create" ? lang[t].productBrand.modalTitleCreate.productBrand : lang[t].productBrand.modalTitleUpdate.viewDetail
           }
           footer={null}
           content={
@@ -355,7 +360,7 @@ const ProductBrandMDM = () => {
               <Input
                 defaultValue={modalProductBrandForm.data?.brand}
                 width="100%"
-                label="Name"
+                label={lang[t].productBrand.productBrandName}
                 height="48px"
                 required
                 placeholder={"e.g Brand 1"}
@@ -369,7 +374,7 @@ const ProductBrandMDM = () => {
               ) : (
                 <>
                   <Dropdown
-                    label="Parent"
+                    label={lang[t].productBrand.productBrandParent}
                     isOptional
                     width="100%"
                     items={dataParentProductBrandMDM.map((data) => ({
@@ -404,7 +409,7 @@ const ProductBrandMDM = () => {
                       setModalProductBrandForm({ open: false, data: {}, typeForm: "" })
                     }
                   >
-                    Cancel
+                    {lang[t].productBrand.tertier.cancel}
                   </Button>
                 ) : (
                   <Button
@@ -420,14 +425,14 @@ const ProductBrandMDM = () => {
                       });
                     }}
                   >
-                    Delete
+                    {lang[t].productBrand.tertier.delete}
                   </Button>
                 )}
 
                 <Button onClick={handleSubmit(onSubmit)} variant="primary" size="big">
                   {isLoadingCreateProductBrandMDM || isLoadingUpdateProductBrandMDM
                     ? "Loading..."
-                    : "Save"}
+                    : lang[t].productBrand.primary.save}
                 </Button>
               </div>
             </div>

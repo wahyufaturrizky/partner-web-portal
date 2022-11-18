@@ -15,10 +15,11 @@ import { DragOutlined } from "@ant-design/icons";
 import { ModalDeleteConfirmation } from "components/elements/Modal/ModalConfirmationDelete";
 import { queryClient } from "pages/_app";
 import ArrowLeft from "assets/icons/arrow-left.svg";
+import { lang } from "lang";
 
 const CreateMenuDesignList: any = () => {
   const router = useRouter();
-
+  const t = localStorage.getItem("lan") || "en-US";
   const { menu_design_id } = router.query;
 
   const { register, handleSubmit, control, setValue } = useForm();
@@ -415,10 +416,10 @@ const CreateMenuDesignList: any = () => {
 
             <Row gap="16px">
               <Button size="big" variant={"tertiary"} onClick={() => setShowDeleteModal(true)}>
-                Delete
+                {lang[t].menuDesign.tertier.delete}
               </Button>
               <Button size="big" variant={"primary"} onClick={handleSubmit(submit)}>
-                {isLoadingUpdateMenuDesign ? "loading..." : "Save"}
+                {isLoadingUpdateMenuDesign ? "loading..." : lang[t].menuDesign.primary.save}
               </Button>
             </Row>
           </Row>
@@ -428,7 +429,9 @@ const CreateMenuDesignList: any = () => {
 
         <Accordion>
           <Accordion.Item key={1}>
-            <Accordion.Header variant="blue">General</Accordion.Header>
+            <Accordion.Header variant="blue">
+              {lang[t].menuDesign.accordion.general}
+            </Accordion.Header>
             <Accordion.Body>
               <Row width="50%" gap="20px" noWrap>
                 <Col width="100%">
@@ -453,25 +456,22 @@ const CreateMenuDesignList: any = () => {
           <Accordion.Item key={1}>
             <Accordion.Header variant="blue">
               <Row gap="8px" alignItems="baseline">
-                Hirarchy Menu
+                {lang[t].menuDesign.accordion.hyrarchyMenu}
               </Row>
             </Accordion.Header>
             <Accordion.Body>
               <Row>
                 <Button size="big" variant={"primary"} onClick={() => setShowModuleConfig(true)}>
-                  Add Module
+                  {lang[t].menuDesign.primary.addModule}
                 </Button>
 
                 <Spacer size={16} />
 
-                <Button
-                  size="big"
-                  variant={"secondary"}
-                  disabled={selectedRowKeyTree?.length === 0}
-                  onClick={handleRemoveMenu}
-                >
-                  Remove
-                </Button>
+                {selectedRowKeyTree?.length > 0 && (
+                  <Button size="big" variant={"secondary"} onClick={handleRemoveMenu}>
+                    {lang[t].menuDesign.tertier.remove}
+                  </Button>
+                )}
               </Row>
 
               <Spacer size={16} />

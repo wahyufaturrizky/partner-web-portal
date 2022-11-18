@@ -1,3 +1,4 @@
+import { lang } from "lang";
 import { useRouter } from "next/router";
 import { Accordion, Button, Col, Input, Modal, Row, Spacer, Table, Text } from "pink-lava-ui";
 import { useState } from "react";
@@ -8,6 +9,10 @@ import { useCreateProductOptionMDM } from "../../hooks/mdm/product-option/usePro
 import { queryClient } from "../_app";
 
 const ProductOptionCreate = () => {
+  const companyId = localStorage.getItem("companyId")
+  const companyCode = localStorage.getItem("companyCode")
+  const t = localStorage.getItem("lan") || "en-US";
+  
   const [dataItem, setDataItem] = useState([]);
   const [modalChannelForm, setModalChannelForm] = useState({
     open: false,
@@ -31,7 +36,7 @@ const ProductOptionCreate = () => {
   const onSubmit = (data: any) => {
     if (dataItem.length > 0) {
       const formData = {
-        company_id: "KSNI",
+        company_id: companyCode,
         items: dataItem.map((mapData) => mapData.name),
         ...data,
       };
@@ -79,7 +84,7 @@ const ProductOptionCreate = () => {
       dataIndex: "id",
     },
     {
-      title: "Action",
+      title: lang[t].productOption.productOptionAction,
       dataIndex: "action",
       width: "15%",
       align: "left",
@@ -109,7 +114,7 @@ const ProductOptionCreate = () => {
       },
     },
     {
-      title: "Item Name",
+      title: lang[t].productOption.productOptionItemName,
       dataIndex: "name",
     },
   ];
@@ -117,7 +122,7 @@ const ProductOptionCreate = () => {
   return (
     <Col>
       <Row gap="4px">
-        <Text variant={"h4"}>Create Product Option</Text>
+        <Text variant={"h4"}>{lang[t].productOption.pageTitle.createProductOption}</Text>
       </Row>
 
       <Spacer size={20} />
@@ -126,10 +131,10 @@ const ProductOptionCreate = () => {
         <Row justifyContent="flex-end" alignItems="center" nowrap>
           <Row gap="16px">
             <Button size="big" variant={"tertiary"} onClick={() => router.back()}>
-              Cancel
+              {lang[t].productOption.tertier.cancel}
             </Button>
             <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
-              {isLoadingCreateProductOption ? "Loading..." : "Save"}
+              {isLoadingCreateProductOption ? "Loading..." : lang[t].productOption.primary.save}
             </Button>
           </Row>
         </Row>
@@ -139,13 +144,13 @@ const ProductOptionCreate = () => {
 
       <Accordion>
         <Accordion.Item key={1}>
-          <Accordion.Header variant="blue">General</Accordion.Header>
+          <Accordion.Header variant="blue">{lang[t].productOption.accordion.general}</Accordion.Header>
           <Accordion.Body>
             <Row width="100%" noWrap>
               <Col width={"50%"}>
                 <Input
                   width="100%"
-                  label="Product Option Name"
+                  label={lang[t].productOption.emptyState.productOptionName}
                   height="40px"
                   placeholder={"e.g Flavour"}
                   {...register("name", { required: "Please enter name." })}
@@ -160,14 +165,14 @@ const ProductOptionCreate = () => {
 
       <Accordion>
         <Accordion.Item key={1}>
-          <Accordion.Header variant="blue">Product Options Item</Accordion.Header>
+          <Accordion.Header variant="blue">{lang[t].productOption.accordion.productOptionItem}</Accordion.Header>
           <Accordion.Body>
             <Button
               size="big"
               variant={"tertiary"}
               onClick={() => setModalChannelForm({ open: true, typeForm: "create", data: {} })}
             >
-              <ICPlus /> Add New
+              <ICPlus /> {lang[t].productOption.tertier.addNew}
             </Button>
 
             <Spacer size={20} />

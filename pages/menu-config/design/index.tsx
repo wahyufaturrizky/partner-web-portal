@@ -6,6 +6,7 @@ import { Button, Col, Pagination, Row, Search, Spacer, Table, Text } from "pink-
 import { colors } from "utils/color";
 import { useDeleteMenuDesignList, useMenuDesignLists } from "hooks/menu-config/useMenuDesign";
 import { ModalDeleteConfirmation } from "components/elements/Modal/ModalConfirmationDelete";
+import { lang } from "lang";
 
 import styled from "styled-components";
 
@@ -18,7 +19,7 @@ const MenuConfigDesign: any = () => {
     arrows: true,
     totalItems: 100,
   });
-
+  const t = localStorage.getItem("lan") || "en-US";
   const [search, setSearch] = useState("");
   const [modalDelete, setModalDelete] = useState({ open: false });
 
@@ -54,7 +55,7 @@ const MenuConfigDesign: any = () => {
                   }
                   variant="tertiary"
                 >
-                  View Detail
+                  {lang[t].menuDesign.tertier.viewDetail}
                 </Button>
               </div>
             ),
@@ -78,12 +79,12 @@ const MenuConfigDesign: any = () => {
 
   const columns = [
     {
-      title: "Menu Design Name",
+      title: lang[t].menuDesign.menuDesignName,
       dataIndex: "field_name",
       width: "80%",
     },
     {
-      title: "Action",
+      title: lang[t].menuDesign.menuDesignAction,
       dataIndex: "action",
       width: "15%",
       align: "left",
@@ -104,18 +105,18 @@ const MenuConfigDesign: any = () => {
   return (
     <>
       <Col>
-        <Text variant={"h4"}>Menu Design</Text>
+        <Text variant={"h4"}>{lang[t].menuDesign.pageTitle.menuDesign}</Text>
         <Spacer size={20} />
         <Card>
           <Row justifyContent="space-between">
             <Search
               width="380px"
               nameIcon="SearchOutlined"
-              placeholder="Search Menu Design Name"
+              placeholder={lang[t].menuDesign.searchBar.menuDesign}
               colorIcon={colors.grey.regular}
               onChange={({ target }: any) => setSearch(target.value)}
             />
-            <Row gap="16px">
+            {/* <Row gap="16px">
               <Button
                 size="big"
                 variant={"tertiary"}
@@ -131,7 +132,7 @@ const MenuConfigDesign: any = () => {
               >
                 Create
               </Button>
-            </Row>
+            </Row> */}
           </Row>
         </Card>
         <Spacer size={10} />

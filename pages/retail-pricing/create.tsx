@@ -34,7 +34,8 @@ const downloadFile = (params: any) =>
 
 const CreateRetailPricing: any = () => {
   const router = useRouter();
-
+  const companyId = localStorage.getItem("companyId")
+  const companyCode = localStorage.getItem("companyCode")
   const {
     register,
     control,
@@ -179,7 +180,7 @@ const CreateRetailPricing: any = () => {
 	});
 
   const onSubmit = (data:any) => {
-    data.company_id = 'KSNI'
+    data.company_id = companyCode
     data.availability = data?.availability?.filter((data:any) => {
       Object.keys(data).length === 0;
     }).map((data) => {
@@ -343,7 +344,7 @@ const CreateRetailPricing: any = () => {
                     Use this template to add rules structure
                   </Text>
                   <Spacer size={10} />
-                  <Button variant="tertiary" size="big" onClick={() => downloadFile({ with_data: "N", type: 'rule', company_id: "KSNI" })}>
+                  <Button variant="tertiary" size="big" onClick={() => downloadFile({ with_data: "N", type: 'rule', company_id: companyCode })}>
                     Download Template
                   </Button>
                 </DownloadUploadContainer>

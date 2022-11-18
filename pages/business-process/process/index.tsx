@@ -7,8 +7,10 @@ import { ModalDeleteConfirmation } from "../../../components/elements/Modal/Moda
 import { useConfigs } from "../../../hooks/config/useConfig";
 import { useDeleteProcessList, useProcessLists } from "../../../hooks/business-process/useProcess";
 import { colors } from "../../../utils/color";
+import { lang } from "lang";
 
 const ProcessList: any = () => {
+	const t = localStorage.getItem("lan") || "en-US";
 	const pagination = usePagination({
 		page: 1,
 		itemsPerPage: 20,
@@ -64,17 +66,17 @@ const ProcessList: any = () => {
 
 	const columns = [
 		{
-			title: "Process Name",
+			title: lang[t].process.permissionList.name,
 			dataIndex: "field_name",
 			width: "43%",
 		},
 		{
-			title: "Modul",
+			title: lang[t].process.permissionList.module,
 			dataIndex: "field_module",
 			width: "42%",
 		},
 		{
-			title: "Action",
+			title: lang[t].process.permissionList.action,
 			dataIndex: "action",
 			width: "15%",
 		},
@@ -97,7 +99,7 @@ const ProcessList: any = () => {
 					}
 					variant="tertiary"
 				>
-					View Detail
+					{lang[t].process.tertier.viewDetail}
 				</Button>
 			),
 		});
@@ -126,7 +128,7 @@ const ProcessList: any = () => {
 	return (
 		<>
 			<Col>
-				<Text variant={"h4"}>Process List</Text>
+				<Text variant={"h4"}>{lang[t].process.pageTitle.processList}</Text>
 				<Spacer size={20} />
 				<Card>
 					<Row justifyContent="space-between">
@@ -134,7 +136,7 @@ const ProcessList: any = () => {
 							<Search
 								width="380px"
 								nameIcon="SearchOutlined"
-								placeholder="Search Process Name"
+								placeholder={lang[t].process.searchBar.processList}
 								colorIcon={colors.grey.regular}
 								onChange={(e: any) => setSearch(e.target.value)}
 							/>
@@ -150,7 +152,7 @@ const ProcessList: any = () => {
 									dataConfigsModule &&
 									dataConfigsModule?.rows.map((data: any) => ({ id: data.id, value: data.name }))
 								}
-								placeholder={"Modul"}
+								placeholder={lang[t].process.filterbar.module}
 								handleChange={handleChangeDropdown}
 								noSearch
 								rounded

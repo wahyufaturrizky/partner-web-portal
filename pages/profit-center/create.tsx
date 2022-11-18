@@ -14,7 +14,9 @@ import ArrowLeft from "../../assets/icons/arrow-left.svg";
 
 function ProfitCenterCreate({isUpdate,detailProfitCenter,isLoadingProfit,isFetchingProfit} :any) {
 
-  const router = useRouter();  
+  const router = useRouter();
+  const companyId = localStorage.getItem("companyId")
+  const companyCode = localStorage.getItem("companyCode")  
   const [validFromValue, setValidFromValue] = useState<any>(null);
   const [validToValue, setValidToValue] = useState<any>(null);
   const {

@@ -12,8 +12,10 @@ import {
 import { STATUS_BUSINESS_PROCESS } from "../../utils/constant";
 import useDebounce from "../../lib/useDebounce";
 import { queryClient } from "../_app";
+import { lang } from "lang";
 
 const BusinessProcess = () => {
+  const t = localStorage.getItem("lan") || "en-US";
   const router = useRouter();
   const pagination = usePagination({
     page: 1,
@@ -58,7 +60,7 @@ const BusinessProcess = () => {
                   }}
                   variant="tertiary"
                 >
-                  View Detail
+                  {lang[t].businessProcess.tertier.viewDetail}
                 </Button>
               </div>
             ),
@@ -82,11 +84,11 @@ const BusinessProcess = () => {
 
   const columns = [
     {
-      title: "Business Process Name",
+      title: lang[t].businessProcess.businessProcessName,
       dataIndex: "name",
     },
     {
-      title: "Status",
+      title: lang[t].businessProcess.businessProcessStatus,
       dataIndex: "status",
       width: "30%",
       render: (status: any) => (
@@ -96,7 +98,7 @@ const BusinessProcess = () => {
       ),
     },
     {
-      title: "Action",
+      title: lang[t].businessProcess.businessProcessAction,
       dataIndex: "action",
       align: "left",
     },
@@ -110,13 +112,13 @@ const BusinessProcess = () => {
   return (
     <>
       <Col>
-        <Text variant={"h4"}>Business Process List</Text>
+        <Text variant={"h4"}>{lang[t].businessProcess.pageTitle.businessProcess}</Text>
         <Spacer size={20} />
         <Card>
           <Row justifyContent="space-between">
             <Search
               width="380px"
-              placeholder="Search Business Process Name"
+              placeholder={lang[t].businessProcess.searchBar.businessProcess}
               onChange={(e: any) => {
                 setSearch(e.target.value);
               }}
@@ -135,7 +137,7 @@ const BusinessProcess = () => {
                 variant="primary"
                 onClick={() => router.push("/business-process/create")}
               >
-                Create
+                {lang[t].businessProcess.primary.create}
               </Button>
             </Row>
           </Row>

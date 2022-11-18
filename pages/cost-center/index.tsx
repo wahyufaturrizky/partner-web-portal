@@ -49,6 +49,8 @@ const renderConfirmationText = (type: any, data: any) => {
 
 const CostCenter = () => {
   const router = useRouter();
+  const companyId = localStorage.getItem("companyId")
+  const companyCode = localStorage.getItem("companyCode")
   const pagination = usePagination({
     page: 1,
     itemsPerPage: 20,
@@ -74,6 +76,7 @@ const CostCenter = () => {
       search: debounceSearch,
       page: pagination.page,
       limit: pagination.itemsPerPage,
+      company_id : companyCode,
     },
     options: {
       onSuccess: (data: any) => {

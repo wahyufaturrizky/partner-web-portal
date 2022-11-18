@@ -9,6 +9,7 @@ import { ModalDeleteConfirmation } from "../../components/elements/Modal/ModalCo
 import { colors } from "../../utils/color";
 
 import styled from "styled-components";
+import { lang } from "lang";
 
 const MenuConfigList: any = () => {
 	const pagination = usePagination({
@@ -23,7 +24,7 @@ const MenuConfigList: any = () => {
 	const [search, setSearch] = useState("");
 	const [defaultActiveKey, setDefaultActiveKey] = useState("All");
 	const [modalDelete, setModalDelete] = useState({ open: false });
-
+	const t = localStorage.getItem("lan") || "en-US";
 	const {
 		data: fields,
 		refetch: refetchFields,
@@ -35,7 +36,7 @@ const MenuConfigList: any = () => {
 			},
 		},
 		query:
-			defaultActiveKey === "All"
+			(defaultActiveKey === "All" || defaultActiveKey === "Semua")
 				? {
 						search,
 						page: pagination.page,
@@ -61,17 +62,17 @@ const MenuConfigList: any = () => {
 
 	const columns = [
 		{
-			title: "Menu Name",
+			title: lang[t].menuList.menuListName,
 			dataIndex: "field_name",
 			width: "43%",
 		},
 		{
-			title: "Type",
+			title: lang[t].menuList.menuListType,
 			dataIndex: "field_type",
 			width: "42%",
 		},
 		{
-			title: "Action",
+			title: lang[t].menuList.menuList.action,
 			dataIndex: "action",
 			width: "15%",
 		},
@@ -94,7 +95,7 @@ const MenuConfigList: any = () => {
 					}
 					variant="tertiary"
 				>
-					View Detail
+					{lang[t].menuList.tertier.viewDetail}
 				</Button>
 			),
 		});
@@ -117,22 +118,22 @@ const MenuConfigList: any = () => {
 	};
 
 	const listTab = [
-		{title: "All"},
-		{title: "Menu"},
-		{title: "Process"},
+		{title: lang[t].menuList.tabs.all},
+		{title: lang[t].menuList.tabs.menu},
+		{title: lang[t].menuList.tabs.process},
 	];
 
 	return (
 		<>
 			<Col>
-				<Text variant={"h4"}>Menu List</Text>
+				<Text variant={"h4"}>{lang[t].menuList.pageTitle.menuList}</Text>
 				<Spacer size={20} />
 				<Card>
 					<Row justifyContent="space-between">
 						<Search
 							width="380px"
 							nameIcon="SearchOutlined"
-							placeholder="Search Menu Name"
+							placeholder={lang[t].menuList.searchBar.menuList}
 							colorIcon={colors.grey.regular}
 							onChange={(e: any) => setSearch(e.target.value)}
 						/>

@@ -46,6 +46,8 @@ switch (type) {
 
 const UOMConversionCreate = () => {
   const router = useRouter();
+  const companyId = localStorage.getItem("companyId")
+  const companyCode = localStorage.getItem("companyCode")
   const pagination = usePagination({
     page: 1,
     itemsPerPage: 20,
@@ -69,7 +71,7 @@ const UOMConversionCreate = () => {
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
 
   const [newUom, setNewUom] = useState({
-    company_id: "KSNI",
+    company_id: companyCode,
     name: "",
     base_uom_id: "",
   })
@@ -86,7 +88,7 @@ const UOMConversionCreate = () => {
   } = useUOMInfiniteLists({
     query: {
       search: debounceFetch,
-      company_id: "KSNI",
+      company_id: companyCode,
       limit: 10,
     },
     options: {
@@ -122,7 +124,7 @@ const UOMConversionCreate = () => {
   } = useUOMInfiniteLists({
     query: {
       search: debounceFetchModal,
-      company_id: "KSNI",
+      company_id: companyCode,
       limit: 10,
     },
     options: {
@@ -195,7 +197,7 @@ const UOMConversionCreate = () => {
       }])
     }
     setNewUom({
-      company_id: "KSNI",
+      company_id: companyCode,
       name: data.name,
       base_uom_id: listUomCategory?.find(e => e.value === data.uom)?.label ? listUomCategory?.find(e => e.value === data.uom)?.label : listUomCategoryModal?.find(e => e.value === data.uom)?.label,
     })
@@ -217,7 +219,7 @@ const UOMConversionCreate = () => {
       })
     }
     const saveData = {
-    company_id: "KSNI",
+    company_id: companyCode,
     name: data.name,
     base_uom_id: data.baseUom,
     items: savedTable
