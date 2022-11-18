@@ -128,8 +128,8 @@ const ConditionalField = ({
 
     append({
       ...(type === "edit" && { id: 0 }),
-      group: "",
-      condition: filterGroupingOption[0]?.value === "PRICE" ? "BETWEEN" : "",
+      group: null,
+      condition: filterGroupingOption[0]?.value === "PRICE" ? "BETWEEN" : null,
       value_from: "0",
       value_to: "0",
       values: "0",
@@ -296,7 +296,9 @@ const ConditionalField = ({
                 )}
               />
 
-              {(itemsWatch[index]?.group === "PRICE" || itemsWatch[index]?.group === "") && (
+              {(itemsWatch[index]?.group === "PRICE" ||
+                itemsWatch[index]?.group === "" ||
+                itemsWatch[index]?.group === null) && (
                 <Controller
                   control={control}
                   rules={{ required: true }}
@@ -347,7 +349,7 @@ const ConditionalField = ({
                       <Label>Product Category Name</Label>
                       <Spacer size={3} />
                       <FormSelect
-                        defaultValue={item?.values}
+                        defaultValue={item?.values === "0" && null}
                         style={{ width: "100%" }}
                         size={"large"}
                         placeholder={"Select"}
