@@ -4,7 +4,7 @@ import {
   Col,
   Row,
   Spacer,
-  Dropdown2,
+  Dropdown,
   Button,
   TextArea,
   Input,
@@ -113,7 +113,7 @@ const CostCenterCreate = () => {
   const [description, setDescription] = useState("")
   const [costCenterCategory, setCostCenterCategory] = useState("")
   
-  const { register, control, handleSubmit } = useForm();
+  const { register, control, handleSubmit,formState: { errors }, } = useForm();
   
 
   const {
@@ -154,7 +154,7 @@ const CostCenterCreate = () => {
       options: {
       onSuccess: (data: CompanyList) => {
           setlistCompany([{
-            value: data.id,
+            value: data.code,
             label: data.name,
             language: data.language,
             currency: data.currency
@@ -476,7 +476,8 @@ const CostCenterCreate = () => {
                         defaultValue={costCenterData?.code}
                         required
                         placeholder={"e.g 0131930111"}
-                        {...register("code", { required: "Please enter name." })}
+                        {...register("code", { required: 'Profit center code must be filled' })}
+                        error={errors?.code?.message}
                     />
                 </Col>
 
@@ -490,7 +491,8 @@ const CostCenterCreate = () => {
                         defaultValue={costCenterData?.name}
                         required
                         placeholder={"e.g Dept IT"}
-                        {...register("name", { required: "Please enter name." })}
+                        {...register("name", { required: "Profit center name must be filled" })}
+                        error={errors?.name?.message}
                     />
                 </Col>
             </Row>
@@ -544,6 +546,7 @@ const CostCenterCreate = () => {
                 <Controller
                     control={control}
                     name="company_id"
+                    defaultValue={listCompany[0]?.value}
                     render={({ field: { onChange } }) => (
                     <>
                         <Label>Company</Label>
@@ -747,7 +750,7 @@ const CostCenterCreate = () => {
             {/* Cost Center Category */}
             <Row width="100%" noWrap>
                 <Col width={"100%"}>
-                <Dropdown2
+                <Dropdown
                   label="Cost Center Category"
                   height="48px"
                   width={"100%"}

@@ -4,7 +4,7 @@ import {
   Col,
   Row,
   Spacer,
-  Dropdown2,
+  Dropdown,
   Button,
   TextArea,
   Input,
@@ -115,7 +115,7 @@ const CostCenterCreate = () => {
     plant_revenues: false,
     commitment_update: false,
   }])
-  const { register, control, handleSubmit } = useForm();
+  const { register, control, handleSubmit,formState: { errors } } = useForm();
   
   // const {
   //       data: companyData,
@@ -154,7 +154,7 @@ const CostCenterCreate = () => {
         options: {
         onSuccess: (data: CompanyList) => {
             setListCompany([{
-              value: data.id,
+              value: data.code,
               label: data.name,
               language: data.language,
               currency: data.currency
@@ -473,7 +473,8 @@ const CostCenterCreate = () => {
                         height="48px"
                         required
                         placeholder={"e.g 0131930111"}
-                        {...register("code", { required: "Please enter name." })}
+                        error={errors?.code?.message}
+                        {...register("code", { required: "Please cost center code." })}
                     />
                 </Col>
 
@@ -486,7 +487,8 @@ const CostCenterCreate = () => {
                         height="48px"
                         required
                         placeholder={"e.g Dept IT"}
-                        {...register("name", { required: "Please enter name." })}
+                        error={errors?.name?.message}
+                        {...register("name", { required: "Please enter cost center name." })}
                     />
                 </Col>
             </Row>
@@ -738,7 +740,7 @@ const CostCenterCreate = () => {
             {/* Cost Center Category */}
             <Row width="100%" noWrap>
                 <Col width={"100%"}>
-                <Dropdown2
+                <Dropdown
                   label="Cost Center Category"
                   height="48px"
                   width={"100%"}
