@@ -169,8 +169,6 @@ const ConditionalField = ({
       items: mapFilterProduct,
     };
 
-    console.log(requestBody);
-
     filterProduct(requestBody);
   }, [debounceMin, debounceMax]);
 
@@ -208,7 +206,6 @@ const ConditionalField = ({
       setValue(`items.${index}.values`, "0");
     }
     onChange(value);
-    console.log(value, "based on");
     const mapFilterProduct = itemsWatch.map((el: any, elIndex: any) => {
       if (index === elIndex) {
         return {
@@ -233,8 +230,6 @@ const ConditionalField = ({
       company_id: "KSNI",
       items: mapFilterProduct,
     };
-
-    console.log(requestBody);
 
     filterProduct(requestBody);
   };
@@ -294,8 +289,6 @@ const ConditionalField = ({
       company_id: "KSNI",
       items: mapFilterProduct,
     };
-
-    console.log(requestBody);
 
     filterProduct(requestBody);
   };
