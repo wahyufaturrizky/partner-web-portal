@@ -23,6 +23,14 @@ import DraggableTable from "../../components/pages/BusinessProcess/DraggableTabl
 import DraggableGrids from "../../components/pages/BusinessProcess/DraggableGrid";
 
 import styled from "styled-components";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
+
+let schema = yup
+.object({
+	name: yup.string().required("Name is Required"),
+})
+.required();
 
 const CreateBusinessProcess = () => {
   const router = useRouter();
@@ -40,7 +48,11 @@ const CreateBusinessProcess = () => {
   const [search, setSearch] = useState("");
   const debounceFetch = useDebounce(search, 1000);
 
-  const { register, handleSubmit, control } = useForm();
+  const { register, handleSubmit, control, 
+		formState: { errors },
+	} = useForm({
+		resolver: yupResolver(schema),
+	});
 
   const {
     isFetching: isFetchingProcess,
@@ -224,6 +236,8 @@ const CreateBusinessProcess = () => {
                   width="100%"
                   label="Name"
                   height="48px"
+									error={errors?.name?.message}
+                  required
                   placeholder={"e.g  Order to Cash"}
                   {...register("name")}
                 />

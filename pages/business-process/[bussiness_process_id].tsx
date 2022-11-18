@@ -340,6 +340,7 @@ const BussinessProcessDetail = () => {
                   width="100%"
                   label="Name"
                   height="48px"
+                  required
                   placeholder={"e.g  Order to Cash"}
                   defaultValue={businessProcessData.name}
                   {...register("name")}
