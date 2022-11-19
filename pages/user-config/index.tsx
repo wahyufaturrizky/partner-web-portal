@@ -11,202 +11,258 @@ import {
   Search,
   Table,
   Pagination,
-	DropdownMenu,
-  Lozenge } from "pink-lava-ui";
-
-	import DownloadSvg from "../../assets/icons/ic-download.svg";
-	import UploadSvg from "../../assets/icons/ic-upload.svg";
-import { ModalDeleteConfirmation } from "../../components/elements/Modal/ModalConfirmationDelete";
-import { useUsers, useDeleteUser } from "../../hooks/user-config/useUser";
-import { STATUS_APPROVAL_VARIANT, STATUS_APPROVAL_TEXT } from "../../utils/constant";
+  DropdownMenu,
+  Lozenge,
+  FileUploadModal,
+} from "pink-lava-ui";
+import DownloadSvg from "assets/icons/ic-download.svg";
+import UploadSvg from "assets/icons/ic-upload.svg";
+import { ModalDeleteConfirmation } from "components/elements/Modal/ModalConfirmationDelete";
+import { useUsers, useDeleteUser, useUploadFileUserConfig } from "hooks/user-config/useUser";
+import { STATUS_APPROVAL_VARIANT, STATUS_APPROVAL_TEXT } from "utils/constant";
 import { lang } from "lang";
+import useDebounce from "lib/useDebounce";
+import { clientDownloadService } from "lib/client";
+import { queryClient } from "pages/_app";
 
 const UserConfigUser: any = () => {
-	const router = useRouter();
-	const t = localStorage.getItem("lan") || "en-US";
+  const router = useRouter();
+  const t = localStorage.getItem("lan") || "en-US";
 
-	const pagination = usePagination({
-		page: 1,
-		itemsPerPage: 20,
-		maxPageItems: Infinity,
-		numbers: true,
-		arrows: true,
-		totalItems: 100,
-	});
+  const pagination = usePagination({
+    page: 1,
+    itemsPerPage: 20,
+    maxPageItems: Infinity,
+    numbers: true,
+    arrows: true,
+    totalItems: 100,
+  });
 
-	const [search, setSearch] = useState("");
-	const [modalDelete, setModalDelete] = useState({ open: false });
+  const [search, setSearch] = useState("");
+  const [modalDelete, setModalDelete] = useState({ open: false });
+  const [isShowUpload, setShowUpload] = useState(false);
+  const debounceSearch = useDebounce(search, 1000);
 
-	const {
-		data: users,
-		refetch: refetchFields,
-		isLoading: isLoadingField,
-	} = useUsers({
-		options: {
-			onSuccess: (data: any) => {
-				pagination.setTotalItems(data.totalRow);
-			},
-		},
-		query: {
-			search,
-			page: pagination.page,
-			limit: pagination.itemsPerPage,
-		},
-	});
+  const {
+    data: users,
+    refetch: refetchFields,
+    isLoading: isLoadingField,
+  } = useUsers({
+    query: {
+      search: debounceSearch,
+      page: pagination.page,
+      limit: pagination.itemsPerPage,
+    },
+    options: {
+      onSuccess: (data: any) => {
+        pagination.setTotalItems(data.totalRow);
+      },
+      select: (data: any) => {
+        const mappedData = data?.rows?.map((element: any) => {
+          return {
+            key: element.id,
+            name: element.fullname,
+            email: element.email,
+            role: element?.userRole?.name,
+            status: element.status,
+            action: (
+              <Button
+                size="small"
+                onClick={() => router.push(`/user-config/${element.id}`)}
+                variant="tertiary"
+              >
+                {lang[t].userList.list.button.detail}
+              </Button>
+            ),
+          };
+        });
 
-	const { mutate: deleteFields } = useDeleteUser({
-		options: {
-			onSuccess: () => {
-				refetchFields();
-				setModalDelete({ open: false });
-				setSelectedRowKeys([]);
-			},
-		},
-	});
+        return { data: mappedData, totalRow: data.totalRow };
+      },
+    },
+  });
 
-	const columns = [
-		{
-			title: lang[t].userList.list.table.employeeId,
-			dataIndex: "key",
-		},
-		{
-			title: lang[t].userList.list.table.name,
-			dataIndex: "name",
-		},
-		{
-			title: lang[t].userList.list.table.status,
-			dataIndex: "status",
-			render: (text: any) => (
-				<Lozenge variant={STATUS_APPROVAL_VARIANT[text]}>{STATUS_APPROVAL_TEXT[text]}</Lozenge>
-			),
-		},
-		{
-			title: lang[t].userList.list.table.action,
-			dataIndex: "action",
-			width: "20%",
-		},
-	];
+  const { mutate: deleteFields } = useDeleteUser({
+    options: {
+      onSuccess: () => {
+        refetchFields();
+        setModalDelete({ open: false });
+        setSelectedRowKeys([]);
+      },
+    },
+  });
 
-	const data: any = [];
-	users?.rows?.map((user: any) => {
-		data.push({
-			key: user.id,
-			name: user.fullname,
-			email: user.email,
-			role: user?.userRole?.name,
-			status: user.status,
-			action: (
-				<Button
-					size="small"
-					onClick={() => router.push(`/user-config/${user.id}`)}
-					variant="tertiary"
-				>
-					{lang[t].userList.list.button.detail}
-				</Button>
-			),
-		});
-	});
+  const { mutate: uploadFileUserConfig, isLoading: isLoadingUploadFileTrainingType } =
+    useUploadFileUserConfig({
+      options: {
+        onSuccess: () => {
+          queryClient.invalidateQueries(["users"]);
+          setShowUpload(false);
+        },
+      },
+    });
 
-	const paginateField = data;
-	const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+  const columns = [
+    {
+      title: lang[t].userList.list.table.employeeId,
+      dataIndex: "key",
+    },
+    {
+      title: lang[t].userList.list.table.name,
+      dataIndex: "name",
+    },
+    {
+      title: lang[t].userList.list.table.status,
+      dataIndex: "status",
+      render: (text: any) => (
+        <Lozenge variant={STATUS_APPROVAL_VARIANT[text]}>{STATUS_APPROVAL_TEXT[text]}</Lozenge>
+      ),
+    },
+    {
+      title: lang[t].userList.list.table.action,
+      dataIndex: "action",
+      width: "20%",
+    },
+  ];
 
-	const onSelectChange = (selectedRowKeys: any) => {
-		setSelectedRowKeys(selectedRowKeys);
-	};
+  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
 
-	const rowSelection = {
-		selectedRowKeys,
-		onChange: onSelectChange,
-	};
+  const onSelectChange = (selectedRowKeys: any) => {
+    setSelectedRowKeys(selectedRowKeys);
+  };
 
-	return (
-		<>
-			<Col>
-				<Text variant={"h4"}>{lang[t].userList.list.headerTitle}</Text>
-				<Spacer size={20} />
-				<Card>
-					<Row justifyContent="space-between">
-						<Search
-							width="380px"
-							placeholder={lang[t].userList.list.field.searchBar}
-							onChange={(e: any) => setSearch(e.target.value)}
-						/>
-						<Row gap="16px">
-							<Button
-								size="big"
-								variant={"tertiary"}
-								onClick={() => setModalDelete({ open: true })}
-								disabled={rowSelection.selectedRowKeys?.length === 0}
-							>
-								{lang[t].userList.list.button.delete}
-							</Button>
-							<DropdownMenu
-								title={lang[t].userList.list.button.more}
-								buttonVariant="secondary"
-								buttonSize="big"
-								textVariant="button"
-								textColor="pink.regular"
-								menuList={[
-								{
-									key: 1,
-									value: (
-										<div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-											<DownloadSvg />
-											<p style={{ margin: "0" }}>{lang[t].userList.list.button.download}</p>
-										</div>
-									),
-								},
-								{
-									key: 2,
-									value: (
-										<div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-											<UploadSvg />
-											<p style={{ margin: "0" }}>{lang[t].userList.list.button.upload}</p>
-										</div>
-									),
-								}]}
-							/>
-							<Button
-								size="big"
-								variant={"primary"}
-								onClick={() => router.push("/user-config/create")}
-							>
-								{lang[t].userList.list.button.create}
-							</Button>
-						</Row>
-					</Row>
-				</Card>
-				<Spacer size={10} />
-				<Card style={{ padding: "16px 20px" }}>
-					<Col gap="60px">
-						<Table
-							loading={isLoadingField}
-							columns={columns}
-							data={paginateField}
-							rowSelection={rowSelection}
-						/>
-						<Pagination pagination={pagination} />
-					</Col>
-				</Card>
-			</Col>
+  const rowSelection = {
+    selectedRowKeys,
+    onChange: onSelectChange,
+  };
 
-			{modalDelete.open && (
-				<ModalDeleteConfirmation
-					totalSelected={selectedRowKeys.length}
-					itemTitle={paginateField?.find((user: any) => user.key === selectedRowKeys[0])?.name}
-					visible={modalDelete.open}
-					onCancel={() => setModalDelete({ open: false })}
-					onOk={() => deleteFields({ ids: selectedRowKeys })}
-				/>
-			)}
-		</>
-	);
+  const downloadFile = (params: any) =>
+    clientDownloadService("/partner-user/download", { params }).then((res) => {
+      let dataUrl = window.URL.createObjectURL(new Blob([res.data]));
+      let tempLink = document.createElement("a");
+      tempLink.href = dataUrl;
+      tempLink.setAttribute("download", `user_config_${new Date().getTime()}.xlsx`);
+      tempLink.click();
+    });
+
+  const onSubmitFile = (file: any) => {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    uploadFileUserConfig(formData);
+  };
+
+  return (
+    <>
+      <Col>
+        <Text variant={"h4"}>{lang[t].userList.list.headerTitle}</Text>
+        <Spacer size={20} />
+        <Card>
+          <Row justifyContent="space-between">
+            <Search
+              width="380px"
+              placeholder={lang[t].userList.list.field.searchBar}
+              onChange={(e: any) => setSearch(e.target.value)}
+            />
+            <Row gap="16px">
+              <Button
+                size="big"
+                variant={"tertiary"}
+                onClick={() => setModalDelete({ open: true })}
+                disabled={rowSelection.selectedRowKeys?.length === 0}
+              >
+                {lang[t].userList.list.button.delete}
+              </Button>
+              <DropdownMenu
+                title={lang[t].userList.list.button.more}
+                buttonVariant="secondary"
+                buttonSize="big"
+                textVariant="button"
+                textColor="pink.regular"
+                iconStyle={{ fontSize: "12px" }}
+                onClick={(e: any) => {
+                  switch (parseInt(e.key)) {
+                    case 1:
+                      downloadFile({ with_data: "N" });
+                      break;
+                    case 2:
+                      setShowUpload(true);
+                      break;
+
+                    default:
+                      break;
+                  }
+                }}
+                menuList={[
+                  {
+                    key: 1,
+                    value: (
+                      <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                        <DownloadSvg />
+                        <p style={{ margin: "0" }}>{lang[t].userList.list.button.download}</p>
+                      </div>
+                    ),
+                  },
+                  {
+                    key: 2,
+                    value: (
+                      <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                        <UploadSvg />
+                        <p style={{ margin: "0" }}>{lang[t].userList.list.button.upload}</p>
+                      </div>
+                    ),
+                  },
+                ]}
+              />
+              <Button
+                size="big"
+                variant={"primary"}
+                onClick={() => router.push("/user-config/create")}
+              >
+                {lang[t].userList.list.button.create}
+              </Button>
+            </Row>
+          </Row>
+        </Card>
+        <Spacer size={10} />
+        <Card style={{ padding: "16px 20px" }}>
+          <Col gap="60px">
+            <Table
+              loading={isLoadingField}
+              columns={columns}
+              data={users?.data}
+              rowSelection={rowSelection}
+            />
+            <Pagination pagination={pagination} />
+          </Col>
+        </Card>
+      </Col>
+
+      {modalDelete.open && (
+        <ModalDeleteConfirmation
+          totalSelected={selectedRowKeys.length}
+          itemTitle={users?.data?.find((user: any) => user.key === selectedRowKeys[0])?.name}
+          visible={modalDelete.open}
+          onCancel={() => setModalDelete({ open: false })}
+          onOk={() => deleteFields({ ids: selectedRowKeys })}
+        />
+      )}
+
+      {isShowUpload && (
+        <FileUploadModal
+          visible={isShowUpload}
+          setVisible={setShowUpload}
+          onSubmit={onSubmitFile}
+        />
+      )}
+    </>
+  );
 };
 
 const Card = styled.div`
-	background: #ffffff;
-	border-radius: 16px;
-	padding: 16px;
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 16px;
 `;
 
 export default UserConfigUser;
