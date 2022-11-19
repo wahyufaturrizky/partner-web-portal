@@ -418,6 +418,7 @@ const ConditionalField = ({
                         size={"large"}
                         placeholder={"Select"}
                         borderColor={"#AAAAAA"}
+                        withSearch
                         isLoading={isFetchingProductBrand}
                         isLoadingMore={isFetchingMoreProductCategory}
                         fetchMore={() => {
@@ -433,7 +434,6 @@ const ConditionalField = ({
                         }
                         onChange={(value: any) => {
                           handleCategoryChange(value, onChange, index);
-                          // onChange(value);
                         }}
                         onSearch={(value: any) => {
                           setSearchProductCategory(value);
