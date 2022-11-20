@@ -14,8 +14,8 @@ import { lang } from "lang";
 
 const ProductGroupCreate = () => {
   const t = localStorage.getItem("lan") || "en-US";
-  const companyId = localStorage.getItem("companyId")
-  const companyCode = localStorage.getItem("companyCode")
+  const companyId = localStorage.getItem("companyId");
+  const companyCode = localStorage.getItem("companyCode");
   const router = useRouter();
   const pagination = usePagination({
     page: 1,
@@ -36,7 +36,7 @@ const ProductGroupCreate = () => {
     setValue,
   } = useForm({
     defaultValues: {
-      items: [{ group: "", condition: "", value_from: "0", value_to: "0", values: "0" }],
+      items: [{ group: null, condition: null, value_from: "0", value_to: "0", values: "0" }],
     },
   });
 
@@ -108,9 +108,18 @@ const ProductGroupCreate = () => {
   ];
 
   const onSubmit = (data: any) => {
+    const mappingItemData = data?.items?.map((el: any) => {
+      return {
+        ...el,
+        group: el?.group === null ? "" : el?.group,
+        condition: el?.condition === null ? "" : el.condition,
+      };
+    });
+
     const formData = {
       company_id: companyCode,
       ...data,
+      items: mappingItemData,
     };
 
     createProductGroup(formData);
@@ -142,7 +151,7 @@ const ProductGroupCreate = () => {
 
         <Spacer size={20} />
 
-        <Accordion>
+        <Accordion style={{ position: "relative" }} id="area">
           <Accordion.Item key={1}>
             <Accordion.Header variant="blue">
               {lang[t].productGroup.create.accordion.general}
@@ -153,7 +162,7 @@ const ProductGroupCreate = () => {
                   <Input
                     width="100%"
                     label={lang[t].productGroup.create.emptyState.groupName}
-                    height="40px"
+                    height="48px"
                     placeholder={"e.g Wafer 1K"}
                     {...register("name", { required: true })}
                   />

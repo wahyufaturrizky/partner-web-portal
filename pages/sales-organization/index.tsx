@@ -121,6 +121,7 @@ const CreateConfig = () => {
 			onSuccess: () => {
 				refetchSalesOrganization()
 			},
+            retry: true
 		}
 	});
 
@@ -129,6 +130,7 @@ const CreateConfig = () => {
 			onSuccess: () => {
 				refetchSalesOrganization()
 			},
+            retry: true
 		},
 	});
 

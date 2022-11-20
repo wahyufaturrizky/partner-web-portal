@@ -54,8 +54,8 @@ const renderConfirmationText = (type: any, data: any) => {
 const TermOfPayment = () => {
   const t = localStorage.getItem("lan") || "en-US";
   const router = useRouter();
-  const companyId = localStorage.getItem("companyId")
-  const companyCode = localStorage.getItem("companyCode")
+  const companyId = localStorage.getItem("companyId");
+  const companyCode = localStorage.getItem("companyCode");
   const pagination = usePagination({
     page: 1,
     itemsPerPage: 20,
@@ -173,7 +173,7 @@ const TermOfPayment = () => {
       <Card>
         <Row justifyContent="space-between">
           <Search
-            width="340px"
+            width="370px"
             placeholder={lang[t].termOfPayment.searchBar.termOfPayment}
             onChange={(e: any) => {
               setSearch(e.target.value);
