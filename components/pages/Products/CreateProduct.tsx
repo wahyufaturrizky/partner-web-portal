@@ -63,7 +63,7 @@ export default function CreateProduct({ isCreateProductVariant = true }) {
   const [canBeSold, setCanBeSold] = useState(false);
   const [canBeExpensed, setCanExpensed] = useState(false);
   const [canBeManufacture, setCanManufacture] = useState(false);
-  const [canBeShareable, setCanBeShareable] = useState(false);
+  const [isShareable, setIsShareable] = useState(false);
 
   const [isShowDelete, setShowDelete] = useState({ open: false });
 
@@ -121,7 +121,7 @@ export default function CreateProduct({ isCreateProductVariant = true }) {
       can_be_sold: false,
       can_be_purchased: false,
       can_be_expensed: false,
-      can_be_shareable: false,
+      is_shareable: false,
       expired_date: moment().utc().toString(),
       external_code: "",
       use_unit_leveling: false,
@@ -199,7 +199,7 @@ export default function CreateProduct({ isCreateProductVariant = true }) {
           setCanBePurchased(data.can_be_purchased);
           setCanBeSold(data.can_be_sold);
           setCanManufacture(data.can_be_manufactured);
-          setCanBeShareable(data.can_be_shareable)
+          setIsShareable(data.is_shareable)
         });
         return data;
       },
@@ -357,11 +357,10 @@ export default function CreateProduct({ isCreateProductVariant = true }) {
     payload.uom_conversion = [];
 
     if (data?.uom?.length > 0 && payload.use_unit_leveling) {
-      console.log("data?.uom", data?.uom)
-      payload.uom_conversion = data?.uom?.map((data) => ({
-        level_id: data?.levelId || null,
-        uom_conversion_item_id: data?.id,
-        conversion_id: data?.uomConversionItemId,
+      payload.uom_conversion = data?.uom?.map((dataUom) => ({
+        level_id: dataUom?.levelId || null,
+        uom_conversion_item_id: dataUom?.id,
+        conversion_id: data.base_uom.uom_id,
       }));
     } else {
       payload.uom_conversion = [];
@@ -372,7 +371,7 @@ export default function CreateProduct({ isCreateProductVariant = true }) {
     payload.can_be_purchased = canBePurchased;
     payload.can_be_expensed = canBeExpensed;
     payload.can_be_manufactured = canBeManufacture;
-    payload.can_be_shareable = canBeShareable;
+    payload.is_shareable = isShareable;
 
     payload.expired_date = data?.expired_date?.includes("/")
       ? moment(data.expired_date, "DD/MM/YYYY").utc().toString()
@@ -690,14 +689,14 @@ export default function CreateProduct({ isCreateProductVariant = true }) {
               <Row alignItems="center">
                 <Checkbox
                   size="small"
-                  checked={canBeShareable}
-                  onChange={() => setCanBeShareable(!canBeShareable)}
+                  checked={isShareable}
+                  onChange={() => setIsShareable(!isShareable)}
                 />
                 <div
                   style={{ cursor: "pointer" }}
-                  onClick={() => setCanBeShareable(!canBeShareable)}
+                  onClick={() => setIsShareable(!isShareable)}
                 >
-                  <Text variant={"h6"}>{lang[t].productList.create.checkbox.canBeManufacture || "Is Shareable"}</Text>
+                  <Text variant={"h6"}>{lang[t].productList.create.checkbox.isShareable || "Is Shareable"}</Text>
                 </div>
               </Row>
             </Col>

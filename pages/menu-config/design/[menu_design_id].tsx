@@ -416,7 +416,7 @@ const CreateMenuDesignList: any = () => {
 
             <Row gap="16px">
               <Button size="big" variant={"tertiary"} onClick={() => setShowDeleteModal(true)}>
-                {lang[t].menuDesign.tertier.cancel}
+                {lang[t].menuDesign.tertier.delete}
               </Button>
               <Button size="big" variant={"primary"} onClick={handleSubmit(submit)}>
                 {isLoadingUpdateMenuDesign ? "loading..." : lang[t].menuDesign.primary.save}

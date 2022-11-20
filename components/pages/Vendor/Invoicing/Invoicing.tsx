@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Col, Row, Spacer, Text, Button, FormSelect, Table, Input, Spin } from "pink-lava-ui";
+import { Col, Row, Spacer, Text, Button, FormSelect, Table, Input, Spin, FormSelectCustom } from "pink-lava-ui";
 import { ICPlusWhite, ICDelete, ICEdit } from "assets";
 import { useFormContext, useFieldArray, Controller } from "react-hook-form";
 import ModalAddBankAccounts from "components/elements/Modal/ModalAddBankAccounts";
@@ -126,8 +126,8 @@ const Invoicing = () => {
         const mappedData = data?.pages?.map((group: any) => {
           return group.rows?.map((element: any) => {
             return {
-              label: element.country.name,
-              value: element.countryId,
+              label: element?.country?.name,
+              value: element?.countryId,
             };
           });
         });
@@ -284,8 +284,11 @@ const Invoicing = () => {
             <>
               <Text variant="headingRegular">Select Payment Method</Text>
               <Spacer size={5} />
-              <FormSelect
-                defaultValue={value}
+              <FormSelectCustom
+                showArrow
+                maxTagCount={4}
+                mode="multiple"
+                value={Array.isArray(value) ? value : []}
                 style={{ width: "50%" }}
                 size={"large"}
                 placeholder={"Select"}

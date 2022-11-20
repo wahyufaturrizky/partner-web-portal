@@ -28,13 +28,13 @@ import ConditionalField from "../../components/pages/ProductGroup/ConditionalFie
 import { lang } from "lang";
 
 const itemDefaultValue = [
-  { id: 0, group: "", condition: "", value_from: "0", value_to: "0", values: "0" },
+  { id: 0, group: null, condition: null, value_from: "0", value_to: "0", values: "0" },
 ];
 
 const ProductGroupDetail = () => {
   const t = localStorage.getItem("lan") || "en-US";
-  const companyId = localStorage.getItem("companyId")
-  const companyCode = localStorage.getItem("companyCode")
+  const companyId = localStorage.getItem("companyId");
+  const companyCode = localStorage.getItem("companyCode");
   const router = useRouter();
   const { product_group_id } = router.query;
 
@@ -256,7 +256,7 @@ const ProductGroupDetail = () => {
                   <Input
                     width="100%"
                     label={lang[t].productGroup.detail.emptyState.groupName}
-                    height="40px"
+                    height="48px"
                     placeholder={"e.g Wafer 1K"}
                     defaultValue={productGroupData?.name}
                     {...register("name", { required: true })}
