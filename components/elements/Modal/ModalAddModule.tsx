@@ -51,7 +51,7 @@ const ModalAddModule = ({
                 <Button
                   size="small"
                   onClick={() => {
-                    window.open(`/config/${element.id}`, "_blank");
+                    window.open(`/module-config/${element.id}`, "_blank");
                   }}
                   variant="tertiary"
                 >
@@ -140,9 +140,9 @@ const ModalAddModule = ({
             <Button
               size="big"
               variant={"tertiary"}
-              onClick={() => window.open(`/config/create`, "_blank")}
+              onClick={() => window.open(`/module-config/create`, "_blank")}
             >
-              Add Module
+              Create Module
             </Button>
           </Row>
           <Spacer size={10} />

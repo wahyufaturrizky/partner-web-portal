@@ -94,6 +94,7 @@ const EmployeeList = () => {
     data: employeeListData,
     isLoading: isLoadingEmployeeList,
     isFetching: isFetchinggEmployeeList,
+    refetch: refetchEmployeeList,
   } = useEmployeeListsMDM({
     query: {
       search: debounceSearch,
@@ -156,6 +157,7 @@ const EmployeeList = () => {
           queryClient.invalidateQueries(["employee-list"]);
           setShowUpload(false);
           window.alert("success upload");
+          refetchEmployeeList();
         },
       },
     });

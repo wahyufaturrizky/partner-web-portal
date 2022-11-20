@@ -72,7 +72,7 @@ export const lang = {
       },
       channel: "Channel",
       byDeleting: "By deleting it will affect data that already uses Channel",
-      createChannel: "Create Channel",
+      createChannel: "Create Sales Channel",
       salesChannelName: "Sales Channel Name",
       placeHolder: { egModernTrade: "e.g Modern Trade" },
       tertier: { more: "More", viewDetail: "View Detail", delete: "Delete", cancel: "Cancel" },
@@ -423,7 +423,7 @@ export const lang = {
         productBrand: "Product Brand",
       },
       searchBar: {
-        productBrand: "Search Product Brand ID, Product Brand Name",
+        productBrand: "Search Product Brand ID, Name, Parent",
       },
       modalTitleCreate: {
         productBrand: "Create Product Brand",
@@ -927,7 +927,7 @@ export const lang = {
         termOfPayment: "Term of Payment",
       },
       searchBar: {
-        termOfPayment: "SearchTerm of Payment ID, Payment Term",
+        termOfPayment: "Search Term of Payment ID, Payment Term",
       },
       modalTitleCreate: {
         termOfPayment: "Create Term of Payment",
@@ -1075,6 +1075,7 @@ export const lang = {
         remove: "Remove",
         createModule: "Create Module",
         createMenu: "Create Menu",
+        delete: "Delete",
       },
       menuDesignName: "Menu Design Name",
       menuDesignAction: "Action",
@@ -2592,6 +2593,7 @@ export const lang = {
         remove: "Menghapus",
         createModule: "Buat Modul",
         createMenu: "Buat Menu",
+        delete: "Hapus",
       },
       menuDesignName: "Nama Desain Menu",
       menuDesignAction: "Tindakan",

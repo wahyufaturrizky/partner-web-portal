@@ -86,7 +86,7 @@ const BranchCreate = () => {
     isLoading: isLoadingSalesOrganizationData,
     isFetching: isFetchingSalesOrganizationData,
   } = useSalesOrganizationHirarcy({
-      structure_id: 101, //structure untuk KSNI
+      structure_id: 74, //structure untuk KSNI
       // query: {
       //   search: debounceFetchSalesOrganization
       // },
@@ -103,6 +103,21 @@ const BranchCreate = () => {
         },
       },
   });
+
+  const [salesOrganizationList, setSalesOrganizationList] = useState([
+    {
+      label: "Domestic",
+      value: "Domestic"
+    },
+    {
+      label: "Export",
+      value: "Export"
+    },
+    {
+      label: "Import",
+      value: "Import"
+    },
+  ])
 
   const { 
     isFetching: isFetchingTimezone,
@@ -240,7 +255,8 @@ const BranchCreate = () => {
     },
   });
 
-  if( isLoadingCalendar || isLoadingSalesOrganizationData || isLoadingTimezone || isLoadingCountry){
+// isLoadingSalesOrganizationData
+  if( isLoadingCalendar || isLoadingTimezone || isLoadingCountry){
     return (
       <Center>
       <Spin tip="Loading data..." />
@@ -248,7 +264,6 @@ const BranchCreate = () => {
     )
   }
   const onSubmit = (data: any) => {
-    console.log(data, '<<<<data submit')
     const formData = {
       company_id: "KSNI",
       ...data,
@@ -316,7 +331,6 @@ const BranchCreate = () => {
                     <>
                       <Label>Parent</Label>
                       <Spacer size={4} />
-
                       <FormSelect
                         style={{ width: "100%" }}
                         size={"large"}
@@ -354,66 +368,77 @@ const BranchCreate = () => {
                   render={({ field: { onChange } }) => (
                     <>
                       <Label>Company Internal Structure</Label>
-                      <FormSelect
-                        style={{ width: "100%" }}
-                        size={"large"}
-                        placeholder={"Select"}
-                        borderColor={"#AAAAAA"}
-                        arrowColor={"#000"}
-                        withSearch
-                        isLoading={isLoadingSalesOrganizationData}
-                        isLoadingMore={isFetchingSalesOrganizationData}
-                        fetchMore={() => {}}
-                        items={salesOrganizationData}
-                        onChange={(value: any) => {
-                          onChange(value);
-                        }}
-                        onSearch={(value: any) => {
-                          setSearchSalesOrganization(value)
-                        }}
-                      />
+                        <FormSelect
+                          style={{ width: "100%" }}
+                          size={"large"}
+                          placeholder={"Select"}
+                          borderColor={"#AAAAAA"}
+                          arrowColor={"#000"}
+                          withSearch
+                          isLoading={isLoadingSalesOrganizationData}
+                          isLoadingMore={isFetchingSalesOrganizationData}
+                          fetchMore={() => {}}
+                          items={isLoadingSalesOrganizationData  && isFetchingSalesOrganizationData ? [] : salesOrganizationData}
+                          onChange={(value: any) => {
+                            onChange(value);
+                          }}
+                          onSearch={(value: any) => {
+                            setSearchSalesOrganization(value)
+                          }}
+                        />
                     </>
                   )}
                 />
               </Col>
               <Spacer size={10} />
-
               <Col width="100%">
                 <Controller
-                  control={control}
-                  name="timezone"
-                  render={({ field: { onChange } }) => (
-                    <>
-                      <Label>Timezone</Label>
-                      <FormSelect
-                        style={{ width: "100%" }}
-                        size={"large"}
-                        placeholder={"Select"}
-                        borderColor={"#AAAAAA"}
-                        arrowColor={"#000"}
-                        withSearch
-                        isLoading={isFetchingTimezone}
-                        isLoadingMore={isFetchingMoreTimezone}
-                        fetchMore={() => {
-                          if (timezoneHasNextPage) {
-                            timezoneFetchNextPage();
-                          }
-                        }}
-                        items={
-                          isFetchingTimezone && !isFetchingMoreTimezone
-                            ? []
-                            : listTimezone
-                        }
-                        onChange={(value: any) => {
-                          onChange(value);
-                        }}
-                        onSearch={(value: any) => {
-                          setSearchTimezone(value);
-                        }}
-                      />
-                    </>
-                  )}
-                />
+                    control={control}
+                    name="sales_organization_id"
+                    render={({ field: { onChange } }) => (
+                      <>
+                        <Label>Sales Organization</Label>
+                          <FormSelect
+                            style={{ width: "100%" }}
+                            size={"large"}
+                            placeholder={"Select"}
+                            borderColor={"#AAAAAA"}
+                            arrowColor={"#000"}
+                            withSearch
+                            // isLoading={isLoadingSalesOrganizationData}
+                            // isLoadingMore={isFetchingSalesOrganizationData}
+                            // fetchMore={() => {}}
+                            items={salesOrganizationList}
+                            onChange={(value: any) => {
+                              onChange(value);
+                            }}
+                            onSearch={(value: any) => {
+                              console.log(value, '<<<<val')
+                              console.log(salesOrganizationList)
+                              if(value === '') {
+                                setSalesOrganizationList([
+                                  {
+                                    label: "Domestic",
+                                    value: "Domestic"
+                                  },
+                                  {
+                                    label: "Export",
+                                    value: "Export"
+                                  },
+                                  {
+                                    label: "Import",
+                                    value: "Import"
+                                  },
+                                ])
+                              } else {
+                                const search = new RegExp(value, 'i')
+                                setSalesOrganizationList(salesOrganizationList.filter(sales => search.test(sales.label.toLowerCase())))
+                              }
+                            }}
+                          />
+                      </>
+                    )}
+                  />
               </Col>
             </Row>
 
@@ -461,14 +486,41 @@ const BranchCreate = () => {
                 />
               </Col>
               <Spacer size={10} />
-
               <Col width="100%">
-                <Input
-                    width="100%"
-                    label="External Code"
-                    height="40px"
-                    placeholder={"e.g 12345"}
-                    {...register("external_code", { required: "Please enter name." })}
+                <Controller
+                  control={control}
+                  name="timezone"
+                  render={({ field: { onChange } }) => (
+                    <>
+                      <Label>Timezone</Label>
+                      <FormSelect
+                        style={{ width: "100%" }}
+                        size={"large"}
+                        placeholder={"Select"}
+                        borderColor={"#AAAAAA"}
+                        arrowColor={"#000"}
+                        withSearch
+                        isLoading={isFetchingTimezone}
+                        isLoadingMore={isFetchingMoreTimezone}
+                        fetchMore={() => {
+                          if (timezoneHasNextPage) {
+                            timezoneFetchNextPage();
+                          }
+                        }}
+                        items={
+                          isFetchingTimezone && !isFetchingMoreTimezone
+                            ? []
+                            : listTimezone
+                        }
+                        onChange={(value: any) => {
+                          onChange(value);
+                        }}
+                        onSearch={(value: any) => {
+                          setSearchTimezone(value);
+                        }}
+                      />
+                    </>
+                  )}
                 />
               </Col>
             </Row>
@@ -539,6 +591,16 @@ const BranchCreate = () => {
               </Col>
             </Row>
 
+            <Spacer size={15} />
+            <Col width="50%">
+                <Input
+                    width="100%"
+                    label="External Code"
+                    height="40px"
+                    placeholder={"e.g 12345"}
+                    {...register("external_code", { required: "Please enter name." })}
+                />
+              </Col>
             <Spacer size={15} />
           </Accordion.Body>
         </Accordion.Item>

@@ -343,6 +343,7 @@ const BussinessProcessDetail = () => {
                   width="100%"
                   label={lang[t].businessProcess.emptyState.name}
                   height="48px"
+                  required
                   placeholder={lang[t].businessProcess.pageTitle.ordertoCash}
                   defaultValue={businessProcessData.name}
                   {...register("name")}
