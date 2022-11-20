@@ -29,6 +29,7 @@ import { useProfitCenters } from "hooks/mdm/profit-center/useProfitCenter";
 import { useLanguages } from "hooks/languages/useLanguages";
 import { useCreateCostCenter } from "hooks/mdm/cost-center/useCostCenter";
 import { CompanyList, CostCenterSave, CurrenciesData, LanguagesData, ProfitCenterList, RowCompanyList, RowCurrenciesData, RowLanguagesData, RowProfitCenter } from "./cost_center_interface";
+import { colors } from "utils/color";
 
 
 const costCenterCategoryTable = [
@@ -103,7 +104,7 @@ const CostCenterCreate = () => {
   const [checkSelectAll, setCheckSelectAll] = useState(false)
   const [description, setDescription] = useState("")
   const [costCenterCategory, setCostCenterCategory] = useState("")
-  
+  const companyCode = localStorage.getItem("companyCode")
 
 
   const [newCostCenterTable, setNewCostCenterTable] = useState([{
@@ -184,6 +185,7 @@ const CostCenterCreate = () => {
         search: debounceFetchProfitCenter,
         page: pagination.page,
         limit: pagination.itemsPerPage,
+        company_id: companyId
         },
     });
 
@@ -253,12 +255,12 @@ const CostCenterCreate = () => {
         company_id :listCompany && listCompany[0]?.value?.toString(),
         code :data?.code,
         name : data?.name,
-        cost_center_category : costCenterCategory,
+        cost_center_category : data.cost_center_category,
         valid_from : data?.valid_from? data?.valid_from : moment().format("DD/MM/YYYY"),
         valid_to : data?.valid_to? data?.valid_to : moment().format("DD/MM/YYYY"),
-        external_code : data?.external_code,
-        description : description,
-        person_responsible :data?.person_responsible,
+        external_code : data?.external_code || "-",
+        description : description || "-",
+        person_responsible :data?.person_responsible || "-",
         actual_primary_cost :newCostCenterTable[0].actual_primary_cost ? "YES" : "NO",
         plant_primary_cost :newCostCenterTable[0].plant_primary_cost ? "YES" : "NO",
         actual_secondary_cost :newCostCenterTable[0].actual_secondary_cost ? "YES" : "NO",
@@ -640,11 +642,20 @@ const CostCenterCreate = () => {
                 <Controller
                     control={control}
                     name="profit_center_id"
-                    render={({ field: { onChange } }) => (
+                    rules={{
+                      required: {
+                        value: true,
+                        message: "Please enter profit center.",
+                      },
+                    }}
+                    render={({ field: { onChange }, fieldState: { error } }) => (
                     <>
-                        <Label>Profit Center</Label>
+                        <Label>
+                          Profit Center <span style={{ color: colors.red.regular }}>*</span>
+                        </Label>
                         <Spacer size={3} />
                         <FormSelect
+                        error={error?.message}
                         style={{ width: "100%" }}
                         size={"large"}
                         required
@@ -740,14 +751,30 @@ const CostCenterCreate = () => {
             {/* Cost Center Category */}
             <Row width="100%" noWrap>
                 <Col width={"100%"}>
-                <Dropdown
-                  label="Cost Center Category"
-                  height="48px"
-                  width={"100%"}
-                  handleChange={handleCostCenterCategory}
-                  items={costCenterCategoryTable}
-                  placeholder={"Select"}
-                  noSearch
+                <Controller
+                  control={control}
+                  name="cost_center_category"
+                  rules={{
+                    required: {
+                      value: true,
+                      message: "Please enter title.",
+                    },
+                  }}
+                  render={({ field: { onChange }, fieldState: { error } }) => (
+                    <Dropdown
+                      error={error?.message}
+                      label="Cost Center Category"
+                      required
+                      height="48px"
+                      width={"100%"}
+                      handleChange={(value: any) => {
+                        onChange(value);
+                      }}
+                      items={costCenterCategoryTable}
+                      placeholder={"Select"}
+                      noSearch
+                    />
+                  )}
                 />
                 </Col>
 
