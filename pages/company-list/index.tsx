@@ -173,7 +173,7 @@ const CompanyList: any = () => {
           <Card style={{ padding: "16px 20px" }}>
             <Col gap="60px">
               {!isLoadingData && (
-                <Table columns={columns} data={paginateField} rowSelection={rowSelection} />
+                <Table columns={columns} data={paginateField} />
               )}
 
               <Pagination pagination={pagination} />
