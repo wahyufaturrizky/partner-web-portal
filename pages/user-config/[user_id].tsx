@@ -9,7 +9,7 @@ import Router, { useRouter } from "next/router";
 
 import ArrowLeft from "../../assets/icons/arrow-left.svg";
 
-import { useCreateUser, useDeleteUser, useUpdateUser, useUser } from "../../hooks/user-config/useUser";
+import {  useDeleteUser, useUpdateUser, useUser } from "../../hooks/user-config/useUser";
 import { useRolePermissions } from "../../hooks/role/useRole";
 import { useLanguages } from "../../hooks/languages/useLanguages";
 import { useTimezoneInfiniteLists } from "hooks/mdm/branch/useBranch";

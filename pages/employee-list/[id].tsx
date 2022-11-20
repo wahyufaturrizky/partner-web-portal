@@ -1413,19 +1413,11 @@ const EmployeeDetail = () => {
       <Card padding="20px">
         <Row justifyContent="space-between" alignItems="center" nowrap>
           <Row alignItems="center" gap="16px">
-            <Text color="grey.regular">
-              Employee Type <span style={{ color: colors.red.regular }}>*</span>
-            </Text>
+            <Text color="grey.regular">Employee Type</Text>
             <Controller
               control={control}
               defaultValue={dataEmployee?.type}
               name="type"
-              rules={{
-                required: {
-                  value: true,
-                  message: "Please enter type employee.",
-                },
-              }}
               render={({ field: { onChange }, fieldState: { error } }) => (
                 <Dropdown
                   error={error?.message}
@@ -1804,6 +1796,7 @@ const EmployeeDetail = () => {
                       fullWidth
                       onChange={(date: any, dateString: any) => onChange(dateString)}
                       label="Join Date"
+                      placeholder={moment().format("DD/MM/YYYY")}
                     />
                   )}
                 />
@@ -1819,6 +1812,7 @@ const EmployeeDetail = () => {
                       fullWidth
                       onChange={(date: any, dateString: any) => onChange(dateString)}
                       label="Resign Date"
+                      placeholder={moment().format("DD/MM/YYYY")}
                     />
                   )}
                 />
@@ -1832,14 +1826,14 @@ const EmployeeDetail = () => {
                   name="languages"
                   render={({ field: { onChange } }) => (
                     <>
-                      <Label>Language</Label>
+                      <Label>Preferred Language</Label>
                       <Spacer size={3} />
                       <FormSelect
                         defaultValue={dataEmployee?.languages}
                         height="48px"
                         style={{ width: "100%" }}
                         size={"large"}
-                        placeholder={"Select"}
+                        placeholder={"Type language e.g Indonesia with separate comma or Enter"}
                         borderColor={"#AAAAAA"}
                         arrowColor={"#000"}
                         withSearch
@@ -1940,6 +1934,7 @@ const EmployeeDetail = () => {
                           fullWidth
                           onChange={(date: any, dateString: any) => onChange(dateString)}
                           label="Date of Birth"
+                          placeholder={moment().format("DD/MM/YYYY")}
                         />
                       )}
                     />
@@ -2139,7 +2134,7 @@ const EmployeeDetail = () => {
                       required
                       defaultValue={dataEmployee?.personal?.mobile}
                       error={errors.personal?.mobile?.message}
-                      placeholder={"e.g you@email.com"}
+                      placeholder={"e.g 0811 1234567890"}
                       {...register("personal.mobile", {
                         required: "Please enter mobile number.",
                         maxLength: {
@@ -2179,6 +2174,7 @@ const EmployeeDetail = () => {
                           fullWidth
                           onChange={(date: any, dateString: any) => onChange(dateString)}
                           label="Visa Expired Date"
+                          placeholder={moment().format("DD/MM/YYYY")}
                         />
                       )}
                     />

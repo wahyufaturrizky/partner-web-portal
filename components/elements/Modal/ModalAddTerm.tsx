@@ -250,7 +250,7 @@ const ModalAddTerm = ({
                       }}
                     />{" "}
                     <Text variant="headingRegular" inline>
-                      Of The Month
+                      Of The Week
                     </Text>
                     {/* {errors?.company_name?.type === "required" && (
                   <Text variant="alert" color={"red.regular"}>
@@ -289,7 +289,7 @@ const ModalAddTerm = ({
                       }}
                     />{" "}
                     <Text variant="headingRegular" inline>
-                      Of The Week
+                      Of The Month
                     </Text>
                     {/* {errors?.company_name?.type === "required" && (
                   <Text variant="alert" color={"red.regular"}>
