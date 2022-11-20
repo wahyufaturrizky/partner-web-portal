@@ -16,6 +16,7 @@ import {
   Switch,
   Spin,
   DropdownMenuOptionGroupCustom,
+  FormSelect
 } from "pink-lava-ui";
 import {
   useDeleteCoa,
@@ -32,13 +33,29 @@ import ArrowLeft from "../../../assets/icons/arrow-left.svg";
 import VectorPeople from "../../../assets/icons/vector-people.svg";
 import PlusAdd from "../../../assets/icons/plus-add.svg";
 import { lang } from "lang";
+import { useInfiniteIndustry } from "hooks/industry/useIndustries";
+import { useSegmentInfiniteLists } from "hooks/segment/useSegment";
+import { useCountryInfiniteLists } from "hooks/mdm/country-structure/useCountries";
+import useDebounce from "lib/useDebounce";
+import { Controller, useForm } from "react-hook-form";
+import { colors } from "utils/color";
 
 const DetailCoa: any = () => {
+  const {
+		register,
+		handleSubmit,
+		formState: { errors },
+		control,
+	} = useForm({});
+
   const router = useRouter();
   const t = localStorage.getItem("lan") || "en-US";
-
+  const companyCode = localStorage.getItem("companyCode")
   const { coa_id } = router.query;
   const [coaName, setCoaName] = useState("");
+  const [countryId, setCountryId] = useState("");
+	const [industryId, setIndustryId] = useState("");
+	const [segmentId, setSegmentId] = useState("");
   const [coaItems, setCoaItems] = useState([]);
   const [coaItemsNew, setCoaItemsNew] = useState([]);
   const [error, setError] = useState("");
@@ -51,6 +68,22 @@ const DetailCoa: any = () => {
   const [searchAccountGroup, setSearchAccountGroup] = useState("");
   const [modalDelete, setModalDelete] = useState({ open: false });
 
+  const [countryList, setCountryList] = useState<any[]>([]);
+  const [totalRowsCountryList, setTotalRowsCountryList] = useState(0);
+  const [industryList, setIndustryList] = useState<any[]>([]);
+  const [totalRowsIndustryList, setTotalRowsIndustryList] = useState(0);
+  const [segmentList, setSegmentList] = useState<any[]>([]);
+  const [totalRowsSegmentList, setTotalRowsSegmentList] = useState(0);
+  const [searchCountry, setSearchCountry] = useState("");
+  const [searchIndustry, setSearchIndustry] = useState("");
+  const [searchSegment, setSearchSegment] = useState("");
+  
+  const debounceFetch = useDebounce(
+      searchCountry ||
+      searchSegment ||
+      searchIndustry,
+    1000
+  );
   let allCoaItems = [];
   allCoaItems = [...coaItemsNew, ...coaItems];
   allCoaItems = allCoaItems?.filter((item) => !coaItemsDeleted?.includes(item?.accountCode));
@@ -109,7 +142,108 @@ const DetailCoa: any = () => {
     selectedRowKeys,
     onChange: onSelectChange,
   };
-
+  const {
+    isFetching: isFetchingCountry,
+    isFetchingNextPage: isFetchingMoreCountry,
+    hasNextPage: hasNextPageCountry,
+    fetchNextPage: fetchNextPageCountry,
+  } = useCountryInfiniteLists({
+    query: {
+      search: debounceFetch,
+      limit: 10,
+    },
+    options: {
+      onSuccess: (data: any) => {
+        setTotalRowsCountryList(data.pages[0].totalRow);
+        const mappedData = data?.pages?.map((group: any) => {
+          return group.rows?.map((element: any) => {
+            return {
+              value: element.id,
+              label: element.name,
+            };
+          });
+        });
+        const flattenArray = [].concat(...mappedData);
+        setCountryList(flattenArray);
+      },
+      getNextPageParam: (_lastPage: any, pages: any) => {
+        if (countryList.length < totalRowsCountryList) {
+          return pages.length + 1;
+        } else {
+          return undefined;
+        }
+      },
+    },
+  });
+  const {
+    isFetching: isFetchingSegment,
+    isFetchingNextPage: isFetchingMoreSegment,
+    hasNextPage: hasNextPageSegment,
+    fetchNextPage: fetchNextPageSegment,
+  } = useSegmentInfiniteLists({
+    query: {
+      search: debounceFetch,
+      limit: 10,
+      industry_id : industryId
+    },
+    options: {
+      onSuccess: (data: any) => {
+        setTotalRowsSegmentList(data.pages[0].totalRow);
+        const mappedData = data?.pages?.map((group: any) => {
+          return group.rows?.map((element: any) => {
+            return {
+              value: element.id,
+              label: element.name,
+            };
+          });
+        });
+        const flattenArray = [].concat(...mappedData);
+        setSegmentList(flattenArray);
+      },
+      getNextPageParam: (_lastPage: any, pages: any) => {
+        if (segmentList.length < totalRowsSegmentList) {
+          return pages.length + 1;
+        } else {
+          return undefined;
+        }
+      },
+    },
+  });
+  
+	const {
+		isLoading: isLoadingIndustry,
+		isFetching: isFetchingIndustry,
+		isFetchingNextPage: isFetchingMoreIndustry,
+		hasNextPage: hasNextIndustry,
+		fetchNextPage: fetchNextIndustry,
+	} = useInfiniteIndustry({
+		query: {
+			search: debounceFetch,
+			limit: 10,
+		},
+		options: {
+			onSuccess: (data: any) => {
+				setTotalRowsIndustryList(data.pages[0].totalRow);
+				const mappedData = data?.pages?.map((group: any) => {
+					return group.rows?.map((element: any) => {
+						return {
+							label: element.name,
+							value: element.id,
+						};
+					});
+				});
+				const flattenArray = [].concat(...mappedData);
+				setIndustryList(flattenArray);
+			},
+			getNextPageParam: (_lastPage: any, pages: any) => {
+				if (industryList.length < totalRowsIndustryList) {
+					return pages.length + 1;
+				} else {
+					return undefined;
+				}
+			},
+		},
+	});
   const { mutate: updateCoa } = useUpdateCoa({
     options: {
       onSuccess: () => {
@@ -127,7 +261,7 @@ const DetailCoa: any = () => {
     },
   });
 
-  const onSubmitCoa = () => {
+  const onSubmitCoa = (value:any) => {
     const newCoaItems = coaItemsNew.map((data: any) => ({
       accountCode: data.accountCode,
       accountName: data.accountName,
@@ -146,7 +280,11 @@ const DetailCoa: any = () => {
     }));
 
     const payload: any = {
-      name: coaName,
+			name: value.name,
+			industry_id : value.industry_id,
+			segment_id : value.segment_id,
+			country_id : value.country_id,
+      company_id: companyCode,
       coa_items: {
         copyFrom: coa_id === copyCoaId ? "" : copyCoaId,
         addNew: newCoaItems,
@@ -177,7 +315,10 @@ const DetailCoa: any = () => {
       enabled: !!copyCoaId,
       onSuccess: (data) => {
         setCoaItems(data.coaItems.rows);
-        setCoaName(data.name);
+				setCoaName(data.name);
+				setCountryId(data.countryId);
+				setIndustryId(data.industryId);
+				setSegmentId(data.segmentId);
         paginationCoaAccount.setTotalItems(data.coaItems.totalRow);
       },
     },
@@ -336,33 +477,15 @@ const DetailCoa: any = () => {
                 <Spacer size={20} />
                 <Card style={{ height: "88px" }}>
                   <Row alignItems="center" justifyContent="space-between" gap="20" noWrap>
-                    <Row width="50%" alignItems="center">
-                      <Input
-                        id="name"
-                        label=""
-                        height="48px"
-                        placeholder={lang[t].coaTemplate.create.template.field.searchList}
-                        defaultValue={coaName ? coaName : ""}
-                        onChange={(e) => setCoaName(e.target.value)}
-                        onBlur={(e) => {
-                          if (!e.target.value) {
-                            setError("Name is required");
-                          }
-                        }}
-                        error={error}
-                        onFocus={() => setError("")}
-                      />
-                    </Row>
-                    <Row justifyContent="flex-end" width="50%" gap="16px">
+                    <Row justifyContent="flex-end" width="100%" gap="16px">
                       <Button
                         size="big"
                         variant={"tertiary"}
                         onClick={() => setModalDelete({ open: true })}
-                        disabled={rowSelection.selectedRowKeys?.length === 0}
                       >
                         {lang[t].coaTemplate.list.button.delete}
                       </Button>
-                      <Button size="big" variant={"primary"} onClick={() => onSubmitCoa()}>
+                      <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmitCoa)}>
                         {lang[t].coaTemplate.list.button.save}
                       </Button>
                     </Row>
@@ -370,7 +493,162 @@ const DetailCoa: any = () => {
                 </Card>
                 <Spacer size={10} />
 
-                <Card style={{ padding: "16px 20px", height: "626px" }}>
+                <Card style={{ padding: "16px 20px", height: "700px" }}>
+                  <Row width="100%" gap="20px" noWrap>
+                    <Col width="100%">
+                      <Input
+                        label="Name"
+                        height="48px"
+                        placeholder={lang[t].coaTemplate.create.template.field.searchList}
+                        defaultValue={coaName ? coaName : ""}
+                        {...register("name", { required: true })}
+                        error={errors?.name?.type === "required" && "This  field is required"}
+                        required
+                      />
+                    </Col>
+                    <Col width="100%">
+                      <Controller
+                        control={control}
+                        name="country_id"
+                        defaultValue={countryId ? countryId : "" }
+                        rules={{
+                          required: {
+                            value: true,
+                            message: "Please enter country.",
+                          },
+                        }}
+                        render={({ field: { onChange }, fieldState: { error } }) => (
+                          <>
+                            <Label>
+                              Country <span style={{ color: colors.red.regular }}>*</span>
+                            </Label>
+                            <Spacer size={3} />
+                            <FormSelect
+                              defaultValue={countryId ? countryId : "" }
+                              error={error?.message}
+                              height="48px"
+                              style={{ width: "100%" }}
+                              size={"large"}
+                              placeholder={"Select"}
+                              borderColor={"#AAAAAA"}
+                              arrowColor={"#000"}
+                              withSearch
+                              isLoading={isFetchingCountry}
+                              isLoadingMore={isFetchingMoreCountry}
+                              fetchMore={() => {
+                                if (hasNextPageCountry) {
+                                  fetchNextPageCountry();
+                                }
+                              }}
+                              items={isFetchingCountry && !isFetchingMoreCountry ? [] : countryList}
+                              onChange={(value: any) => {
+                                onChange(value);
+                              }}
+                              onSearch={(value: any) => {
+                                setSearchCountry(value);
+                              }}
+                            />
+                          </>
+                        )}
+                      />
+                    </Col>
+									</Row>
+									<Row width="100%" gap="20px" noWrap>
+                    <Col width="100%">
+                      <Controller
+                        control={control}
+                        name="industry_id"
+                        defaultValue={industryId ? industryId : "" }
+                        rules={{
+                          required: {
+                            value: true,
+                            message: "Please enter country.",
+                          },
+                        }}
+                        render={({ field: { onChange }, fieldState: { error } }) => (
+                          <>
+                            <Label>
+                              Industry <span style={{ color: colors.red.regular }}>*</span>
+                            </Label>
+                            <Spacer size={3} />
+                            <FormSelect
+                              defaultValue={industryId ? industryId : "" }
+                              error={error?.message}
+                              height="48px"
+                              style={{ width: "100%" }}
+                              size={"large"}
+                              placeholder={"Select"}
+                              borderColor={"#AAAAAA"}
+                              arrowColor={"#000"}
+                              withSearch
+                              isLoading={isFetchingIndustry}
+                              isLoadingMore={isFetchingMoreIndustry}
+                              fetchMore={() => {
+                                if (hasNextIndustry) {
+                                  fetchNextIndustry();
+                                }
+                              }}
+                              items={isFetchingIndustry && !isFetchingMoreIndustry ? [] : industryList}
+                              onChange={(value: any) => {
+                                onChange(value);
+                                setIndustryId(value);
+                              }}
+                              onSearch={(value: any) => {
+                                setSearchIndustry(value);
+                              }}
+                            />
+                          </>
+                        )}
+                      />
+                    </Col>
+                    <Col width="100%">
+                      <Controller
+                        control={control}
+                        name="segment_id"
+                        defaultValue={segmentId ? segmentId : ""}
+                        rules={{
+                          required: {
+                            value: true,
+                            message: "Please enter country.",
+                          },
+                        }}
+                        render={({ field: { onChange }, fieldState: { error } }) => (
+                          <>
+                            <Label>
+                              Segment <span style={{ color: colors.red.regular }}>*</span>
+                            </Label>
+                            <Spacer size={3} />
+                            <FormSelect
+                              defaultValue={segmentId ? segmentId : ""}
+                              error={error?.message}
+                              height="48px"
+                              style={{ width: "100%" }}
+                              size={"large"}
+                              placeholder={"Select"}
+                              borderColor={"#AAAAAA"}
+                              arrowColor={"#000"}
+                              withSearch
+                              isLoading={isFetchingSegment}
+                              isLoadingMore={isFetchingMoreSegment}
+                              fetchMore={() => {
+                                if (hasNextPageSegment) {
+                                  fetchNextPageSegment();
+                                }
+                              }}
+                              items={isFetchingSegment && !isFetchingMoreSegment ? [] : segmentList}
+                              onChange={(value: any) => {
+                                onChange(value);
+                              }}
+                              onSearch={(value: any) => {
+                                setSearchSegment(value);
+                              }}
+                            />
+                          </>
+                        )}
+                      />
+                    </Col>
+                   
+									</Row>                  
                   <Spacer size={10} />
                   <Col gap="30px">
                     {allCoaItems.length !== 0 || isSearchAndFilter ? (
@@ -398,16 +676,24 @@ const DetailCoa: any = () => {
                           </Row>
 
                           <Row gap="20px">
+														<Button
+															size="big"
+															variant={"tertiary"}
+															onClick={() => setModalDelete({ open: true })}
+															disabled={rowSelection.selectedRowKeys?.length === 0}
+														>
+															Delete
+														</Button>
                             <Button
                               size="big"
-                              variant={"ghost"}
+                              variant={"tertiary"}
                               onClick={() => setModalCopyCoa({ open: true })}
                             >
                               {lang[t].coaTemplate.create.template.button.copyCoa}
                             </Button>
                             <Button
                               size="big"
-                              variant={"ghost"}
+                              variant={"tertiary"}
                               onClick={() =>
                                 setMode({ field: null, mode: "ADD_ACCOUNT", source: "" })
                               }
@@ -603,5 +889,10 @@ const Card = styled.div`
   border-radius: 16px;
   padding: 16px;
 `;
-
+const Label = styled.div`
+  font-weight: bold;
+  font-size: 16px;
+  line-height: 24px;
+  color: #000000;
+`;
 export default DetailCoa;
