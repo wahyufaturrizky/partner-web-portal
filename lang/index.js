@@ -1240,8 +1240,8 @@ export const lang = {
       jobPositionName: "Job Position Name",
       jobPositionName: "Job Position Name",
       action: "Action",
-      title: "Job Position",
-      palceholderSearch: "Search Job Position ID, Name.",
+      title: "Job Position Name",
+      palceholderSearch: "Search Job Position ID, Job Position Name",
       ghost: {
         downloadTemplate: "Download Template",
         uploadTemplate: "Upload Template",
