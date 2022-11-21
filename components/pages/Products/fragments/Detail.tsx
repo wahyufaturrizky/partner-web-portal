@@ -19,7 +19,7 @@ import {
 import { arrayMove } from "@dnd-kit/sortable";
 import { useUOMInfiniteLists } from "../../../../hooks/mdm/unit-of-measure/useUOM";
 import useDebounce from "../../../../lib/useDebounce";
-import { Controller, useWatch } from "react-hook-form";
+import { Controller, useFormState, useWatch } from "react-hook-form";
 import _ from "lodash";
 import usePagination from "@lucasmogari/react-pagination";
 import ProductOptionsCreate from "./ProductOptionsCreate";
@@ -85,6 +85,7 @@ export default function Detail(props: any) {
   const [searchUomTemplate, setSearchUomTemplate] = useState("");
   const debounceFetchUomTemplate = useDebounce(searchUomTemplate, 1000);
   const [listUomTemplate, setListUomTemplate] = useState<any[]>([]);
+  const [isConversionChanged, setIsConversionChanged] = useState(false)
 
   const {
     isFetching: isFetchingUomTemplate,
@@ -231,16 +232,18 @@ export default function Detail(props: any) {
     isLoading: isLoadingUom,
     isFetching: isFetchingUom,
   } = useUOMConversion({
-    id: detailForm.base_uom?.uom_id,
+    id: detailForm.base_uom?.id || detailForm.base_uom?.uom_id,
     companyId: "KSNI",
     query: {
       page: 1,
       limit: 10000,
     },
     options: {
-      enabled: !!detailForm.base_uom?.uom_id,
+      enabled: !!detailForm.base_uom?.id || !!detailForm.base_uom?.uom_id,
       onSuccess: (data: any) => {
-        setValue("uom", data?.mappedData);
+        if(isConversionChanged){
+          setValue("uom", data?.mappedData);
+        }
       },
       select: (data: any) => {
         const listUom: any = [];
@@ -260,7 +263,7 @@ export default function Detail(props: any) {
 
           listUom.push({
             value: uomConversion.uom?.name,
-            id: uomConversion?.uomConversionId,
+            id: uomConversion?.uomId,
             conversionNumber: uomConversion.conversionNumber,
           });
 
@@ -322,7 +325,7 @@ export default function Detail(props: any) {
       <Controller
           control={control}
           name="base_uom.uom_id"
-          defaultValue={detailForm.base_uom?.uom_id}
+          defaultValue={detailForm.base_uom?.uom_id || detailForm.base_uom?.id}
           render={({ field: { onChange } }) => (
             <Col width="100%">
               <span>
@@ -349,6 +352,7 @@ export default function Detail(props: any) {
                   isFetchingUomConversion || isFetchingMoreUomConversion ? [] : listUomConversion
                 }
                 onChange={(value: any) => {
+                  setIsConversionChanged(true)
                   onChange(value);
                 }}
                 onSearch={(value: any) => {
@@ -435,7 +439,7 @@ export default function Detail(props: any) {
             setValue={setValue}
             onSelectUom={(data: any, newUom: any, indexData: any) => {
               const uomConversation = UomData?.mappedUomConversion;
-              const uomData = uomConversation.find((uom) => uom.uomConversionItemId === newUom);
+              const uomData = uomConversation.find((uom) => uom.uomId === newUom);
               const newData = {
                 id: data.id,
                 key: data.key,

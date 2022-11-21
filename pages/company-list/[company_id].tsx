@@ -16,6 +16,7 @@ import {
   Spin,
   Radio,
   Tooltip,
+  FormSelect
 } from "pink-lava-ui";
 import { ExclamationCircleOutlined } from "@ant-design/icons";
 import styled from "styled-components";
@@ -42,6 +43,11 @@ import { useTimezone } from "../../hooks/timezone/useTimezone";
 import { useLanguages } from "hooks/languages/useLanguages";
 import moment from "moment";
 import { lang } from "lang";
+import { useCountryInfiniteLists } from "hooks/mdm/country-structure/useCountries";
+import { useSegmentInfiniteLists } from "hooks/segment/useSegment";
+import useDebounce from "lib/useDebounce";
+import { useInfiniteIndustry } from "hooks/industry/useIndustries";
+import { colors } from "utils/color";
 
 const CompanyTypeDataFake = [
   {
@@ -398,9 +404,9 @@ const DetailCompany: any = () => {
 
   const [searchTimezone, setSearchTimezone] = useState();
 
-  const [searchCountry, setSearchCountry] = useState();
+  // const [searchCountry, setSearchCountry] = useState();
 
-  const [industryList, setIndustryList] = useState(IndustryDataFake);
+  // const [industryList, setIndustryList] = useState(IndustryDataFake);
   const [sectorList, setSectorList] = useState([]);
 
   const [address, setAddress] = useState("");
@@ -411,7 +417,23 @@ const DetailCompany: any = () => {
 
   const [foto, setFoto] = useState("");
   const [fromTemplate, setFromTemplate] = useState("none");
+  const [countryList, setCountryList] = useState<any[]>([]);
+  const [totalRowsCountryList, setTotalRowsCountryList] = useState(0);
+  const [industryList, setIndustryList] = useState<any[]>([]);
+  const [totalRowsIndustryList, setTotalRowsIndustryList] = useState(0);
+  const [segmentList, setSegmentList] = useState<any[]>([]);
+  const [totalRowsSegmentList, setTotalRowsSegmentList] = useState(0);
+  const [searchCountry, setSearchCountry] = useState("");
+  const [searchIndustry, setSearchIndustry] = useState("");
+  const [searchSegment, setSearchSegment] = useState("");
+  const [industryId, setIndustryId] = useState("");
 
+  const debounceFetch = useDebounce(
+      searchCountry ||
+      searchSegment ||
+      searchIndustry,
+    1000
+  );
   const {
     register,
     handleSubmit,
@@ -486,9 +508,110 @@ const DetailCompany: any = () => {
     },
     query: {
       search: searchCoa,
+      company_id: "KSNI"
     },
   });
-
+  const {
+    isFetching: isFetchingCountry,
+    isFetchingNextPage: isFetchingMoreCountry,
+    hasNextPage: hasNextPageCountry,
+    fetchNextPage: fetchNextPageCountry,
+  } = useCountryInfiniteLists({
+    query: {
+      search: debounceFetch,
+      limit: 10,
+    },
+    options: {
+      onSuccess: (data: any) => {
+        setTotalRowsCountryList(data.pages[0].totalRow);
+        const mappedData = data?.pages?.map((group: any) => {
+          return group.rows?.map((element: any) => {
+            return {
+              value: element.id,
+              label: element.name,
+            };
+          });
+        });
+        const flattenArray = [].concat(...mappedData);
+        setCountryList(flattenArray);
+      },
+      getNextPageParam: (_lastPage: any, pages: any) => {
+        if (countryList.length < totalRowsCountryList) {
+          return pages.length + 1;
+        } else {
+          return undefined;
+        }
+      },
+    },
+  });
+  const {
+    isFetching: isFetchingSegment,
+    isFetchingNextPage: isFetchingMoreSegment,
+    hasNextPage: hasNextPageSegment,
+    fetchNextPage: fetchNextPageSegment,
+  } = useSegmentInfiniteLists({
+    query: {
+      search: debounceFetch,
+      limit: 10,
+      industry_id : industryId ? industryId : companyData?.industryId
+    },
+    options: {
+      onSuccess: (data: any) => {
+        setTotalRowsSegmentList(data.pages[0].totalRow);
+        const mappedData = data?.pages?.map((group: any) => {
+          return group.rows?.map((element: any) => {
+            return {
+              value: element.id,
+              label: element.name,
+            };
+          });
+        });
+        const flattenArray = [].concat(...mappedData);
+        setSegmentList((industryId || companyData?.industryId) ? flattenArray : []);
+      },
+      getNextPageParam: (_lastPage: any, pages: any) => {
+        if (segmentList.length < totalRowsSegmentList) {
+          return pages.length + 1;
+        } else {
+          return undefined;
+        }
+      },
+    },
+  });
+	const {
+		isLoading: isLoadingIndustry,
+		isFetching: isFetchingIndustry,
+		isFetchingNextPage: isFetchingMoreIndustry,
+		hasNextPage: hasNextIndustry,
+		fetchNextPage: fetchNextIndustry,
+	} = useInfiniteIndustry({
+		query: {
+			search: debounceFetch,
+			limit: 10,
+		},
+		options: {
+			onSuccess: (data: any) => {
+				setTotalRowsIndustryList(data.pages[0].totalRow);
+				const mappedData = data?.pages?.map((group: any) => {
+					return group.rows?.map((element: any) => {
+						return {
+							label: element.name,
+							value: element.id,
+						};
+					});
+				});
+				const flattenArray = [].concat(...mappedData);
+				setIndustryList(flattenArray);
+			},
+			getNextPageParam: (_lastPage: any, pages: any) => {
+				if (industryList.length < totalRowsIndustryList) {
+					return pages.length + 1;
+				} else {
+					return undefined;
+				}
+			},
+		},
+	});
   // const { data: menuDesignData, isLoading: isLoadingMenuDesignList } = useMenuDesignLists({
   //   options: {
   //     onSuccess: (data) => {},
@@ -668,7 +791,49 @@ const DetailCompany: any = () => {
                   ]}
                 />
               </Row>
-
+              <Spacer size={12} />
+              <Row width="100%" gap={20} noWrap>
+                <Span>{lang[t].companyList.copyFromTemplate}</Span>
+              </Row>
+              <Row width="100%" gap="20px" noWrap>
+                <Col width="50%">
+                  <Flex>
+                    <Radio
+                      value={"companyInternal"}
+                      checked={fromTemplate == "none"}
+                      onChange={(e: any) => setFromTemplate("none")}
+                    >
+                      <SpanAlign>{lang[t].companyList.none}</SpanAlign>
+                    </Radio>
+                    <Radio
+                      value={"companyInternal"}
+                      checked={fromTemplate == "eDot"}
+                      onChange={(e: any) => setFromTemplate("eDot")}
+                    >
+                      eDOT
+                    </Radio>
+                    <Radio
+                      value={"companyInternal"}
+                      checked={fromTemplate == "Other Company"}
+                      onChange={(e: any) => setFromTemplate("Other Company")}
+                    >
+                      {lang[t].companyList.otherCompany}
+                    </Radio>
+                  </Flex>
+                </Col>
+                <Col width="50%">
+                  {/* For company */}
+                  {/* <Input
+                    width="100%"
+                    label={lang[t].companyList.name}
+                    height="48px"
+                    placeholder={"e.g PT. Kaldu Sari Nabati Indonesia"}
+                    error={errors?.name?.message}
+                    required
+                    {...register("name", { required: true })}
+                  /> */}
+                </Col>
+              </Row>
               <Row width="100%" gap="20px" noWrap>
                 <Input
                   width="100%"
@@ -711,6 +876,67 @@ const DetailCompany: any = () => {
                     {...register("address")}
                     onChange={(e) => setAddress(e.target.value)}
                   /> */}
+                   <Input
+                    width="100%"
+                    label="Phone Number"
+                    height="48px"
+                    placeholder={"e.g JL. Soekarno Hatta"}
+                    defaultValue={companyData.phone_number}
+                    error={errors?.phone_number?.message}
+                    required
+                    {...register("phone_number", { required: true })}
+                  />
+                </Col>
+              </Row>
+              <Row width="100%" gap="20px" noWrap>
+                <Col width="50%">
+                  <Controller
+                    control={control}
+                    name="country"
+                    rules={{
+                      required: {
+                        value: true,
+                        message: "Please enter country.",
+                      },
+                    }}
+                    defaultValue={companyData.country}
+                    render={({ field: { onChange }, fieldState: { error } }) => (
+                      <>
+                        <Label>
+                          Country <span style={{ color: colors.red.regular }}>*</span>
+                        </Label>
+                        <Spacer size={3} />
+                        <FormSelect
+                          error={error?.message}
+                          height="48px"
+                          style={{ width: "100%" }}
+                          size={"large"}
+                          placeholder={"Select"}
+                          borderColor={"#AAAAAA"}
+                          arrowColor={"#000"}
+                          withSearch
+                          isLoading={isFetchingCountry}
+                          isLoadingMore={isFetchingMoreCountry}
+                          defaultValue={companyData.country}
+                          fetchMore={() => {
+                            if (hasNextPageCountry) {
+                              fetchNextPageCountry();
+                            }
+                          }}
+                          items={isFetchingCountry && !isFetchingMoreCountry ? [] : countryList}
+                          onChange={(value: any) => {
+                            onChange(value);
+                            setValue("country",value);
+                          }}
+                          onSearch={(value: any) => {
+                            setSearchCountry(value);
+                          }}
+                        />
+                      </>
+                    )}
+                  />
+                </Col>
+                <Col width="50%">
                   <Input
                     width="100%"
                     label={lang[t].companyList.address}
@@ -724,37 +950,85 @@ const DetailCompany: any = () => {
               </Row>
               <Row width="100%" gap="20px" noWrap>
                 <Col width="50%">
-                  {isLoadingCountryList ? (
-                    <Spin tip="Loading data..." />
-                  ) : (
-                    <Dropdown
-                      label={lang[t].companyList.country}
-                      width={"100%"}
-                      items={countryData.rows.map((data) => ({
-                        id: data.name,
-                        value: data.name,
-                      }))}
-                      placeholder={"Select"}
-                      handleChange={(value) => setValue("country", value)}
-                      onSearch={(search) => setSearchCountry(search)}
-                      required
-                      defaultValue={companyData.country}
-                      error={errors?.country?.message}
-                      {...register("country")}
-                    />
-                  )}
+                  <Controller
+                    control={control}
+                    name="industry_id"
+                    defaultValue={companyData.industryId}
+                    render={({ field: { onChange }, fieldState: { error } }) => (
+                      <>
+                        <Label>
+                          Industry
+                        </Label>
+                        <Spacer size={3} />
+                        <FormSelect
+                          height="48px"
+                          style={{ width: "100%" }}
+                          size={"large"}
+                          placeholder={"Select"}
+                          borderColor={"#AAAAAA"}
+                          arrowColor={"#000"}
+                          withSearch
+                          isLoading={isFetchingIndustry}
+                          isLoadingMore={isFetchingMoreIndustry}
+                          defaultValue={companyData.industryId}
+                          fetchMore={() => {
+                            if (hasNextIndustry) {
+                              fetchNextIndustry();
+                            }
+                          }}
+                          items={isFetchingIndustry && !isFetchingMoreIndustry ? [] : industryList}
+                          onChange={(value: any) => {
+                            onChange(value);
+                            setValue("industry_id",value);
+                            setIndustryId(value);
+                          }}
+                          onSearch={(value: any) => {
+                            setSearchIndustry(value);
+                          }}
+                        />
+                      </>
+                    )}
+                  />
                 </Col>
                 <Col width="50%">
-                  <Dropdown
-                    label={lang[t].companyList.industry}
-                    width={"100%"}
-                    items={industryList}
-                    placeholder={"Select"}
-                    handleChange={(value: any) => handleSelectIndustry(value)}
-                    onSearch={(search) => handleSearchIndustry(search)}
-                    defaultValue={companyData.industry}
-                    error={errors?.industry?.message}
-                    {...register("industry", { required: true })}
+                  <Controller
+                    control={control}
+                    name="segment_id"
+                    defaultValue={companyData.sectorId}
+                    render={({ field: { onChange }, fieldState: { error } }) => (
+                      <>
+                        <Label>
+                          Segment
+                        </Label>
+                        <Spacer size={3} />
+                        <FormSelect
+                          error={error?.message}
+                          height="48px"
+                          style={{ width: "100%" }}
+                          size={"large"}
+                          placeholder={"Select"}
+                          borderColor={"#AAAAAA"}
+                          arrowColor={"#000"}
+                          withSearch
+                          isLoading={isFetchingSegment}
+                          isLoadingMore={isFetchingMoreSegment}
+                          defaultValue={companyData.sectorId}
+                          fetchMore={() => {
+                            if (hasNextPageSegment) {
+                              fetchNextPageSegment();
+                            }
+                          }}
+                          items={isFetchingSegment && !isFetchingMoreSegment ? [] : segmentList}
+                          onChange={(value: any) => {
+                            onChange(value);
+                            setValue("segment_id",value);
+                          }}
+                          onSearch={(value: any) => {
+                            setSearchSegment(value);
+                          }}
+                        />
+                      </>
+                    )}
                   />
                 </Col>
               </Row>
@@ -773,34 +1047,6 @@ const DetailCompany: any = () => {
                   />
                 </Col>
                 <Col width="50%">
-                  <Dropdown
-                    label={lang[t].companyList.sector}
-                    width={"100%"}
-                    items={sectorList}
-                    placeholder={"Select"}
-                    handleChange={(value) => setValue("sector", value)}
-                    noSearch
-                    defaultValue={companyData.sector}
-                    error={errors?.sector?.message}
-                    {...register("sector", { required: true })}
-                  />
-                </Col>
-              </Row>
-              {/* <Row width="100%" gap="20px" noWrap>
-                <Col width="50%">
-                  <Dropdown
-                    label="Menu Design"
-                    width={"100%"}
-                    items={[]}
-                    placeholder={"Select"}
-                    handleChange={(value) => setValue("fromTemplate", value)}
-                    // onSearch={(search) => setSearchMenuDesign(search)}
-                    {...register("fromTemplate")}
-                  />
-                </Col>
-              </Row> */}
-              <Row width="100%" gap="20px" noWrap>
-                <Col width="50%">
                   <Input
                     width="100%"
                     label={lang[t].companyList.taxID}
@@ -817,37 +1063,20 @@ const DetailCompany: any = () => {
                     />
                   </Row>
                 </Col>
-                <Col width="50%">
-                  <Row width="100%" gap={20} noWrap>
-                    <Span>{lang[t].companyList.copyFromTemplate}</Span>
-                  </Row>
-                  <Row width="100%" noWrap>
-                    <Flex>
-                      <Radio
-                        value={"companyInternal"}
-                        checked={fromTemplate == "none"}
-                        onChange={(e: any) => setFromTemplate("none")}
-                      >
-                        <SpanAlign>{lang[t].companyList.none}</SpanAlign>
-                      </Radio>
-                      <Radio
-                        value={"companyInternal"}
-                        checked={fromTemplate == "edot"}
-                        onChange={(e: any) => setFromTemplate("eDot")}
-                      >
-                        eDOT
-                      </Radio>
-                      <Radio
-                        value={"companyInternal"}
-                        checked={fromTemplate == "other company"}
-                        onChange={(e: any) => setFromTemplate("Other Company")}
-                      >
-                        {lang[t].companyList.otherCompany}
-                      </Radio>
-                    </Flex>
-                  </Row>
-                </Col>
               </Row>
+              {/* <Row width="100%" gap="20px" noWrap>
+                <Col width="50%">
+                  <Dropdown
+                    label="Menu Design"
+                    width={"100%"}
+                    items={[]}
+                    placeholder={"Select"}
+                    handleChange={(value) => setValue("fromTemplate", value)}
+                    // onSearch={(search) => setSearchMenuDesign(search)}
+                    {...register("fromTemplate")}
+                  />
+                </Col>
+              </Row> */}
             </Accordion.Body>
           </Accordion.Item>
         </Accordion>
@@ -1183,6 +1412,12 @@ const Center = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
+`;
+const Label = styled.div`
+  font-weight: bold;
+  font-size: 16px;
+  line-height: 24px;
+  color: #000000;
 `;
 
 export default DetailCompany;

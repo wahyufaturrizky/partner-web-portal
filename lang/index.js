@@ -423,7 +423,7 @@ export const lang = {
         productBrand: "Product Brand",
       },
       searchBar: {
-        productBrand: "Search Product Brand ID, Product Brand Name",
+        productBrand: "Search Product Brand ID, Name, Parent",
       },
       modalTitleCreate: {
         productBrand: "Create Product Brand",
@@ -927,7 +927,7 @@ export const lang = {
         termOfPayment: "Term of Payment",
       },
       searchBar: {
-        termOfPayment: "SearchTerm of Payment ID, Payment Term",
+        termOfPayment: "Search Term of Payment ID, Payment Term",
       },
       modalTitleCreate: {
         termOfPayment: "Create Term of Payment",

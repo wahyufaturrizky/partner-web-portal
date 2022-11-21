@@ -2,7 +2,7 @@ import { useQuery, useMutation, useInfiniteQuery } from "react-query";
 import { client, mdmService } from "../../lib/client";
 
 const fetchUsers = async ({ query = {} }) => {
-  return mdmService(`/user`, {
+  return client(`/partner-user`, {
     params: {
       search: "",
       limit: 10,
@@ -64,7 +64,7 @@ const useApprovalUsers = ({ query = {}, options } = {}) => {
 function useCreateUser({ options }) {
   return useMutation(
     (updates) =>
-      mdmService(`/user`, {
+      client(`/partner-user`, {
         method: "POST",
         data: updates,
       }),
@@ -75,7 +75,7 @@ function useCreateUser({ options }) {
 }
 
 const fetchUser = async ({ user_id }) => {
-  return mdmService(`/user/${user_id}`).then((data) => data);
+  return client(`/user/${user_id}`).then((data) => data);
 };
 
 const useUser = ({ user_id, options }) => {
@@ -100,7 +100,7 @@ function useApproveUser({ options }) {
 function useUpdateUser({ user_id, options }) {
   return useMutation(
     (updates) =>
-      mdmService(`/user/${user_id}`, {
+      client(`/partner-user/${user_id}`, {
         method: "PUT",
         data: updates,
       }),
@@ -113,12 +113,24 @@ function useUpdateUser({ user_id, options }) {
 const useDeleteUser = ({ options }) => {
   return useMutation(
     (ids) => {
-      console.log(ids);
-      return mdmService(`/user/delete`, {
+      return client(`/partner-user`, {
         method: "POST",
         data: ids,
       });
     },
+    {
+      ...options,
+    }
+  );
+};
+
+const useUploadFileUserConfig = ({ options }) => {
+  return useMutation(
+    (data) =>
+      client(`/partner-user/upload`, {
+        method: "POST",
+        data,
+      }),
     {
       ...options,
     }
@@ -134,4 +146,5 @@ export {
   useUpdateUser,
   useDeleteUser,
   useUserInfiniteList,
+  useUploadFileUserConfig,
 };

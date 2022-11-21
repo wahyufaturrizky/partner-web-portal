@@ -226,7 +226,11 @@ const DraggableTable = ({ termList, isLoading, onDrag, onEdit, onDelete }: any) 
             </td>
             <td>{props.data.index + 1}</td>
             <td>{getTypeName(props.data.type)}</td>
-            <td>{props.data.value}</td>
+            <td>
+              {getTypeName(props.data.type) === "Percent"
+                ? `${props.data.value}%`
+                : props.data.value}
+            </td>
             <td>{props.data.optionValue}</td>
             <td>{getOptionName(props.data.option)}</td>
           </>
@@ -277,7 +281,9 @@ const StaticTableRow = ({ row }) => {
       </StyledStaticData>
       <StyledStaticData style={{ padding: "16px" }}>{row.index + 1}</StyledStaticData>
       <StyledStaticData style={{ padding: "16px" }}>{getTypeName(row.type)}</StyledStaticData>
-      <StyledStaticData style={{ padding: "16px" }}>{row.value}</StyledStaticData>
+      <StyledStaticData style={{ padding: "16px" }}>
+        {getTypeName(row.type) === "Percent" ? `${row.value}%` : row.value}
+      </StyledStaticData>
       <StyledStaticData style={{ padding: "16px" }}>{row.optionValue}</StyledStaticData>
       <StyledStaticData style={{ padding: "16px" }}>{getOptionName(row.option)}</StyledStaticData>
     </StyledStaticTableRow>

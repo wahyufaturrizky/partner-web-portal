@@ -120,6 +120,7 @@ export const ModalManageDataEdit = ({
   const { mutate: updateSalesOrganizationHirarcy } = useCreateSalesOrganizationHirarcy({
     options: {
       onSuccess: () => {},
+      retry: true
     },
   });
 
