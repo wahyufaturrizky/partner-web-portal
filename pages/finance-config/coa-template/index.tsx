@@ -12,7 +12,7 @@ import { lang } from "lang";
 const FinanceConfigCoATemplate: any = () => {
   const router = useRouter();
   const t = localStorage.getItem("lan") || "en-US";
-
+  const companyCode = localStorage.getItem("companyCode")
   const pagination = usePagination({
     page: 1,
     itemsPerPage: 20,
@@ -49,6 +49,7 @@ const FinanceConfigCoATemplate: any = () => {
       search: debounceSearch,
       page: pagination.page,
       limit: pagination.itemsPerPage,
+      company_id : companyCode,
     },
     options: {
       onSuccess: (data: any) => {
