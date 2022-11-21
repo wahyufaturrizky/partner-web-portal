@@ -17,6 +17,7 @@ const schema = yup
   .required();
 
 const DetailCoA: any = ({ onSubmit, onBack, account, onDelete, source }: any) => {
+  const companyCode = localStorage.getItem("companyCode");
   const {
     register,
     handleSubmit,
@@ -35,6 +36,7 @@ const DetailCoA: any = ({ onSubmit, onBack, account, onDelete, source }: any) =>
     options: {},
     query: {
       search,
+      company_id: companyCode,
       limit: 1000000,
     },
   });

@@ -8,6 +8,7 @@ import { lang } from "lang";
 
 const CreateAccount: any = ({ onSubmit, onBack, coaId, coaItemsDeleted }: any) => {
   const t = localStorage.getItem("lan") || "en-US";
+  const companyCode = localStorage.getItem("companyCode");
 
   const {
     register,
@@ -25,6 +26,7 @@ const CreateAccount: any = ({ onSubmit, onBack, coaId, coaItemsDeleted }: any) =
     options: {},
     query: {
       search,
+      company_id: companyCode,
       limit: 1000000,
     },
   });
@@ -143,7 +145,9 @@ const CreateAccount: any = ({ onSubmit, onBack, coaId, coaItemsDeleted }: any) =
 
               <Col>
                 <Spacer size={20} />
-                <Text variant="subtitle1">{lang[t].coaTemplate.create.createAccount.field.deprecated}</Text>
+                <Text variant="subtitle1">
+                  {lang[t].coaTemplate.create.createAccount.field.deprecated}
+                </Text>
               </Col>
               <Col>
                 <Spacer size={20} />
