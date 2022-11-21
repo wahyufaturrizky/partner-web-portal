@@ -26,7 +26,7 @@ export const ModalCopyCoA: any = ({
 	});
 
 	const [selectedRowKeys, setSelectedRowKeys] = useState([]);
-
+	const companyCode = localStorage.getItem("companyCode")
 	const columns = [
 		{
 			title: "Name",
@@ -50,6 +50,7 @@ export const ModalCopyCoA: any = ({
 			excepted_id: coaId ?? "",
 			page: pagination.page,
 			limit: pagination.itemsPerPage,
+			company_id: companyCode
 		},
 	});
 
