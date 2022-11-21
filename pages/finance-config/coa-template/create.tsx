@@ -44,7 +44,8 @@ const FinanceConfigCoATemplateCreate: any = () => {
 		handleSubmit,
 		formState: { errors },
 		control,
-    setValue
+    setValue,
+    getValues
 	} = useForm({});
 
   const router = useRouter();
@@ -475,6 +476,7 @@ const FinanceConfigCoATemplateCreate: any = () => {
                             message: "Please enter country.",
                           },
                         }}
+                        defaultValue={getValues("country_id")}
                         render={({ field: { onChange }, fieldState: { error } }) => (
                           <>
                             <Label>
@@ -482,6 +484,7 @@ const FinanceConfigCoATemplateCreate: any = () => {
                             </Label>
                             <Spacer size={3} />
                             <FormSelect
+                              defaultValue={getValues("country_id")}
                               error={error?.message}
                               height="48px"
                               style={{ width: "100%" }}
@@ -519,9 +522,10 @@ const FinanceConfigCoATemplateCreate: any = () => {
                         rules={{
                           required: {
                             value: true,
-                            message: "Please enter country.",
+                            message: "Please enter industry.",
                           },
                         }}
+                        defaultValue={getValues("industry_id")}
                         render={({ field: { onChange }, fieldState: { error } }) => (
                           <>
                             <Label>
@@ -529,6 +533,7 @@ const FinanceConfigCoATemplateCreate: any = () => {
                             </Label>
                             <Spacer size={3} />
                             <FormSelect
+                              defaultValue={getValues("industry_id")}
                               error={error?.message}
                               height="48px"
                               style={{ width: "100%" }}
@@ -568,6 +573,7 @@ const FinanceConfigCoATemplateCreate: any = () => {
                             message: "Please enter segment.",
                           },
                         }}
+                        defaultValue={getValues("segment_id")}
                         render={({ field: { onChange }, fieldState: { error } }) => (
                           <>
                             <Label>
@@ -575,6 +581,7 @@ const FinanceConfigCoATemplateCreate: any = () => {
                             </Label>
                             <Spacer size={3} />
                             <FormSelect
+                              defaultValue={getValues("segment_id")}
                               error={error?.message}
                               height="48px"
                               style={{ width: "100%" }}
