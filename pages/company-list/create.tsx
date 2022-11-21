@@ -16,6 +16,7 @@ import {
   Spin,
   Radio,
   Tooltip,
+  FormSelect
 } from "pink-lava-ui";
 import { ExclamationCircleOutlined } from "@ant-design/icons";
 import styled from "styled-components";
@@ -40,6 +41,11 @@ import { useTimezone } from "../../hooks/timezone/useTimezone";
 import { useLanguages } from "hooks/languages/useLanguages";
 import moment from "moment";
 import { lang } from "lang";
+import { useCountryInfiniteLists } from "hooks/mdm/country-structure/useCountries";
+import { useSegmentInfiniteLists } from "hooks/segment/useSegment";
+import { useInfiniteIndustry } from "hooks/industry/useIndustries";
+import useDebounce from "lib/useDebounce";
+import { colors } from "utils/color";
 
 const CompanyTypeDataFake = [
   {
@@ -338,15 +344,16 @@ const schema = yup
   .object({
     name: yup.string().required("Name is Required"),
     code: yup.string().required("Company code is Required"),
-    email: yup.string().email("Email not validated"),
-    address: yup.string().default(""),
+    email: yup.string().email("Email not validated").required("Email is required"),
+    phone_number: yup.string().required("Phone Number is Required"),
+    address: yup.string().required("Addres is required").default(""),
     taxId: yup.string().default(""),
     language: yup.string().required("Language is Required"),
-    source_exchange: yup.string().default(""),
     country: yup.string().required("Country is Required"),
-    industry: yup.string().default(""),
-    numberOfEmployee: yup.string().default(""),
-    sector: yup.string().default(""),
+    source_exchange: yup.string().default(""),
+    industry_id: yup.string().default(""),
+    numberOfEmployee: yup.string().required("Number of employee is Required").default(""),
+    sector_id: yup.string().default(""),
     fromTemplate: yup.string().default("none"),
     companyType: yup.string().default(""),
     corporate: yup.string().default(""),
@@ -371,6 +378,9 @@ const defaultValue = {
   chart_of_account: "",
   external_code: "",
   fiscal_year: 0,
+  industry_id: "",
+  country: "",
+  sector_id: ""
 };
 
 const CreateCompany: any = () => {
@@ -394,11 +404,11 @@ const CreateCompany: any = () => {
 
   const [searchTimezone, setSearchTimezone] = useState();
 
-  const [searchCountry, setSearchCountry] = useState();
+  // const [searchCountry, setSearchCountry] = useState();
 
-  const [industryList, setIndustryList] = useState(IndustryDataFake);
+  // const [industryList, setIndustryList] = useState(IndustryDataFake);
   const [sectorList, setSectorList] = useState([]);
-
+  const companyCode = localStorage.getItem("companyCode")
   const [address, setAddress] = useState("");
   const [search, setSearch] = useState({
     language: "",
@@ -409,10 +419,28 @@ const CreateCompany: any = () => {
 
   const [fromTemplate, setFromTemplate] = useState("none");
 
+  const [countryList, setCountryList] = useState<any[]>([]);
+  const [totalRowsCountryList, setTotalRowsCountryList] = useState(0);
+  const [industryList, setIndustryList] = useState<any[]>([]);
+  const [totalRowsIndustryList, setTotalRowsIndustryList] = useState(0);
+  const [segmentList, setSegmentList] = useState<any[]>([]);
+  const [totalRowsSegmentList, setTotalRowsSegmentList] = useState(0);
+  const [searchCountry, setSearchCountry] = useState("");
+  const [searchIndustry, setSearchIndustry] = useState("");
+  const [searchSegment, setSearchSegment] = useState("");
+  const [industryId, setIndustryId] = useState("");
+
+  const debounceFetch = useDebounce(
+      searchCountry ||
+      searchSegment ||
+      searchIndustry,
+    1000
+  );
   const {
     register,
     handleSubmit,
     setValue,
+    control,
     formState: { errors },
   } = useForm({
     resolver: yupResolver(schema),
@@ -442,9 +470,110 @@ const CreateCompany: any = () => {
     },
     query: {
       search: searchCoa,
+      company_id: companyCode
     },
   });
-
+  const {
+    isFetching: isFetchingCountry,
+    isFetchingNextPage: isFetchingMoreCountry,
+    hasNextPage: hasNextPageCountry,
+    fetchNextPage: fetchNextPageCountry,
+  } = useCountryInfiniteLists({
+    query: {
+      search: debounceFetch,
+      limit: 10,
+    },
+    options: {
+      onSuccess: (data: any) => {
+        setTotalRowsCountryList(data.pages[0].totalRow);
+        const mappedData = data?.pages?.map((group: any) => {
+          return group.rows?.map((element: any) => {
+            return {
+              value: element.id,
+              label: element.name,
+            };
+          });
+        });
+        const flattenArray = [].concat(...mappedData);
+        setCountryList(flattenArray);
+      },
+      getNextPageParam: (_lastPage: any, pages: any) => {
+        if (countryList.length < totalRowsCountryList) {
+          return pages.length + 1;
+        } else {
+          return undefined;
+        }
+      },
+    },
+  });
+  const {
+    isFetching: isFetchingSegment,
+    isFetchingNextPage: isFetchingMoreSegment,
+    hasNextPage: hasNextPageSegment,
+    fetchNextPage: fetchNextPageSegment,
+  } = useSegmentInfiniteLists({
+    query: {
+      search: debounceFetch,
+      limit: 10,
+      industry_id : industryId
+    },
+    options: {
+      onSuccess: (data: any) => {
+        setTotalRowsSegmentList(data.pages[0].totalRow);
+        const mappedData = data?.pages?.map((group: any) => {
+          return group.rows?.map((element: any) => {
+            return {
+              value: element.id,
+              label: element.name,
+            };
+          });
+        });
+        const flattenArray = [].concat(...mappedData);
+        setSegmentList(industryId ? flattenArray : []);
+      },
+      getNextPageParam: (_lastPage: any, pages: any) => {
+        if (segmentList.length < totalRowsSegmentList) {
+          return pages.length + 1;
+        } else {
+          return undefined;
+        }
+      },
+    },
+  });
+	const {
+		isLoading: isLoadingIndustry,
+		isFetching: isFetchingIndustry,
+		isFetchingNextPage: isFetchingMoreIndustry,
+		hasNextPage: hasNextIndustry,
+		fetchNextPage: fetchNextIndustry,
+	} = useInfiniteIndustry({
+		query: {
+			search: debounceFetch,
+			limit: 10,
+		},
+		options: {
+			onSuccess: (data: any) => {
+				setTotalRowsIndustryList(data.pages[0].totalRow);
+				const mappedData = data?.pages?.map((group: any) => {
+					return group.rows?.map((element: any) => {
+						return {
+							label: element.name,
+							value: element.id,
+						};
+					});
+				});
+				const flattenArray = [].concat(...mappedData);
+				setIndustryList(flattenArray);
+			},
+			getNextPageParam: (_lastPage: any, pages: any) => {
+				if (industryList.length < totalRowsIndustryList) {
+					return pages.length + 1;
+				} else {
+					return undefined;
+				}
+			},
+		},
+	});
   // const { data: menuDesignData, isLoading: isLoadingMenuDesignList } = useMenuDesignLists({
   //   options: {
   //     onSuccess: (data) => {},
@@ -529,10 +658,11 @@ const CreateCompany: any = () => {
       email: data.email,
       address: address,
       country: data.country || "",
-      industry: data.industry,
       employees: data.numberOfEmployee,
-      sector: data.sector,
+      industry_id: data.industry_id,
+      sector_id: data.sector_id,
       from_template: fromTemplate,
+      other_company_id: null,
       tax_id: data.taxId,
       pkp: data.isPkp,
       logo: foto,
@@ -541,19 +671,19 @@ const CreateCompany: any = () => {
       currency: data.currency,
       source_exchange: data.source_exchange || "",
       language: data.language,
-      coa: data.coaTemplate,
+      coa: `${data.coaTemplate}`,
       format_date: data.formatDate,
       format_number: data.numberFormat,
       timezone: data.timezone || "",
       advance_approval: data.advanceApproval,
-      retail_pricing: data.retailPricing,
       pricing_structure: data.pricingStructure,
+      retail_pricing: data.retailPricing,
       chart_of_account: data.chart_of_account,
       fiscal_year: `${data.fiscal_year}`,
       external_code: data.external_code,
       status: data.activeStatus,
     };
-    // console.log(payload);
+    console.log(payload);
     createCompany(payload);
   };
 
@@ -614,7 +744,49 @@ const CreateCompany: any = () => {
                   ]}
                 />
               </Row>
-
+              <Spacer size={12} />
+              <Row width="100%" gap={20} noWrap>
+                <Span>{lang[t].companyList.copyFromTemplate}</Span>
+              </Row>
+              <Row width="100%" gap="20px" noWrap>
+                <Col width="50%">
+                  <Flex>
+                    <Radio
+                      value={"companyInternal"}
+                      checked={fromTemplate == "none"}
+                      onChange={(e: any) => setFromTemplate("none")}
+                    >
+                      <SpanAlign>{lang[t].companyList.none}</SpanAlign>
+                    </Radio>
+                    <Radio
+                      value={"companyInternal"}
+                      checked={fromTemplate == "eDot"}
+                      onChange={(e: any) => setFromTemplate("eDot")}
+                    >
+                      eDOT
+                    </Radio>
+                    <Radio
+                      value={"companyInternal"}
+                      checked={fromTemplate == "Other Company"}
+                      onChange={(e: any) => setFromTemplate("Other Company")}
+                    >
+                      {lang[t].companyList.otherCompany}
+                    </Radio>
+                  </Flex>
+                </Col>
+                <Col width="50%">
+                  {/* For company */}
+                  {/* <Input
+                    width="100%"
+                    label={lang[t].companyList.name}
+                    height="48px"
+                    placeholder={"e.g PT. Kaldu Sari Nabati Indonesia"}
+                    error={errors?.name?.message}
+                    required
+                    {...register("name", { required: true })}
+                  /> */}
+                </Col>
+              </Row>
               <Row width="100%" gap="20px" noWrap>
                 <Input
                   width="100%"
@@ -643,6 +815,7 @@ const CreateCompany: any = () => {
                     height="48px"
                     placeholder={"e.g karina@nabatisnack.co.id"}
                     error={errors?.email?.message}
+                    required
                     {...register("email", { required: true })}
                   />
                 </Col>
@@ -656,45 +829,151 @@ const CreateCompany: any = () => {
                   /> */}
                   <Input
                     width="100%"
+                    label="Phone Number"
+                    height="48px"
+                    placeholder={"e.g karina@nabatisnack.co.id"}
+                    error={errors?.phone_number?.message}
+                    required
+                    {...register("phone_number", { required: true })}
+                  />
+                </Col>
+              </Row>
+              <Row width="100%" gap="20px" noWrap>
+                <Col width="50%">
+                  <Controller
+                    control={control}
+                    name="country"
+                    rules={{
+                      required: {
+                        value: true,
+                        message: "Please enter country.",
+                      },
+                    }}
+                    render={({ field: { onChange }, fieldState: { error } }) => (
+                      <>
+                        <Label>
+                          Country <span style={{ color: colors.red.regular }}>*</span>
+                        </Label>
+                        <Spacer size={3} />
+                        <FormSelect
+                          error={error?.message}
+                          height="48px"
+                          style={{ width: "100%" }}
+                          size={"large"}
+                          placeholder={"Select"}
+                          borderColor={"#AAAAAA"}
+                          arrowColor={"#000"}
+                          withSearch
+                          isLoading={isFetchingCountry}
+                          isLoadingMore={isFetchingMoreCountry}
+                          fetchMore={() => {
+                            if (hasNextPageCountry) {
+                              fetchNextPageCountry();
+                            }
+                          }}
+                          items={isFetchingCountry && !isFetchingMoreCountry ? [] : countryList}
+                          onChange={(value: any) => {
+                            onChange(value);
+                            setValue("country",value);
+                          }}
+                          onSearch={(value: any) => {
+                            setSearchCountry(value);
+                          }}
+                        />
+                      </>
+                    )}
+                  />
+                </Col>
+                <Col width="50%">
+                  <Input
+                    width="100%"
                     label={lang[t].companyList.address}
                     height="48px"
                     placeholder={"e.g JL. Soekarno Hatta"}
                     {...register("address")}
+                    required
+                    error={errors?.address?.message}
                     onChange={(e) => setAddress(e.target.value)}
                   />
                 </Col>
               </Row>
               <Row width="100%" gap="20px" noWrap>
                 <Col width="50%">
-                  {isLoadingCountryList ? (
-                    <Spin tip="Loading data..." />
-                  ) : (
-                    <Dropdown
-                      label={lang[t].companyList.country}
-                      width={"100%"}
-                      items={countryData.rows.map((data) => ({
-                        id: data.name,
-                        value: data.name,
-                      }))}
-                      placeholder={"Select"}
-                      handleChange={(value) => setValue("country", value)}
-                      onSearch={(search) => setSearchCountry(search)}
-                      required
-                      error={errors?.country?.message}
-                      {...register("country")}
-                    />
-                  )}
+                  <Controller
+                    control={control}
+                    name="industry_id"
+                    render={({ field: { onChange }, fieldState: { error } }) => (
+                      <>
+                        <Label>
+                          Industry
+                        </Label>
+                        <Spacer size={3} />
+                        <FormSelect
+                          height="48px"
+                          style={{ width: "100%" }}
+                          size={"large"}
+                          placeholder={"Select"}
+                          borderColor={"#AAAAAA"}
+                          arrowColor={"#000"}
+                          withSearch
+                          isLoading={isFetchingIndustry}
+                          isLoadingMore={isFetchingMoreIndustry}
+                          fetchMore={() => {
+                            if (hasNextIndustry) {
+                              fetchNextIndustry();
+                            }
+                          }}
+                          items={isFetchingIndustry && !isFetchingMoreIndustry ? [] : industryList}
+                          onChange={(value: any) => {
+                            onChange(value);
+                            setValue("industry_id",value);
+                            setIndustryId(value);
+                          }}
+                          onSearch={(value: any) => {
+                            setSearchIndustry(value);
+                          }}
+                        />
+                      </>
+                    )}
+                  />
                 </Col>
                 <Col width="50%">
-                  <Dropdown
-                    label={lang[t].companyList.industry}
-                    width={"100%"}
-                    items={industryList}
-                    placeholder={"Select"}
-                    handleChange={(value: any) => handleSelectIndustry(value)}
-                    onSearch={(search) => handleSearchIndustry(search)}
-                    error={errors?.industry?.message}
-                    {...register("industry", { required: true })}
+                  <Controller
+                    control={control}
+                    name="sector_id"
+                    render={({ field: { onChange }, fieldState: { error } }) => (
+                      <>
+                        <Label>
+                          Segment
+                        </Label>
+                        <Spacer size={3} />
+                        <FormSelect
+                          error={error?.message}
+                          height="48px"
+                          style={{ width: "100%" }}
+                          size={"large"}
+                          placeholder={"Select"}
+                          borderColor={"#AAAAAA"}
+                          arrowColor={"#000"}
+                          withSearch
+                          isLoading={isFetchingSegment}
+                          isLoadingMore={isFetchingMoreSegment}
+                          fetchMore={() => {
+                            if (hasNextPageSegment) {
+                              fetchNextPageSegment();
+                            }
+                          }}
+                          items={isFetchingSegment && !isFetchingMoreSegment ? [] : segmentList}
+                          onChange={(value: any) => {
+                            onChange(value);
+                            setValue("sector_id",value);
+                          }}
+                          onSearch={(value: any) => {
+                            setSearchSegment(value);
+                          }}
+                        />
+                      </>
+                    )}
                   />
                 </Col>
               </Row>
@@ -708,36 +987,11 @@ const CreateCompany: any = () => {
                     handleChange={(value: any) => setValue("numberOfEmployee", value)}
                     required
                     {...register("numberOfEmployee", { required: true })}
+                    error={errors?.numberOfEmployee?.message}
                     noSearch
                   />
+
                 </Col>
-                <Col width="50%">
-                  <Dropdown
-                    label={lang[t].companyList.sector}
-                    width={"100%"}
-                    items={sectorList}
-                    placeholder={"Select"}
-                    handleChange={(value) => setValue("sector", value)}
-                    noSearch
-                    error={errors?.sector?.message}
-                    {...register("sector", { required: true })}
-                  />
-                </Col>
-              </Row>
-              {/* <Row width="100%" gap="20px" noWrap>
-                <Col width="50%">
-                  <Dropdown
-                    label="Menu Design"
-                    width={"100%"}
-                    items={[]}
-                    placeholder={"Select"}
-                    handleChange={(value) => setValue("fromTemplate", value)}
-                    // onSearch={(search) => setSearchMenuDesign(search)}
-                    {...register("fromTemplate")}
-                  />
-                </Col>
-              </Row> */}
-              <Row width="100%" gap="20px" noWrap>
                 <Col width="50%">
                   <Input
                     width="100%"
@@ -749,36 +1003,6 @@ const CreateCompany: any = () => {
                   <Row>
                     <Text variant="body1">PKP ? </Text>
                     <Switch defaultChecked={false} onChange={(value) => setValue("isPkp", value)} />
-                  </Row>
-                </Col>
-                <Col width="50%">
-                  <Row width="100%" gap={20} noWrap>
-                    <Span>{lang[t].companyList.copyFromTemplate}</Span>
-                  </Row>
-                  <Row width="100%" noWrap>
-                    <Flex>
-                      <Radio
-                        value={"companyInternal"}
-                        checked={fromTemplate == "none"}
-                        onChange={(e: any) => setFromTemplate("none")}
-                      >
-                        <SpanAlign>{lang[t].companyList.none}</SpanAlign>
-                      </Radio>
-                      <Radio
-                        value={"companyInternal"}
-                        checked={fromTemplate == "eDot"}
-                        onChange={(e: any) => setFromTemplate("eDot")}
-                      >
-                        eDOT
-                      </Radio>
-                      <Radio
-                        value={"companyInternal"}
-                        checked={fromTemplate == "Other Company"}
-                        onChange={(e: any) => setFromTemplate("Other Company")}
-                      >
-                        {lang[t].companyList.otherCompany}
-                      </Radio>
-                    </Flex>
                   </Row>
                 </Col>
               </Row>
@@ -1070,6 +1294,12 @@ const Span = styled.span`
 
 const SpanAlign = styled.span`
   margin: auto;
+`;
+const Label = styled.div`
+  font-weight: bold;
+  font-size: 16px;
+  line-height: 24px;
+  color: #000000;
 `;
 
 export default CreateCompany;
