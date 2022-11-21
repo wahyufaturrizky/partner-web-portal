@@ -1175,7 +1175,11 @@ const CreateCompany: any = () => {
               <Spacer size={20} />
               <Row width="100%" gap="20px" noWrap>
                 <Row width="100%" noWrap style={{ alignItems: "center" }}>
-                  <Text variant="body1">
+                  <Text variant="body1" style={{
+                    display: 'flex',
+                    gap: '.25rem',
+                    paddingRight: '.25rem'
+                  }}>
                     {lang[t].companyList.companyUseAdvanceApproval}{""}
                     <Tooltip
                       overlayInnerStyle={{ width: "fit-content" }}
@@ -1191,7 +1195,11 @@ const CreateCompany: any = () => {
                   />
                 </Row>
                 <Row justifyContent="center" width="100%" noWrap style={{ alignItems: "center" }}>
-                  <Text variant="body1">
+                  <Text variant="body1" style={{
+                    display: 'flex',
+                    gap: '.25rem',
+                    paddingRight: '.25rem'
+                  }}>
                     {lang[t].companyList.companyUseRetailPricing}{""}
                     <Tooltip
                       overlayInnerStyle={{ width: "fit-content" }}
@@ -1207,7 +1215,11 @@ const CreateCompany: any = () => {
                   />
                 </Row>
                 <Row width="100%" justifyContent="end" noWrap style={{ alignItems: "center" }}>
-                  <Text variant="body1">
+                  <Text variant="body1" style={{
+                    display: 'flex',
+                    gap: '.25rem',
+                    paddingRight: '.25rem'
+                  }}>
                     {lang[t].companyList.companyUsePricingStructure}{""}
                     <Tooltip
                       overlayInnerStyle={{ width: "fit-content" }}
