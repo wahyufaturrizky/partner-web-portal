@@ -1,5 +1,5 @@
-import { useQuery, useMutation } from "react-query";
-import { client } from "../../lib/client";
+import { useQuery, useMutation, useInfiniteQuery } from "react-query";
+import { client, mdmService } from "../../lib/client";
 
 const fetchRolePermissions = async ({ query = {} }) => {
   return client(`/role-permission`, {
@@ -25,6 +25,27 @@ const fetchApprovalRolePermissions = async ({ query = {} }) => {
       ...query,
     },
   }).then((data) => data);
+};
+
+const fetchInfiniteViewTypeList = async ({ pageParam = 1, queryKey }) => {
+  const searchQuery = queryKey[1].search;
+  return client(`/view-type`, {
+    params: {
+      search: searchQuery,
+      limit: 10,
+      page: pageParam,
+      sortBy: "created_at",
+      sortOrder: "DESC",
+      ...queryKey[1],
+    },
+  }).then((data) => data);
+};
+
+const useViewTypeListInfiniteList = ({ query = {}, options }) => {
+  return useInfiniteQuery(["view-type/infinite", query], fetchInfiniteViewTypeList, {
+    keepPreviousData: true,
+    ...options,
+  });
 };
 
 const useRolePermissions = ({ query = {}, options } = {}) => {
@@ -116,4 +137,5 @@ export {
   useCreatePermission,
   useUpdateRole,
   useDeletePermission,
+  useViewTypeListInfiniteList,
 };

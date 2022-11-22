@@ -1,6 +1,17 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import Router from "next/router";
-import { Accordion, Button, Col, Dropdown, Input, Row, Spacer, Spin, Text } from "pink-lava-ui";
+import {
+  Accordion,
+  Button,
+  Col,
+  Dropdown,
+  Input,
+  Row,
+  Spacer,
+  Spin,
+  Text,
+  FormSelectCustom,
+} from "pink-lava-ui";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import styled from "styled-components";
@@ -13,8 +24,9 @@ import {
   usePartnerConfigPermissionList,
   useUpdatePartnerConfigPermissionList,
 } from "../../../hooks/user-config/usePermission";
-import { useRolePermissions } from "../../../hooks/role/useRole";
+import { useRolePermissions, useViewTypeListInfiniteList } from "../../../hooks/role/useRole";
 import { lang } from "lang";
+import useDebounce from "lib/useDebounce";
 
 const schema = yup
   .object({
@@ -29,6 +41,12 @@ const defaultValue = {
 };
 
 const DetailPartnerConfigPermissionList: any = () => {
+  const [searchViewType, setSearchViewType] = useState("");
+  const [totalRowsViewTypeList, setTotalRowsViewTypeList] = useState(0);
+  const [viewTypeList, setListViewTypeList] = useState<any[]>([]);
+
+  const debounceFetchViewType = useDebounce(searchViewType, 1000);
+
   const { permission_id } = Router.query;
   const t = localStorage.getItem("lan") || "en-US";
   const {
@@ -109,6 +127,41 @@ const DetailPartnerConfigPermissionList: any = () => {
 
   const { data: fieldRole, isLoading: isLoadingFieldRole } = useRolePermissions();
 
+  const {
+    isFetching: isFetchingViewTypeList,
+    isFetchingNextPage: isFetchingMoreViewTypeList,
+    hasNextPage: hasNextPageViewTypeList,
+    fetchNextPage: fetchNextPageViewTypeList,
+    isLoading: isLoadingViewTypeList,
+  } = useViewTypeListInfiniteList({
+    query: {
+      search: debounceFetchViewType,
+      limit: 10,
+    },
+    options: {
+      onSuccess: (data: any) => {
+        setTotalRowsViewTypeList(data.pages[0].totalRow);
+        const mappedData = data?.pages?.map((group: any) => {
+          return group.rows?.map((element: any) => {
+            return {
+              value: element.id,
+              label: element.name,
+            };
+          });
+        });
+        const flattenArray = [].concat(...mappedData);
+        setListViewTypeList(flattenArray);
+      },
+      getNextPageParam: (_lastPage: any, pages: any) => {
+        if (viewTypeList.length < totalRowsViewTypeList) {
+          return pages.length + 1;
+        } else {
+          return undefined;
+        }
+      },
+    },
+  });
+
   return (
     <>
       <Col>
@@ -164,7 +217,9 @@ const DetailPartnerConfigPermissionList: any = () => {
 
         <Accordion>
           <Accordion.Item key={1}>
-            <Accordion.Header variant="blue">{lang[t].permissionList.accordion.general}</Accordion.Header>
+            <Accordion.Header variant="blue">
+              {lang[t].permissionList.accordion.general}
+            </Accordion.Header>
             {isLoadingPartnerConfigPermissionList ? (
               <Spin ip="Loading..." />
             ) : (
@@ -201,6 +256,47 @@ const DetailPartnerConfigPermissionList: any = () => {
                     handleChange={(value: any) => setValue("isSystemConfig", value)}
                     noSearch
                   />
+
+                  <Col width="100%">
+                    {isLoadingViewTypeList ? (
+                      <Center>
+                        <Spin tip="loading..." />
+                      </Center>
+                    ) : (
+                      <>
+                        <Label>View Type</Label>
+                        <Spacer size={5} />
+                        <FormSelectCustom
+                          showArrow
+                          height="48px"
+                          style={{ width: "100%" }}
+                          size={"large"}
+                          placeholder={"Select"}
+                          borderColor={"#AAAAAA"}
+                          arrowColor={"#000"}
+                          withSearch
+                          isLoading={isFetchingViewTypeList}
+                          isLoadingMore={isFetchingMoreViewTypeList}
+                          fetchMore={() => {
+                            if (hasNextPageViewTypeList) {
+                              fetchNextPageViewTypeList();
+                            }
+                          }}
+                          items={
+                            isFetchingViewTypeList && !isFetchingMoreViewTypeList
+                              ? []
+                              : viewTypeList
+                          }
+                          onChange={(value: any) => {
+                            setValue("viewType", value);
+                          }}
+                          onSearch={(value: any) => {
+                            setSearchViewType(value);
+                          }}
+                        />
+                      </>
+                    )}
+                  </Col>
                 </Row>
               </Accordion.Body>
             )}
@@ -227,7 +323,8 @@ const DetailPartnerConfigPermissionList: any = () => {
           <Accordion.Item key={1}>
             <Accordion.Header variant="blue">
               <Row gap="8px" alignItems="baseline">
-                {lang[t].permissionList.accordion.associatedRole} <Span>(Auto added from roles)</Span>
+                {lang[t].permissionList.accordion.associatedRole}{" "}
+                <Span>(Auto added from roles)</Span>
               </Row>
             </Accordion.Header>
             <Accordion.Body>
@@ -271,6 +368,19 @@ const DetailPartnerConfigPermissionList: any = () => {
     </>
   );
 };
+
+const Label = styled.div`
+  font-weight: bold;
+  font-size: 16px;
+  line-height: 24px;
+  color: #000000;
+`;
+
+const Center = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
 
 const Span = styled.div`
   font-size: 14px;

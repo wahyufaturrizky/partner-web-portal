@@ -2,24 +2,10 @@ import React, { useState } from "react";
 import styled from "styled-components";
 import { useRouter } from "next/router";
 import usePagination from "@lucasmogari/react-pagination";
-import {
-  Text,
-  Button,
-  Col,
-  Row,
-  Spacer,
-  Search,
-  Table,
-  Pagination,
-  Lozenge,
-  Dropdown,
-} from "pink-lava-ui";
+import { Text, Button, Col, Row, Spacer, Search, Table, Pagination, Dropdown } from "pink-lava-ui";
 
 import { useMenuLists } from "../../../hooks/menu-config/useMenuConfig";
-import {
-  usePartnerConfigPermissionLists,
-  useDeletePartnerConfigPermissionList,
-} from "../../../hooks/user-config/usePermission";
+import { usePartnerConfigPermissionLists } from "../../../hooks/user-config/usePermission";
 import { lang } from "lang";
 
 const UserConfigPermission: any = () => {
@@ -35,7 +21,6 @@ const UserConfigPermission: any = () => {
   });
 
   const [search, setSearch] = useState("");
-  const [modalDelete, setModalDelete] = useState({ open: false });
   const [dataListDropdownMenu, setDataListDropdownMenu] = useState(null);
   const [dataListDropdownIsSystemConfig, setDataListDropdownIsSystemConfig] = useState(null);
 
@@ -51,6 +36,9 @@ const UserConfigPermission: any = () => {
   ];
 
   const { data: fieldsMenuList, isLoading: isLoadingMenuList } = useMenuLists({
+    query: {
+      company_id: "KSNI",
+    },
     options: {
       onSuccess: (data: any) => {
         pagination.setTotalItems(data.totalRow);
@@ -74,6 +62,7 @@ const UserConfigPermission: any = () => {
       limit: pagination.itemsPerPage,
       sysConfigSearch: dataListDropdownIsSystemConfig,
       menuId: dataListDropdownMenu,
+      company_id: "KSNI",
     },
   });
 
