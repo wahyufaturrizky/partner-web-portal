@@ -11,167 +11,171 @@ import styled from "styled-components";
 import { lang } from "lang";
 
 const UserConfigRole: any = () => {
-	const t = localStorage.getItem("lan") || "en-US";
-	const router = useRouter();
-	const pagination = usePagination({
-		page: 1,
-		itemsPerPage: 20,
-		maxPageItems: Infinity,
-		numbers: true,
-		arrows: true,
-		totalItems: 100,
-	});
+  const t = localStorage.getItem("lan") || "en-US";
+  const companyCode = localStorage.getItem("companyCode");
+  const router = useRouter();
+  const pagination = usePagination({
+    page: 1,
+    itemsPerPage: 20,
+    maxPageItems: Infinity,
+    numbers: true,
+    arrows: true,
+    totalItems: 100,
+  });
 
-	const [search, setSearch] = useState("");
-	const [modalDelete, setModalDelete] = useState({ open: false });
+  const [search, setSearch] = useState("");
+  const [modalDelete, setModalDelete] = useState({ open: false });
 
-	const {
-		data: fields,
-		refetch: refetchFields,
-		isLoading: isLoadingField,
-	} = useRolePermissions({
-		options: {
-			onSuccess: (data: any) => {
-				pagination.setTotalItems(data.totalRow);
-			},
-		},
-		query: {
-			search,
-			page: pagination.page,
-			limit: pagination.itemsPerPage,
-		},
-	});
+  const {
+    data: fields,
+    refetch: refetchFields,
+    isLoading: isLoadingField,
+  } = useRolePermissions({
+    options: {
+      onSuccess: (data: any) => {
+        pagination.setTotalItems(data.totalRow);
+      },
+    },
+    query: {
+      company_id: companyCode,
+      search,
+      page: pagination.page,
+      limit: pagination.itemsPerPage,
+    },
+  });
 
-	const { mutate: deleteFields } = useDeletePermission({
-		options: {
-			onSuccess: () => {
-				refetchFields();
-				setModalDelete({ open: false });
-				setSelectedRowKeys([]);
-			},
-		},
-	});
+  const { mutate: deleteFields } = useDeletePermission({
+    options: {
+      onSuccess: () => {
+        refetchFields();
+        setModalDelete({ open: false });
+        setSelectedRowKeys([]);
+      },
+    },
+  });
 
-	const columns = [
-		{
-			title: lang[t].roleList.roleList.roleName,
-			dataIndex: "field_name",
-			width: "43%",
-		},
-		{
-			title: lang[t].roleList.roleList.company,
-			dataIndex: "company",
-			render: (text: any) => (
-				<Lozenge variant={STATUS_APPROVAL_VARIANT[text]}>{STATUS_APPROVAL_TEXT[text]}</Lozenge>
-			),
-			width: "42%",
-		},
-		{
-			title: lang[t].roleList.userListAction,
-			dataIndex: "action",
-			width: "15%",
-			align: "left",
-		},
-	];
+  const columns = [
+    {
+      title: lang[t].roleList.roleList.roleName,
+      dataIndex: "field_name",
+      width: "43%",
+    },
+    {
+      title: lang[t].roleList.roleList.company,
+      dataIndex: "company",
+      render: (text: any) => (
+        <Lozenge variant={STATUS_APPROVAL_VARIANT[text]}>{STATUS_APPROVAL_TEXT[text]}</Lozenge>
+      ),
+      width: "42%",
+    },
+    {
+      title: lang[t].roleList.userListAction,
+      dataIndex: "action",
+      width: "15%",
+      align: "left",
+    },
+  ];
 
-	const data: any = [];
-	fields?.rows?.map((field: any) => {
-		data.push({
-			key: field.id,
-			field_name: field.name,
-			approval_status: field.status,
-			action: (
-				<div style={{ display: "flex", justifyContent: "left" }}>
-					<Button
-						size="small"
-						onClick={() => {
-							router.push(`/user-config/role/${field.id}`);
-						}}
-						variant="tertiary"
-					>
-						{lang[t].roleList.tertier.viewDetail}
-					</Button>
-				</div>
-			),
-		});
-	});
+  const data: any = [];
+  fields?.rows?.map((field: any) => {
+    data.push({
+      key: field.id,
+      field_name: field.name,
+      approval_status: field.status,
+      action: (
+        <div style={{ display: "flex", justifyContent: "left" }}>
+          <Button
+            size="small"
+            onClick={() => {
+              router.push(`/user-config/role/${field.id}`);
+            }}
+            variant="tertiary"
+          >
+            {lang[t].roleList.tertier.viewDetail}
+          </Button>
+        </div>
+      ),
+    });
+  });
 
-	const paginateField = data;
-	const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+  const paginateField = data;
+  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
 
-	const onSelectChange = (selectedRowKeys: any) => {
-		setSelectedRowKeys(selectedRowKeys);
-	};
+  const onSelectChange = (selectedRowKeys: any) => {
+    setSelectedRowKeys(selectedRowKeys);
+  };
 
-	const rowSelection = {
-		selectedRowKeys,
-		onChange: onSelectChange,
-	};
+  const rowSelection = {
+    selectedRowKeys,
+    onChange: onSelectChange,
+  };
 
-	return (
-		<>
-			<Col>
-				<Text variant={"h4"}>{lang[t].roleList.pageTitle.roleList}</Text>
-				<Spacer size={20} />
-				<Card>
-					<Row justifyContent="space-between">
-						<Search
-							width="380px"
-							placeholder={lang[t].roleList.searchBar.roleList}
-							onChange={(e: any) => setSearch(e.target.value)}
-						/>
-						<Row gap="16px">
-							<Button
-								size="big"
-								variant={"tertiary"}
-								onClick={() => setModalDelete({ open: true })}
-								disabled={rowSelection.selectedRowKeys?.length === 0}
-							>
-								{lang[t].roleList.tertier.delete}
-							</Button>
-							<Button
-								size="big"
-								variant={"primary"}
-								onClick={() => {
-									router.push("/user-config/role/create");
-								}}
-							>
-								{lang[t].roleList.primary.create}
-							</Button>
-						</Row>
-					</Row>
-				</Card>
-				<Spacer size={10} />
-				<Card style={{ padding: "16px 20px" }}>
-					<Col gap="60px">
-						<Table
-							loading={isLoadingField}
-							columns={columns}
-							data={paginateField}
-							rowSelection={rowSelection}
-						/>
-						<Pagination pagination={pagination} />
-					</Col>
-				</Card>
-			</Col>
+  return (
+    <>
+      <Col>
+        <Text variant={"h4"}>{lang[t].roleList.pageTitle.roleList}</Text>
+        <Spacer size={20} />
+        <Card>
+          <Row justifyContent="space-between">
+            <Search
+              width="380px"
+              placeholder={lang[t].roleList.searchBar.roleList}
+              onChange={(e: any) => setSearch(e.target.value)}
+            />
+            <Row gap="16px">
+              <Button
+                size="big"
+                variant={"tertiary"}
+                onClick={() => setModalDelete({ open: true })}
+                disabled={rowSelection.selectedRowKeys?.length === 0}
+              >
+                {lang[t].roleList.tertier.delete}
+              </Button>
+              <Button
+                size="big"
+                variant={"primary"}
+                onClick={() => {
+                  router.push("/user-config/role/create");
+                }}
+              >
+                {lang[t].roleList.primary.create}
+              </Button>
+            </Row>
+          </Row>
+        </Card>
+        <Spacer size={10} />
+        <Card style={{ padding: "16px 20px" }}>
+          <Col gap="60px">
+            <Table
+              loading={isLoadingField}
+              columns={columns}
+              data={paginateField}
+              rowSelection={rowSelection}
+            />
+            <Pagination pagination={pagination} />
+          </Col>
+        </Card>
+      </Col>
 
-			{modalDelete.open && (
-				<ModalDeleteConfirmation
-					totalSelected={selectedRowKeys?.length}
-					itemTitle={paginateField?.find((role: any) => role.key === selectedRowKeys[0])?.field_name}
-					visible={modalDelete.open}
-					onCancel={() => setModalDelete({ open: false })}
-					onOk={() => deleteFields({ id: selectedRowKeys })}
-				/>
-			)}
-		</>
-	);
+      {modalDelete.open && (
+        <ModalDeleteConfirmation
+          totalSelected={selectedRowKeys?.length}
+          itemTitle={
+            paginateField?.find((role: any) => role.key === selectedRowKeys[0])?.field_name
+          }
+          visible={modalDelete.open}
+          onCancel={() => setModalDelete({ open: false })}
+          onOk={() => deleteFields({ id: selectedRowKeys })}
+        />
+      )}
+    </>
+  );
 };
 
 const Card = styled.div`
-	background: #ffffff;
-	border-radius: 16px;
-	padding: 16px;
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 16px;
 `;
 
 export default UserConfigRole;
