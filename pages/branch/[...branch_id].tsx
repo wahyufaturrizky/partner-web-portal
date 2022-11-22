@@ -30,7 +30,6 @@ const BranchDetail = () => {
     totalItems: 100,
   });
   const { branch_id } = router.query;
-  console.log(branch_id, '<<< id nya')
   const [searchBranchParent, setSearchBranchParent] = useState("")
   const [searchSalesOrganization, setSearchSalesOrganization] = useState("");
   const [searchTimezone, setSearchTimezone] = useState("");
@@ -110,7 +109,6 @@ const BranchDetail = () => {
     },
   });
 
-  console.log(branchDetailData, '<<<detail')
   const {
     data: branchParentData,
     isLoading: isLoadingBranchParentData,
@@ -141,10 +139,10 @@ const BranchDetail = () => {
       isLoading: isLoadingSalesOrganizationData,
       isFetching: isFetchingSalesOrganizationData,
     } = useSalesOrganizationHirarcy({
-      structure_id: 101, //structure untuk KSNI
-      // query: {
-      //   search: debounceFetchSalesOrganization
-      // },
+      structure_id: 74, //structure untuk KSNI
+      query: {
+        search: debounceFetchSalesOrganization
+      },
       options: {
         onSuccess: (data: any) => {
         },
@@ -478,8 +476,6 @@ const BranchDetail = () => {
                               onChange(value);
                             }}
                             onSearch={(value: any) => {
-                              console.log(value, '<<<<val')
-                              console.log(salesOrganizationList)
                               if(value === '') {
                                 setSalesOrganizationList([
                                   {

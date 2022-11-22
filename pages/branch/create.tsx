@@ -68,7 +68,6 @@ const BranchCreate = () => {
     },
     options: {
       onSuccess: (data: any) => {
-        console.log(data, '<<< parent')
       },
       select: (data: any) => {
         return data?.rows?.map((parent: { parentName: string; parentId: string; }) => {
@@ -87,12 +86,10 @@ const BranchCreate = () => {
     isFetching: isFetchingSalesOrganizationData,
   } = useSalesOrganizationHirarcy({
       structure_id: 74, //structure untuk KSNI
-      // query: {
-      //   search: debounceFetchSalesOrganization
-      // },
+      query: {
+        search: debounceFetchSalesOrganization
+      },
       options: {
-        onSuccess: (data: any) => {
-        },
         select: (data: any) => {
           return data?.map((salesOrganization: { name: string; id: number; }) => {
             return {
@@ -413,8 +410,6 @@ const BranchCreate = () => {
                               onChange(value);
                             }}
                             onSearch={(value: any) => {
-                              console.log(value, '<<<<val')
-                              console.log(salesOrganizationList)
                               if(value === '') {
                                 setSalesOrganizationList([
                                   {
