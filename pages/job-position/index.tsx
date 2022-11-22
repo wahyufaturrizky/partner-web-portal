@@ -351,7 +351,7 @@ const JobPosition = () => {
                 width="100%"
                 label={lang[t].jobPosition.title}
                 height="48px"
-                placeholder={"e.g Staff"}
+                placeholder={"e.g Sales"}
                 {...register("name", {
                   shouldUnregister: true,
                 })}

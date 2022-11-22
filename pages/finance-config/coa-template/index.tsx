@@ -46,6 +46,7 @@ const FinanceConfigCoATemplate: any = () => {
     isFetching: isFetchingCoa,
   } = useCoa({
     query: {
+      company_id: companyCode,
       search: debounceSearch,
       page: pagination.page,
       limit: pagination.itemsPerPage,
