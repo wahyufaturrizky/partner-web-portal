@@ -27,7 +27,6 @@ const CreateAccount: any = ({ onSubmit, onBack, coaId, coaItemsDeleted }: any) =
       search,
       company_id: companyCode,
       limit: 1000000,
-      company_id: companyCode,
     },
   });
 

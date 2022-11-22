@@ -31,7 +31,7 @@ const DetailCoA: any = ({ onSubmit, onBack, account, onDelete, source }: any) =>
   const [search, setSearchAccountGroup] = useState("");
   const [modalDelete, setModalDelete] = useState({ open: false });
 
-  const [isDeprecated, setDeprecated] = useState(false);
+  const [isDeprecated, setDeprecated] = useState(account.deprecated === "Y");
   const { data: accountGroupParent } = useAccountGroups({
     options: {},
     query: {
