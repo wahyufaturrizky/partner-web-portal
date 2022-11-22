@@ -8,11 +8,7 @@ import { lang } from "lang";
 
 const CreateAccount: any = ({ onSubmit, onBack, coaId, coaItemsDeleted }: any) => {
   const t = localStorage.getItem("lan") || "en-US";
-<<<<<<< HEAD
-  const companyCode = localStorage.getItem("companyCode");
-=======
   const companyCode = localStorage.getItem("companyCode")
->>>>>>> 9733b60a6f53e778608c6b751cc2cfc58929e32b
   const {
     register,
     handleSubmit,
