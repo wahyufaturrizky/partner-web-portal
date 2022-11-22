@@ -122,7 +122,7 @@ export const lang = {
       tertier: {
         viewDetail: "Lihat Detail",
         active: "Active",
-        nonActive: "Non Active",
+        nonActive: "Inactive",
         cancel: "Cancel",
         upload: "Upload",
       },
