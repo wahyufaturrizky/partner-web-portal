@@ -156,6 +156,7 @@ const PricingStructureList: any = () => {
   } = useCustomerGroupsMDM({
     query: {
       limit: 10000,
+      company: "KSNI",
     },
     options: {
       onSuccess: (data: any) => {},

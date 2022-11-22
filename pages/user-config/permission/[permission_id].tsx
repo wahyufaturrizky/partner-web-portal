@@ -247,15 +247,17 @@ const DetailPartnerConfigPermissionList: any = () => {
                   />
                 </Row>
                 <Row width="50%" gap="20px" noWrap>
-                  <Dropdown
-                    label={lang[t].permissionList.permissionList.systemConfig}
-                    width={"100%"}
-                    items={valueIsSystemConfig}
-                    placeholder={"Select"}
-                    defaultValue={dataPartnerConfigPermissionList?.isSystemConfig}
-                    handleChange={(value: any) => setValue("isSystemConfig", value)}
-                    noSearch
-                  />
+                  <Col width="loading...">
+                    <Dropdown
+                      label={lang[t].permissionList.permissionList.systemConfig}
+                      width={"100%"}
+                      items={valueIsSystemConfig}
+                      placeholder={"Select"}
+                      defaultValue={dataPartnerConfigPermissionList?.isSystemConfig}
+                      handleChange={(value: any) => setValue("isSystemConfig", value)}
+                      noSearch
+                    />
+                  </Col>
 
                   <Col width="100%">
                     {isLoadingViewTypeList ? (
