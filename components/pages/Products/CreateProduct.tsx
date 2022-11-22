@@ -352,6 +352,7 @@ export default function CreateProduct({ isCreateProductVariant = true }) {
       "variants",
       "registration",
       "accounting",
+      "tax"
     ]);
 
     payload.uom_conversion = [];
@@ -469,7 +470,7 @@ export default function CreateProduct({ isCreateProductVariant = true }) {
           <Branch setValue={setValue} branch={branchForm} isUpdate={isUpdate} />
         </div>
         <div style={{display: tabAktived === 'Purchasing' ? 'block': 'none'}}>
-          <Purchasing />
+          <Purchasing control={control} setValue={setValue} register={register} />
         </div>
         <div style={{display: tabAktived === 'Accounting' ? 'block': 'none'}}>
           <Accounting {...propsAccounting} />
