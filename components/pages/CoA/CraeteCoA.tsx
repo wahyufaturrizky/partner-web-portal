@@ -8,7 +8,7 @@ import { lang } from "lang";
 
 const CreateAccount: any = ({ onSubmit, onBack, coaId, coaItemsDeleted }: any) => {
   const t = localStorage.getItem("lan") || "en-US";
-  const companyCode = localStorage.getItem("companyCode")
+  const companyCode = localStorage.getItem("companyCode");
   const {
     register,
     handleSubmit,
@@ -27,7 +27,7 @@ const CreateAccount: any = ({ onSubmit, onBack, coaId, coaItemsDeleted }: any) =
       search,
       company_id: companyCode,
       limit: 1000000,
-      company_id: companyCode
+      company_id: companyCode,
     },
   });
 
