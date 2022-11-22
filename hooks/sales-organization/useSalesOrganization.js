@@ -14,16 +14,13 @@ const fetchSalesOrganization = async ({ queryKey }) => {
 };
 
 const useSalesOrganization = ({ options, company_code } = {}) => {
-  return useQuery(
-    ["sales-organization", company_code], fetchSalesOrganization,
-    {
-      keepPreviousData: true,
-      refetchOnWindowFocus: false,
-      refetchOnMount: true,
-      retry: false,
-      ...options,
-    }
-  );
+  return useQuery(["sales-organization", company_code], fetchSalesOrganization, {
+    keepPreviousData: true,
+    refetchOnWindowFocus: false,
+    refetchOnMount: true,
+    retry: false,
+    ...options,
+  });
 };
 
 const fetchInfiniteeSalesOrganizationLists = async ({ pageParam = 1, queryKey }) => {
@@ -99,14 +96,18 @@ const useGenerateTemplate = async ({ query }) => {
     });
 };
 
-const fetchSalesOrganizationHirarcy = async ({ structure_id }) => {
-  return mdmService(`/sales-org/hirarcy/${structure_id}`, {}).then((data) => data);
+const fetchSalesOrganizationHirarcy = async ({ structure_id, query }) => {
+  return mdmService(`/sales-org/hirarcy/${structure_id}`, {
+    params: {
+      ...query,
+    },
+  }).then((data) => data);
 };
 
-const useSalesOrganizationHirarcy = ({ options, structure_id } = {}) => {
+const useSalesOrganizationHirarcy = ({ options, structure_id, query = {} } = {}) => {
   return useQuery(
-    ["sales-organization-hirarcy", structure_id],
-    () => fetchSalesOrganizationHirarcy({ structure_id }),
+    ["sales-organization-hirarcy", structure_id, query],
+    () => fetchSalesOrganizationHirarcy({ structure_id, query }),
     {
       keepPreviousData: true,
       ...options,

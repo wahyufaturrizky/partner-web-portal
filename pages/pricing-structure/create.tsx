@@ -558,6 +558,7 @@ const CreatePricingStructure: any = () => {
       active_date: moment().format("YYYY-MM-DD"),
       distributions: dataSubmit.distribution_channel,
       products: dataSubmit.product_selected.map((mapping: any) => mapping.id),
+      company_id: "KSNI",
     });
 
   const onSubmitDraft = (dataDraft: any) =>
@@ -568,6 +569,7 @@ const CreatePricingStructure: any = () => {
       active_date: moment().format("YYYY-MM-DD"),
       distributions: dataDraft.distribution_channel,
       products: dataDraft.product_selected.map((mapping: any) => mapping.id),
+      company_id: "KSNI",
     });
 
   useEffect(
@@ -612,7 +614,7 @@ const CreatePricingStructure: any = () => {
                   .find((finding: any) => finding.id === data.pricing_config)
                   .priceStructureLevelings.map((subLevel: any) => ({
                     ...subLevel,
-                    nameLevel: dataGroupBuying.rows[subLevel.buyingPrice]?.name,
+                    nameLevel: dataGroupBuying?.rows[subLevel.buyingPrice]?.name,
                   })),
                 currency: currenciesInfiniteList.find(
                   (finding: any) => finding.id === data.currency
@@ -639,7 +641,7 @@ const CreatePricingStructure: any = () => {
                   .find((finding: any) => finding.id === data.pricing_config)
                   .priceStructureLevelings.map((subLevel: any) => ({
                     ...subLevel,
-                    nameLevel: dataGroupBuying.rows[subLevel.buyingPrice]?.name,
+                    nameLevel: dataGroupBuying?.rows[subLevel.buyingPrice]?.name,
                   })),
                 currency: currenciesInfiniteList.find(
                   (finding: any) => finding.id === data.currency
@@ -674,7 +676,7 @@ const CreatePricingStructure: any = () => {
                   .find((finding: any) => finding.id === data.pricing_config)
                   .priceStructureLevelings.map((subLevel: any) => ({
                     ...subLevel,
-                    nameLevel: dataGroupBuying.rows[subLevel.buyingPrice]?.name,
+                    nameLevel: dataGroupBuying?.rows[subLevel.buyingPrice]?.name,
                   })),
                 currency: currenciesInfiniteList.find(
                   (finding: any) => finding.id === data.currency
@@ -701,7 +703,7 @@ const CreatePricingStructure: any = () => {
                   .find((finding: any) => finding.id === data.pricing_config)
                   .priceStructureLevelings.map((subLevel: any) => ({
                     ...subLevel,
-                    nameLevel: dataGroupBuying.rows[subLevel.buyingPrice]?.name,
+                    nameLevel: dataGroupBuying?.rows[subLevel.buyingPrice]?.name,
                   })),
                 currency: currenciesInfiniteList.find(
                   (finding: any) => finding.id === data.currency
