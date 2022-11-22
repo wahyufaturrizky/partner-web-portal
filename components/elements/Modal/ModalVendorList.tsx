@@ -103,7 +103,7 @@ const ModalVendorList = ({ show, onCancel, selectedRowKeys, onAddMenu }: any) =>
           <Button
             disabled={false}
             onClick={() => {
-              onAddMenu(selectedMenu, selectedRowKeys);
+              onAddMenu(selectedMenu, selectedRowKeysMenu);
             }}
             variant="primary"
             size="big"

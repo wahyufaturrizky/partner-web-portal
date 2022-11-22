@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Spacer, Table, Text, Row, Pagination, Col, FormSelect, Spin, Input } from 'pink-lava-ui'
 import { lang } from 'lang';
 import usePagination from '@lucasmogari/react-pagination';
@@ -8,7 +8,7 @@ import useDebounce from 'lib/useDebounce';
 import { Controller, useForm } from 'react-hook-form';
 import styled from 'styled-components';
 
-export default function Purchasing() {
+export default function Purchasing({ control, setValue, register } : any) {
   const t = localStorage.getItem("lan") || "en-US";
 
   const [showVendor, setShowVendor] = useState({
@@ -84,7 +84,10 @@ export default function Purchasing() {
     },
   });
 
-  const { register, control, setValue, watch} = useForm();
+  useEffect(() => {
+    setValue("tax.tax_vendors", showVendor.selectedRowKeyMenu)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedVendor])
 
   return (
     <div>
@@ -115,7 +118,7 @@ export default function Purchasing() {
           <Controller
             control={control}
             defaultValue={""}
-            name="invoicing.tax_country"
+            name="tax.tax_country_id"
             render={({ field: { onChange, value }, formState: { errors } }) => (
               <Col width={"50%"}>
                 {isLoadingTax ? (
@@ -172,7 +175,7 @@ export default function Purchasing() {
           <Controller
             control={control}
             defaultValue={""}
-            name="invoicing.tax_name"
+            name="tax.tax_name"
             render={({ field: { onChange, value }, formState: { errors } }) => (
               <Col width={"50%"}>
                 <Text variant="headingRegular">Tax Name</Text>
@@ -197,8 +200,8 @@ export default function Purchasing() {
                       (el: any) => el.taxItemId === value
                     );
 
-                    setValue("invoicing.tax_type", filterTaxName[0]?.taxType ?? "");
-                    setValue("invoicing.tax_code", filterTaxName[0]?.taxCode ?? "");
+                    setValue("tax.tax_type", filterTaxName[0]?.taxType ?? "");
+                    setValue("tax.tax_code", filterTaxName[0]?.taxCode ?? "");
                   }}
                   onSearch={(value: any) => {
                     // const filterData = taxData?.filter(
@@ -223,7 +226,7 @@ export default function Purchasing() {
               defaultValue={""}
               placeholder={""}
               disabled={true}
-              {...register("invoicing.tax_type")}
+              {...register("tax.tax_type")}
             />
           </Col>
           <Col width={"50%"}>
@@ -234,7 +237,7 @@ export default function Purchasing() {
               defaultValue={""}
               placeholder={""}
               disabled={true}
-              {...register("invoicing.tax_code")}
+              {...register("tax.tax_code")}
             />
           </Col>
         </Row>
