@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Text,
   Col,
@@ -28,7 +28,8 @@ import { Controller, useForm } from "react-hook-form";
 import usePagination from "@lucasmogari/react-pagination";
 import {
   useCoa,
-  useCountries,
+  useCompany,
+  useCompanyInfiniteLists,
   useCreateCompany,
   useCurrenciesMDM,
   useDateFormatLists,
@@ -425,14 +426,22 @@ const CreateCompany: any = () => {
   const [totalRowsIndustryList, setTotalRowsIndustryList] = useState(0);
   const [segmentList, setSegmentList] = useState<any[]>([]);
   const [totalRowsSegmentList, setTotalRowsSegmentList] = useState(0);
+  const [companyList, setCompanyList] = useState<any[]>([]);
+  const [totalRowsCompanyList, setTotalRowsCompanyList] = useState(0);
+
   const [searchCountry, setSearchCountry] = useState("");
   const [searchIndustry, setSearchIndustry] = useState("");
   const [searchSegment, setSearchSegment] = useState("");
+  const [searchOtherCompany, setSearchOtherCompany] = useState("");
+  const [otherCompanyId, setOtherCompanyId] = useState("");
+
   const [industryId, setIndustryId] = useState("");
+  const [countryId, setCountryId] = useState("");
 
   const debounceFetch = useDebounce(
       searchCountry ||
       searchSegment ||
+      searchOtherCompany ||
       searchIndustry,
     1000
   );
@@ -574,6 +583,41 @@ const CreateCompany: any = () => {
 			},
 		},
 	});
+	const {
+		isLoading: isLoadingCompany,
+		isFetching: isFetchingCompany,
+		isFetchingNextPage: isFetchingMoreCompany,
+		hasNextPage: hasNextCompany,
+		fetchNextPage: fetchNextCompany,
+	} = useCompanyInfiniteLists({
+		query: {
+			search: debounceFetch,
+			limit: 10,
+		},
+		options: {
+			onSuccess: (data: any) => {
+				setTotalRowsCompanyList(data.pages[0].totalRow);
+				const mappedData = data?.pages?.map((group: any) => {
+					return group.rows?.map((element: any) => {
+						return {
+              id: element.id,
+							label: element.name,
+							value: element.name,
+						};
+					});
+				});
+				const flattenArray = [].concat(...mappedData);
+				setCompanyList(flattenArray);
+			},
+			getNextPageParam: (_lastPage: any, pages: any) => {
+				if (companyList.length < totalRowsCompanyList) {
+					return pages.length + 1;
+				} else {
+					return undefined;
+				}
+			},
+		},
+	});
   // const { data: menuDesignData, isLoading: isLoadingMenuDesignList } = useMenuDesignLists({
   //   options: {
   //     onSuccess: (data) => {},
@@ -592,15 +636,6 @@ const CreateCompany: any = () => {
     },
   });
 
-  const { data: countryData, isLoading: isLoadingCountryList } = useCountries({
-    options: {
-      onSuccess: (data) => {},
-    },
-    query: {
-      search: searchCountry,
-    },
-  });
-
   const { data: timezoneData, isLoading: isLoadingTimezoneList } = useTimezones({
     options: {
       onSuccess: (data) => {},
@@ -615,22 +650,50 @@ const CreateCompany: any = () => {
     query: {},
   });
 
-  const handleSearchIndustry = (value) => {
-    const newIndustry = IndustryDataFake.filter((tz) => tz.value.includes(value));
-    setIndustryList(newIndustry);
-  };
-
-  const handleSelectIndustry = (value) => {
-    setValue("industry", value);
-    const filterIndustry = industryList.filter((tz) => tz.value.includes(value));
-    setSectorList(filterIndustry[0].data);
-  };
-
   const { mutate: createCompany } = useCreateCompany({
     options: {
       onSuccess: (data) => {
         alert("Create Success!");
         router.push("/company-list");
+      },
+    },
+  });  
+  const {
+    data: companyData,
+    isLoading: isLoadingCompanyData,
+    isFetching: isFetchingCompanyData,
+  } = useCompany({
+    id: otherCompanyId,
+    options: {
+      onSuccess: (data: any) => {
+        setAddress(data?.address);
+        setFoto(data?.logo);
+        setFromTemplate(fromTemplate);
+        setValue("name", data?.name);
+        setValue("code", data?.code);
+        setValue("email", data?.email);
+        setValue("address", data?.address);
+        setValue("taxId", data?.taxId);
+        setValue("language", data?.language);
+        setValue("source_exchange", data?.sourceExchange);
+        setValue("country", data?.country);
+        setValue("industry", data?.industry);
+        setValue("numberOfEmployee", data?.employees);
+        setValue("sector", data?.sector);
+        setValue("fromTemplate", fromTemplate);
+        setValue("companyType", data?.companyType);
+        setValue("corporate", data?.corporate);
+        setValue("currency", data?.currency);
+        setValue("coaTemplate", data?.coa);
+        setValue("formatDate", data?.formatDate);
+        setValue("numberFormat", data?.formatNumber);
+        setValue("timezone", data?.timezone);
+        setValue("isPkp", data?.pkp);
+        setValue("advanceApproval", data?.advanceApproval);
+        setValue("retailPricing", data?.retailPricing);
+        setValue("pricingStructure", data?.pricingStructure);
+        setValue("external_code", data?.externalCode);
+        setValue("fiscal_year", data?.fiscalYear);
       },
     },
   });
@@ -643,13 +706,14 @@ const CreateCompany: any = () => {
       },
     },
   });
-
+  
+  
   const handleUploadLogo = (file: any) => {
     const formData = new FormData();
     formData.append("upload_file", file);
     uploadLogo(formData);
   };
-
+  
   const onSubmit = (data) => {
     const payload: any = {
       account_id: "0",
@@ -662,7 +726,9 @@ const CreateCompany: any = () => {
       industry_id: data.industry_id,
       sector_id: data.sector_id,
       from_template: fromTemplate,
-      other_company_id: null,
+      other_company_id: fromTemplate === "Other Company" ? otherCompanyId : null,
+      other_company: data.other_company,
+      phone_number: data.phone_number,
       tax_id: data.taxId,
       pkp: data.isPkp,
       logo: foto,
@@ -682,11 +748,11 @@ const CreateCompany: any = () => {
       fiscal_year: `${data.fiscal_year}`,
       external_code: data.external_code,
       status: data.activeStatus,
+      parent: fromTemplate === "Other Company" ? `${otherCompanyId}` : null,
     };
     console.log(payload);
     createCompany(payload);
-  };
-
+  };  
   return (
     <>
       <Col>
@@ -776,15 +842,47 @@ const CreateCompany: any = () => {
                 </Col>
                 <Col width="50%">
                   {/* For company */}
-                  {/* <Input
-                    width="100%"
-                    label={lang[t].companyList.name}
-                    height="48px"
-                    placeholder={"e.g PT. Kaldu Sari Nabati Indonesia"}
-                    error={errors?.name?.message}
-                    required
-                    {...register("name", { required: true })}
-                  /> */}
+                  {fromTemplate === "Other Company" && (
+                  <Col width="100%">
+                    <Controller
+                      control={control}
+                      name="other_company"
+                      render={({ field: { onChange }, fieldState: { error } }) => (
+                        <>
+                          <Label>
+                            Other Company Name
+                          </Label>
+                          <Spacer size={3} />
+                          <FormSelect
+                            height="48px"
+                            style={{ width: "100%" }}
+                            size={"large"}
+                            placeholder={"Select"}
+                            borderColor={"#AAAAAA"}
+                            arrowColor={"#000"}
+                            withSearch
+                            isLoading={isFetchingCompany}
+                            isLoadingMore={isFetchingMoreCompany}
+                            fetchMore={() => {
+                              if (hasNextCompany) {
+                                fetchNextCompany();
+                              }
+                            }}
+                            items={isFetchingCompany && !isFetchingMoreCompany ? [] : companyList}
+                            onChange={(value: any) => {
+                              onChange(value);
+                              setValue("other_company",value);
+                              setOtherCompanyId(companyList.filter((e: { value: any; }) => e.value === value)[0]?.id)
+                            }}
+                            onSearch={(value: any) => {
+                              setSearchOtherCompany(value);
+                            }}
+                          />
+                        </>
+                      )}
+                    />
+                  </Col>
+                  )}
                 </Col>
               </Row>
               <Row width="100%" gap="20px" noWrap>
@@ -801,7 +899,7 @@ const CreateCompany: any = () => {
                   width="100%"
                   label={lang[t].companyList.companyCode}
                   height="48px"
-                  placeholder={"e.g KSNI"}
+                  placeholder={"e.g eDot"}
                   error={errors?.code?.message}
                   required
                   {...register("code", { required: true })}
@@ -831,7 +929,7 @@ const CreateCompany: any = () => {
                     width="100%"
                     label="Phone Number"
                     height="48px"
-                    placeholder={"e.g karina@nabatisnack.co.id"}
+                    placeholder={"e.g 0811321456"}
                     error={errors?.phone_number?.message}
                     required
                     {...register("phone_number", { required: true })}
@@ -849,6 +947,7 @@ const CreateCompany: any = () => {
                         message: "Please enter country.",
                       },
                     }}
+                    defaultValue={companyData?.country}
                     render={({ field: { onChange }, fieldState: { error } }) => (
                       <>
                         <Label>
@@ -856,6 +955,7 @@ const CreateCompany: any = () => {
                         </Label>
                         <Spacer size={3} />
                         <FormSelect
+                          defaultValue={companyData?.country}
                           error={error?.message}
                           height="48px"
                           style={{ width: "100%" }}
@@ -1002,7 +1102,7 @@ const CreateCompany: any = () => {
                   />
                   <Row>
                     <Text variant="body1">PKP ? </Text>
-                    <Switch defaultChecked={false} onChange={(value) => setValue("isPkp", value)} />
+                    <Switch defaultChecked={companyData ? companyData?.pkp : false} onChange={(value) => setValue("isPkp", value)} />
                   </Row>
                 </Col>
               </Row>
