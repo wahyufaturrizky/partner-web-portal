@@ -30,7 +30,8 @@ const schema = yup
 
 const CreateSequenceNumber: any = () => {
   const router = useRouter();
-
+  const companyId = localStorage.getItem("companyId")
+  const companyCode = localStorage.getItem("companyCode")
   const [incCompany, setIncCompany] = useState(false);
   const [incBranch, setIncBranch] = useState(false);
   const [periodMonth, setPeriodMonth] = useState(false);
@@ -85,7 +86,7 @@ const CreateSequenceNumber: any = () => {
 
     const payload = {
       ...data,
-      company_id: 1,
+      company_id: companyCode,
       include: include,
       periodically_update: periodically_update,
       parent_id: `1${data.branch_id != undefined ? data.branch_id : ""}`,
