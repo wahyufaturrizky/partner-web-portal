@@ -37,6 +37,7 @@ const defaultValue = {
 };
 
 const CreatePartnerConfigPermissionList: any = () => {
+  const companyCode = localStorage.getItem("companyCode");
   const [searchViewType, setSearchViewType] = useState("");
   const [totalRowsViewTypeList, setTotalRowsViewTypeList] = useState(0);
   const [viewTypeList, setListViewTypeList] = useState<any[]>([]);
@@ -66,7 +67,7 @@ const CreatePartnerConfigPermissionList: any = () => {
   });
 
   const { data: menuLists } = useMenuLists({
-    query: { limit: 0, owner: "HERMES", company_id: "KSNI" },
+    query: { limit: 0, owner: "HERMES", company_id: companyCode },
     options: {
       refetchOnWindowFocus: "always",
     },
@@ -96,7 +97,7 @@ const CreatePartnerConfigPermissionList: any = () => {
 
   const { data: fieldRole, isLoading: isLoadingFieldRole } = useRolePermissions({
     query: {
-      company_id: "KSNI",
+      company_id: companyCode,
     },
   });
 

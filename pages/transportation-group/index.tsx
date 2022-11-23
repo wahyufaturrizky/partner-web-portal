@@ -60,6 +60,7 @@ const renderConfirmationText = (type: any, data: any) => {
 };
 
 const TransportationGroup = () => {
+  const companyCode = localStorage.getItem("companyCode");
   const pagination = usePagination({
     page: 1,
     itemsPerPage: 20,
@@ -91,7 +92,7 @@ const TransportationGroup = () => {
       search: debounceSearch,
       page: pagination.page,
       limit: pagination.itemsPerPage,
-      // company_id: "KSNI",
+      company_id: companyCode,
     },
     options: {
       onSuccess: (data: any) => {
@@ -143,7 +144,7 @@ const TransportationGroup = () => {
   const { mutate: updateTransportation, isLoading: isLoadingUpdateTransportation } =
     useUpdateTransportation({
       id: modalForm?.data?.id,
-      // companyId: "KSNI",
+      companyId: companyCode,
       options: {
         onSuccess: () => {
           setModalForm({ open: false, typeForm: "", data: {} });
@@ -214,13 +215,17 @@ const TransportationGroup = () => {
     switch (modalForm.typeForm) {
       case "create":
         const formData = {
-          // company_id: "KSNI",
+          company_id: companyCode,
           ...data,
         };
         createTransportation(formData);
         break;
       case "edit":
-        updateTransportation(data);
+        const newData = {
+          ...data,
+          company_id: companyCode,
+        }
+        updateTransportation(newData);
         break;
       default:
         setModalForm({ open: false, typeForm: "", data: {} });

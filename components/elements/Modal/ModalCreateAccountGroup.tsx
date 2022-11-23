@@ -36,8 +36,15 @@ export const ModalCreateAccountGroup: any = ({
 		resolver: yupResolver(schema),
 	});
 	const t = localStorage.getItem("lan") || "en-US";
+	const companyCode = localStorage.getItem("companyCode");
 	const errorsApi = error?.errors;
-	const onSubmit = (data: any) => onOk(data);
+	const onSubmit = (data: any) => {
+		const newData = {
+			...data,
+			company_id: companyCode
+		}
+		onOk(newData)
+	};
 
 	const [search, setSearch] = useState("");
 
@@ -46,6 +53,7 @@ export const ModalCreateAccountGroup: any = ({
 		query: {
 			search: search,
 			limit: 100000,
+			company_id: companyCode
 		},
 	});
 

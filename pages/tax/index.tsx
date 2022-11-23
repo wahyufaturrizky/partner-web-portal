@@ -77,6 +77,7 @@ const columns = [
 
 const Tax = () => {
   const router = useRouter();
+  const companyCode = localStorage.getItem("companyCode");
   const pagination = usePagination({
     page: 1,
     itemsPerPage: 20,
@@ -100,6 +101,7 @@ const Tax = () => {
       search: debounceSearch,
       page: pagination.page,
       limit: pagination.itemsPerPage,
+      // company_id: companyCode,
     },
     options: {
       onSuccess: (data: any) => {

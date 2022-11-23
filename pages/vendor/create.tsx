@@ -24,6 +24,7 @@ const objectIsEmpty = (object: any) =>
 
 export default function VendorCreate() {
   const router = useRouter();
+  const companyCode = localStorage.getItem("companyCode");
 
   const methods = useForm({
     defaultValues: { status: "Active", purchasing: {}, invoicing: {}, customer_id: "" },
@@ -128,6 +129,7 @@ export default function VendorCreate() {
 
     const formData = {
       customer_id: "",
+      company_id: companyCode,
       ...data,
       company: companyPayload,
       individu: individuPayload,

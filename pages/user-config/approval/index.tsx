@@ -11,6 +11,7 @@ import { colors } from "../../../utils/color";
 import { lang } from "lang";
 
 const UserConfigApproval: any = () => {
+	const companyCode = localStorage.getItem("companyCode");
 	const pagination = usePagination({
 		page: 1,
 		itemsPerPage: 20,
@@ -24,7 +25,14 @@ const UserConfigApproval: any = () => {
 	const [dataListDropdownProcess, setDataListDropdownProcess] = useState(null);
 	const [modalDelete, setModalDelete] = useState({ open: false });
 	const t = localStorage.getItem("lan") || "en-US";
-	const { data: dataFieldsProcessLists, isLoading: isLoadingieldsProcessLists } = useProcessLists();
+	
+	const { data: dataFieldsProcessLists, isLoading: isLoadingieldsProcessLists } = useProcessLists({
+		options: {
+		},
+		query: {
+			company_id: companyCode,
+		},
+	});
 
 	const {
 		data: fields,
@@ -41,6 +49,7 @@ const UserConfigApproval: any = () => {
 			page: pagination.page,
 			limit: pagination.itemsPerPage,
 			process_id: dataListDropdownProcess,
+			company_id: companyCode,
 		},
 	});
 

@@ -31,6 +31,7 @@ export interface ConfigModuleList {}
 
 const CreatePartnerConfigApproval: any = () => {
   const t = localStorage.getItem("lan") || "en-US";
+  const companyCode = localStorage.getItem("companyCode");
   const [approvalStages, setApprovalStages] = useState<any>([{ is_mandatory: false }]);
   const [numberOfApprovalStage, setnumberOfApprovalStage] = useState<any>(1);
   const [associateRoleUserData, setAssociateRoleUserData] = useState([
@@ -93,6 +94,9 @@ const CreatePartnerConfigApproval: any = () => {
 
         return { data: mappedData, totalRow: data.totalRow };
       },
+    },
+    query: {
+      company_id: companyCode,
     },
   });
 
