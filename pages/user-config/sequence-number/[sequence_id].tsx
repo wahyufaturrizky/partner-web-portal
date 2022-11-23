@@ -55,6 +55,7 @@ const DetailSequenceNumber: any = () => {
     },
     query: {
       search,
+      company_id: companyId,
     },
   });
 
@@ -103,7 +104,7 @@ const DetailSequenceNumber: any = () => {
 
     const payload = {
       ...data,
-      company_id: companyCode,
+      company_id: companyId,
       include: include,
       periodically_update: periodically_update,
       // parent_id: `1${data.branch_id != undefined ? data.branch_id : ""}`,

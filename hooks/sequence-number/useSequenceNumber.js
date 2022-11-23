@@ -9,7 +9,6 @@ const fetchAllSequenceNumber = async ({ query = {} }) => {
       limit: 10,
       sortBy: "company.name",
       sortOrder: "DESC",
-      company_id: 1,
       ...query,
     },
   }).then((data) => data);
@@ -46,7 +45,7 @@ const useAllSequenceNumber = ({ query = {}, options }) => {
 //   );
 // };
 
-const fetchSequenceNumber = async ({query = {}, id }) => {
+const fetchSequenceNumber = async ({ query = {}, id }) => {
   // return client(`/sequence/list?parent_id=${id}`).then((data) => data);
   return client(`/sequence/list?parent_id=${id}`, {
     params: {
