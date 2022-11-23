@@ -16,6 +16,7 @@ import { lang } from "lang";
 
 const BusinessProcess = () => {
   const t = localStorage.getItem("lan") || "en-US";
+	const companyCode = localStorage.getItem("companyCode");
   const router = useRouter();
   const pagination = usePagination({
     page: 1,
@@ -40,6 +41,7 @@ const BusinessProcess = () => {
       search: debounceSearch,
       page: pagination.page,
       limit: pagination.itemsPerPage,
+      company_id: companyCode
     },
     options: {
       onSuccess: (data: any) => {

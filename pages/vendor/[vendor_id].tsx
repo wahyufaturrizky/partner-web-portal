@@ -42,6 +42,7 @@ const objectIsEmpty = (object: any) =>
 
 export default function VendorDetail() {
   const router = useRouter();
+  const companyCode = localStorage.getItem("companyCode");
 
   const { vendor_id } = router.query;
 
@@ -299,6 +300,7 @@ export default function VendorDetail() {
 
     const formData = {
       customer_id: "",
+      company_id: companyCode,
       ...data,
       company: companyPayload,
       individu: individuPayload,

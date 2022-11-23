@@ -40,6 +40,7 @@ const downloadFile = (params: any) =>
 
 export default function Vendor() {
   const router = useRouter();
+  const companyCode = localStorage.getItem("companyCode");
 
   const pagination = usePagination({
     page: 1,
@@ -66,6 +67,7 @@ export default function Vendor() {
       search: debounceSearch,
       page: pagination.page,
       limit: pagination.itemsPerPage,
+      company_id: companyCode,
     },
     options: {
       onSuccess: (data: any) => {
@@ -293,7 +295,7 @@ export default function Vendor() {
           itemTitle={vendorData?.data?.find((item: any) => item.key === selectedRowKeys[0])?.name}
           isLoading={isLoadingDeleteVendor}
           onCancel={() => setShowDelete(false)}
-          onOk={() => deleteVendor({ ids: selectedRowKeys, company_id: "KSNI" })}
+          onOk={() => deleteVendor({ ids: selectedRowKeys, company_id: companyCode })}
         />
       )}
 

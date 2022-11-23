@@ -20,6 +20,7 @@ const MenuConfigDesign: any = () => {
     totalItems: 100,
   });
   const t = localStorage.getItem("lan") || "en-US";
+  const companyCode = localStorage.getItem("companyCode");
   const [search, setSearch] = useState("");
   const [modalDelete, setModalDelete] = useState({ open: false });
 
@@ -33,6 +34,7 @@ const MenuConfigDesign: any = () => {
       search,
       page: pagination.page,
       limit: pagination.itemsPerPage,
+      company_id: companyCode
     },
     options: {
       onSuccess: (data: any) => {

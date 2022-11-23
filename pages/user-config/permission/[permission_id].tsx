@@ -41,6 +41,7 @@ const defaultValue = {
 };
 
 const DetailPartnerConfigPermissionList: any = () => {
+  const companyCode = localStorage.getItem("companyCode");
   const [searchViewType, setSearchViewType] = useState("");
   const [totalRowsViewTypeList, setTotalRowsViewTypeList] = useState(0);
   const [viewTypeList, setListViewTypeList] = useState<any[]>([]);
@@ -77,6 +78,7 @@ const DetailPartnerConfigPermissionList: any = () => {
   const { data: dataPartnerConfigPermissionList, isLoading: isLoadingPartnerConfigPermissionList } =
     usePartnerConfigPermissionList({
       partner_config_menu_list_id: permission_id,
+      company_id: companyCode,
       options: {
         onSuccess: (data: any) => {
           setValue("isSystemConfig", data?.isSystemConfig);
@@ -88,7 +90,7 @@ const DetailPartnerConfigPermissionList: any = () => {
     });
 
   const { data: menuLists } = useMenuLists({
-    query: { limit: 0 },
+    query: { limit: 0, company_id: companyCode },
     options: {
       refetchOnWindowFocus: "always",
     },
@@ -125,7 +127,12 @@ const DetailPartnerConfigPermissionList: any = () => {
     },
   });
 
-  const { data: fieldRole, isLoading: isLoadingFieldRole } = useRolePermissions();
+  const { data: fieldRole, isLoading: isLoadingFieldRole } = useRolePermissions({
+    options: {},
+    query: {
+      company_id: companyCode,
+    },
+  });
 
   const {
     isFetching: isFetchingViewTypeList,

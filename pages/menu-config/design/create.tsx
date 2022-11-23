@@ -12,6 +12,8 @@ import { DragOutlined } from "@ant-design/icons";
 const CreateMenuDesignList: any = () => {
   const { register, handleSubmit, control } = useForm();
 
+  const companyCode = localStorage.getItem("companyCode");
+  
   const [showModuleConfig, setShowModuleConfig] = useState(false);
   const [showMenuConfig, setShowMenuConfig] = useState({
     show: false,
@@ -260,6 +262,7 @@ const CreateMenuDesignList: any = () => {
     const formData = {
       ...data,
       hierarchies: mappingHierarchiesPayload,
+      company_id: companyCode
     };
 
     createMenuDesign(formData);

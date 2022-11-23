@@ -22,6 +22,7 @@ const ModuleConfig: any = () => {
 	const [modalDelete, setModalDelete] = useState({ open: false });
 	const [parent, setParent] = useState("");
 	const t = localStorage.getItem("lan") || "en-US";
+	
 	const {
 		data: configs,
 		refetch: refetchConfig,

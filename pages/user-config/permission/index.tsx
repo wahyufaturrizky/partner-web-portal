@@ -11,6 +11,7 @@ import { lang } from "lang";
 const UserConfigPermission: any = () => {
   const router = useRouter();
   const t = localStorage.getItem("lan") || "en-US";
+  const companyCode = localStorage.getItem("companyCode");
   const pagination = usePagination({
     page: 1,
     itemsPerPage: 20,
@@ -37,7 +38,7 @@ const UserConfigPermission: any = () => {
 
   const { data: fieldsMenuList, isLoading: isLoadingMenuList } = useMenuLists({
     query: {
-      company_id: "KSNI",
+      company_id: companyCode,
     },
     options: {
       onSuccess: (data: any) => {
@@ -62,7 +63,7 @@ const UserConfigPermission: any = () => {
       limit: pagination.itemsPerPage,
       sysConfigSearch: dataListDropdownIsSystemConfig,
       menuId: dataListDropdownMenu,
-      company_id: "KSNI",
+      company_id: companyCode,
     },
   });
 

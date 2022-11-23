@@ -32,6 +32,7 @@ const FinanceConfigAccountGroud: any = () => {
   const [modalDelete, setModalDelete] = useState({ open: false });
   const useDebounceSearchAccountGroup = useDebounce(search, 1000);
   const t = localStorage.getItem("lan") || "en-US";
+  const companyCode = localStorage.getItem("companyCode");
 
   const columns = [
     {
@@ -72,6 +73,7 @@ const FinanceConfigAccountGroud: any = () => {
       search: useDebounceSearchAccountGroup,
       page: pagination.page,
       limit: pagination.itemsPerPage,
+      company_id: companyCode
     },
     options: {
       onSuccess: (data: any) => {
