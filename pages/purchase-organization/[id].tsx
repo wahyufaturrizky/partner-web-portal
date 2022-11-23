@@ -35,6 +35,7 @@ import { usePartnerConfigPermissionLists } from "../../hooks/user-config/usePerm
 
 const DetailMenuList: any = () => {
   const t = localStorage.getItem("lan") || "en-US";
+  const companyCode = localStorage.getItem("companyCode");
   const [isLoading, setIsLoading] = useState(true);
   const [searchTableField, setSearchTableField] = useState("");
   const [searchTablePermission, setSearchTablePermission] = useState("");
@@ -395,7 +396,7 @@ const DetailMenuList: any = () => {
     );
 
     const data = {
-      company: "KSNI",
+      company: companyCode,
       name: stateFieldInput?.name,
       parent: parent,
       product_categories: "",
@@ -465,7 +466,7 @@ const DetailMenuList: any = () => {
 
   const { data: dataParentPurchaseOrganization, isLoading: isLoadingParentPurchaseOrganization } =
     useParentPurchaseOrganizationMDM({
-      id: Router.query.id + "/KSNI",
+      id: Router.query.id + `/${companyCode}`,
     });
 
   return (

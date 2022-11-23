@@ -31,6 +31,9 @@ import { lang } from "lang";
 
 const JobPosition = () => {
   const t = localStorage.getItem("lan") || "en-US";
+  const companyId = localStorage.getItem("companyId")
+  const companyCode = localStorage.getItem("companyCode")
+
   const pagination = usePagination({
     page: 1,
     itemsPerPage: 20,
@@ -87,7 +90,7 @@ const JobPosition = () => {
       search: debounceSearch,
       page: pagination.page,
       limit: pagination.itemsPerPage,
-      company_id: "KSNI",
+      company_id: companyCode,
     },
     options: {
       onSuccess: (data: any) => {
@@ -131,7 +134,7 @@ const JobPosition = () => {
 
   const { mutate: updateDepartment, isLoading: isLoadingUpdateDepartment } = useUpdateDepartment({
     id: modalForm?.data?.departmentId,
-    companyId: "KSNI",
+    companyId: companyCode,
     options: {
       onSuccess: () => {
         setModalForm({ open: false, typeForm: "", data: {} });
@@ -189,7 +192,7 @@ const JobPosition = () => {
     switch (modalForm.typeForm) {
       case "create":
         const formData = {
-          company_id: "KSNI",
+          company_id: companyCode,
           ...data,
         };
         createDepartment(formData);
@@ -205,7 +208,7 @@ const JobPosition = () => {
 
   const onSubmitFile = (file: any) => {
     const formData = new FormData();
-    formData.append("company_id", "KSNI");
+    formData.append("company_id", companyCode);
     formData.append("file", file);
 
     uploadFileDepartment(formData);
@@ -251,13 +254,13 @@ const JobPosition = () => {
               onClick={(e: any) => {
                 switch (parseInt(e.key)) {
                   case 1:
-                    downloadFile({ with_data: "N", company_id: "KSNI" });
+                    downloadFile({ with_data: "N", company_id: companyCode });
                     break;
                   case 2:
                     setShowUpload(true);
                     break;
                   case 3:
-                    downloadFile({ with_data: "Y", company_id: "KSNI" });
+                    downloadFile({ with_data: "Y", company_id: companyCode });
                     break;
                   case 4:
                     break;
@@ -432,9 +435,9 @@ const JobPosition = () => {
                   size="big"
                   onClick={() => {
                     if (isShowDelete.type === "selection") {
-                      deleteDepartment({ ids: selectedRowKeys, company_id: "KSNI" });
+                      deleteDepartment({ ids: selectedRowKeys, company_id: companyCode });
                     } else {
-                      deleteDepartment({ ids: [modalForm.data.departmentId], company_id: "KSNI" });
+                      deleteDepartment({ ids: [modalForm.data.departmentId], company_id: companyCode });
                     }
                   }}
                 >

@@ -9,7 +9,6 @@ const fetchPurchaseOrganizationsMDM = async ({ query = {} }) => {
       limit: 10,
       sortBy: "created_at",
       sortOrder: "DESC",
-      company: "KSNI",
       ...query,
     },
   }).then((data) => data);

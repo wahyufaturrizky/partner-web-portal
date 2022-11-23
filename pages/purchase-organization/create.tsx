@@ -31,6 +31,7 @@ import { usePartnerConfigPermissionLists } from "../../hooks/user-config/usePerm
 
 const CreateMenuList: any = () => {
   const t = localStorage.getItem("lan") || "en-US";
+  const companyCode = localStorage.getItem("companyCode");
   const [isLoading, setLoading] = useState(true);
   const [searchTableField, setSearchTableField] = useState("");
   const [searchTablePermission, setSearchTablePermission] = useState("");
@@ -238,7 +239,7 @@ const CreateMenuList: any = () => {
 
   const { data: dataParentPurchaseOrganization, isLoading: isLoadingParentPurchaseOrganization } =
     useParentPurchaseOrganizationMDM({
-      id: 0 + "/KSNI",
+      id: 0 + `/${companyCode}`,
     });
 
   const handleSelectedField = () => {
@@ -326,7 +327,7 @@ const CreateMenuList: any = () => {
     );
 
     const data = {
-      company: "KSNI",
+      company: companyCode,
       name: stateFieldInput?.name,
       parent: parent,
       product_categories: "",
