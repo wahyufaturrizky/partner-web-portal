@@ -4,7 +4,7 @@ import {
   Col,
   Row,
   Spacer,
-  Dropdown2,
+  Dropdown,
   Button,
   TextArea,
   Input,
@@ -738,7 +738,7 @@ const CostCenterCreate = () => {
             {/* Cost Center Category */}
             <Row width="100%" noWrap>
                 <Col width={"100%"}>
-                <Dropdown2
+                <Dropdown
                   label="Cost Center Category"
                   height="48px"
                   width={"100%"}
