@@ -13,6 +13,8 @@ import {
 
 const DetailSequenceNumber: any = () => {
   const router = useRouter();
+  const companyId = localStorage.getItem("companyId")
+  const companyCode = localStorage.getItem("companyCode")
   const { sequence_id } = router.query;
 
   const [search, setSearch] = useState("");
@@ -53,6 +55,7 @@ const DetailSequenceNumber: any = () => {
     },
     query: {
       search,
+      company_id: companyId,
     },
   });
 
@@ -101,7 +104,7 @@ const DetailSequenceNumber: any = () => {
 
     const payload = {
       ...data,
-      company_id: 1,
+      company_id: companyId,
       include: include,
       periodically_update: periodically_update,
       // parent_id: `1${data.branch_id != undefined ? data.branch_id : ""}`,

@@ -73,6 +73,7 @@ const UpdateProductCategory: any = () => {
 
   const { data: categoryData, isLoading: isLoadingCategoryData } = useProductCategory({
     id: category_id,
+    company_id: companyCode,
     options: {
       onSuccess: (data) => {
         setValue("name", data.name);
@@ -109,6 +110,7 @@ const UpdateProductCategory: any = () => {
   const { data: coaListPayable, isLoading: isLoadingCoaListPayable } = useCoaList({
     status: "payable",
     query: {
+      company_code: companyCode,
       search: searchPayable
     },
     options: {
@@ -119,6 +121,7 @@ const UpdateProductCategory: any = () => {
   const { data: coaListReceivable, isLoading: isLoadingCoaListReceivable } = useCoaListReceive({
     status: "receivable",
     query: {
+      company_code: companyCode,
       search: searchReceivable,
     },
     options: {
@@ -128,6 +131,7 @@ const UpdateProductCategory: any = () => {
 
   const { data: coaListAll, isLoading: isLoadingCoaListAll } = useCoaListAll({
     query: {
+      company_code: companyCode,
       search: searchAllCoa,
     },
     options: {
@@ -141,6 +145,7 @@ const UpdateProductCategory: any = () => {
     },
     query: {
       search: searchCoa,
+      company_code: companyCode,
     },
   });
 
@@ -196,7 +201,7 @@ const UpdateProductCategory: any = () => {
 
           <Spacer size={20} />
 
-          <Accordion>
+          <Accordion style={{ position: "relative" }} id="general-prod-category">
             <Accordion.Item key={1}>
               <Accordion.Header variant="blue">General</Accordion.Header>
               <Accordion.Body>
@@ -222,6 +227,7 @@ const UpdateProductCategory: any = () => {
                     handleChange={(value) => setValue("parent", value)}
                     onSearch={(search) => setSearchProductCategory(search)}
                     defaultValue={categoryData.parent}
+                    containerId={"general-prod-category"}
                   />
                 </Row>
               </Accordion.Body>
@@ -230,7 +236,7 @@ const UpdateProductCategory: any = () => {
 
           <Spacer size={20} />
 
-          <Accordion>
+          <Accordion style={{ position: "relative" }} id="inventory-valuation">
             <Accordion.Item key={2}>
               <Accordion.Header variant="blue">Inventory Valuation</Accordion.Header>
               <Accordion.Body>
@@ -243,6 +249,7 @@ const UpdateProductCategory: any = () => {
                     handleChange={(value) => setValue("costing_method", value)}
                     defaultValue={categoryData.costingMethod}
                     noSearch
+                    containerId={"inventory-valuation"}
                   />
                   <Dropdown
                     label="Inventory Valuation"
@@ -263,6 +270,7 @@ const UpdateProductCategory: any = () => {
                       setValue("inventory_valuation", value);
                     }}
                     defaultValue={categoryData.inventoryValuation}
+                    containerId={"inventory-valuation"}
                     noSearch
                   />
                 </Row>
@@ -272,7 +280,7 @@ const UpdateProductCategory: any = () => {
 
           <Spacer size={20} />
 
-          <Accordion>
+          <Accordion style={{ position: "relative" }} id="account-prop">
             <Accordion.Item key={3}>
               <Accordion.Header variant="blue">Account Properties</Accordion.Header>
               <Accordion.Body>
@@ -289,6 +297,7 @@ const UpdateProductCategory: any = () => {
                       handleChange={(value) => setValue("price_difference_account", value)}
                       onSearch={(search) => setSearchAllCoa(search)}
                       defaultValue={categoryData.priceDifferenceAccount}
+                      containerId={"account-prop"}
                     />
                   )}
                 </Row>
@@ -304,6 +313,7 @@ const UpdateProductCategory: any = () => {
                     handleChange={(value) => setValue("income_account", value)}
                     onSearch={(search) => setSearchReceivable(search)}
                     defaultValue={categoryData.incomeAccount}
+                    containerId={"account-prop"}
                   />
                   <Dropdown
                     label="Expense Account"
@@ -316,6 +326,7 @@ const UpdateProductCategory: any = () => {
                     handleChange={(value) => setValue("expense_account", value)}
                     onSearch={(search) => setSearchPayable(search)}
                     defaultValue={categoryData.expenseAccount}
+                    containerId={"account-prop"}
                   />
                 </Row>
                 <Spacer size={10} />
@@ -338,6 +349,7 @@ const UpdateProductCategory: any = () => {
                         handleChange={(value) => setValue("stock_valuation_account", value)}
                         onSearch={(search) => setSearchAllCoa(search)}
                         defaultValue={categoryData.stockValuationAccount}
+                        containerId={"account-prop"}
                       />
                       <Dropdown
                         label="Stock Journal"
@@ -350,6 +362,7 @@ const UpdateProductCategory: any = () => {
                         handleChange={(value) => setValue("stock_journal", value)}
                         onSearch={(search) => setSearchAllCoa(search)}
                         defaultValue={categoryData.stockJournal}
+                        containerId={"account-prop"}
                       />
                     </Row>
                     <Row width="100%" gap="20px" noWrap>
@@ -364,6 +377,7 @@ const UpdateProductCategory: any = () => {
                         handleChange={(value) => setValue("stock_input_account", value)}
                         onSearch={(search) => setSearchAllCoa(search)}
                         defaultValue={categoryData.stockInputAccount}
+                        containerId={"account-prop"}
                       />
                       <Dropdown
                         label="Stock Output Account"
@@ -376,6 +390,7 @@ const UpdateProductCategory: any = () => {
                         handleChange={(value) => setValue("stock_output_account", value)}
                         onSearch={(search) => setSearchAllCoa(search)}
                         defaultValue={categoryData.stockOutputAccount}
+                        containerId={"account-prop"}
                       />
                     </Row>
                   </>

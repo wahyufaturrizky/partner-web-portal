@@ -1,7 +1,18 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import Router from "next/router";
-import { Accordion, Button, Col, Dropdown, Input, Row, Spacer, Spin, Text } from "pink-lava-ui";
-import React from "react";
+import {
+  Accordion,
+  Button,
+  Col,
+  Dropdown,
+  Input,
+  Row,
+  Spacer,
+  Spin,
+  Text,
+  FormSelectCustom,
+} from "pink-lava-ui";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import styled from "styled-components";
 import * as yup from "yup";
@@ -9,7 +20,9 @@ import ArrowLeft from "../../../assets/icons/arrow-left.svg";
 
 import { useMenuLists } from "../../../hooks/menu-config/useMenuConfig";
 import { useCreatePartnerConfigPermissionList } from "../../../hooks/user-config/usePermission";
-import { useRolePermissions } from "../../../hooks/role/useRole";
+import { useRolePermissions, useViewTypeListInfiniteList } from "../../../hooks/role/useRole";
+import useDebounce from "lib/useDebounce";
+import { useEmployeeInfiniteLists } from "hooks/mdm/employee-list/useEmployeeListMDM";
 
 const schema = yup
   .object({
@@ -24,6 +37,10 @@ const defaultValue = {
 };
 
 const CreatePartnerConfigPermissionList: any = () => {
+  const [searchViewType, setSearchViewType] = useState("");
+  const [totalRowsViewTypeList, setTotalRowsViewTypeList] = useState(0);
+  const [viewTypeList, setListViewTypeList] = useState<any[]>([]);
+
   const {
     register,
     handleSubmit,
@@ -33,6 +50,8 @@ const CreatePartnerConfigPermissionList: any = () => {
     resolver: yupResolver(schema),
     defaultValues: defaultValue,
   });
+
+  const debounceFetchViewType = useDebounce(searchViewType, 1000);
 
   const { mutate: mutatePartnerConfigPermissionList } = useCreatePartnerConfigPermissionList({
     options: {
@@ -47,7 +66,7 @@ const CreatePartnerConfigPermissionList: any = () => {
   });
 
   const { data: menuLists } = useMenuLists({
-    query: { limit: 0, owner: "HERMES" },
+    query: { limit: 0, owner: "HERMES", company_id: "KSNI" },
     options: {
       refetchOnWindowFocus: "always",
     },
@@ -75,7 +94,46 @@ const CreatePartnerConfigPermissionList: any = () => {
     window.open("/menu-config/create", "_blank");
   };
 
-  const { data: fieldRole, isLoading: isLoadingFieldRole } = useRolePermissions();
+  const { data: fieldRole, isLoading: isLoadingFieldRole } = useRolePermissions({
+    query: {
+      company_id: "KSNI",
+    },
+  });
+
+  const {
+    isFetching: isFetchingViewTypeList,
+    isFetchingNextPage: isFetchingMoreViewTypeList,
+    hasNextPage: hasNextPageViewTypeList,
+    fetchNextPage: fetchNextPageViewTypeList,
+    isLoading: isLoadingViewTypeList,
+  } = useViewTypeListInfiniteList({
+    query: {
+      search: debounceFetchViewType,
+      limit: 10,
+    },
+    options: {
+      onSuccess: (data: any) => {
+        setTotalRowsViewTypeList(data.pages[0].totalRow);
+        const mappedData = data?.pages?.map((group: any) => {
+          return group.rows?.map((element: any) => {
+            return {
+              value: element.id,
+              label: element.name,
+            };
+          });
+        });
+        const flattenArray = [].concat(...mappedData);
+        setListViewTypeList(flattenArray);
+      },
+      getNextPageParam: (_lastPage: any, pages: any) => {
+        if (viewTypeList.length < totalRowsViewTypeList) {
+          return pages.length + 1;
+        } else {
+          return undefined;
+        }
+      },
+    },
+  });
 
   return (
     <>
@@ -142,15 +200,56 @@ const CreatePartnerConfigPermissionList: any = () => {
                   noSearch
                 />
               </Row>
-              <Row width="50%" gap="20px" noWrap>
-                <Dropdown
-                  label="Is System Config"
-                  width={"100%"}
-                  items={valueIsSystemConfig}
-                  placeholder={"Select"}
-                  handleChange={(value) => setValue("isSystemConfig", value)}
-                  noSearch
-                />
+              <Row width="100%" gap="20px" noWrap>
+                <Col width="100%">
+                  <Dropdown
+                    label="Is System Config"
+                    width={"100%"}
+                    items={valueIsSystemConfig}
+                    placeholder={"Select"}
+                    handleChange={(value) => setValue("isSystemConfig", value)}
+                    noSearch
+                  />
+                </Col>
+
+                <Col width="100%">
+                  {isLoadingViewTypeList ? (
+                    <Center>
+                      <Spin tip="loading..." />
+                    </Center>
+                  ) : (
+                    <>
+                      <Label>View Type</Label>
+                      <Spacer size={5} />
+                      <FormSelectCustom
+                        showArrow
+                        height="48px"
+                        style={{ width: "100%" }}
+                        size={"large"}
+                        placeholder={"Select"}
+                        borderColor={"#AAAAAA"}
+                        arrowColor={"#000"}
+                        withSearch
+                        isLoading={isFetchingViewTypeList}
+                        isLoadingMore={isFetchingMoreViewTypeList}
+                        fetchMore={() => {
+                          if (hasNextPageViewTypeList) {
+                            fetchNextPageViewTypeList();
+                          }
+                        }}
+                        items={
+                          isFetchingViewTypeList && !isFetchingMoreViewTypeList ? [] : viewTypeList
+                        }
+                        onChange={(value: any) => {
+                          setValue("viewType", value);
+                        }}
+                        onSearch={(value: any) => {
+                          setSearchViewType(value);
+                        }}
+                      />
+                    </>
+                  )}
+                </Col>
               </Row>
             </Accordion.Body>
           </Accordion.Item>
@@ -198,26 +297,39 @@ const CreatePartnerConfigPermissionList: any = () => {
   );
 };
 
+const Label = styled.div`
+  font-weight: bold;
+  font-size: 16px;
+  line-height: 24px;
+  color: #000000;
+`;
+
 const Span = styled.div`
-	font-size: 14px;
-	line-height: 18px;
-	font-weight: normal;
-	color: #ffe12e;
+  font-size: 14px;
+  line-height: 18px;
+  font-weight: normal;
+  color: #ffe12e;
 `;
 
 const Card = styled.div`
-	background: #ffffff;
-	border-radius: 16px;
-	padding: ${(p) => (p.padding ? p.padding : "16px")};
+  background: #ffffff;
+  border-radius: 16px;
+  padding: ${(p) => (p.padding ? p.padding : "16px")};
 `;
 
 const Record = styled.div`
-	height: 54px;
-	padding: 0px 20px;
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	border-top: ${(p) => (p.borderTop ? "0.5px solid #AAAAAA" : "none")};
+  height: 54px;
+  padding: 0px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: ${(p) => (p.borderTop ? "0.5px solid #AAAAAA" : "none")};
+`;
+
+const Center = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
 `;
 
 export default CreatePartnerConfigPermissionList;

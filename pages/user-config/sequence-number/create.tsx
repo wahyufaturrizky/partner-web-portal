@@ -30,7 +30,8 @@ const schema = yup
 
 const CreateSequenceNumber: any = () => {
   const router = useRouter();
-
+  const companyId = localStorage.getItem("companyId")
+  const companyCode = localStorage.getItem("companyCode")
   const [incCompany, setIncCompany] = useState(false);
   const [incBranch, setIncBranch] = useState(false);
   const [periodMonth, setPeriodMonth] = useState(false);
@@ -41,7 +42,9 @@ const CreateSequenceNumber: any = () => {
     isLoading: isLoadingBP,
     isFetching: isFetchingBP,
   } = useBusinessProcesses({
-    query: {},
+    query: {
+      company_id: companyCode
+    },
     options: {
       onSuccess: (data: any) => {},
     },
@@ -85,7 +88,7 @@ const CreateSequenceNumber: any = () => {
 
     const payload = {
       ...data,
-      company_id: 1,
+      company_id: companyId,
       include: include,
       periodically_update: periodically_update,
       parent_id: `1${data.branch_id != undefined ? data.branch_id : ""}`,
@@ -132,7 +135,7 @@ const CreateSequenceNumber: any = () => {
 
         <Spacer size={20} />
 
-        <Accordion>
+        <Accordion style={{ position: "relative" }} id="general-sequence">
           <Accordion.Item key={1}>
             <Accordion.Header variant="blue">General</Accordion.Header>
             <Accordion.Body>
@@ -161,6 +164,7 @@ const CreateSequenceNumber: any = () => {
                     required
                     noSearch
                     isLoading={isLoadingBP}
+                    containerId={"general-sequence"}
                   />
                 </Col>
               </Row>
@@ -192,6 +196,7 @@ const CreateSequenceNumber: any = () => {
                     {...register("branch_id")}
                     noSearch
                     isLoading={isLoadingBranch}
+                    containerId={"general-sequence"}
                   />
                 </Col>
               </Row>
@@ -213,7 +218,7 @@ const CreateSequenceNumber: any = () => {
                   height="48px"
                   placeholder={""}
                   // disabled={true}
-                  {...register("sequenceCode", { required: true })}
+                  {...register("sequence_code", { required: true })}
                 />
               </Row>
               <Spacer size={20} />

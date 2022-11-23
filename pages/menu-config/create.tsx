@@ -26,6 +26,7 @@ import { usePartnerConfigPermissionLists } from "../../hooks/user-config/usePerm
 import { useFilterListPermissions } from "../../hooks/permission/usePermission";
 
 const CreateMenuList: any = () => {
+	const companyCode = localStorage.getItem("companyCode");
 	const [isLoading, setLoading] = useState(true);
 	const [setSearchAllowedField] = useState("");
 	const [searchTableField, setSearchTableField] = useState("");
@@ -363,6 +364,7 @@ const CreateMenuList: any = () => {
 					isHermes: isHermes ? "Y" : "N",
 					field: dataAllowedField.map((data) => data.key),
 					permission: dataAssociatedPermissionsField.map((data) => data.key),
+					company_id:companyCode
 				};
 				createFieldMenuList(data);
 			} else {
