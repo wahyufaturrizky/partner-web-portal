@@ -29,6 +29,7 @@ import usePagination from "@lucasmogari/react-pagination";
 import {
   useCoa,
   useCompany,
+  useCompanyInfiniteLists,
   useCountries,
   useCreateCompany,
   useCurrenciesMDM,
@@ -423,17 +424,24 @@ const DetailCompany: any = () => {
   const [totalRowsIndustryList, setTotalRowsIndustryList] = useState(0);
   const [segmentList, setSegmentList] = useState<any[]>([]);
   const [totalRowsSegmentList, setTotalRowsSegmentList] = useState(0);
+  const [companyList, setCompanyList] = useState<any[]>([]);
+  const [totalRowsCompanyList, setTotalRowsCompanyList] = useState(0);
+
   const [searchCountry, setSearchCountry] = useState("");
   const [searchIndustry, setSearchIndustry] = useState("");
   const [searchSegment, setSearchSegment] = useState("");
+  const [searchOtherCompany, setSearchOtherCompany] = useState("");
+  const [otherCompanyId, setOtherCompanyId] = useState(company_id);
   const [industryId, setIndustryId] = useState("");
 
   const debounceFetch = useDebounce(
       searchCountry ||
       searchSegment ||
+      searchOtherCompany ||
       searchIndustry,
     1000
   );
+  
   const {
     register,
     handleSubmit,
@@ -450,7 +458,7 @@ const DetailCompany: any = () => {
     isLoading: isLoadingCompanyData,
     isFetching: isFetchingCompanyData,
   } = useCompany({
-    id: company_id,
+    id: otherCompanyId,
     options: {
       onSuccess: (data: any) => {
         setAddress(data.address);
@@ -605,6 +613,41 @@ const DetailCompany: any = () => {
 			},
 			getNextPageParam: (_lastPage: any, pages: any) => {
 				if (industryList.length < totalRowsIndustryList) {
+					return pages.length + 1;
+				} else {
+					return undefined;
+				}
+			},
+		},
+	});
+	const {
+		isLoading: isLoadingCompany,
+		isFetching: isFetchingCompany,
+		isFetchingNextPage: isFetchingMoreCompany,
+		hasNextPage: hasNextCompany,
+		fetchNextPage: fetchNextCompany,
+	} = useCompanyInfiniteLists({
+		query: {
+			search: debounceFetch,
+			limit: 10,
+		},
+		options: {
+			onSuccess: (data: any) => {
+				setTotalRowsCompanyList(data.pages[0].totalRow);
+				const mappedData = data?.pages?.map((group: any) => {
+					return group.rows?.map((element: any) => {
+						return {
+              id: element.id,
+							label: element.name,
+							value: element.name,
+						};
+					});
+				});
+				const flattenArray = [].concat(...mappedData);
+				setCompanyList(flattenArray);
+			},
+			getNextPageParam: (_lastPage: any, pages: any) => {
+				if (companyList.length < totalRowsCompanyList) {
 					return pages.length + 1;
 				} else {
 					return undefined;
@@ -823,15 +866,47 @@ const DetailCompany: any = () => {
                 </Col>
                 <Col width="50%">
                   {/* For company */}
-                  {/* <Input
-                    width="100%"
-                    label={lang[t].companyList.name}
-                    height="48px"
-                    placeholder={"e.g PT. Kaldu Sari Nabati Indonesia"}
-                    error={errors?.name?.message}
-                    required
-                    {...register("name", { required: true })}
-                  /> */}
+                  {fromTemplate === "Other Company" && (
+                  <Col width="100%">
+                    <Controller
+                      control={control}
+                      name="other_company"
+                      render={({ field: { onChange }, fieldState: { error } }) => (
+                        <>
+                          <Label>
+                            Other Company Name
+                          </Label>
+                          <Spacer size={3} />
+                          <FormSelect
+                            height="48px"
+                            style={{ width: "100%" }}
+                            size={"large"}
+                            placeholder={"Select"}
+                            borderColor={"#AAAAAA"}
+                            arrowColor={"#000"}
+                            withSearch
+                            isLoading={isFetchingCompany}
+                            isLoadingMore={isFetchingMoreCompany}
+                            fetchMore={() => {
+                              if (hasNextCompany) {
+                                fetchNextCompany();
+                              }
+                            }}
+                            items={isFetchingCompany && !isFetchingMoreCompany ? [] : companyList}
+                            onChange={(value: any) => {
+                              onChange(value);
+                              setValue("other_company",value);
+                              setOtherCompanyId(companyList.filter((e: { value: any; }) => e.value === value)[0]?.id)
+                            }}
+                            onSearch={(value: any) => {
+                              setSearchOtherCompany(value);
+                            }}
+                          />
+                        </>
+                      )}
+                    />
+                  </Col>
+                  )}
                 </Col>
               </Row>
               <Row width="100%" gap="20px" noWrap>

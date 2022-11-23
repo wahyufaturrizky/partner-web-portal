@@ -48,7 +48,9 @@ const useCompanyInfiniteLists = ({ query = {}, options }) => {
 };
 
 const fetchCompany = async ({ id }) => {
-  return client(`/hermes/company/${id}`).then((data) => data);
+  if (id) {
+    return client(`/hermes/company/${id}`).then((data) => data);
+  }
 };
 
 const useCompany = ({ id, options }) => {
