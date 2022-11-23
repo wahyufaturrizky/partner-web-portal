@@ -42,7 +42,9 @@ const CreateSequenceNumber: any = () => {
     isLoading: isLoadingBP,
     isFetching: isFetchingBP,
   } = useBusinessProcesses({
-    query: {},
+    query: {
+      company_id: companyCode
+    },
     options: {
       onSuccess: (data: any) => {},
     },
@@ -133,7 +135,7 @@ const CreateSequenceNumber: any = () => {
 
         <Spacer size={20} />
 
-        <Accordion>
+        <Accordion style={{ position: "relative" }} id="general-sequence">
           <Accordion.Item key={1}>
             <Accordion.Header variant="blue">General</Accordion.Header>
             <Accordion.Body>
@@ -162,6 +164,7 @@ const CreateSequenceNumber: any = () => {
                     required
                     noSearch
                     isLoading={isLoadingBP}
+                    containerId={"general-sequence"}
                   />
                 </Col>
               </Row>
@@ -193,6 +196,7 @@ const CreateSequenceNumber: any = () => {
                     {...register("branch_id")}
                     noSearch
                     isLoading={isLoadingBranch}
+                    containerId={"general-sequence"}
                   />
                 </Col>
               </Row>
@@ -214,7 +218,7 @@ const CreateSequenceNumber: any = () => {
                   height="48px"
                   placeholder={""}
                   // disabled={true}
-                  {...register("sequenceCode", { required: true })}
+                  {...register("sequence_code", { required: true })}
                 />
               </Row>
               <Spacer size={20} />
