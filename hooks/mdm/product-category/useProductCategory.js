@@ -71,16 +71,16 @@ const fetchOneProductCategory = async ({ id, company_id }) => {
   return mdmService(`/product-category/${company_id}/${id}`).then((data) => data);
 };
 
-const useProductCategory = ({ id, options }) => {
+const useProductCategory = ({ id, options, company_id }) => {
   return useQuery(["product-category", id], () => fetchOneProductCategory({ id, company_id }), {
     ...options,
   });
 };
 
-const useUpdateProductCategory = ({ id, options }) => {
+const useUpdateProductCategory = ({ id, options, company_id }) => {
   return useMutation(
     (data) =>
-      mdmService(`/product-category/KSNI/${id}`, {
+      mdmService(`/product-category/${company_id}/${id}`, {
         method: "PUT",
         data,
       }),
@@ -90,8 +90,8 @@ const useUpdateProductCategory = ({ id, options }) => {
   );
 };
 
-const fetchCoaList = async ({ query = {}, status, company_id }) => {
-  return client(`/coa-list?company_code=${company_id}&account_type=${status}`, {
+const fetchCoaList = async ({ query = {}, status }) => {
+  return client(`/coa-list?account_type=${status}`, {
     params: {
       // search: "",
       // page: 1,
@@ -103,28 +103,28 @@ const fetchCoaList = async ({ query = {}, status, company_id }) => {
   }).then((data) => data);
 };
 
-const useCoaList = ({ query = {}, options, status, company_id }) => {
-  return useQuery(["coa-list", query], () => fetchCoaList({ query, status, company_id }), {
+const useCoaList = ({ query = {}, options, status }) => {
+  return useQuery(["coa-list", query], () => fetchCoaList({ query, status }), {
     ...options,
   });
 };
 
-const useCoaListReceive = ({ query = {}, options, status, company_id }) => {
-  return useQuery(["coa-list-receive", query], () => fetchCoaList({ query, status, company_id }), {
+const useCoaListReceive = ({ query = {}, options, status }) => {
+  return useQuery(["coa-list-receive", query], () => fetchCoaList({ query, status }), {
     ...options,
   });
 };
 
 const fetchAllCoaList = async ({ query = {} }) => {
-  return client(`/coa-list?company_code=KSNI`, {
+  return client(`/coa-list`, {
     params: {
       ...query,
     },
   }).then((data) => data);
 };
 
-const useCoaListAll = ({ query = {}, options, company_id }) => {
-  return useQuery(["coa-list-all", query], () => fetchAllCoaList({ query, company_id }), {
+const useCoaListAll = ({ query = {}, options }) => {
+  return useQuery(["coa-list-all", query], () => fetchAllCoaList({ query }), {
     ...options,
   });
 };
