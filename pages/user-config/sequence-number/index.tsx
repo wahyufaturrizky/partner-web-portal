@@ -11,7 +11,8 @@ const SequenceNumber = () => {
 
   const [search, setSearch] = useState("");
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
-
+  const companyId = localStorage.getItem("companyId")
+  const companyCode = localStorage.getItem("companyCode")
   const pagination = usePagination({
     page: 1,
     itemsPerPage: 10,
@@ -53,6 +54,7 @@ const SequenceNumber = () => {
       search,
       page: pagination.page,
       limit: pagination.itemsPerPage,
+      company_id: companyId
     },
   });
 
