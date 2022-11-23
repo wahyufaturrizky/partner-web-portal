@@ -85,4 +85,5 @@ export interface CostCenterSave {
   valid_to: string;
   external_code: string;
   person_responsible: string;
+  cost_center_category: string;
 }
