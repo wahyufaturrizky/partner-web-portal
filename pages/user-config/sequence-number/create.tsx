@@ -94,7 +94,7 @@ const CreateSequenceNumber: any = () => {
       parent_id: `1${data.branch_id != undefined ? data.branch_id : ""}`,
     };
 
-    console.log(payload, "payload");
+    // console.log(payload, "payload");
     createSequence(payload);
   };
 
