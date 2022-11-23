@@ -55,6 +55,8 @@ const renderConfirmationText = (type: any, data: any) => {
 
 const EmployeeList = () => {
   const router = useRouter();
+  const companyCode = localStorage.getItem("companyCode");
+
   const pagination = usePagination({
     page: 1,
     itemsPerPage: 20,
@@ -82,7 +84,7 @@ const EmployeeList = () => {
   const { data: jobPositionsData, isLoading: isLoadingJobPositions } = useJobPositions({
     query: {
       limit: pagination.totalItems,
-      company_id: "KSNI",
+      company_id: companyCode,
     },
     options: {
       onSuccess: () => {},
@@ -100,7 +102,7 @@ const EmployeeList = () => {
       search: debounceSearch,
       page: pagination.page,
       limit: pagination.itemsPerPage,
-      company: "KSNI",
+      company: companyCode,
       position: debounceFilterJobPosition,
       type: debounceFiltefilterTypeJob,
     },
@@ -295,13 +297,13 @@ const EmployeeList = () => {
               onClick={(e: any) => {
                 switch (parseInt(e.key)) {
                   case 1:
-                    downloadFile({ with_data: "N", company_id: "KSNI" });
+                    downloadFile({ with_data: "N", company_id: companyCode });
                     break;
                   case 2:
                     setShowUpload(true);
                     break;
                   case 3:
-                    downloadFile({ with_data: "Y", company_id: "KSNI" });
+                    downloadFile({ with_data: "Y", company_id: companyCode });
                     break;
                   case 4:
                     break;
