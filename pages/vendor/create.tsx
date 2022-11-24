@@ -103,7 +103,8 @@ export default function VendorCreate() {
           postal_code: address.postal_code,
           lon: address.lon,
           lat: address.lat,
-          photo: "",
+          // Only get photo url
+          photo: address.photo?.map((photoObj: any) => photoObj?.response?.data),
         };
       }) ?? [];
 

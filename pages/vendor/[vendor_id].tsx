@@ -188,14 +188,22 @@ export default function VendorDetail() {
             type: address.type,
             street: address.street,
             country: address.country,
-            province: address.countryLevelsArray[0] ?? "",
+            province:
+              address.countryLevelsArray[0] === 0 || address.countryLevelsArray[0] === undefined
+                ? ""
+                : address.countryLevelsArray[0],
             city: address.countryLevelsArray[1] ?? "",
             district: address.countryLevelsArray[2] ?? "",
             zone: address.countryLevelsArray[3] ?? "",
             postal_code: address.postalCode,
             lon: address.lon,
             lat: address.lat,
-            photo: address.photo,
+            photo: address.photos.map((photoUrl: any, index: any) => ({
+              uid: `-${index + 1}`,
+              name: photoUrl?.substring(photoUrl.lastIndexOf("/") + 1),
+              status: "done",
+              url: photoUrl,
+            })),
             deleted: false,
           };
         });
@@ -222,7 +230,7 @@ export default function VendorDetail() {
           tax_type: data?.invoicing?.taxType,
           tax_code: data?.invoicing?.taxCode,
           currency: data?.invoicing?.currency,
-          payment_method: data?.invoicing?.paymentMethod,
+          payment_method: data?.invoicing?.paymentMethods ?? [],
           banks: data?.invoicing?.banks ?? [],
         };
 
@@ -266,6 +274,7 @@ export default function VendorDetail() {
         const allEqual = mappCountrylevel.every((value) => value === 0);
 
         return {
+          id: address.id,
           is_primary: address.is_primary,
           type: address.type,
           street: address.street,
@@ -274,7 +283,8 @@ export default function VendorDetail() {
           postal_code: address.postal_code,
           lon: address.lon,
           lat: address.lat,
-          photo: "",
+          photo: address.photo?.map((photoObj: any) => photoObj?.response?.data ?? photoObj?.url),
+          deleted: false,
         };
       }) ?? [];
 
@@ -309,7 +319,6 @@ export default function VendorDetail() {
       purchasing: purchasingPayload,
       invoicing: mappingInvoicing,
     };
-    // console.log("data", formData);
     updateVendor(formData);
   };
 
