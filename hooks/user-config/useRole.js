@@ -2,7 +2,7 @@ import { useQuery, useMutation } from "react-query";
 import { client } from "../../lib/client";
 
 const fetchRolePermissions = async ({ query = {} }) => {
-  return client(`/role-permission`, {
+  return client(`/partner-role`, {
     params: {
       search: "",
       limit: 10,
@@ -48,7 +48,7 @@ const useApprovalRolePermissions = ({ query = {}, options } = {}) => {
 function useCreatePermission({ options }) {
   return useMutation(
     (updates) =>
-      client(`/role-permission`, {
+      client(`/partner-role`, {
         method: "POST",
         data: updates,
       }),
@@ -59,7 +59,7 @@ function useCreatePermission({ options }) {
 }
 
 const fetchPermission = async ({ role_id }) => {
-  return client(`/role-permission/${role_id}`).then((data) => data);
+  return client(`/partner-role/${role_id}`).then((data) => data);
 };
 
 const useRole = ({ role_id, options }) => {
@@ -72,7 +72,7 @@ const useRole = ({ role_id, options }) => {
 function useUpdateRole({ role_id, options }) {
   return useMutation(
     (updates) =>
-      client(`/role-permission/${role_id}`, {
+      client(`/partner-role/${role_id}`, {
         method: "PUT",
         data: updates,
       }),
@@ -98,8 +98,8 @@ function useApproveRolePermission({ options }) {
 const useDeletePermission = ({ options }) => {
   return useMutation(
     (ids) =>
-      client(`/role-permission/delete`, {
-        method: "POST",
+      client(`/partner-role`, {
+        method: "DELETE",
         data: ids,
       }),
     {

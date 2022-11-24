@@ -37,7 +37,7 @@ const schema = yup
 	.required();
 
 const defaultValue = {
-	activeStatus: "Y",
+	// activeStatus: "Y",
 };
 
 const CreateRole: any = () => {
@@ -79,7 +79,6 @@ const CreateRole: any = () => {
 		formState: { errors },
 	} = useForm({
 		resolver: yupResolver(schema),
-		defaultValues: defaultValue,
 	});
 
 	const [companyList, setCompanyList] = useState([])
@@ -106,7 +105,7 @@ const CreateRole: any = () => {
             const mappedData = data?.pages?.map((group: any) => {
               return group.rows?.map((element: any) => {
                 return {
-                  value: element.id,
+                  value: element.code,
                   label: element.name,
                 };
               });
@@ -128,7 +127,7 @@ const CreateRole: any = () => {
 		options: {
 			onSuccess: () => {
 				setModalDelete({ open: false });
-				router.push("/role");
+				router.back();
 			},
 		},
 	});
@@ -136,20 +135,20 @@ const CreateRole: any = () => {
 	const { mutate: createRole } = useCreatePermission({
 		options: {
 			onSuccess: () => {
-				router.push("/role");
+				router.back();
 			},
 		},
 	});
 
-	const activeStatus = [
-		{ id: "Y", value: '<div key="1" style="color:green;">Active</div>' },
-		{ id: "N", value: '<div key="2" style="color:red;">Non Active</div>' },
-	];
+	// const activeStatus = [
+	// 	{ id: "Y", value: '<div key="1" style="color:green;">Active</div>' },
+	// 	{ id: "N", value: '<div key="2" style="color:red;">Non Active</div>' },
+	// ];
 
 	const onSubmit = (data: any) => {
 		const payload = {
 			...data,
-			permissions: permissionsIds,
+			permissions: permissionsIds ?? [],
 		};
 
 		createRole(payload);
@@ -259,8 +258,8 @@ const CreateRole: any = () => {
 				</Row>
 				<Spacer size={12} />
 				<Card>
-					<Row justifyContent="space-between" alignItems="center" nowrap>
-						<Dropdown
+					<Row justifyContent="flex-end" alignItems="center" nowrap>
+						{/* <Dropdown
 							label=""
 							isHtml
 							width={"185px"}
@@ -269,8 +268,7 @@ const CreateRole: any = () => {
 							handleChange={(text: any) => setValue("activeStatus", text)}
 							noSearch
 							defaultValue="Y"
-						/>
-						<Row>
+						/> */}
 							<Row gap="16px">
 								<Button size="big" variant="tertiary" onClick={() => Router.push("/user-config/role")}>
 									{lang[t].roleList.tertier.cancel}
@@ -279,11 +277,10 @@ const CreateRole: any = () => {
 									{lang[t].roleList.primary.save}
 								</Button>
 							</Row>
-						</Row>
 					</Row>
 				</Card>
 				<Spacer size={20} />
-				<Accordion>
+				<Accordion style={{position:"relative"}} id="area">
 					<Accordion.Item key={1}>
 						<Accordion.Header variant="blue">{lang[t].roleList.accordion.general}</Accordion.Header>
 						<Accordion.Body>
@@ -309,6 +306,7 @@ const CreateRole: any = () => {
 										</div>
 										<Spacer size={6} />
 										<FormSelect
+										containerId={"area"}
 											defaultValue={defaultValue?.company?.name}
 											style={{ width: "700px"}}
 											size={"large"}
@@ -346,7 +344,7 @@ const CreateRole: any = () => {
 
 				<Spacer size={20} />
 
-				<Accordion>
+				<Accordion style={{position:"relative"}} id="area2">
 					<Accordion.Item key={1}>
 						<Accordion.Header variant="blue">
 							<Row gap="8px" alignItems="baseline">
@@ -365,6 +363,7 @@ const CreateRole: any = () => {
 											onChange={(e) => setSearch(e.target.value)}
 										/>
 										<Dropdown
+											containerId={"area2"}
 											label={lang[t].roleList.filterBar.menu}
 											width={"300px"}
 											items={menu}
@@ -374,6 +373,7 @@ const CreateRole: any = () => {
 											defaultValue="All"
 										/>
 										<Dropdown
+											containerId={"area2"}
 											label={lang[t].roleList.filterBar.permissions}
 											width={"300px"}
 											items={permissionFilter}

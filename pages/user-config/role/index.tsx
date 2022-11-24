@@ -1,18 +1,18 @@
 import React, { useState } from "react";
 import usePagination from "@lucasmogari/react-pagination";
 import { useRouter } from "next/router";
-import { Button, Col, Lozenge, Pagination, Row, Search, Spacer, Table, Text } from "pink-lava-ui";
+import { Button, Col, Pagination, Row, Search, Spacer, Table, Text } from "pink-lava-ui";
 
 import { ModalDeleteConfirmation } from "../../../components/elements/Modal/ModalConfirmationDelete";
 import { useDeletePermission, useRolePermissions } from "../../../hooks/user-config/useRole";
-import { STATUS_APPROVAL_TEXT, STATUS_APPROVAL_VARIANT } from "../../../utils/constant";
 
 import styled from "styled-components";
 import { lang } from "lang";
+import useDebounce from "lib/useDebounce";
 
 const UserConfigRole: any = () => {
   const t = localStorage.getItem("lan") || "en-US";
-  const companyCode = localStorage.getItem("companyCode");
+  // const companyCode = localStorage.getItem("companyCode");
   const router = useRouter();
   const pagination = usePagination({
     page: 1,
@@ -25,6 +25,7 @@ const UserConfigRole: any = () => {
 
   const [search, setSearch] = useState("");
   const [modalDelete, setModalDelete] = useState({ open: false });
+  const debounceSearch = useDebounce(search, 1000)
 
   const {
     data: fields,
@@ -37,8 +38,8 @@ const UserConfigRole: any = () => {
       },
     },
     query: {
-      company_id: companyCode,
-      search,
+      // company_id: companyCode,
+      search : debounceSearch,
       page: pagination.page,
       limit: pagination.itemsPerPage,
     },
@@ -63,9 +64,6 @@ const UserConfigRole: any = () => {
     {
       title: lang[t].roleList.roleList.company,
       dataIndex: "company",
-      render: (text: any) => (
-        <Lozenge variant={STATUS_APPROVAL_VARIANT[text]}>{STATUS_APPROVAL_TEXT[text]}</Lozenge>
-      ),
       width: "42%",
     },
     {
@@ -81,7 +79,7 @@ const UserConfigRole: any = () => {
     data.push({
       key: field.id,
       field_name: field.name,
-      approval_status: field.status,
+      company: field.company.name,
       action: (
         <div style={{ display: "flex", justifyContent: "left" }}>
           <Button
@@ -165,7 +163,7 @@ const UserConfigRole: any = () => {
           }
           visible={modalDelete.open}
           onCancel={() => setModalDelete({ open: false })}
-          onOk={() => deleteFields({ id: selectedRowKeys })}
+          onOk={() => deleteFields({ ids: selectedRowKeys })}
         />
       )}
     </>
