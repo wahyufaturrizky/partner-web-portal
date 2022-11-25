@@ -277,9 +277,9 @@ const DetailRoleConfig: any = () => {
 							<Text variant={"h4"}>{role?.name}</Text>
 						</Row>
 						<Spacer size={12} />
-						<Card>
+						{/* <Card>
 							<Row justifyContent="flex-end" alignItems="center" nowrap>
-								{/* <Dropdown
+								<Dropdown
 									label=""
 									isHtml
 									width={"185px"}
@@ -288,7 +288,7 @@ const DetailRoleConfig: any = () => {
 									handleChange={(text: any) => setValue("activeStatus", text)}
 									noSearch
 									defaultValue={role?.role?.activeStatus}
-								/> */}
+								/>
 								<Row gap="16px">
 									<Button size="big" variant={"tertiary"} onClick={() => Router.back()}>
 										{lang[t].roleList.tertier.cancel}
@@ -298,9 +298,9 @@ const DetailRoleConfig: any = () => {
 									</Button>
 								</Row>
 							</Row>
-						</Card>
+						</Card> */}
 
-						<Spacer size={20} />
+						{/* <Spacer size={20} /> */}
 						{role?.role?.reasonRejection && (
 							<>
 								<Alert>
@@ -322,6 +322,7 @@ const DetailRoleConfig: any = () => {
 											label={lang[t].roleList.roleList.roleName}
 											height="38px"
 											placeholder={"e.g Sales Admin"}
+											disabled={true}
 											{...register("name", { required: true })}
 										/>
 										<Controller
@@ -342,6 +343,7 @@ const DetailRoleConfig: any = () => {
 													defaultValue={role?.companyId}
 													style={{ width: "700px"}}
 													size={"large"}
+													disabled={true}
 													placeholder={"Select"}
 													borderColor={"#AAAAAA"}
 													arrowColor={"#000"}
@@ -439,6 +441,7 @@ const DetailRoleConfig: any = () => {
 													name={menu.name}
 													checked={permissionsIds}
 													onChange={(data: any) => setPermissions(data)}
+													disabled={true}
 												/>
 											))}
 										</Col>

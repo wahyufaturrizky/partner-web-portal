@@ -123,14 +123,6 @@ const UserConfigRole: any = () => {
             <Row gap="16px">
               <Button
                 size="big"
-                variant={"tertiary"}
-                onClick={() => setModalDelete({ open: true })}
-                disabled={rowSelection.selectedRowKeys?.length === 0}
-              >
-                {lang[t].roleList.tertier.delete}
-              </Button>
-              <Button
-                size="big"
                 variant={"primary"}
                 onClick={() => {
                   router.push("/user-config/role/create");
@@ -148,7 +140,6 @@ const UserConfigRole: any = () => {
               loading={isLoadingField}
               columns={columns}
               data={paginateField}
-              rowSelection={rowSelection}
             />
             <Pagination pagination={pagination} />
           </Col>
