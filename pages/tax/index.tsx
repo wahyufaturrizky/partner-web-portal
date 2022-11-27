@@ -101,7 +101,7 @@ const Tax = () => {
       search: debounceSearch,
       page: pagination.page,
       limit: pagination.itemsPerPage,
-      // company_id: companyCode,
+      company_id: companyCode,
     },
     options: {
       onSuccess: (data: any) => {

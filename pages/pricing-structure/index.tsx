@@ -78,6 +78,7 @@ const renderConfirmationTextPricingConfig = (type: any, data: any) => {
 };
 
 const PricingStructureList: any = () => {
+  const companyCode = localStorage.getItem("companyCode");
   const [searchGroupBuying, setSearchGroupBuying] = useState("");
   const [searchPricingConfig, setSearchPricingConfig] = useState("");
 
@@ -135,6 +136,7 @@ const PricingStructureList: any = () => {
     },
     query: {
       status: "ACTIVE",
+      company_id: companyCode
     },
   });
 
@@ -156,7 +158,7 @@ const PricingStructureList: any = () => {
   } = useCustomerGroupsMDM({
     query: {
       limit: 10000,
-      company: "KSNI",
+      company: companyCode,
     },
     options: {
       onSuccess: (data: any) => {},
