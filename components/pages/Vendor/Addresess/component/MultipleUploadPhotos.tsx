@@ -10,7 +10,8 @@ const getBase64 = (file: any) =>
     reader.onerror = (error) => reject(error);
   });
 
-const uploadUrl = "https://mdm-portal.nabatisnack.co.id:3001/api/v1/vendor/file/upload";
+let apiURL = process.env.NEXT_PUBLIC_API_BASE3;
+const uploadUrl = `${apiURL}/vendor/file/upload`;
 
 const MultipleUploadPhotos = ({ index, control }: any) => {
   const token = localStorage.getItem("token");
