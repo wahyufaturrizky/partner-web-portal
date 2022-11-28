@@ -46,6 +46,7 @@ import { ICCopy, ICInfo, ICPlus } from "../../assets";
 import ArrowLeft from "../../assets/icons/arrow-left.svg";
 
 const CreatePricingStructure: any = () => {
+  const companyCode = localStorage.getItem("companyCode");
   const paginationProducts = usePagination({
     page: 1,
     itemsPerPage: 20,
@@ -342,7 +343,7 @@ const CreatePricingStructure: any = () => {
       search: debounceFetchProduct,
       page: paginationProducts.page,
       limit: paginationProducts.itemsPerPage,
-      company_id: "KSNI",
+      company_id: companyCode,
     },
     options: {
       onSuccess: (data: any) => {
@@ -450,7 +451,7 @@ const CreatePricingStructure: any = () => {
     query: {
       search: debounceFetchSalesOrganizationInfinite,
       limit: 10,
-      company_code: "KSNI",
+      company_code: companyCode,
     },
     options: {
       onSuccess: (data: any) => {
@@ -558,7 +559,7 @@ const CreatePricingStructure: any = () => {
       active_date: moment().format("YYYY-MM-DD"),
       distributions: dataSubmit.distribution_channel,
       products: dataSubmit.product_selected.map((mapping: any) => mapping.id),
-      company_id: "KSNI",
+      company_id: companyCode,
     });
 
   const onSubmitDraft = (dataDraft: any) =>
@@ -569,7 +570,7 @@ const CreatePricingStructure: any = () => {
       active_date: moment().format("YYYY-MM-DD"),
       distributions: dataDraft.distribution_channel,
       products: dataDraft.product_selected.map((mapping: any) => mapping.id),
-      company_id: "KSNI",
+      company_id: companyCode,
     });
 
   useEffect(

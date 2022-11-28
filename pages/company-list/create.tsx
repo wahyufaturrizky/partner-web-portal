@@ -367,6 +367,7 @@ const schema = yup
     advanceApproval: yup.boolean(),
     retailPricing: yup.boolean(),
     pricingStructure: yup.boolean(),
+    other_company: yup.string().default(""),
   })
   .required();
 
@@ -726,7 +727,7 @@ const CreateCompany: any = () => {
       industry_id: data.industry_id,
       sector_id: data.sector_id,
       from_template: fromTemplate,
-      other_company_id: fromTemplate === "Other Company" ? otherCompanyId : null,
+      other_company_id: fromTemplate === "Other Company" ? otherCompanyId : 0,
       other_company: data.other_company,
       phone_number: data.phone_number,
       tax_id: data.taxId,
@@ -748,6 +749,7 @@ const CreateCompany: any = () => {
       fiscal_year: `${data.fiscal_year}`,
       external_code: data.external_code,
       status: data.activeStatus,
+      
       parent: fromTemplate === "Other Company" ? `${otherCompanyId}` : null,
     };
     console.log(payload);
