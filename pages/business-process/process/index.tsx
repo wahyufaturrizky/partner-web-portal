@@ -11,6 +11,7 @@ import { lang } from "lang";
 
 const ProcessList: any = () => {
 	const t = localStorage.getItem("lan") || "en-US";
+	const companyCode = localStorage.getItem("companyCode");
 	const pagination = usePagination({
 		page: 1,
 		itemsPerPage: 20,
@@ -46,12 +47,14 @@ const ProcessList: any = () => {
 					page: pagination.page,
 					limit: pagination.itemsPerPage,
 					module: dataListDropdownModul,
+					company_id: companyCode,
 			  }
 			: {
 					search,
 					page: pagination.page,
 					limit: pagination.itemsPerPage,
-			  },
+					company_id: companyCode,
+				},
 	});
 
 	const { mutate: deleteFields, isLoading: isLoadingDeleteProcessList } = useDeleteProcessList({

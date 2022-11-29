@@ -20,6 +20,7 @@ import { lang } from "lang";
 const CreateMenuDesignList: any = () => {
   const router = useRouter();
   const t = localStorage.getItem("lan") || "en-US";
+  const companyCode = localStorage.getItem("companyCode");
   const { menu_design_id } = router.query;
 
   const { register, handleSubmit, control, setValue } = useForm();
@@ -368,6 +369,7 @@ const CreateMenuDesignList: any = () => {
       ...data,
       status: data?.status === "Active" || data?.status === "Y" ? "Y" : "N",
       hierarchies: mappingHierarchiesPayload,
+      company_id: companyCode
     };
 
     updateMenuDesign(formData);

@@ -121,7 +121,7 @@ export default function CreateProduct({ isCreateProductVariant = true }) {
       can_be_sold: false,
       can_be_purchased: false,
       can_be_expensed: false,
-      is_shareable: false,
+      can_be_shared: false,
       expired_date: moment().utc().toString(),
       external_code: "",
       use_unit_leveling: false,
@@ -148,6 +148,13 @@ export default function CreateProduct({ isCreateProductVariant = true }) {
       },
       category: {},
       uom: [],
+      tax: {
+        tax_vendors: [],
+        tax_country_id: "",
+        tax_id: "",
+        tax_type: "",
+        tax_code: ""
+      }
     },
   });
 
@@ -192,6 +199,12 @@ export default function CreateProduct({ isCreateProductVariant = true }) {
                 ids: branchIds
               }
               setValue(key, branch)
+          } else if(key === 'tax') {
+            setValue('tax.tax_type', data?.tax?.tax_type);
+            setValue('tax.tax_code', data?.tax?.tax_code);
+            setValue('tax.tax_id', data?.tax?.id);
+            setValue('tax.tax_country_id', data?.tax?.tax_country?.id);
+            setValue('tax.tax_vendors', data?.tax?.tax_vendors?.map((tax: any) => tax.id));
           } else {
             setValue(key, data[key]);
           }
@@ -199,7 +212,7 @@ export default function CreateProduct({ isCreateProductVariant = true }) {
           setCanBePurchased(data.can_be_purchased);
           setCanBeSold(data.can_be_sold);
           setCanManufacture(data.can_be_manufactured);
-          setIsShareable(data.is_shareable)
+          setIsShareable(data.can_be_shared)
         });
         return data;
       },
@@ -372,7 +385,7 @@ export default function CreateProduct({ isCreateProductVariant = true }) {
     payload.can_be_purchased = canBePurchased;
     payload.can_be_expensed = canBeExpensed;
     payload.can_be_manufactured = canBeManufacture;
-    payload.is_shareable = isShareable;
+    payload.can_be_shared = isShareable;
 
     payload.expired_date = data?.expired_date?.includes("/")
       ? moment(data.expired_date, "DD/MM/YYYY").utc().toString()
@@ -470,7 +483,7 @@ export default function CreateProduct({ isCreateProductVariant = true }) {
           <Branch setValue={setValue} branch={branchForm} isUpdate={isUpdate} />
         </div>
         <div style={{display: tabAktived === 'Purchasing' ? 'block': 'none'}}>
-          <Purchasing control={control} setValue={setValue} register={register} />
+          <Purchasing control={control} setValue={setValue} register={register} productData={productData} />
         </div>
         <div style={{display: tabAktived === 'Accounting' ? 'block': 'none'}}>
           <Accounting {...propsAccounting} />

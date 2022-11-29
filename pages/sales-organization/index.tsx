@@ -12,7 +12,6 @@ import { ModalManageDataEdit } from "../../components/elements/Modal/ModalManage
 import axios from "axios";
 import { lang } from "lang";
 
-const COMPANY_CODE = 'KSNI';
 
 let token;
 let apiURL = process.env.NEXT_PUBLIC_API_BASE3;
@@ -23,6 +22,9 @@ if (typeof window !== "undefined") {
 
 const CreateConfig = () => {
     const t = localStorage.getItem("lan") || "en-US";
+    
+    const COMPANY_CODE = localStorage.getItem("companyCode");
+
 	const [countryStructure, setCountryStructure] = useState([]);
 	const [modalDelete, setModalDelete] = useState({ index: -1, open: false, structure: {} });
 	const [showUploadStructure, setShowUploadStructure] = useState();

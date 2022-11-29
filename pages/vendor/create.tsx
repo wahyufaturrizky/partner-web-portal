@@ -24,6 +24,7 @@ const objectIsEmpty = (object: any) =>
 
 export default function VendorCreate() {
   const router = useRouter();
+  const companyCode = localStorage.getItem("companyCode");
 
   const methods = useForm({
     defaultValues: { status: "Active", purchasing: {}, invoicing: {}, customer_id: "" },
@@ -102,7 +103,8 @@ export default function VendorCreate() {
           postal_code: address.postal_code,
           lon: address.lon,
           lat: address.lat,
-          photo: "",
+          // Only get photo url
+          photo: address.photo?.map((photoObj: any) => photoObj?.response?.data),
         };
       }) ?? [];
 
@@ -128,6 +130,7 @@ export default function VendorCreate() {
 
     const formData = {
       customer_id: "",
+      company_id: companyCode,
       ...data,
       company: companyPayload,
       individu: individuPayload,

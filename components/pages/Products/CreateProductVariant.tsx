@@ -123,7 +123,7 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
       status: "active",
       can_be_sold: false,
       can_be_purchased: false,
-      is_shareable: false,
+      can_be_shared: false,
       expired_date: "",
       external_code: "",
       use_unit_leveling: false,
@@ -152,9 +152,18 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
       uom: [],
       sales_division: {
         ids: []
+      },
+      tax: {
+        tax_vendors: [],
+        tax_country_id: "",
+        tax_id: "",
+        tax_type: "",
+        tax_code: ""
       }
     }
   });
+
+  console.log("watch", watch())
 
   //useFieldArray REGISTRATION
   const {
@@ -205,13 +214,19 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
                   ids:  data[key]?.map((data:any) => data?.id) || []
                 }
                 setValue(key, branch)
+            } else if(key === 'tax') {
+              setValue('tax.tax_type', data?.tax?.tax_type);
+              setValue('tax.tax_code', data?.tax?.tax_code);
+              setValue('tax.tax_id', data?.tax?.id);
+              setValue('tax.tax_country_id', data?.tax?.tax_country?.id);
+              setValue('tax.tax_vendors', data?.tax?.tax_vendors?.map((tax: any) => tax.id));
             } else {
               setValue(key, data[key]);
             }
             setCanBePurchased(data.can_be_purchased);
             setCanBeSold(data.can_be_sold);
             setCanManufacture(data.can_be_manufactured);
-            setIsShareable(data.is_shareable)
+            setIsShareable(data.can_be_shared)
           })
       return data;
     }
@@ -360,7 +375,8 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
       'barcode',
       'sku',
       'accounting',
-      'sales_division'
+      'sales_division',
+      "tax"
     ])
 
     payload.uom_conversion = [];
@@ -379,7 +395,7 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
     payload.can_be_sold = canBeSold;
     payload.can_be_purchased = canBePurchased;
     payload.can_be_manufactured = canBeManufacture;
-    payload.is_shareable = isShareable;
+    payload.can_be_shared = isShareable;
 
     if(data.expired_date){
       payload.expired_date = data?.expired_date?.includes("/")
@@ -476,7 +492,7 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
           <Branch setValue={setValue} branch={branchForm} isUpdate={isUpdate} />
         </div>
         <div style={{display: tabAktived === 'Purchasing' ? 'block': 'none'}}>
-          <Purchasing />
+        <Purchasing control={control} setValue={setValue} register={register} productData={productDetail} />
         </div>
         <div style={{display: tabAktived === 'Accounting' ? 'block': 'none'}}>
           <Accounting {...propsAccounting} />

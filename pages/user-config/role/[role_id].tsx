@@ -39,7 +39,7 @@ const schema = yup
 	.required();
 
 const defaultValue = {
-	activeStatus: "Y",
+	// activeStatus: "Y",
 };
 
 const DetailRoleConfig: any = () => {
@@ -66,10 +66,9 @@ const DetailRoleConfig: any = () => {
 		role_id,
 		options: {
 			onSuccess: (data: any) => {
-				const permission = data?.role;
-				setValue("name", permission?.name);
-				setValue("activeStatus", permission?.activeStatus ?? "N");
-				setPermissions(data?.permission?.map((permission: any) => permission?.id));
+				setValue("name", data?.name);
+				// setValue("activeStatus", permission?.activeStatus ?? "N");
+				setPermissions(data?.partnerRoleToPermissions?.map((permission: any) => permission?.permissionId));
 			},
 		},
 	});
@@ -120,7 +119,7 @@ const DetailRoleConfig: any = () => {
             const mappedData = data?.pages?.map((group: any) => {
               return group.rows?.map((element: any) => {
                 return {
-                  value: element.id,
+                  value: element.code,
                   label: element.name,
                 };
               });
@@ -156,15 +155,15 @@ const DetailRoleConfig: any = () => {
 		},
 	});
 
-	const activeStatus = [
-		{ id: "Y", value: '<div key="1" style="color:green;">Active</div>' },
-		{ id: "N", value: '<div key="2" style="color:red;">Non Active</div>' },
-	];
+	// const activeStatus = [
+	// 	{ id: "Y", value: '<div key="1" style="color:green;">Active</div>' },
+	// 	{ id: "N", value: '<div key="2" style="color:red;">Non Active</div>' },
+	// ];
 
 	const onSubmit = (data: any) => {
 		const payload = {
 			...data,
-			permissions: permissionsIds,
+			permissions: permissionsIds ?? [],
 		};
 		updateRole(payload);
 	};
@@ -275,11 +274,11 @@ const DetailRoleConfig: any = () => {
 					<Col>
 						<Row gap="4px" alignItems="center">
 							<ArrowLeft style={{ cursor: "pointer" }} onClick={() => Router.back()} />
-							<Text variant={"h4"}>{role?.role?.name}</Text>
+							<Text variant={"h4"}>{role?.name}</Text>
 						</Row>
 						<Spacer size={12} />
-						<Card>
-							<Row justifyContent="space-between" alignItems="center" nowrap>
+						{/* <Card>
+							<Row justifyContent="flex-end" alignItems="center" nowrap>
 								<Dropdown
 									label=""
 									isHtml
@@ -290,20 +289,18 @@ const DetailRoleConfig: any = () => {
 									noSearch
 									defaultValue={role?.role?.activeStatus}
 								/>
-								<Row>
-									<Row gap="16px">
-										<Button size="big" variant={"tertiary"} onClick={() => Router.push("/user-config/role")}>
-											{lang[t].roleList.tertier.cancel}
-										</Button>
-										<Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
-											{lang[t].roleList.primary.save}
-										</Button>
-									</Row>
+								<Row gap="16px">
+									<Button size="big" variant={"tertiary"} onClick={() => Router.back()}>
+										{lang[t].roleList.tertier.cancel}
+									</Button>
+									<Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
+										{lang[t].roleList.primary.save}
+									</Button>
 								</Row>
 							</Row>
-						</Card>
+						</Card> */}
 
-						<Spacer size={20} />
+						{/* <Spacer size={20} /> */}
 						{role?.role?.reasonRejection && (
 							<>
 								<Alert>
@@ -315,7 +312,7 @@ const DetailRoleConfig: any = () => {
 							</>
 						)}
 
-						<Accordion>
+						<Accordion style={{position:"relative"}} id="area">
 							<Accordion.Item key={1}>
 								<Accordion.Header variant="blue">{lang[t].roleList.accordion.general}</Accordion.Header>
 								<Accordion.Body>
@@ -325,6 +322,7 @@ const DetailRoleConfig: any = () => {
 											label={lang[t].roleList.roleList.roleName}
 											height="38px"
 											placeholder={"e.g Sales Admin"}
+											disabled={true}
 											{...register("name", { required: true })}
 										/>
 										<Controller
@@ -341,9 +339,11 @@ const DetailRoleConfig: any = () => {
 												</div>
 												<Spacer size={6} />
 												<FormSelect
-													defaultValue={defaultValue?.company?.name}
+													containerId={"area"}
+													defaultValue={role?.companyId}
 													style={{ width: "700px"}}
 													size={"large"}
+													disabled={true}
 													placeholder={"Select"}
 													borderColor={"#AAAAAA"}
 													arrowColor={"#000"}
@@ -377,7 +377,7 @@ const DetailRoleConfig: any = () => {
 
 						<Spacer size={20} />
 
-						<Accordion>
+						<Accordion style={{position:"relative"}} id="area">
 							<Accordion.Item key={1}>
 								<Accordion.Header variant="blue">
 									<Row gap="8px" alignItems="baseline">
@@ -396,6 +396,7 @@ const DetailRoleConfig: any = () => {
 													onChange={(e: any) => setSearch(e.target.value)}
 												/>
 												<Dropdown
+													containerId={"area"}
 													label={lang[t].roleList.filterBar.menu}
 													width={"300px"}
 													items={menu}
@@ -405,6 +406,7 @@ const DetailRoleConfig: any = () => {
 													defaultValue="All"
 												/>
 												<Dropdown
+													containerId={"area"}
 													label={lang[t].roleList.filterBar.permissions}
 													width={"300px"}
 													items={permissionFilter}
@@ -439,6 +441,7 @@ const DetailRoleConfig: any = () => {
 													name={menu.name}
 													checked={permissionsIds}
 													onChange={(data: any) => setPermissions(data)}
+													disabled={true}
 												/>
 											))}
 										</Col>
@@ -447,7 +450,8 @@ const DetailRoleConfig: any = () => {
 							</Accordion.Item>
 						</Accordion>
 					</Col>
-
+					
+					{showModal.visible && 
 					<Modal
 						width={880}
 						visible={showModal.visible}
@@ -501,7 +505,8 @@ const DetailRoleConfig: any = () => {
 							</>
 						}
 					/>
-
+					}
+					
 					{modalDelete.open && (
 						<ModalDeleteConfirmation
 							visible={modalDelete.open}

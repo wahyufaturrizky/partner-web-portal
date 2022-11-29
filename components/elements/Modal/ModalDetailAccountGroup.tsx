@@ -33,7 +33,9 @@ export const ModalDetailAccountGroup: any = ({
     resolver: yupResolver(schema),
   });
   const t = localStorage.getItem("lan") || "en-US";
-  const onSubmit = (data: any) => onOk({ groupName: data.groupName, parentId: data.parentId });
+  const companyCode = localStorage.getItem("companyCode");
+
+  const onSubmit = (data: any) => onOk({ groupName: data.groupName, parentId: data.parentId, company_id: companyCode });
 
   const { data: accountGroupParent } = useAccountGroupParent({
     options: {},

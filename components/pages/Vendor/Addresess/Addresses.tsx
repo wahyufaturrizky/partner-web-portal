@@ -7,9 +7,10 @@ import { useCountryStructureVendor, useCountryPostalVendor } from "hooks/mdm/ven
 import { useCountryInfiniteLists } from "hooks/mdm/country-structure/useCountries";
 import useDebounce from "lib/useDebounce";
 import styled from "styled-components";
+import MultipleUploadPhotos from "./component/MultipleUploadPhotos";
 
 const Addresses = ({ formType }: any) => {
-  const { register, control, setValue } = useFormContext();
+  const { register, control } = useFormContext();
 
   const { fields, append, remove, update }: any = useFieldArray({
     control,
@@ -119,7 +120,7 @@ const Addresses = ({ formType }: any) => {
                 lon: "",
                 lat: "",
                 is_primary: fields.length === 0,
-                photo: "",
+                photo: [],
                 deleted: false,
               });
             } else {
@@ -135,7 +136,7 @@ const Addresses = ({ formType }: any) => {
                 lon: "",
                 lat: "",
                 is_primary: fields.length === 0,
-                photo: "",
+                photo: [],
               });
             }
           }}
@@ -146,7 +147,7 @@ const Addresses = ({ formType }: any) => {
 
       <Spacer size={20} />
 
-      {fields.map((address: any, addressIndex: any) => {
+      {fields?.map((address: any, addressIndex: any) => {
         return (
           <Col key={address.id}>
             <Text variant="headingRegular" color="blue.dark">
@@ -446,6 +447,10 @@ const Addresses = ({ formType }: any) => {
                 />
               </Col>
             </Row>
+
+            <Spacer size={10} />
+
+            <MultipleUploadPhotos index={addressIndex} control={control} />
 
             <Spacer size={25} />
           </Col>

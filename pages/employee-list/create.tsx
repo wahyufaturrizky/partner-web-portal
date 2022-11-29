@@ -47,6 +47,7 @@ import { queryClient } from "../_app";
 
 const EmployeeListCreate = () => {
   const router = useRouter();
+  const companyCode = localStorage.getItem("companyCode");
 
   const [departmentList, setListDepartmentList] = useState<any[]>([]);
   const [totalRowsDepartmentList, setTotalRowsDepartmentList] = useState(0);
@@ -279,7 +280,7 @@ const EmployeeListCreate = () => {
   } = useDepartmentInfiniteLists({
     query: {
       search: debounceFetch,
-      company_id: "KSNI",
+      company_id: companyCode,
       limit: 10,
     },
     options: {
@@ -314,7 +315,7 @@ const EmployeeListCreate = () => {
   } = useReportToInfiniteLists({
     query: {
       search: debounceFetch,
-      company: "KSNI",
+      company: companyCode,
       limit: 10,
     },
     options: {
@@ -504,7 +505,7 @@ const EmployeeListCreate = () => {
   } = useBranchInfiniteLists({
     query: {
       search: debounceFetch,
-      company_id: "KSNI",
+      company_id: companyCode,
       limit: 10,
     },
     options: {
@@ -540,7 +541,7 @@ const EmployeeListCreate = () => {
   } = useJobPositionInfiniteLists({
     query: {
       search: debounceFetch,
-      company_id: "KSNI",
+      company_id: companyCode,
       limit: 10,
     },
     options: {
@@ -575,7 +576,7 @@ const EmployeeListCreate = () => {
   } = useEmployeeInfiniteLists({
     query: {
       search: debounceFetch,
-      company: "KSNI",
+      company: companyCode,
       limit: 10,
     },
     options: {
@@ -610,7 +611,7 @@ const EmployeeListCreate = () => {
   } = useJobLevelInfiniteLists({
     query: {
       search: debounceFetch,
-      company_id: "KSNI",
+      company_id: companyCode,
       limit: 10,
     },
     options: {
@@ -710,7 +711,7 @@ const EmployeeListCreate = () => {
 
     const formData = {
       ...data,
-      company: "KSNI",
+      company: companyCode,
     };
 
     createEmployeeList({

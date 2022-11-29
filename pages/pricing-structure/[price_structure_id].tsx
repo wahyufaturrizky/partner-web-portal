@@ -64,6 +64,7 @@ export const emptyPayloadPriceStructure = {
 
 const DetailPricingStructure: any = () => {
   const router = useRouter();
+  const companyCode = localStorage.getItem("companyCode");
   const { price_structure_id } = router.query;
   const activeStatus = [
     { id: "ACTIVE", value: '<div key="1" style="color:green;">Active</div>' },
@@ -472,7 +473,7 @@ const DetailPricingStructure: any = () => {
       search: debounceFetchProduct,
       page: paginationProducts.page,
       limit: paginationProducts.itemsPerPage,
-      company_id: "KSNI",
+      company_id: companyCode,
     },
     options: {
       onSuccess: (data: any) => {
@@ -626,7 +627,7 @@ const DetailPricingStructure: any = () => {
     query: {
       search: debounceFetchSalesOrganizationInfinite,
       limit: 10,
-      company_code: "KSNI",
+      company_code: companyCode,
     },
     options: {
       onSuccess: (data: any) => {

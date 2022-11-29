@@ -368,6 +368,7 @@ const schema = yup
     advanceApproval: yup.boolean(),
     retailPricing: yup.boolean(),
     pricingStructure: yup.boolean(),
+    other_company: yup.string().default(""),
   })
   .required();
 
@@ -428,7 +429,7 @@ const DetailCompany: any = () => {
   const [searchIndustry, setSearchIndustry] = useState("");
   const [searchSegment, setSearchSegment] = useState("");
   const [searchOtherCompany, setSearchOtherCompany] = useState("");
-  const [otherCompanyId, setOtherCompanyId] = useState("");
+  const [otherCompanyId, setOtherCompanyId] = useState(0);
   const [countryId, setCountryId] = useState("");
   const [industryId, setIndustryId] = useState("");
   const [segmentId, setSegmentId] = useState("");
@@ -445,6 +446,7 @@ const DetailCompany: any = () => {
     register,
     handleSubmit,
     setValue,
+    getValues,
     formState: { errors },
     control,
   } = useForm({
@@ -519,7 +521,7 @@ const DetailCompany: any = () => {
   
   const activeStatus = [
     { id: "Active", value: `<div key="1" style="color:green;">${lang[t].companyList.tertier.active}</div>` },
-    { id: "Unactive", value: `<div key="2" style="color:red;">${lang[t].companyList.tertier.nonActive}</div>` },
+    { id: "Inactive", value: `<div key="2" style="color:red;">${lang[t].companyList.tertier.nonActive}</div>` },
   ];
 
   const { data: dateFormatData, isLoading: isLoadingDateFormatList } = useDateFormatLists({
@@ -790,9 +792,8 @@ const DetailCompany: any = () => {
               items={activeStatus}
               placeholder={"Status"}
               handleChange={(text) => setValue("activeStatus", text)}
-              defaultValue={companyData.status}
+              defaultValue={getValues("status") || companyData.status}
               noSearch
-              defaultValue="Active"
             />
             <Row>
               <Row gap="16px">
@@ -895,7 +896,7 @@ const DetailCompany: any = () => {
                             items={isFetchingCompany && !isFetchingMoreCompany ? [] : companyList}
                             onChange={(value: any) => {
                               onChange(value);
-                              setValue("other_company",value);
+                              setValue("other_company", value);
                               setOtherCompanyId(companyList.filter((e: { value: any; }) => e.value === value)[0]?.id)
                             }}
                             onSearch={(value: any) => {

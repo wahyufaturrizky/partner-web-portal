@@ -117,7 +117,7 @@ const useDeletePermission = ({ options }) => {
 };
 
 const fetchPermissionMenu = async ({ query = {} }) => {
-  return client(`/permission/menu`, {
+  return client(`/partner-permission/menu`, {
     params: {
       search: "",
       all: 1,

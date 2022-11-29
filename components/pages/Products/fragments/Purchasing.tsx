@@ -8,15 +8,15 @@ import useDebounce from 'lib/useDebounce';
 import { Controller, useForm } from 'react-hook-form';
 import styled from 'styled-components';
 
-export default function Purchasing({ control, setValue, register } : any) {
+export default function Purchasing({ control, setValue, register, productData } : any) {
   const t = localStorage.getItem("lan") || "en-US";
 
   const [showVendor, setShowVendor] = useState({
     show: false,
-    selectedRowKeyMenu: [],
+    selectedRowKeyMenu: productData?.tax?.taxVendors?.map((tax: any) => tax?.id) || [],
   });
 
-  const [selectedVendor, setSelectedVendor] = useState([])
+  const [selectedVendor, setSelectedVendor] = useState(productData?.tax?.taxVendors || [])
   const pagination = usePagination({
     page: 1,
     itemsPerPage: 5,
@@ -130,7 +130,7 @@ export default function Purchasing({ control, setValue, register } : any) {
                     <Text variant="headingRegular">Tax Country</Text>
                     <Spacer size={5} />
                     <CustomFormSelect
-                      defaultValue={value ? value : undefined}
+                      defaultValue={productData?.tax?.tax_country?.name}
                       style={{ width: "100%" }}
                       size={"large"}
                       placeholder={"Select"}
@@ -175,13 +175,13 @@ export default function Purchasing({ control, setValue, register } : any) {
           <Controller
             control={control}
             defaultValue={""}
-            name="tax.tax_name"
+            name="tax.tax_id"
             render={({ field: { onChange, value }, formState: { errors } }) => (
               <Col width={"50%"}>
                 <Text variant="headingRegular">Tax Name</Text>
                 <Spacer size={5} />
                 <CustomFormSelect
-                  defaultValue={value ? value : undefined}
+                  defaultValue={productData?.tax?.name}
                   style={{ width: "100%" }}
                   size={"large"}
                   placeholder={"Select"}
