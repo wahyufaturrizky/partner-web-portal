@@ -426,7 +426,7 @@ const CreateCompany: any = () => {
   const [searchIndustry, setSearchIndustry] = useState("");
   const [searchSegment, setSearchSegment] = useState("");
   const [searchOtherCompany, setSearchOtherCompany] = useState("");
-  const [otherCompanyId, setOtherCompanyId] = useState("");
+  const [otherCompanyId, setOtherCompanyId] = useState("0");
 
   const [industryId, setIndustryId] = useState("");
   const [countryId, setCountryId] = useState("");
@@ -469,7 +469,7 @@ const CreateCompany: any = () => {
 
   const activeStatus = [
     { id: "Active", value: `<div key="1" style="color:green;">${lang[t].companyList.tertier.active}</div>` },
-    { id: "Unactive", value: `<div key="2" style="color:red;">${lang[t].companyList.tertier.nonActive}</div>` },
+    { id: "Inactive", value: `<div key="2" style="color:red;">${lang[t].companyList.tertier.nonActive}</div>` },
   ];
 
   const { data: dateFormatData, isLoading: isLoadingDateFormatList } = useDateFormatLists({
@@ -685,10 +685,10 @@ const CreateCompany: any = () => {
       address: address,
       country: data.country || "",
       employees: data.numberOfEmployee,
-      industry_id: data.industryId,
-      sector_id: data.sectorId,
+      industry_id: data.industry_id,
+      sector_id: data.sector_id,
       from_template: fromTemplate,
-      other_company_id: fromTemplate === "Other Company" ? otherCompanyId : 0,
+      other_company_id: fromTemplate === "others" ? otherCompanyId : 0,
       other_company: data.other_company,
       phone_number: data.phone_number,
       tax_id: data.taxId,
@@ -712,6 +712,8 @@ const CreateCompany: any = () => {
       status: data.activeStatus,
       parent: companyParent,
     };
+    console.log(payload);
+    
     createCompany(payload);
   };  
   return (
