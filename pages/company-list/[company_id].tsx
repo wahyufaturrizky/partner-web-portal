@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Text,
   Col,
@@ -353,7 +353,7 @@ const schema = yup
     language: yup.string().required("Language is Required"),
     source_exchange: yup.string().default(""),
     country: yup.string().required("Country is Required"),
-    industry: yup.string().default(""),
+    industry_id: yup.string().default(""),
     numberOfEmployee: yup.string().default(""),
     sector: yup.string().default(""),
     fromTemplate: yup.string().default("none"),
@@ -405,9 +405,6 @@ const DetailCompany: any = () => {
 
   const [searchTimezone, setSearchTimezone] = useState();
 
-  // const [searchCountry, setSearchCountry] = useState();
-
-  // const [industryList, setIndustryList] = useState(IndustryDataFake);
   const [sectorList, setSectorList] = useState([]);
 
   const [address, setAddress] = useState("");
@@ -431,9 +428,11 @@ const DetailCompany: any = () => {
   const [searchIndustry, setSearchIndustry] = useState("");
   const [searchSegment, setSearchSegment] = useState("");
   const [searchOtherCompany, setSearchOtherCompany] = useState("");
-  const [otherCompanyId, setOtherCompanyId] = useState(company_id);
+  const [otherCompanyId, setOtherCompanyId] = useState("");
+  const [countryId, setCountryId] = useState("");
   const [industryId, setIndustryId] = useState("");
-
+  const [segmentId, setSegmentId] = useState("");
+  const [companyParent, setCompanyParent] = useState("");
   const debounceFetch = useDebounce(
       searchCountry ||
       searchSegment ||
@@ -458,9 +457,9 @@ const DetailCompany: any = () => {
     isLoading: isLoadingCompanyData,
     isFetching: isFetchingCompanyData,
   } = useCompany({
-    id: otherCompanyId,
+    id: company_id,
     options: {
-      onSuccess: (data: any) => {
+      onSuccess: (data: any) => {        
         setAddress(data.address);
         setFoto(data.logo);
         setFromTemplate(data.fromTemplate);
@@ -472,9 +471,10 @@ const DetailCompany: any = () => {
         setValue("language", data.language);
         setValue("source_exchange", data.sourceExchange);
         setValue("country", data.country);
-        setValue("industry", data.industry);
+        setValue("industry", data.industryId);
+        setValue("phone_number", data.phoneNumber);
         setValue("numberOfEmployee", data.employees);
-        setValue("sector", data.sector);
+        setValue("sector", data.sectorId);
         setValue("fromTemplate", data.fromTemplate);
         setValue("companyType", data.companyType);
         setValue("corporate", data.corporate);
@@ -489,10 +489,34 @@ const DetailCompany: any = () => {
         setValue("pricingStructure", data.pricingStructure);
         setValue("external_code", data.externalCode);
         setValue("fiscal_year", data.fiscalYear);
+        setOtherCompanyId(data.otherCompanyId);
+        setCompanyParent(data?.parent);
+        setCountryId(data.country);
+        setIndustryId(data.industryId);
+        setSegmentId(data.sectorId);
       },
     },
   });
 
+  const [queryParam, setQueryParam] = useState<any>({
+			search: debounceFetch,
+			limit: 10,
+		})
+
+  useEffect(() => {
+    if (countryId) {
+      console.log("masuk");
+      
+       setQueryParam({...queryParam, country_id: countryId})
+    }
+    if (industryId) {
+       setQueryParam({...queryParam, country_id: countryId,industry_id: industryId})
+    }
+    if (segmentId) {
+       setQueryParam({...queryParam, country_id: countryId,industry_id: industryId,sector_id: segmentId})
+    }
+  },[countryId,industryId,segmentId]);
+  
   const activeStatus = [
     { id: "Active", value: `<div key="1" style="color:green;">${lang[t].companyList.tertier.active}</div>` },
     { id: "Unactive", value: `<div key="2" style="color:red;">${lang[t].companyList.tertier.nonActive}</div>` },
@@ -627,10 +651,7 @@ const DetailCompany: any = () => {
 		hasNextPage: hasNextCompany,
 		fetchNextPage: fetchNextCompany,
 	} = useCompanyInfiniteLists({
-		query: {
-			search: debounceFetch,
-			limit: 10,
-		},
+		query: queryParam,
 		options: {
 			onSuccess: (data: any) => {
 				setTotalRowsCompanyList(data.pages[0].totalRow);
@@ -655,14 +676,6 @@ const DetailCompany: any = () => {
 			},
 		},
 	});
-  // const { data: menuDesignData, isLoading: isLoadingMenuDesignList } = useMenuDesignLists({
-  //   options: {
-  //     onSuccess: (data) => {},
-  //   },
-  //   query: {
-  //     search: searchMenuDesign,
-  //   },
-  // });
 
   const { data: currencyData, isLoading: isLoadingCurrencyList } = useCurrenciesMDM({
     options: {
@@ -673,14 +686,6 @@ const DetailCompany: any = () => {
     },
   });
 
-  const { data: countryData, isLoading: isLoadingCountryList } = useCountries({
-    options: {
-      onSuccess: (data) => {},
-    },
-    query: {
-      search: searchCountry,
-    },
-  });
 
   const { data: timezoneData, isLoading: isLoadingTimezoneList } = useTimezones({
     options: {
@@ -696,16 +701,6 @@ const DetailCompany: any = () => {
     query: {},
   });
 
-  const handleSearchIndustry = (value) => {
-    const newIndustry = IndustryDataFake.filter((tz) => tz.value.includes(value));
-    setIndustryList(newIndustry);
-  };
-
-  const handleSelectIndustry = (value) => {
-    setValue("industry", value);
-    const filterIndustry = industryList.filter((tz) => tz.value.includes(value));
-    setSectorList(filterIndustry[0].data);
-  };
 
   const { mutate: updateCompany, isLoading: isLoadingUpdateCompany } = useUpdateCompany({
     id: company_id,
@@ -740,10 +735,13 @@ const DetailCompany: any = () => {
       email: data.email,
       address: address,
       country: data.country || "",
-      industry: data.industry,
+      industry_id: data.industry_id,
       employees: data.numberOfEmployee,
-      sector: data.sector,
+      sector_id: data.sector,
       from_template: fromTemplate,
+      other_company_id: fromTemplate === "others" ? otherCompanyId : null,
+      other_company: data.other_company,
+      phone_number: data.phone_number,
       tax_id: data.taxId,
       pkp: data.isPkp,
       logo: foto,
@@ -763,8 +761,8 @@ const DetailCompany: any = () => {
       fiscal_year: `${data.fiscal_year}`,
       external_code: data.external_code,
       status: data.activeStatus,
+      parent: companyParent,
     };
-    // console.log(payload);
     updateCompany(payload);
   };
 
@@ -850,15 +848,15 @@ const DetailCompany: any = () => {
                     </Radio>
                     <Radio
                       value={"companyInternal"}
-                      checked={fromTemplate == "eDot"}
-                      onChange={(e: any) => setFromTemplate("eDot")}
+                      checked={fromTemplate == "edot"}
+                      onChange={(e: any) => setFromTemplate("edot")}
                     >
                       eDOT
                     </Radio>
                     <Radio
                       value={"companyInternal"}
-                      checked={fromTemplate == "Other Company"}
-                      onChange={(e: any) => setFromTemplate("Other Company")}
+                      checked={fromTemplate == "others"}
+                      onChange={(e: any) => setFromTemplate("others")}
                     >
                       {lang[t].companyList.otherCompany}
                     </Radio>
@@ -866,11 +864,12 @@ const DetailCompany: any = () => {
                 </Col>
                 <Col width="50%">
                   {/* For company */}
-                  {fromTemplate === "Other Company" && (
+                  {fromTemplate === "others" && (
                   <Col width="100%">
                     <Controller
                       control={control}
                       name="other_company"
+                      defaultValue={companyData.otherCompany}
                       render={({ field: { onChange }, fieldState: { error } }) => (
                         <>
                           <Label>
@@ -878,6 +877,7 @@ const DetailCompany: any = () => {
                           </Label>
                           <Spacer size={3} />
                           <FormSelect
+                            defaultValue={companyData.otherCompany}
                             height="48px"
                             style={{ width: "100%" }}
                             size={"large"}
@@ -956,7 +956,7 @@ const DetailCompany: any = () => {
                     label="Phone Number"
                     height="48px"
                     placeholder={"e.g JL. Soekarno Hatta"}
-                    defaultValue={companyData.phone_number}
+                    defaultValue={companyData.phoneNumber}
                     error={errors?.phone_number?.message}
                     required
                     {...register("phone_number", { required: true })}
@@ -1002,6 +1002,7 @@ const DetailCompany: any = () => {
                           onChange={(value: any) => {
                             onChange(value);
                             setValue("country",value);
+                            setCountryId(value);
                           }}
                           onSearch={(value: any) => {
                             setSearchCountry(value);
@@ -1054,7 +1055,7 @@ const DetailCompany: any = () => {
                           items={isFetchingIndustry && !isFetchingMoreIndustry ? [] : industryList}
                           onChange={(value: any) => {
                             onChange(value);
-                            setValue("industry_id",value);
+                            setValue("industry",value);
                             setIndustryId(value);
                           }}
                           onSearch={(value: any) => {
@@ -1096,7 +1097,8 @@ const DetailCompany: any = () => {
                           items={isFetchingSegment && !isFetchingMoreSegment ? [] : segmentList}
                           onChange={(value: any) => {
                             onChange(value);
-                            setValue("segment_id",value);
+                            setValue("sector",value);
+                            setSegmentId(value);
                           }}
                           onSearch={(value: any) => {
                             setSearchSegment(value);
@@ -1439,17 +1441,6 @@ const DetailCompany: any = () => {
                       />
                     )}
                   />
-                  {/* <DatePickerInput
-                    fullWidth
-                    placeholder="YYYY"
-                    onChange={(date: any, dateString: any) =>
-                      setValue("fiscal_year", Number(dateString))
-                    }
-                    label="Fiscal Year"
-                    picker="year"
-                    defaultValue={moment(toString(companyData.fiscalYear))}
-                    format={"YYYY"}
-                  /> */}
                 </Col>
               </Row>
             </Accordion.Body>

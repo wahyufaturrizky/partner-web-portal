@@ -400,16 +400,8 @@ const CreateCompany: any = () => {
   const [searchCoa, setSearchCoa] = useState("");
 
   const [searchCurrency, setSearchCurrency] = useState("");
-
-  const [searchFromTemplate, setSearchFromTemplate] = useState("");
-
-  const [searchTimezone, setSearchTimezone] = useState();
-
-  // const [searchCountry, setSearchCountry] = useState();
-
-  // const [industryList, setIndustryList] = useState(IndustryDataFake);
-  const [sectorList, setSectorList] = useState([]);
-  const companyCode = localStorage.getItem("companyCode")
+  const [searchTimezone, setSearchTimezone] = useState("");
+  const companyCode = localStorage.getItem("companyCode");
   const [address, setAddress] = useState("");
   const [search, setSearch] = useState({
     language: "",
@@ -437,7 +429,9 @@ const CreateCompany: any = () => {
 
   const [industryId, setIndustryId] = useState("");
   const [countryId, setCountryId] = useState("");
-
+  const [segmentId, setSegmentId] = useState("");
+  const [companyParent, setCompanyParent] = useState("");
+  
   const debounceFetch = useDebounce(
       searchCountry ||
       searchSegment ||
@@ -445,6 +439,22 @@ const CreateCompany: any = () => {
       searchIndustry,
     1000
   );
+  const [queryParam, setQueryParam] = useState<any>({
+			search: debounceFetch,
+			limit: 10,
+		})
+
+  useEffect(() => {
+    if (countryId) {
+       setQueryParam({...queryParam, country_id: countryId})
+    }
+    if (industryId) {
+       setQueryParam({...queryParam, country_id: countryId,industry_id: industryId})
+    }
+    if (segmentId) {
+       setQueryParam({...queryParam, country_id: countryId,industry_id: industryId,sector_id: segmentId})
+    }
+  },[countryId,industryId,segmentId]);  
   const {
     register,
     handleSubmit,
@@ -590,10 +600,7 @@ const CreateCompany: any = () => {
 		hasNextPage: hasNextCompany,
 		fetchNextPage: fetchNextCompany,
 	} = useCompanyInfiniteLists({
-		query: {
-			search: debounceFetch,
-			limit: 10,
-		},
+		query: queryParam,
 		options: {
 			onSuccess: (data: any) => {
 				setTotalRowsCompanyList(data.pages[0].totalRow);
@@ -601,6 +608,7 @@ const CreateCompany: any = () => {
 					return group.rows?.map((element: any) => {
 						return {
               id: element.id,
+              parent:element.parent,
 							label: element.name,
 							value: element.name,
 						};
@@ -618,14 +626,6 @@ const CreateCompany: any = () => {
 			},
 		},
 	});
-  // const { data: menuDesignData, isLoading: isLoadingMenuDesignList } = useMenuDesignLists({
-  //   options: {
-  //     onSuccess: (data) => {},
-  //   },
-  //   query: {
-  //     search: searchMenuDesign,
-  //   },
-  // });
 
   const { data: currencyData, isLoading: isLoadingCurrencyList } = useCurrenciesMDM({
     options: {
@@ -658,45 +658,6 @@ const CreateCompany: any = () => {
       },
     },
   });  
-  const {
-    data: companyData,
-    isLoading: isLoadingCompanyData,
-    isFetching: isFetchingCompanyData,
-  } = useCompany({
-    id: otherCompanyId,
-    options: {
-      onSuccess: (data: any) => {
-        setAddress(data?.address);
-        setFoto(data?.logo);
-        setFromTemplate(fromTemplate);
-        setValue("name", data?.name);
-        setValue("code", data?.code);
-        setValue("email", data?.email);
-        setValue("address", data?.address);
-        setValue("taxId", data?.taxId);
-        setValue("language", data?.language);
-        setValue("source_exchange", data?.sourceExchange);
-        setValue("country", data?.country);
-        setValue("industry", data?.industry);
-        setValue("numberOfEmployee", data?.employees);
-        setValue("sector", data?.sector);
-        setValue("fromTemplate", fromTemplate);
-        setValue("companyType", data?.companyType);
-        setValue("corporate", data?.corporate);
-        setValue("currency", data?.currency);
-        setValue("coaTemplate", data?.coa);
-        setValue("formatDate", data?.formatDate);
-        setValue("numberFormat", data?.formatNumber);
-        setValue("timezone", data?.timezone);
-        setValue("isPkp", data?.pkp);
-        setValue("advanceApproval", data?.advanceApproval);
-        setValue("retailPricing", data?.retailPricing);
-        setValue("pricingStructure", data?.pricingStructure);
-        setValue("external_code", data?.externalCode);
-        setValue("fiscal_year", data?.fiscalYear);
-      },
-    },
-  });
 
   const { mutate: uploadLogo, isLoading: isLoadingUploadLogo } = useUploadLogoCompany({
     options: {
@@ -723,10 +684,10 @@ const CreateCompany: any = () => {
       address: address,
       country: data.country || "",
       employees: data.numberOfEmployee,
-      industry_id: data.industry_id,
-      sector_id: data.sector_id,
+      industry_id: data.industryId,
+      sector_id: data.sectorId,
       from_template: fromTemplate,
-      other_company_id: fromTemplate === "Other Company" ? otherCompanyId : null,
+      other_company_id: fromTemplate === "others" ? otherCompanyId : null,
       other_company: data.other_company,
       phone_number: data.phone_number,
       tax_id: data.taxId,
@@ -748,9 +709,8 @@ const CreateCompany: any = () => {
       fiscal_year: `${data.fiscal_year}`,
       external_code: data.external_code,
       status: data.activeStatus,
-      parent: fromTemplate === "Other Company" ? `${otherCompanyId}` : null,
+      parent: companyParent,
     };
-    console.log(payload);
     createCompany(payload);
   };  
   return (
@@ -833,8 +793,8 @@ const CreateCompany: any = () => {
                     </Radio>
                     <Radio
                       value={"companyInternal"}
-                      checked={fromTemplate == "Other Company"}
-                      onChange={(e: any) => setFromTemplate("Other Company")}
+                      checked={fromTemplate == "others"}
+                      onChange={(e: any) => setFromTemplate("others")}
                     >
                       {lang[t].companyList.otherCompany}
                     </Radio>
@@ -842,7 +802,7 @@ const CreateCompany: any = () => {
                 </Col>
                 <Col width="50%">
                   {/* For company */}
-                  {fromTemplate === "Other Company" && (
+                  {fromTemplate === "others" && (
                   <Col width="100%">
                     <Controller
                       control={control}
@@ -873,6 +833,7 @@ const CreateCompany: any = () => {
                               onChange(value);
                               setValue("other_company",value);
                               setOtherCompanyId(companyList.filter((e: { value: any; }) => e.value === value)[0]?.id)
+                              setCompanyParent(companyList.filter((e: { value: any; }) => e.value === value)[0]?.parent)
                             }}
                             onSearch={(value: any) => {
                               setSearchOtherCompany(value);
@@ -947,7 +908,6 @@ const CreateCompany: any = () => {
                         message: "Please enter country.",
                       },
                     }}
-                    defaultValue={companyData?.country}
                     render={({ field: { onChange }, fieldState: { error } }) => (
                       <>
                         <Label>
@@ -955,7 +915,6 @@ const CreateCompany: any = () => {
                         </Label>
                         <Spacer size={3} />
                         <FormSelect
-                          defaultValue={companyData?.country}
                           error={error?.message}
                           height="48px"
                           style={{ width: "100%" }}
@@ -975,6 +934,7 @@ const CreateCompany: any = () => {
                           onChange={(value: any) => {
                             onChange(value);
                             setValue("country",value);
+                            setCountryId(value);
                           }}
                           onSearch={(value: any) => {
                             setSearchCountry(value);
@@ -1067,6 +1027,7 @@ const CreateCompany: any = () => {
                           onChange={(value: any) => {
                             onChange(value);
                             setValue("sector_id",value);
+                            setSegmentId(value);
                           }}
                           onSearch={(value: any) => {
                             setSearchSegment(value);
@@ -1102,7 +1063,7 @@ const CreateCompany: any = () => {
                   />
                   <Row>
                     <Text variant="body1">PKP ? </Text>
-                    <Switch defaultChecked={companyData ? companyData?.pkp : false} onChange={(value) => setValue("isPkp", value)} />
+                    <Switch onChange={(value) => setValue("isPkp", value)} />
                   </Row>
                 </Col>
               </Row>
