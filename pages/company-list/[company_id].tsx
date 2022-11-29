@@ -506,9 +506,7 @@ const DetailCompany: any = () => {
 		})
 
   useEffect(() => {
-    if (countryId) {
-      console.log("masuk");
-      
+    if (countryId) {      
        setQueryParam({...queryParam, country_id: countryId})
     }
     if (industryId) {
