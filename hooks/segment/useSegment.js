@@ -1,8 +1,8 @@
 import { useInfiniteQuery, useQuery } from "react-query";
-import { client } from "../../lib/client";
+import { client, client3 } from "../../lib/client";
 
 const fetchSegments = async ({ query = {} }) => {
-  return client(`/sector`, {
+  return client3(`/sector`, {
     params: {
       search: "",
       limit: 10000,
@@ -23,7 +23,7 @@ const useSegments = ({ query = {}, options } = {}) => {
 
 const fetchInfiniteSegment = async ({ pageParam = 1, queryKey }) => {
   const searchQuery = queryKey[1].search;
-  return client(`/sector`, {
+  return client3(`/sector`, {
     params: {
       search: searchQuery,
       limit: 20,

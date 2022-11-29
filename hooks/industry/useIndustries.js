@@ -1,8 +1,8 @@
 import { useInfiniteQuery, useQuery } from "react-query";
-import { client } from "../../lib/client";
+import { client, client3 } from "../../lib/client";
 
 const fetchIndustries = async ({ query = {} }) => {
-  return client(`/industry`, {
+  return client3(`/industry`, {
     params: {
       search: "",
       limit: 10000,
@@ -23,7 +23,7 @@ const useIndustries = ({ query = {}, options } = {}) => {
 
 const fetchInfiniteIndustry = async ({ pageParam = 1, queryKey }) => {
   const searchQuery = queryKey[1].search;
-  return client(`/industry`, {
+  return client3(`/industry`, {
     params: {
       search: searchQuery,
       limit: 20,
