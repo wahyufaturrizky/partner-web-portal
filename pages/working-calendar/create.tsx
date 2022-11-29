@@ -25,7 +25,7 @@ const CompanyIcon = (props: any) => <Icon component={CompanySvg} {...props} />;
 
 const WorkingCalendarCreate = () => {
   const router = useRouter();
-
+  const companyCode = localStorage.getItem("companyCode");
   const [statusCard, setStatusCard] = useState("country");
   const [workingDaysPayload, setWorkingDaysPayload] = useState([
     false,
@@ -84,6 +84,7 @@ const WorkingCalendarCreate = () => {
       company: companyPayload,
       country: countryPayload,
       working_days: workingDaysPayload,
+      company_id: companyCode,
     };
 
     createWorkingCalendar(formData);
