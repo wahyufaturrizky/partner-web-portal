@@ -2,6 +2,7 @@ import { useQuery, useMutation, useInfiniteQuery } from "react-query";
 import { client, mdmService } from "../../lib/client";
 
 const fetchRolePermissions = async ({ query = {} }) => {
+  const companyCode = localStorage.getItem("companyCode")
   return client(`/role-permission`, {
     params: {
       search: "",
@@ -10,6 +11,7 @@ const fetchRolePermissions = async ({ query = {} }) => {
       sortBy: "id",
       sortOrder: "asc",
       ...query,
+      company_id: companyCode
     },
   }).then((data) => data);
 };
