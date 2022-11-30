@@ -33,11 +33,12 @@ const useBusinessProcess = ({ id, options }) => {
 };
 
 function useCreateBusinessProcess({ options }) {
+  const companyCode = localStorage.getItem("companyCode")
   return useMutation(
     (data) =>
       client(`/bprocess`, {
         method: "POST",
-        data,
+        data: {...data, company_id: companyCode},
       }),
     {
       ...options,
