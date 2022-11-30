@@ -54,7 +54,7 @@ const SequenceNumber = () => {
       search,
       page: pagination.page,
       limit: pagination.itemsPerPage,
-      company_id: companyId
+      company_id: companyCode
     },
   });
 
