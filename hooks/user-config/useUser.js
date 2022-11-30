@@ -75,7 +75,7 @@ function useCreateUser({ options }) {
 }
 
 const fetchUser = async ({ user_id }) => {
-  return client(`/user/${user_id}`).then((data) => data);
+  return client(`/partner-user/${user_id}`).then((data) => data);
 };
 
 const useUser = ({ user_id, options }) => {
