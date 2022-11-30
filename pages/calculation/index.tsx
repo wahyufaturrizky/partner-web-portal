@@ -85,20 +85,23 @@ const Calculation = () => {
     isFetching: isFetchingCalculation,
   } = useCalculations({
     query: {
+      company_id: "HERMES",
       search: debounceSearch,
       page: pagination.page,
       limit: pagination.itemsPerPage,
     },
     options: {
       onSuccess: (data: any) => {
-        pagination.setTotalItems(data.totalRow);
+        pagination?.setTotalItems(data.totalRow);
       },
       select: (data: any) => {
         let payment = 0
         const mappedData = data?.rows?.map((element: any) => {
           const companyName = companyList.filter(el => el.companyId === element.companyId)[0]?.value?.split(' - ')[0]
-          const newMenu = element.modules?.map(el => el)?.map(e => e.menus)[0]?.map(e => e.menu.name)?.slice()?.join(', ')
+          const newMenu = element.modules?.map((el: { name: string; }) => el.name)
+          console.log(newMenu)
             payment += +element?.totalPayment
+            console.log(payment)
             return {
               key: element.id,
               id: element.id,
@@ -142,7 +145,7 @@ const Calculation = () => {
               ),
             };
           });
-
+          console.log(mappedData, '<<<mapped')
           paymentButton?.threeMonths? payment = (payment * 3) - (payment * 3 * 0.1) :
           paymentButton?.sixMonths? payment = (payment * 6) - (payment * 6 * 0.25) :
           paymentButton?.twelveMonths? payment = (payment * 12) - (payment * 12 * 0.5) : payment
