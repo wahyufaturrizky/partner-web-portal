@@ -2,6 +2,7 @@ import { useQuery, useMutation } from "react-query";
 import { client } from "../../lib/client";
 
 const fetchConfigs = async ({ query = {} }) => {
+	const companyCode = localStorage.getItem("companyCode")
 	return client(`/module`, {
 		params: {
 			search: "",
@@ -10,6 +11,7 @@ const fetchConfigs = async ({ query = {} }) => {
 			sortBy: "id",
 			sortOrder: "asc",
 			...query,
+			company_id: companyCode
 		},
 	}).then((data) => data);
 };
