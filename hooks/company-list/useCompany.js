@@ -132,6 +132,7 @@ const useDeleteCompany = ({ options }) => {
 // list Date Format
 
 const fetchDateFormatLists = async ({ query = {} }) => {
+  const companyCode = localStorage.getItem("companyCode")
   return client(`/formatting/date`, {
     params: {
       // search: "",
@@ -140,6 +141,7 @@ const fetchDateFormatLists = async ({ query = {} }) => {
       sortBy: "id",
       sortOrder: "DESC",
       ...query,
+      company_id: companyCode
     },
   }).then((data) => data);
 };
@@ -154,6 +156,7 @@ const useDateFormatLists = ({ query = {}, options } = {}) => {
 // List Number Format
 
 const fetchNumberFormatLists = async ({ query = {} }) => {
+  const companyCode = localStorage.getItem("companyCode")
   return client(`/formatting/number`, {
     params: {
       // search: "",
@@ -162,6 +165,7 @@ const fetchNumberFormatLists = async ({ query = {} }) => {
       sortBy: "id",
       sortOrder: "DESC",
       ...query,
+      company_id: companyCode
     },
   }).then((data) => data);
 };

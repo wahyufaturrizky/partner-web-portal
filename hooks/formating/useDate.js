@@ -2,6 +2,7 @@ import { useQuery } from "react-query";
 import { client } from "../../lib/client";
 
 const fetchDateFormatLists = async ({ query = {} }) => {
+	const companyCode = localStorage.getItem("companyCode")
 	return client(`/formatting/date`, {
 		params: {
 			search: "",
@@ -10,6 +11,7 @@ const fetchDateFormatLists = async ({ query = {} }) => {
 			sortBy: "id",
 			sortOrder: "DESC",
 			...query,
+			company_id: companyCode
 		},
 	}).then((data) => data);
 };
