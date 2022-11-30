@@ -53,11 +53,12 @@ const usePartnerConfigPermissionList = ({ partner_config_menu_list_id, options }
 };
 
 function useUpdatePartnerConfigPermissionList({ partnerConfigPermissionListId, options }) {
+  const companyCode = localStorage.getItem("companyCode")
   return useMutation(
     (updates) =>
       client(`/partner-permission/${partnerConfigPermissionListId}`, {
         method: "PUT",
-        data: updates,
+        data: {...updates, company_id: companyCode},
       }),
     {
       ...options,
