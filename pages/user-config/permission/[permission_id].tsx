@@ -297,7 +297,7 @@ const DetailPartnerConfigPermissionList: any = () => {
                               : viewTypeList
                           }
                           onChange={(value: any) => {
-                            setValue("viewType", value);
+                            setValue("viewTypes", [value]);
                           }}
                           onSearch={(value: any) => {
                             setSearchViewType(value);
