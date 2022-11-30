@@ -28,7 +28,7 @@ import { useBranchInfiniteLists } from 'hooks/mdm/branch/useBranch';
 import { useUsers } from 'hooks/user-config/useUser';
 import usePagination from '@lucasmogari/react-pagination';
 import { useCalculationModules } from 'hooks/calculation-config/useCalculation';
-import { useRolePermissions } from 'hooks/role/useRole';
+import { useRolePermissions } from 'hooks/user-config/useRole';
 
 
 
@@ -60,6 +60,9 @@ const ModalCalculation = ({
     const [totalRowsBranchList, setTotalRowsBranchList] = useState(0)
     const [searchBranch, setSearchBranch] = useState("");
     const debounceFetchBranch = useDebounce(searchBranch, 1000);
+    
+    const [searchRole, setSearchRole] = useState("");
+    const debounceFetchRole = useDebounce(searchRole, 1000);
 
     const [openAdvanceView, setOpenAdvanceView] = useState(false)
     const [searchUsers, setSearchUsers] = useState("");
@@ -122,10 +125,10 @@ const ModalCalculation = ({
 				pagination.setTotalItems(data.totalRow);
 			},
             select: (data: any) => {
-                const mappedData = data?.rows?.map((element: { name: any; id: any; }) => ({
+                const mappedData = data?.rows?.map((element: { name: any; id: any; company: any }) => ({
                     label: element.name,
                     value: element.id,
-                    company: "PT. Kaldu Sari Nabati"
+                    company: element?.company?.name
                 }))
                 const flattenArray = [].concat(...mappedData);
 
@@ -136,7 +139,7 @@ const ModalCalculation = ({
             }
 		},
 		query: {
-			// search,
+			search: debounceFetchRole,
 			page: pagination.page,
 			limit: pagination.itemsPerPage,
 			company_id: companyCode,
@@ -236,7 +239,6 @@ const ModalCalculation = ({
 		},
 	});
 
-    // console.log(users, '<<<< list of users')
     const columns = [
 		{
 			title: "Name",
@@ -281,15 +283,14 @@ const ModalCalculation = ({
         isFetching: isFetchingCalculationModules,
       } = useCalculationModules({
         options: {
-            onSuccess: (data: { testData: React.SetStateAction<never[]>; }) => {
-                setModuleSelected(data.testData[0]?.id)
-                setCalculationData(data.testData)
+            onSuccess: (data: { newMappedModules: React.SetStateAction<never[]>; }) => {
+                setModuleSelected(data.newMappedModules[0]?.id)
+                setCalculationData(data.newMappedModules)
                 setCount(count => count + data.countData)
             },
           select: (data: any) => {
-            // console.log(data, '<<<<<data module')
-            let data2mapped: string | any[] = []
-            let testData = data?.map((e: { moduleId: any; moduleName: any; menu: any[]; }) => {
+            let menusFromModules: string | any[] = []
+            let newMappedModules = data?.map((e: { moduleId: any; moduleName: any; menu: any[]; }) => {
                 return {
                     id: e.moduleId,
                     name: e.moduleName,
@@ -305,13 +306,13 @@ const ModalCalculation = ({
             })
 
             if(defaultValue){
-                data2mapped = defaultValue?.modules?.map((module: { menus: any; }) => module.menus).map((menu: any[]) => menu.map(el => el.menu.id))?.flatMap((e: any) => e)
-                testData = testData?.map(el => {
+                menusFromModules = defaultValue?.modules?.map((module: { menus: any; }) => module.menus)?.flatMap((e: any) => e)
+                newMappedModules = newMappedModules?.map(el => {
                     return {
                         ...el,
                         menu: el?.menu?.map(e => {
-                        for(let i = 0; i < data2mapped.length; i++){
-                            if(data2mapped[i] === e.id){
+                        for(let i = 0; i < menusFromModules.length; i++){
+                            if(menusFromModules[i]?.id === e.id){
                             return {
                                 ...e,
                                 checked:true
@@ -324,11 +325,11 @@ const ModalCalculation = ({
                     }
                     })
             }
-            // console.log(testData, '<<<<<< ini data modules')
+            console.log(newMappedModules, '<<<<<< ini data modules')
             return { 
                 totalRow: data.totalRow, 
-                testData,
-                countData: data2mapped.length
+                newMappedModules,
+                countData: menusFromModules.length
             };
           },
         },
@@ -336,7 +337,7 @@ const ModalCalculation = ({
 
       useEffect(() => {
         const moduleIdFromDefaultValue = defaultValue?.modules?.map((module: { id: any; }) => module.id)
-        setInputWithTagsValue(defaultValue?.users?.map(e => e.name))
+        setInputWithTagsValue(defaultValue?.users?.map(e => e.fullname))
         setSelectedRowKeys(defaultValue?.users?.map(e => e.id))
         setModuleSelected(moduleIdFromDefaultValue)
         
@@ -367,46 +368,47 @@ const ModalCalculation = ({
     }
 
     const onAdd = (data: any) => {
-        const newCalculationData = calculationData.map(e => e.menu.filter(el => el.checked === true))
-        const menu_ids = newCalculationData[0]?.map(element => element.id?.toString())
-        const array_of_fee = newCalculationData[0]?.map(el => el?.price)
+        const newCalculationData = calculationData.map(module => module?.menu?.filter((menu: { checked: boolean; }) => menu.checked === true))
+        const array_of_fee = newCalculationData[0]?.map((element: { price: number; }) => element?.price)
         let fee = []
         let total_fee
-        // ini harus di cek ulang terutama kalo data module nya lebih dari satu
-        const module_ids = calculationData?.filter(e => e.menu.map(e => e.name === newCalculationData[0][0]?.name))?.map(el => el.id?.toString())
-        
-        // ini untuk fee
         if(array_of_fee.length >= 1){
-            fee = array_of_fee?.reduce((a, b) => a + b)
-            // ini untuk total fee
+            fee = array_of_fee?.reduce((a: number, b: number) => a + b)
             total_fee = fee * data?.total_user
-        }        
+        }    
+        const modules = calculationData?.map((module: {id: any; menu: any}) => {
+            const menu_ids = module?.menu?.filter((element: { checked: boolean; }) => element?.checked === true)?.map((menu: { id: any; }) => menu.id)
+            if(menu_ids?.length > 0){
+                return {
+                    module_ids: [module.id?.toString()],
+                    menu_ids
+                }
+            }
+        })
+            
         const newDataCreate = {
             ...data,
-            company_id: radioValue === "new"? data?.company_id : companyList?.filter(el => el.label === companyFromRole)[0]?.value,
-            menu_ids,
-            module_ids,
+            company_id: radioValue === "new"? data?.company_id : companyList?.filter(el => el?.label === companyFromRole)[0]?.value,
+            modules,
             fee,
             total_fee,
             user_ids: selectedRowKeys,
             period: "1",
             role_id: data?.role_id?? "1",
+            role_name: radioValue === "new" ? data?.role_name : roleData?.data?.find(role => role?.value === +data?.role_id)?.label,
             total_payment: total_fee,
             assign_payment: 'holding'
         }
+
         onOk(newDataCreate)
         
     }
 
     const onEdit = (data: any) => {
         const newCalculationData = calculationData.map(e=> e?.menu?.filter(el => el?.checked === true))
-        const menu_ids = newCalculationData[0]?.map(element => element.id)
         const array_of_fee = newCalculationData[0]?.map(el => el?.price)
         let fee = []
         let total_fee
-        console.log(newCalculationData, '<<<<')
-        // ini harus di cek ulang terutama kalo data module nya lebih dari satu
-        const module_ids = calculationData?.filter(e => e.menu.map(e => e.name === newCalculationData[0][0]?.name))?.map(el => el.id)
         
         if(array_of_fee.length >= 1){
             fee = array_of_fee?.reduce((a, b) => a + b)
@@ -416,11 +418,19 @@ const ModalCalculation = ({
                 total_fee = fee * data?.totalUser
             }
         }
-
+        const modules = calculationData?.map((module: {id: any; menu: any}) => {
+            const menu_ids = module?.menu?.filter((element: { checked: boolean; }) => element?.checked === true)?.map((menu: { id: any; }) => menu.id)
+            if(menu_ids?.length > 0){
+                return {
+                    module_ids: [module.id?.toString()],
+                    menu_ids
+                }
+            }
+        })
         const newDataEdit = {
             company_id: radioValue === "new" && data?.company_id === "" ? data?.companyId : radioValue === "new" && data?.company_id !== "" ? data?.company_id : companyList?.filter(el => el.label === companyFromRole)[0]?.value,
             role_id: data?.role_id ?? data?.roleId,
-            role_name: data?.role_name,
+            role_name: radioValue === "new" ? data?.role_name : roleData?.data?.find(role => role?.value === +data?.role_id)?.label,
             period: "1",
             branch: data?.branch,
             total_user: data?.total_user?? data?.totalUser,
@@ -428,13 +438,11 @@ const ModalCalculation = ({
             user_ids: selectedRowKeys,
             total_fee,
             total_payment: total_fee,
-            menu_ids,
-            module_ids,
+            modules,
             assign_payment: 'holding'
         }
         onOk(newDataEdit)
     }
-
 
   return (
     <Modal
@@ -529,7 +537,7 @@ const ModalCalculation = ({
                                     }}
                                     onSearch={(value: any) => {
                                         value === '' ? value = ' ' : value
-                                        setSearchCompany(value);
+                                        setSearchRole(value);
                                     }}
                                 />
                                 </Col>
