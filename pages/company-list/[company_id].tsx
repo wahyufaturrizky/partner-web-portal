@@ -386,7 +386,7 @@ const defaultValue = {
 const DetailCompany: any = () => {
   const router = useRouter();
   const t = localStorage.getItem("lan") || "en-US";
-
+  const companyCode = localStorage.getItem("companyCode");
   const { company_id } = router.query;
 
   const pagination = usePagination({
@@ -526,11 +526,17 @@ const DetailCompany: any = () => {
     options: {
       onSuccess: (data) => {},
     },
+    query: {
+      company_id: companyCode
+    },
   });
 
   const { data: numberFormatData, isLoading: isLoadingNumberFormatList } = useNumberFormatLists({
     options: {
       onSuccess: (data) => {},
+    },
+    query: {
+      company_id: companyCode
     },
   });
 
@@ -540,7 +546,7 @@ const DetailCompany: any = () => {
     },
     query: {
       search: searchCoa,
-      company_id: "KSNI"
+      company_id: companyCode
     },
   });
   const {
@@ -552,6 +558,7 @@ const DetailCompany: any = () => {
     query: {
       search: debounceFetch,
       limit: 10,
+      // company_id: companyCode
     },
     options: {
       onSuccess: (data: any) => {
@@ -586,6 +593,7 @@ const DetailCompany: any = () => {
       search: debounceFetch,
       limit: 10,
       industry_id : industryId ? industryId : companyData?.industryId
+      // company_id: companyCode
     },
     options: {
       onSuccess: (data: any) => {
@@ -620,6 +628,7 @@ const DetailCompany: any = () => {
 		query: {
 			search: debounceFetch,
 			limit: 10,
+      // company_id: companyCode
 		},
 		options: {
 			onSuccess: (data: any) => {
@@ -683,6 +692,7 @@ const DetailCompany: any = () => {
     },
     query: {
       search: searchCurrency,
+      // company_id: companyCode
     },
   });
 
@@ -693,12 +703,15 @@ const DetailCompany: any = () => {
     },
     query: {
       search: searchTimezone,
+      // company_id: companyCode
     },
   });
 
   const { data: listLanguage } = useLanguages({
     options: { onSuccess: () => {} },
-    query: {},
+    query: {
+      company_id: companyCode
+    },
   });
 
 

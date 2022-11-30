@@ -15,6 +15,7 @@ const schema = yup
 
 const CreateConfig: any = () => {
 	const router = useRouter();
+	const companyCode = localStorage.getItem("companyCode");
 	const {
 		register,
 		handleSubmit,
@@ -33,7 +34,11 @@ const CreateConfig: any = () => {
 	});
 
 	const onSubmit = (data) => {
-		createConfig(data);
+		const payload = {
+			...data,
+			company_id: companyCode
+		}
+		createConfig(payload);
 	};
 
 	const { data: configs, refetch: refetchConfig } = useConfigs();

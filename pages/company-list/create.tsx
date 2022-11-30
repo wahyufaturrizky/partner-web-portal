@@ -443,6 +443,7 @@ const CreateCompany: any = () => {
   const [queryParam, setQueryParam] = useState<any>({
 			search: debounceFetch,
 			limit: 10,
+      company_id: companyCode
 		})
 
   useEffect(() => {
@@ -476,11 +477,17 @@ const CreateCompany: any = () => {
     options: {
       onSuccess: (data) => {},
     },
+    query: {
+      company_id: companyCode
+    },
   });
 
   const { data: numberFormatData, isLoading: isLoadingNumberFormatList } = useNumberFormatLists({
     options: {
       onSuccess: (data) => {},
+    },
+    query: {
+      company_id: companyCode
     },
   });
 
@@ -502,6 +509,7 @@ const CreateCompany: any = () => {
     query: {
       search: debounceFetch,
       limit: 10,
+      // company_id: companyCode
     },
     options: {
       onSuccess: (data: any) => {
@@ -535,7 +543,8 @@ const CreateCompany: any = () => {
     query: {
       search: debounceFetch,
       limit: 10,
-      industry_id : industryId
+      industry_id : industryId,
+      // company_id: companyCode
     },
     options: {
       onSuccess: (data: any) => {
@@ -570,6 +579,7 @@ const CreateCompany: any = () => {
 		query: {
 			search: debounceFetch,
 			limit: 10,
+      // company_id: companyCode
 		},
 		options: {
 			onSuccess: (data: any) => {
@@ -634,6 +644,7 @@ const CreateCompany: any = () => {
     },
     query: {
       search: searchCurrency,
+      // company_id: companyCode
     },
   });
 
@@ -643,12 +654,15 @@ const CreateCompany: any = () => {
     },
     query: {
       search: searchTimezone,
+      // company_id: companyCode
     },
   });
 
   const { data: listLanguage } = useLanguages({
     options: { onSuccess: () => {} },
-    query: {},
+    query: {
+      company_id: companyCode
+    },
   });
 
   const { mutate: createCompany } = useCreateCompany({

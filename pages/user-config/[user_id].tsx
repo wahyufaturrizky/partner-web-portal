@@ -41,7 +41,7 @@ const UpdateUserConfig: any = () => {
     const router = useRouter();
     const { user_id } = router.query;
 	const t = localStorage.getItem("lan") || "en-US";
-
+	const companyCode = localStorage.getItem("companyCode");
 	const [defaultValues, setDefaultValues] = useState({})
 
 	const {
@@ -134,7 +134,7 @@ const UpdateUserConfig: any = () => {
 	} = useEmployeeInfiniteLists({
 	query: {
 		search: debounceFetchEmployee,
-		company: "KSNI",
+		company: companyCode,
 		limit: 10
 	},
 	options: {

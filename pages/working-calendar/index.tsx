@@ -41,7 +41,7 @@ const renderConfirmationText = (type: any, data: any) => {
 
 const WorkingCalendar = () => {
   const router = useRouter();
-
+  const companyCode = localStorage.getItem("companyCode");
   const pagination = usePagination({
     page: 1,
     itemsPerPage: 20,
@@ -81,6 +81,7 @@ const WorkingCalendar = () => {
       search: debounceSearch,
       page: pagination.page,
       limit: pagination.itemsPerPage,
+      company_id: companyCode,
     },
     options: {
       onSuccess: (data: any) => {
