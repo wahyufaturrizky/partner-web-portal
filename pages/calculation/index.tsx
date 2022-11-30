@@ -47,7 +47,7 @@ const downloadFile = (params: any) =>
 
 const Calculation = () => {
   const router = useRouter();
-
+  const companyCode = localStorage.getItem("companyCode");
   const pagination = usePagination({
     page: 1,
     itemsPerPage: 20,
@@ -89,6 +89,7 @@ const Calculation = () => {
       search: debounceSearch,
       page: pagination.page,
       limit: pagination.itemsPerPage,
+      company_id: companyCode,
     },
     options: {
       onSuccess: (data: any) => {
@@ -164,6 +165,7 @@ const Calculation = () => {
     query: {
       search: debounceFetchCompany,
       limit: 10,
+      company_id: companyCode,
     },
     options: {
       onSuccess: (data: any) => {
@@ -267,7 +269,7 @@ const Calculation = () => {
 
   const onSubmitFile = (file: any) => {
     const formData = new FormData();
-    formData.append("company_id", "KSNI");
+    formData.append("company_id", companyCode);
     formData.append("file", file);
 
     uploadFileCalculation(formData);

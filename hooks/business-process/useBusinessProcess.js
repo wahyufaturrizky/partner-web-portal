@@ -2,6 +2,7 @@ import { useQuery, useMutation } from "react-query";
 import { client } from "../../lib/client";
 
 const fetchBusinessProcesses = async ({ query = {} }) => {
+  const companyCode = localStorage.getItem("companyCode")
   return client(`/bprocess`, {
     params: {
       search: "",
@@ -10,6 +11,7 @@ const fetchBusinessProcesses = async ({ query = {} }) => {
       sortBy: "created_at",
       sortOrder: "DESC",
       ...query,
+      company_id: companyCode
     },
   }).then((data) => data);
 };
@@ -31,11 +33,12 @@ const useBusinessProcess = ({ id, options }) => {
 };
 
 function useCreateBusinessProcess({ options }) {
+  const companyCode = localStorage.getItem("companyCode")
   return useMutation(
     (data) =>
       client(`/bprocess`, {
         method: "POST",
-        data,
+        data: {...data, company_id: companyCode},
       }),
     {
       ...options,

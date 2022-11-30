@@ -28,7 +28,7 @@ import { queryClient } from "pages/_app";
 const UserConfigUser: any = () => {
   const router = useRouter();
   const t = localStorage.getItem("lan") || "en-US";
-
+  const companyCode = localStorage.getItem("companyCode");
   const pagination = usePagination({
     page: 1,
     itemsPerPage: 20,
@@ -52,6 +52,7 @@ const UserConfigUser: any = () => {
       search: debounceSearch,
       page: pagination.page,
       limit: pagination.itemsPerPage,
+      company_id: companyCode,
     },
     options: {
       onSuccess: (data: any) => {

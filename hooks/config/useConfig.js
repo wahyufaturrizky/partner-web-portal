@@ -2,6 +2,7 @@ import { useQuery, useMutation } from "react-query";
 import { client } from "../../lib/client";
 
 const fetchConfigs = async ({ query = {} }) => {
+	const companyCode = localStorage.getItem("companyCode")
 	return client(`/module`, {
 		params: {
 			search: "",
@@ -10,6 +11,7 @@ const fetchConfigs = async ({ query = {} }) => {
 			sortBy: "id",
 			sortOrder: "asc",
 			...query,
+			company_id: companyCode
 		},
 	}).then((data) => data);
 };
@@ -22,11 +24,12 @@ const useConfigs = ({ query = {}, options } = {}) => {
 };
 
 function useCreateConfig({ options }) {
+	const companyCode = localStorage.getItem("companyCode")
 	return useMutation(
 		(updates) =>
 			client(`/module`, {
 				method: "POST",
-				data: updates,
+				data: {...updates, company_id: companyCode},
 			}),
 		{
 			...options,
@@ -43,11 +46,12 @@ const useConfig = ({ config_id, options = {} }) => {
 };
 
 function useUpdateConfig({ config_id, options }) {
+	const companyCode = localStorage.getItem("companyCode")
 	return useMutation(
 		(updates) =>
 			client(`/module/${config_id}`, {
 				method: "PUT",
-				data: updates,
+				data: {...updates, company_id: companyCode},
 			}),
 		{
 			...options,

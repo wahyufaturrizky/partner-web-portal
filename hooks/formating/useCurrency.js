@@ -2,6 +2,7 @@ import { useQuery } from "react-query";
 import { client } from "../../lib/client";
 
 const fetchCurrencyFormatLists = async ({ query = {} }) => {
+	const companyCode = localStorage.getItem("companyCode")
 	return client(`/formatting/currency`, {
 		params: {
 			search: "",
@@ -10,6 +11,7 @@ const fetchCurrencyFormatLists = async ({ query = {} }) => {
 			sortBy: "id",
 			sortOrder: "DESC",
 			...query,
+			company_id: companyCode
 		},
 	}).then((data) => data);
 };

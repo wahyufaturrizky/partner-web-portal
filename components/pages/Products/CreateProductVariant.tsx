@@ -217,7 +217,7 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
             } else if(key === 'tax') {
               setValue('tax.tax_type', data?.tax?.tax_type);
               setValue('tax.tax_code', data?.tax?.tax_code);
-              setValue('tax.tax_id', data?.tax?.id);
+              setValue('tax.tax_id', data?.tax?.tax_detail?.id);
               setValue('tax.tax_country_id', data?.tax?.tax_country?.id);
               setValue('tax.tax_vendors', data?.tax?.tax_vendors?.map((tax: any) => tax.id));
             } else {

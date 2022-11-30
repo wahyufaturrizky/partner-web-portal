@@ -41,7 +41,7 @@ const ModalCalculation = ({
     title,
     onOk
 }: any) => {
-
+    const companyCode = localStorage.getItem("companyCode");
     const pagination = usePagination({
 		page: 1,
 		itemsPerPage: 20,
@@ -142,7 +142,7 @@ const ModalCalculation = ({
 			search: debounceFetchRole,
 			page: pagination.page,
 			limit: pagination.itemsPerPage,
-            company_id: "HERMES"
+			company_id: companyCode,
 		},
 	});
 
@@ -157,6 +157,7 @@ const ModalCalculation = ({
         query: {
           search: debounceFetchCompany,
           limit: 10000,
+          company_id: companyCode,
         },
         options: {
           onSuccess: (data: any) => {
@@ -191,7 +192,7 @@ const ModalCalculation = ({
         fetchNextPage: fetchNextPageBranch,
       } = useBranchInfiniteLists({
         query: {
-          company_id: "KSNI",
+          company_id: companyCode,
           search: debounceFetchBranch,
           limit: 10,
         },
@@ -234,7 +235,7 @@ const ModalCalculation = ({
 			search: debounceFetchUsers,
 			page: pagination.page,
 			limit: pagination.itemsPerPage,
-            company_id: "HERMES"
+			company_id: companyCode,
 		},
 	});
 

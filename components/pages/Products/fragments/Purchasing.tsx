@@ -10,7 +10,8 @@ import styled from 'styled-components';
 
 export default function Purchasing({ control, setValue, register, productData } : any) {
   const t = localStorage.getItem("lan") || "en-US";
-
+  const companyCode = localStorage.getItem("companyCode");
+  
   const [showVendor, setShowVendor] = useState({
     show: false,
     selectedRowKeyMenu: productData?.tax?.taxVendors?.map((tax: any) => tax?.id) || [],
@@ -58,6 +59,7 @@ export default function Purchasing({ control, setValue, register, productData } 
       search: debounceSearchTax,
       sortOrder: "DESC",
       limit: 10,
+      company_id: companyCode
     },
     options: {
       onSuccess: (data: any) => {
@@ -88,6 +90,7 @@ export default function Purchasing({ control, setValue, register, productData } 
     setValue("tax.tax_vendors", showVendor.selectedRowKeyMenu)
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedVendor])
+  
 
   return (
     <div>
@@ -130,7 +133,7 @@ export default function Purchasing({ control, setValue, register, productData } 
                     <Text variant="headingRegular">Tax Country</Text>
                     <Spacer size={5} />
                     <CustomFormSelect
-                      defaultValue={productData?.tax?.tax_country?.name}
+                      defaultValue={productData?.tax?.taxCountry?.name}
                       style={{ width: "100%" }}
                       size={"large"}
                       placeholder={"Select"}
@@ -181,7 +184,7 @@ export default function Purchasing({ control, setValue, register, productData } 
                 <Text variant="headingRegular">Tax Name</Text>
                 <Spacer size={5} />
                 <CustomFormSelect
-                  defaultValue={productData?.tax?.name}
+                  defaultValue={productData?.tax?.taxDetail?.name}
                   style={{ width: "100%" }}
                   size={"large"}
                   placeholder={"Select"}
@@ -193,13 +196,15 @@ export default function Purchasing({ control, setValue, register, productData } 
                   fetchMore={() => {}}
                   items={listTaxName}
                   onChange={(value: any) => {
-                    onChange(value);
+                    // console.log("value", value)
+                    // onChange(value);
 
                     // Filter berdasarkan tax name  yang dipilih
                     const filterTaxName: any = listTaxNameTemp?.filter(
                       (el: any) => el.taxItemId === value
                     );
 
+                    onChange(filterTaxName[0]?.taxId ?? "")
                     setValue("tax.tax_type", filterTaxName[0]?.taxType ?? "");
                     setValue("tax.tax_code", filterTaxName[0]?.taxCode ?? "");
                   }}

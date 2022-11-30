@@ -2,6 +2,7 @@ import { useQuery, useMutation, useInfiniteQuery } from "react-query";
 import { client } from "../../lib/client";
 
 const fetchProcessLists = async ({ query = {} }) => {
+  const companyCode = localStorage.getItem("companyCode")
   return client(`/process`, {
     params: {
       search: "",
@@ -10,6 +11,7 @@ const fetchProcessLists = async ({ query = {} }) => {
       sortBy: "created_at",
       sortOrder: "DESC",
       ...query,
+      company_id: companyCode
     },
   }).then((data) => data);
 };
@@ -22,11 +24,12 @@ const useProcessLists = ({ query = {}, options } = {}) => {
 };
 
 function useCreateProcessList({ options }) {
+  const companyCode = localStorage.getItem("companyCode")
   return useMutation(
     (updates) =>
       client(`/process`, {
         method: "POST",
-        data: updates,
+        data: {...updates, company_id: companyCode},
       }),
     {
       ...options,
@@ -72,6 +75,7 @@ const useDeleteProcessList = ({ options }) => {
 
 const fetchInfiniteProcessLists = async ({ pageParam = 1, queryKey }) => {
   const searchQuery = queryKey[1].search;
+  const companyCode = localStorage.getItem("companyCode")
   return client(`/process`, {
     params: {
       search: searchQuery,
@@ -79,6 +83,7 @@ const fetchInfiniteProcessLists = async ({ pageParam = 1, queryKey }) => {
       page: pageParam,
       sortBy: "created_at",
       sortOrder: "DESC",
+      company_id: companyCode
     },
   }).then((data) => data);
 };

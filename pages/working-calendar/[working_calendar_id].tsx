@@ -34,7 +34,7 @@ const publicHolidaysDefaultValue = [{ holiday_date: "", holiday_name: "" }];
 
 const WorkingCalendarCreate = () => {
   const router = useRouter();
-
+  const companyCode = localStorage.getItem("companyCode");
   const { working_calendar_id } = router.query;
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -139,6 +139,7 @@ const WorkingCalendarCreate = () => {
       company: companyPayload,
       country: countryPayload,
       working_days: workingDaysPayload,
+      company_id: companyCode,
     };
 
     updateWorkingCalendar(formData);

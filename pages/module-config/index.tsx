@@ -21,6 +21,7 @@ import { useConfigs, useDeleteConfig } from "../../hooks/config/useConfig";
 
 const ModuleConfig: any = () => {
   const router = useRouter();
+  const companyCode = localStorage.getItem("companyCode");
   const pagination = usePagination({
     page: 1,
     itemsPerPage: 20,
@@ -59,6 +60,7 @@ const ModuleConfig: any = () => {
       search,
       page: pagination.page,
       limit: pagination.itemsPerPage,
+      company_id: companyCode,
       parent,
     },
   });

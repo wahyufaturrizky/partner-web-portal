@@ -56,7 +56,7 @@ const CreateUserConfig: any = () => {
 		defaultValues: defaultValue,
 	});
 	const t = localStorage.getItem("lan") || "en-US";
-
+	const companyCode = localStorage.getItem("companyCode");
 	const [searchTimezone, setSearchTimezone] = useState("")
 	const [searchEmployee, setSearchEmployee] = useState("")
 
@@ -119,7 +119,7 @@ const CreateUserConfig: any = () => {
 	} = useEmployeeInfiniteLists({
 	query: {
 		search: debounceFetchEmployee,
-		company: "KSNI",
+		company: companyCode,
 		limit: 10
 	},
 	options: {
@@ -163,7 +163,11 @@ const CreateUserConfig: any = () => {
 	];
 
 	const onSubmit = (data: any) => {
-		createUser(data)
+		const payload = {
+			...data,
+			company_id: companyCode
+		}
+		createUser(payload)
 	};
 
 	if(isLoadingTimezone || isLoadingEmployee){

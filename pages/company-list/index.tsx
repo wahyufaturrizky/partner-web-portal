@@ -65,6 +65,7 @@ const CompanyList: any = () => {
       search,
       page: pagination.page,
       limit: pagination.itemsPerPage,
+      company_id: companyCode,
     },
   });
 
