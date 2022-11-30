@@ -74,6 +74,7 @@ const useDeleteProcessList = ({ options }) => {
 
 const fetchInfiniteProcessLists = async ({ pageParam = 1, queryKey }) => {
   const searchQuery = queryKey[1].search;
+  const companyCode = localStorage.getItem("companyCode")
   return client(`/process`, {
     params: {
       search: searchQuery,
@@ -81,6 +82,7 @@ const fetchInfiniteProcessLists = async ({ pageParam = 1, queryKey }) => {
       page: pageParam,
       sortBy: "created_at",
       sortOrder: "DESC",
+      company_id: companyCode
     },
   }).then((data) => data);
 };
