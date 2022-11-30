@@ -24,11 +24,12 @@ const useProcessLists = ({ query = {}, options } = {}) => {
 };
 
 function useCreateProcessList({ options }) {
+  const companyCode = localStorage.getItem("companyCode")
   return useMutation(
     (updates) =>
       client(`/process`, {
         method: "POST",
-        data: updates,
+        data: {...updates, company_id: companyCode},
       }),
     {
       ...options,
