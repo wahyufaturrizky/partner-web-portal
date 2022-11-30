@@ -117,11 +117,13 @@ const useDeletePermission = ({ options }) => {
 };
 
 const fetchPermissionMenu = async ({ query = {} }) => {
+  const companyCode = localStorage.getItem("companyCode")
   return client(`/partner-permission/menu`, {
     params: {
       search: "",
       all: 1,
       ...query,
+      company_id: companyCode
     },
   }).then((data) => data);
 };
