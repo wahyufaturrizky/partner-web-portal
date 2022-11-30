@@ -24,11 +24,12 @@ const useConfigs = ({ query = {}, options } = {}) => {
 };
 
 function useCreateConfig({ options }) {
+	const companyCode = localStorage.getItem("companyCode")
 	return useMutation(
 		(updates) =>
 			client(`/module`, {
 				method: "POST",
-				data: updates,
+				data: {...updates, company_id: companyCode},
 			}),
 		{
 			...options,
@@ -45,11 +46,12 @@ const useConfig = ({ config_id, options = {} }) => {
 };
 
 function useUpdateConfig({ config_id, options }) {
+	const companyCode = localStorage.getItem("companyCode")
 	return useMutation(
 		(updates) =>
 			client(`/module/${config_id}`, {
 				method: "PUT",
-				data: updates,
+				data: {...updates, company_id: companyCode},
 			}),
 		{
 			...options,
