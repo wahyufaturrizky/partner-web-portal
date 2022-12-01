@@ -48,11 +48,12 @@ const useProcessList = ({ process_list_id, options }) => {
 };
 
 function useUpdateProcessList({ processListId, options }) {
+  const companyCode = localStorage.getItem("companyCode")
   return useMutation(
     (updates) =>
       client(`/process/${processListId}`, {
         method: "PUT",
-        data: updates,
+        data: {...updates, company_id: companyCode},
       }),
     {
       ...options,
