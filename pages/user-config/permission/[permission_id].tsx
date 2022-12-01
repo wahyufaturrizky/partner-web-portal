@@ -48,6 +48,9 @@ const DetailPartnerConfigPermissionList: any = () => {
 
   const debounceFetchViewType = useDebounce(searchViewType, 1000);
 
+  const [searchAssociatedMenu, setSearchAssociatedMenu] = useState("")
+	const debounceSearchAssociatedMenu = useDebounce(searchAssociatedMenu, 1000);
+
   const { permission_id } = Router.query;
   const t = localStorage.getItem("lan") || "en-US";
   const {
@@ -90,7 +93,7 @@ const DetailPartnerConfigPermissionList: any = () => {
     });
 
   const { data: menuLists } = useMenuLists({
-    query: { limit: 0, company_id: companyCode },
+    query: { limit: 0, company_id: companyCode, search: debounceSearchAssociatedMenu },
     options: {
       refetchOnWindowFocus: "always",
     },
@@ -250,7 +253,7 @@ const DetailPartnerConfigPermissionList: any = () => {
                     items={menus}
                     placeholder={"Select"}
                     handleChange={(value: any) => setValue("menuId", value)}
-                    noSearch
+                    onSearch={(search) => setSearchAssociatedMenu(search)}
                   />
                 </Row>
                 <Row width="50%" gap="20px" noWrap>

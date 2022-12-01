@@ -11,6 +11,7 @@ import {
 	Accordion,
 	Input,
 } from "pink-lava-ui";
+import ArrowLeft from "../../assets/icons/arrow-left.svg";
 import styled from "styled-components";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -128,6 +129,7 @@ const ConfigDetail: any = () => {
 			) : (
 				<Col>
 					<Row gap="4px">
+						<ArrowLeft style={{ cursor: "pointer" }} onClick={() => router.back()} />
 						<Text variant={"h4"}>{config?.name}</Text>
 					</Row>
 					<Spacer size={12} />

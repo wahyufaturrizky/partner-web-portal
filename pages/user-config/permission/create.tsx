@@ -53,6 +53,8 @@ const CreatePartnerConfigPermissionList: any = () => {
   });
 
   const debounceFetchViewType = useDebounce(searchViewType, 1000);
+  const [searchAssociatedMenu, setSearchAssociatedMenu] = useState("")
+	const debounceSearchAssociatedMenu = useDebounce(searchAssociatedMenu, 1000);
 
   const { mutate: mutatePartnerConfigPermissionList } = useCreatePartnerConfigPermissionList({
     options: {
@@ -67,7 +69,7 @@ const CreatePartnerConfigPermissionList: any = () => {
   });
 
   const { data: menuLists } = useMenuLists({
-    query: { limit: 0, owner: "HERMES", company_id: companyCode },
+    query: { limit: 0, owner: "HERMES", company_id: companyCode , search: debounceSearchAssociatedMenu},
     options: {
       refetchOnWindowFocus: "always",
     },
@@ -198,7 +200,7 @@ const CreatePartnerConfigPermissionList: any = () => {
                   items={menus}
                   placeholder={"Select"}
                   handleChange={(value) => setValue("menuId", value)}
-                  noSearch
+                  onSearch={(search) => setSearchAssociatedMenu(search)}
                 />
               </Row>
               <Row width="100%" gap="20px" noWrap>
