@@ -325,7 +325,6 @@ const ModalCalculation = ({
                     }
                     })
             }
-            console.log(newMappedModules, '<<<<<< ini data modules')
             return { 
                 totalRow: data.totalRow, 
                 newMappedModules,
@@ -427,6 +426,7 @@ const ModalCalculation = ({
                 }
             }
         })
+        console.log(roleData, '<<<role')
         const newDataEdit = {
             company_id: radioValue === "new" && data?.company_id === "" ? data?.companyId : radioValue === "new" && data?.company_id !== "" ? data?.company_id : companyList?.filter(el => el.label === companyFromRole)[0]?.value,
             role_id: data?.role_id ?? data?.roleId,
@@ -441,6 +441,7 @@ const ModalCalculation = ({
             modules,
             assign_payment: 'holding'
         }
+        console.log(newDataEdit)
         onOk(newDataEdit)
     }
 

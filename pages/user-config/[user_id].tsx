@@ -177,9 +177,20 @@ const UpdateUserConfig: any = () => {
 	});
 
 
+	const {
+		data: languageData,
+		isLoading: isLoadingLibraryLanguage,
+		isFetching: isFetchingLibraryLanguage,
+	  } = useAllLibraryLanguage({
+		options: {},
+		query: {
+		//   search: search.languageSearch,
+		  limit: 10000,
+		}});
+	const language = languageData?.rows?.map((row) => ({ id: row.id, value: row.id + ' - ' + row.name })) ?? [];
 
-	const { data: languageData } = useLanguages();
-	const language = languageData?.rows?.map((row) => ({ id: row.id, value: row.name })) ?? [];
+	// const { data: languageData } = useLanguages();
+	// const language = languageData?.rows?.map((row) => ({ id: row.id, value: row.name })) ?? [];
 
 	const active_status = [
 		{ id: "ACTIVE", value: `<div key="1" style="color:green;">${lang[t].userList.create.template.button.active}</div>` },
