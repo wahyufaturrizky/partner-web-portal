@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { MultipleUpload } from "pink-lava-ui";
+import { MultipleUpload, Modal } from "pink-lava-ui";
 import { Controller } from "react-hook-form";
 
 const getBase64 = (file: any) =>
@@ -35,24 +35,24 @@ const MultipleUploadPhotos = ({ index, control }: any) => {
       name={`addresses.${index}.photo`}
       defaultValue={[]}
       render={({ field: { onChange, value }, formState: { errors } }) => (
-        <MultipleUpload
-          accept=".png,.jpg,.jpeg"
-          listType="picture-card"
-          name={"upload_file"}
-          action={uploadUrl}
-          headers={{
-            Authorization: `Bearer ${token}`,
-          }}
-          fileList={value}
-          onPreview={handlePreview}
-          onCancelPreview={() => setPreviewOpen(false)}
-          onChange={({ fileList: newFileList }: any) => {
-            onChange(newFileList);
-          }}
-          previewOpen={previewOpen}
-          previewTitle={previewTitle}
-          previewImageUrl={previewImage}
-        />
+          <MultipleUpload
+            accept=".png,.jpg,.jpeg"
+            listType="picture-card"
+            name={"upload_file"}
+            action={uploadUrl}
+            headers={{
+              Authorization: `Bearer ${token}`,
+            }}
+            fileList={value}
+            onPreview={handlePreview}
+            onCancelPreview={() => setPreviewOpen(false)}
+            onChange={({ fileList: newFileList }: any) => {
+              onChange(newFileList);
+            }}
+            previewOpen={previewOpen}
+            // previewTitle={<button>previewTitle</button>}
+            previewImageUrl={previewImage}
+          />
       )}
     />
   );
