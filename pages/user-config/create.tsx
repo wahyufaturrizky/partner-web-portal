@@ -223,7 +223,7 @@ const CreateUserConfig: any = () => {
 
 				<Spacer size={20} />
 
-				<Accordion>
+				<Accordion style={{display:"relative"}} id="area">
 					<Accordion.Item key={1}>
 						<Accordion.Header variant="blue">{lang[t].userList.create.template.accordion.employeeInformation}</Accordion.Header>
 						<Accordion.Body>
@@ -263,6 +263,7 @@ const CreateUserConfig: any = () => {
 												<Label>{lang[t].userList.create.template.field.associatedEmployee}</Label>
 												<Spacer size={4}/>
 												<FormSelect
+													containerId={"area"}
 													style={{ width: "100%"}}
 													height={"48px"}
 													size={"large"}
@@ -304,7 +305,7 @@ const CreateUserConfig: any = () => {
 
 				<Spacer size={20} />
 
-				<Accordion>
+				<Accordion style={{display:"relative"}} id="area2">
 					<Accordion.Item key={1}>
 						<Accordion.Header variant="blue">{lang[t].userList.create.template.accordion.generalInformation}</Accordion.Header>
 						<Accordion.Body>
@@ -339,6 +340,7 @@ const CreateUserConfig: any = () => {
 										<Label>{lang[t].userList.create.template.field.timezone}</Label>
 										<Spacer size={4}/>
 										<FormSelect
+											containerId="area2"
 											style={{ width: "100%"}}
 											height={"48px"}
 											size={"large"}
