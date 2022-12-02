@@ -75,7 +75,7 @@ const UserConfigPermission: any = () => {
     {
       title: lang[t].permissionList.permissionList.associated,
       dataIndex: "field_menu",
-      render: (text: any) => text.name,
+      render: (text: any) => text?.name,
     },
     {
       title: lang[t].permissionList.permissionList.systemConfig,
