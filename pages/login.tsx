@@ -166,7 +166,16 @@ const Login: any = () => {
     isLoading: isLoadingLogin,
   } = useSignIn({
     onSuccess: (data: any) => {
-      window.location.assign(window.location);
+      let referer: any = globalThis?.document?.referrer;
+      const storage = globalThis?.sessionStorage;
+      if (storage) referer = storage.getItem("prevPath");
+
+      if (referer) {
+        window.location.assign(referer);
+      } else {
+        window.location.assign(window.location);
+      }
+
     },
     onError: (error: any) => {
       if (
