@@ -2,6 +2,7 @@ import { useQuery, useMutation } from "react-query";
 import { client } from "../../lib/client";
 
 const fetchPartnerConfigPermissionLists = async ({ query = {} }) => {
+  const companyCode = localStorage.getItem("companyCode");
   return client(`/partner-permission`, {
     params: {
       search: "",
@@ -9,6 +10,7 @@ const fetchPartnerConfigPermissionLists = async ({ query = {} }) => {
       page: 1,
       sortBy: "created_at",
       sortOrder: "DESC",
+      company_id: companyCode,
       ...query,
     },
   }).then((data) => data);
@@ -53,12 +55,12 @@ const usePartnerConfigPermissionList = ({ partner_config_menu_list_id, options }
 };
 
 function useUpdatePartnerConfigPermissionList({ partnerConfigPermissionListId, options }) {
-  const companyCode = localStorage.getItem("companyCode")
+  const companyCode = localStorage.getItem("companyCode");
   return useMutation(
     (updates) =>
       client(`/partner-permission/${partnerConfigPermissionListId}`, {
         method: "PUT",
-        data: {...updates, company_id: companyCode},
+        data: { ...updates, company_id: companyCode },
       }),
     {
       ...options,

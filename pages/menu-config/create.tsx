@@ -24,6 +24,7 @@ import { useCreateField, useFields } from "../../hooks/field/useField";
 import { useCreateMenuList } from "../../hooks/menu-config/useMenuConfig";
 import { usePartnerConfigPermissionLists } from "../../hooks/user-config/usePermission";
 import { useFilterListPermissions } from "../../hooks/permission/usePermission";
+import { useConfigs } from "hooks/config/useConfig";
 
 const CreateMenuList: any = () => {
 	const companyCode = localStorage.getItem("companyCode");
@@ -81,7 +82,7 @@ const CreateMenuList: any = () => {
 		totalItems: 100,
 	});
 
-	const { data: fieldsTablePermission } = usePartnerConfigPermissionLists({
+	const { data: fieldsTablePermission } = useConfigs({
 		options: {
 			onSuccess: (data: any) => {
 				paginationTablePermission.setTotalItems(data.totalRow);
@@ -324,7 +325,6 @@ const CreateMenuList: any = () => {
 			onSuccess: (data: any) => {
 				if (data) {
 					setLoading(false);
-					window.alert("Menu created successfully");
 					Router.back();
 				}
 			},
@@ -350,12 +350,14 @@ const CreateMenuList: any = () => {
 		const isEmptyField: any = Object.keys(stateFieldInput).find(
 			(thereIsEmptyField) =>
 				thereIsEmptyField !== "process_name" &&
+				thereIsEmptyField !== "screen" &&
 				stateFieldInput &&
 				stateFieldInput[thereIsEmptyField] === ""
 		);
 
 		if (!isEmptyField) {
-			if (dataAllowedField.length !== 0 && dataAssociatedPermissionsField.length !== 0) {
+			// if (dataAllowedField.length !== 0 && dataAssociatedPermissionsField.length !== 0) {
+				if (dataAssociatedPermissionsField.length !== 0) {
 				const data: any = {
 					name: stateFieldInput?.name,
 					screen: stateFieldInput?.screen,
@@ -363,12 +365,12 @@ const CreateMenuList: any = () => {
 					isZeus: isZeus ? "Y" : "N",
 					isHermes: isHermes ? "Y" : "N",
 					field: dataAllowedField.map((data) => data.key),
-					permission: dataAssociatedPermissionsField.map((data) => data.key),
+					modules: dataAssociatedPermissionsField.map((data) => data.key),
 					company_id:companyCode
 				};
 				createFieldMenuList(data);
 			} else {
-				window.alert("data allowed and data associate permission can't be empty");
+				window.alert("data associate permission can't be empty");
 			}
 		} else {
 			setLoading(false);
@@ -476,7 +478,7 @@ const CreateMenuList: any = () => {
 
 				<Spacer size={20} />
 
-				<Accordion>
+				<Accordion style={{display:"relative"}} id="area">
 					<Accordion.Item key={1}>
 						<Accordion.Header variant="blue">General</Accordion.Header>
 						<Accordion.Body>
@@ -512,6 +514,7 @@ const CreateMenuList: any = () => {
 							)}
 
 							<DropdownMenuOptionCustome
+								containerId="area"
 								handleOpenTotalBadge={() =>
 									setStateModal({
 										...stateModal,
