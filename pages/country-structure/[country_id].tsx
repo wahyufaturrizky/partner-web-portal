@@ -31,6 +31,8 @@ import { ModalManageDataEdit } from "../../components/elements/Modal/ModalManage
 import styled from "styled-components";
 import { COUNTRY_CODE } from "utils/country_code_constant";
 import { PHONE_CODE } from "utils/phone_code_constant";
+import { useUserPermissions } from "hooks/user-config/usePermission";
+import { permissionCountry } from "permission/country";
 
 const CreateConfig = () => {
 	const router = useRouter();
@@ -68,6 +70,20 @@ const CreateConfig = () => {
 	const [checkCountryName, setCheckCountryName] = useState(false);
 	const [isCountryNameDuplicate, setIsCountryNameDuplicate] = useState(false)
 	const [isCountryNameFocused, setIsCountryNameFocused] = useState(false)
+
+	const { data: dataUserPermission } = useUserPermissions({
+		options: {
+			onSuccess: () => {},
+		},
+	});
+
+	const listPermission = dataUserPermission?.permission?.filter(
+		(filtering: any) => filtering.menu === "Country"
+	);
+
+	const allowPermissionToShow = listPermission?.filter((data: any) =>
+		permissionCountry.role[dataUserPermission?.role?.name].component.includes(data.name)
+	);
 
 	const onUploadStructure = (data: any) => {
 		let idsCountryStructure = countryStructure.map((data: any) => data.id);
@@ -416,16 +432,20 @@ const CreateConfig = () => {
 						<Row justifyContent="flex-end" alignItems="center" nowrap>
 							<Row>
 								<Row gap="16px">
-									<Button
-										size="big"
-										variant={"tertiary"}
-										onClick={() => setModalDeleteCountry({ open: true })}
-									>
-										Delete
-									</Button>
-									<Button disabled={errors?.name || isCountryNameFocused} size="big" variant={"primary"} onClick={onSubmit}>
-										Save
-									</Button>
+									{allowPermissionToShow?.map((data: any) => data.name)?.includes("Delete Country") && (
+										<Button
+											size="big"
+											variant={"tertiary"}
+											onClick={() => setModalDeleteCountry({ open: true })}
+										>
+											Delete
+										</Button>
+									)}
+									{allowPermissionToShow?.map((data: any) => data.name)?.includes("Update Country") && (
+										<Button disabled={errors?.name || isCountryNameFocused} size="big" variant={"primary"} onClick={onSubmit}>
+											Save
+										</Button>
+									)}
 								</Row>
 							</Row>
 						</Row>
@@ -631,11 +651,13 @@ const CreateConfig = () => {
 					itemTitle={modalDelete.structure.name}
 				/>
 			)}
+			{showUploadStructure && 
 			<FileUploaderExcel
 				setVisible={setShowUploadStructure}
 				visible={showUploadStructure}
 				onSubmit={onUploadStructure}
-			/>
+			/>}
+			
 			{showManageData.visible && (
 				<ModalManageDataEdit
 					updateAllStructure={updateAllStructure}

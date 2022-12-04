@@ -31,6 +31,8 @@ import DownloadSvg from "../../../assets/icons/ic-download.svg";
 import UploadSvg from "../../../assets/icons/ic-upload.svg";
 import SyncSvg from "../../../assets/icons/ic-sync.svg";
 import { lang } from "lang";
+import { useUserPermissions } from "hooks/user-config/usePermission";
+import {permissionCurrency} from "permission/currency"
 
 const downloadFile = (params: any) =>
 	mdmDownloadService("/currency/download", { params }).then((res) => {
@@ -82,6 +84,20 @@ const CountryStructureCurrency = () => {
 	const debounceSearch = useDebounce(search, 1000);
 
 	const { register, handleSubmit } = useForm();
+
+	const { data: dataUserPermission } = useUserPermissions({
+		options: {
+			onSuccess: () => {},
+		},
+	});
+
+	const listPermission = dataUserPermission?.permission?.filter(
+		(filtering: any) => filtering.menu === "Currency"
+	);
+
+	const allowPermissionToShow = listPermission?.filter((data: any) =>
+		permissionCurrency.role[dataUserPermission?.role?.name].component.includes(data.name)
+	);
 
 	const {
 		data: currenciesMDMData,
@@ -187,12 +203,16 @@ const CountryStructureCurrency = () => {
 			title: lang[t].currency.currencyName,
 			dataIndex: "currencyName",
 		},
-		{
-			title: lang[t].currency.currencyAction,
-			dataIndex: "action",
-			width: "15%",
-			align: "left",
-		},
+		...(allowPermissionToShow?.some((el: any) => el.name === "View Currency")
+		? [
+			{
+				title: lang[t].currency.currencyAction,
+				dataIndex: "action",
+				width: "15%",
+				align: "left",
+			},
+		  ]
+		: []),
 	];
 
 	const rowSelection = {
@@ -239,90 +259,108 @@ const CountryStructureCurrency = () => {
 						}}
 					/>
 					<Row gap="16px">
-						<Button
-							size="big"
-							variant={"tertiary"}
-							onClick={() =>
-								setShowDelete({
-									open: true,
-									type: "selection",
-									data: { currencyData: currenciesMDMData, selectedRowKeys },
-								})
-							}
-							disabled={rowSelection.selectedRowKeys?.length === 0}
-						>
-							{lang[t].currency.tertier.delete}
-						</Button>
-						<DropdownMenu
-							title={lang[t].currency.secondary.more}
-							buttonVariant={"secondary"}
-							buttonSize={"big"}
-							textVariant={"button"}
-							textColor={"pink.regular"}
-							iconStyle={{ fontSize: "12px" }}
-							onClick={(e: any) => {
-								switch (parseInt(e.key)) {
-									case 1:
-										downloadFile({ with_data: "N" });
-										break;
-									case 2:
-										setShowUpload(true);
-										break;
-									case 3:
-										downloadFile({ with_data: "Y" });
-										break;
-									case 4:
-										break;
-									default:
-										break;
+						{allowPermissionToShow?.map((data: any) => data.name)?.includes("Delete Currency") && (
+							<Button
+								size="big"
+								variant={"tertiary"}
+								onClick={() =>
+									setShowDelete({
+										open: true,
+										type: "selection",
+										data: { currencyData: currenciesMDMData, selectedRowKeys },
+									})
 								}
-							}}
-							menuList={[
-								{
-									key: 1,
-									value: (
-										<div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-											<DownloadSvg />
-											<p style={{ margin: "0" }}>{lang[t].currency.ghost.downloadTemplate}</p>
-										</div>
-									),
-								},
-								{
-									key: 2,
-									value: (
-										<div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-											<UploadSvg />
-											<p style={{ margin: "0" }}>{lang[t].currency.ghost.uploadTemplate}</p>
-										</div>
-									),
-								},
-								{
-									key: 3,
-									value: (
-										<div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-											<DownloadSvg />
-											<p style={{ margin: "0" }}>{lang[t].currency.ghost.downloadData}</p>
-										</div>
-									),
-								},
-								{
-									key: 4,
-									value: (
-										<div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-											<SyncSvg />
-											<p style={{ margin: "0" }}>Sync Data</p>
-										</div>
-									),
-								},
-							]}
-						/>
-						<Button
-							size="big"
-							variant="primary"
-							onClick={() => setModalCurrencyForm({ open: true, typeForm: "create", data: {} })}
-						>
-							{lang[t].currency.primary.create}
-						</Button>
+								disabled={rowSelection.selectedRowKeys?.length === 0}
+							>
+								{lang[t].currency.tertier.delete}
+							</Button>
+						)}
+						{(allowPermissionToShow
+							?.map((data: any) => data.name)
+							?.includes("Download Template Currency") ||
+							allowPermissionToShow
+								?.map((data: any) => data.name)
+								?.includes("Download Data Currency") ||
+							allowPermissionToShow
+								?.map((data: any) => data.name)
+								?.includes("Upload Currency")) && (
+							<DropdownMenu
+								title={lang[t].currency.secondary.more}
+								buttonVariant={"secondary"}
+								buttonSize={"big"}
+								textVariant={"button"}
+								textColor={"pink.regular"}
+								iconStyle={{ fontSize: "12px" }}
+								onClick={(e: any) => {
+									switch (parseInt(e.key)) {
+										case 1:
+											downloadFile({ with_data: "N" });
+											break;
+										case 2:
+											setShowUpload(true);
+											break;
+										case 3:
+											downloadFile({ with_data: "Y" });
+											break;
+										case 4:
+											break;
+										default:
+											break;
+									}
+								}}
+								menuList={[
+									{
+										...(allowPermissionToShow
+											?.map((data: any) => data.name)
+											?.includes("Download Template Currency") && {
+											key: 1,
+											value: (
+												<div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+													<DownloadSvg />
+													<p style={{ margin: "0" }}>{lang[t].currency.ghost.downloadTemplate}</p>
+												</div>
+											),
+										}),
+									},
+									{
+										...(allowPermissionToShow
+											?.map((data: any) => data.name)
+											?.includes("Upload Currency") && {
+											key: 2,
+											value: (
+												<div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+													<UploadSvg />
+													<p style={{ margin: "0" }}>{lang[t].currency.ghost.uploadTemplate}</p>
+												</div>
+											),
+										}),
+									},
+									{
+										...(allowPermissionToShow
+											?.map((data: any) => data.name)
+											?.includes("Download Data Currency") && {
+											key: 3,
+											value: (
+												<div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+													<DownloadSvg />
+													<p style={{ margin: "0" }}>{lang[t].currency.ghost.downloadData}</p>
+												</div>
+											),
+										}),
+									},
+								]}
+							/>
+						)}
+						{allowPermissionToShow?.map((data: any) => data.name)?.includes("Create Currency") && (
+							<Button
+								size="big"
+								variant="primary"
+								onClick={() => setModalCurrencyForm({ open: true, typeForm: "create", data: {} })}
+							>
+								{lang[t].currency.primary.create}
+							</Button>
+						)}
+						
 					</Row>
 				</Row>
 			</Card>

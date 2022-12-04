@@ -23,6 +23,8 @@ import SyncSvg from "../../assets/icons/ic-sync.svg";
 
 import styled from "styled-components";
 import { mdmDownloadService } from "../../lib/client";
+import { useUserPermissions } from "hooks/user-config/usePermission";
+import { permissionCountry } from "permission/country";
 
 const dropdownStyles = {cursor: "pointer", display: "flex", alignItems: "center", gap: 5}
 
@@ -43,6 +45,20 @@ const ListTemplateMenu = () => {
 	const [search, setSearch] = useState<string>("");
 	const [selectedItem, setSelectedItem] = useState([]);
 
+	const { data: dataUserPermission } = useUserPermissions({
+		options: {
+			onSuccess: () => {},
+		},
+	});
+
+	const listPermission = dataUserPermission?.permission?.filter(
+		(filtering: any) => filtering.menu === "Country"
+	);
+
+	const allowPermissionToShow = listPermission?.filter((data: any) =>
+		permissionCountry.role[dataUserPermission?.role?.name].component.includes(data.name)
+	);
+
 
 	// event function
 	const columns = [
@@ -56,14 +72,18 @@ const ListTemplateMenu = () => {
 			dataIndex: "countryName",
 			key: "countryName",
 		},
-		{
-			title: "Action",
-			render: ({ countryID }: { countryID: string }) => (
-				<Button size="small" onClick={() => router.push(`/country-structure/${countryID}`)} variant="tertiary">
-					View Detail
-				</Button>
-			),
-		},
+		...(allowPermissionToShow?.some((el: any) => el.name === "View Country")
+		? [
+			{
+				title: "Action",
+				render: ({ countryID }: { countryID: string }) => (
+					<Button size="small" onClick={() => router.push(`/country-structure/${countryID}`)} variant="tertiary">
+						View Detail
+					</Button>
+				),
+			},
+		  ]
+		: []),
 	];
 
 	const rowSelection = {
@@ -145,6 +165,7 @@ const ListTemplateMenu = () => {
 							}
 						/>
 						<Row gap="16px">
+						{allowPermissionToShow?.map((data: any) => data.name)?.includes("Delete Country") && (
 							<Button
 								size="big"
 								variant="tertiary"
@@ -153,55 +174,89 @@ const ListTemplateMenu = () => {
 							>
 								Delete
 							</Button>
+						)}
+						{(allowPermissionToShow
+							?.map((data: any) => data.name)
+							?.includes("Download Template Country") ||
+							allowPermissionToShow
+								?.map((data: any) => data.name)
+								?.includes("Download Data Country") ||
+							allowPermissionToShow
+								?.map((data: any) => data.name)
+								?.includes("Upload Country")) && (
 							<DropdownMenu
-							title={"More"}
-							buttonVariant={"secondary"}
-							buttonSize={"big"}
-							textVariant={"button"}
-							textColor={"pink.regular"}
-							iconStyle={{ fontSize: "12px" }}
-							menuList={[
-								{
-									key: 1,
-									value: (
-										<div onClick={() => handleDownloadFile({ with_data: "Y" })} style={dropdownStyles}>
-											<DownloadSvg />
-											<p style={{ margin: "0" }}>Download Template</p>
-										</div>
-									),
-								},
-								{
-									key: 2,
-									value: (
-										<div onClick={() => setVisible({ delete: false, upload: true })} style={dropdownStyles}>
-											<UploadSvg />
-											<p style={{ margin: "0" }}>Upload Template</p>
-										</div>
-									),
-								},
-								{
-									key: 3,
-									value: (
-										<div onClick={() => handleDownloadFile({ with_data: "N" })} style={dropdownStyles}>
-											<DownloadSvg />
-											<p style={{ margin: "0" }}>Download Data</p>
-										</div>
-									),
-								},
-								{
-									key: 4,
-									value: (
-										<div onClick={() => {}} style={dropdownStyles}>
-											<SyncSvg />
-											<p style={{ margin: "0" }}>Sync Data</p>
-										</div>
-									),
-								},
-							]}
-						/>
+								title={"More"}
+								buttonVariant={"secondary"}
+								buttonSize={"big"}
+								textVariant={"button"}
+								textColor={"pink.regular"}
+								iconStyle={{ fontSize: "12px" }}
+								onClick={(e: any) => {
+									switch (parseInt(e.key)) {
+										case 1:
+											downloadFile({ with_data: "N" });
+											break;
+										case 2:
+											setShowUpload(true);
+											break;
+										case 3:
+											downloadFile({ with_data: "Y" });
+											break;
+										case 4:
+											break;
+										default:
+											break;
+									}
+								}}
+								menuList={[
+									{
+										...(allowPermissionToShow
+											?.map((data: any) => data.name)
+											?.includes("Download Template Country") && {
+											key: 1,
+											value: (
+												<div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+													<DownloadSvg />
+													<p style={{ margin: "0" }}>Download Template</p>
+												</div>
+											),
+										}),
+									},
+									{
+										...(allowPermissionToShow
+											?.map((data: any) => data.name)
+											?.includes("Upload Country") && {
+											key: 2,
+											value: (
+												<div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+													<UploadSvg />
+													<p style={{ margin: "0" }}>Upload Template</p>
+												</div>
+											),
+										}),
+									},
+									{
+										...(allowPermissionToShow
+											?.map((data: any) => data.name)
+											?.includes("Download Data Country") && {
+											key: 3,
+											value: (
+												<div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+													<DownloadSvg />
+													<p style={{ margin: "0" }}>Download Data</p>
+												</div>
+											),
+										}),
+									},
+								]}
+							/>
+						)}	
+						{allowPermissionToShow?.map((data: any) => data.name)?.includes("Create Country") && (
 							<Button size="big" variant="primary" onClick={() => router.push("/country-structure/create")}>
 								Create
 							</Button>
+						)}
+							
 						</Row>
 					</Row>
 				</Card>
@@ -217,19 +272,24 @@ const ListTemplateMenu = () => {
 				</Card>
 			</Col>
 
+			{visible.upload && 
 			<FileUploadModal
 				visible={visible.upload}
 				setVisible={() => setVisible({ upload: false, delete: false })}
 				onSubmit={submitUploadFile}
 			/>
+}
 
+			
+			{visible.delete && 
 			<ModalDeleteConfirmation
 				totalSelected={0}
 				itemTitle={`ID ${selectedItem}`}
 				visible={visible.delete}
 				onOk={() => deleteDataCountries({ ids: selectedItem })}
 				onCancel={() => setVisible({ delete: false, upload: false })}
-			/>
+			/>}
+			
 		</>
 	);
 };
