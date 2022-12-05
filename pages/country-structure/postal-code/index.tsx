@@ -34,6 +34,8 @@ import useDebounce from "lib/useDebounce";
 import { mdmDownloadService } from "lib/client";
 import { queryClient } from "pages/_app";
 import { lang } from "lang";
+import { useUserPermissions } from "hooks/user-config/usePermission";
+import { permissionPostalCode } from "permission/postalCode";
 const downloadFile = (params: any) =>
   mdmDownloadService("/postal-code/download", { params }).then((res) => {
     let dataUrl = window.URL.createObjectURL(new Blob([res.data]));
@@ -64,6 +66,20 @@ const CountryPostalCode = () => {
   const debounceSearch = useDebounce(search, 1000);
   const debounceFilter = useDebounce(filterCountry, 1000);
 
+  const { data: dataUserPermission } = useUserPermissions({
+    options: {
+      onSuccess: () => {},
+    },
+  });
+
+  const listPermission = dataUserPermission?.permission?.filter(
+    (filtering: any) => filtering.menu === "Postal Code"
+  );
+
+  const allowPermissionToShow = listPermission?.filter((data: any) =>
+    permissionPostalCode.role[dataUserPermission?.role?.name].component.includes(data.name)
+  );
+
   const columns = [
     {
       title: lang[t].postalCode.postalCodeID,
@@ -77,10 +93,14 @@ const CountryPostalCode = () => {
       title: lang[t].postalCode.postalCountryName,
       dataIndex: "country_name",
     },
-    {
-      title: lang[t].postalCode.postalAction,
-      dataIndex: "action",
-    },
+    ...(allowPermissionToShow?.some((el: any) => el.name === "View Postal Code")
+      ? [
+          {
+            title: lang[t].postalCode.postalAction,
+            dataIndex: "action",
+          },
+        ]
+      : []),
   ];
 
   const { isLoading: isLoadingFilter } = usePostalCodesFilter({
@@ -225,81 +245,105 @@ const CountryPostalCode = () => {
               )}
             </Row>
             <Row gap="16px">
-              <Button
-                size="big"
-                variant="tertiary"
-                onClick={() => setModalDelete({ open: true })}
-                disabled={!(selectedRowKeys.length > 0)}
-              >
-                {lang[t].postalCode.tertier.delete}
-              </Button>
-              <DropdownMenu
-                title={lang[t].postalCode.secondary.more}
-                buttonVariant={"secondary"}
-                buttonSize={"big"}
-                textVariant={"button"}
-                textColor={"pink.regular"}
-                iconStyle={{ fontSize: "12px" }}
-                onClick={(e: any) => {
-                  switch (parseInt(e.key)) {
-                    case 1:
-                      downloadFile({ with_data: "N" });
-                      break;
-                    case 2:
-                      setShowUpload(true);
-                      break;
-                    case 3:
-                      downloadFile({ with_data: "Y" });
-                      break;
-                    case 4:
-                      refetchPostalCode();
-                      break;
-                    default:
-                      break;
-                  }
-                }}
-                menuList={[
-                  {
-                    key: 1,
-                    value: (
-                      <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                        <DownloadSvg />
-                        <p style={{ margin: "0" }}>{lang[t].postalCode.ghost.downloadTemplate}</p>
-                      </div>
-                    ),
-                  },
-                  {
-                    key: 2,
-                    value: (
-                      <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                        <UploadSvg />
-                        <p style={{ margin: "0" }}>{lang[t].postalCode.ghost.uploadTemplate}</p>
-                      </div>
-                    ),
-                  },
-                  {
-                    key: 3,
-                    value: (
-                      <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                        <DownloadSvg />
-                        <p style={{ margin: "0" }}>{lang[t].postalCode.ghost.downloadData}</p>
-                      </div>
-                    ),
-                  },
-                  {
-                    key: 4,
-                    value: (
-                      <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                        <SyncSvg />
-                        <p style={{ margin: "0" }}>Sync Data</p>
-                      </div>
-                    ),
-                  },
-                ]}
-              />
-              <Button size="big" variant="primary" onClick={() => setModalCreate({ open: true })}>
-                {lang[t].postalCode.primary.create}
-              </Button>
+              {allowPermissionToShow
+                ?.map((data: any) => data.name)
+                ?.includes("Delete Postal Code") && (
+                <Button
+                  size="big"
+                  variant="tertiary"
+                  onClick={() => setModalDelete({ open: true })}
+                  disabled={!(selectedRowKeys.length > 0)}
+                >
+                  {lang[t].postalCode.tertier.delete}
+                </Button>
+              )}
+
+              {(allowPermissionToShow
+                ?.map((data: any) => data.name)
+                ?.includes("Download Template Postal Code") ||
+                allowPermissionToShow
+                  ?.map((data: any) => data.name)
+                  ?.includes("Download Data Postal Code") ||
+                allowPermissionToShow
+                  ?.map((data: any) => data.name)
+                  ?.includes("Upload Postal Code")) && (
+                <DropdownMenu
+                  title={"More"}
+                  buttonVariant={"secondary"}
+                  buttonSize={"big"}
+                  textVariant={"button"}
+                  textColor={"pink.regular"}
+                  iconStyle={{ fontSize: "12px" }}
+                  onClick={(e: any) => {
+                    switch (parseInt(e.key)) {
+                      case 1:
+                        generateItem("N");
+                        break;
+                      case 2:
+                        setShowUpload(true);
+                        break;
+                      case 3:
+                        generateItem("Y");
+                        break;
+                      case 4:
+                        break;
+                      default:
+                        break;
+                    }
+                  }}
+                  menuList={[
+                    {
+                      ...(allowPermissionToShow
+                        ?.map((data: any) => data.name)
+                        ?.includes("Download Template Postal Code") && {
+                        key: 1,
+                        value: (
+                          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                            <DownloadSvg />
+                            <p style={{ margin: "0" }}>
+                              {lang[t].postalCode.ghost.downloadTemplate}
+                            </p>
+                          </div>
+                        ),
+                      }),
+                    },
+                    {
+                      ...(allowPermissionToShow
+                        ?.map((data: any) => data.name)
+                        ?.includes("Upload Postal Code") && {
+                        key: 2,
+                        value: (
+                          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                            <UploadSvg />
+                            <p style={{ margin: "0" }}>{lang[t].postalCode.ghost.uploadTemplate}</p>
+                          </div>
+                        ),
+                      }),
+                    },
+                    {
+                      ...(allowPermissionToShow
+                        ?.map((data: any) => data.name)
+                        ?.includes("Download Data Postal Code") && {
+                        key: 3,
+                        value: (
+                          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                            <DownloadSvg />
+                            <p style={{ margin: "0" }}>{lang[t].postalCode.ghost.downloadData}</p>
+                          </div>
+                        ),
+                      }),
+                    },
+                  ]}
+                />
+              )}
+
+              {allowPermissionToShow
+                ?.map((data: any) => data.name)
+                ?.includes("Create Postal Code") && (
+                <Button size="big" variant="primary" onClick={() => setModalCreate({ open: true })}>
+                  {lang[t].postalCode.primary.create}
+                </Button>
+              )}
             </Row>
           </Row>
         </Card>
