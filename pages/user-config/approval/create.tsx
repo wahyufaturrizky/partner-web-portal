@@ -66,6 +66,10 @@ const CreatePartnerConfigApproval: any = () => {
   });
 
   const { data: dataConfigsModule, isLoading: isLoadingConfigModule } = useConfigs({
+    query: {
+      page: 1,
+      limit: 1000,
+    },
     options: {
       refetchOnWindowFocus: "always",
       select: (data: any) => {
@@ -82,6 +86,11 @@ const CreatePartnerConfigApproval: any = () => {
   });
 
   const { data: fieldsListProcess, isLoading: isLoadingFieldListProcess } = useProcessLists({
+    query: {
+      page: 1,
+      limit: 1000,
+      company_id: companyCode,
+    },
     options: {
       refetchOnWindowFocus: "always",
       select: (data: any) => {
@@ -95,13 +104,14 @@ const CreatePartnerConfigApproval: any = () => {
         return { data: mappedData, totalRow: data.totalRow };
       },
     },
-    query: {
-      company_id: companyCode,
-    },
   });
 
   const { data: fieldsPermissionList, isLoading: isLoadingFieldsPermissionList } =
     usePartnerConfigPermissionLists({
+      query: {
+        page: 1,
+        limit: 1000,
+      },
       options: {
         refetchOnWindowFocus: "always",
         select: (data: any) => {
