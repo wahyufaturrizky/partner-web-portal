@@ -25,6 +25,10 @@ import { ICDownload, ICUpload } from "../../assets/icons";
 import { mdmDownloadService } from "../../lib/client";
 import { useRouter } from "next/router";
 import { lang } from "lang";
+import { useUserPermissions } from "hooks/user-config/useUser";
+import { permissionTermOfPayment } from "permission/term-of-payment";
+import { usePartnerConfigPermissionLists } from "hooks/user-config/usePermission";
+
 
 const downloadFile = (params: any) =>
   mdmDownloadService("/top/download", { params }).then((res) => {
@@ -156,6 +160,35 @@ const TermOfPayment = () => {
     },
   };
 
+  // const { data: dataUserPermission } = useUserPermissions({
+	// 	options: {
+	// 		onSuccess: () => {},
+	// 	},
+	// });
+  // nanti ganti sama atas
+  const { data: dataUserPermission } = usePartnerConfigPermissionLists({
+		options: {
+			onSuccess: () => {},
+		},
+	});
+
+	// const listPermission = dataUserPermission?.permission?.filter(
+	// 	(filtering: any) => filtering.menu === "Term Of Payment"
+	// );
+  // nanti ganti sama atas
+	const listPermission = dataUserPermission?.rows?.filter(
+		(filtering: any) => filtering?.menu?.name === "Term Of Payment"
+	);
+
+	// const allowPermissionToShow = listPermission?.filter((data: any) =>
+	// 	// permissionTermOfPayment.role[dataUserPermission?.role?.name].component.includes(data.name)
+	// );
+  // nanti ganti sama atas
+	const allowPermissionToShow = listPermission?.filter((data: any) =>{
+		return permissionTermOfPayment.role["Admin"].component.includes(data.name)
+	});
+
+
   const onSubmitFile = (file: any) => {
     const formData = new FormData();
     formData.append("company_id", companyCode);
@@ -163,6 +196,40 @@ const TermOfPayment = () => {
 
     uploadFileTop(formData);
   };
+
+  let menuList: any[] = []
+
+  if(allowPermissionToShow){
+    menuList = [
+      allowPermissionToShow?.map((data: any) => data.name)?.includes("Download Template Term Of Payment") && {
+        key: 1,
+        value: (
+          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+            <ICDownload />
+            <p style={{ margin: "0" }}>{lang[t].termOfPayment.ghost.downloadTemplate}</p>
+          </div>
+        ),
+      },
+      allowPermissionToShow?.map((data: any) => data.name)?.includes("Upload Template Term Of Payment") &&{
+        key: 2,
+        value: (
+          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+            <ICUpload />
+            <p style={{ margin: "0" }}>{lang[t].termOfPayment.ghost.uploadTemplate}</p>
+          </div>
+        ),
+      },
+      allowPermissionToShow?.map((data: any) => data.name)?.includes("Download Data Term Of Payment") && {
+        key: 3,
+        value: (
+          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+            <ICDownload />
+            <p style={{ margin: "0" }}>{lang[t].termOfPayment.ghost.downloadData}</p>
+          </div>
+        ),
+      },
+    ]
+  }
 
   return (
     <>
@@ -180,6 +247,7 @@ const TermOfPayment = () => {
             }}
           />
           <Row gap="16px">
+							{allowPermissionToShow?.map((data: any) => data.name)?.includes("Delete Term Of Payment") && (
             <Button
               size="big"
               variant={"tertiary"}
@@ -194,6 +262,7 @@ const TermOfPayment = () => {
             >
               {lang[t].termOfPayment.tertier.delete}
             </Button>
+              )}
             <DropdownMenu
               title={lang[t].termOfPayment.secondary.more}
               buttonVariant={"secondary"}
@@ -203,7 +272,7 @@ const TermOfPayment = () => {
               iconStyle={{ fontSize: "12px" }}
               onClick={(e: any) => {
                 switch (parseInt(e.key)) {
-                  case 1:
+                    case 1:
                     downloadFile({ with_data: "N", company_id: companyCode });
                     break;
                   case 2:
@@ -218,36 +287,9 @@ const TermOfPayment = () => {
                     break;
                 }
               }}
-              menuList={[
-                {
-                  key: 1,
-                  value: (
-                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                      <ICDownload />
-                      <p style={{ margin: "0" }}>{lang[t].termOfPayment.ghost.downloadTemplate}</p>
-                    </div>
-                  ),
-                },
-                {
-                  key: 2,
-                  value: (
-                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                      <ICUpload />
-                      <p style={{ margin: "0" }}>{lang[t].termOfPayment.ghost.uploadTemplate}</p>
-                    </div>
-                  ),
-                },
-                {
-                  key: 3,
-                  value: (
-                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                      <ICDownload />
-                      <p style={{ margin: "0" }}>{lang[t].termOfPayment.ghost.downloadData}</p>
-                    </div>
-                  ),
-                },
-              ]}
+              menuList={menuList}
             />
+							{allowPermissionToShow?.map((data: any) => data.name)?.includes("Create Term Of Payment") && (
             <Button
               size="big"
               variant="primary"
@@ -255,6 +297,7 @@ const TermOfPayment = () => {
             >
               {lang[t].termOfPayment.primary.create}
             </Button>
+              )}
           </Row>
         </Row>
       </Card>

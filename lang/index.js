@@ -1195,10 +1195,10 @@ export const lang = {
           upload: "Upload Template",
         },
         field: {
-          searchBar: "Search UserList, User List ID,User List Name",
+          searchBar: "Search User ID, Name",
         },
         table: {
-          employeeId: "Employee ID",
+          employeeId: "User ID",
           name: "Name",
           status: "Status",
           action: "Action",
