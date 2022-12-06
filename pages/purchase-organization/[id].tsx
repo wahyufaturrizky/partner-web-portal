@@ -1,4 +1,5 @@
 import usePagination from "@lucasmogari/react-pagination";
+import { useProductCategoryList } from "hooks/mdm/product-category/useProductCategory";
 import { lang } from "lang";
 import Router from "next/router";
 import {
@@ -131,7 +132,7 @@ const DetailMenuList: any = () => {
   });
 
   const { data: fieldsTablePermission, isLoading: isLoadingPermissions } =
-    usePartnerConfigPermissionLists({
+  useProductCategoryList({
       options: {
         onSuccess: (data) => {
           paginationTablePermission.setTotalItems(data.totalRow);
@@ -177,11 +178,11 @@ const DetailMenuList: any = () => {
   const datFieldPermission = [];
   dataTableAssociatePermission?.rows?.map((field) => {
     dataTablePermission.push({
-      key: field.id,
+      key: field.productCategoryId,
       field_name: field.name,
     });
     datFieldPermission.push({
-      value: field.id,
+      value: field.productCategoryId,
       label: field.name,
     });
   });

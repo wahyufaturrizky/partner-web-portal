@@ -1,4 +1,5 @@
 import usePagination from "@lucasmogari/react-pagination";
+import { useProductCategoryList } from "hooks/mdm/product-category/useProductCategory";
 import { lang } from "lang";
 import Router from "next/router";
 import {
@@ -72,7 +73,7 @@ const CreateMenuList: any = () => {
     totalItems: 100,
   });
 
-  const { data: fieldsTablePermission } = usePartnerConfigPermissionLists({
+  const { data: fieldsTablePermission } = useProductCategoryList({
     options: {
       onSuccess: (data) => {
         paginationTablePermission.setTotalItems(data.totalRow);
@@ -96,6 +97,8 @@ const CreateMenuList: any = () => {
       },
     });
 
+    console.log(fieldsTablePermission, '<<<<req')
+
   useEffect(() => {
     if (fieldsTablePermissionFilter && selectedFilter.length > 0) {
       setDataTableAssociatePermission(fieldsTablePermissionFilter);
@@ -116,11 +119,11 @@ const CreateMenuList: any = () => {
 
   dataTableAssociatePermission?.rows?.map((field) => {
     dataTablePermission.push({
-      key: field.id,
+      key: field.productCategoryId,
       field_name: field.name,
     });
     datFieldPermission.push({
-      value: field.id,
+      value: field.productCategoryId,
       label: field.name,
     });
   });
@@ -205,7 +208,7 @@ const CreateMenuList: any = () => {
       limit: paginationTableField.itemsPerPage,
     },
   });
-
+  console.log(tableFieldData, '<<<<table field')
   const dataTableField = [];
   tableFieldData?.rows?.map((field) => {
     dataTableField.push({
@@ -371,6 +374,7 @@ const CreateMenuList: any = () => {
     });
   };
 
+  console.log(dataAssociatedPermissionsField, '<<<<cek')
   return (
     <>
       <Col>
