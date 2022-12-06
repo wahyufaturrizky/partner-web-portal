@@ -25,6 +25,8 @@ import { ICDownload, ICUpload } from "../../assets/icons";
 import { mdmDownloadService } from "../../lib/client";
 import { useRouter } from "next/router";
 import { lang } from "lang";
+import { usePartnerConfigPermissionLists } from "hooks/user-config/usePermission";
+import { permissionProductGroup } from "permission/product-group";
 
 const ProductGroup = () => {
   const t = localStorage.getItem("lan") || "en-US";
@@ -160,6 +162,73 @@ const ProductGroup = () => {
     },
   };
 
+  // const { data: dataUserPermission } = useUserPermissions({
+	// 	options: {
+	// 		onSuccess: () => {},
+	// 	},
+	// });
+  // nanti ganti sama atas
+  const { data: dataUserPermission } = usePartnerConfigPermissionLists({
+		query: {
+      limit: 10000
+    },
+    options: {
+			onSuccess: () => {},
+		},
+	});
+
+	// const listPermission = dataUserPermission?.permission?.filter(
+	// 	(filtering: any) => filtering.menu === "Product Group"
+	// );
+  // nanti ganti sama atas
+	const listPermission = dataUserPermission?.rows?.filter(
+		(filtering: any) => filtering?.menu?.name === "Product Group"
+	);
+
+	// const allowPermissionToShow = listPermission?.filter((data: any) =>
+	// 	// permissionProductGroup.role[dataUserPermission?.role?.name].component.includes(data.name)
+	// );
+  // nanti ganti sama atas
+	const allowPermissionToShow = listPermission?.filter((data: any) =>{
+		return permissionProductGroup.role["Admin"].component.includes(data.name)
+	});
+
+  console.log(allowPermissionToShow, '<<<<allow')
+
+  let menuList: any[] = []
+
+  if(allowPermissionToShow){
+    menuList = [
+      allowPermissionToShow?.map((data: any) => data.name)?.includes("Download Template Product Group") && {
+        key: 1,
+        value: (
+          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+            <ICDownload />
+            <p style={{ margin: "0" }}>{lang[t].termOfPayment.ghost.downloadTemplate}</p>
+          </div>
+        ),
+      },
+      allowPermissionToShow?.map((data: any) => data.name)?.includes("Upload Template Product Group") &&{
+        key: 2,
+        value: (
+          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+            <ICUpload />
+            <p style={{ margin: "0" }}>{lang[t].termOfPayment.ghost.uploadTemplate}</p>
+          </div>
+        ),
+      },
+      allowPermissionToShow?.map((data: any) => data.name)?.includes("Download Data Product Group") && {
+        key: 3,
+        value: (
+          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+            <ICDownload />
+            <p style={{ margin: "0" }}>{lang[t].termOfPayment.ghost.downloadData}</p>
+          </div>
+        ),
+      },
+    ]
+  }
+
   const onSubmitFile = (file: any) => {
     const formData = new FormData();
     formData.append("company_id", companyCode);
@@ -188,6 +257,7 @@ const ProductGroup = () => {
             }}
           />
           <Row gap="16px">
+							{allowPermissionToShow?.map((data: any) => data.name)?.includes("Delete Product Group") && (
             <Button
               size="big"
               variant={"tertiary"}
@@ -202,6 +272,7 @@ const ProductGroup = () => {
             >
               {lang[t].productGroup.list.button.delete}
             </Button>
+              )}
             <DropdownMenu
               title={lang[t].productGroup.list.button.more}
               buttonVariant={"secondary"}
@@ -226,40 +297,9 @@ const ProductGroup = () => {
                     break;
                 }
               }}
-              menuList={[
-                {
-                  key: 1,
-                  value: (
-                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                      <ICDownload />
-                      <p style={{ margin: "0" }}>
-                        {lang[t].productGroup.list.ghost.downloadTemplate}
-                      </p>
-                    </div>
-                  ),
-                },
-                {
-                  key: 2,
-                  value: (
-                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                      <ICUpload />
-                      <p style={{ margin: "0" }}>
-                        {lang[t].productGroup.list.ghost.uploadTemplate}
-                      </p>
-                    </div>
-                  ),
-                },
-                {
-                  key: 3,
-                  value: (
-                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                      <ICDownload />
-                      <p style={{ margin: "0" }}>{lang[t].productGroup.list.ghost.downloadData}</p>
-                    </div>
-                  ),
-                },
-              ]}
+              menuList={menuList}
             />
+							{allowPermissionToShow?.map((data: any) => data.name)?.includes("Create Product Group") && (
             <Button
               size="big"
               variant="primary"
@@ -267,6 +307,7 @@ const ProductGroup = () => {
             >
               {lang[t].productGroup.list.button.create}
             </Button>
+              )}
           </Row>
         </Row>
       </Card>

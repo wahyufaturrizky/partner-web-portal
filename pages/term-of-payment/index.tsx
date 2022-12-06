@@ -167,7 +167,10 @@ const TermOfPayment = () => {
 	// });
   // nanti ganti sama atas
   const { data: dataUserPermission } = usePartnerConfigPermissionLists({
-		options: {
+    query: {
+      limit: 10000
+    },
+    options: {
 			onSuccess: () => {},
 		},
 	});

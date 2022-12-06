@@ -35,6 +35,8 @@ import ModalCalculation from "components/elements/Modal/ModalCalculation";
 import { useCalculations, useCreateCalculation, useDeleteCalculation, useUpdateCalculation, useUploadFileCalculation } from "hooks/calculation-config/useCalculation";
 import IDR_formatter from "hooks/number-formatter/useNumberFormatter";
 import { useCompanyInfiniteLists } from "hooks/company-list/useCompany";
+import { usePartnerConfigPermissionLists } from "hooks/user-config/usePermission";
+import { permissionCalculation } from "permission/calculation";
 
 const downloadFile = (params: any) =>
   mdmDownloadService("/branch/download", { params }).then((res) => {
@@ -79,6 +81,38 @@ const Calculation = () => {
   const [searchCompany, setSearchCompany] = useState("");
   const debounceFetchCompany = useDebounce(searchCompany, 1000);
 
+   // const { data: dataUserPermission } = useUserPermissions({
+	// 	options: {
+	// 		onSuccess: () => {},
+	// 	},
+	// });
+  // nanti ganti sama atas
+  const { data: dataUserPermission } = usePartnerConfigPermissionLists({
+    query: {
+      limit: 10000
+    },
+		options: {
+			onSuccess: () => {},
+		},
+	});
+
+	// const listPermission = dataUserPermission?.permission?.filter(
+	// 	(filtering: any) => filtering.menu === "Calculation"
+	// );
+  // nanti ganti sama atas
+	const listPermission = dataUserPermission?.rows?.filter(
+		(filtering: any) => filtering?.menu?.name === "Calculation"
+	);
+
+	// const allowPermissionToShow = listPermission?.filter((data: any) =>
+	// 	// permissionCalculation.role[dataUserPermission?.role?.name].component.includes(data.name)
+	// );
+  // nanti ganti sama atas
+	const allowPermissionToShow = listPermission?.filter((data: any) =>{
+		return permissionCalculation.role["Admin"].component.includes(data.name)
+	});
+  console.log(allowPermissionToShow, '<<<<allow')
+
   const {
     data: calculationData,
     isLoading: isLoadingCalculation,
@@ -115,6 +149,7 @@ const Calculation = () => {
               total_fee: 'IDR ' + IDR_formatter.format(element?.totalFee?.split('.')[0])?.split('Rp')[1],
               action: (
                 <div style={{ display: "flex", justifyContent: "left" }}>
+                {allowPermissionToShow?.map((data: any) => data.name)?.includes("Update Calculation") && (
                     <EditOutlined
                   style={{
                     cursor: "pointer",
@@ -128,7 +163,9 @@ const Calculation = () => {
                     setShowEdit({open: true, title: "Edit Roles, Menu, etc", data: {...element, companyName}, id: element?.id})
                   }}
                 />
+              )}
                 <Spacer size={5} />
+							{allowPermissionToShow?.map((data: any) => data.name)?.includes("Delete Calculation") && (
                 <DeleteOutlined
                   style={{
                     cursor: "pointer",
@@ -142,6 +179,7 @@ const Calculation = () => {
                    setShowDelete({ open: true, id: element.id, name: element.roleName })
                   }}
                 />
+              )}
                 </div>
               ),
             };
@@ -369,14 +407,14 @@ const Calculation = () => {
         <Spacer size={20} />
         
         <Row gap="16px">
-        
+        {allowPermissionToShow?.map((data: any) => data.name)?.includes("Create Calculation") && (
         <Button size="big" variant="primary" onClick={() => setShowCreate({
             open: true,
             title: 'Add New Roles, Menu, etc'
         })}>
             + Add New
         </Button>
-
+        )}
         <Search
         width="340px"
         placeholder="Search Role Name, Total User, Menu Name, etc."
