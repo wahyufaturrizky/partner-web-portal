@@ -1,5 +1,5 @@
 import { yupResolver } from "@hookform/resolvers/yup";
-import Router from "next/router";
+import Router, { useRouter } from "next/router";
 import {
   Accordion,
   Button,
@@ -41,6 +41,7 @@ const defaultValue = {
 };
 
 const DetailPartnerConfigPermissionList: any = () => {
+  const router = useRouter();
   const companyCode = localStorage.getItem("companyCode");
   const [searchViewType, setSearchViewType] = useState("");
   const [totalRowsViewTypeList, setTotalRowsViewTypeList] = useState(0);
@@ -58,6 +59,7 @@ const DetailPartnerConfigPermissionList: any = () => {
     handleSubmit,
     setValue,
     formState: { errors },
+    watch
   }: any = useForm({
     resolver: yupResolver(schema),
     defaultValues: defaultValue,
@@ -172,6 +174,7 @@ const DetailPartnerConfigPermissionList: any = () => {
     },
   });
 
+  const systemConfig = watch("isSystemConfig")
   return (
     <>
       <Col>
@@ -180,34 +183,19 @@ const DetailPartnerConfigPermissionList: any = () => {
           <Text variant={"h4"}>
             Permission Detail - {dataPartnerConfigPermissionList?.name || "Unknown"}
           </Text>
+          {systemConfig && <Lozenge>System Config</Lozenge>}
         </Row>
         <Spacer size={12} />
         <Card padding="20px">
-          <Row justifyContent="space-between" alignItems="center" nowrap>
-            {isLoadingPartnerConfigPermissionList ? (
-              <Spin ip="Loading..." />
-            ) : (
-              <Dropdown
-                label=""
-                isHtml
-                width={"185px"}
-                items={activeStatus}
-                placeholder={"Status"}
-                handleChange={(text: any) => setValue("activeStatus", text)}
-                noSearch
-                defaultValue={dataPartnerConfigPermissionList?.activeStatus ?? "N"}
-              />
-            )}
-
+          <Row justifyContent="flex-end" alignItems="center" nowrap>
             <Row>
               <Row gap="16px">
                 <Button
                   size="big"
-                  hidden
                   variant={"tertiary"}
-                  onClick={() => setModalDelete({ open: true })}
+                  onClick={() => router.back()}
                 >
-                  Delete
+                  Cancel
                 </Button>
                 <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
                   {lang[t].permissionList.primary.save}
@@ -254,21 +242,11 @@ const DetailPartnerConfigPermissionList: any = () => {
                     placeholder={"Select"}
                     handleChange={(value: any) => setValue("menuId", value)}
                     onSearch={(search) => setSearchAssociatedMenu(search)}
+                    disabled={systemConfig}
                   />
                 </Row>
-                <Row width="50%" gap="20px" noWrap>
-                  <Col width="loading...">
-                    <Dropdown
-                      label={lang[t].permissionList.permissionList.systemConfig}
-                      width={"100%"}
-                      items={valueIsSystemConfig}
-                      placeholder={"Select"}
-                      defaultValue={dataPartnerConfigPermissionList?.isSystemConfig}
-                      handleChange={(value: any) => setValue("isSystemConfig", value)}
-                      noSearch
-                    />
-                  </Col>
-
+                <Spacer size={20} />
+                <Row width="100%" gap="20px" noWrap>
                   <Col width="100%">
                     {isLoadingViewTypeList ? (
                       <Center>
@@ -278,7 +256,7 @@ const DetailPartnerConfigPermissionList: any = () => {
                       <>
                         <Label>View Type</Label>
                         <Spacer size={5} />
-                        <FormSelectCustom
+                        <CustomFormSelect
                           showArrow
                           height="48px"
                           style={{ width: "100%" }}
@@ -309,6 +287,13 @@ const DetailPartnerConfigPermissionList: any = () => {
                       </>
                     )}
                   </Col>
+                  <div style={{ visibility: "hidden", width: "100%" }}>
+                    <Input
+                      label="Name"
+                      height="48px"
+                      placeholder={"e.g 10000000"}
+                    />
+                  </div>
                 </Row>
               </Accordion.Body>
             )}
@@ -380,6 +365,40 @@ const DetailPartnerConfigPermissionList: any = () => {
     </>
   );
 };
+
+const Lozenge = styled.div`
+  background: #DDDDDD;
+  border-radius: 64px;
+  padding: 4px 8px;
+  color: #666666;
+  display: flex;
+  align-items: center;
+  text-align: center;
+  height: 32px;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 24px;
+`
+
+const CustomFormSelect = styled(FormSelectCustom)`
+  
+  .ant-select-selection-placeholder {
+    line-height: 48px !important;
+  }
+
+  .ant-select-selection-search-input {
+    height: 48px !important;
+  }
+
+  .ant-select-selector {
+    height: 48px !important;
+  }
+
+  .ant-select-selection-item {
+    display: flex;
+    align-items: center;
+  }
+`
 
 const Label = styled.div`
   font-weight: bold;

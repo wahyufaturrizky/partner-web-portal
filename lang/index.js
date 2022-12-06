@@ -1309,8 +1309,11 @@ export const lang = {
       tertier: {
         viewDetail: "View Detail",
         more: "More",
+        cancel: "Cancel",
+        delete: "Delete",
       },
       trainingTypeId: "Training Type ID",
+      createTrainingType: "Create Training Type",
       trainingTypeName: "Training Type Name",
       action: "Action",
       title: "Training Type",
@@ -1320,7 +1323,7 @@ export const lang = {
         uploadTemplate: "Upload Template",
         downloadData: "Download Data",
       },
-      primary: { create: "Membuat", save: "Menyimpan", yes: "Iya" },
+      primary: { create: "Create", save: "Save", yes: "Yes" },
     },
     customer: {
       customerId: "Customer Id",
@@ -2823,10 +2826,12 @@ export const lang = {
       yes: "Iya",
     },
     trainingType: {
+      createTrainingType: "Membuat Jenis Pelatihan",
       tertier: {
         viewDetail: "Lihat Detail",
         cancel: "Membatalkan",
         more: "Lebih",
+        delete: "Menghapus",
       },
       trainingTypeId: "ID Jenis Pelatihan",
       trainingTypeName: "Nama Jenis Pelatihan",
