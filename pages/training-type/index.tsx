@@ -31,8 +31,8 @@ import { lang } from "lang";
 
 const TrainingType = () => {
   const t = localStorage.getItem("lan") || "en-US";
-  const companyId = localStorage.getItem("companyId")
-  const companyCode = localStorage.getItem("companyCode")
+  const companyId = localStorage.getItem("companyId");
+  const companyCode = localStorage.getItem("companyCode");
   const pagination = usePagination({
     page: 1,
     itemsPerPage: 20,
@@ -245,7 +245,7 @@ const TrainingType = () => {
               }
               disabled={rowSelection.selectedRowKeys?.length === 0}
             >
-              {lang[t].trainingType.palceholderSearch}
+              {lang[t].trainingType.tertier.delete}
             </Button>
             <DropdownMenu
               title={lang[t].trainingType.tertier.more}
