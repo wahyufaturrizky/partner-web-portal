@@ -64,6 +64,7 @@ const CreateMenuList: any = () => {
     arrows: true,
     totalItems: 100,
   });
+
   const paginationTablePermission = usePagination({
     page: 1,
     itemsPerPage: 20,
@@ -327,11 +328,14 @@ const CreateMenuList: any = () => {
         stateFieldInput[thereIsEmptyField] === ""
     );
 
+    let product_categories = ""
+    dataAssociatedPermissionsField?.forEach((permission, i )=> product_categories += i !== dataAssociatedPermissionsField?.length - 1 ? permission?.key + ',' : permission?.key)
+    console.log(product_categories, '<<<<<prod')
     const data = {
       company: companyCode,
       name: stateFieldInput?.name,
       parent: parent,
-      product_categories: "",
+      product_categories,
       // process_name: stateFieldInput?.process_name,
       // isZeus: isZeus ? "Y" : "N",
       // isHermes: isHermes ? "Y" : "N",
