@@ -15,14 +15,16 @@ const fetchListCoa = async ({ query = {} }) => {
 };
 
 const fetchDetailCoa = async ({ coa_id, query }) => {
+  const companyCode = localStorage.getItem('companyCode')
   return client(`/coa/detail/${coa_id}`, {
     data: {
       page: 1,
-      search: "lancar",
+      search: "",
       limit: 10,
       sortBy: "account_name",
       sortOrder: "DESC",
       ...query,
+      company_id: companyCode
     },
     method: "PUT",
     skipSnakeCase: true,
@@ -97,13 +99,15 @@ const useFilterAccountCoa = ({ options, query } = {}) => {
 
 const useDeleteCoa = ({ options }) => {
   return useMutation(
-    (ids) =>
+    (ids) => {
+      const companyCode = localStorage.getItem('companyCode')
       client(`/coa/delete`, {
         method: "POST",
-        data: ids,
+        data: { ...ids, company_id: companyCode },
       }),
-    {
-      ...options,
+      {
+        ...options,
+      }
     }
   );
 };
