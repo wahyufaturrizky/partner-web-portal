@@ -97,7 +97,6 @@ const CreateMenuList: any = () => {
       },
     });
 
-    console.log(fieldsTablePermission, '<<<<req')
 
   useEffect(() => {
     if (fieldsTablePermissionFilter && selectedFilter.length > 0) {
@@ -208,7 +207,6 @@ const CreateMenuList: any = () => {
       limit: paginationTableField.itemsPerPage,
     },
   });
-  console.log(tableFieldData, '<<<<table field')
   const dataTableField = [];
   tableFieldData?.rows?.map((field) => {
     dataTableField.push({
@@ -374,7 +372,6 @@ const CreateMenuList: any = () => {
     });
   };
 
-  console.log(dataAssociatedPermissionsField, '<<<<cek')
   return (
     <>
       <Col>
