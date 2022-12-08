@@ -195,8 +195,10 @@ const CreateConfig = () => {
                 }))
             }
         }
-        console.log(payload, '<<<<payload')
-        if(!payload?.data && payload?.add[0]?.name === "" || payload?.update[0]?.name === ""){
+        const addIsEmpty = payload?.add?.find(data => data.name === "")
+        const updateIsEmpty = payload?.update?.find(data => data.name === "")
+        
+        if(addIsEmpty || updateIsEmpty){
             return ""
         }
         
