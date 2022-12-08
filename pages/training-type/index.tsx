@@ -68,8 +68,8 @@ const TrainingType = () => {
     switch (type) {
       case "selection":
         return data.selectedRowKeys.length > 1
-          ? `${lang[t].areYouSureToDelete} ${data.selectedRowKeys.length} items ?`
-          : `${lang[t].areYouSureToDelete} ${
+          ? `${lang[t].trainingType.areYouSureToDelete} ${data.selectedRowKeys.length} items ?`
+          : `${lang[t].trainingType.areYouSureToDelete} ${
               data?.trainingTypeData?.data.find((el: any) => el.key === data.selectedRowKeys[0])
                 ?.name
             } ?`;
