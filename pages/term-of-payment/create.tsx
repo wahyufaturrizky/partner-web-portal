@@ -13,6 +13,8 @@ import ModalAddTerm from "../../components/elements/Modal/ModalAddTerm";
 import DraggableTable from "../../components/pages/TermOfPayment/DraggableTable";
 import { ExclamationCircleOutlined } from "@ant-design/icons";
 import { lang } from "lang";
+import { permissionTermOfPayment } from "permission/term-of-payment";
+import { usePartnerConfigPermissionLists } from "hooks/user-config/usePermission";
 
 const TermOfPaymentCreate = () => {
   const t = localStorage.getItem("lan") || "en-US";
@@ -117,6 +119,37 @@ const TermOfPaymentCreate = () => {
     }
   };
 
+  // const { data: dataUserPermission } = useUserPermissions({
+	// 	options: {
+	// 		onSuccess: () => {},
+	// 	},
+	// });
+  // nanti ganti sama atas
+  const { data: dataUserPermission } = usePartnerConfigPermissionLists({
+    query: {
+      limit: 10000
+    },
+    options: {
+			onSuccess: () => {},
+		},
+	});
+
+	// const listPermission = dataUserPermission?.permission?.filter(
+	// 	(filtering: any) => filtering.menu === "Term Of Payment"
+	// );
+  // nanti ganti sama atas
+	const listPermission = dataUserPermission?.rows?.filter(
+		(filtering: any) => filtering?.menu?.name === "Term Of Payment"
+	);
+
+	// const allowPermissionToShow = listPermission?.filter((data: any) =>
+	// 	// permissionTermOfPayment.role[dataUserPermission?.role?.name].component.includes(data.name)
+	// );
+  // nanti ganti sama atas
+	const allowPermissionToShow = listPermission?.filter((data: any) =>{
+		return permissionTermOfPayment.role["Admin"].component.includes(data.name)
+	});
+
   const onSubmit = (data: any) => {
     const mappedTermListRequest = termList.map((el: any) => {
       return {
@@ -151,9 +184,11 @@ const TermOfPaymentCreate = () => {
               <Button size="big" variant={"tertiary"} onClick={() => router.back()}>
                 {lang[t].termOfPayment.tertier.cancel}
               </Button>
+							{allowPermissionToShow?.map((data: any) => data.name)?.includes("Create Term Of Payment") && (
               <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
                 {isLoadingTermOfPayment ? "Loading..." : lang[t].termOfPayment.primary.save}
               </Button>
+              )}
             </Row>
           </Row>
         </Card>
@@ -175,6 +210,7 @@ const TermOfPaymentCreate = () => {
             <Spacer size={10} />
 
             <Row width={"150px"}>
+							{allowPermissionToShow?.map((data: any) => data.name)?.includes("Create Term Of Payment") && (
               <Button
                 size="small"
                 variant={"tertiary"}
@@ -190,6 +226,7 @@ const TermOfPaymentCreate = () => {
               >
                 + Add Terms
               </Button>
+              )}
             </Row>
 
             <Spacer size={10} />

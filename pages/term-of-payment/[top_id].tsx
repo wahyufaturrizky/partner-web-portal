@@ -17,6 +17,8 @@ import ModalAddTerm from "../../components/elements/Modal/ModalAddTerm";
 import DraggableTable from "../../components/pages/TermOfPayment/DraggableTable";
 import { ExclamationCircleOutlined } from "@ant-design/icons";
 import { lang } from "lang";
+import { usePartnerConfigPermissionLists } from "hooks/user-config/usePermission";
+import { permissionTermOfPayment } from "permission/term-of-payment";
 
 const TermOfPaymentEdit = () => {
   const t = localStorage.getItem("lan") || "en-US";
@@ -162,6 +164,38 @@ const TermOfPaymentEdit = () => {
     }
   };
 
+  // const { data: dataUserPermission } = useUserPermissions({
+	// 	options: {
+	// 		onSuccess: () => {},
+	// 	},
+	// });
+  // nanti ganti sama atas
+  const { data: dataUserPermission } = usePartnerConfigPermissionLists({
+    query: {
+      limit: 10000
+    },
+    options: {
+			onSuccess: () => {},
+		},
+	});
+
+	// const listPermission = dataUserPermission?.permission?.filter(
+	// 	(filtering: any) => filtering.menu === "Term Of Payment"
+	// );
+  // nanti ganti sama atas
+	const listPermission = dataUserPermission?.rows?.filter(
+		(filtering: any) => filtering?.menu?.name === "Term Of Payment"
+	);
+
+	// const allowPermissionToShow = listPermission?.filter((data: any) =>
+	// 	// permissionTermOfPayment.role[dataUserPermission?.role?.name].component.includes(data.name)
+	// );
+  // nanti ganti sama atas
+	const allowPermissionToShow = listPermission?.filter((data: any) =>{
+		return permissionTermOfPayment.role["Admin"].component.includes(data.name)
+	});
+
+
   const onSubmit = (data: any) => {
     const mappedTermListRequest = termList.map((el: any) => {
       return {
@@ -203,12 +237,16 @@ const TermOfPaymentEdit = () => {
         <Card padding="20px">
           <Row justifyContent="flex-end" alignItems="center" nowrap>
             <Row gap="16px">
+							{allowPermissionToShow?.map((data: any) => data.name)?.includes("Delete Term Of Payment") && (
               <Button size="big" variant={"tertiary"} onClick={() => setShowDeleteModal(true)}>
                 {lang[t].termOfPayment.tertier.delete}
               </Button>
+              )}
+							{allowPermissionToShow?.map((data: any) => data.name)?.includes("Update Term Of Payment") && (
               <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
                 {isLoadingUpdateTermOfPayment ? "Loading..." : lang[t].termOfPayment.primary.save}
               </Button>
+              )}
             </Row>
           </Row>
         </Card>
@@ -231,6 +269,7 @@ const TermOfPaymentEdit = () => {
             <Spacer size={10} />
 
             <Row width={"150px"}>
+							{allowPermissionToShow?.map((data: any) => data.name)?.includes("Create Term Of Payment") && (
               <Button
                 size="small"
                 variant={"tertiary"}
@@ -246,6 +285,7 @@ const TermOfPaymentEdit = () => {
               >
                 + Add Terms
               </Button>
+              )}
             </Row>
 
             <Spacer size={10} />
@@ -260,7 +300,8 @@ const TermOfPaymentEdit = () => {
                 onEdit={(data: any) => {
                   setShowTermForm({ type: "edit", open: true, data });
                 }}
-                onDelete={(data: any) => {
+                onDelete={
+                  (data: any) => {
                   if (data.id !== 0) {
                     setRemoveList((prevList: any) => {
                       return [...prevList, { id: data.id }];

@@ -15,6 +15,8 @@ import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
 import { CSS } from "@dnd-kit/utilities";
 import { useSortable, SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import styled from "styled-components";
+import { usePartnerConfigPermissionLists } from "hooks/user-config/usePermission";
+import { permissionTermOfPayment } from "permission/term-of-payment";
 
 const getTypeName = (type: any) => {
   switch (type) {
@@ -112,6 +114,37 @@ const DraggableTable = ({ termList, isLoading, onDrag, onEdit, onDelete }: any) 
       dataIndex: "option",
     },
   ];
+  
+  // const { data: dataUserPermission } = useUserPermissions({
+	// 	options: {
+	// 		onSuccess: () => {},
+	// 	},
+	// });
+  // nanti ganti sama atas
+  const { data: dataUserPermission } = usePartnerConfigPermissionLists({
+    query: {
+      limit: 10000
+    },
+    options: {
+			onSuccess: () => {},
+		},
+	});
+
+	// const listPermission = dataUserPermission?.permission?.filter(
+	// 	(filtering: any) => filtering.menu === "Term Of Payment"
+	// );
+  // nanti ganti sama atas
+	const listPermission = dataUserPermission?.rows?.filter(
+		(filtering: any) => filtering?.menu?.name === "Term Of Payment"
+	);
+
+	// const allowPermissionToShow = listPermission?.filter((data: any) =>
+	// 	// permissionTermOfPayment.role[dataUserPermission?.role?.name].component.includes(data.name)
+	// );
+  // nanti ganti sama atas
+	const allowPermissionToShow = listPermission?.filter((data: any) =>{
+		return permissionTermOfPayment.role["Admin"].component.includes(data.name)
+	});
 
   return (
     <DndContext
@@ -195,6 +228,7 @@ const DraggableTable = ({ termList, isLoading, onDrag, onEdit, onDelete }: any) 
                   }}
                 />
                 <Spacer size={5} />
+							{allowPermissionToShow?.map((data: any) => data.name)?.includes("Update Term Of Payment") && (
                 <EditOutlined
                   style={{
                     cursor: "pointer",
@@ -208,7 +242,9 @@ const DraggableTable = ({ termList, isLoading, onDrag, onEdit, onDelete }: any) 
                     onEdit && onEdit(props.data);
                   }}
                 />
+              )}
                 <Spacer size={5} />
+							{allowPermissionToShow?.map((data: any) => data.name)?.includes("Delete Term Of Payment") && (
                 <DeleteOutlined
                   style={{
                     cursor: "pointer",
@@ -222,6 +258,7 @@ const DraggableTable = ({ termList, isLoading, onDrag, onEdit, onDelete }: any) 
                     onDelete && onDelete(props.data);
                   }}
                 />
+              )}
               </div>
             </td>
             <td>{props.data.index + 1}</td>
