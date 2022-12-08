@@ -18,8 +18,6 @@ import styled from "styled-components";
 
 import DownloadSvg from "../../../assets/icons/ic-download.svg";
 import UploadSvg from "../../../assets/icons/ic-upload.svg";
-import SyncSvg from "../../../assets/icons/ic-sync.svg";
-
 import { ModalCreatePostalCode } from "../../../components/elements/Modal/ModalCreatePostalCode";
 import { ModalDeleteConfirmation } from "../../../components/elements/Modal/ModalConfirmationDelete";
 import { ModalDetailPostalCode } from "../../../components/elements/Modal/ModalDetailPostalCode";
@@ -55,6 +53,7 @@ const CountryPostalCode = () => {
     arrows: true,
     totalItems: 100,
   });
+  const companyCode = localStorage.getItem("companyCode");
   const [modalDelete, setModalDelete] = useState({ open: false });
   const [isShowUpload, setShowUpload] = useState(false);
   const [search, setSearch] = useState("");
@@ -208,8 +207,6 @@ const CountryPostalCode = () => {
     uploadFilePostalCodesMDM(formData);
   };
 
-  console.log(filterCountry);
-
   return (
     <>
       <Col>
@@ -277,13 +274,13 @@ const CountryPostalCode = () => {
                   onClick={(e: any) => {
                     switch (parseInt(e.key)) {
                       case 1:
-                        generateItem("N");
+                        downloadFile({ with_data: "N", company_id: companyCode });
                         break;
                       case 2:
                         setShowUpload(true);
                         break;
                       case 3:
-                        generateItem("Y");
+                        downloadFile({ with_data: "Y", company_id: companyCode });
                         break;
                       case 4:
                         break;

@@ -28,11 +28,12 @@ import { useForm } from "react-hook-form";
 import { ICDownload, ICUpload } from "../../assets/icons";
 import { mdmDownloadService } from "../../lib/client";
 import { lang } from "lang";
+import { permissionJobLevel } from "permission/jobLevel";
 
 const JobPosition = () => {
   const t = localStorage.getItem("lan") || "en-US";
-  const companyId = localStorage.getItem("companyId")
-  const companyCode = localStorage.getItem("companyCode")
+  const companyId = localStorage.getItem("companyId");
+  const companyCode = localStorage.getItem("companyCode");
   const pagination = usePagination({
     page: 1,
     itemsPerPage: 20,
@@ -54,6 +55,20 @@ const JobPosition = () => {
   const debounceSearch = useDebounce(search, 1000);
 
   const { register, handleSubmit } = useForm();
+
+  const { data: dataUserPermission } = useUserPermissions({
+    options: {
+      onSuccess: () => {},
+    },
+  });
+
+  const listPermission = dataUserPermission?.permission?.filter(
+    (filtering: any) => filtering.menu === "Job Level"
+  );
+
+  const allowPermissionToShow = listPermission?.filter((data: any) =>
+    permissionJobLevel.role[dataUserPermission?.role?.name].component.includes(data.name)
+  );
 
   const downloadFile = (params: any) =>
     mdmDownloadService("/job-level/download", { params }).then((res) => {
@@ -172,12 +187,16 @@ const JobPosition = () => {
       title: lang[t].jobLevel.jobLevelName,
       dataIndex: "name",
     },
-    {
-      title: lang[t].jobLevel.action,
-      dataIndex: "action",
-      width: "15%",
-      align: "left",
-    },
+    ...(allowPermissionToShow?.some((el: any) => el.name === "View Job Level")
+      ? [
+          {
+            title: lang[t].jobLevel.action,
+            dataIndex: "action",
+            width: "15%",
+            align: "left",
+          },
+        ]
+      : []),
   ];
 
   const rowSelection = {
@@ -229,81 +248,109 @@ const JobPosition = () => {
             }}
           />
           <Row gap="16px">
-            <Button
-              size="big"
-              variant={"tertiary"}
-              onClick={() =>
-                setShowDelete({
-                  open: true,
-                  type: "selection",
-                  data: { jobLevelData: jobLevelsData, selectedRowKeys },
-                })
-              }
-              disabled={rowSelection.selectedRowKeys?.length === 0}
-            >
-              {lang[t].jobLevel.tertier.delete}
-            </Button>
-            <DropdownMenu
-              title={"More"}
-              buttonVariant={"secondary"}
-              buttonSize={"big"}
-              textVariant={"button"}
-              textColor={"pink.regular"}
-              iconStyle={{ fontSize: "12px" }}
-              onClick={(e: any) => {
-                switch (parseInt(e.key)) {
-                  case 1:
-                    downloadFile({ with_data: "N", company_id: companyCode });
-                    break;
-                  case 2:
-                    setShowUpload(true);
-                    break;
-                  case 3:
-                    downloadFile({ with_data: "Y", company_id: companyCode });
-                    break;
-                  case 4:
-                    break;
-                  default:
-                    break;
+            {allowPermissionToShow?.map((data: any) => data.name)?.includes("Delete Job Level") && (
+              <Button
+                size="big"
+                variant={"tertiary"}
+                onClick={() =>
+                  setShowDelete({
+                    open: true,
+                    type: "selection",
+                    data: { jobLevelData: jobLevelsData, selectedRowKeys },
+                  })
                 }
-              }}
-              menuList={[
-                {
-                  key: 1,
-                  value: (
-                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                      <ICDownload />
-                      <p style={{ margin: "0" }}>{lang[t].jobLevel.ghost.downloadTemplate}</p>
-                    </div>
-                  ),
-                },
-                {
-                  key: 2,
-                  value: (
-                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                      <ICUpload />
-                      <p style={{ margin: "0" }}>{lang[t].jobLevel.ghost.uploadTemplate}</p>
-                    </div>
-                  ),
-                },
-                {
-                  key: 3,
-                  value: (
-                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                      <ICDownload />
-                      <p style={{ margin: "0" }}>{lang[t].jobLevel.ghost.downloadData}</p>
-                    </div>
-                  ),
-                },
-              ]}
-            />
-            <Button
-              size="big"
-              variant="primary"
-              onClick={() => setModalForm({ open: true, typeForm: "create", data: {} })}
-            >
-              {lang[t].jobLevel.primary.create}
-            </Button>
+                disabled={rowSelection.selectedRowKeys?.length === 0}
+              >
+                {lang[t].jobLevel.tertier.delete}
+              </Button>
+            )}
+
+            {(allowPermissionToShow
+              ?.map((data: any) => data.name)
+              ?.includes("Download Template Job Level") ||
+              allowPermissionToShow
+                ?.map((data: any) => data.name)
+                ?.includes("Download Data Job Level") ||
+              allowPermissionToShow
+                ?.map((data: any) => data.name)
+                ?.includes("Upload Job Level")) && (
+              <DropdownMenu
+                title={"More"}
+                buttonVariant={"secondary"}
+                buttonSize={"big"}
+                textVariant={"button"}
+                textColor={"pink.regular"}
+                iconStyle={{ fontSize: "12px" }}
+                onClick={(e: any) => {
+                  switch (parseInt(e.key)) {
+                    case 1:
+                      downloadFile({ with_data: "N", company_id: companyCode });
+                      break;
+                    case 2:
+                      setShowUpload(true);
+                      break;
+                    case 3:
+                      downloadFile({ with_data: "Y", company_id: companyCode });
+                      break;
+                    case 4:
+                      break;
+                    default:
+                      break;
+                  }
+                }}
+                menuList={[
+                  {
+                    ...(allowPermissionToShow
+                      ?.map((data: any) => data.name)
+                      ?.includes("Download Template Job Level") && {
+                      key: 1,
+                      value: (
+                        <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                          <ICDownload />
+                          <p style={{ margin: "0" }}>{lang[t].jobLevel.ghost.downloadTemplate}</p>
+                        </div>
+                      ),
+                    }),
+                  },
+                  {
+                    ...(allowPermissionToShow
+                      ?.map((data: any) => data.name)
+                      ?.includes("Upload Job Level") && {
+                      key: 2,
+                      value: (
+                        <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                          <ICUpload />
+                          <p style={{ margin: "0" }}>{lang[t].jobLevel.ghost.uploadTemplate}</p>
+                        </div>
+                      ),
+                    }),
+                  },
+                  {
+                    ...(allowPermissionToShow
+                      ?.map((data: any) => data.name)
+                      ?.includes("Download Data Job Level") && {
+                      key: 3,
+                      value: (
+                        <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                          <ICDownload />
+                          <p style={{ margin: "0" }}>{lang[t].jobLevel.ghost.downloadData}</p>
+                        </div>
+                      ),
+                    }),
+                  },
+                ]}
+              />
+            )}
+
+            {allowPermissionToShow?.map((data: any) => data.name)?.includes("Create Job Level") && (
+              <Button
+                size="big"
+                variant="primary"
+                onClick={() => setModalForm({ open: true, typeForm: "create", data: {} })}
+              >
+                {lang[t].jobLevel.primary.create}
+              </Button>
+            )}
           </Row>
         </Row>
       </Card>

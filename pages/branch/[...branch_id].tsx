@@ -11,6 +11,8 @@ import { useSalesOrganizationHirarcy, useSalesOrganizationInfiniteLists } from "
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { useCountryInfiniteLists } from "hooks/mdm/country-structure/useCountries";
+import { useUserPermissions } from "hooks/user-config/usePermission";
+import { permissionBranch } from "permission/branch";
 
 const schema = yup
 	.object({
@@ -78,6 +80,20 @@ const BranchDetail = () => {
     { value: 2, label: '40124' },
     { value: 3, label: '40125' },
   ])
+
+  const { data: dataUserPermission } = useUserPermissions({
+    options: {
+      onSuccess: () => {},
+    },
+  });
+
+  const listPermission = dataUserPermission?.permission?.filter(
+    (filtering: any) => filtering.menu === "Branch"
+  );
+
+  const allowPermissionToShow = listPermission?.filter((data: any) =>
+    permissionBranch.role[dataUserPermission?.role?.name].component.includes(data.name)
+  );
 
 
   // const { register, control, handleSubmit } = useForm();
@@ -358,9 +374,13 @@ const BranchDetail = () => {
           <Button size="big" variant={"tertiary"} onClick={() => router.back()}>
             Cancel
           </Button>
-          <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
-            {isLoadingUpdateBranch ? "Loading..." : "Save"}
-          </Button>
+          {allowPermissionToShow
+            ?.map((data: any) => data.name)
+            ?.includes("Delete Branch") && (
+              <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
+                {isLoadingUpdateBranch ? "Loading..." : "Save"}
+              </Button>
+          )}
         </Row>
       </Card>
 

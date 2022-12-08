@@ -24,6 +24,8 @@ import { queryClient } from "../_app";
 import { ICDownload, ICUpload } from "../../assets/icons";
 import { mdmDownloadService } from "../../lib/client";
 import { useRouter } from "next/router";
+import { useUserPermissions } from "hooks/user-config/usePermission";
+import { permissionBranch } from "permission/branch";
 
 const downloadFile = (params: any) =>
   mdmDownloadService("/branch/download", { params }).then((res) => {
@@ -52,8 +54,8 @@ const renderConfirmationText = (type: any, data: any) => {
 
 const Branch = () => {
   const router = useRouter();
-  const companyId = localStorage.getItem("companyId")
-  const companyCode = localStorage.getItem("companyCode")
+  const companyId = localStorage.getItem("companyId");
+  const companyCode = localStorage.getItem("companyCode");
   const pagination = usePagination({
     page: 1,
     itemsPerPage: 20,
@@ -74,6 +76,20 @@ const Branch = () => {
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const debounceSearch = useDebounce(search, 1000);
 
+  const { data: dataUserPermission } = useUserPermissions({
+    options: {
+      onSuccess: () => {},
+    },
+  });
+
+  const listPermission = dataUserPermission?.permission?.filter(
+    (filtering: any) => filtering.menu === "Branch"
+  );
+
+  const allowPermissionToShow = listPermission?.filter((data: any) =>
+    permissionBranch.role[dataUserPermission?.role?.name].component.includes(data.name)
+  );
+
   const {
     data: branchData,
     isLoading: isLoadingBranch,
@@ -83,34 +99,34 @@ const Branch = () => {
       search: debounceSearch,
       page: pagination.page,
       limit: pagination.itemsPerPage,
-      company_id: companyCode
+      company_id: companyCode,
     },
     options: {
       onSuccess: (data: any) => {
-        console.log(data, '<<< abis tembak')
+        console.log(data, "<<< abis tembak");
         pagination.setTotalItems(data.totalRow);
       },
       select: (data: any) => {
         const mappedData = data?.rows?.map((element: any) => {
-            return {
-              key: element.branchId,
-              id: element.branchId,
-              branchName: element.name,
-              action: (
-                <div style={{ display: "flex", justifyContent: "left" }}>
-                  <Button
-                    size="small"
-                    onClick={() => {
-                      router.push(`/branch/${element.companyId}/${element.branchId}`);
-                    }}
-                    variant="tertiary"
-                  >
-                    View Detail
-                  </Button>
-                </div>
-              ),
-            };
-          });
+          return {
+            key: element.branchId,
+            id: element.branchId,
+            branchName: element.name,
+            action: (
+              <div style={{ display: "flex", justifyContent: "left" }}>
+                <Button
+                  size="small"
+                  onClick={() => {
+                    router.push(`/branch/${element.companyId}/${element.branchId}`);
+                  }}
+                  variant="tertiary"
+                >
+                  View Detail
+                </Button>
+              </div>
+            ),
+          };
+        });
         return { data: mappedData, totalRow: data.totalRow };
       },
     },
@@ -144,12 +160,16 @@ const Branch = () => {
       title: "Branch Name",
       dataIndex: "branchName",
     },
-    {
-      title: "Action",
-      dataIndex: "action",
-      width: "15%",
-      align: "left",
-    },
+    ...(allowPermissionToShow?.some((el: any) => el.name === "View Branch")
+      ? [
+          {
+            title: "Action",
+            dataIndex: "action",
+            width: "15%",
+            align: "left",
+          },
+        ]
+      : []),
   ];
 
   const rowSelection = {
@@ -183,77 +203,103 @@ const Branch = () => {
             }}
           />
           <Row gap="16px">
-            <Button
-              size="big"
-              variant={"tertiary"}
-              onClick={() =>
-                setShowDelete({
-                  open: true,
-                  type: "selection",
-                  data: { branchData, selectedRowKeys },
-                })
-              }
-              disabled={rowSelection.selectedRowKeys?.length === 0}
-            >
-              Delete
-            </Button>
-            <DropdownMenu
-              title={"More"}
-              buttonVariant={"secondary"}
-              buttonSize={"big"}
-              textVariant={"button"}
-              textColor={"pink.regular"}
-              iconStyle={{ fontSize: "12px" }}
-              onClick={(e: any) => {
-                switch (parseInt(e.key)) {
-                  case 1:
-                    downloadFile({ with_data: "N", company_id: companyCode });
-                    break;
-                  case 2:
-                    setShowUpload(true);
-                    break;
-                  case 3:
-                    downloadFile({ with_data: "Y", company_id: companyCode });
-                    break;
-                  case 4:
-                    break;
-                  default:
-                    break;
+            {allowPermissionToShow?.map((data: any) => data.name)?.includes("Delete Branch") && (
+              <Button
+                size="big"
+                variant={"tertiary"}
+                onClick={() =>
+                  setShowDelete({
+                    open: true,
+                    type: "selection",
+                    data: { branchData, selectedRowKeys },
+                  })
                 }
-              }}
-              menuList={[
-                {
-                  key: 1,
-                  value: (
-                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                      <ICDownload />
-                      <p style={{ margin: "0" }}>Download Template</p>
-                    </div>
-                  ),
-                },
-                {
-                  key: 2,
-                  value: (
-                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                      <ICUpload />
-                      <p style={{ margin: "0" }}>Upload Template</p>
-                    </div>
-                  ),
-                },
-                {
-                  key: 3,
-                  value: (
-                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                      <ICDownload />
-                      <p style={{ margin: "0" }}>Download Data</p>
-                    </div>
-                  ),
-                },
-              ]}
-            />
-            <Button size="big" variant="primary" onClick={() => router.push("/branch/create")}>
-              Create
-            </Button>
+                disabled={rowSelection.selectedRowKeys?.length === 0}
+              >
+                Delete
+              </Button>
+            )}
+
+            {(allowPermissionToShow
+              ?.map((data: any) => data.name)
+              ?.includes("Download Template Branch") ||
+              allowPermissionToShow
+                ?.map((data: any) => data.name)
+                ?.includes("Download Data Branch") ||
+              allowPermissionToShow?.map((data: any) => data.name)?.includes("Upload Branch")) && (
+              <DropdownMenu
+                title={"More"}
+                buttonVariant={"secondary"}
+                buttonSize={"big"}
+                textVariant={"button"}
+                textColor={"pink.regular"}
+                iconStyle={{ fontSize: "12px" }}
+                onClick={(e: any) => {
+                  switch (parseInt(e.key)) {
+                    case 1:
+                      downloadFile({ with_data: "N", company_id: companyCode });
+                      break;
+                    case 2:
+                      setShowUpload(true);
+                      break;
+                    case 3:
+                      downloadFile({ with_data: "Y", company_id: companyCode });
+                      break;
+                    case 4:
+                      break;
+                    default:
+                      break;
+                  }
+                }}
+                menuList={[
+                  {
+                    ...(allowPermissionToShow
+                      ?.map((data: any) => data.name)
+                      ?.includes("Download Template Branch") && {
+                      key: 1,
+                      value: (
+                        <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                          <ICDownload />
+                          <p style={{ margin: "0" }}>Download Template</p>
+                        </div>
+                      ),
+                    }),
+                  },
+                  {
+                    ...(allowPermissionToShow
+                      ?.map((data: any) => data.name)
+                      ?.includes("Upload Branch") && {
+                      key: 2,
+                      value: (
+                        <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                          <ICUpload />
+                          <p style={{ margin: "0" }}>Upload Template</p>
+                        </div>
+                      ),
+                    }),
+                  },
+                  {
+                    ...(allowPermissionToShow
+                      ?.map((data: any) => data.name)
+                      ?.includes("Download Data Branch") && {
+                      key: 3,
+                      value: (
+                        <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                          <ICDownload />
+                          <p style={{ margin: "0" }}>Download Data</p>
+                        </div>
+                      ),
+                    }),
+                  },
+                ]}
+              />
+            )}
+
+            {allowPermissionToShow?.map((data: any) => data.name)?.includes("Create Branch") && (
+              <Button size="big" variant="primary" onClick={() => router.push("/branch/create")}>
+                Create
+              </Button>
+            )}
           </Row>
         </Row>
       </Card>

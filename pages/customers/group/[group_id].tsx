@@ -23,11 +23,13 @@ import {
   useParentCustomerGroupMDM,
   useUpdateCustomerGroupMDM,
 } from "../../../hooks/mdm/customers/useCustomersGroupMDM";
+import { useUserPermissions } from "hooks/user-config/usePermission";
+import { permissionCustomerGroup } from "permission/custormerGroup";
 
 const CustomerGroupDetail = () => {
   const router = useRouter();
-  const companyId = localStorage.getItem("companyId")
-  const companyCode = localStorage.getItem("companyCode")
+  const companyId = localStorage.getItem("companyId");
+  const companyCode = localStorage.getItem("companyCode");
   const { group_id: id } = router.query;
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -36,6 +38,20 @@ const CustomerGroupDetail = () => {
     defaultValues: { parent: "" },
   });
 
+  const { data: dataUserPermission } = useUserPermissions({
+    options: {
+      onSuccess: () => {},
+    },
+  });
+
+  const listPermission = dataUserPermission?.permission?.filter(
+    (filtering: any) => filtering.menu === "Customer Group"
+  );
+
+  const allowPermissionToShow = listPermission?.filter((data: any) =>
+    permissionCustomerGroup.role[dataUserPermission?.role?.name].component.includes(data.name)
+  );
+
   const {
     data: customerGroupData,
     isLoading: isLoadingCustomerGroup,
@@ -43,7 +59,7 @@ const CustomerGroupDetail = () => {
   } = useCustomerGroupMDM({
     id: id,
     options: {
-      onSuccess: (data: any) => { },
+      onSuccess: (data: any) => {},
     },
   });
 
@@ -76,7 +92,7 @@ const CustomerGroupDetail = () => {
   } = useParentCustomerGroupMDM({
     id: Number(id) + `/${companyCode}`,
     options: {
-      onSuccess: (data: any) => { },
+      onSuccess: (data: any) => {},
     },
   });
 
@@ -115,7 +131,7 @@ const CustomerGroupDetail = () => {
       customer: "PT. Indomarco Jaya",
       action: (
         <div style={{ display: "flex", justifyContent: "left" }}>
-          <Button size="small" onClick={() => { }} variant="tertiary">
+          <Button size="small" onClick={() => {}} variant="tertiary">
             View Detail
           </Button>
         </div>
@@ -127,7 +143,7 @@ const CustomerGroupDetail = () => {
       customer: "PT. Alfamart ",
       action: (
         <div style={{ display: "flex", justifyContent: "left" }}>
-          <Button size="small" onClick={() => { }} variant="tertiary">
+          <Button size="small" onClick={() => {}} variant="tertiary">
             View Detail
           </Button>
         </div>
@@ -148,12 +164,20 @@ const CustomerGroupDetail = () => {
         <Card padding="20px">
           <Row justifyContent="flex-end" alignItems="center" nowrap>
             <Row gap="16px">
-              <Button size="big" variant={"tertiary"} onClick={() => setShowDeleteModal(true)}>
-                Delete
-              </Button>
-              <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
-                {isLoadingUpdateCreateCustomerGroup ? "Loading..." : "Save"}
-              </Button>
+              {allowPermissionToShow
+                ?.map((data: any) => data.name)
+                ?.includes("Delete Customer Group") && (
+                <Button size="big" variant={"tertiary"} onClick={() => setShowDeleteModal(true)}>
+                  Delete
+                </Button>
+              )}
+              {allowPermissionToShow
+                ?.map((data: any) => data.name)
+                ?.includes("Update Customer Group") && (
+                <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
+                  {isLoadingUpdateCreateCustomerGroup ? "Loading..." : "Save"}
+                </Button>
+              )}
             </Row>
           </Row>
         </Card>

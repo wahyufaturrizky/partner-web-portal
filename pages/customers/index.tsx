@@ -1,8 +1,10 @@
 import usePagination from "@lucasmogari/react-pagination";
+import { useUserPermissions } from "hooks/user-config/usePermission";
 import { lang } from "lang";
 import { mdmDownloadService } from "lib/client";
 import { useRouter } from "next/router";
 import { queryClient } from "pages/_app";
+import { permissionCustomer } from "permission/customer";
 import {
   Button,
   Col,
@@ -50,6 +52,20 @@ export default function Customer() {
   const [itemsSelected, setItemsSelected] = useState([]);
   const [visible, setVisible] = useState(false);
 
+  const { data: dataUserPermission } = useUserPermissions({
+    options: {
+      onSuccess: () => {},
+    },
+  });
+
+  const listPermission = dataUserPermission?.permission?.filter(
+    (filtering: any) => filtering.menu === "Customer"
+  );
+
+  const allowPermissionToShow = listPermission?.filter((data: any) =>
+    permissionCustomer.role[dataUserPermission?.role?.name].component.includes(data.name)
+  );
+
   const columns = [
     {
       title: lang[t].customer.customerId,
@@ -67,19 +83,27 @@ export default function Customer() {
       title: lang[t].customer.salesman,
       dataIndex: "salesman",
     },
-    {
-      title: lang[t].customer.action,
-      dataIndex: "id",
-      width: "15%",
-      align: "left",
-      render: (id: any) => (
-        <div style={{ display: "flex", justifyContent: "left" }}>
-          <Button size="small" onClick={() => router.push(`/customers/${id}`)} variant="tertiary">
-            {lang[t].customer.tertier.viewDetail}
-          </Button>
-        </div>
-      ),
-    },
+    ...(allowPermissionToShow?.some((el: any) => el.name === "View Customer")
+      ? [
+          {
+            title: lang[t].customer.action,
+            dataIndex: "id",
+            width: "15%",
+            align: "left",
+            render: (id: any) => (
+              <div style={{ display: "flex", justifyContent: "left" }}>
+                <Button
+                  size="small"
+                  onClick={() => router.push(`/customers/${id}`)}
+                  variant="tertiary"
+                >
+                  {lang[t].customer.tertier.viewDetail}
+                </Button>
+              </div>
+            ),
+          },
+        ]
+      : []),
   ];
 
   const {
@@ -123,31 +147,41 @@ export default function Customer() {
 
   const actDrowpdown = [
     {
-      key: 1,
-      value: (
-        <ButtonAction>
-          <ICDownload />
-          <p style={{ margin: "0" }}>{lang[t].customer.ghost.downloadTemplate}</p>
-        </ButtonAction>
-      ),
+      ...(allowPermissionToShow
+        ?.map((data: any) => data.name)
+        ?.includes("Download Template Customer") && {
+        key: 1,
+        value: (
+          <ButtonAction>
+            <ICDownload />
+            <p style={{ margin: "0" }}>{lang[t].customer.ghost.downloadTemplate}</p>
+          </ButtonAction>
+        ),
+      }),
     },
     {
-      key: 2,
-      value: (
-        <ButtonAction disabled>
-          <ICUpload />
-          <p style={{ margin: "0" }}>{lang[t].customer.ghost.uploadTemplate}</p>
-        </ButtonAction>
-      ),
+      ...(allowPermissionToShow?.map((data: any) => data.name)?.includes("Upload Customer") && {
+        key: 2,
+        value: (
+          <ButtonAction disabled>
+            <ICUpload />
+            <p style={{ margin: "0" }}>{lang[t].customer.ghost.uploadTemplate}</p>
+          </ButtonAction>
+        ),
+      }),
     },
     {
-      key: 3,
-      value: (
-        <ButtonAction>
-          <ICDownload />
-          <p style={{ margin: "0" }}>{lang[t].customer.ghost.downloadData}</p>
-        </ButtonAction>
-      ),
+      ...(allowPermissionToShow
+        ?.map((data: any) => data.name)
+        ?.includes("Download Data Customer") && {
+        key: 3,
+        value: (
+          <ButtonAction>
+            <ICDownload />
+            <p style={{ margin: "0" }}>{lang[t].customer.ghost.downloadData}</p>
+          </ButtonAction>
+        ),
+      }),
     },
   ];
 
@@ -188,41 +222,58 @@ export default function Customer() {
             onChange={({ target }: any) => setSearch(target.value)}
           />
           <Row gap="16px">
-            <Button
-              size="big"
-              variant={"tertiary"}
-              onClick={() => setVisible(true)}
-              disabled={itemsSelected?.length < 1}
-            >
-              {lang[t].customer.tertier.delete}
-            </Button>
-            <DropdownMenu
-              title={lang[t].customer.tertier.more}
-              buttonVariant={"secondary"}
-              buttonSize={"big"}
-              textVariant={"button"}
-              textColor={"pink.regular"}
-              iconStyle={{ fontSize: "12px" }}
-              onClick={(e: any) => {
-                switch (parseInt(e.key)) {
-                  case 1:
-                    downloadFile({ with_data: "N" });
-                    break;
-                  case 2:
-                    setShowUpload(true);
-                    break;
-                  case 3:
-                    downloadFile({ with_data: "Y" });
-                    break;
-                  default:
-                    break;
-                }
-              }}
-              menuList={actDrowpdown}
-            />
-            <Button size="big" variant="primary" onClick={() => router.push("/customers/create")}>
-              {lang[t].customer.primary.create}
-            </Button>
+            {allowPermissionToShow
+              ?.map((data: any) => data.name)
+              ?.includes("Delete Postal Code") && (
+              <Button
+                size="big"
+                variant={"tertiary"}
+                onClick={() => setVisible(true)}
+                disabled={itemsSelected?.length < 1}
+              >
+                {lang[t].customer.tertier.delete}
+              </Button>
+            )}
+
+            {(allowPermissionToShow
+              ?.map((data: any) => data.name)
+              ?.includes("Download Template Customer") ||
+              allowPermissionToShow
+                ?.map((data: any) => data.name)
+                ?.includes("Download Data Customer") ||
+              allowPermissionToShow
+                ?.map((data: any) => data.name)
+                ?.includes("Upload Customer")) && (
+              <DropdownMenu
+                title={lang[t].customer.tertier.more}
+                buttonVariant={"secondary"}
+                buttonSize={"big"}
+                textVariant={"button"}
+                textColor={"pink.regular"}
+                iconStyle={{ fontSize: "12px" }}
+                onClick={(e: any) => {
+                  switch (parseInt(e.key)) {
+                    case 1:
+                      downloadFile({ with_data: "N" });
+                      break;
+                    case 2:
+                      setShowUpload(true);
+                      break;
+                    case 3:
+                      downloadFile({ with_data: "Y" });
+                      break;
+                    default:
+                      break;
+                  }
+                }}
+                menuList={actDrowpdown}
+              />
+            )}
+            {allowPermissionToShow?.map((data: any) => data.name)?.includes("Create Customer") && (
+              <Button size="big" variant="primary" onClick={() => router.push("/customers/create")}>
+                {lang[t].customer.primary.create}
+              </Button>
+            )}
           </Row>
         </Row>
       </Card>

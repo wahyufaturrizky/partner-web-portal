@@ -23,10 +23,12 @@ import {
   useUploadFileProductCategory,
 } from "hooks/mdm/product-category/useProductCategory";
 import useDebounce from "../../lib/useDebounce";
+import { useUserPermissions } from "hooks/user-config/usePermission";
+import { permissionProductCategory } from "permission/productCategory";
 
 const ProductCategory = () => {
-  const companyId = localStorage.getItem("companyId")
-  const companyCode = localStorage.getItem("companyCode")
+  const companyId = localStorage.getItem("companyId");
+  const companyCode = localStorage.getItem("companyCode");
   const pagination = usePagination({
     page: 1,
     itemsPerPage: 20,
@@ -45,6 +47,20 @@ const ProductCategory = () => {
 
   const debounceSearch = useDebounce(search, 1000);
 
+  const { data: dataUserPermission } = useUserPermissions({
+    options: {
+      onSuccess: () => {},
+    },
+  });
+
+  const listPermission = dataUserPermission?.permission?.filter(
+    (filtering: any) => filtering.menu === "Product Category"
+  );
+
+  const allowPermissionToShow = listPermission?.filter((data: any) =>
+    permissionProductCategory.role[dataUserPermission?.role?.name].component.includes(data.name)
+  );
+
   const columns = [
     {
       title: "Product Category ID",
@@ -58,11 +74,15 @@ const ProductCategory = () => {
       title: "Parent",
       dataIndex: "parent",
     },
-    {
-      title: "Action",
-      dataIndex: "action",
-      width: "15%",
-    },
+    ...(allowPermissionToShow?.some((el: any) => el.name === "View Product Category")
+      ? [
+          {
+            title: "Action",
+            dataIndex: "action",
+            width: "15%",
+          },
+        ]
+      : []),
   ];
 
   const {
@@ -122,31 +142,43 @@ const ProductCategory = () => {
 
   const actDrowpdown = [
     {
-      key: 1,
-      value: (
-        <ButtonAction onClick={() => handleDownloadFile({ with_data: "N" })}>
-          <ICDownload />
-          <p style={{ margin: "0" }}>Download Template</p>
-        </ButtonAction>
-      ),
+      ...(allowPermissionToShow
+        ?.map((data: any) => data.name)
+        ?.includes("Download Template Product Category") && {
+        key: 1,
+        value: (
+          <ButtonAction onClick={() => handleDownloadFile({ with_data: "N" })}>
+            <ICDownload />
+            <p style={{ margin: "0" }}>Download Template</p>
+          </ButtonAction>
+        ),
+      }),
     },
     {
-      key: 2,
-      value: (
-        <ButtonAction onClick={() => setVisible({ upload: true, delete: false })} >
-          <ICUpload />
-          <p style={{ margin: "0" }}>Upload Template</p>
-        </ButtonAction>
-      ),
+      ...(allowPermissionToShow
+        ?.map((data: any) => data.name)
+        ?.includes("Upload Product Category") && {
+        key: 2,
+        value: (
+          <ButtonAction onClick={() => setVisible({ upload: true, delete: false })}>
+            <ICUpload />
+            <p style={{ margin: "0" }}>Upload Template</p>
+          </ButtonAction>
+        ),
+      }),
     },
     {
-      key: 3,
-      value: (
-        <ButtonAction onClick={() => handleDownloadFile({ with_data: "Y" })}>
-          <ICDownload />
-          <p style={{ margin: "0" }}>Download Data</p>
-        </ButtonAction>
-      ),
+      ...(allowPermissionToShow
+        ?.map((data: any) => data.name)
+        ?.includes("Download Data Product Category") && {
+        key: 3,
+        value: (
+          <ButtonAction onClick={() => handleDownloadFile({ with_data: "Y" })}>
+            <ICDownload />
+            <p style={{ margin: "0" }}>Download Data</p>
+          </ButtonAction>
+        ),
+      }),
     },
   ];
 
@@ -158,13 +190,15 @@ const ProductCategory = () => {
   };
 
   const handleDownloadFile = (params) => {
-    mdmDownloadService(`/product-category/download?company_id=${companyCode}`, { params }).then((res) => {
-      let dataUrl = window.URL.createObjectURL(new Blob([res?.data]));
-      let tempLink = document.createElement("a");
-      tempLink.href = dataUrl;
-      tempLink.setAttribute("download", `product-category ${new Date().getTime()}.xlsx`);
-      tempLink.click();
-    });
+    mdmDownloadService(`/product-category/download?company_id=${companyCode}`, { params }).then(
+      (res) => {
+        let dataUrl = window.URL.createObjectURL(new Blob([res?.data]));
+        let tempLink = document.createElement("a");
+        tempLink.href = dataUrl;
+        tempLink.setAttribute("download", `product-category ${new Date().getTime()}.xlsx`);
+        tempLink.click();
+      }
+    );
   };
 
   const { mutate: uploadFileProductCategory } = useUploadFileProductCategory({
@@ -183,7 +217,7 @@ const ProductCategory = () => {
 
     uploadFileProductCategory(formData);
   };
-  
+
   return (
     <div>
       <Col>
@@ -198,31 +232,49 @@ const ProductCategory = () => {
             onChange={({ target }: any) => setSearch(target.value)}
           />
           <Row gap="16px">
-            <Button
-              size="big"
-              variant={"tertiary"}
-              onClick={() => setVisible({ upload: false, delete: true })}
-              disabled={itemsSelected?.length < 1}
-            >
-              Delete
-            </Button>
-            <DropdownMenu
-              title={"More"}
-              buttonVariant={"secondary"}
-              buttonSize={"big"}
-              textVariant={"button"}
-              textColor={"pink.regular"}
-              iconStyle={{ fontSize: "12px" }}
-              //   onClick={({ key }: any) => key === '1' && handleDownloadFile()}
-              menuList={actDrowpdown}
-            />
-            <Button
-              size="big"
-              variant="primary"
-              onClick={() => router.push("/product-category/create")}
-            >
-              Create
-            </Button>
+            {allowPermissionToShow
+              ?.map((data: any) => data.name)
+              ?.includes("Delete Product Category") && (
+              <Button
+                size="big"
+                variant={"tertiary"}
+                onClick={() => setVisible({ upload: false, delete: true })}
+                disabled={itemsSelected?.length < 1}
+              >
+                Delete
+              </Button>
+            )}
+            {(allowPermissionToShow
+              ?.map((data: any) => data.name)
+              ?.includes("Download Template Product Category") ||
+              allowPermissionToShow
+                ?.map((data: any) => data.name)
+                ?.includes("Download Data Product Category") ||
+              allowPermissionToShow
+                ?.map((data: any) => data.name)
+                ?.includes("Upload Product Category")) && (
+              <DropdownMenu
+                title={"More"}
+                buttonVariant={"secondary"}
+                buttonSize={"big"}
+                textVariant={"button"}
+                textColor={"pink.regular"}
+                iconStyle={{ fontSize: "12px" }}
+                //   onClick={({ key }: any) => key === '1' && handleDownloadFile()}
+                menuList={actDrowpdown}
+              />
+            )}
+            {allowPermissionToShow
+              ?.map((data: any) => data.name)
+              ?.includes("Create Product Category") && (
+              <Button
+                size="big"
+                variant="primary"
+                onClick={() => router.push("/product-category/create")}
+              >
+                Create
+              </Button>
+            )}
           </Row>
         </Row>
       </Card>
@@ -239,22 +291,31 @@ const ProductCategory = () => {
         </Col>
       </Card>
 
-      <FileUploadModal
-        visible={visible.upload}
-        setVisible={() => setVisible({ upload: false, delete: false })}
-        onSubmit={submitUploadFile}
-      />
+      {visible.upload && (
+        <FileUploadModal
+          visible={visible.upload}
+          setVisible={() => setVisible({ upload: false, delete: false })}
+          onSubmit={submitUploadFile}
+        />
+      )}
 
-      <ModalDeleteConfirmation
-        totalSelected={itemsSelected.length}
-        visible={visible.delete}
-        itemTitle={
-          productCategoryData?.data?.find((item: any) => item.key === itemsSelected[0])?.name
-        }
-        isLoading={loadingDelete}
-        onCancel={() => setVisible({ delete: false, upload: false })}
-        onOk={() => deleteProductCategory({ product_category_ids: itemsSelected, company_id: [companyCode] })}
-      />
+      {visible.delete && (
+        <ModalDeleteConfirmation
+          totalSelected={itemsSelected.length}
+          visible={visible.delete}
+          itemTitle={
+            productCategoryData?.data?.find((item: any) => item.key === itemsSelected[0])?.name
+          }
+          isLoading={loadingDelete}
+          onCancel={() => setVisible({ delete: false, upload: false })}
+          onOk={() =>
+            deleteProductCategory({
+              product_category_ids: itemsSelected,
+              company_id: [companyCode],
+            })
+          }
+        />
+      )}
     </div>
   );
 };
