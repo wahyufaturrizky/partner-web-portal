@@ -191,6 +191,10 @@ const CreateConfig = () => {
                 }))
             }
         }
+        if(payload?.add[0]?.name === "" || payload?.update[0]?.name === ""){
+            return ""
+        }
+        
 	    isNew ? createSalesOrganization(payload) : updateSalesOrganization(payload);
 	};
 
