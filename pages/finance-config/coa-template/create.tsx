@@ -443,7 +443,7 @@ const FinanceConfigCoATemplateCreate: any = () => {
                         variant={"tertiary"}
                         onClick={() => router.push("/finance-config/coa-template")}
                       >
-                        {lang[t].coaTemplate.list.button.delete}
+                        {lang[t].coaTemplate.list.button.cancel}
                       </Button>
                       <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmitCoa)}>
                         {lang[t].coaTemplate.list.button.save}

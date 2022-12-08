@@ -17,7 +17,7 @@ const fetchListCoa = async ({ query = {} }) => {
 };
 
 const fetchDetailCoa = async ({ coa_id, query }) => {
-  const companyCode = localStorage.getItem('companyCode')
+  const companyCode = localStorage.getItem("companyCode");
   return client(`/coa/detail/${coa_id}`, {
     data: {
       page: 1,
@@ -26,13 +26,12 @@ const fetchDetailCoa = async ({ coa_id, query }) => {
       sortBy: "account_name",
       sortOrder: "DESC",
       ...query,
-      company_id: companyCode
+      company_id: companyCode,
     },
     method: "PUT",
     skipSnakeCase: true,
   }).then((data) => data);
 };
-
 
 const fetchInfiniteCoaLists = async ({ pageParam = 1, queryKey }) => {
   const searchQuery = queryKey[1].search;
@@ -101,15 +100,13 @@ const useFilterAccountCoa = ({ options, query } = {}) => {
 
 const useDeleteCoa = ({ options }) => {
   return useMutation(
-    (ids) => {
-      const companyCode = localStorage.getItem('companyCode')
+    (ids) =>
       client(`/coa/delete`, {
         method: "POST",
-        data: { ...ids, company_id: companyCode },
+        data: { ...ids },
       }),
-      {
-        ...options,
-      }
+    {
+      ...options,
     }
   );
 };
