@@ -34,7 +34,7 @@ import {
 import { lang } from "lang";
 
 const downloadFile = (params: any) =>
-  mdmDownloadService("/customer-group/download", { params }).then((res) => {
+  mdmDownloadService("/customer-group/template/download", { params }).then((res) => {
     let dataUrl = window.URL.createObjectURL(new Blob([res.data]));
     let tempLink = document.createElement("a");
     tempLink.href = dataUrl;
@@ -154,7 +154,7 @@ const CustomerGroupMDM = () => {
     });
 
   const { data: dataParentCustomerGroupMDM, isLoading: isLoadingParentCustomerGroupMDM } =
-    useParentCustomerGroupMDM({id: modalCustomerGroupForm.data?.id ?? 0 + "/KSNI"});
+    useParentCustomerGroupMDM({id: modalCustomerGroupForm.data?.id ?? 0 + `/${companyCode}`});
 
   const { mutate: deleteCustomerGroupMDM, isLoading: isLoadingDeleteCustomerGroupMDM } =
     useDeleteCustomerGroupMDM({
@@ -270,13 +270,13 @@ const CustomerGroupMDM = () => {
               onClick={(e: any) => {
                 switch (parseInt(e.key)) {
                   case 1:
-                    downloadFile({ with_data: "N", company: companyCode });
+                    downloadFile({ with_data: "N", company_id: companyCode });
                     break;
                   case 2:
                     setShowUpload(true);
                     break;
                   case 3:
-                    downloadFile({ with_data: "Y", company: companyCode });
+                    downloadFile({ with_data: "Y", company_id: companyCode });
                     break;
                   case 4:
                     break;
