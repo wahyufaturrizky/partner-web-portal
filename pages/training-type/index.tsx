@@ -74,7 +74,7 @@ const TrainingType = () => {
                 ?.name
             } ?`;
       case "detail":
-        return `${lang[t].areYouSureToDelete} ${data.name} ?`;
+        return `${lang[t].trainingType.areYouSureToDelete} ${data.name} ?`;
 
       default:
         break;
