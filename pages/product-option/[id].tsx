@@ -42,7 +42,7 @@ const ProductOptionDetail = () => {
     options: {
       onSuccess: () => {},
     },
-    id: `KSNI/${id}`,
+    id: `${companyCode}/${id}`,
   });
 
   const { mutate: updateProductOption, isLoading: isLoadingUpdateProductOption } =
