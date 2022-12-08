@@ -1301,9 +1301,9 @@ export const lang = {
       primary: {
         create: "Create",
         save: "Menyimpan",
+        yes: "Yes",
       },
       confirmDelete: "Confirm Delete",
-      yes: "Yes",
     },
     trainingType: {
       tertier: {
@@ -2823,9 +2823,9 @@ export const lang = {
       primary: {
         create: "Membuat",
         save: "Menyimpan",
+        yes: "Iya",
       },
       confirmDelete: "Konfirmasi Hapus",
-      yes: "Iya",
     },
     trainingType: {
       createTrainingType: "Membuat Jenis Pelatihan",

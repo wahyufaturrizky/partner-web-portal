@@ -373,7 +373,7 @@ const TrainingType = () => {
                     type="primary"
                     onClick={() => setModalForm({ open: false, data: {}, typeForm: "" })}
                   >
-                    {lang[t].trainingType.tertier.delete}
+                    {lang[t].trainingType.tertier.cancel}
                   </Button>
                 ) : (
                   <Button
