@@ -1324,6 +1324,8 @@ export const lang = {
         downloadData: "Download Data",
       },
       primary: { create: "Create", save: "Save", yes: "Yes" },
+      confirmDelete: "Confirm Delete",
+      areYouSureToDelete: "Are you sure to delete",
     },
     customer: {
       customerId: "Customer Id",
@@ -2851,6 +2853,7 @@ export const lang = {
       createTrainingType: "Buat Jenis Pelatihan",
       confirmDelete: "Konfirmasi Hapus",
       areYouSureToDelete: "Apakah Anda yakin untuk menghapus?",
+      confirmDelete: "Konfirmasi Hapus",
     },
     customer: {
       customerId: "ID Pelanggan",
