@@ -1180,6 +1180,9 @@ export const lang = {
       salesmanName: "Salesman Name",
       branch: "Branch",
       idCard: "ID Card",
+      divisionName: "Division Name",
+      mobileNumber: "Mobile Number",
+      email: "Email",
     },
     userList: {
       list: {
