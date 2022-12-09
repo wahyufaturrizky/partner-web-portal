@@ -41,7 +41,8 @@ function useCreatePartnerConfigPermissionList({ options }) {
 }
 
 const fetchPartnerConfigPermissionList = async ({ partner_config_menu_list_id }) => {
-  return client(`/partner-permission/${partner_config_menu_list_id}`).then((data) => data);
+  const companyCode = localStorage.getItem("companyCode");
+  return client(`/partner-permission/${partner_config_menu_list_id}/${companyCode}`).then((data) => data);
 };
 
 const usePartnerConfigPermissionList = ({ partner_config_menu_list_id, options }) => {
