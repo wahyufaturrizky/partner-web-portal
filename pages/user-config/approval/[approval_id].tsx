@@ -27,6 +27,7 @@ import {
 	useUpdatePartnerConfigApprovalList,
 } from "../../../hooks/user-config/useApproval";
 import { lang } from "lang";
+import { usePartnerConfigPermissionLists } from "hooks/user-config/usePermission";
 
 export interface ConfigModuleList {}
 
@@ -34,6 +35,7 @@ const DetailUserConfigApproval: any = () => {
 	const router = useRouter();
 
 	const t = localStorage.getItem("lan") || "en-US";
+	const companyCode = localStorage.getItem("companyCode");
 	const { approval_id } = router.query;
 	const [dataListDropdownModul, setDataListDropdownModul] = useState(null);
 	const [modalDelete, setModalDelete] = useState({ open: false });
@@ -132,7 +134,15 @@ const DetailUserConfigApproval: any = () => {
 		},
 	});
 
-	const { data: fieldsPermissionList, isLoading: isLoadingFieldsPermissionList } = usePermissions({
+	// const { data: fieldsPermissionList, isLoading: isLoadingFieldsPermissionList } = usePermissions({
+	// 	options: {
+	// 		refetchOnWindowFocus: "always",
+	// 	},
+	// });
+	const { data: fieldsPermissionList, isLoading: isLoadingFieldsPermissionList } = usePartnerConfigPermissionLists({
+		query: {
+			company_id: companyCode,
+		},
 		options: {
 			refetchOnWindowFocus: "always",
 		},
@@ -154,7 +164,7 @@ const DetailUserConfigApproval: any = () => {
 				})),
 				is_email_notification: isSendEmailNotif,
 			};
-			mutateUpdatePartnerConfigApprovalList(data);
+			mutateUpdatePartnerConfigApprovalList({...data, company_id: companyCode});
 		} else {
 			window.alert(`field ${isEmptyField} must be fill!`);
 		}
