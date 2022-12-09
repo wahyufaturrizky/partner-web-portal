@@ -33,7 +33,8 @@ const useAccountGroupParent = ({ query = {}, options } = {}) => {
 };
 
 const fetchAccountGroupDetail = async ({ query = {}, id }) => {
-  return client(`/account-group/${id}`).then((data) => data);
+  const companyCode = localStorage.getItem('companyCode');
+  return client(`/account-group/${companyCode}/${id}`).then((data) => data);
 };
 
 const useAccountGroupsDetail = ({ query = {}, options, id } = {}) => {
