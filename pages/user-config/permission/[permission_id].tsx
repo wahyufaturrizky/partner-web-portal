@@ -221,7 +221,7 @@ const DetailPartnerConfigPermissionList: any = () => {
 				</Alert>
 				<Spacer size={20} /> */}
 
-        <Accordion>
+        <Accordion style={{ position: "relative" }} id="area">
           <Accordion.Item key={1}>
             <Accordion.Header variant="blue">
               {lang[t].permissionList.accordion.general}
@@ -280,6 +280,7 @@ const DetailPartnerConfigPermissionList: any = () => {
                           //     fetchNextPageViewTypeList();
                           //   }
                           // }}
+												  containerId={"area"}
                           items={
                             isFetchingViewTypeList && !isFetchingMoreViewTypeList
                               ? []
