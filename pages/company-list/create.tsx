@@ -739,7 +739,7 @@ const CreateCompany: any = () => {
         if (data.industryId) setValue("industry_id", data.industryId);
         if (data.languageId) setValue("language", data.languageId);
         if (data?.currencyFormat?.id) setValue("currency", data.currencyFormat.id)
-        if (data?.dateFormatId) setValue("dateFormat", data.dateFormatId)
+        if (data?.dateFormatId) setValue("formatDate", data.dateFormatId)
         if (data?.timezoneId) setValue("timezone", data.timezoneId)
         if (data?.numberFormatId) setValue("numberFormat", data.numberFormatId)
         if (data?.coaId) setValue("coaTemplate", data.coaId)
