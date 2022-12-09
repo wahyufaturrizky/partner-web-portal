@@ -15,6 +15,7 @@ import {
 } from "pink-lava-ui";
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
+import ArrowLeft from "../../../assets/icons/arrow-left.svg";
 
 import { usePermissions } from "../../../hooks/permission/usePermission";
 import { useProcessLists } from "../../../hooks/business-process/useProcess";
@@ -216,7 +217,7 @@ const DetailUserConfigApproval: any = () => {
 		<>
 			<Col>
 				<Row gap="4px" alignItems="center">
-					
+					<ArrowLeft style={{ cursor: "pointer" }} onClick={() => Router.back()} />
 					<Text variant={"h4"}>
 						Approval Partner Detail - {dataPartnerConfigApprovalList?.name || "Unknown"}
 					</Text>
