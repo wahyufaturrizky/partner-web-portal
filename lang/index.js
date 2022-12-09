@@ -1180,6 +1180,9 @@ export const lang = {
       salesmanName: "Salesman Name",
       branch: "Branch",
       idCard: "ID Card",
+      divisionName: "Division Name",
+      mobileNumber: "Mobile Number",
+      email: "Email",
     },
     userList: {
       list: {
@@ -1301,9 +1304,9 @@ export const lang = {
       primary: {
         create: "Create",
         save: "Menyimpan",
+        yes: "Yes",
       },
       confirmDelete: "Confirm Delete",
-      yes: "Yes",
     },
     trainingType: {
       tertier: {
@@ -1324,6 +1327,8 @@ export const lang = {
         downloadData: "Download Data",
       },
       primary: { create: "Create", save: "Save", yes: "Yes" },
+      confirmDelete: "Confirm Delete",
+      areYouSureToDelete: "Are you sure to delete",
     },
     customer: {
       customerId: "Customer Id",
@@ -1376,7 +1381,7 @@ export const lang = {
           addNew: "Add New",
           cancel: "Cancel",
           download: "Download Template",
-          downloadData: "Upload Data",
+          downloadData: "Download Data",
           upload: "Upload Template",
           yes: "Yes",
           view: "View",
@@ -1495,7 +1500,7 @@ export const lang = {
           addNew: "Add New",
           cancel: "Cancel",
           download: "Download Template",
-          downloadData: "Upload Data",
+          downloadData: "Download Data",
           upload: "Upload Template",
           yes: "Yes",
           view: "View",
@@ -2821,9 +2826,9 @@ export const lang = {
       primary: {
         create: "Membuat",
         save: "Menyimpan",
+        yes: "Iya",
       },
       confirmDelete: "Konfirmasi Hapus",
-      yes: "Iya",
     },
     trainingType: {
       createTrainingType: "Membuat Jenis Pelatihan",
@@ -2851,6 +2856,7 @@ export const lang = {
       createTrainingType: "Buat Jenis Pelatihan",
       confirmDelete: "Konfirmasi Hapus",
       areYouSureToDelete: "Apakah Anda yakin untuk menghapus?",
+      confirmDelete: "Konfirmasi Hapus",
     },
     customer: {
       customerId: "ID Pelanggan",

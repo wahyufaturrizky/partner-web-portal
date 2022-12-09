@@ -110,8 +110,8 @@ const BussinessProcessDetail = () => {
               key: `${index}`,
               bp_id: element.id,
               index,
-              id: element.process.id,
-              name: element.process.name,
+              id: element?.process?.id,
+              name: element?.process?.name,
               is_mandatory: element.isMandatory ? "Is Mandatory" : "Not Mandatory",
               status: element.status === "Y" ? "ACTIVE" : "INACTIVE",
             };

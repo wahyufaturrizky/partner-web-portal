@@ -64,6 +64,7 @@ const CreateMenuList: any = () => {
     arrows: true,
     totalItems: 100,
   });
+
   const paginationTablePermission = usePagination({
     page: 1,
     itemsPerPage: 20,
@@ -97,7 +98,6 @@ const CreateMenuList: any = () => {
       },
     });
 
-    console.log(fieldsTablePermission, '<<<<req')
 
   useEffect(() => {
     if (fieldsTablePermissionFilter && selectedFilter.length > 0) {
@@ -208,7 +208,6 @@ const CreateMenuList: any = () => {
       limit: paginationTableField.itemsPerPage,
     },
   });
-  console.log(tableFieldData, '<<<<table field')
   const dataTableField = [];
   tableFieldData?.rows?.map((field) => {
     dataTableField.push({
@@ -329,11 +328,13 @@ const CreateMenuList: any = () => {
         stateFieldInput[thereIsEmptyField] === ""
     );
 
+    let product_categories = ""
+    dataAssociatedPermissionsField?.forEach((permission, i )=> product_categories += i !== dataAssociatedPermissionsField?.length - 1 ? permission?.key + ',' : permission?.key)
     const data = {
       company: companyCode,
       name: stateFieldInput?.name,
       parent: parent,
-      product_categories: "",
+      product_categories,
       // process_name: stateFieldInput?.process_name,
       // isZeus: isZeus ? "Y" : "N",
       // isHermes: isHermes ? "Y" : "N",
@@ -374,7 +375,6 @@ const CreateMenuList: any = () => {
     });
   };
 
-  console.log(dataAssociatedPermissionsField, '<<<<cek')
   return (
     <>
       <Col>
@@ -390,7 +390,7 @@ const CreateMenuList: any = () => {
                   {lang[t].purchaseOrg.tertier.cancel}
                 </Button>
                 <Button size="big" variant={"primary"} onClick={handleCreateMenuList}>
-                  {isLoading ? "loading..." : lang[t].purchaseOrg.primary.save}
+                  {isLoadingurchaseOrganization ? "loading..." : lang[t].purchaseOrg.primary.save}
                 </Button>
               </Row>
             </Row>

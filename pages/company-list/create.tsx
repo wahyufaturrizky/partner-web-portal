@@ -47,6 +47,7 @@ import { useSegmentInfiniteLists } from "hooks/segment/useSegment";
 import { useInfiniteIndustry } from "hooks/industry/useIndustries";
 import useDebounce from "lib/useDebounce";
 import { colors } from "utils/color";
+import { useUpdateTemplateGeneral } from "hooks/template-general/useTemplateGeneral";
 
 const CompanyTypeDataFake = [
   {
@@ -432,6 +433,7 @@ const CreateCompany: any = () => {
   const [countryId, setCountryId] = useState("");
   const [segmentId, setSegmentId] = useState("");
   const [companyParent, setCompanyParent] = useState("");
+  const [language, setLanguage] = useState("");
   
   const debounceFetch = useDebounce(
       searchCountry ||
@@ -730,6 +732,39 @@ const CreateCompany: any = () => {
     
     createCompany(payload);
   };  
+
+  const { mutate: getTemplateGeneral, data: templateGeneralData } : any = useUpdateTemplateGeneral({
+    options: {
+      onSuccess: (data: any) => {
+        if (data.countryId) setValue("country", data.country.refCountryId);
+        if (data.industryId) setValue("industry_id", data.industryId);
+        if (data.languageId) setValue("language", data.languageId);
+        if (data?.currencyFormat?.id) setValue("currency", data.currencyFormat.id)
+        if (data?.dateFormatId) setValue("formatDate", data.dateFormatId)
+        if (data?.timezoneId) setValue("timezone", data.timezoneId)
+        if (data?.numberFormatId) setValue("numberFormat", data.numberFormatId)
+        if (data?.coaId) setValue("coaTemplate", data.coaId)
+        setLanguage(data.languageId)
+      }
+    }
+  })
+
+  const fillUpTemplateGeneral = () => {
+    if (countryId && industryId && fromTemplate === "eDot") {
+      getTemplateGeneral(
+        {
+          country_id: countryId,
+          industry_id: industryId,
+          sector_id: segmentId || 0
+        }
+      )
+    }
+  }
+
+  useEffect(() => {
+    fillUpTemplateGeneral()
+  }, [industryId, segmentId, countryId, fromTemplate] )
+
   return (
     <>
       <Col>
@@ -1137,6 +1172,8 @@ const CreateCompany: any = () => {
                       onSearch={(search) => setSearchCurrency(search)}
                       required
                       error={errors?.currency?.message}
+                      defaultValue={templateGeneralData?.currencyFormat?.format}
+                      key={templateGeneralData?.currencyFormat?.format}
                       {...register("currency", { required: true })}
                     />
                   )}
@@ -1169,6 +1206,8 @@ const CreateCompany: any = () => {
                       placeholder={"Select"}
                       handleChange={(value) => setValue("formatDate", value)}
                       error={errors?.formatDate?.message}
+                      defaultValue={templateGeneralData?.dateFormat?.format}
+                      key={templateGeneralData?.dateFormat?.format}
                       {...register("formatDate")}
                       noSearch
                     />
@@ -1189,6 +1228,8 @@ const CreateCompany: any = () => {
                       handleChange={(value) => setValue("coaTemplate", value)}
                       onSearch={(search) => setSearchCoa(search)}
                       error={errors?.coaTemplate?.message}
+                      defaultValue={templateGeneralData?.coa?.name}
+                      key={templateGeneralData?.coa?.name}
                       {...register("coaTemplate")}
                     />
                   )}
@@ -1211,6 +1252,8 @@ const CreateCompany: any = () => {
                       handleChange={(value) => setValue("timezone", value)}
                       onSearch={(search) => setSearchTimezone(search)}
                       error={errors?.timezone?.message}
+                      defaultValue={templateGeneralData?.timezone?.name}
+                      key={templateGeneralData?.timezone?.name}
                       {...register("timezone")}
                     />
                   )}
@@ -1226,6 +1269,8 @@ const CreateCompany: any = () => {
                     onSearch={(search: string) => setSearch(search)}
                     required
                     error={errors?.language?.message}
+                    defaultValue={listLanguage?.rows?.find((data) => data?.id == language)?.name}
+                    key={language}
                     {...register("language", { required: true })}
                   />
                 </Col>
@@ -1244,6 +1289,8 @@ const CreateCompany: any = () => {
                       placeholder={"Select"}
                       handleChange={(value) => setValue("numberFormat", value)}
                       error={errors?.numberFormat?.message}
+                      defaultValue={templateGeneralData?.numberFormat?.numberFormat}
+                      key={templateGeneralData?.numberFormat?.numberFormat}
                       {...register("numberFormat")}
                       noSearch
                     />

@@ -131,11 +131,11 @@ export default function Salesman() {
   const onhandleActDownload = (key: string) => {
     switch (key) {
       case '1':
-        return downloadFile({ company_id: 'KSNI', with_data: 'N' })
+        return downloadFile({ company_id: companyCode, with_data: 'N' })
       case '2':
         return setVisible(true)
       case '3':
-        return downloadFile({ company_id: 'KSNI', with_data: 'Y' })
+        return downloadFile({ company_id: companyCode, with_data: 'Y' })
       default:
         return '0'
     }
