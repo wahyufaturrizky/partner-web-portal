@@ -433,6 +433,7 @@ const CreateCompany: any = () => {
   const [countryId, setCountryId] = useState("");
   const [segmentId, setSegmentId] = useState("");
   const [companyParent, setCompanyParent] = useState("");
+  const [language, setLanguage] = useState("");
   
   const debounceFetch = useDebounce(
       searchCountry ||
@@ -743,6 +744,7 @@ const CreateCompany: any = () => {
         if (data?.timezoneId) setValue("timezone", data.timezoneId)
         if (data?.numberFormatId) setValue("numberFormat", data.numberFormatId)
         if (data?.coaId) setValue("coaTemplate", data.coaId)
+        setLanguage(data.languageId)
       }
     }
   })
@@ -1267,8 +1269,8 @@ const CreateCompany: any = () => {
                     onSearch={(search: string) => setSearch(search)}
                     required
                     error={errors?.language?.message}
-                    defaultValue={templateGeneralData?.language?.name}
-                    key={templateGeneralData?.language?.name}
+                    defaultValue={listLanguage?.rows?.find((data) => data?.id == language)?.name}
+                    key={language}
                     {...register("language", { required: true })}
                   />
                 </Col>
