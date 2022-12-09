@@ -736,7 +736,7 @@ const CreateCompany: any = () => {
   const { mutate: getTemplateGeneral, data: templateGeneralData } : any = useUpdateTemplateGeneral({
     options: {
       onSuccess: (data: any) => {
-        if (data.countryId) setValue("country", data.countryId);
+        if (data.countryId) setValue("country", data.country.refCountryId);
         if (data.industryId) setValue("industry_id", data.industryId);
         if (data.languageId) setValue("language", data.languageId);
         if (data?.currencyFormat?.id) setValue("currency", data.currencyFormat.id)
