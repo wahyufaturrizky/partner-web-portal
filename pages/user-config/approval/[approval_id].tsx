@@ -1,4 +1,4 @@
-import Router from "next/router";
+import Router, { useRouter } from "next/router";
 import {
 	Accordion,
 	Button,
@@ -30,8 +30,10 @@ import { lang } from "lang";
 export interface ConfigModuleList {}
 
 const DetailUserConfigApproval: any = () => {
+	const router = useRouter();
+
 	const t = localStorage.getItem("lan") || "en-US";
-	const { approval_partner_id } = Router.query;
+	const { approval_id } = router.query;
 	const [dataListDropdownModul, setDataListDropdownModul] = useState(null);
 	const [modalDelete, setModalDelete] = useState({ open: false });
 	const [dataListDropdownProcess, setDataListDropdownProcess] = useState(null);
@@ -62,10 +64,10 @@ const DetailUserConfigApproval: any = () => {
 			},
 		},
 	});
-
+	console.log(approval_id)
 	const { data: dataPartnerConfigApprovalList, isLoading: isLoadingPartnerConfigApprovalList } =
 		usePartnerConfigApprovalList({
-			partner_config_approval_list_id: approval_partner_id,
+			partner_config_approval_list_id: approval_id,
 			options: {
 				onSuccess: (data: any) => {
 					setisSendEmailNotif(data?.isEmailNotification);
@@ -100,7 +102,7 @@ const DetailUserConfigApproval: any = () => {
 		mutate: mutateUpdatePartnerConfigApprovalList,
 		isLoading: isLoadingUpdatePartnerConfigApprovalList,
 	} = useUpdatePartnerConfigApprovalList({
-		partnerConfigApprovalListId: approval_partner_id,
+		partnerConfigApprovalListId: approval_id,
 		options: {
 			onSuccess: (data: any) => {
 				if (data) {
@@ -517,7 +519,7 @@ const DetailUserConfigApproval: any = () => {
 					itemTitle={Router.query.name}
 					visible={modalDelete.open}
 					onCancel={() => setModalDelete({ open: false })}
-					onOk={() => deleteApproval({ id: [Number(approval_partner_id)] })}
+					onOk={() => deleteApproval({ id: [Number(approval_id)] })}
 				/>
 			)}
 		</>

@@ -92,7 +92,7 @@ const UserConfigApproval: any = () => {
 			action: (
 				<Button
 					size="small"
-					onClick={() => Router.push(`/partner-config-approval/${field.id}`)}
+					onClick={() => Router.push(`/user-config/approval/${field.id}`)}
 					variant="tertiary"
 				>
 					{lang[t].approvalList.tertier.viewDetail}
