@@ -70,7 +70,6 @@ const CountryStructureCurrency = () => {
 		totalItems: 100,
 	});
 	const t = localStorage.getItem("lan") || "en-US";
-	const companyCode = localStorage.getItem("companyCode")
 	const [search, setSearch] = useState("");
 	const [isShowDelete, setShowDelete] = useState({ open: false, type: "selection", data: {} });
 	const [isShowUpload, setShowUpload] = useState(false);
@@ -206,10 +205,10 @@ const CountryStructureCurrency = () => {
 	const onSubmit = (data: any) => {
 		switch (modalCurrencyForm.typeForm) {
 			case "create":
-				createCurrencyMDM({...data, company_id: companyCode});
+				createCurrencyMDM(data);
 				break;
 			case "edit":
-				updateCurrencyMDM({...data, company_id: companyCode});
+				updateCurrencyMDM(data);
 				break;
 			default:
 				setModalCurrencyForm({ open: false, typeForm: "", data: {} });
