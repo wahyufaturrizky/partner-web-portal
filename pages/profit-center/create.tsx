@@ -103,11 +103,10 @@ function ProfitCenterCreate({isUpdate,detailProfitCenter,isLoadingProfit,isFetch
       'description',
       'person_responsible'
     ])
-
       payload.code = data.code,
       payload.name = data.name,
-      payload.valid_from = data?.valid_from?.includes('/') ? data.valid_from : moment(data.valid_from).utc().format('DD/MM/YYYY').toString(),
-      payload.valid_to = data?.valid_to?.includes('/') ? data.valid_to : moment(data.valid_to).utc().format('DD/MM/YYYY').toString(),
+      payload.valid_from = typeof data?.valid_from === "string" ? data.valid_from : moment(data.valid_from).utc().format('DD/MM/YYYY').toString(),
+      payload.valid_to = typeof data?.valid_to === "string" ? data.valid_to : moment(data.valid_to).utc().format('DD/MM/YYYY').toString(),
       payload.company_id = data.company_id,
       payload.external_code = data.external_code,
       payload.description = data.description,

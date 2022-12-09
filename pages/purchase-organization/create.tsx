@@ -330,7 +330,6 @@ const CreateMenuList: any = () => {
 
     let product_categories = ""
     dataAssociatedPermissionsField?.forEach((permission, i )=> product_categories += i !== dataAssociatedPermissionsField?.length - 1 ? permission?.key + ',' : permission?.key)
-    console.log(product_categories, '<<<<<prod')
     const data = {
       company: companyCode,
       name: stateFieldInput?.name,
@@ -391,7 +390,7 @@ const CreateMenuList: any = () => {
                   {lang[t].purchaseOrg.tertier.cancel}
                 </Button>
                 <Button size="big" variant={"primary"} onClick={handleCreateMenuList}>
-                  {isLoading ? "loading..." : lang[t].purchaseOrg.primary.save}
+                  {isLoadingurchaseOrganization ? "loading..." : lang[t].purchaseOrg.primary.save}
                 </Button>
               </Row>
             </Row>
