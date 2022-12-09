@@ -64,7 +64,6 @@ const DetailUserConfigApproval: any = () => {
 			},
 		},
 	});
-	console.log(approval_id)
 	const { data: dataPartnerConfigApprovalList, isLoading: isLoadingPartnerConfigApprovalList } =
 		usePartnerConfigApprovalList({
 			partner_config_approval_list_id: approval_id,

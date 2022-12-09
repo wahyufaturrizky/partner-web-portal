@@ -27,6 +27,7 @@ import {
 import { useRolePermissions, useViewTypeListInfiniteList } from "../../../hooks/role/useRole";
 import { lang } from "lang";
 import useDebounce from "lib/useDebounce";
+import Link from "next/link";
 
 const schema = yup
   .object({
@@ -138,6 +139,12 @@ const DetailPartnerConfigPermissionList: any = () => {
       company_id: companyCode,
     },
   });
+  // const { data: fieldRole, isLoading: isLoadingFieldRole } = usePartnerConfigPermissionList({
+  //   options: {},
+  //   query: {
+  //     company_id: companyCode,
+  //   },
+  // });
 
   const {
     isFetching: isFetchingViewTypeList,
@@ -173,7 +180,8 @@ const DetailPartnerConfigPermissionList: any = () => {
       },
     },
   });
-
+  console.log(dataPartnerConfigPermissionList, '<<<<partner')
+  console.log(fieldRole, '<<<<role')
   const systemConfig = watch("isSystemConfig")
   return (
     <>
@@ -329,19 +337,26 @@ const DetailPartnerConfigPermissionList: any = () => {
                 <Accordion.Item key={1}>
                   <Accordion.Header>{lang[t].permissionList.permissionListRole}</Accordion.Header>
                   <Accordion.Body padding="0px">
-                    {isLoadingFieldRole ? (
+                    {isLoadingPartnerConfigPermissionList ? (
                       <Spin tip="Loading roles..." />
                     ) : (
-                      fieldRole.rows.map((data: any) => (
+                      dataPartnerConfigPermissionList?.associatedRole?.map((data: any) => (
                         <Record borderTop key={data.id}>
                           {data.name}
 
                           <Button
                             size="small"
-                            onClick={() => Router.push(`/role/${data.id}`)}
+                            // href={}
+                            // onClick={() => router.push(`/user-config/role/${data.id}`)}
                             variant="tertiary"
                           >
+                          <Link href={`/user-config/role/${data.id}`}>
+                            <p
+                            style={{color: "#EB008B"}}
+                            >
                             {lang[t].permissionList.tertier.viewDetail}
+                            </p>
+                            </Link>
                           </Button>
                         </Record>
                       ))
