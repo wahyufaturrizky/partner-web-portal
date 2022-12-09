@@ -433,6 +433,7 @@ const CreateCompany: any = () => {
   const [countryId, setCountryId] = useState("");
   const [segmentId, setSegmentId] = useState("");
   const [companyParent, setCompanyParent] = useState("");
+  const [language, setLanguage] = useState("");
   
   const debounceFetch = useDebounce(
       searchCountry ||
@@ -735,14 +736,15 @@ const CreateCompany: any = () => {
   const { mutate: getTemplateGeneral, data: templateGeneralData } : any = useUpdateTemplateGeneral({
     options: {
       onSuccess: (data: any) => {
-        if (data.countryId) setValue("country", data.countryId);
+        if (data.countryId) setValue("country", data.country.refCountryId);
         if (data.industryId) setValue("industry_id", data.industryId);
         if (data.languageId) setValue("language", data.languageId);
         if (data?.currencyFormat?.id) setValue("currency", data.currencyFormat.id)
-        if (data?.dateFormatId) setValue("dateFormat", data.dateFormatId)
+        if (data?.dateFormatId) setValue("formatDate", data.dateFormatId)
         if (data?.timezoneId) setValue("timezone", data.timezoneId)
         if (data?.numberFormatId) setValue("numberFormat", data.numberFormatId)
         if (data?.coaId) setValue("coaTemplate", data.coaId)
+        setLanguage(data.languageId)
       }
     }
   })
@@ -1267,8 +1269,8 @@ const CreateCompany: any = () => {
                     onSearch={(search: string) => setSearch(search)}
                     required
                     error={errors?.language?.message}
-                    defaultValue={templateGeneralData?.language?.name}
-                    key={templateGeneralData?.language?.name}
+                    defaultValue={listLanguage?.rows?.find((data) => data?.id == language)?.name}
+                    key={language}
                     {...register("language", { required: true })}
                   />
                 </Col>

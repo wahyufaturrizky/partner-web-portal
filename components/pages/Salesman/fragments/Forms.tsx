@@ -62,6 +62,7 @@ const Forms = ({
       <Col width="48%">
         <Dropdown2
           width="100%"
+          labelBold
           label={divisionName}
           height="50px"
           placeholder={divisionName}

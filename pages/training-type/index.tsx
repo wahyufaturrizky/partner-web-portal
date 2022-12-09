@@ -74,7 +74,7 @@ const TrainingType = () => {
                 ?.name
             } ?`;
       case "detail":
-        return `${lang[t].areYouSureToDelete} ${data.name} ?`;
+        return `${lang[t].trainingType.areYouSureToDelete} ${data.name} ?`;
 
       default:
         break;
@@ -373,7 +373,7 @@ const TrainingType = () => {
                     type="primary"
                     onClick={() => setModalForm({ open: false, data: {}, typeForm: "" })}
                   >
-                    {lang[t].trainingType.tertier.delete}
+                    {lang[t].trainingType.tertier.cancel}
                   </Button>
                 ) : (
                   <Button
