@@ -275,11 +275,11 @@ const DetailPartnerConfigPermissionList: any = () => {
                           withSearch
                           isLoading={isFetchingViewTypeList}
                           isLoadingMore={isFetchingMoreViewTypeList}
-                          fetchMore={() => {
-                            if (hasNextPageViewTypeList) {
-                              fetchNextPageViewTypeList();
-                            }
-                          }}
+                          // fetchMore={() => {
+                          //   if (hasNextPageViewTypeList) {
+                          //     fetchNextPageViewTypeList();
+                          //   }
+                          // }}
                           items={
                             isFetchingViewTypeList && !isFetchingMoreViewTypeList
                               ? []
