@@ -29,6 +29,8 @@ import { queryClient } from "../_app";
 import { useForm, Controller } from "react-hook-form";
 import { ICDownload, ICUpload } from "../../assets/icons";
 import { mdmDownloadService } from "../../lib/client";
+import { useUserPermissions } from "hooks/user-config/usePermission";
+import { permissionTransportationGroup } from "permission/transportationGroup";
 
 const downloadFile = (params: any) =>
   mdmDownloadService(
@@ -82,6 +84,20 @@ const TransportationGroup = () => {
   const debounceSearch = useDebounce(search, 1000);
 
   const { register, control, handleSubmit } = useForm();
+
+  const { data: dataUserPermission } = useUserPermissions({
+    options: {
+      onSuccess: () => {},
+    },
+  });
+
+  const listPermission = dataUserPermission?.permission?.filter(
+    (filtering: any) => filtering.menu === "Transportation Group"
+  );
+
+  const allowPermissionToShow = listPermission?.filter((data: any) =>
+    permissionTransportationGroup.role[dataUserPermission?.role?.name].component.includes(data.name)
+  );
 
   const {
     data: transportationsData,
@@ -196,12 +212,16 @@ const TransportationGroup = () => {
       title: "Weight",
       dataIndex: "transportationWeight",
     },
-    {
-      title: "Action",
-      dataIndex: "action",
-      width: "15%",
-      align: "left",
-    },
+    ...(allowPermissionToShow?.some((el: any) => el.name === "View Transportation Group")
+      ? [
+          {
+            title: "Action",
+            dataIndex: "action",
+            width: "15%",
+            align: "left",
+          },
+        ]
+      : []),
   ];
 
   const rowSelection = {
@@ -224,7 +244,7 @@ const TransportationGroup = () => {
         const newData = {
           ...data,
           company_id: companyCode,
-        }
+        };
         updateTransportation(newData);
         break;
       default:
@@ -257,81 +277,113 @@ const TransportationGroup = () => {
             }}
           />
           <Row gap="16px">
-            <Button
-              size="big"
-              variant={"tertiary"}
-              onClick={() =>
-                setShowDelete({
-                  open: true,
-                  type: "selection",
-                  data: { transportationsData, selectedRowKeys },
-                })
-              }
-              disabled={rowSelection.selectedRowKeys?.length === 0}
-            >
-              Delete
-            </Button>
-            <DropdownMenu
-              title={"More"}
-              buttonVariant={"secondary"}
-              buttonSize={"big"}
-              textVariant={"button"}
-              textColor={"pink.regular"}
-              iconStyle={{ fontSize: "12px" }}
-              onClick={(e: any) => {
-                switch (parseInt(e.key)) {
-                  case 1:
-                    downloadFile({ with_data: "N", company_id: "KSNI" });
-                    break;
-                  case 2:
-                    setShowUpload(true);
-                    break;
-                  case 3:
-                    downloadFile({ with_data: "Y", company_id: "KSNI" });
-                    break;
-                  case 4:
-                    break;
-                  default:
-                    break;
+            {allowPermissionToShow
+              ?.map((data: any) => data.name)
+              ?.includes("Delete Transportation Group") && (
+              <Button
+                size="big"
+                variant={"tertiary"}
+                onClick={() =>
+                  setShowDelete({
+                    open: true,
+                    type: "selection",
+                    data: { transportationsData, selectedRowKeys },
+                  })
                 }
-              }}
-              menuList={[
-                {
-                  key: 1,
-                  value: (
-                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                      <ICDownload />
-                      <p style={{ margin: "0" }}>Download Template</p>
-                    </div>
-                  ),
-                },
-                {
-                  key: 2,
-                  value: (
-                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                      <ICUpload />
-                      <p style={{ margin: "0" }}>Upload Template</p>
-                    </div>
-                  ),
-                },
-                {
-                  key: 3,
-                  value: (
-                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                      <ICDownload />
-                      <p style={{ margin: "0" }}>Download Data</p>
-                    </div>
-                  ),
-                },
-              ]}
-            />
-            <Button
-              size="big"
-              variant="primary"
-              onClick={() => setModalForm({ open: true, typeForm: "create", data: {} })}
-            >
-              Create
-            </Button>
+                disabled={rowSelection.selectedRowKeys?.length === 0}
+              >
+                Delete
+              </Button>
+            )}
+
+            {(allowPermissionToShow
+              ?.map((data: any) => data.name)
+              ?.includes("Download Template Postal Code") ||
+              allowPermissionToShow
+                ?.map((data: any) => data.name)
+                ?.includes("Download Data Postal Code") ||
+              allowPermissionToShow
+                ?.map((data: any) => data.name)
+                ?.includes("Upload Postal Code")) && (
+              <DropdownMenu
+                title={"More"}
+                buttonVariant={"secondary"}
+                buttonSize={"big"}
+                textVariant={"button"}
+                textColor={"pink.regular"}
+                iconStyle={{ fontSize: "12px" }}
+                onClick={(e: any) => {
+                  switch (parseInt(e.key)) {
+                    case 1:
+                      downloadFile({ with_data: "N", company_id: "KSNI" });
+                      break;
+                    case 2:
+                      setShowUpload(true);
+                      break;
+                    case 3:
+                      downloadFile({ with_data: "Y", company_id: "KSNI" });
+                      break;
+                    case 4:
+                      break;
+                    default:
+                      break;
+                  }
+                }}
+                menuList={[
+                  {
+                    ...(allowPermissionToShow
+                      ?.map((data: any) => data.name)
+                      ?.includes("Download Template Transportation Group") && {
+                      key: 1,
+                      value: (
+                        <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                          <ICDownload />
+                          <p style={{ margin: "0" }}>Download Template</p>
+                        </div>
+                      ),
+                    }),
+                  },
+                  {
+                    ...(allowPermissionToShow
+                      ?.map((data: any) => data.name)
+                      ?.includes("Upload Transportation Group") && {
+                      key: 2,
+                      value: (
+                        <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                          <ICUpload />
+                          <p style={{ margin: "0" }}>Upload Template</p>
+                        </div>
+                      ),
+                    }),
+                  },
+                  {
+                    ...(allowPermissionToShow
+                      ?.map((data: any) => data.name)
+                      ?.includes("Download Data Transportation Group") && {
+                      key: 3,
+                      value: (
+                        <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                          <ICDownload />
+                          <p style={{ margin: "0" }}>Download Data</p>
+                        </div>
+                      ),
+                    }),
+                  },
+                ]}
+              />
+            )}
+
+            {allowPermissionToShow
+              ?.map((data: any) => data.name)
+              ?.includes("Create Transportation Group") && (
+              <Button
+                size="big"
+                variant="primary"
+                onClick={() => setModalForm({ open: true, typeForm: "create", data: {} })}
+              >
+                Create
+              </Button>
+            )}
           </Row>
         </Row>
       </Card>

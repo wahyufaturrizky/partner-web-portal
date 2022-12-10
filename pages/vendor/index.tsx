@@ -24,6 +24,8 @@ import { queryClient } from "pages/_app";
 import { ModalDeleteConfirmation } from "components/elements/Modal/ModalConfirmationDelete";
 import ModalVendorGroup from "components/elements/Modal/ModalVendorGroup";
 import Icon from "@ant-design/icons";
+import { useUserPermissions } from "hooks/user-config/usePermission";
+import { permissionVendor } from "permission/vendor";
 
 const PackageSvg = () => <ICPackage />;
 
@@ -57,6 +59,20 @@ export default function Vendor() {
   const [showVendorGroup, setShowVendorGroup] = useState(false);
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const debounceSearch = useDebounce(search, 1000);
+
+  const { data: dataUserPermission } = useUserPermissions({
+    options: {
+      onSuccess: () => {},
+    },
+  });
+
+  const listPermission = dataUserPermission?.permission?.filter(
+    (filtering: any) => filtering.menu === "Vendor"
+  );
+
+  const allowPermissionToShow = listPermission?.filter((data: any) =>
+    permissionVendor.role[dataUserPermission?.role?.name].component.includes(data.name)
+  );
 
   const {
     data: vendorData,
@@ -150,12 +166,16 @@ export default function Vendor() {
         );
       },
     },
-    {
-      title: "Action",
-      dataIndex: "action",
-      width: "15%",
-      align: "left",
-    },
+    ...(allowPermissionToShow?.some((el: any) => el.name === "View Vendor")
+      ? [
+          {
+            title: "Action",
+            dataIndex: "action",
+            width: "15%",
+            align: "left",
+          },
+        ]
+      : []),
   ];
 
   const rowSelection = {
@@ -188,78 +208,102 @@ export default function Vendor() {
             }}
           />
           <Row gap="16px">
-            <Button
-              size="big"
-              variant={"tertiary"}
-              onClick={() => setShowDelete(true)}
-              disabled={rowSelection.selectedRowKeys?.length === 0}
-            >
-              Delete
-            </Button>
-            <DropdownMenu
-              title={"More"}
-              buttonVariant={"secondary"}
-              buttonSize={"big"}
-              textVariant={"button"}
-              textColor={"pink.regular"}
-              iconStyle={{ fontSize: "12px" }}
-              onClick={(e: any) => {
-                switch (parseInt(e.key)) {
-                  case 1:
-                    downloadFile({ with_data: "N" });
-                    break;
-                  case 2:
-                    setShowUpload(true);
-                    break;
-                  case 3:
-                    downloadFile({ with_data: "Y" });
-                    break;
-                  case 4:
-                    setShowVendorGroup(true);
-                    break;
-                  default:
-                    break;
-                }
-              }}
-              menuList={[
-                {
-                  key: 1,
-                  value: (
-                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                      <ICDownload />
-                      <p style={{ margin: "0" }}>Download Template</p>
-                    </div>
-                  ),
-                },
-                {
-                  key: 2,
-                  value: (
-                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                      <ICUpload />
-                      <p style={{ margin: "0" }}>Upload Template</p>
-                    </div>
-                  ),
-                },
-                {
-                  key: 3,
-                  value: (
-                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                      <ICDownload />
-                      <p style={{ margin: "0" }}>Download Data</p>
-                    </div>
-                  ),
-                },
-                {
-                  key: 4,
-                  value: (
-                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                      <PackageIcon style={{ color: "black" }} />
-                      <p style={{ margin: "0" }}>Manage Vendor Group</p>
-                    </div>
-                  ),
-                },
-              ]}
-            />
+            {allowPermissionToShow?.map((data: any) => data.name)?.includes("Delete Vendor") && (
+              <Button
+                size="big"
+                variant={"tertiary"}
+                onClick={() => setShowDelete(true)}
+                disabled={rowSelection.selectedRowKeys?.length === 0}
+              >
+                Delete
+              </Button>
+            )}
+
+            {(allowPermissionToShow
+              ?.map((data: any) => data.name)
+              ?.includes("Download Template Vendor") ||
+              allowPermissionToShow
+                ?.map((data: any) => data.name)
+                ?.includes("Download Data Vendor") ||
+              allowPermissionToShow?.map((data: any) => data.name)?.includes("Upload Vendor")) && (
+              <DropdownMenu
+                title={"More"}
+                buttonVariant={"secondary"}
+                buttonSize={"big"}
+                textVariant={"button"}
+                textColor={"pink.regular"}
+                iconStyle={{ fontSize: "12px" }}
+                onClick={(e: any) => {
+                  switch (parseInt(e.key)) {
+                    case 1:
+                      downloadFile({ with_data: "N" });
+                      break;
+                    case 2:
+                      setShowUpload(true);
+                      break;
+                    case 3:
+                      downloadFile({ with_data: "Y" });
+                      break;
+                    case 4:
+                      setShowVendorGroup(true);
+                      break;
+                    default:
+                      break;
+                  }
+                }}
+                menuList={[
+                  {
+                    ...(allowPermissionToShow
+                      ?.map((data: any) => data.name)
+                      ?.includes("Download Template Vendor") && {
+                      key: 1,
+                      value: (
+                        <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                          <ICDownload />
+                          <p style={{ margin: "0" }}>Download Template</p>
+                        </div>
+                      ),
+                    }),
+                  },
+                  {
+                    ...(allowPermissionToShow
+                      ?.map((data: any) => data.name)
+                      ?.includes("Upload Vendor") && {
+                      key: 2,
+                      value: (
+                        <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                          <ICUpload />
+                          <p style={{ margin: "0" }}>Upload Template</p>
+                        </div>
+                      ),
+                    }),
+                  },
+                  {
+                    ...(allowPermissionToShow
+                      ?.map((data: any) => data.name)
+                      ?.includes("Download Data Vendor") && {
+                      key: 3,
+                      value: (
+                        <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                          <ICDownload />
+                          <p style={{ margin: "0" }}>Download Data</p>
+                        </div>
+                      ),
+                    }),
+                  },
+                  {
+                    key: 4,
+                    value: (
+                      <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                        <PackageIcon style={{ color: "black" }} />
+                        <p style={{ margin: "0" }}>Manage Vendor Group</p>
+                      </div>
+                    ),
+                  },
+                ]}
+              />
+            )}
+
             <Button size="big" variant="primary" onClick={() => router.push("/vendor/create")}>
               Create
             </Button>

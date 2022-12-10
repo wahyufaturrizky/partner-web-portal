@@ -29,6 +29,8 @@ import { queryClient } from "pages/_app";
 import ArrowLeft from "assets/icons/arrow-left.svg";
 import { VendorContext } from "context/VendorContext";
 import { ModalDeleteConfirmation } from "components/elements/Modal/ModalConfirmationDelete";
+import { useUserPermissions } from "hooks/user-config/usePermission";
+import { permissionVendor } from "permission/vendor";
 
 const listTabItems = [
   { title: "Contacts" },
@@ -81,6 +83,20 @@ export default function VendorDetail() {
   const [companyLogo, setCompanyLogo] = useState("/placeholder-employee-photo.svg");
   const [selectFromForm, setSelectFromForm] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+
+  const { data: dataUserPermission } = useUserPermissions({
+    options: {
+      onSuccess: () => {},
+    },
+  });
+
+  const listPermission = dataUserPermission?.permission?.filter(
+    (filtering: any) => filtering.menu === "Vendor"
+  );
+
+  const allowPermissionToShow = listPermission?.filter((data: any) =>
+    permissionVendor.role[dataUserPermission?.role?.name].component.includes(data.name)
+  );
 
   const watchCustomerId = useWatch({
     control,
@@ -384,15 +400,18 @@ export default function VendorDetail() {
             />
 
             <Row gap="16px">
-              <Button
-                size="big"
-                variant={"tertiary"}
-                onClick={() => {
-                  setShowDeleteModal(true);
-                }}
-              >
-                Delete
-              </Button>
+              {allowPermissionToShow?.map((data: any) => data.name)?.includes("Delete Vendor") && (
+                <Button
+                  size="big"
+                  variant={"tertiary"}
+                  onClick={() => {
+                    setShowDeleteModal(true);
+                  }}
+                >
+                  Delete
+                </Button>
+              )}
+
               <Button
                 size="big"
                 variant={"secondary"}
@@ -403,9 +422,11 @@ export default function VendorDetail() {
               >
                 {isLoadingConvertCustomer ? "Loading..." : " Convert to Customer"}
               </Button>
-              <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
-                {isLoadingUpdateVendor ? "Loading..." : "Save"}
-              </Button>
+              {allowPermissionToShow?.map((data: any) => data.name)?.includes("Update Vendor") && (
+                <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
+                  {isLoadingUpdateVendor ? "Loading..." : "Save"}
+                </Button>
+              )}
             </Row>
           </Row>
         </Card>

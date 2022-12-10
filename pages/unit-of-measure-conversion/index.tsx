@@ -20,6 +20,8 @@ import { queryClient } from "../_app";
 import { ICDownload, ICUpload } from "../../assets/icons";
 import { mdmDownloadService } from "../../lib/client";
 import { useRouter } from "next/router";
+import { useUserPermissions } from "hooks/user-config/usePermission";
+import { permissionUoMConversion } from "permission/uomConversion";
 
 const downloadFile = (params: any) =>
   mdmDownloadService("/uom-conversion/download", { params }).then((res) => {
@@ -69,6 +71,20 @@ const UOMConversion = () => {
   });
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const debounceSearch = useDebounce(search, 1000);
+
+  const { data: dataUserPermission } = useUserPermissions({
+    options: {
+      onSuccess: () => {},
+    },
+  });
+
+  const listPermission = dataUserPermission?.permission?.filter(
+    (filtering: any) => filtering.menu === "UoM Conversion"
+  );
+
+  const allowPermissionToShow = listPermission?.filter((data: any) =>
+    permissionUoMConversion.role[dataUserPermission?.role?.name].component.includes(data.name)
+  );
 
   const {
     data: UOMConversionData,
@@ -145,12 +161,16 @@ const UOMConversion = () => {
       dataIndex: "name",
       key: 'name'
     },
-    {
-      title: "Action",
-      dataIndex: "action",
-      width: "15%",
-      align: "left",
-    },
+    ...(allowPermissionToShow?.some((el: any) => el.name === "View UoM Conversion")
+    ? [
+        {
+          title: "Action",
+          dataIndex: "action",
+          width: "15%",
+          align: "left",
+        },
+      ]
+    : []),
   ];
   
 
@@ -186,81 +206,114 @@ const UOMConversion = () => {
             }}
           />
           <Row gap="16px">
-            <Button
-              size="big"
-              variant={"tertiary"}
-              onClick={() =>
-                setShowDelete({
-                  open: true,
-                  type: "selection",
-                  data: { uomData: UOMConversionData?.data, selectedRowKeys },
-                })
-              }
-              disabled={rowSelection.selectedRowKeys?.length === 0}
-            >
-              Delete
-            </Button>
-            <DropdownMenu
-              title={"More"}
-              buttonVariant={"secondary"}
-              buttonSize={"big"}
-              textVariant={"button"}
-              textColor={"pink.regular"}
-              iconStyle={{ fontSize: "12px" }}
-              onClick={(e: any) => {
-                switch (parseInt(e.key)) {
-                  case 1:
-                    downloadFile({ with_data: "N", company_id: companyCode });
-                    break;
-                  case 2:
-                    setShowUpload(true);
-                    break;
-                  case 3:
-                    downloadFile({ with_data: "Y", company_id: companyCode });
-                    break;
-                  case 4:
-                    break;
-                  default:
-                    break;
+          {allowPermissionToShow
+              ?.map((data: any) => data.name)
+              ?.includes("Delete UoM Conversion") && (
+                <Button
+                size="big"
+                variant={"tertiary"}
+                onClick={() =>
+                  setShowDelete({
+                    open: true,
+                    type: "selection",
+                    data: { uomData: UOMConversionData?.data, selectedRowKeys },
+                  })
                 }
-              }}
-              menuList={[
-                {
-                  key: 1,
-                  value: (
-                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                      <ICDownload />
-                      <p style={{ margin: "0" }}>Download Template</p>
-                    </div>
-                  ),
-                },
-                {
-                  key: 2,
-                  value: (
-                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                      <ICUpload />
-                      <p style={{ margin: "0" }}>Upload Template</p>
-                    </div>
-                  ),
-                },
-                {
-                  key: 3,
-                  value: (
-                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                      <ICDownload />
-                      <p style={{ margin: "0" }}>Download Data</p>
-                    </div>
-                  ),
-                },
-              ]}
-            />
-            <Button
-              size="big"
-              variant="primary"
-              onClick={() => router.push("/unit-of-measure-conversion/create")}
-            >
-              Create
-            </Button>
+                disabled={rowSelection.selectedRowKeys?.length === 0}
+              >
+                Delete
+              </Button>
+              )}
+
+          {(allowPermissionToShow
+                ?.map((data: any) => data.name)
+                ?.includes("Download Template UoM Conversion") ||
+                allowPermissionToShow
+                  ?.map((data: any) => data.name)
+                  ?.includes("Download Data UoM Conversion") ||
+                allowPermissionToShow
+                  ?.map((data: any) => data.name)
+                  ?.includes("Upload UoM Conversion")) && (
+                    <DropdownMenu
+                    title={"More"}
+                    buttonVariant={"secondary"}
+                    buttonSize={"big"}
+                    textVariant={"button"}
+                    textColor={"pink.regular"}
+                    iconStyle={{ fontSize: "12px" }}
+                    onClick={(e: any) => {
+                      switch (parseInt(e.key)) {
+                        case 1:
+                          downloadFile({ with_data: "N", company_id: companyCode });
+                          break;
+                        case 2:
+                          setShowUpload(true);
+                          break;
+                        case 3:
+                          downloadFile({ with_data: "Y", company_id: companyCode });
+                          break;
+                        case 4:
+                          break;
+                        default:
+                          break;
+                      }
+                    }}
+                    menuList={[
+                      {
+                        ...(allowPermissionToShow
+                          ?.map((data: any) => data.name)
+                          ?.includes("Download Template UoM Conversion") &&  {
+                            key: 1,
+                            value: (
+                              <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                                <ICDownload />
+                                <p style={{ margin: "0" }}>Download Template</p>
+                              </div>
+                            ),
+                          }),
+                      },
+                      {
+                        ...(allowPermissionToShow
+                          ?.map((data: any) => data.name)
+                          ?.includes("Upload UoM Conversion") &&   {
+                            key: 2,
+                            value: (
+                              <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                                <ICUpload />
+                                <p style={{ margin: "0" }}>Upload Template</p>
+                              </div>
+                            ),
+                          }),
+                      },
+                      {
+                        ...(allowPermissionToShow
+                          ?.map((data: any) => data.name)
+                          ?.includes("Download Data UoM Conversion") &&  {
+                            key: 3,
+                            value: (
+                              <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                                <ICDownload />
+                                <p style={{ margin: "0" }}>Download Data</p>
+                              </div>
+                            ),
+                          }),
+                      }, 
+                    ]}
+                  />
+                  )}
+          
+              {allowPermissionToShow
+                ?.map((data: any) => data.name)
+                ?.includes("Create UoM Conversion") && (
+                  <Button
+                  size="big"
+                  variant="primary"
+                  onClick={() => router.push("/unit-of-measure-conversion/create")}
+                >
+                  Create
+                </Button>
+              )}
+           
           </Row>
         </Row>
       </Card>

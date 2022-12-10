@@ -21,6 +21,8 @@ import { queryClient } from "../_app";
 import { ICDownload, ICUpload } from "../../assets/icons";
 import { mdmDownloadService } from "../../lib/client";
 import { useRouter } from "next/router";
+import { useUserPermissions } from "hooks/user-config/usePermission";
+import { permissionTax } from "permission/tax";
 
 interface TaxTable { 
   key: string; 
@@ -55,26 +57,6 @@ const renderConfirmationText = (type: any, data: any) => {
   }
 };
 
-const columns = [
-  {
-    title: "Tax ID",
-    dataIndex: "id",
-    key: 'id',
-  },
-  {
-    title: "Country",
-    dataIndex: "taxCountryName",
-    key: 'taxCountryName'
-  },
-  {
-    title: "Action",
-    dataIndex: "action",
-    width: "15%",
-    align: "left",
-  },
-];
-
-
 const Tax = () => {
   const router = useRouter();
   const companyCode = localStorage.getItem("companyCode");
@@ -91,6 +73,43 @@ const Tax = () => {
   const [isShowUpload, setShowUpload] = useState(false);
 
   const debounceSearch = useDebounce(search, 1000);
+
+  const { data: dataUserPermission } = useUserPermissions({
+    options: {
+      onSuccess: () => {},
+    },
+  });
+
+  const listPermission = dataUserPermission?.permission?.filter(
+    (filtering: any) => filtering.menu === "Tax"
+  );
+
+  const allowPermissionToShow = listPermission?.filter((data: any) =>
+    permissionTax.role[dataUserPermission?.role?.name].component.includes(data.name)
+  );
+
+  const columns = [
+    {
+      title: "Tax ID",
+      dataIndex: "id",
+      key: 'id',
+    },
+    {
+      title: "Country",
+      dataIndex: "taxCountryName",
+      key: 'taxCountryName'
+    },
+    ...(allowPermissionToShow?.some((el: any) => el.name === "View Tax")
+    ? [
+        {
+          title: "Action",
+          dataIndex: "action",
+          width: "15%",
+          align: "left",
+        },
+      ]
+    : []),
+  ];  
 
   const {
     data: TaxData,
@@ -178,60 +197,83 @@ const Tax = () => {
             onChange={(e: any) => {setSearch(e.target.value)}}
           />
           <Row gap="16px">
-            <DropdownMenu
-              title={"More"}
-              buttonVariant={"secondary"}
-              buttonSize={"big"}
-              textVariant={"button"}
-              textColor={"pink.regular"}
-              iconStyle={{ fontSize: "12px" }}
-              onClick={(e: any) => {
-                switch (parseInt(e.key)) {
-                  case 1:
-                    downloadFile({ with_data: "N", country_id: "MCS-1015229" });
-                    break;
-                  case 2:
-                    setShowUpload(true);
-                    break;
-                  case 3:
-                    downloadFile({ with_data: "Y", country_id: "MCS-1015229" });
-                    break;
-                  case 4:
-                    break;
-                  default:
-                    break;
-                }
-              }}
-              menuList={[
-                {
-                  key: 1,
-                  value: (
-                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                      <ICDownload />
-                      <p style={{ margin: "0" }}>Download Template</p>
-                    </div>
-                  ),
-                },
-                {
-                  key: 2,
-                  value: (
-                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                      <ICUpload />
-                      <p style={{ margin: "0" }}>Upload Template</p>
-                    </div>
-                  ),
-                },
-                {
-                  key: 3,
-                  value: (
-                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                      <ICDownload />
-                      <p style={{ margin: "0" }}>Download Data</p>
-                    </div>
-                  ),
-                },
-              ]}
-            />
+          {(allowPermissionToShow
+              ?.map((data: any) => data.name)
+              ?.includes("Download Template Tax") ||
+              allowPermissionToShow
+                ?.map((data: any) => data.name)
+                ?.includes("Download Data Tax") ||
+              allowPermissionToShow
+                ?.map((data: any) => data.name)
+                ?.includes("Upload Tax")) && (
+                      <DropdownMenu
+                      title={"More"}
+                      buttonVariant={"secondary"}
+                      buttonSize={"big"}
+                      textVariant={"button"}
+                      textColor={"pink.regular"}
+                      iconStyle={{ fontSize: "12px" }}
+                      onClick={(e: any) => {
+                        switch (parseInt(e.key)) {
+                          case 1:
+                            downloadFile({ with_data: "N", country_id: "MCS-1015229" });
+                            break;
+                          case 2:
+                            setShowUpload(true);
+                            break;
+                          case 3:
+                            downloadFile({ with_data: "Y", country_id: "MCS-1015229" });
+                            break;
+                          case 4:
+                            break;
+                          default:
+                            break;
+                        }
+                      }}
+                      menuList={[
+                        {
+                          ...(allowPermissionToShow
+                            ?.map((data: any) => data.name)
+                            ?.includes("Download Template Tax") &&    {
+                              key: 1,
+                              value: (
+                                <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                                  <ICDownload />
+                                  <p style={{ margin: "0" }}>Download Template</p>
+                                </div>
+                              ),
+                            }),
+                        },
+                        {
+                          ...(allowPermissionToShow
+                            ?.map((data: any) => data.name)
+                            ?.includes("Upload Tax") &&   {
+                              key: 2,
+                              value: (
+                                <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                                  <ICUpload />
+                                  <p style={{ margin: "0" }}>Upload Template</p>
+                                </div>
+                              ),
+                            }),
+                        },
+                        {
+                        ...(allowPermissionToShow
+                          ?.map((data: any) => data.name)
+                          ?.includes("Download Data Tax") &&   {
+                            key: 3,
+                            value: (
+                              <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                                <ICDownload />
+                                <p style={{ margin: "0" }}>Download Data</p>
+                              </div>
+                            ),
+                          }),
+                        },
+                      ]}
+                    />
+                  )}
+           
           </Row>
         </Row>
       </Card>
