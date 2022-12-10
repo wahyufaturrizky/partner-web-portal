@@ -74,10 +74,25 @@ const useDeletePartnerConfigApprovalList = ({ options }) => {
   );
 };
 
+const fetchPartnerUserApprovalList = async ({ company_id, role_id }) => {
+  return client(`/partner-approval/${company_id}/${role_id}`).then((data) => data);
+};
+
+const usePartnerUserApprovalList = ({ company_id, role_id, options }) => {
+  return useQuery(
+    ["partner-approval"],
+    () => fetchPartnerUserApprovalList({ company_id, role_id }),
+    {
+      ...options,
+    }
+  );
+};
+
 export {
   usePartnerConfigApprovalLists,
   usePartnerConfigApprovalList,
   useCreatePartnerConfigApprovalList,
   useUpdatePartnerConfigApprovalList,
   useDeletePartnerConfigApprovalList,
+  usePartnerUserApprovalList,
 };

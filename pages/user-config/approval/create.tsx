@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import Router from "next/router";
 import {
   Accordion,
@@ -14,18 +14,16 @@ import {
   Text,
   EmptyState,
   Pagination,
-  FormSelect,
-  Spin,
 } from "pink-lava-ui";
 import styled from "styled-components";
-
 import { useConfigs } from "../../../hooks/config/useConfig";
 import { useCreatePartnerConfigApprovalList } from "../../../hooks/user-config/useApproval";
-import { usePermissions } from "../../../hooks/permission/usePermission";
 import { useProcessLists } from "../../../hooks/business-process/useProcess";
 import usePagination from "@lucasmogari/react-pagination";
 import { Controller, useForm } from "react-hook-form";
 import { lang } from "lang";
+import { usePartnerConfigPermissionLists } from "hooks/user-config/usePermission";
+import AssociateUserRole from "components/pages/userConfig/Approval/AssociateUserRole";
 
 export interface ConfigModuleList {}
 
@@ -37,6 +35,8 @@ const CreatePartnerConfigApproval: any = () => {
   const [associateRoleUserData, setAssociateRoleUserData] = useState([
     { stage: 1, roles: [], users: [], cc_email: false },
   ]);
+  const [roleList, setRoleList] = useState([]);
+  const [idPermission, setIdPermision] = useState<any>(undefined);
 
   const {
     register,
@@ -59,7 +59,7 @@ const CreatePartnerConfigApproval: any = () => {
     isLoading: isLoadingCreatePartnerConfigApprovalList,
   } = useCreatePartnerConfigApprovalList({
     options: {
-      onSuccess: (data: any) => {
+      onSuccess: () => {
         Router.back();
       },
     },
@@ -71,8 +71,8 @@ const CreatePartnerConfigApproval: any = () => {
       select: (data: any) => {
         const mappedData = data?.rows?.map((element: any) => {
           return {
-            id: data.id,
-            value: data.name,
+            id: element.id,
+            value: element.name,
           };
         });
 
@@ -87,8 +87,8 @@ const CreatePartnerConfigApproval: any = () => {
       select: (data: any) => {
         const mappedData = data?.rows?.map((element: any) => {
           return {
-            id: data.id,
-            value: data.name,
+            id: element.id,
+            value: element.name,
           };
         });
 
@@ -100,21 +100,22 @@ const CreatePartnerConfigApproval: any = () => {
     },
   });
 
-  const { data: fieldsPermissionList, isLoading: isLoadingFieldsPermissionList } = usePermissions({
-    options: {
-      refetchOnWindowFocus: "always",
-      select: (data: any) => {
-        const mappedData = data?.rows?.map((element: any) => {
-          return {
-            id: data.id,
-            value: data.name,
-          };
-        });
+  const { data: fieldsPermissionList, isLoading: isLoadingFieldsPermissionList } =
+    usePartnerConfigPermissionLists({
+      options: {
+        refetchOnWindowFocus: "always",
+        select: (data: any) => {
+          const mappedData = data?.rows?.map((element: any) => {
+            return {
+              id: element.id,
+              value: element.name,
+            };
+          });
 
-        return { data: mappedData, totalRow: data.totalRow };
+          return { data: mappedData, totalRow: data.totalRow };
+        },
       },
-    },
-  });
+    });
 
   const handleChangeInput = (e: any) => {
     // Set Approval Stage
@@ -135,6 +136,14 @@ const CreatePartnerConfigApproval: any = () => {
     setApprovalStages(approvalStage);
 
     // set Associate role and users data
+    // set Associate role and users data
+    let associateRoleUser: any = [];
+
+    for (let i = 0; i < lengthValue; i++) {
+      associateRoleUser.push({ stage: i + 1, roles: [], users: [], cc_email: false });
+    }
+
+    setAssociateRoleUserData(associateRoleUser);
   };
 
   const handleDirectAssociated = (name: any) => {
@@ -145,41 +154,49 @@ const CreatePartnerConfigApproval: any = () => {
     {
       title: "Stage",
       dataIndex: "stage",
+      width: "5%",
     },
     {
       title: "Role",
-      dataIndex: "role",
+      dataIndex: "partner_role_id",
+      width: "15%",
       render: (value: any, record: any, index: any) => (
-        <Controller
+        <AssociateUserRole
+          type="role"
+          index={index}
           control={control}
-          defaultValue={null}
-          shouldUnregister={true}
-          name={`associate_role_user.${index}.role`}
-          render={({ field: { onChange }, formState: { errors } }) => (
-            <Dropdown width="200px" items={[]} placeholder={"Select"} noSearch />
-          )}
+          roleList={roleList}
+          setRoleList={(data: any) => {
+            setRoleList(data);
+          }}
+          idPermission={idPermission}
         />
       ),
     },
     {
       title: "User",
-      dataIndex: "user",
+      dataIndex: "partner_user_id",
+      width: "15%",
+      render: (value: any, record: any, index: any) => (
+        <AssociateUserRole type="user" index={index} control={control} />
+      ),
     },
     {
       title: "Cc Email",
       dataIndex: "cc_email",
       align: "center",
+      width: "15%",
       render: (value: any, record: any, index: any) => (
         <Controller
           control={control}
           defaultValue={false}
           shouldUnregister={true}
-          name={`associate_role_user.${index}.cc_email`}
-          render={({ field: { onChange }, formState: { errors } }) => (
+          name={`associate_role_user.${index}.is_cc_email`}
+          render={({ field: { onChange, value }, formState: { errors } }) => (
             <Switch
-              checked={false}
+              checked={value}
               onChange={(value: any) => {
-                onChange(!value);
+                onChange(value);
               }}
             />
           )}
@@ -189,14 +206,29 @@ const CreatePartnerConfigApproval: any = () => {
   ];
 
   const onSubmit = (data: any) => {
-    console.log(data);
-    // const formData = {
-    // 	...data,
-    // 	approval_stages: approvalStages.map((dataApprovalStages: any) => ({
-    // 		is_mandatory: dataApprovalStages.is_mandatory,
-    // 	})),
-    // 	is_email_notification: isSendEmailNotif,
-    // };
+    const length = numberOfApprovalStage === "" ? 1 : numberOfApprovalStage;
+
+    const approval_stages: any = [];
+
+    for (let i = 0; i < length; i++) {
+      approval_stages.push({
+        stage: i + 1,
+        ...data?.associate_role_user[i],
+        ...data?.approval_stages[i],
+      });
+    }
+
+    delete data?.associate_role_user;
+    delete data?.approval_stages;
+
+    const formData = {
+      ...data,
+      reminder_day: data?.reminder_day === "" ? 0 : data?.reminder_day,
+      approval_stages,
+      company_id: companyCode,
+    };
+
+    console.log(formData);
 
     // mutateCreatePartnerConfigApprovalList(formData);
   };
@@ -242,7 +274,9 @@ const CreatePartnerConfigApproval: any = () => {
                   {lang[t].approvalList.tertier.cancel}
                 </Button>
                 <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
-                  {isLoadingCreatePartnerConfigApprovalList ? "loading..." : lang[t].approvalList.primary.save}
+                  {isLoadingCreatePartnerConfigApprovalList
+                    ? "loading..."
+                    : lang[t].approvalList.primary.save}
                 </Button>
               </Row>
             </Row>
@@ -251,9 +285,11 @@ const CreatePartnerConfigApproval: any = () => {
 
         <Spacer size={20} />
 
-        <Accordion>
+        <Accordion style={{ display: "relative" }} id="area">
           <Accordion.Item key={1}>
-            <Accordion.Header variant="blue">{lang[t].approvalList.accordion.general}</Accordion.Header>
+            <Accordion.Header variant="blue">
+              {lang[t].approvalList.accordion.general}
+            </Accordion.Header>
             <Accordion.Body>
               <Row width="100%" gap="20px" noWrap></Row>
               <Row width="100%" gap="20px" noWrap>
@@ -278,6 +314,7 @@ const CreatePartnerConfigApproval: any = () => {
                     render={({ field: { onChange }, formState: { errors } }) => (
                       <Dropdown
                         width="100%"
+                        containerId={"area"}
                         label={lang[t].approvalList.filterbar.module}
                         id="Module"
                         loading={isLoadingConfigModule}
@@ -308,6 +345,7 @@ const CreatePartnerConfigApproval: any = () => {
                     render={({ field: { onChange }, formState: { errors } }) => (
                       <Dropdown
                         width="100%"
+                        containerId={"area"}
                         label={lang[t].approvalList.filterbar.process}
                         loading={isLoadingFieldListProcess}
                         items={fieldsListProcess?.data}
@@ -336,11 +374,15 @@ const CreatePartnerConfigApproval: any = () => {
                     render={({ field: { onChange }, formState: { errors } }) => (
                       <Dropdown
                         width="100%"
+                        containerId={"area"}
                         label={lang[t].approvalList.filterbar.permission}
                         loading={isLoadingFieldsPermissionList}
                         items={fieldsPermissionList?.data}
                         placeholder={"Select"}
-                        handleChange={(value: any) => onChange(value)}
+                        handleChange={(value: any) => {
+                          onChange(value);
+                          setIdPermision(Number(value));
+                        }}
                         noSearch
                         required
                         error={
@@ -368,14 +410,15 @@ const CreatePartnerConfigApproval: any = () => {
 
         <Accordion>
           <Accordion.Item key={1}>
-            <Accordion.Header variant="blue">{lang[t].approvalList.accordion.approval}</Accordion.Header>
+            <Accordion.Header variant="blue">
+              {lang[t].approvalList.accordion.approval}
+            </Accordion.Header>
             <Accordion.Body>
-              <Row width="100%" gap="20px" noWrap></Row>
-              <Row width="100%" gap="20px" noWrap>
-                <Col width="50%">
+              <Col width="100%">
+                <Row width={"50%"}>
                   <Input
                     id="numberOfApprovalStage"
-                    width="100%"
+                    width="50%"
                     label={lang[t].approvalList.emptyState.approval}
                     height="48px"
                     value={numberOfApprovalStage}
@@ -383,41 +426,43 @@ const CreatePartnerConfigApproval: any = () => {
                     onChange={handleChangeInput}
                     type="number"
                   />
-                  <Spacer size={24} />
-                  <Text clickable variant="headingSmall">
-                    Choose mandatory approval stages
-                  </Text>
+                </Row>
 
-                  <Spacer size={5} />
+                <Spacer size={24} />
 
-                  <Row gap="24px">
-                    {approvalStages.map((data: any, index: any) => (
-                      <Col key={index}>
-                        <Row alignItems="center">
-                          <Controller
-                            control={control}
-                            defaultValue={data?.is_mandatory}
-                            name={`approval_stages.${index}.is_mandatory`}
-                            render={({ field: { onChange, value }, formState: { errors } }) => (
-                              <>
-                                <Checkbox
-                                  checked={value}
-                                  onChange={() => {
-                                    onChange(!value);
-                                  }}
-                                />
-                                <div>
-                                  <Text variant={"h6"}>Stage {index + 1}</Text>
-                                </div>
-                              </>
-                            )}
-                          />
-                        </Row>
-                      </Col>
-                    ))}
-                  </Row>
-                </Col>
-              </Row>
+                <Text clickable variant="headingSmall">
+                  Choose mandatory approval stages
+                </Text>
+
+                <Spacer size={5} />
+
+                <Grid gap="24px">
+                  {approvalStages.map((data: any, index: any) => (
+                    <Col key={index}>
+                      <Row alignItems="center">
+                        <Controller
+                          control={control}
+                          defaultValue={data?.is_mandatory}
+                          name={`approval_stages.${index}.is_mandatory`}
+                          render={({ field: { onChange, value }, formState: { errors } }) => (
+                            <>
+                              <Checkbox
+                                checked={value}
+                                onChange={() => {
+                                  onChange(!value);
+                                }}
+                              />
+                              <div>
+                                <Text variant={"h6"}>Stage {index + 1}</Text>
+                              </div>
+                            </>
+                          )}
+                        />
+                      </Row>
+                    </Col>
+                  ))}
+                </Grid>
+              </Col>
             </Accordion.Body>
           </Accordion.Item>
         </Accordion>
@@ -426,7 +471,9 @@ const CreatePartnerConfigApproval: any = () => {
 
         <Accordion>
           <Accordion.Item key={1}>
-            <Accordion.Header variant="blue">{lang[t].approvalList.accordion.associatedRole}</Accordion.Header>
+            <Accordion.Header variant="blue">
+              {lang[t].approvalList.accordion.associatedRole}
+            </Accordion.Header>
             <Accordion.Body>
               {approvalStages.length === 0 ? (
                 <Col>
@@ -463,6 +510,12 @@ const Card: any = styled.div`
   background: #ffffff;
   border-radius: 16px;
   padding: ${(p: any) => (p.padding ? p.padding : "16px")};
+`;
+
+const Grid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  gap: 20px;
 `;
 
 export default CreatePartnerConfigApproval;
