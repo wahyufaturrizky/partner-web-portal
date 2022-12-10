@@ -28,7 +28,6 @@ import {
   usePartnerConfigApprovalLists
 } from "../../../hooks/user-config/useApproval";
 import { lang } from "lang";
-import { usePartnerConfigPermissionLists } from "hooks/user-config/usePermission";
 import ArrowLeft from "assets/icons/arrow-left.svg";
 import { useForm, Controller } from "react-hook-form";
 import usePagination from "@lucasmogari/react-pagination";
