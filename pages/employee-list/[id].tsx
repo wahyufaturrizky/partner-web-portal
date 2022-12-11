@@ -2279,6 +2279,7 @@ const EmployeeDetail = () => {
                                   borderColor={"#AAAAAA"}
                                   arrowColor={"#000"}
                                   withSearch
+                                  defaultValue={dataEmployee?.address?.[index]?.countryLevelsOptions?.name} 
                                   isLoading={isFetchingCountry}
                                   isLoadingMore={isFetchingMoreCountry}
                                   fetchMore={() => {
