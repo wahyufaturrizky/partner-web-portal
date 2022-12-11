@@ -52,7 +52,7 @@ const ProductOptionDetail = () => {
           router.back();
         },
       },
-      id: `KSNI/${id}`,
+      id: `${companyCode}/${id}`,
     });
 
   const { mutate: updateProductOptionItem, isLoading: isLoadingUpdateProductOptionItem }: any =

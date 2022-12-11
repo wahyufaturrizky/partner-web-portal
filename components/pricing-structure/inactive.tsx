@@ -45,6 +45,7 @@ const InActivePricingStructure: any = (props: any) => {
     arrows: true,
     totalItems: 100,
   });
+  const companyCode = localStorage.getItem("companyCode")
 
   const [search, setSearch] = useState("");
 
@@ -151,7 +152,7 @@ const InActivePricingStructure: any = (props: any) => {
               onClick={(e: any) => {
                 switch (parseInt(e.key)) {
                   case 1:
-                    downloadFile({ with_data: "N", company_id: "KSNI" });
+                    downloadFile({ with_data: "N", company_id: companyCode });
                     break;
                   case 2:
                     setShowUpload(true);
