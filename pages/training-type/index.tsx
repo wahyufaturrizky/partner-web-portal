@@ -28,6 +28,8 @@ import { useForm } from "react-hook-form";
 import { ICDownload, ICUpload } from "../../assets/icons";
 import { mdmDownloadService } from "../../lib/client";
 import { lang } from "lang";
+import { useUserPermissions } from "hooks/user-config/usePermission";
+import { permissionTrainingType } from "permission/training-type";
 
 const TrainingType = () => {
   const t = localStorage.getItem("lan") || "en-US";
@@ -167,6 +169,19 @@ const TrainingType = () => {
       },
     });
 
+  const { data: dataUserPermission } = useUserPermissions({
+    options: {
+      onSuccess: () => {},
+    },
+  });  
+  const listPermission = dataUserPermission?.permission?.filter(
+    (filtering: any) => filtering.menu === "Term Of Payment"
+  );
+  const allowPermissionToShow = listPermission?.filter((data: any) =>
+    permissionTrainingType.role[dataUserPermission?.role?.name]?.component.includes(data.name)
+  );
+  console.log(listPermission);
+  
   const columns = [
     {
       title: lang[t].trainingType.trainingTypeId,
@@ -301,6 +316,7 @@ const TrainingType = () => {
                 },
               ]}
             />
+            {allowPermissionToShow?.some((el: any) => el.name === "Create Training Type") && (
             <Button
               size="big"
               variant="primary"
@@ -308,6 +324,7 @@ const TrainingType = () => {
             >
               {lang[t].trainingType.primary.create}
             </Button>
+            )}
           </Row>
         </Row>
       </Card>
@@ -365,36 +382,48 @@ const TrainingType = () => {
                 }}
               >
                 {modalForm.typeForm === "create" ? (
-                  <Button
-                    full
-                    size="big"
-                    variant={"tertiary"}
-                    key="submit"
-                    type="primary"
-                    onClick={() => setModalForm({ open: false, data: {}, typeForm: "" })}
-                  >
-                    {lang[t].trainingType.tertier.delete}
-                  </Button>
+                  <>
+                  {allowPermissionToShow?.some((el: any) => el.name === "Delete Training Type") && (
+                    <Button
+                      full
+                      size="big"
+                      variant={"tertiary"}
+                      key="submit"
+                      type="primary"
+                      onClick={() => setModalForm({ open: false, data: {}, typeForm: "" })}
+                    >
+                      {lang[t].trainingType.tertier.delete}
+                    </Button>
+                  )}
+                    <Button full onClick={handleSubmit(onSubmit)} variant="primary" size="big">
+                      {isLoadingCreateTrainingType || isLoadingUpdateTrainingType
+                        ? "Loading..."
+                        : lang[t].trainingType.primary.save}
+                    </Button>
+                  </>
                 ) : (
-                  <Button
-                    full
-                    size="big"
-                    variant={"tertiary"}
-                    key="submit"
-                    type="primary"
-                    onClick={() => {
-                      setShowDelete({ open: true, type: "detail", data: modalForm.data });
-                    }}
-                  >
-                    {lang[t].trainingType.tertier.delete}
-                  </Button>
+                  <>
+                    <Button
+                      full
+                      size="big"
+                      variant={"tertiary"}
+                      key="submit"
+                      type="primary"
+                      onClick={() => {
+                        setShowDelete({ open: true, type: "detail", data: modalForm.data });
+                      }}
+                    >
+                      {lang[t].trainingType.tertier.delete}
+                    </Button>
+                    <Button full onClick={handleSubmit(onSubmit)} variant="primary" size="big">
+                      {isLoadingCreateTrainingType || isLoadingUpdateTrainingType
+                        ? "Loading..."
+                        : lang[t].trainingType.primary.save}
+                    </Button>
+                  </>
                 )}
 
-                <Button full onClick={handleSubmit(onSubmit)} variant="primary" size="big">
-                  {isLoadingCreateTrainingType || isLoadingUpdateTrainingType
-                    ? "Loading..."
-                    : lang[t].trainingType.primary.save}
-                </Button>
+                
               </div>
             </div>
           }
