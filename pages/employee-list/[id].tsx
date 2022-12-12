@@ -199,6 +199,7 @@ const EmployeeDetail = () => {
         setValue("personal.mobile", data.personal.mobile);
         setValue("personal.visa", data.personal.visa);
         setValue("personal.visa_expire", data.personal.visaExpire);
+        setValue("personal.insurance", data.personal.insurance);
         setValue(
           "address",
           data.address.map((data: any) => ({
@@ -2019,6 +2020,7 @@ const EmployeeDetail = () => {
                           <Spacer size={3} />
                           <Dropdown
                             noSearch
+                            defaultValue={dataEmployee?.personal?.blood}
                             width="100%"
                             items={[
                               { id: "A", value: "A" },
@@ -2046,6 +2048,7 @@ const EmployeeDetail = () => {
                           <Spacer size={3} />
                           <Dropdown
                             noSearch
+                            defaultValue={dataEmployee?.personal?.religion}
                             width="100%"
                             items={[
                               { id: "Moslem", value: "Moslem" },
@@ -2071,6 +2074,7 @@ const EmployeeDetail = () => {
                     <Input
                       type="number"
                       width="100%"
+                      defaultValue={dataEmployee?.personal?.insurance}
                       error={errors.personal?.insurance?.message}
                       label="Medical Number (Insurance)"
                       height="48px"
@@ -2091,6 +2095,7 @@ const EmployeeDetail = () => {
                       width="100%"
                       label="Personal Email"
                       height="48px"
+                      defaultValue={dataEmployee?.personal?.email}
                       error={errors.personal?.email?.message}
                       placeholder={"e.g you@email.com"}
                       {...register("personal.email", {

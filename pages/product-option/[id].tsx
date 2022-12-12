@@ -79,7 +79,6 @@ const ProductOptionDetail = () => {
       options: {
         onSuccess: () => {
           router.back();
-          queryClient.invalidateQueries(["product-option"]);
         },
       },
     });
