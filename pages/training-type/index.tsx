@@ -180,8 +180,7 @@ const TrainingType = () => {
   const allowPermissionToShow = listPermission?.filter((data: any) =>
     permissionTrainingType.role[dataUserPermission?.role?.name]?.component.includes(data.name)
   );
-  console.log(listPermission);
-  
+  let menuList :any = []
   const columns = [
     {
       title: lang[t].trainingType.trainingTypeId,
@@ -205,7 +204,48 @@ const TrainingType = () => {
       setSelectedRowKeys(selectedRowKeys);
     },
   };
-
+	if (allowPermissionToShow?.map((data: any) => data.name)?.includes("Download Training Type")) {
+		  menuList = [
+			...menuList, 
+      {
+        key: 1,
+        value: (
+          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+            <ICDownload />
+            <p style={{ margin: "0" }}>{lang[t].trainingType.ghost.downloadTemplate}</p>
+          </div>
+        ),
+      },
+		];
+	}
+	if (allowPermissionToShow?.map((data: any) => data.name)?.includes("Upload Training Type")) {
+		  menuList = [
+			...menuList, 
+      {
+        key: 2,
+        value: (
+          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+            <ICUpload />
+            <p style={{ margin: "0" }}>{lang[t].trainingType.ghost.uploadTemplate}</p>
+          </div>
+        ),
+      },
+		];
+	}
+	if (allowPermissionToShow?.map((data: any) => data.name)?.includes("Download Training Type")) {
+	menuList = [
+		...menuList, 
+    {
+      key: 3,
+      value: (
+        <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+          <ICDownload />
+          <p style={{ margin: "0" }}>{lang[t].trainingType.ghost.downloadData}</p>
+        </div>
+      ),
+    },
+	];
+	}
   const onSubmit = (data: any) => {
     switch (modalForm.typeForm) {
       case "create":
@@ -262,6 +302,7 @@ const TrainingType = () => {
             >
               {lang[t].trainingType.palceholderSearch}
             </Button>
+            {menuList.length > 0 && (
             <DropdownMenu
               title={lang[t].trainingType.tertier.more}
               buttonVariant={"secondary"}
@@ -286,36 +327,9 @@ const TrainingType = () => {
                     break;
                 }
               }}
-              menuList={[
-                {
-                  key: 1,
-                  value: (
-                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                      <ICDownload />
-                      <p style={{ margin: "0" }}>{lang[t].trainingType.ghost.downloadTemplate}</p>
-                    </div>
-                  ),
-                },
-                {
-                  key: 2,
-                  value: (
-                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                      <ICUpload />
-                      <p style={{ margin: "0" }}>{lang[t].trainingType.ghost.uploadTemplate}</p>
-                    </div>
-                  ),
-                },
-                {
-                  key: 3,
-                  value: (
-                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                      <ICDownload />
-                      <p style={{ margin: "0" }}>{lang[t].trainingType.ghost.downloadData}</p>
-                    </div>
-                  ),
-                },
-              ]}
+              menuList={menuList}
             />
+            )}
             {allowPermissionToShow?.some((el: any) => el.name === "Create Training Type") && (
             <Button
               size="big"
@@ -403,23 +417,27 @@ const TrainingType = () => {
                   </>
                 ) : (
                   <>
-                    <Button
-                      full
-                      size="big"
-                      variant={"tertiary"}
-                      key="submit"
-                      type="primary"
-                      onClick={() => {
-                        setShowDelete({ open: true, type: "detail", data: modalForm.data });
-                      }}
-                    >
-                      {lang[t].trainingType.tertier.delete}
-                    </Button>
-                    <Button full onClick={handleSubmit(onSubmit)} variant="primary" size="big">
-                      {isLoadingCreateTrainingType || isLoadingUpdateTrainingType
-                        ? "Loading..."
-                        : lang[t].trainingType.primary.save}
-                    </Button>
+                    {allowPermissionToShow?.some((el: any) => el.name === "Delete Training Type") && (
+                      <Button
+                        full
+                        size="big"
+                        variant={"tertiary"}
+                        key="submit"
+                        type="primary"
+                        onClick={() => {
+                          setShowDelete({ open: true, type: "detail", data: modalForm.data });
+                        }}
+                      >
+                        {lang[t].trainingType.tertier.delete}
+                      </Button>
+                    )}
+                    {allowPermissionToShow?.some((el: any) => el.name === "Update Training Type") && (
+                      <Button full onClick={handleSubmit(onSubmit)} variant="primary" size="big">
+                        {isLoadingCreateTrainingType || isLoadingUpdateTrainingType
+                          ? "Loading..."
+                          : lang[t].trainingType.primary.save}
+                      </Button>
+                    )}
                   </>
                 )}
 
