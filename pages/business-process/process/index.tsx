@@ -8,6 +8,8 @@ import { useConfigs } from "../../../hooks/config/useConfig";
 import { useDeleteProcessList, useProcessLists } from "../../../hooks/business-process/useProcess";
 import { colors } from "../../../utils/color";
 import { lang } from "lang";
+import { useUserPermissions } from "hooks/user-config/usePermission";
+import { permissionProcess } from "permission/process";
 
 const ProcessList: any = () => {
 	const t = localStorage.getItem("lan") || "en-US";
@@ -24,6 +26,20 @@ const ProcessList: any = () => {
 	const [search, setSearch] = useState("");
 	const [dataListDropdownModul, setDataListDropdownModul] = useState(null);
 	const [modalDelete, setModalDelete] = useState({ open: false });
+
+	const { data: dataUserPermission } = useUserPermissions({
+		options: {
+		  onSuccess: () => {},
+		},
+	  });
+	
+	  const listPermission = dataUserPermission?.permission?.filter(
+		(filtering: any) => filtering.menu === "Process"
+	  );
+	
+	  const allowPermissionToShow = listPermission?.filter((data: any) =>
+		permissionProcess.role[dataUserPermission?.role?.name].component.includes(data.name)
+	  );
 
 	const {
 		data: dataConfigsModule,
@@ -78,11 +94,16 @@ const ProcessList: any = () => {
 			dataIndex: "field_module",
 			width: "42%",
 		},
-		{
-			title: lang[t].process.permissionList.action,
-			dataIndex: "action",
-			width: "15%",
-		},
+		...(allowPermissionToShow?.some((el: any) => el.name === "View Process")
+		? [
+			{
+				title: lang[t].process.permissionList.action,
+				dataIndex: "action",
+				width: "15%",
+			},
+		  ]
+		: []),
+
 	];
 
 	const data: any[] = [];

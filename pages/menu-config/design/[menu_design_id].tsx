@@ -16,6 +16,8 @@ import { ModalDeleteConfirmation } from "components/elements/Modal/ModalConfirma
 import { queryClient } from "pages/_app";
 import ArrowLeft from "assets/icons/arrow-left.svg";
 import { lang } from "lang";
+import { useUserPermissions } from "hooks/user-config/usePermission";
+import { permissionMenuDesign } from "permission/menuDesign";
 
 const CreateMenuDesignList: any = () => {
   const router = useRouter();
@@ -38,6 +40,20 @@ const CreateMenuDesignList: any = () => {
   const [selectedRowKeyTree, setSelectedRowKeyTree] = useState<any>([]);
 
   const [hierarchyData, setHierarchyData] = useState<any>([]);
+
+  const { data: dataUserPermission } = useUserPermissions({
+    options: {
+      onSuccess: () => {},
+    },
+  });
+
+  const listPermission = dataUserPermission?.permission?.filter(
+    (filtering: any) => filtering.menu === "Menu Design"
+  );
+
+  const allowPermissionToShow = listPermission?.filter((data: any) =>
+    permissionMenuDesign.role[dataUserPermission?.role?.name].component.includes(data.name)
+  );
 
   const {
     data: menuDesignData,
@@ -369,7 +385,7 @@ const CreateMenuDesignList: any = () => {
       ...data,
       status: data?.status === "Active" || data?.status === "Y" ? "Y" : "N",
       hierarchies: mappingHierarchiesPayload,
-      company_id: companyCode
+      company_id: companyCode,
     };
 
     updateMenuDesign(formData);
@@ -417,12 +433,20 @@ const CreateMenuDesignList: any = () => {
             />
 
             <Row gap="16px">
-              <Button size="big" variant={"tertiary"} onClick={() => setShowDeleteModal(true)}>
-                {lang[t].menuDesign.tertier.delete}
-              </Button>
-              <Button size="big" variant={"primary"} onClick={handleSubmit(submit)}>
-                {isLoadingUpdateMenuDesign ? "loading..." : lang[t].menuDesign.primary.save}
-              </Button>
+              {allowPermissionToShow
+                ?.map((data: any) => data.name)
+                ?.includes("Delete Menu Design") && (
+                <Button size="big" variant={"tertiary"} onClick={() => setShowDeleteModal(true)}>
+                  {lang[t].menuDesign.tertier.delete}
+                </Button>
+              )}
+              {allowPermissionToShow
+                ?.map((data: any) => data.name)
+                ?.includes("Update Menu Design") && (
+                <Button size="big" variant={"primary"} onClick={handleSubmit(submit)}>
+                  {isLoadingUpdateMenuDesign ? "loading..." : lang[t].menuDesign.primary.save}
+                </Button>
+              )}
             </Row>
           </Row>
         </Card>

@@ -30,6 +30,8 @@ import ModalEditProcess from "../../components/elements/Modal/ModalEditProcess";
 import DraggableTable from "../../components/pages/BusinessProcess/DraggableTable";
 import DraggableGrids from "../../components/pages/BusinessProcess/DraggableGrid";
 import { lang } from "lang";
+import { useUserPermissions } from "hooks/user-config/usePermission";
+import { permissionBusinessProcess } from "permission/businessProcess";
 
 const BussinessProcessDetail = () => {
   const t = localStorage.getItem("lan") || "en-US";
@@ -51,6 +53,20 @@ const BussinessProcessDetail = () => {
   const debounceFetch = useDebounce(search, 1000);
 
   const { register, handleSubmit, control } = useForm();
+
+  const { data: dataUserPermission } = useUserPermissions({
+    options: {
+      onSuccess: () => {},
+    },
+  });
+
+  const listPermission = dataUserPermission?.permission?.filter(
+    (filtering: any) => filtering.menu === "Postal Code"
+  );
+
+  const allowPermissionToShow = listPermission?.filter((data: any) =>
+    permissionBusinessProcess.role[dataUserPermission?.role?.name].component.includes(data.name)
+  );
 
   const {
     isFetching: isFetchingProcess,
@@ -183,16 +199,16 @@ const BussinessProcessDetail = () => {
         };
       }
     });
-    let newProcessList = 
-    [...processList, ...mappedProcessList].map((data, index) => 
-      ({ ...data, index }));
+    let newProcessList = [...processList, ...mappedProcessList].map((data, index) => ({
+      ...data,
+      index,
+    }));
 
     setProcessList(newProcessList);
     setShowAddProcessModal(false);
-    setMandatory("Is Mandatory")
-    setIsActive("Active")
-    setValue([])
-
+    setMandatory("Is Mandatory");
+    setIsActive("Active");
+    setValue([]);
   };
 
   const editProcessList = () => {
@@ -321,12 +337,22 @@ const BussinessProcessDetail = () => {
             />
 
             <Row gap="16px">
-              <Button size="big" variant={"tertiary"} onClick={() => setShowDeleteModal(true)}>
-                Delete
-              </Button>
-              <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
-                {isLoadingUpdateBusinessProcess ? "...Loading" : lang[t].businessProcess.primary.save}
-              </Button>
+              {allowPermissionToShow
+                ?.map((data: any) => data.name)
+                ?.includes("Delete Business Process") && (
+                <Button size="big" variant={"tertiary"} onClick={() => setShowDeleteModal(true)}>
+                  Delete
+                </Button>
+              )}
+              {allowPermissionToShow
+                ?.map((data: any) => data.name)
+                ?.includes("Update Business Process") && (
+                <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
+                  {isLoadingUpdateBusinessProcess
+                    ? "...Loading"
+                    : lang[t].businessProcess.primary.save}
+                </Button>
+              )}
             </Row>
           </Row>
         </Card>
@@ -335,7 +361,9 @@ const BussinessProcessDetail = () => {
 
         <Accordion>
           <Accordion.Item key={1}>
-            <Accordion.Header variant="blue">{lang[t].businessProcess.accordion.general}</Accordion.Header>
+            <Accordion.Header variant="blue">
+              {lang[t].businessProcess.accordion.general}
+            </Accordion.Header>
             <Accordion.Body>
               <Row>
                 <Input
@@ -357,7 +385,9 @@ const BussinessProcessDetail = () => {
 
         <Accordion>
           <Accordion.Item key={1}>
-            <Accordion.Header variant="blue">{lang[t].businessProcess.accordion.processes}</Accordion.Header>
+            <Accordion.Header variant="blue">
+              {lang[t].businessProcess.accordion.processes}
+            </Accordion.Header>
             <Accordion.Body>
               {!!processList.length ? (
                 <>

@@ -17,6 +17,8 @@ import useDebounce from "lib/useDebounce";
 import { useEmployeeInfiniteLists } from "hooks/mdm/employee-list/useEmployeeListMDM";
 import { lang } from "lang";
 import { useAllLibraryLanguage } from "hooks/mdm/library-language/useLibraryLanguage";
+import { useUserPermissions } from "hooks/user-config/usePermission";
+import { permissionSequenceNumber } from "permission/sequenceNumber";
 
 const phoneRegex = /^(\+?\d{0,4})?\s?-?\s?(\(?\d{3}\)?)\s?-?\s?(\(?\d{3}\)?)\s?-?\s?(\(?\d{4}\)?)?$/
 const schema = yup
@@ -55,6 +57,7 @@ const UpdateUserConfig: any = () => {
 		resolver: yupResolver(schema),
 		defaultValues: defaultValues,
 	});
+	
 	const [searchTimezone, setSearchTimezone] = useState("")
 	const [searchEmployee, setSearchEmployee] = useState("")
 
@@ -67,6 +70,20 @@ const UpdateUserConfig: any = () => {
 	const [listTimezone, setListTimezone] = useState<any[]>([])
 	const [listEmployee, setListEmployee] = useState<any[]>([])
 	const [employeeLanguages, setEmployeeLanguages] = useState("")
+
+	const { data: dataUserPermission } = useUserPermissions({
+		options: {
+		  onSuccess: () => {},
+		},
+	  });
+	
+	  const listPermission = dataUserPermission?.permission?.filter(
+		(filtering: any) => filtering.menu === "Postal Code"
+	  );
+	
+	  const allowPermissionToShow = listPermission?.filter((data: any) =>
+		permissionSequenceNumber.role[dataUserPermission?.role?.name].component.includes(data.name)
+	  );
 
 
     const {
@@ -240,12 +257,20 @@ const UpdateUserConfig: any = () => {
 						/>
 						<Row>
 							<Row gap="16px">
-								<Button size="big" variant={"tertiary"} onClick={() => deleteUser({ids: [user_id]})}>
-									{lang[t].userList.list.button.delete}
-								</Button>
-								<Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
-									{lang[t].userList.list.button.save}
-								</Button>
+								{allowPermissionToShow
+									?.map((data: any) => data.name)
+									?.includes("Delete Sequence Number") && (
+										<Button size="big" variant={"tertiary"} onClick={() => deleteUser({ids: [user_id]})}>
+														{lang[t].userList.list.button.delete}
+													</Button>
+								)}
+								{allowPermissionToShow
+									?.map((data: any) => data.name)
+									?.includes("Update Sequence Number") && (
+										<Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
+										{lang[t].userList.list.button.save}
+									</Button>
+								)}
 							</Row>
 						</Row>
 					</Row>

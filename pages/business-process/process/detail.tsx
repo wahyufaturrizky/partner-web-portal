@@ -11,6 +11,8 @@ import {
 	useUpdateProcessList,
 } from "../../../hooks/business-process/useProcess";
 import { lang } from "lang";
+import { useUserPermissions } from "hooks/user-config/usePermission";
+import { permissionProcess } from "permission/process";
 
 const DetailProcessList: any = () => {
 	const t = localStorage.getItem("lan") || "en-US";
@@ -22,6 +24,21 @@ const DetailProcessList: any = () => {
 		name: "",
 	});
 	const { name } = stateFieldInput;
+
+	const { data: dataUserPermission } = useUserPermissions({
+		options: {
+		  onSuccess: () => {},
+		},
+	  });
+	
+	  const listPermission = dataUserPermission?.permission?.filter(
+		(filtering: any) => filtering.menu === "Process"
+	  );
+	
+	  const allowPermissionToShow = listPermission?.filter((data: any) =>
+		permissionProcess.role[dataUserPermission?.role?.name].component.includes(data.name)
+	  );
+	
 
 	const {
 		data: dataConfigsModule,
@@ -127,9 +144,13 @@ const DetailProcessList: any = () => {
 								>
 									Delete
 								</Button> */}
-								<Button size="big" variant={"primary"} onClick={handleUpdateProcessList}>
-									{isLoading ? "loading..." : lang[t].process.primary.save}
-								</Button>
+								{allowPermissionToShow
+									?.map((data: any) => data.name)
+									?.includes("Update Process") && (
+										<Button size="big" variant={"primary"} onClick={handleUpdateProcessList}>
+											{isLoading ? "loading..." : lang[t].process.primary.save}
+										</Button>
+								)}
 							</Row>
 						</Row>
 					</Row>

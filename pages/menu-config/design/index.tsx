@@ -9,6 +9,9 @@ import { ModalDeleteConfirmation } from "components/elements/Modal/ModalConfirma
 import { lang } from "lang";
 
 import styled from "styled-components";
+import { useUserPermissions } from "hooks/user-config/usePermission";
+import { permissionPostalCode } from "permission/postalCode";
+import { permissionMenuDesign } from "permission/menuDesign";
 
 const MenuConfigDesign: any = () => {
   const pagination = usePagination({
@@ -24,6 +27,20 @@ const MenuConfigDesign: any = () => {
   const [search, setSearch] = useState("");
   const [modalDelete, setModalDelete] = useState({ open: false });
 
+  const { data: dataUserPermission } = useUserPermissions({
+    options: {
+      onSuccess: () => {},
+    },
+  });
+
+  const listPermission = dataUserPermission?.permission?.filter(
+    (filtering: any) => filtering.menu === "Menu Design"
+  );
+
+  const allowPermissionToShow = listPermission?.filter((data: any) =>
+    permissionMenuDesign.role[dataUserPermission?.role?.name].component.includes(data.name)
+  );
+
   const {
     data: fields,
     refetch: refetchFields,
@@ -34,7 +51,7 @@ const MenuConfigDesign: any = () => {
       search,
       page: pagination.page,
       limit: pagination.itemsPerPage,
-      company_id: companyCode
+      company_id: companyCode,
     },
     options: {
       onSuccess: (data: any) => {
@@ -85,12 +102,16 @@ const MenuConfigDesign: any = () => {
       dataIndex: "field_name",
       width: "80%",
     },
-    {
-      title: lang[t].menuDesign.menuDesignAction,
-      dataIndex: "action",
-      width: "15%",
-      align: "left",
-    },
+    ...(allowPermissionToShow?.some((el: any) => el.name === "View Menu Design")
+      ? [
+          {
+            title: lang[t].menuDesign.menuDesignAction,
+            dataIndex: "action",
+            width: "15%",
+            align: "left",
+          },
+        ]
+      : []),
   ];
 
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);

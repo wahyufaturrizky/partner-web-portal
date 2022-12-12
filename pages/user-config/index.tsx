@@ -24,6 +24,8 @@ import { lang } from "lang";
 import useDebounce from "lib/useDebounce";
 import { clientDownloadService } from "lib/client";
 import { queryClient } from "pages/_app";
+import { useUserPermissions } from "hooks/user-config/usePermission";
+import { permissionSequenceNumber } from "permission/sequenceNumber";
 
 const UserConfigUser: any = () => {
   const router = useRouter();
@@ -42,6 +44,21 @@ const UserConfigUser: any = () => {
   const [modalDelete, setModalDelete] = useState({ open: false });
   const [isShowUpload, setShowUpload] = useState(false);
   const debounceSearch = useDebounce(search, 1000);
+
+  const { data: dataUserPermission } = useUserPermissions({
+    options: {
+      onSuccess: () => {},
+    },
+  });
+
+  const listPermission = dataUserPermission?.permission?.filter(
+    (filtering: any) => filtering.menu === "Sequence Number"
+  );
+
+  const allowPermissionToShow = listPermission?.filter((data: any) =>
+    permissionSequenceNumber.role[dataUserPermission?.role?.name].component.includes(data.name)
+  );
+
 
   const {
     data: users,
@@ -119,11 +136,16 @@ const UserConfigUser: any = () => {
         <Lozenge variant={STATUS_APPROVAL_VARIANT[text]}>{STATUS_APPROVAL_TEXT[text]}</Lozenge>
       ),
     },
-    {
-      title: lang[t].userList.list.table.action,
-      dataIndex: "action",
-      width: "20%",
-    },
+    ...(allowPermissionToShow?.some((el: any) => el.name === "View Sequence Number")
+    ? [
+        {
+          title: lang[t].userList.list.table.action,
+          dataIndex: "action",
+          width: "20%",
+        },
+      ]
+    : []),
+
   ];
 
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
@@ -166,62 +188,91 @@ const UserConfigUser: any = () => {
               onChange={(e: any) => setSearch(e.target.value)}
             />
             <Row gap="16px">
-              <Button
-                size="big"
-                variant={"tertiary"}
-                onClick={() => setModalDelete({ open: true })}
-                disabled={rowSelection.selectedRowKeys?.length === 0}
-              >
-                {lang[t].userList.list.button.delete}
-              </Button>
-              <DropdownMenu
-                title={lang[t].userList.list.button.more}
-                buttonVariant="secondary"
-                buttonSize="big"
-                textVariant="button"
-                textColor="pink.regular"
-                iconStyle={{ fontSize: "12px" }}
-                onClick={(e: any) => {
-                  switch (parseInt(e.key)) {
-                    case 1:
-                      downloadFile({ with_data: "N" });
-                      break;
-                    case 2:
-                      setShowUpload(true);
-                      break;
+            {allowPermissionToShow
+                ?.map((data: any) => data.name)
+                ?.includes("Delete Postal Code") && (
+                <Button
+                  size="big"
+                  variant={"tertiary"}
+                  onClick={() => setModalDelete({ open: true })}
+                  disabled={rowSelection.selectedRowKeys?.length === 0}
+                >
+                  {lang[t].userList.list.button.delete}
+                </Button>
+              )}
 
-                    default:
-                      break;
-                  }
-                }}
-                menuList={[
-                  {
-                    key: 1,
-                    value: (
-                      <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                        <DownloadSvg />
-                        <p style={{ margin: "0" }}>{lang[t].userList.list.button.download}</p>
-                      </div>
-                    ),
-                  },
-                  {
-                    key: 2,
-                    value: (
-                      <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                        <UploadSvg />
-                        <p style={{ margin: "0" }}>{lang[t].userList.list.button.upload}</p>
-                      </div>
-                    ),
-                  },
-                ]}
-              />
-              <Button
-                size="big"
-                variant={"primary"}
-                onClick={() => router.push("/user-config/create")}
-              >
-                {lang[t].userList.list.button.create}
-              </Button>
+              {(allowPermissionToShow
+                ?.map((data: any) => data.name)
+                ?.includes("Download Template Sequence Number") ||
+                allowPermissionToShow
+                  ?.map((data: any) => data.name)
+                  ?.includes("Download Data Sequence Number") ||
+                allowPermissionToShow
+                  ?.map((data: any) => data.name)
+                  ?.includes("Upload Sequence Number")) && (
+                    <DropdownMenu
+                    title={lang[t].userList.list.button.more}
+                    buttonVariant="secondary"
+                    buttonSize="big"
+                    textVariant="button"
+                    textColor="pink.regular"
+                    iconStyle={{ fontSize: "12px" }}
+                    onClick={(e: any) => {
+                      switch (parseInt(e.key)) {
+                        case 1:
+                          downloadFile({ with_data: "N" });
+                          break;
+                        case 2:
+                          setShowUpload(true);
+                          break;
+    
+                        default:
+                          break;
+                      }
+                    }}
+                    menuList={[
+                      {
+                        ...(allowPermissionToShow
+                          ?.map((data: any) => data.name)
+                          ?.includes("Download Template Sequence Number") &&  {
+                            key: 1,
+                            value: (
+                              <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                                <DownloadSvg />
+                                <p style={{ margin: "0" }}>{lang[t].userList.list.button.download}</p>
+                              </div>
+                            ),
+                          }),
+                      },
+                      {
+                        ...(allowPermissionToShow
+                          ?.map((data: any) => data.name)
+                          ?.includes("Upload Sequence Number") &&   {
+                            key: 2,
+                            value: (
+                              <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                                <UploadSvg />
+                                <p style={{ margin: "0" }}>{lang[t].userList.list.button.upload}</p>
+                              </div>
+                            ),
+                          }),
+                      },
+                    ]}
+                  />
+                  )}
+             
+             {allowPermissionToShow
+                ?.map((data: any) => data.name)
+                ?.includes("Create Postal Code") && (
+                  <Button
+                  size="big"
+                  variant={"primary"}
+                  onClick={() => router.push("/user-config/create")}
+                >
+                  {lang[t].userList.list.button.create}
+                </Button>
+              )}
+              
             </Row>
           </Row>
         </Card>
