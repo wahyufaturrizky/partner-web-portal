@@ -28,6 +28,8 @@ import useDebounce from "../../lib/useDebounce";
 import { queryClient } from "../_app";
 import { useProductCategoryInfiniteLists } from 'hooks/mdm/product-category/useProductCategory';
 import { lang } from "lang";
+import { useUserPermissions } from "hooks/user-config/usePermission";
+import { permissionProductList } from "permission/product-list";
 
 const downloadFile = (params: any) =>
   mdmDownloadService("/product/download", { params }).then((res) => {
@@ -151,6 +153,19 @@ const Product = () => {
     }
   );
 
+  const { data: dataUserPermission } = useUserPermissions({
+    options: {
+      onSuccess: () => {},
+    },
+  });
+
+  const listPermission = dataUserPermission?.permission?.filter(
+    (filtering: any) => filtering.menu === "Product List"
+  );
+  const allowPermissionToShow = listPermission?.filter((data: any) =>
+    permissionProductList.role[dataUserPermission?.role?.name].component.includes(data.name)
+  );
+  
   const columns = [
     {
       title: lang[t].productList.list.table.productId,
@@ -177,11 +192,15 @@ const Product = () => {
         </Lozenge>
       ),
     },  
-    {
-      title: lang[t].productList.list.table.action,
-      dataIndex: "action",
-      width: "15%",
-    },
+    ...(allowPermissionToShow?.some((el: any) => el.name === "View Product List")
+    ? [
+        {
+          title: lang[t].productList.list.table.action,
+          dataIndex: "action",
+          width: "15%",
+        },
+      ]
+    : [])
   ];
 
   const rowSelection = {
@@ -243,7 +262,52 @@ const Product = () => {
       },
     },
   });
+  let menuList: any[] = [];
 
+  if (allowPermissionToShow?.map((data: any) => data.name)?.includes("Download Template Product List")) {
+    menuList = [
+      ...menuList,
+      {
+        key: 1,
+        value: (
+          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+            <ICDownload />
+            <p style={{ margin: "0" }}>{lang[t].productList.list.button.download}</p>
+          </div>
+        ),
+      },
+    ];
+  }
+
+  if (allowPermissionToShow?.map((data: any) => data.name)?.includes("Upload Template Product List")) {
+    menuList = [
+      ...menuList,
+      {
+        key: 2,
+        value: (
+          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+            <ICUpload />
+            <p style={{ margin: "0" }}>{lang[t].productList.list.button.upload}</p>
+          </div>
+        ),
+      },
+    ];
+  }
+
+  if (allowPermissionToShow?.map((data: any) => data.name)?.includes("Download Data Product List")) {
+    menuList = [
+      ...menuList,
+      {
+        key: 3,
+        value: (
+          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+            <ICDownload />
+            <p style={{ margin: "0" }}>{lang[t].productList.list.button.downloadData}</p>
+          </div>
+        ),
+      },
+    ];
+  }
   return (
     <>
       <Col>
@@ -290,6 +354,7 @@ const Product = () => {
             </Col>
           </Row>
           <Row gap="16px">
+            {menuList.length > 0 && (
             <DropdownMenu
               title={lang[t].productList.list.button.more}
               buttonVariant={"secondary"}
@@ -314,43 +379,18 @@ const Product = () => {
                     break;
                 }
               }}
-              menuList={[
-                {
-                  key: 1,
-                  value: (
-                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                      <ICDownload />
-                      <p style={{ margin: "0" }}>{lang[t].productList.list.button.download}</p>
-                    </div>
-                  ),
-                },
-                {
-                  key: 2,
-                  value: (
-                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                      <ICUpload />
-                      <p style={{ margin: "0" }}>{lang[t].productList.list.button.upload}</p>
-                    </div>
-                  ),
-                },
-                {
-                  key: 3,
-                  value: (
-                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                      <ICDownload />
-                      <p style={{ margin: "0" }}>{lang[t].productList.list.button.downloadData}</p>
-                    </div>
-                  ),
-                },
-              ]}
+              menuList={menuList}
             />
-            <Button
-              size="big"
-              variant="primary"
-              onClick={() => router.push("/product-list/create")}
-            >
-              {lang[t].productList.list.button.create}
-            </Button>
+            )}
+            {allowPermissionToShow?.some((el: any) => el.name === "Create Product List") && (
+              <Button
+                size="big"
+                variant="primary"
+                onClick={() => router.push("/product-list/create")}
+              >
+                {lang[t].productList.list.button.create}
+              </Button>
+            )}
           </Row>
         </Row>
       </Card>
