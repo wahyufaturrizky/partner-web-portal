@@ -28,6 +28,8 @@ import { useForm } from "react-hook-form";
 import { ICDownload, ICUpload } from "../../assets/icons";
 import { mdmDownloadService } from "../../lib/client";
 import { lang } from "lang";
+import { useUserPermissions } from "hooks/user-config/usePermission";
+import { permissionDepartment } from "permission/department";
 
 const JobPosition = () => {
   const t = localStorage.getItem("lan") || "en-US";
@@ -164,6 +166,17 @@ const JobPosition = () => {
       },
     });
 
+  const { data: dataUserPermission } = useUserPermissions({
+    options: {
+      onSuccess: () => {},
+    },
+  });  
+  const listPermission = dataUserPermission?.permission?.filter(
+    (filtering: any) => filtering.menu === "Department"
+  );
+  const allowPermissionToShow = listPermission?.filter((data: any) =>
+    permissionDepartment.role["Admin"].component.includes(data.name)
+  );
   const columns = [
     {
       title: lang[t].department.departmentID,
@@ -230,6 +243,7 @@ const JobPosition = () => {
             }}
           />
           <Row gap="16px">
+            {allowPermissionToShow?.some((el: any) => el.name === "Delete Department") && (
             <Button
               size="big"
               variant={"tertiary"}
@@ -244,6 +258,7 @@ const JobPosition = () => {
             >
               {lang[t].department.tertier.delete}
             </Button>
+            )}
             <DropdownMenu
               title={"More"}
               buttonVariant={"secondary"}
@@ -298,6 +313,7 @@ const JobPosition = () => {
                 },
               ]}
             />
+            {allowPermissionToShow?.some((el: any) => el.name === "Create Department") && (
             <Button
               size="big"
               variant="primary"
@@ -305,6 +321,7 @@ const JobPosition = () => {
             >
               {lang[t].department.primary.create}
             </Button>
+            )}
           </Row>
         </Row>
       </Card>
@@ -358,17 +375,26 @@ const JobPosition = () => {
                 }}
               >
                 {modalForm.typeForm === "create" ? (
-                  <Button
-                    full
-                    size="big"
-                    variant={"tertiary"}
-                    key="submit"
-                    type="primary"
-                    onClick={() => setModalForm({ open: false, data: {}, typeForm: "" })}
-                  >
-                    {lang[t].department.tertier.cancel}
-                  </Button>
+                  <>
+                    <Button
+                      full
+                      size="big"
+                      variant={"tertiary"}
+                      key="submit"
+                      type="primary"
+                      onClick={() => setModalForm({ open: false, data: {}, typeForm: "" })}
+                    >
+                      {lang[t].department.tertier.cancel}
+                    </Button>
+                    <Button full onClick={handleSubmit(onSubmit)} variant="primary" size="big">
+                      {isLoadingCreateDepartment || isLoadingUpdateDepartment
+                        ? "Loading..."
+                        : lang[t].department.primary.save}
+                    </Button>
+                  </>
                 ) : (
+                  <>
+                  {allowPermissionToShow?.some((el: any) => el.name === "Delete Department") && (
                   <Button
                     full
                     size="big"
@@ -381,13 +407,18 @@ const JobPosition = () => {
                   >
                     {lang[t].department.tertier.delete}
                   </Button>
+                  )}
+                  {allowPermissionToShow?.some((el: any) => el.name === "Update Department") && (
+                  <Button full onClick={handleSubmit(onSubmit)} variant="primary" size="big">
+                      {isLoadingCreateDepartment || isLoadingUpdateDepartment
+                        ? "Loading..."
+                        : lang[t].department.primary.save}
+                    </Button>
+                  )}
+                  </>
                 )}
 
-                <Button full onClick={handleSubmit(onSubmit)} variant="primary" size="big">
-                  {isLoadingCreateDepartment || isLoadingUpdateDepartment
-                    ? "Loading..."
-                    : lang[t].department.primary.save}
-                </Button>
+
               </div>
             </div>
           }
