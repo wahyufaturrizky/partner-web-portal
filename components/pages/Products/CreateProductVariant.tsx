@@ -40,7 +40,7 @@ import ArrowLeft from "../../../assets/icons/arrow-left.svg";
 import { queryClient } from "../../../pages/_app";
 import { useProductCategoryInfiniteLists } from 'hooks/mdm/product-category/useProductCategory';
 
-export default function CreateProductVariant({ isCreateProductVariant = true}) {
+export default function CreateProductVariant({ isCreateProductVariant = true, allowPermissionToShow} :any) {
   const router = useRouter();
   const companyId = localStorage.getItem("companyId")
   const companyCode = localStorage.getItem("companyCode")
@@ -672,24 +672,46 @@ export default function CreateProductVariant({ isCreateProductVariant = true}) {
           />
 
           <Row gap="16px">
-            {isUpdate ?
-              <Button size="big" variant={"tertiary"} disabled={productForm?.variants?.length > 0} onClick={() => setShowDelete({ open: true})}>
-                Delete
-             </Button> :
-              <Button size="big" variant={"tertiary"} onClick={() => router.back()}>
-                Cancel
-              </Button>
+            {isUpdate ? (
+              <>
+                {allowPermissionToShow?.some((el: any) => el.name === "Delete Product Variant") && (
+                  <Button size="big" variant={"tertiary"} disabled={productForm?.variants?.length > 0} onClick={() => setShowDelete({ open: true})}>
+                    Delete
+                  </Button>
+                )}
+                {allowPermissionToShow?.some((el: any) => el.name === "Update Product Variant") && (
+                <Button size="big" variant={"primary"} onClick={(e: any) => {
+                      if(!inventoryWatch?.weight?.net){
+                        setTabAktived('Inventory')
+                        handleSubmit(onSubmit)(e)
+                      } else {
+                        handleSubmit(onSubmit)(e)
+                      }
+                    }}>
+                  {isLoadingCreateProduct || isLoadingUploadImage || isLoadingUpdateProduct? "Loading..." : "Save"}
+                </Button>
+                )}
+              </>
+              ):(
+              <>
+                <Button size="big" variant={"tertiary"} onClick={() => router.back()}>
+                  Cancel
+                </Button>
+                {allowPermissionToShow?.some((el: any) => el.name === "Create Product Variant") && (
+                  <Button size="big" variant={"primary"} onClick={(e: any) => {
+                        if(!inventoryWatch?.weight?.net){
+                          setTabAktived('Inventory')
+                          handleSubmit(onSubmit)(e)
+                        } else {
+                          handleSubmit(onSubmit)(e)
+                        }
+                      }}>
+                    {isLoadingCreateProduct || isLoadingUploadImage || isLoadingUpdateProduct? "Loading..." : "Save"}
+                  </Button>
+                )}
+              </>
+              )
             }
-             <Button size="big" variant={"primary"} onClick={(e: any) => {
-                  if(!inventoryWatch?.weight?.net){
-                    setTabAktived('Inventory')
-                    handleSubmit(onSubmit)(e)
-                  } else {
-                    handleSubmit(onSubmit)(e)
-                  }
-                }}>
-              {isLoadingCreateProduct || isLoadingUploadImage || isLoadingUpdateProduct? "Loading..." : "Save"}
-            </Button>
           </Row>
         </Row>
       </Card>
