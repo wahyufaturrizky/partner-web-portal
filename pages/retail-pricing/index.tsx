@@ -1,5 +1,7 @@
 import usePagination from "@lucasmogari/react-pagination";
+import { useUserPermissions } from "hooks/user-config/usePermission";
 import { useRouter } from "next/router";
+import { permissionRetailPricing } from "permission/retail-pricing";
 import {
   Button,
   Col,
@@ -88,6 +90,19 @@ const RetailPricing = () => {
     },
   });
 
+  const { data: dataUserPermission } = useUserPermissions({
+    options: {
+      onSuccess: () => {},
+    },
+  });
+
+  const listPermission = dataUserPermission?.permission?.filter(
+    (filtering: any) => filtering.menu === "Retail Pricing"
+  );
+  const allowPermissionToShow = listPermission?.filter((data: any) =>
+    permissionRetailPricing.role[dataUserPermission?.role?.name].component.includes(data.name)
+  );
+  
   const columns = [
     {
       title: "Retail Price ID",
@@ -101,11 +116,14 @@ const RetailPricing = () => {
       title: "Based on",
       dataIndex: "based_on",
     },
-    {
-      title: "Action",
-      dataIndex: "action",
-      width: "15%",
-    },
+    // ...(allowPermissionToShow?.some((el: any) => el.name === "View Retail Pricing")
+    // ? [
+        {
+          title: "Action",
+          dataIndex: "action",
+          width: "15%",
+        },
+    // ]:[])
   ];
 
   return (
@@ -124,6 +142,7 @@ const RetailPricing = () => {
             }}
           />
           <Row gap="16px">
+            {allowPermissionToShow?.some((el: any) => el.name === "Download Data Retail Pricing") && (
             <DropdownMenu
               title={"More"}
               buttonVariant={"secondary"}
@@ -154,13 +173,16 @@ const RetailPricing = () => {
                 },
               ]}
             />
-            <Button
-              size="big"
-              variant="primary"
-              onClick={() => router.push("/retail-pricing/create")}
-            >
-              Create
-            </Button>
+            )}
+            {allowPermissionToShow?.some((el: any) => el.name === "Create Retail Pricing") && (
+              <Button
+                size="big"
+                variant="primary"
+                onClick={() => router.push("/retail-pricing/create")}
+              >
+                Create
+              </Button>
+            )}
           </Row>
         </Row>
       </Card>

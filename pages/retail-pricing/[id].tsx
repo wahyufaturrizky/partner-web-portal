@@ -23,6 +23,8 @@ import { useRetailPricingDetail, useUpdateRetailPricing } from "hooks/mdm/retail
 import Conditions from "components/pages/RetailPricing/fragments/Conditions";
 import { toSnakeCase } from "lib/caseConverter";
 import { mdmDownloadService } from "lib/client";
+import { useUserPermissions } from "hooks/user-config/usePermission";
+import { permissionRetailPricing } from "permission/retail-pricing";
 
 const downloadFile = (params: any) =>
   mdmDownloadService("/retail-pricing/download", { params }).then((res) => {
@@ -80,43 +82,64 @@ const DetailRetailPricing: any = () => {
     tempRule: null,
     index: null
   })
+
+  const { data: dataUserPermission } = useUserPermissions({
+    options: {
+      onSuccess: () => {},
+    },
+  });
+
+  const listPermission = dataUserPermission?.permission?.filter(
+    (filtering: any) => filtering.menu === "User List"
+  );
+  const allowPermissionToShow = listPermission?.filter((data: any) =>
+    permissionRetailPricing.role[dataUserPermission?.role?.name]?.component.includes(data.name)
+  );
+
   const columns = [
     {
       title: "key",
       dataIndex: "key",
     },
-    {
-      title: "Action",
-      dataIndex: "action",
-      width: "15%",
-      align: "left",
-      render: (_, __, index) => {
-        return (
-          <Row gap="16px" alignItems="center" nowrap>
-            <Col>
-              <ICEdit
-                style={{cursor: 'pointer'}}
-                onClick={() => {
-                  setShowModalRules({
-                    visibility: true,
-                    tempRule: fieldRules[index],
-                    index: index
-                  })
-                }}
-              />
-            </Col>
-            <Col>
-              <ICDelete
-                style={{cursor: 'pointer'}}
-                onClick={() =>{
-                  removeRules(index)
-                }}
-              />
-            </Col>
-          </Row>
-        );
+    // ...(allowPermissionToShow?.some((el: any) => el.name === "Delete Retail Pricing")
+    // ? [
+      {
+        title: "Action",
+        dataIndex: "action",
+        width: "15%",
+        align: "left",
+        render: (_, __, index) => {
+          return (
+            <Row gap="16px" alignItems="center" nowrap>
+              {allowPermissionToShow?.some((el: any) => el.name === "Update Retail Pricing") && (
+              <Col>
+                <ICEdit
+                  style={{cursor: 'pointer'}}
+                  onClick={() => {
+                    setShowModalRules({
+                      visibility: true,
+                      tempRule: fieldRules[index],
+                      index: index
+                    })
+                  }}
+                />
+              </Col>
+              )}
+              {allowPermissionToShow?.some((el: any) => el.name === "Delete Retail Pricing") && (
+              <Col>
+                <ICDelete
+                  style={{cursor: 'pointer'}}
+                  onClick={() =>{
+                    removeRules(index)
+                  }}
+                />
+              </Col>
+              )}
+            </Row>
+          );
+        },
       },
-    },
+        // ]:[]),
     {
       title: "Price Computation",
       dataIndex: "price_computation",
@@ -376,6 +399,7 @@ const DetailRetailPricing: any = () => {
             <Button size="big" variant={"tertiary"} onClick={() => router.back()}>
               Cancel
             </Button>
+            {allowPermissionToShow?.some((el: any) => el.name === "Update Retail Pricing") && (
             <Button
               size="big"
               variant={"primary"}
@@ -383,6 +407,7 @@ const DetailRetailPricing: any = () => {
             >
               Save
             </Button>
+            )}
           </Row>
         </Card>
 
@@ -426,6 +451,7 @@ const DetailRetailPricing: any = () => {
           <Accordion.Item key={2}>
             <Accordion.Header variant="blue">Price Rules</Accordion.Header>
             <Accordion.Body>
+              {allowPermissionToShow?.some((el: any) => el.name === "Update Retail Pricing") && (
               <Row width="100%" gap="20px" noWrap>
                 <DownloadUploadContainer>
                   <Text variant="headingMedium">Download and fill in excel file </Text>
@@ -455,6 +481,7 @@ const DetailRetailPricing: any = () => {
                   </Button>
                 </DownloadUploadContainer>
 							</Row>
+              )}
               <Spacer size={20} />
               <Row width="100%" noWrap>
                 <Col width={"100%"}>
