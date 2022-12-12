@@ -39,6 +39,8 @@ import { useCountryInfiniteLists } from "hooks/mdm/country-structure/useCountrie
 import useDebounce from "lib/useDebounce";
 import { Controller, useForm } from "react-hook-form";
 import { colors } from "utils/color";
+import { permissionCoaTemplate } from "permission/coa-template";
+import { useUserPermissions } from "hooks/user-config/usePermission";
 
 const DetailCoa: any = () => {
   const {
@@ -78,6 +80,19 @@ const DetailCoa: any = () => {
   const [searchIndustry, setSearchIndustry] = useState("");
   const [searchSegment, setSearchSegment] = useState("");
   
+  const { data: dataUserPermission } = useUserPermissions({
+    options: {
+      onSuccess: () => {},
+    },
+  });
+
+  const listPermission = dataUserPermission?.permission?.filter(
+    (filtering: any) => filtering.menu === "Coa Template"
+  );
+  const allowPermissionToShow = listPermission?.filter((data: any) =>
+    permissionCoaTemplate.role[dataUserPermission?.role?.name]?.component.includes(data.name)
+  );
+
   const debounceFetch = useDebounce(
       searchCountry ||
       searchSegment ||
@@ -328,6 +343,7 @@ const DetailCoa: any = () => {
       search: searchAccountGroup,
       account_group_id: accountGroupId,
       code: accountCode,
+      company_id: "KSNI"
     },
   });
 
@@ -342,6 +358,7 @@ const DetailCoa: any = () => {
       search: searchAccountGroup,
       account_group_id: accountGroupId,
       code: accountCode,
+      company_id: "KSNI"
     },
   });
 
@@ -478,16 +495,20 @@ const DetailCoa: any = () => {
                 <Card style={{ height: "88px" }}>
                   <Row alignItems="center" justifyContent="space-between" gap="20" noWrap>
                     <Row justifyContent="flex-end" width="100%" gap="16px">
-                      <Button
-                        size="big"
-                        variant={"tertiary"}
-                        onClick={() => setModalDelete({ open: true })}
-                      >
-                        {lang[t].coaTemplate.list.button.delete}
-                      </Button>
-                      <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmitCoa)}>
-                        {lang[t].coaTemplate.list.button.save}
-                      </Button>
+                      {allowPermissionToShow?.some((el: any) => el.name === "Delete Coa Template") && (
+                        <Button
+                          size="big"
+                          variant={"tertiary"}
+                          onClick={() => setModalDelete({ open: true })}
+                        >
+                          {lang[t].coaTemplate.list.button.delete}
+                        </Button>
+                      )}
+                      {allowPermissionToShow?.some((el: any) => el.name === "Update Coa Template") && (
+                        <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmitCoa)}>
+                          {lang[t].coaTemplate.list.button.save}
+                        </Button>
+                      )}
                     </Row>
                   </Row>
                 </Card>

@@ -8,6 +8,8 @@ import { useCoa, useDeleteCoa } from "../../../hooks/finance-config/useCoaTempla
 import useDebounce from "lib/useDebounce";
 import { queryClient } from "pages/_app";
 import { lang } from "lang";
+import { useUserPermissions } from "hooks/user-config/usePermission";
+import { permissionCoaTemplate } from "permission/coa-template";
 
 const FinanceConfigCoATemplate: any = () => {
   const router = useRouter();
@@ -27,17 +29,33 @@ const FinanceConfigCoATemplate: any = () => {
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const debounceSearch = useDebounce(search, 1000);
 
+  const { data: dataUserPermission } = useUserPermissions({
+    options: {
+      onSuccess: () => {},
+    },
+  });
+
+  const listPermission = dataUserPermission?.permission?.filter(
+    (filtering: any) => filtering.menu === "Coa Template"
+  );
+  const allowPermissionToShow = listPermission?.filter((data: any) =>
+    permissionCoaTemplate.role[dataUserPermission?.role?.name]?.component.includes(data.name)
+  );
+
   const columns = [
     {
       title: lang[t].coaTemplate.list.table.name,
       dataIndex: "field_name",
     },
-    {
-      title: lang[t].coaTemplate.list.table.action,
-      dataIndex: "action",
-      width: "15%",
-      align: "left",
-    },
+    // ...(allowPermissionToShow?.some((el: any) => el.name === "View User List")
+    // ? [
+        {
+          title: lang[t].coaTemplate.list.table.action,
+          dataIndex: "action",
+          width: "15%",
+          align: "left",
+        },
+    // ]:[])
   ];
 
   const {
@@ -114,23 +132,27 @@ const FinanceConfigCoATemplate: any = () => {
               onChange={(e: any) => setSearch(e.target.value)}
             />
             <Row gap="16px">
-              <Button
-                size="big"
-                variant="tertiary"
-                onClick={() => setModalDelete({ open: true })}
-                disabled={rowSelection.selectedRowKeys?.length === 0}
-              >
-                {lang[t].coaTemplate.list.button.delete}
-              </Button>
-              <Button
-                size="big"
-                variant={"primary"}
-                onClick={() => {
-                  router.push(`/finance-config/coa-template/create`);
-                }}
-              >
-                {lang[t].coaTemplate.list.button.create}
-              </Button>
+              {allowPermissionToShow?.some((el: any) => el.name === "Delete Coa Template") && (
+                <Button
+                  size="big"
+                  variant="tertiary"
+                  onClick={() => setModalDelete({ open: true })}
+                  disabled={rowSelection.selectedRowKeys?.length === 0}
+                >
+                  {lang[t].coaTemplate.list.button.delete}
+                </Button>
+              )}
+              {allowPermissionToShow?.some((el: any) => el.name === "Create Coa Template") && (
+                <Button
+                  size="big"
+                  variant={"primary"}
+                  onClick={() => {
+                    router.push(`/finance-config/coa-template/create`);
+                  }}
+                >
+                  {lang[t].coaTemplate.list.button.create}
+                </Button>
+              )}
             </Row>
           </Row>
         </Card>
