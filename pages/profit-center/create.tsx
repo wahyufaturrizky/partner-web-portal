@@ -12,7 +12,7 @@ import { toSnakeCase } from "lib/caseConverter";
 import { queryClient } from "pages/_app";
 import ArrowLeft from "../../assets/icons/arrow-left.svg";
 
-function ProfitCenterCreate({isUpdate,detailProfitCenter,isLoadingProfit,isFetchingProfit} :any) {
+function ProfitCenterCreate({isUpdate,detailProfitCenter,isLoadingProfit,isFetchingProfit,allowPermissionToShow} :any) {
 
   const router = useRouter();
   const companyId = localStorage.getItem("companyId")
@@ -143,9 +143,16 @@ function ProfitCenterCreate({isUpdate,detailProfitCenter,isLoadingProfit,isFetch
               <Button size="big" variant={"tertiary"} onClick={() => router.back()}>
                 Cancel
               </Button>
+              {isUpdate && allowPermissionToShow?.some((el:any) => el.name === "Update Profit Center") && (
               <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
-                Save
+                Saves
               </Button>
+              )}
+              {!isUpdate && allowPermissionToShow?.some((el:any) => el.name === "Create Profit Center") && (
+                <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
+                Saves
+              </Button>
+              )}
             </Row>
           </Row>
         </Card>

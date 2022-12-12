@@ -1,5 +1,7 @@
 import { useDetailProfitCenter } from 'hooks/mdm/profit-center/useProfitCenter';
+import { useUserPermissions } from 'hooks/user-config/usePermission';
 import { useRouter } from 'next/router'
+import { permissionProfitCenter } from 'permission/profit-center';
 import React from 'react'
 import ProfitCenterCreate from './create';
 
@@ -25,7 +27,19 @@ export default function ProfitCenterDetail() {
     isLoadingProfit,
     isFetchingProfit
   }
+  const { data: dataUserPermission } = useUserPermissions({
+  options: {
+    onSuccess: () => {},
+  },
+});
+
+const listPermission = dataUserPermission?.permission?.filter(
+  (filtering: any) => filtering.menu === "Profit Center"
+);
+const allowPermissionToShow = listPermission?.filter((data: any) =>
+  permissionProfitCenter.role["Admin"].component.includes(data.name)
+);
   return (
-    <ProfitCenterCreate isUpdate = {true} {...propsDropdownField}/>
+    <ProfitCenterCreate isUpdate = {true} {...propsDropdownField} allowPermissionToShow={allowPermissionToShow}/>
   )
 }

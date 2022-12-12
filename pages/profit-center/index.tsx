@@ -24,6 +24,8 @@ import { queryClient } from "../_app";
 import { ICDownload, ICUpload } from "../../assets/icons";
 import { mdmDownloadService } from "../../lib/client";
 import { useRouter } from "next/router";
+import { useUserPermissions } from "hooks/user-config/usePermission";
+import { permissionProfitCenter } from "permission/profit-center";
 
 const downloadFile = (params: any) =>
   mdmDownloadService("/profit-center/download", { params }).then((res) => {
@@ -131,6 +133,19 @@ const ProfitCenter = () => {
     },
   });
 
+  const { data: dataUserPermission } = useUserPermissions({
+    options: {
+      onSuccess: () => {},
+    },
+  });
+
+  const listPermission = dataUserPermission?.permission?.filter(
+    (filtering: any) => filtering.menu === "Profit Center"
+  );
+  const allowPermissionToShow = listPermission?.filter((data: any) =>
+    permissionProfitCenter.role["Admin"].component.includes(data.name)
+  );
+
   const columns = [
     {
       title: "Profit Center ID",
@@ -183,20 +198,22 @@ const ProfitCenter = () => {
             }}
           />
           <Row gap="16px">
-            <Button
-              size="big"
-              variant={"tertiary"}
-              onClick={() =>
-                setShowDelete({
-                  open: true,
-                  type: "selection",
-                  data: { profitData: ProfitData, selectedRowKeys },
-                })
-              }
-              disabled={rowSelection.selectedRowKeys?.length === 0}
-            >
-              Delete
-            </Button>
+            {allowPermissionToShow?.some((el:any) => el.name === "Delete Profit Center") && (
+              <Button
+                size="big"
+                variant={"tertiary"}
+                onClick={() =>
+                  setShowDelete({
+                    open: true,
+                    type: "selection",
+                    data: { profitData: ProfitData, selectedRowKeys },
+                  })
+                }
+                disabled={rowSelection.selectedRowKeys?.length === 0}
+              >
+                Delete
+              </Button>
+            )}
             <DropdownMenu
               title={"More"}
               buttonVariant={"secondary"}
@@ -251,6 +268,7 @@ const ProfitCenter = () => {
                 },
               ]}
             />
+            {allowPermissionToShow?.some((el:any) => el.name === "Create Profit Center") && (
             <Button
               size="big"
               variant="primary"
@@ -258,6 +276,7 @@ const ProfitCenter = () => {
             >
               Create
             </Button>
+            )}
           </Row>
         </Row>
       </Card>
