@@ -9,6 +9,8 @@ import { useDeletePermission, useRolePermissions } from "../../../hooks/user-con
 import styled from "styled-components";
 import { lang } from "lang";
 import useDebounce from "lib/useDebounce";
+import { useUserPermissions } from "hooks/user-config/usePermission";
+import { permissionRoleList } from "permission/role-list";
 
 const UserConfigRole: any = () => {
   const t = localStorage.getItem("lan") || "en-US";
@@ -55,6 +57,19 @@ const UserConfigRole: any = () => {
     },
   });
 
+  const { data: dataUserPermission } = useUserPermissions({
+    options: {
+      onSuccess: () => {},
+    },
+  });
+
+  const listPermission = dataUserPermission?.permission?.filter(
+    (filtering: any) => filtering.menu === "Role List"
+  );
+  const allowPermissionToShow = listPermission?.filter((data: any) =>
+    permissionRoleList.role[dataUserPermission?.role?.name]?.component.includes(data.name)
+  );
+
   const columns = [
     {
       title: lang[t].roleList.roleList.roleName,
@@ -66,12 +81,15 @@ const UserConfigRole: any = () => {
       dataIndex: "company",
       width: "42%",
     },
+    // ...(allowPermissionToShow?.some((el: any) => el.name === "View Role List")
+    // ? [
     {
       title: lang[t].roleList.userListAction,
       dataIndex: "action",
       width: "15%",
       align: "left",
     },
+  // ]:[]),
   ];
 
   const data: any = [];
@@ -121,6 +139,7 @@ const UserConfigRole: any = () => {
               onChange={(e: any) => setSearch(e.target.value)}
             />
             <Row gap="16px">
+            {allowPermissionToShow?.some((el: any) => el.name === "Create Role List") && (
               <Button
                 size="big"
                 variant={"primary"}
@@ -130,6 +149,7 @@ const UserConfigRole: any = () => {
               >
                 {lang[t].roleList.primary.create}
               </Button>
+            )}
             </Row>
           </Row>
         </Card>
