@@ -40,6 +40,8 @@ import {
   useUpdatePricingConfigList,
 } from "../../hooks/pricing-structure/usePricingStructure";
 import { useCustomerGroupsMDM } from "hooks/mdm/customers/useCustomersGroupMDM";
+import { permissionPricingStructure } from "permission/pricing-structure";
+import { useUserPermissions } from "hooks/user-config/usePermission";
 
 const renderConfirmationTextGroupBuying = (type: any, data: any) => {
   switch (type) {
@@ -126,6 +128,18 @@ const PricingStructureList: any = () => {
     1000
   );
 
+  const { data: dataUserPermission } = useUserPermissions({
+    options: {
+      onSuccess: () => {},
+    },
+  });
+  const listPermission = dataUserPermission?.permission?.filter(
+    (filtering: any) => filtering.menu === "Pricing Structure"
+  );
+  const allowPermissionToShow = listPermission?.filter((data: any) =>
+    permissionPricingStructure.role["Admin"].component.includes(data.name)
+  );
+  
   const {
     data: pricingStructureLists,
     isLoading: isLoadingPricingStructureList,
@@ -585,6 +599,7 @@ const PricingStructureList: any = () => {
             <ActivePricingStructure
               modalPricingStructureForm={modalPricingStructureForm}
               setModalPricingStructureForm={setModalPricingStructureForm}
+              allowPermissionToShow={allowPermissionToShow}
             />
           ) : tab === "inactive" ? (
             <InActivePricingStructure

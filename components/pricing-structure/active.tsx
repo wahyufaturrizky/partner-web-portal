@@ -36,6 +36,7 @@ const downloadFile = (params: any) =>
   });
 
 const ActivePricingStructure: any = (props: any) => {
+  
   const router = useRouter();
   const pagination = usePagination({
     page: 1,
@@ -221,7 +222,7 @@ const ActivePricingStructure: any = (props: any) => {
                 },
               ]}
             />
-
+            {props.allowPermissionToShow?.some((el:any) => el.name === "Create Pricing Structure") && (
             <Button
               size="big"
               variant={"primary"}
@@ -231,6 +232,7 @@ const ActivePricingStructure: any = (props: any) => {
             >
               Create
             </Button>
+          )}
           </Row>
         </Row>
       </Card>

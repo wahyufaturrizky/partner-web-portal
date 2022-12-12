@@ -213,16 +213,17 @@ const InActivePricingStructure: any = (props: any) => {
                 },
               ]}
             />
-
-            <Button
-              size="big"
-              variant={"primary"}
-              onClick={() => {
-                router.push("/pricing-structure/create");
-              }}
-            >
-              Create
-            </Button>
+            {props.allowPermissionToShow?.some((el:any) => el.name === "Create Pricing Structure") && (
+              <Button
+                size="big"
+                variant={"primary"}
+                onClick={() => {
+                  router.push("/pricing-structure/create");
+                }}
+              >
+                Create
+              </Button>
+            )}
           </Row>
         </Row>
       </Card>
