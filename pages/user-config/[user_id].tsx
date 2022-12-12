@@ -17,6 +17,8 @@ import useDebounce from "lib/useDebounce";
 import { useEmployeeInfiniteLists } from "hooks/mdm/employee-list/useEmployeeListMDM";
 import { lang } from "lang";
 import { useAllLibraryLanguage } from "hooks/mdm/library-language/useLibraryLanguage";
+import { useUserPermissions } from "hooks/user-config/usePermission";
+import { permissionUserList } from "permission/user-list";
 
 const phoneRegex = /^(\+?\d{0,4})?\s?-?\s?(\(?\d{3}\)?)\s?-?\s?(\(?\d{3}\)?)\s?-?\s?(\(?\d{4}\)?)?$/
 const schema = yup
@@ -126,6 +128,19 @@ const UpdateUserConfig: any = () => {
 	},
 	});
 
+	const { data: dataUserPermission } = useUserPermissions({
+		options: {
+		onSuccess: () => {},
+		},
+	});
+
+	const listPermission = dataUserPermission?.permission?.filter(
+		(filtering: any) => filtering.menu === "User List"
+	);
+	const allowPermissionToShow = listPermission?.filter((data: any) =>
+		permissionUserList.role[dataUserPermission?.role?.name].component.includes(data.name)
+	);
+	
 	const { 
 		isFetching: isFetchingEmployee,
 		isFetchingNextPage: isFetchingMoreEmployee,
@@ -240,12 +255,16 @@ const UpdateUserConfig: any = () => {
 						/>
 						<Row>
 							<Row gap="16px">
+								{allowPermissionToShow?.some((el: any) => el.name === "Delete User List") && (
 								<Button size="big" variant={"tertiary"} onClick={() => deleteUser({ids: [user_id]})}>
 									{lang[t].userList.list.button.delete}
 								</Button>
+								)}
+								{allowPermissionToShow?.some((el: any) => el.name === "Update User List") && (
 								<Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
 									{lang[t].userList.list.button.save}
 								</Button>
+								)}
 							</Row>
 						</Row>
 					</Row>
@@ -417,9 +436,11 @@ const UpdateUserConfig: any = () => {
 									/>
 								</Row>
 								<Row width="100%" gap="20px" noWrap>
+									{allowPermissionToShow?.some((el: any) => el.name === "Delete User List") && (
 									<Button size="big" variant={"tertiary"} onClick={() => Router.push("https://accounts.edot.id/infopribadi")}>
 										Reset Password
 									</Button>
+									)}
 								</Row>
 							</Col>
 						</Accordion.Body>
