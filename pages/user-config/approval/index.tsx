@@ -9,6 +9,8 @@ import { useDeletePartnerConfigApprovalList, usePartnerConfigApprovalLists} from
 import { useProcessLists } from "../../../hooks/business-process/useProcess";
 import { colors } from "../../../utils/color";
 import { lang } from "lang";
+import { useUserPermissions } from "hooks/user-config/usePermission";
+import { permissionApprovalList } from "permission/approval-list";
 
 const UserConfigApproval: any = () => {
 	const companyCode = localStorage.getItem("companyCode");
@@ -63,6 +65,19 @@ const UserConfigApproval: any = () => {
 				},
 			},
 		});
+
+	const { data: dataUserPermission } = useUserPermissions({
+		options: {
+		onSuccess: () => {},
+		},
+	});
+
+	const listPermission = dataUserPermission?.permission?.filter(
+		(filtering: any) => filtering.menu === "Approval List"
+	);
+	const allowPermissionToShow = listPermission?.filter((data: any) =>
+		permissionApprovalList.role[dataUserPermission?.role?.name]?.component.includes(data.name)
+	);
 
 	const columns = [
 		{
@@ -153,14 +168,17 @@ const UserConfigApproval: any = () => {
 							/>
 						</Row>
 						<Row gap="16px">
-							<Button
-								size="big"
-								variant={"tertiary"}
-								onClick={() => setModalDelete({ open: true })}
-								disabled={rowSelection.selectedRowKeys?.length === 0}
-							>
-								{lang[t].approvalList.tertier.delete}
-							</Button>
+							{allowPermissionToShow?.some((el: any) => el.name === "Delete Approval List") && (
+								<Button
+									size="big"
+									variant={"tertiary"}
+									onClick={() => setModalDelete({ open: true })}
+									disabled={rowSelection.selectedRowKeys?.length === 0}
+								>
+									{lang[t].approvalList.tertier.delete}
+								</Button>
+							)}
+							{allowPermissionToShow?.some((el: any) => el.name === "Create Approval List") && (
 							<Button
 								size="big"
 								variant={"primary"}
@@ -168,6 +186,7 @@ const UserConfigApproval: any = () => {
 							>
 								{lang[t].approvalList.primary.create}
 							</Button>
+							)}
 						</Row>
 					</Row>
 				</Card>

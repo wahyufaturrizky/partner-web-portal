@@ -26,6 +26,8 @@ import {
 	useUpdatePartnerConfigApprovalList,
 } from "../../../hooks/user-config/useApproval";
 import { lang } from "lang";
+import { permissionApprovalList } from "permission/approval-list";
+import { useUserPermissions } from "hooks/user-config/usePermission";
 
 export interface ConfigModuleList {}
 
@@ -42,6 +44,20 @@ const DetailUserConfigApproval: any = () => {
 		name: "",
 		numberOfApprovalStage: 1,
 	});
+
+	const { data: dataUserPermission } = useUserPermissions({
+		options: {
+		onSuccess: () => {},
+		},
+	});
+
+	const listPermission = dataUserPermission?.permission?.filter(
+		(filtering: any) => filtering.menu === "Approval List"
+	);
+	const allowPermissionToShow = listPermission?.filter((data: any) =>
+		permissionApprovalList.role[dataUserPermission?.role?.name]?.component.includes(data.name)
+	);
+
 	const { name, numberOfApprovalStage } = stateFieldInput;
 
 	const handleChangeDropdown = (value: any, name: any) => {
@@ -242,6 +258,7 @@ const DetailUserConfigApproval: any = () => {
 
 						<Row>
 							<Row gap="16px">
+								{allowPermissionToShow?.some((el: any) => el.name === "Delete Approval List") && (
 								<Button
 									size="big"
 									variant={"tertiary"}
@@ -249,9 +266,12 @@ const DetailUserConfigApproval: any = () => {
 								>
 									{lang[t].approvalList.tertier.delete}
 								</Button>
-								<Button size="big" variant={"primary"} onClick={handleCreateProcessList}>
-									{isLoadingUpdatePartnerConfigApprovalList ? "loading..." : lang[t].approvalList.primary.save}
-								</Button>
+								)}
+								{allowPermissionToShow?.some((el: any) => el.name === "Update Approval List") && (
+									<Button size="big" variant={"primary"} onClick={handleCreateProcessList}>
+										{isLoadingUpdatePartnerConfigApprovalList ? "loading..." : lang[t].approvalList.primary.save}
+									</Button>
+								)}
 							</Row>
 						</Row>
 					</Row>
