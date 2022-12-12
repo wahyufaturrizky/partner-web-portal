@@ -1,6 +1,8 @@
+import { useUserPermissions } from "hooks/user-config/usePermission";
 import moment from "moment";
 import Image from "next/image";
 import { useRouter } from "next/router";
+import { permissionEmployeeList } from "permission/employee.list";
 import {
   Accordion,
   Button,
@@ -168,6 +170,20 @@ const EmployeeDetail = () => {
       },
     },
   });
+
+  const { data: dataUserPermission } = useUserPermissions({
+    options: {
+      onSuccess: () => {},
+    },
+  });
+  console.log("dataUserPermission",dataUserPermission);
+  
+  const listPermission = dataUserPermission?.permission?.filter(
+    (filtering: any) => filtering.menu === "Employee List"
+  );
+  const allowPermissionToShow = listPermission?.filter((data: any) =>
+    permissionEmployeeList.role["Admin"].component.includes(data.name)
+  );
 
   const { data: dataEmployee, isLoading: isLoadingEmployee } = useEmployeeListMDM({
     options: {
@@ -1443,12 +1459,16 @@ const EmployeeDetail = () => {
           </Row>
 
           <Row gap="16px">
-            <Button size="big" variant={"tertiary"} onClick={() => setShowDeleteModal(true)}>
-              Delete
-            </Button>
-            <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
-              {isLoadingUpdateEmployeeList ? "Loading..." : "Save"}
-            </Button>
+            {allowPermissionToShow?.some((el: any) => el.name === "Delete Employee List") && (
+              <Button size="big" variant={"tertiary"} onClick={() => setShowDeleteModal(true)}>
+                Delete
+              </Button>
+            )}
+            {allowPermissionToShow?.some((el: any) => el.name === "Save Employee List") && (
+              <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
+                {isLoadingUpdateEmployeeList ? "Loading..." : "Save"}
+              </Button>
+            )}
           </Row>
         </Row>
       </Card>

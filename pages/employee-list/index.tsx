@@ -1,6 +1,8 @@
 import usePagination from "@lucasmogari/react-pagination";
 import { useJobPositions } from "hooks/mdm/job-position/useJobPositon";
+import { useUserPermissions } from "hooks/user-config/usePermission";
 import { useRouter } from "next/router";
+import { permissionEmployeeList } from "permission/employee.list";
 import {
   Button,
   Col,
@@ -164,6 +166,20 @@ const EmployeeList = () => {
       },
     });
 
+  const { data: dataUserPermission } = useUserPermissions({
+    options: {
+      onSuccess: () => {},
+    },
+  });
+  console.log("dataUserPermission",dataUserPermission);
+  
+  const listPermission = dataUserPermission?.permission?.filter(
+    (filtering: any) => filtering.menu === "Employee List"
+  );
+  const allowPermissionToShow = listPermission?.filter((data: any) =>
+    permissionEmployeeList.role["Admin"].component.includes(data.name)
+  );
+
   const columns = [
     {
       title: "Employee ID",
@@ -273,20 +289,22 @@ const EmployeeList = () => {
           </Row>
 
           <Row gap="16px">
-            <Button
-              size="big"
-              variant={"tertiary"}
-              onClick={() =>
-                setShowDelete({
-                  open: true,
-                  type: "selection",
-                  data: { employeeListData: employeeListData, selectedRowKeys },
-                })
-              }
-              disabled={rowSelection.selectedRowKeys?.length === 0}
-            >
-              Delete
-            </Button>
+            {allowPermissionToShow?.some((el: any) => el.name === "Delete Employee List") && (
+              <Button
+                size="big"
+                variant={"tertiary"}
+                onClick={() =>
+                  setShowDelete({
+                    open: true,
+                    type: "selection",
+                    data: { employeeListData: employeeListData, selectedRowKeys },
+                  })
+                }
+                disabled={rowSelection.selectedRowKeys?.length === 0}
+              >
+                Delete
+              </Button>
+            )}
             <DropdownMenu
               title={"More"}
               buttonVariant={"secondary"}
@@ -341,6 +359,7 @@ const EmployeeList = () => {
                 },
               ]}
             />
+            {allowPermissionToShow?.some((el: any) => el.name === "Create Employee List") && (
             <Button
               size="big"
               variant="primary"
@@ -348,6 +367,7 @@ const EmployeeList = () => {
             >
               Create
             </Button>
+            )}
           </Row>
         </Row>
       </Card>
