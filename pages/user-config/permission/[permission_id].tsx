@@ -23,6 +23,7 @@ import {
   useDeletePartnerConfigPermissionList,
   usePartnerConfigPermissionList,
   useUpdatePartnerConfigPermissionList,
+  useUserPermissions,
 } from "../../../hooks/user-config/usePermission";
 import { useRolePermissions, useViewTypeListInfiniteList } from "../../../hooks/role/useRole";
 import { lang } from "lang";
@@ -80,6 +81,15 @@ const DetailPartnerConfigPermissionList: any = () => {
     },
     partnerConfigPermissionListId: permission_id,
   });
+	const { data: dataUserPermission } = useUserPermissions({
+		options: {
+			onSuccess: () => {},
+		},
+	});
+
+	const listPermission = dataUserPermission?.permission?.filter(
+		(filtering: any) => filtering.menu === "Permission List"
+	);
 
   const { data: dataPartnerConfigPermissionList, isLoading: isLoadingPartnerConfigPermissionList } =
     usePartnerConfigPermissionList({
@@ -205,9 +215,11 @@ const DetailPartnerConfigPermissionList: any = () => {
                 >
                   Cancel
                 </Button>
-                <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
-                  {lang[t].permissionList.primary.save}
-                </Button>
+                {listPermission?.filter((x:any) => x.viewTypes[0]?.viewType.name === "Update").length > 0 && (
+                  <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
+                    {lang[t].permissionList.primary.save}
+                  </Button>
+                )}
               </Row>
             </Row>
           </Row>
@@ -313,13 +325,15 @@ const DetailPartnerConfigPermissionList: any = () => {
 
         <Row>
           <Col>
-            <Button
-              size="big"
-              variant={"secondary"}
-              onClick={() => window.open("/user-config/approval/create", "_self")}
-            >
-              {lang[t].permissionList.secondary.createApproval}
-            </Button>
+            {listPermission?.filter((x:any) => x.viewTypes[0]?.viewType.name === "Update").length > 0 && (
+              <Button
+                size="big"
+                variant={"secondary"}
+                onClick={() => window.open("/user-config/approval/create", "_self")}
+              >
+                {lang[t].permissionList.secondary.createApproval}
+              </Button>
+            )}
           </Col>
         </Row>
 
