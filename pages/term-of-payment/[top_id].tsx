@@ -225,7 +225,7 @@ const TermOfPaymentEdit = () => {
       </Center>
     );
     
-    // console.log(listPermission?.find(permission => permission?.name === "Delete Term Of Payment"), '<<<<list')
+    // console.log(listPermission?.map((data: any) => data.name)?.includes("Delete Term Of Payment"), '<<<<list')
   return (
     <>
       <Col>
@@ -239,12 +239,12 @@ const TermOfPaymentEdit = () => {
         <Card padding="20px">
           <Row justifyContent="flex-end" alignItems="center" nowrap>
             <Row gap="16px">
-							{listPermission?.find(permission => permission?.name === "Delete Term Of Payment") && (
+							{listPermission?.map((data: any) => data.name)?.includes("Delete Term Of Payment") && (
               <Button size="big" variant={"tertiary"} onClick={() => setShowDeleteModal(true)}>
                 {lang[t].termOfPayment.tertier.delete}
               </Button>
               )}
-							{listPermission?.find(permission => permission?.name === "Update Term Of Payment") && (
+							{listPermission?.map((data: any) => data.name)?.includes("Update Term Of Payment") && (
               <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
                 {isLoadingUpdateTermOfPayment ? "Loading..." : lang[t].termOfPayment.primary.save}
               </Button>
@@ -271,7 +271,7 @@ const TermOfPaymentEdit = () => {
             <Spacer size={10} />
 
             <Row width={"150px"}>
-							{listPermission?.find(permission => permission?.name === "Create Term Of Payment") && (
+							{listPermission?.map((data: any) => data.name)?.includes("Create Term Of Payment") && (
               <Button
                 size="small"
                 variant={"tertiary"}

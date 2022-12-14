@@ -164,7 +164,7 @@ const TermOfPaymentCreate = () => {
               <Button size="big" variant={"tertiary"} onClick={() => router.back()}>
                 {lang[t].termOfPayment.tertier.cancel}
               </Button>
-							{listPermission?.find(permission => permission?.name === "Create Term Of Payment") && (
+							{listPermission?.map((data: any) => data.name)?.includes("Create Term Of Payment") && (
               <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
                 {isLoadingTermOfPayment ? "Loading..." : lang[t].termOfPayment.primary.save}
               </Button>
@@ -190,7 +190,7 @@ const TermOfPaymentCreate = () => {
             <Spacer size={10} />
 
             <Row width={"150px"}>
-							{listPermission?.find(permission => permission?.name === "Create Term Of Payment") && (
+							{listPermission?.map((data: any) => data.name)?.includes("Create Term Of Payment") && (
               <Button
                 size="small"
                 variant={"tertiary"}

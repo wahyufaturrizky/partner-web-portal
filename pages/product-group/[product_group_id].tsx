@@ -26,6 +26,7 @@ import ArrowLeft from "../../assets/icons/arrow-left.svg";
 import { ModalDeleteConfirmation } from "../../components/elements/Modal/ModalConfirmationDelete";
 import ConditionalField from "../../components/pages/ProductGroup/ConditionalField";
 import { lang } from "lang";
+import { useUserPermissions } from "hooks/user-config/useUser";
 
 const itemDefaultValue = [
   { id: 0, group: null, condition: null, value_from: "0", value_to: "0", values: "0" },
@@ -211,12 +212,24 @@ const ProductGroupDetail = () => {
     }
   }, [isLoadingProductGroup, isFetchingProductGroup, isFetchingProductBrand]);
 
+  const { data: dataUserPermission } = useUserPermissions({
+    options: {
+      onSuccess: () => {},
+    },
+  });
+
+  const listPermission = dataUserPermission?.permission?.filter(
+    (filtering: any) => filtering.menu === "Product Group"
+  );
+
   if ((isLoadingProductGroup || isFetchingProductGroup) && !isSuccessGetAllData)
     return (
       <Center>
         <Spin tip="Loading data..." />
       </Center>
     );
+
+    
 
   return (
     <>
@@ -234,11 +247,13 @@ const ProductGroupDetail = () => {
               <Button size="big" variant={"tertiary"} onClick={() => setShowDeleteModal(true)}>
                 {lang[t].productGroup.list.button.delete}
               </Button>
+							{listPermission?.map((data: any) => data.name)?.includes("Create Product Group") && (
               <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
                 {isLoadingUpdateProductGroup
                   ? "Loading..."
                   : lang[t].productGroup.detail.button.save}
               </Button>
+              )}
             </Row>
           </Row>
         </Card>

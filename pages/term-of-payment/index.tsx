@@ -45,7 +45,7 @@ const renderConfirmationText = (type: any, data: any) => {
       return data.selectedRowKeys.length > 1
         ? `Are you sure to delete ${data.selectedRowKeys.length} items ?`
         : `Are you sure to delete Term of Payment ${
-            data?.topData?.data.find((el: any) => el.key === data.selectedRowKeys[0])?.topTerm
+            data?.topData?.data.map((data: any) => data.name)?.includes(edRowKeys[0])?.topTerm
           } ?`;
     case "detail":
       return `Are you sure to delete Term of Payment ${data.topTerm} ?`;
@@ -182,7 +182,7 @@ const TermOfPayment = () => {
 
   if(listPermission){
     menuList = [
-      listPermission?.find(permission => permission?.name === "Download Template Term Of Payment") && {
+      listPermission?.map((data: any) => data.name)?.includes("Download Template Term Of Payment") && {
         key: 1,
         value: (
           <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
@@ -191,7 +191,7 @@ const TermOfPayment = () => {
           </div>
         ),
       },
-      listPermission?.find(permission => permission?.name === "Upload Term Of Payment") &&{
+      listPermission?.map((data: any) => data.name)?.includes("Upload Term Of Payment") &&{
         key: 2,
         value: (
           <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
@@ -200,7 +200,7 @@ const TermOfPayment = () => {
           </div>
         ),
       },
-      listPermission?.find(permission => permission?.name === "Download Data Term Of Payment") && {
+      listPermission?.map((data: any) => data.name)?.includes("Download Data Term Of Payment") && {
         key: 3,
         value: (
           <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
@@ -228,7 +228,7 @@ const TermOfPayment = () => {
             }}
           />
           <Row gap="16px">
-							{listPermission?.find(permission => permission?.name === "Delete Term Of Payment") && (
+							{listPermission?.map((data: any) => data.name)?.includes("Delete Term Of Payment") && (
             <Button
               size="big"
               variant={"tertiary"}
@@ -270,7 +270,7 @@ const TermOfPayment = () => {
               }}
               menuList={menuList}
             />
-							{listPermission?.find(permission => permission?.name === "Create Term Of Payment") && (
+							{listPermission?.map((data: any) => data.name)?.includes("Create Term Of Payment") && (
             <Button
               size="big"
               variant="primary"
