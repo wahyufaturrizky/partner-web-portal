@@ -160,38 +160,16 @@ const TermOfPayment = () => {
     },
   };
 
-  // const { data: dataUserPermission } = useUserPermissions({
-	// 	options: {
-	// 		onSuccess: () => {},
-	// 	},
-	// });
-  // nanti ganti sama atas
-  const { data: dataUserPermission } = usePartnerConfigPermissionLists({
-    query: {
-      limit: 10000
-    },
-    options: {
+  const { data: dataUserPermission } = useUserPermissions({
+		options: {
 			onSuccess: () => {},
 		},
 	});
 
-	// const listPermission = dataUserPermission?.permission?.filter(
-	// 	(filtering: any) => filtering.menu === "Term Of Payment"
-	// );
-  // nanti ganti sama atas
-	const listPermission = dataUserPermission?.rows?.filter(
-		(filtering: any) => filtering?.menu?.name === "Term Of Payment"
+	const listPermission = dataUserPermission?.permission?.filter(
+		(filtering: any) => filtering.menu === "Term Of Payment"
 	);
-
-	// const allowPermissionToShow = listPermission?.filter((data: any) =>
-	// 	// permissionTermOfPayment.role[dataUserPermission?.role?.name].component.includes(data.name)
-	// );
-  // nanti ganti sama atas
-	const allowPermissionToShow = listPermission?.filter((data: any) =>{
-		return permissionTermOfPayment.role["Admin"].component.includes(data.name)
-	});
-
-
+    
   const onSubmitFile = (file: any) => {
     const formData = new FormData();
     formData.append("company_id", companyCode);
@@ -202,9 +180,9 @@ const TermOfPayment = () => {
 
   let menuList: any[] = []
 
-  if(allowPermissionToShow){
+  if(listPermission){
     menuList = [
-      allowPermissionToShow?.map((data: any) => data.name)?.includes("Download Template Term Of Payment") && {
+      listPermission?.find(permission => permission?.name === "Download Template Term Of Payment") && {
         key: 1,
         value: (
           <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
@@ -213,7 +191,7 @@ const TermOfPayment = () => {
           </div>
         ),
       },
-      allowPermissionToShow?.map((data: any) => data.name)?.includes("Upload Template Term Of Payment") &&{
+      listPermission?.find(permission => permission?.name === "Upload Term Of Payment") &&{
         key: 2,
         value: (
           <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
@@ -222,7 +200,7 @@ const TermOfPayment = () => {
           </div>
         ),
       },
-      allowPermissionToShow?.map((data: any) => data.name)?.includes("Download Data Term Of Payment") && {
+      listPermission?.find(permission => permission?.name === "Download Data Term Of Payment") && {
         key: 3,
         value: (
           <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
@@ -250,7 +228,7 @@ const TermOfPayment = () => {
             }}
           />
           <Row gap="16px">
-							{allowPermissionToShow?.map((data: any) => data.name)?.includes("Delete Term Of Payment") && (
+							{listPermission?.find(permission => permission?.name === "Delete Term Of Payment") && (
             <Button
               size="big"
               variant={"tertiary"}
@@ -292,7 +270,7 @@ const TermOfPayment = () => {
               }}
               menuList={menuList}
             />
-							{allowPermissionToShow?.map((data: any) => data.name)?.includes("Create Term Of Payment") && (
+							{listPermission?.find(permission => permission?.name === "Create Term Of Payment") && (
             <Button
               size="big"
               variant="primary"

@@ -37,6 +37,7 @@ import IDR_formatter from "hooks/number-formatter/useNumberFormatter";
 import { useCompanyInfiniteLists } from "hooks/company-list/useCompany";
 import { usePartnerConfigPermissionLists } from "hooks/user-config/usePermission";
 import { permissionCalculation } from "permission/calculation";
+import { useUserPermissions } from "hooks/user-config/useUser";
 
 const downloadFile = (params: any) =>
   mdmDownloadService("/branch/download", { params }).then((res) => {
@@ -81,27 +82,15 @@ const Calculation = () => {
   const [searchCompany, setSearchCompany] = useState("");
   const debounceFetchCompany = useDebounce(searchCompany, 1000);
 
-   // const { data: dataUserPermission } = useUserPermissions({
-	// 	options: {
-	// 		onSuccess: () => {},
-	// 	},
-	// });
-  // nanti ganti sama atas
-  const { data: dataUserPermission } = usePartnerConfigPermissionLists({
-    query: {
-      limit: 10000
-    },
+   const { data: dataUserPermission } = useUserPermissions({
 		options: {
 			onSuccess: () => {},
 		},
 	});
+  console.log(dataUserPermission, '<<<<<usernya')
 
-	// const listPermission = dataUserPermission?.permission?.filter(
-	// 	(filtering: any) => filtering.menu === "Calculation"
-	// );
-  // nanti ganti sama atas
-	const listPermission = dataUserPermission?.rows?.filter(
-		(filtering: any) => filtering?.menu?.name === "Calculation"
+	const listPermission = dataUserPermission?.permission?.filter(
+		(filtering: any) => filtering.menu === "Calculation"
 	);
 
 	// const allowPermissionToShow = listPermission?.filter((data: any) =>
@@ -111,6 +100,7 @@ const Calculation = () => {
 	const allowPermissionToShow = listPermission?.filter((data: any) =>{
 		return permissionCalculation.role["Admin"].component.includes(data.name)
 	});
+
   console.log(allowPermissionToShow, '<<<<allow')
 
   const {
