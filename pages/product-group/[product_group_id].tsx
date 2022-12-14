@@ -244,9 +244,11 @@ const ProductGroupDetail = () => {
         <Card padding="20px">
           <Row justifyContent="flex-end" alignItems="center" nowrap>
             <Row gap="16px">
+							{listPermission?.map((data: any) => data.name)?.includes("Delete Product Group") && (
               <Button size="big" variant={"tertiary"} onClick={() => setShowDeleteModal(true)}>
                 {lang[t].productGroup.list.button.delete}
               </Button>
+              )}
 							{listPermission?.map((data: any) => data.name)?.includes("Create Product Group") && (
               <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
                 {isLoadingUpdateProductGroup

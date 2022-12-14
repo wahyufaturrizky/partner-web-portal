@@ -34,6 +34,7 @@ import { mdmDownloadService } from "../../../lib/client";
 import { lang } from "lang";
 import { usePartnerConfigPermissionLists } from "hooks/user-config/usePermission";
 import { permissionSalesmanGroup } from "permission/salesman-group";
+import { useUserPermissions } from "hooks/user-config/useUser";
 
 const SalesmanGroup = () => {
   const t = localStorage.getItem("lan") || "en-US";
@@ -288,43 +289,22 @@ const SalesmanGroup = () => {
     }
   };
 
-  // const { data: dataUserPermission } = useUserPermissions({
-	// 	options: {
-	// 		onSuccess: () => {},
-	// 	},
-	// });
-  // nanti ganti sama atas
-  const { data: dataUserPermission } = usePartnerConfigPermissionLists({
-    query: {
-      limit: 10000
-    },
+  const { data: dataUserPermission } = useUserPermissions({
 		options: {
 			onSuccess: () => {},
 		},
 	});
 
-	// const listPermission = dataUserPermission?.permission?.filter(
-	// 	(filtering: any) => filtering.menu === "Salesman Group"
-	// );
-  // nanti ganti sama atas
-	const listPermission = dataUserPermission?.rows?.filter(
-		(filtering: any) => filtering?.menu?.name === "Salesman Group"
+	const listPermission = dataUserPermission?.permission?.filter(
+		(filtering: any) => filtering.menu === "Salesman Group"
 	);
 
-	// const allowPermissionToShow = listPermission?.filter((data: any) =>
-	// 	// permissionSalesmanGroup.role[dataUserPermission?.role?.name].component.includes(data.name)
-	// );
-  // nanti ganti sama atas
-	const allowPermissionToShow = listPermission?.filter((data: any) =>{
-		return permissionSalesmanGroup.role["Admin"].component.includes(data.name)
-	});
-  console.log(dataUserPermission, '<<<data')
-  console.log(allowPermissionToShow, '<<<<allow')
+  console.log(dataUserPermission, '<<<<allow')
   let menuList: any[] = []
 
-  if(allowPermissionToShow){
+  if(listPermission){
     menuList = [
-      allowPermissionToShow?.map((data: any) => data.name)?.includes("Download Template Salesman Group") && {
+      listPermission?.map((data: any) => data.name)?.includes("Download Template Salesman Group") && {
         key: 1,
         value: (
           <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
@@ -333,7 +313,7 @@ const SalesmanGroup = () => {
           </div>
         ),
       },
-      allowPermissionToShow?.map((data: any) => data.name)?.includes("Upload Template Salesman Group") &&{
+      listPermission?.map((data: any) => data.name)?.includes("Upload Template Salesman Group") &&{
         key: 2,
         value: (
           <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
@@ -342,7 +322,7 @@ const SalesmanGroup = () => {
           </div>
         ),
       },
-      allowPermissionToShow?.map((data: any) => data.name)?.includes("Download Data Salesman Group") && {
+      listPermission?.map((data: any) => data.name)?.includes("Download Data Salesman Group") && {
         key: 3,
         value: (
           <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
@@ -377,7 +357,7 @@ const SalesmanGroup = () => {
             }}
           />
           <Row gap="16px">
-							{allowPermissionToShow?.map((data: any) => data.name)?.includes("Delete Salesman Group") && (
+							{listPermission?.map((data: any) => data.name)?.includes("Delete Salesman Group") && (
             <Button
               size="big"
               variant={"tertiary"}
@@ -419,7 +399,7 @@ const SalesmanGroup = () => {
               }}
               menuList={menuList}
             />
-							{allowPermissionToShow?.map((data: any) => data.name)?.includes("Create Salesman Group") && (
+							{listPermission?.map((data: any) => data.name)?.includes("Create Salesman Group") && (
             <Button
               size="big"
               variant="primary"
@@ -574,12 +554,20 @@ const SalesmanGroup = () => {
                     >
                       {lang[t].salesmanGroup.tertier.cancel}
                     </Button>
-
+							      {salesmanGroupFormData && listPermission?.map((data: any) => data.name)?.includes("Update Salesman Group") && (
                     <Button full onClick={handleSubmit(onSubmit)} variant="primary" size="big">
                       {isLoadingCreateSalesmanGroup || isLoadingUpdateSalesmanGroup
                         ? "Loading..."
                         : lang[t].salesmanGroup.primary.save}
                     </Button>
+                    )}
+							      {listPermission?.map((data: any) => data.name)?.includes("Create Salesman Group") && (
+                    <Button full onClick={handleSubmit(onSubmit)} variant="primary" size="big">
+                      {isLoadingCreateSalesmanGroup || isLoadingUpdateSalesmanGroup
+                        ? "Loading..."
+                        : lang[t].salesmanGroup.primary.save}
+                    </Button>
+                    )}
                   </div>
                 </div>
               )}
