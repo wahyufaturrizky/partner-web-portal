@@ -233,7 +233,7 @@ export const lang = {
         createApproval: "Create Approval",
       },
       searchBar: {
-        processList: "Search Proces sList Name",
+        processList: "Search Process Name",
       },
       tertier: {
         viewDetail: "View Detail",

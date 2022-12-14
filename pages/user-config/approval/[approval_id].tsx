@@ -1,4 +1,4 @@
-import Router from "next/router";
+import Router, { useRouter } from "next/router";
 import {
 	Accordion,
 	Button,
@@ -15,6 +15,7 @@ import {
 } from "pink-lava-ui";
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
+import ArrowLeft from "../../../assets/icons/arrow-left.svg";
 
 import { usePermissions } from "../../../hooks/permission/usePermission";
 import { useProcessLists } from "../../../hooks/business-process/useProcess";
@@ -26,12 +27,16 @@ import {
 	useUpdatePartnerConfigApprovalList,
 } from "../../../hooks/user-config/useApproval";
 import { lang } from "lang";
+import { usePartnerConfigPermissionLists } from "hooks/user-config/usePermission";
 
 export interface ConfigModuleList {}
 
 const DetailUserConfigApproval: any = () => {
+	const router = useRouter();
+
 	const t = localStorage.getItem("lan") || "en-US";
-	const { approval_partner_id } = Router.query;
+	const companyCode = localStorage.getItem("companyCode");
+	const { approval_id } = router.query;
 	const [dataListDropdownModul, setDataListDropdownModul] = useState(null);
 	const [modalDelete, setModalDelete] = useState({ open: false });
 	const [dataListDropdownProcess, setDataListDropdownProcess] = useState(null);
@@ -62,10 +67,9 @@ const DetailUserConfigApproval: any = () => {
 			},
 		},
 	});
-
 	const { data: dataPartnerConfigApprovalList, isLoading: isLoadingPartnerConfigApprovalList } =
 		usePartnerConfigApprovalList({
-			partner_config_approval_list_id: approval_partner_id,
+			partner_config_approval_list_id: approval_id,
 			options: {
 				onSuccess: (data: any) => {
 					setisSendEmailNotif(data?.isEmailNotification);
@@ -100,7 +104,7 @@ const DetailUserConfigApproval: any = () => {
 		mutate: mutateUpdatePartnerConfigApprovalList,
 		isLoading: isLoadingUpdatePartnerConfigApprovalList,
 	} = useUpdatePartnerConfigApprovalList({
-		partnerConfigApprovalListId: approval_partner_id,
+		partnerConfigApprovalListId: approval_id,
 		options: {
 			onSuccess: (data: any) => {
 				if (data) {
@@ -130,7 +134,15 @@ const DetailUserConfigApproval: any = () => {
 		},
 	});
 
-	const { data: fieldsPermissionList, isLoading: isLoadingFieldsPermissionList } = usePermissions({
+	// const { data: fieldsPermissionList, isLoading: isLoadingFieldsPermissionList } = usePermissions({
+	// 	options: {
+	// 		refetchOnWindowFocus: "always",
+	// 	},
+	// });
+	const { data: fieldsPermissionList, isLoading: isLoadingFieldsPermissionList } = usePartnerConfigPermissionLists({
+		query: {
+			company_id: companyCode,
+		},
 		options: {
 			refetchOnWindowFocus: "always",
 		},
@@ -152,7 +164,7 @@ const DetailUserConfigApproval: any = () => {
 				})),
 				is_email_notification: isSendEmailNotif,
 			};
-			mutateUpdatePartnerConfigApprovalList(data);
+			mutateUpdatePartnerConfigApprovalList({...data, company_id: companyCode});
 		} else {
 			window.alert(`field ${isEmptyField} must be fill!`);
 		}
@@ -215,7 +227,7 @@ const DetailUserConfigApproval: any = () => {
 		<>
 			<Col>
 				<Row gap="4px" alignItems="center">
-					
+					<ArrowLeft style={{ cursor: "pointer" }} onClick={() => Router.back()} />
 					<Text variant={"h4"}>
 						Approval Partner Detail - {dataPartnerConfigApprovalList?.name || "Unknown"}
 					</Text>
@@ -517,7 +529,7 @@ const DetailUserConfigApproval: any = () => {
 					itemTitle={Router.query.name}
 					visible={modalDelete.open}
 					onCancel={() => setModalDelete({ open: false })}
-					onOk={() => deleteApproval({ id: [Number(approval_partner_id)] })}
+					onOk={() => deleteApproval({ id: [Number(approval_id)] })}
 				/>
 			)}
 		</>

@@ -119,7 +119,6 @@ const Calculation = () => {
     isFetching: isFetchingCalculation,
   } = useCalculations({
     query: {
-      company_id: "HERMES",
       search: debounceSearch,
       page: pagination.page,
       limit: pagination.itemsPerPage,
