@@ -739,10 +739,10 @@ const CreateCompany: any = () => {
         if (data.countryId) setValue("country", data.country.refCountryId);
         if (data.industryId) setValue("industry_id", data.industryId);
         if (data.languageId) setValue("language", data.languageId);
-        if (data?.currencyFormat?.id) setValue("currency", data.currencyFormat.id)
-        if (data?.dateFormatId) setValue("formatDate", data.dateFormatId)
-        if (data?.timezoneId) setValue("timezone", data.timezoneId)
-        if (data?.numberFormatId) setValue("numberFormat", data.numberFormatId)
+        if (data?.currencyFormat?.id) setValue("currency", data.currencyFormat.format)
+        if (data?.dateFormatId) setValue("formatDate", data.dateFormat.format)
+        if (data?.timezoneId) setValue("timezone", data.timezone.name)
+        if (data?.numberFormatId) setValue("numberFormat", data.numberFormat.format)
         if (data?.coaId) setValue("coaTemplate", data.coaId)
         setLanguage(data.languageId)
       }
@@ -1252,7 +1252,9 @@ const CreateCompany: any = () => {
                       handleChange={(value) => setValue("timezone", value)}
                       onSearch={(search) => setSearchTimezone(search)}
                       error={errors?.timezone?.message}
-                      defaultValue={templateGeneralData?.timezone?.name}
+                      defaultValue={
+                        `${templateGeneralData?.timezone?.utc}
+                        ${templateGeneralData?.timezone?.name}`}
                       key={templateGeneralData?.timezone?.name}
                       {...register("timezone")}
                     />
@@ -1289,7 +1291,7 @@ const CreateCompany: any = () => {
                       placeholder={"Select"}
                       handleChange={(value) => setValue("numberFormat", value)}
                       error={errors?.numberFormat?.message}
-                      defaultValue={templateGeneralData?.numberFormat?.numberFormat}
+                      defaultValue={templateGeneralData?.numberFormat?.format}
                       key={templateGeneralData?.numberFormat?.numberFormat}
                       {...register("numberFormat")}
                       noSearch

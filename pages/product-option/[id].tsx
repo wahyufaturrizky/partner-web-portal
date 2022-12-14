@@ -52,7 +52,7 @@ const ProductOptionDetail = () => {
           router.back();
         },
       },
-      id: `KSNI/${id}`,
+      id: `${companyCode}/${id}`,
     });
 
   const { mutate: updateProductOptionItem, isLoading: isLoadingUpdateProductOptionItem }: any =
@@ -79,7 +79,6 @@ const ProductOptionDetail = () => {
       options: {
         onSuccess: () => {
           router.back();
-          queryClient.invalidateQueries(["product-option"]);
         },
       },
     });
