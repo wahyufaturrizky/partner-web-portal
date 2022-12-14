@@ -170,7 +170,7 @@ const menuConfig = [
     children: [
       {
         key: "account-group",
-        title: "Acount Group",
+        title: "Account Group",
         content: () => "Account Group",
         onClick: () => Router.push("/finance-config/account-group"),
       },
