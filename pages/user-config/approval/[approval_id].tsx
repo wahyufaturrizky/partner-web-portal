@@ -151,6 +151,7 @@ const DetailUserConfigApproval: any = () => {
   const { data: dataPartnerConfigApprovalList, isLoading: isLoadingPartnerConfigApprovalList } =
     usePartnerConfigApprovalList({
       partner_config_approval_list_id: approval_id,
+      company_id:companyCode,
       options: {
         onSuccess: (data: any) => {
           const mappingApprovalStages = data?.partnerApprovalStages?.map((el: any) => {

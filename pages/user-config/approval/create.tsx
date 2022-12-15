@@ -43,6 +43,7 @@ const CreatePartnerConfigApproval: any = () => {
     control,
     handleSubmit,
     formState: { errors },
+    setValue,
   } = useForm();
 
   const pagination = usePagination({
@@ -176,6 +177,9 @@ const CreatePartnerConfigApproval: any = () => {
           index={index}
           control={control}
           roleList={roleList}
+          handleRoleChange={() => {
+            // setValue(`associate_role_user.${index}.partner_user_id`, undefined);
+          }}
           setRoleList={(data: any) => {
             setRoleList(data);
           }}
@@ -392,6 +396,9 @@ const CreatePartnerConfigApproval: any = () => {
                         handleChange={(value: any) => {
                           onChange(value);
                           setIdPermision(Number(value));
+                          // reset
+                          // setRoleList([]);
+                          // setValue("associate_role_user", []);
                         }}
                         noSearch
                         required

@@ -34,14 +34,14 @@ function useCreatePartnerConfigApprovalList({ options }) {
   );
 }
 
-const fetchPartnerConfigApprovalList = async ({ partner_config_approval_list_id }) => {
-  return client(`/partner-approval/${partner_config_approval_list_id}`).then((data) => data);
+const fetchPartnerConfigApprovalList = async ({ partner_config_approval_list_id, company_id }) => {
+  return client(`/partner-approval/${company_id}/${partner_config_approval_list_id}`).then((data) => data);
 };
 
-const usePartnerConfigApprovalList = ({ partner_config_approval_list_id, options }) => {
+const usePartnerConfigApprovalList = ({ partner_config_approval_list_id,company_id, options }) => {
   return useQuery(
     ["partner-approval", partner_config_approval_list_id],
-    () => fetchPartnerConfigApprovalList({ partner_config_approval_list_id }),
+    () => fetchPartnerConfigApprovalList({ partner_config_approval_list_id, company_id }),
     {
       ...options,
     }
@@ -75,7 +75,7 @@ const useDeletePartnerConfigApprovalList = ({ options }) => {
 };
 
 const fetchPartnerUserApprovalList = async ({ company_id, role_id }) => {
-  return client(`/partner-approval/${company_id}/${role_id}`).then((data) => data);
+  return client(`/partner-approval/users/${company_id}/${role_id}`).then((data) => data);
 };
 
 const usePartnerUserApprovalList = ({ company_id, role_id, options }) => {

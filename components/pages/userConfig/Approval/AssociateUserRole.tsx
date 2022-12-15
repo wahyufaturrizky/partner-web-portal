@@ -1,16 +1,14 @@
-import React from "react";
+import React, { useState } from "react";
 import { Dropdown, Spin } from "pink-lava-ui";
 import styled from "styled-components";
-import { Controller, useWatch } from "react-hook-form";
+import { Controller } from "react-hook-form";
 import { usePartnerConfigPermissionList } from "hooks/user-config/usePermission";
 import { usePartnerUserApprovalList } from "hooks/user-config/useApproval";
 
-const AssociateUserRole = ({ type, control, roleList, setRoleList, index, idPermission }: any) => {
+const AssociateUserRole = ({ type, control, roleList, setRoleList, index, idPermission, handleRoleChange }: any) => {
   const companyCode = localStorage.getItem("companyCode");
-
-  const watchRoleId = useWatch({ control, name: `associate_role_user.${index}.partner_role_id` });
-
-  console.log(watchRoleId);
+  const [roleId, setRoleId] = useState<any>(undefined);
+  const [userList, setUserList] = useState([]);
 
   const { isLoading: isLoadingPartnerConfigPermissionList } = usePartnerConfigPermissionList({
     partner_config_menu_list_id: idPermission,
@@ -31,20 +29,20 @@ const AssociateUserRole = ({ type, control, roleList, setRoleList, index, idPerm
 
   const { isLoading: isLoadingPartnerUserApprovalList } = usePartnerUserApprovalList({
     company_id: companyCode,
-    role_id: watchRoleId,
+    role_id: roleId,
     options: {
       onSuccess: (data: any) => {
-        console.log(data);
-        // const mapedData = data?.associatedRole?.map((el: any) => {
-        //   return {
-        //     id: el.id,
-        //     value: el.name,
-        //   };
-        // });
+        // console.log(data);
+        const mapedData = data?.map((el: any) => {
+          return {
+            id: el.id,
+            value: el.name,
+          };
+        });
 
-        // setRoleList(mapedData);
+        setUserList(mapedData);
       },
-      enabled: !!watchRoleId,
+      enabled: !!roleId,
     },
   });
 
@@ -69,6 +67,8 @@ const AssociateUserRole = ({ type, control, roleList, setRoleList, index, idPerm
                 placeholder={"Select"}
                 handleChange={(value: any) => {
                   onChange(value);
+                  setRoleId(Number(value));
+                  handleRoleChange()
                 }}
                 noSearch
                 // error={
@@ -94,10 +94,12 @@ const AssociateUserRole = ({ type, control, roleList, setRoleList, index, idPerm
             render={({ field: { onChange }, formState: { errors } }) => (
               <Dropdown
                 width="200px"
-                items={[]}
+                items={userList}
                 placeholder={"Select"}
                 noSearch
-                handleChange={(value: any) => {}}
+                handleChange={(value: any) => {
+                  onChange(value);
+                }}
               />
             )}
           />
