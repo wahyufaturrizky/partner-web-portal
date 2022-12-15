@@ -372,7 +372,7 @@ const General = ({ type, formType }: any) => {
                         { id: "Mr.", value: "Mr." },
                         { id: "Ms.", value: "Ms." },
                       ]}
-                      handleChange={(value: any) => {
+                      onChange={(value: any) => {
                         onChange(value);
                       }}
                     />
