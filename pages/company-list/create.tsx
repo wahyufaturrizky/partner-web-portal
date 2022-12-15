@@ -465,6 +465,7 @@ const CreateCompany: any = () => {
     setValue,
     control,
     formState: { errors },
+    setError
   } = useForm({
     resolver: yupResolver(schema),
     defaultValues: defaultValue,
@@ -673,6 +674,11 @@ const CreateCompany: any = () => {
         alert("Create Success!");
         router.push("/company-list");
       },
+      onError: (error: any) => {
+       if (error?.data?.message?.includes("already exits")) {
+        setError('code', {message: error?.data?.message, type: "focus" }, { shouldFocus: true })
+       }
+      }
     },
   });  
 
