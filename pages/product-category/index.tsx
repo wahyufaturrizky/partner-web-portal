@@ -24,7 +24,6 @@ import {
 } from "hooks/mdm/product-category/useProductCategory";
 import useDebounce from "../../lib/useDebounce";
 import { useUserPermissions } from "hooks/user-config/usePermission";
-import { permissionProductCategory } from "permission/productCategory";
 
 const ProductCategory = () => {
   const companyId = localStorage.getItem("companyId");
@@ -57,10 +56,6 @@ const ProductCategory = () => {
     (filtering: any) => filtering.menu === "Product Category"
   );
 
-  const allowPermissionToShow = listPermission?.filter((data: any) =>
-    permissionProductCategory.role[dataUserPermission?.role?.name].component.includes(data.name)
-  );
-
   const columns = [
     {
       title: "Product Category ID",
@@ -74,7 +69,7 @@ const ProductCategory = () => {
       title: "Parent",
       dataIndex: "parent",
     },
-    ...(allowPermissionToShow?.some((el: any) => el.name === "View Product Category")
+    ...(listPermission?.some((el: any) => el.viewTypes[0]?.viewType.name === "View")
       ? [
           {
             title: "Action",
@@ -142,9 +137,9 @@ const ProductCategory = () => {
 
   const actDrowpdown = [
     {
-      ...(allowPermissionToShow
-        ?.map((data: any) => data.name)
-        ?.includes("Download Template Product Category") && {
+      ...(listPermission?.filter(
+        (data: any) => data.viewTypes[0]?.viewType.name === "Download Template"
+      ).length > 0 && {
         key: 1,
         value: (
           <ButtonAction onClick={() => handleDownloadFile({ with_data: "N" })}>
@@ -155,9 +150,9 @@ const ProductCategory = () => {
       }),
     },
     {
-      ...(allowPermissionToShow
-        ?.map((data: any) => data.name)
-        ?.includes("Upload Product Category") && {
+      ...(listPermission?.filter(
+        (data: any) => data.viewTypes[0]?.viewType.name === "Upload"
+      ).length > 0 && {
         key: 2,
         value: (
           <ButtonAction onClick={() => setVisible({ upload: true, delete: false })}>
@@ -168,9 +163,9 @@ const ProductCategory = () => {
       }),
     },
     {
-      ...(allowPermissionToShow
-        ?.map((data: any) => data.name)
-        ?.includes("Download Data Product Category") && {
+      ...(listPermission?.filter(
+        (data: any) => data.viewTypes[0]?.viewType.name === "Download Data"
+      ).length > 0 && {
         key: 3,
         value: (
           <ButtonAction onClick={() => handleDownloadFile({ with_data: "Y" })}>
@@ -232,9 +227,8 @@ const ProductCategory = () => {
             onChange={({ target }: any) => setSearch(target.value)}
           />
           <Row gap="16px">
-            {allowPermissionToShow
-              ?.map((data: any) => data.name)
-              ?.includes("Delete Product Category") && (
+            {listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Delete")
+            .length > 0 && (
               <Button
                 size="big"
                 variant={"tertiary"}
@@ -244,15 +238,14 @@ const ProductCategory = () => {
                 Delete
               </Button>
             )}
-            {(allowPermissionToShow
-              ?.map((data: any) => data.name)
-              ?.includes("Download Template Product Category") ||
-              allowPermissionToShow
-                ?.map((data: any) => data.name)
-                ?.includes("Download Data Product Category") ||
-              allowPermissionToShow
-                ?.map((data: any) => data.name)
-                ?.includes("Upload Product Category")) && (
+            {(listPermission?.filter(
+							(data: any) => data.viewTypes[0]?.viewType.name === "Download Template"
+						).length > 0 ||
+							listPermission?.filter(
+								(data: any) => data.viewTypes[0]?.viewType.name === "Download Data"
+							).length > 0 ||
+							listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Upload")
+								.length > 0) && (
               <DropdownMenu
                 title={"More"}
                 buttonVariant={"secondary"}
@@ -264,9 +257,8 @@ const ProductCategory = () => {
                 menuList={actDrowpdown}
               />
             )}
-            {allowPermissionToShow
-              ?.map((data: any) => data.name)
-              ?.includes("Create Product Category") && (
+            {listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Create")
+							.length > 0 && (
               <Button
                 size="big"
                 variant="primary"

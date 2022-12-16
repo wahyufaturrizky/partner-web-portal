@@ -29,10 +29,8 @@ import { mdmDownloadService } from "../../../lib/client";
 
 import DownloadSvg from "../../../assets/icons/ic-download.svg";
 import UploadSvg from "../../../assets/icons/ic-upload.svg";
-import SyncSvg from "../../../assets/icons/ic-sync.svg";
 import { lang } from "lang";
 import { useUserPermissions } from "hooks/user-config/usePermission";
-import {permissionCurrency} from "permission/currency"
 
 const downloadFile = (params: any) =>
 	mdmDownloadService("/currency/download", { params }).then((res) => {
@@ -93,10 +91,6 @@ const CountryStructureCurrency = () => {
 
 	const listPermission = dataUserPermission?.permission?.filter(
 		(filtering: any) => filtering.menu === "Currency"
-	);
-
-	const allowPermissionToShow = listPermission?.filter((data: any) =>
-		permissionCurrency.role[dataUserPermission?.role?.name].component.includes(data.name)
 	);
 
 	const {
@@ -203,7 +197,7 @@ const CountryStructureCurrency = () => {
 			title: lang[t].currency.currencyName,
 			dataIndex: "currencyName",
 		},
-		...(allowPermissionToShow?.some((el: any) => el.name === "View Currency")
+		...(listPermission?.some((el: any) => el.viewTypes[0]?.viewType.name === "View")
 		? [
 			{
 				title: lang[t].currency.currencyAction,
@@ -259,7 +253,8 @@ const CountryStructureCurrency = () => {
 						}}
 					/>
 					<Row gap="16px">
-						{allowPermissionToShow?.map((data: any) => data.name)?.includes("Delete Currency") && (
+						{listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Delete")
+							.length > 0 && (
 							<Button
 								size="big"
 								variant={"tertiary"}
@@ -275,15 +270,14 @@ const CountryStructureCurrency = () => {
 								{lang[t].currency.tertier.delete}
 							</Button>
 						)}
-						{(allowPermissionToShow
-							?.map((data: any) => data.name)
-							?.includes("Download Template Currency") ||
-							allowPermissionToShow
-								?.map((data: any) => data.name)
-								?.includes("Download Data Currency") ||
-							allowPermissionToShow
-								?.map((data: any) => data.name)
-								?.includes("Upload Currency")) && (
+						{(listPermission?.filter(
+							(data: any) => data.viewTypes[0]?.viewType.name === "Download Template"
+						).length > 0 ||
+							listPermission?.filter(
+								(data: any) => data.viewTypes[0]?.viewType.name === "Download Data"
+							).length > 0 ||
+							listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Upload")
+								.length > 0) && (
 							<DropdownMenu
 								title={lang[t].currency.secondary.more}
 								buttonVariant={"secondary"}
@@ -310,9 +304,9 @@ const CountryStructureCurrency = () => {
 								}}
 								menuList={[
 									{
-										...(allowPermissionToShow
-											?.map((data: any) => data.name)
-											?.includes("Download Template Currency") && {
+										...(listPermission?.filter(
+											(data: any) => data.viewTypes[0]?.viewType.name === "Download Template"
+										).length > 0 && {
 											key: 1,
 											value: (
 												<div style={{ display: "flex", alignItems: "center", gap: 5 }}>
@@ -323,9 +317,9 @@ const CountryStructureCurrency = () => {
 										}),
 									},
 									{
-										...(allowPermissionToShow
-											?.map((data: any) => data.name)
-											?.includes("Upload Currency") && {
+										...(listPermission?.filter(
+											(data: any) => data.viewTypes[0]?.viewType.name === "Upload"
+										).length > 0 && {
 											key: 2,
 											value: (
 												<div style={{ display: "flex", alignItems: "center", gap: 5 }}>
@@ -336,9 +330,9 @@ const CountryStructureCurrency = () => {
 										}),
 									},
 									{
-										...(allowPermissionToShow
-											?.map((data: any) => data.name)
-											?.includes("Download Data Currency") && {
+										...(listPermission?.filter(
+											(data: any) => data.viewTypes[0]?.viewType.name === "Download Data"
+										).length > 0 && {
 											key: 3,
 											value: (
 												<div style={{ display: "flex", alignItems: "center", gap: 5 }}>

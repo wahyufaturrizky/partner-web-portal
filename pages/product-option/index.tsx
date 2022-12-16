@@ -26,7 +26,6 @@ import useDebounce from "../../lib/useDebounce";
 import { queryClient } from "../_app";
 import { lang } from "lang";
 import { useUserPermissions } from "hooks/user-config/usePermission";
-import { permissionProductOption } from "permission/productOption";
 
 const downloadFile = (params: any) =>
   mdmDownloadService("/product-option/download", { params }).then((res) => {
@@ -87,10 +86,6 @@ const ProductOption = () => {
 
   const listPermission = dataUserPermission?.permission?.filter(
     (filtering: any) => filtering.menu === "Product Option"
-  );
-
-  const allowPermissionToShow = listPermission?.filter((data: any) =>
-    permissionProductOption.role[dataUserPermission?.role?.name].component.includes(data.name)
   );
 
   const {
@@ -169,7 +164,7 @@ const ProductOption = () => {
       title: "Company Id",
       dataIndex: "companyId",
     },
-    ...(allowPermissionToShow?.some((el: any) => el.name === "View Product Option")
+    ...(listPermission?.some((el: any) => el.viewTypes[0]?.viewType.name === "View")
       ? [
           {
             title: lang[t].productOption.productOptionAction,
@@ -212,9 +207,8 @@ const ProductOption = () => {
             }}
           />
           <Row gap="16px">
-            {allowPermissionToShow
-              ?.map((data: any) => data.name)
-              ?.includes("Delete Product Option") && (
+            {listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Delete")
+							.length > 0 && (
               <Button
                 size="big"
                 variant={"tertiary"}
@@ -231,15 +225,14 @@ const ProductOption = () => {
               </Button>
             )}
 
-            {(allowPermissionToShow
-              ?.map((data: any) => data.name)
-              ?.includes("Download Template Product Option") ||
-              allowPermissionToShow
-                ?.map((data: any) => data.name)
-                ?.includes("Download Data Product Option") ||
-              allowPermissionToShow
-                ?.map((data: any) => data.name)
-                ?.includes("Upload Product Option")) && (
+            {(listPermission?.filter(
+							(data: any) => data.viewTypes[0]?.viewType.name === "Download Template"
+						).length > 0 ||
+							listPermission?.filter(
+								(data: any) => data.viewTypes[0]?.viewType.name === "Download Data"
+							).length > 0 ||
+							listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Upload")
+								.length > 0) && (
               <DropdownMenu
                 title={lang[t].productOption.secondary.more}
                 buttonVariant={"secondary"}
@@ -266,9 +259,9 @@ const ProductOption = () => {
                 }}
                 menuList={[
                   {
-                    ...(allowPermissionToShow
-                      ?.map((data: any) => data.name)
-                      ?.includes("Download Template Product Option") && {
+                    ...(listPermission?.filter(
+											(data: any) => data.viewTypes[0]?.viewType.name === "Download Template"
+										).length > 0 && {
                       key: 1,
                       value: (
                         <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
@@ -281,9 +274,9 @@ const ProductOption = () => {
                     }),
                   },
                   {
-                    ...(allowPermissionToShow
-                      ?.map((data: any) => data.name)
-                      ?.includes("Upload Product Option") && {
+                    ...(listPermission?.filter(
+											(data: any) => data.viewTypes[0]?.viewType.name === "Upload"
+										).length > 0 && {
                       key: 2,
                       value: (
                         <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
@@ -296,9 +289,9 @@ const ProductOption = () => {
                     }),
                   },
                   {
-                    ...(allowPermissionToShow
-                      ?.map((data: any) => data.name)
-                      ?.includes("Download Data Product Option") && {
+                    ...(listPermission?.filter(
+											(data: any) => data.viewTypes[0]?.viewType.name === "Download Data"
+										).length > 0 && {
                       key: 3,
                       value: (
                         <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
@@ -312,9 +305,8 @@ const ProductOption = () => {
               />
             )}
 
-            {allowPermissionToShow
-              ?.map((data: any) => data.name)
-              ?.includes("Create Product Option") && (
+            {listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Create")
+							.length > 0 && (
               <Button
                 size="big"
                 variant="primary"

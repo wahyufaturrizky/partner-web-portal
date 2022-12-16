@@ -14,7 +14,6 @@ import {
 } from "hooks/mdm/product-category/useProductCategory";
 import { useCoa } from "hooks/finance-config/useCoaTemplate";
 import { useUserPermissions } from "hooks/user-config/usePermission";
-import { permissionProductCategory } from "permission/productCategory";
 
 const costingMethodData = [
   {
@@ -62,10 +61,6 @@ const UpdateProductCategory: any = () => {
 
   const listPermission = dataUserPermission?.permission?.filter(
     (filtering: any) => filtering.menu === "Product Category"
-  );
-
-  const allowPermissionToShow = listPermission?.filter((data: any) =>
-    permissionProductCategory.role[dataUserPermission?.role?.name].component.includes(data.name)
   );
 
   const { data: categoryData, isLoading: isLoadingCategoryData } = useProductCategory({
@@ -195,9 +190,8 @@ const UpdateProductCategory: any = () => {
                 Cancel
               </Button>
 
-              {allowPermissionToShow
-                ?.map((data: any) => data.name)
-                ?.includes("Update Product Category") && (
+              {listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Update")
+							.length > 0 && (
                 <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
                   Save
                 </Button>

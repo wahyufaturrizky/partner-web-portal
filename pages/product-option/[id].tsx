@@ -17,7 +17,6 @@ import { queryClient } from "../_app";
 import { ModalDeleteConfirmation } from "../../components/elements/Modal/ModalConfirmationDelete";
 import { lang } from "lang";
 import { useUserPermissions } from "hooks/user-config/usePermission";
-import { permissionProductOption } from "permission/productOption";
 
 const ProductOptionDetail = () => {
   const t = localStorage.getItem("lan") || "en-US";
@@ -43,10 +42,6 @@ const ProductOptionDetail = () => {
 
   const listPermission = dataUserPermission?.permission?.filter(
     (filtering: any) => filtering.menu === "Product Option"
-  );
-
-  const allowPermissionToShow = listPermission?.filter((data: any) =>
-    permissionProductOption.role[dataUserPermission?.role?.name].component.includes(data.name)
   );
 
   const {
@@ -193,16 +188,14 @@ const ProductOptionDetail = () => {
         <Card padding="20px">
           <Row justifyContent="flex-end" alignItems="center" nowrap>
             <Row gap="16px">
-              {allowPermissionToShow
-                ?.map((data: any) => data.name)
-                ?.includes("Delete Product Option") && (
+              {listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Delete")
+							.length > 0 && (
                 <Button size="big" variant={"tertiary"} onClick={() => setShowDeleteModal(true)}>
                   {lang[t].productOption.tertier.delete}
                 </Button>
               )}
-              {allowPermissionToShow
-                ?.map((data: any) => data.name)
-                ?.includes("Update Product Option") && (
+              {listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Update")
+							.length > 0 && (
                 <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
                   {isLoadingUpdateProductOption ? "Loading..." : lang[t].productOption.primary.save}
                 </Button>

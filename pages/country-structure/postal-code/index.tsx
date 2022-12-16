@@ -33,7 +33,7 @@ import { mdmDownloadService } from "lib/client";
 import { queryClient } from "pages/_app";
 import { lang } from "lang";
 import { useUserPermissions } from "hooks/user-config/usePermission";
-import { permissionPostalCode } from "permission/postalCode";
+
 const downloadFile = (params: any) =>
   mdmDownloadService("/postal-code/download", { params }).then((res) => {
     let dataUrl = window.URL.createObjectURL(new Blob([res.data]));
@@ -75,10 +75,6 @@ const CountryPostalCode = () => {
     (filtering: any) => filtering.menu === "Postal Code"
   );
 
-  const allowPermissionToShow = listPermission?.filter((data: any) =>
-    permissionPostalCode.role[dataUserPermission?.role?.name].component.includes(data.name)
-  );
-
   const columns = [
     {
       title: lang[t].postalCode.postalCodeID,
@@ -92,7 +88,7 @@ const CountryPostalCode = () => {
       title: lang[t].postalCode.postalCountryName,
       dataIndex: "country_name",
     },
-    ...(allowPermissionToShow?.some((el: any) => el.name === "View Postal Code")
+    ...(listPermission?.some((el: any) => el.viewTypes[0]?.viewType.name === "View")
       ? [
           {
             title: lang[t].postalCode.postalAction,
@@ -242,9 +238,7 @@ const CountryPostalCode = () => {
               )}
             </Row>
             <Row gap="16px">
-              {allowPermissionToShow
-                ?.map((data: any) => data.name)
-                ?.includes("Delete Postal Code") && (
+              {listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Delete") && (
                 <Button
                   size="big"
                   variant="tertiary"
@@ -255,15 +249,14 @@ const CountryPostalCode = () => {
                 </Button>
               )}
 
-              {(allowPermissionToShow
-                ?.map((data: any) => data.name)
-                ?.includes("Download Template Postal Code") ||
-                allowPermissionToShow
-                  ?.map((data: any) => data.name)
-                  ?.includes("Download Data Postal Code") ||
-                allowPermissionToShow
-                  ?.map((data: any) => data.name)
-                  ?.includes("Upload Postal Code")) && (
+              {(listPermission?.filter(
+					  	  (data: any) => data.viewTypes[0]?.viewType.name === "Download Template"
+					  	).length > 0 ||
+							listPermission?.filter(
+								(data: any) => data.viewTypes[0]?.viewType.name === "Download Data"
+							).length > 0 ||
+							listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Upload")
+								.length > 0) && (
                 <DropdownMenu
                   title={"More"}
                   buttonVariant={"secondary"}
@@ -290,9 +283,9 @@ const CountryPostalCode = () => {
                   }}
                   menuList={[
                     {
-                      ...(allowPermissionToShow
-                        ?.map((data: any) => data.name)
-                        ?.includes("Download Template Postal Code") && {
+                      ...(listPermission?.filter(
+                        (data: any) => data.viewTypes[0]?.viewType.name === "Download Template"
+                      ).length > 0  && {
                         key: 1,
                         value: (
                           <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
@@ -305,9 +298,9 @@ const CountryPostalCode = () => {
                       }),
                     },
                     {
-                      ...(allowPermissionToShow
-                        ?.map((data: any) => data.name)
-                        ?.includes("Upload Postal Code") && {
+                      ...(listPermission?.filter(
+                        (data: any) => data.viewTypes[0]?.viewType.name === "Upload"
+                      ).length > 0 && {
                         key: 2,
                         value: (
                           <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
@@ -318,9 +311,9 @@ const CountryPostalCode = () => {
                       }),
                     },
                     {
-                      ...(allowPermissionToShow
-                        ?.map((data: any) => data.name)
-                        ?.includes("Download Data Postal Code") && {
+                      ...(listPermission?.filter(
+                        (data: any) => data.viewTypes[0]?.viewType.name === "Download Data"
+                      ).length > 0 && {
                         key: 3,
                         value: (
                           <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
@@ -334,9 +327,8 @@ const CountryPostalCode = () => {
                 />
               )}
 
-              {allowPermissionToShow
-                ?.map((data: any) => data.name)
-                ?.includes("Create Postal Code") && (
+              {listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Create")
+							.length > 0 && (
                 <Button size="big" variant="primary" onClick={() => setModalCreate({ open: true })}>
                   {lang[t].postalCode.primary.create}
                 </Button>

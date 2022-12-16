@@ -32,7 +32,6 @@ import styled from "styled-components";
 import { COUNTRY_CODE } from "utils/country_code_constant";
 import { PHONE_CODE } from "utils/phone_code_constant";
 import { useUserPermissions } from "hooks/user-config/usePermission";
-import { permissionCountry } from "permission/country";
 
 const CreateConfig = () => {
 	const router = useRouter();
@@ -79,10 +78,6 @@ const CreateConfig = () => {
 
 	const listPermission = dataUserPermission?.permission?.filter(
 		(filtering: any) => filtering.menu === "Country"
-	);
-
-	const allowPermissionToShow = listPermission?.filter((data: any) =>
-		permissionCountry.role[dataUserPermission?.role?.name].component.includes(data.name)
 	);
 
 	const onUploadStructure = (data: any) => {
@@ -432,7 +427,8 @@ const CreateConfig = () => {
 						<Row justifyContent="flex-end" alignItems="center" nowrap>
 							<Row>
 								<Row gap="16px">
-									{allowPermissionToShow?.map((data: any) => data.name)?.includes("Delete Country") && (
+									{listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Delete")
+										.length > 0 && (
 										<Button
 											size="big"
 											variant={"tertiary"}
@@ -441,7 +437,8 @@ const CreateConfig = () => {
 											Delete
 										</Button>
 									)}
-									{allowPermissionToShow?.map((data: any) => data.name)?.includes("Update Country") && (
+									{listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Update")
+										.length > 0 && (
 										<Button disabled={errors?.name || isCountryNameFocused} size="big" variant={"primary"} onClick={onSubmit}>
 											Save
 										</Button>

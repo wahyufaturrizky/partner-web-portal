@@ -19,12 +19,10 @@ import {
 import {useDataCountries, useDeleteDataCountries, useUploadFileCountries} from '../../hooks/mdm/country-structure/useCountries'
 import DownloadSvg from "../../assets/icons/ic-download.svg";
 import UploadSvg from "../../assets/icons/ic-upload.svg";
-import SyncSvg from "../../assets/icons/ic-sync.svg";
 
 import styled from "styled-components";
 import { mdmDownloadService } from "../../lib/client";
 import { useUserPermissions } from "hooks/user-config/usePermission";
-import { permissionCountry } from "permission/country";
 
 const dropdownStyles = {cursor: "pointer", display: "flex", alignItems: "center", gap: 5}
 
@@ -55,11 +53,6 @@ const ListTemplateMenu = () => {
 		(filtering: any) => filtering.menu === "Country"
 	);
 
-	const allowPermissionToShow = listPermission?.filter((data: any) =>
-		permissionCountry.role[dataUserPermission?.role?.name].component.includes(data.name)
-	);
-
-
 	// event function
 	const columns = [
 		{
@@ -72,7 +65,7 @@ const ListTemplateMenu = () => {
 			dataIndex: "countryName",
 			key: "countryName",
 		},
-		...(allowPermissionToShow?.some((el: any) => el.name === "View Country")
+		...(listPermission?.some((el: any) => el.viewTypes[0]?.viewType.name === "View")
 		? [
 			{
 				title: "Action",
@@ -165,7 +158,8 @@ const ListTemplateMenu = () => {
 							}
 						/>
 						<Row gap="16px">
-						{allowPermissionToShow?.map((data: any) => data.name)?.includes("Delete Country") && (
+						{listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Delete")
+							.length > 0 && (
 							<Button
 								size="big"
 								variant="tertiary"
@@ -175,15 +169,14 @@ const ListTemplateMenu = () => {
 								Delete
 							</Button>
 						)}
-						{(allowPermissionToShow
-							?.map((data: any) => data.name)
-							?.includes("Download Template Country") ||
-							allowPermissionToShow
-								?.map((data: any) => data.name)
-								?.includes("Download Data Country") ||
-							allowPermissionToShow
-								?.map((data: any) => data.name)
-								?.includes("Upload Country")) && (
+						{(listPermission?.filter(
+							(data: any) => data.viewTypes[0]?.viewType.name === "Download Template"
+							).length > 0 ||
+							listPermission?.filter(
+								(data: any) => data.viewTypes[0]?.viewType.name === "Download Data"
+							).length > 0 ||
+							listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Upload")
+								.length > 0) && (
 							<DropdownMenu
 								title={"More"}
 								buttonVariant={"secondary"}
@@ -194,13 +187,13 @@ const ListTemplateMenu = () => {
 								onClick={(e: any) => {
 									switch (parseInt(e.key)) {
 										case 1:
-											downloadFile({ with_data: "N" });
+											handleDownloadFile({ with_data: "N" });
 											break;
 										case 2:
-											setShowUpload(true);
+											setVisible({ delete: false, upload: true })
 											break;
 										case 3:
-											downloadFile({ with_data: "Y" });
+											handleDownloadFile({ with_data: "Y" });
 											break;
 										case 4:
 											break;
@@ -210,9 +203,9 @@ const ListTemplateMenu = () => {
 								}}
 								menuList={[
 									{
-										...(allowPermissionToShow
-											?.map((data: any) => data.name)
-											?.includes("Download Template Country") && {
+										...(listPermission?.filter(
+											(data: any) => data.viewTypes[0]?.viewType.name === "Download Template"
+										).length > 0 && {
 											key: 1,
 											value: (
 												<div style={{ display: "flex", alignItems: "center", gap: 5 }}>
@@ -223,9 +216,9 @@ const ListTemplateMenu = () => {
 										}),
 									},
 									{
-										...(allowPermissionToShow
-											?.map((data: any) => data.name)
-											?.includes("Upload Country") && {
+										...(listPermission?.filter(
+											(data: any) => data.viewTypes[0]?.viewType.name === "Download Data"
+										).length > 0 && {
 											key: 2,
 											value: (
 												<div style={{ display: "flex", alignItems: "center", gap: 5 }}>
@@ -236,9 +229,9 @@ const ListTemplateMenu = () => {
 										}),
 									},
 									{
-										...(allowPermissionToShow
-											?.map((data: any) => data.name)
-											?.includes("Download Data Country") && {
+										...(listPermission?.filter(
+											(data: any) => data.viewTypes[0]?.viewType.name === "Upload"
+										).length > 0 && {
 											key: 3,
 											value: (
 												<div style={{ display: "flex", alignItems: "center", gap: 5 }}>
@@ -251,7 +244,8 @@ const ListTemplateMenu = () => {
 								]}
 							/>
 						)}	
-						{allowPermissionToShow?.map((data: any) => data.name)?.includes("Create Country") && (
+						{listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Create")
+							.length > 0 && (
 							<Button size="big" variant="primary" onClick={() => router.push("/country-structure/create")}>
 								Create
 							</Button>
