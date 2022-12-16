@@ -21,7 +21,6 @@ import { ICDownload, ICUpload } from "../../assets/icons";
 import { mdmDownloadService } from "../../lib/client";
 import { useRouter } from "next/router";
 import { useUserPermissions } from "hooks/user-config/usePermission";
-import { permissionUoMConversion } from "permission/uomConversion";
 
 const downloadFile = (params: any) =>
   mdmDownloadService("/uom-conversion/download", { params }).then((res) => {
@@ -80,10 +79,6 @@ const UOMConversion = () => {
 
   const listPermission = dataUserPermission?.permission?.filter(
     (filtering: any) => filtering.menu === "UoM Conversion"
-  );
-
-  const allowPermissionToShow = listPermission?.filter((data: any) =>
-    permissionUoMConversion.role[dataUserPermission?.role?.name].component.includes(data.name)
   );
 
   const {
@@ -161,7 +156,7 @@ const UOMConversion = () => {
       dataIndex: "name",
       key: 'name'
     },
-    ...(allowPermissionToShow?.some((el: any) => el.name === "View UoM Conversion")
+    ...(listPermission?.some((el: any) => el.viewTypes[0]?.viewType.name === "View")
     ? [
         {
           title: "Action",
@@ -206,9 +201,8 @@ const UOMConversion = () => {
             }}
           />
           <Row gap="16px">
-          {allowPermissionToShow
-              ?.map((data: any) => data.name)
-              ?.includes("Delete UoM Conversion") && (
+          {listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Delete")
+							.length > 0  && (
                 <Button
                 size="big"
                 variant={"tertiary"}
@@ -225,15 +219,14 @@ const UOMConversion = () => {
               </Button>
               )}
 
-          {(allowPermissionToShow
-                ?.map((data: any) => data.name)
-                ?.includes("Download Template UoM Conversion") ||
-                allowPermissionToShow
-                  ?.map((data: any) => data.name)
-                  ?.includes("Download Data UoM Conversion") ||
-                allowPermissionToShow
-                  ?.map((data: any) => data.name)
-                  ?.includes("Upload UoM Conversion")) && (
+          {(listPermission?.filter(
+							(data: any) => data.viewTypes[0]?.viewType.name === "Download Template"
+						).length > 0 ||
+							listPermission?.filter(
+								(data: any) => data.viewTypes[0]?.viewType.name === "Download Data"
+							).length > 0 ||
+							listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Upload")
+								.length > 0) && (
                     <DropdownMenu
                     title={"More"}
                     buttonVariant={"secondary"}
@@ -260,9 +253,9 @@ const UOMConversion = () => {
                     }}
                     menuList={[
                       {
-                        ...(allowPermissionToShow
-                          ?.map((data: any) => data.name)
-                          ?.includes("Download Template UoM Conversion") &&  {
+                        ...(listPermission?.filter(
+                          (data: any) => data.viewTypes[0]?.viewType.name === "Download Template"
+                        ).length > 0 &&  {
                             key: 1,
                             value: (
                               <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
@@ -273,9 +266,9 @@ const UOMConversion = () => {
                           }),
                       },
                       {
-                        ...(allowPermissionToShow
-                          ?.map((data: any) => data.name)
-                          ?.includes("Upload UoM Conversion") &&   {
+                        ...(listPermission?.filter(
+                          (data: any) => data.viewTypes[0]?.viewType.name === "Upload"
+                        ).length > 0 &&   {
                             key: 2,
                             value: (
                               <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
@@ -286,9 +279,9 @@ const UOMConversion = () => {
                           }),
                       },
                       {
-                        ...(allowPermissionToShow
-                          ?.map((data: any) => data.name)
-                          ?.includes("Download Data UoM Conversion") &&  {
+                        ...(listPermission?.filter(
+                          (data: any) => data.viewTypes[0]?.viewType.name === "Download Data"
+                        ).length > 0 &&  {
                             key: 3,
                             value: (
                               <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
@@ -302,9 +295,8 @@ const UOMConversion = () => {
                   />
                   )}
           
-              {allowPermissionToShow
-                ?.map((data: any) => data.name)
-                ?.includes("Create UoM Conversion") && (
+              {listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Create")
+							.length > 0 && (
                   <Button
                   size="big"
                   variant="primary"

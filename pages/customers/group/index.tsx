@@ -33,7 +33,6 @@ import {
 } from "../../../hooks/mdm/customers/useCustomersGroupMDM";
 import { lang } from "lang";
 import { useUserPermissions } from "hooks/user-config/usePermission";
-import { permissionCustomerGroup } from "permission/custormerGroup";
 
 const downloadFile = (params: any) =>
   mdmDownloadService("/customer-group/download", { params }).then((res) => {
@@ -101,10 +100,6 @@ const CustomerGroupMDM = () => {
 
   const listPermission = dataUserPermission?.permission?.filter(
     (filtering: any) => filtering.menu === "Customer Group"
-  );
-
-  const allowPermissionToShow = listPermission?.filter((data: any) =>
-    permissionCustomerGroup.role[dataUserPermission?.role?.name].component.includes(data.name)
   );
 
   const {
@@ -212,7 +207,7 @@ const CustomerGroupMDM = () => {
       title: "Company",
       dataIndex: "company",
     },
-    ...(allowPermissionToShow?.some((el: any) => el.name === "View Customer Group")
+    ...(listPermission?.some((el: any) => el.viewTypes[0]?.viewType.name === "View")
       ? [
           {
             title: lang[t].customerGroup.customergroupAction,
@@ -268,9 +263,8 @@ const CustomerGroupMDM = () => {
             }}
           />
           <Row gap="16px">
-            {allowPermissionToShow
-              ?.map((data: any) => data.name)
-              ?.includes("Delete Customer Group") && (
+            {listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Delete")
+							.length > 0 && (
               <Button
                 size="big"
                 variant={"tertiary"}
@@ -287,15 +281,14 @@ const CustomerGroupMDM = () => {
               </Button>
             )}
 
-            {(allowPermissionToShow
-              ?.map((data: any) => data.name)
-              ?.includes("Download Template Customer Group") ||
-              allowPermissionToShow
-                ?.map((data: any) => data.name)
-                ?.includes("Download Data Customer Group") ||
-              allowPermissionToShow
-                ?.map((data: any) => data.name)
-                ?.includes("Upload Customer Group")) && (
+            {(listPermission?.filter(
+							(data: any) => data.viewTypes[0]?.viewType.name === "Download Template"
+						).length > 0 ||
+							listPermission?.filter(
+								(data: any) => data.viewTypes[0]?.viewType.name === "Download Data"
+							).length > 0 ||
+							listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Upload")
+								.length > 0) && (
               <DropdownMenu
                 title={lang[t].customerGroup.secondary.more}
                 buttonVariant={"secondary"}
@@ -322,9 +315,9 @@ const CustomerGroupMDM = () => {
                 }}
                 menuList={[
                   {
-                    ...(allowPermissionToShow
-                      ?.map((data: any) => data.name)
-                      ?.includes("Download Template Customer Group") && {
+                    ...(listPermission?.filter(
+											(data: any) => data.viewTypes[0]?.viewType.name === "Download Template"
+										).length > 0 && {
                       key: 1,
                       value: (
                         <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
@@ -337,9 +330,9 @@ const CustomerGroupMDM = () => {
                     }),
                   },
                   {
-                    ...(allowPermissionToShow
-                      ?.map((data: any) => data.name)
-                      ?.includes("Upload Customer Group") && {
+                    ...(listPermission?.filter(
+											(data: any) => data.viewTypes[0]?.viewType.name === "Upload"
+										).length > 0 && {
                       key: 2,
                       value: (
                         <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
@@ -352,9 +345,9 @@ const CustomerGroupMDM = () => {
                     }),
                   },
                   {
-                    ...(allowPermissionToShow
-                      ?.map((data: any) => data.name)
-                      ?.includes("Download Data Customer Group") && {
+                    ...(listPermission?.filter(
+											(data: any) => data.viewTypes[0]?.viewType.name === "Download Data"
+										).length > 0 && {
                       key: 3,
                       value: (
                         <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
@@ -368,9 +361,8 @@ const CustomerGroupMDM = () => {
               />
             )}
 
-            {allowPermissionToShow
-              ?.map((data: any) => data.name)
-              ?.includes("Create Customer Group") && (
+            {listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Create")
+							.length > 0 && (
               <Button
                 size="big"
                 variant="primary"

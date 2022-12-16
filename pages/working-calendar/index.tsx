@@ -22,7 +22,6 @@ import useDebounce from "../../lib/useDebounce";
 import { queryClient } from "../_app";
 import { useRouter } from "next/router";
 import { useUserPermissions } from "hooks/user-config/usePermission";
-import { permissionWorkingCalendar } from "permission/workingCalendar";
 
 const renderConfirmationText = (type: any, data: any) => {
   switch (type) {
@@ -71,10 +70,6 @@ const WorkingCalendar = () => {
 
   const listPermission = dataUserPermission?.permission?.filter(
     (filtering: any) => filtering.menu === "Working Calendar"
-  );
-
-  const allowPermissionToShow = listPermission?.filter((data: any) =>
-    permissionWorkingCalendar.role[dataUserPermission?.role?.name].component.includes(data.name)
   );
 
   const { mutate: updateWorkingCalendar, isLoading: isLoadingUpdateWorkingCalendar } =
@@ -184,7 +179,7 @@ const WorkingCalendar = () => {
       title: "Active",
       dataIndex: "active",
     },
-    ...(allowPermissionToShow?.some((el: any) => el.name === "View Working Calendar")
+    ...(listPermission?.some((el: any) => el.viewTypes[0]?.viewType.name === "View")
       ? [
           {
             title: "Action",
@@ -228,9 +223,8 @@ const WorkingCalendar = () => {
             }}
           />
           <Row gap="16px">
-            {allowPermissionToShow
-              ?.map((data: any) => data.name)
-              ?.includes("Delete Working Calendar") && (
+            {listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Delete")
+							.length > 0 && (
               <Button
                 size="big"
                 variant={"tertiary"}
@@ -247,9 +241,8 @@ const WorkingCalendar = () => {
               </Button>
             )}
 
-            {allowPermissionToShow
-              ?.map((data: any) => data.name)
-              ?.includes("Create Working Calendar") && (
+            {listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Create")
+							.length > 0 && (
               <Button
                 size="big"
                 variant="primary"

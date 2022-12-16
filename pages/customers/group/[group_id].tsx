@@ -24,7 +24,6 @@ import {
   useUpdateCustomerGroupMDM,
 } from "../../../hooks/mdm/customers/useCustomersGroupMDM";
 import { useUserPermissions } from "hooks/user-config/usePermission";
-import { permissionCustomerGroup } from "permission/custormerGroup";
 
 const CustomerGroupDetail = () => {
   const router = useRouter();
@@ -46,10 +45,6 @@ const CustomerGroupDetail = () => {
 
   const listPermission = dataUserPermission?.permission?.filter(
     (filtering: any) => filtering.menu === "Customer Group"
-  );
-
-  const allowPermissionToShow = listPermission?.filter((data: any) =>
-    permissionCustomerGroup.role[dataUserPermission?.role?.name].component.includes(data.name)
   );
 
   const {
@@ -164,16 +159,14 @@ const CustomerGroupDetail = () => {
         <Card padding="20px">
           <Row justifyContent="flex-end" alignItems="center" nowrap>
             <Row gap="16px">
-              {allowPermissionToShow
-                ?.map((data: any) => data.name)
-                ?.includes("Delete Customer Group") && (
+              {listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Delete")
+							.length > 0 && (
                 <Button size="big" variant={"tertiary"} onClick={() => setShowDeleteModal(true)}>
                   Delete
                 </Button>
               )}
-              {allowPermissionToShow
-                ?.map((data: any) => data.name)
-                ?.includes("Update Customer Group") && (
+              {listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Update")
+							.length > 0 && (
                 <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
                   {isLoadingUpdateCreateCustomerGroup ? "Loading..." : "Save"}
                 </Button>

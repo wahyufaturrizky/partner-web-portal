@@ -22,7 +22,6 @@ import ArrowLeft from "../../assets/icons/arrow-left.svg";
 import { ModalDeleteConfirmation } from "components/elements/Modal/ModalConfirmationDelete";
 import moment from "moment";
 import { useUserPermissions } from "hooks/user-config/usePermission";
-import { permissionWorkingCalendar } from "permission/workingCalendar";
 
 const WorldSvg = () => <ICWorld />;
 
@@ -79,10 +78,6 @@ const WorkingCalendarCreate = () => {
 
   const listPermission = dataUserPermission?.permission?.filter(
     (filtering: any) => filtering.menu === "Postal Code"
-  );
-
-  const allowPermissionToShow = listPermission?.filter((data: any) =>
-    permissionWorkingCalendar.role[dataUserPermission?.role?.name].component.includes(data.name)
   );
 
   const {
@@ -181,9 +176,8 @@ const WorkingCalendarCreate = () => {
         <Card>
           <Row justifyContent="flex-end" alignItems="center" nowrap>
             <Row gap="16px">
-              {allowPermissionToShow
-                ?.map((data: any) => data.name)
-                ?.includes("Delete Working Calendar") && (
+              {listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Delete")
+                .length > 0 && (
                 <Button size="big" variant={"tertiary"} onClick={() => setShowDeleteModal(true)}>
                   Delete
                 </Button>
@@ -198,9 +192,8 @@ const WorkingCalendarCreate = () => {
               >
                 Preview Calendar
               </Button>
-              {allowPermissionToShow
-                ?.map((data: any) => data.name)
-                ?.includes("Update Working Calendar") && (
+              {listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Update")
+                .length > 0 && (
                 <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
                   {isLoadingUpdateWorkingCalendar ? "Loading..." : "Save"}
                 </Button>

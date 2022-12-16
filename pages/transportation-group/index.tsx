@@ -95,10 +95,6 @@ const TransportationGroup = () => {
     (filtering: any) => filtering.menu === "Transportation Group"
   );
 
-  const allowPermissionToShow = listPermission?.filter((data: any) =>
-    permissionTransportationGroup.role[dataUserPermission?.role?.name].component.includes(data.name)
-  );
-
   const {
     data: transportationsData,
     isLoading: isLoadingTransportations,
@@ -212,7 +208,7 @@ const TransportationGroup = () => {
       title: "Weight",
       dataIndex: "transportationWeight",
     },
-    ...(allowPermissionToShow?.some((el: any) => el.name === "View Transportation Group")
+    ...(listPermission?.some((el: any) => el.viewTypes[0]?.viewType.name === "View")
       ? [
           {
             title: "Action",
@@ -277,9 +273,8 @@ const TransportationGroup = () => {
             }}
           />
           <Row gap="16px">
-            {allowPermissionToShow
-              ?.map((data: any) => data.name)
-              ?.includes("Delete Transportation Group") && (
+            {listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Delete")
+              .length > 0 && (
               <Button
                 size="big"
                 variant={"tertiary"}
@@ -296,15 +291,14 @@ const TransportationGroup = () => {
               </Button>
             )}
 
-            {(allowPermissionToShow
-              ?.map((data: any) => data.name)
-              ?.includes("Download Template Postal Code") ||
-              allowPermissionToShow
-                ?.map((data: any) => data.name)
-                ?.includes("Download Data Postal Code") ||
-              allowPermissionToShow
-                ?.map((data: any) => data.name)
-                ?.includes("Upload Postal Code")) && (
+            {(listPermission?.filter(
+              (data: any) => data.viewTypes[0]?.viewType.name === "Download Template"
+            ).length > 0 ||
+              listPermission?.filter(
+                (data: any) => data.viewTypes[0]?.viewType.name === "Download Data"
+              ).length > 0 ||
+              listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Upload")
+                .length > 0) && (
               <DropdownMenu
                 title={"More"}
                 buttonVariant={"secondary"}
@@ -331,9 +325,9 @@ const TransportationGroup = () => {
                 }}
                 menuList={[
                   {
-                    ...(allowPermissionToShow
-                      ?.map((data: any) => data.name)
-                      ?.includes("Download Template Transportation Group") && {
+                    ...(listPermission?.filter(
+                      (data: any) => data.viewTypes[0]?.viewType.name === "Download Template"
+                    ).length > 0 && {
                       key: 1,
                       value: (
                         <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
@@ -344,9 +338,9 @@ const TransportationGroup = () => {
                     }),
                   },
                   {
-                    ...(allowPermissionToShow
-                      ?.map((data: any) => data.name)
-                      ?.includes("Upload Transportation Group") && {
+                    ...(listPermission?.filter(
+                      (data: any) => data.viewTypes[0]?.viewType.name === "Upload"
+                    ).length > 0 && {
                       key: 2,
                       value: (
                         <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
@@ -357,9 +351,9 @@ const TransportationGroup = () => {
                     }),
                   },
                   {
-                    ...(allowPermissionToShow
-                      ?.map((data: any) => data.name)
-                      ?.includes("Download Data Transportation Group") && {
+                    ...(listPermission?.filter(
+                      (data: any) => data.viewTypes[0]?.viewType.name === "Download Data"
+                    ).length > 0 && {
                       key: 3,
                       value: (
                         <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
@@ -373,9 +367,8 @@ const TransportationGroup = () => {
               />
             )}
 
-            {allowPermissionToShow
-              ?.map((data: any) => data.name)
-              ?.includes("Create Transportation Group") && (
+            {listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Create")
+              .length > 0 && (
               <Button
                 size="big"
                 variant="primary"

@@ -203,6 +203,7 @@ export default function PageCreateCustomer() {
     zoneLabel: lang[t].customer.tertier.zoneLabel,
     postalCodeLabel: lang[t].customer.tertier.postalCodeLabel,
     longitudeLabel: lang[t].customer.tertier.longitudeLabel,
+    type:"create"
   };
 
   return <CreateCustomers {...propsDropdownField} />;

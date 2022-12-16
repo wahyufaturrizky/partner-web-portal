@@ -28,7 +28,7 @@ import { useForm } from "react-hook-form";
 import { ICDownload, ICUpload } from "../../assets/icons";
 import { mdmDownloadService } from "../../lib/client";
 import { lang } from "lang";
-import { permissionJobLevel } from "permission/jobLevel";
+import { useUserPermissions } from "hooks/user-config/usePermission";
 
 const JobPosition = () => {
   const t = localStorage.getItem("lan") || "en-US";
@@ -64,10 +64,6 @@ const JobPosition = () => {
 
   const listPermission = dataUserPermission?.permission?.filter(
     (filtering: any) => filtering.menu === "Job Level"
-  );
-
-  const allowPermissionToShow = listPermission?.filter((data: any) =>
-    permissionJobLevel.role[dataUserPermission?.role?.name].component.includes(data.name)
   );
 
   const downloadFile = (params: any) =>
@@ -187,7 +183,7 @@ const JobPosition = () => {
       title: lang[t].jobLevel.jobLevelName,
       dataIndex: "name",
     },
-    ...(allowPermissionToShow?.some((el: any) => el.name === "View Job Level")
+    ...(listPermission?.some((el: any) => el.viewTypes[0]?.viewType.name === "View")
       ? [
           {
             title: lang[t].jobLevel.action,
@@ -248,7 +244,8 @@ const JobPosition = () => {
             }}
           />
           <Row gap="16px">
-            {allowPermissionToShow?.map((data: any) => data.name)?.includes("Delete Job Level") && (
+            {listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Delete")
+							.length > 0 && (
               <Button
                 size="big"
                 variant={"tertiary"}
@@ -265,15 +262,14 @@ const JobPosition = () => {
               </Button>
             )}
 
-            {(allowPermissionToShow
-              ?.map((data: any) => data.name)
-              ?.includes("Download Template Job Level") ||
-              allowPermissionToShow
-                ?.map((data: any) => data.name)
-                ?.includes("Download Data Job Level") ||
-              allowPermissionToShow
-                ?.map((data: any) => data.name)
-                ?.includes("Upload Job Level")) && (
+            {(listPermission?.filter(
+							(data: any) => data.viewTypes[0]?.viewType.name === "Download Template"
+						).length > 0 ||
+							listPermission?.filter(
+								(data: any) => data.viewTypes[0]?.viewType.name === "Download Data"
+							).length > 0 ||
+							listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Upload")
+								.length > 0) && (
               <DropdownMenu
                 title={"More"}
                 buttonVariant={"secondary"}
@@ -300,9 +296,9 @@ const JobPosition = () => {
                 }}
                 menuList={[
                   {
-                    ...(allowPermissionToShow
-                      ?.map((data: any) => data.name)
-                      ?.includes("Download Template Job Level") && {
+                    ...(listPermission?.filter(
+											(data: any) => data.viewTypes[0]?.viewType.name === "Download Template"
+										).length > 0 && {
                       key: 1,
                       value: (
                         <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
@@ -313,9 +309,9 @@ const JobPosition = () => {
                     }),
                   },
                   {
-                    ...(allowPermissionToShow
-                      ?.map((data: any) => data.name)
-                      ?.includes("Upload Job Level") && {
+                    ...(listPermission?.filter(
+											(data: any) => data.viewTypes[0]?.viewType.name === "Upload"
+										).length > 0 && {
                       key: 2,
                       value: (
                         <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
@@ -326,9 +322,9 @@ const JobPosition = () => {
                     }),
                   },
                   {
-                    ...(allowPermissionToShow
-                      ?.map((data: any) => data.name)
-                      ?.includes("Download Data Job Level") && {
+                    ...(listPermission?.filter(
+											(data: any) => data.viewTypes[0]?.viewType.name === "Download Data"
+										).length > 0 && {
                       key: 3,
                       value: (
                         <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
@@ -342,7 +338,8 @@ const JobPosition = () => {
               />
             )}
 
-            {allowPermissionToShow?.map((data: any) => data.name)?.includes("Create Job Level") && (
+            {listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Create")
+							.length > 0 && (
               <Button
                 size="big"
                 variant="primary"

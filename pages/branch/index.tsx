@@ -25,7 +25,6 @@ import { ICDownload, ICUpload } from "../../assets/icons";
 import { mdmDownloadService } from "../../lib/client";
 import { useRouter } from "next/router";
 import { useUserPermissions } from "hooks/user-config/usePermission";
-import { permissionBranch } from "permission/branch";
 
 const downloadFile = (params: any) =>
   mdmDownloadService("/branch/download", { params }).then((res) => {
@@ -84,10 +83,6 @@ const Branch = () => {
 
   const listPermission = dataUserPermission?.permission?.filter(
     (filtering: any) => filtering.menu === "Branch"
-  );
-
-  const allowPermissionToShow = listPermission?.filter((data: any) =>
-    permissionBranch.role[dataUserPermission?.role?.name].component.includes(data.name)
   );
 
   const {
@@ -160,7 +155,7 @@ const Branch = () => {
       title: "Branch Name",
       dataIndex: "branchName",
     },
-    ...(allowPermissionToShow?.some((el: any) => el.name === "View Branch")
+    ...(listPermission?.some((el: any) => el.viewTypes[0]?.viewType.name === "View")
       ? [
           {
             title: "Action",
@@ -203,7 +198,8 @@ const Branch = () => {
             }}
           />
           <Row gap="16px">
-            {allowPermissionToShow?.map((data: any) => data.name)?.includes("Delete Branch") && (
+            {listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Delete")
+							.length > 0 && (
               <Button
                 size="big"
                 variant={"tertiary"}
@@ -220,13 +216,14 @@ const Branch = () => {
               </Button>
             )}
 
-            {(allowPermissionToShow
-              ?.map((data: any) => data.name)
-              ?.includes("Download Template Branch") ||
-              allowPermissionToShow
-                ?.map((data: any) => data.name)
-                ?.includes("Download Data Branch") ||
-              allowPermissionToShow?.map((data: any) => data.name)?.includes("Upload Branch")) && (
+            {(listPermission?.filter(
+							(data: any) => data.viewTypes[0]?.viewType.name === "Download Template"
+						).length > 0 ||
+							listPermission?.filter(
+								(data: any) => data.viewTypes[0]?.viewType.name === "Download Data"
+							).length > 0 ||
+							listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Upload")
+								.length > 0) && (
               <DropdownMenu
                 title={"More"}
                 buttonVariant={"secondary"}
@@ -253,9 +250,9 @@ const Branch = () => {
                 }}
                 menuList={[
                   {
-                    ...(allowPermissionToShow
-                      ?.map((data: any) => data.name)
-                      ?.includes("Download Template Branch") && {
+                    ...(listPermission?.filter(
+											(data: any) => data.viewTypes[0]?.viewType.name === "Download Template"
+										).length > 0 && {
                       key: 1,
                       value: (
                         <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
@@ -266,9 +263,9 @@ const Branch = () => {
                     }),
                   },
                   {
-                    ...(allowPermissionToShow
-                      ?.map((data: any) => data.name)
-                      ?.includes("Upload Branch") && {
+                    ...(listPermission?.filter(
+											(data: any) => data.viewTypes[0]?.viewType.name === "Upload"
+										).length > 0 && {
                       key: 2,
                       value: (
                         <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
@@ -279,9 +276,9 @@ const Branch = () => {
                     }),
                   },
                   {
-                    ...(allowPermissionToShow
-                      ?.map((data: any) => data.name)
-                      ?.includes("Download Data Branch") && {
+                    ...(listPermission?.filter(
+											(data: any) => data.viewTypes[0]?.viewType.name === "Download Data"
+										).length > 0 && {
                       key: 3,
                       value: (
                         <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
@@ -295,7 +292,8 @@ const Branch = () => {
               />
             )}
 
-            {allowPermissionToShow?.map((data: any) => data.name)?.includes("Create Branch") && (
+            {listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Create")
+							.length > 0 && (
               <Button size="big" variant="primary" onClick={() => router.push("/branch/create")}>
                 Create
               </Button>

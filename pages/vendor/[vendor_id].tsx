@@ -30,7 +30,6 @@ import ArrowLeft from "assets/icons/arrow-left.svg";
 import { VendorContext } from "context/VendorContext";
 import { ModalDeleteConfirmation } from "components/elements/Modal/ModalConfirmationDelete";
 import { useUserPermissions } from "hooks/user-config/usePermission";
-import { permissionVendor } from "permission/vendor";
 
 const listTabItems = [
   { title: "Contacts" },
@@ -92,10 +91,6 @@ export default function VendorDetail() {
 
   const listPermission = dataUserPermission?.permission?.filter(
     (filtering: any) => filtering.menu === "Vendor"
-  );
-
-  const allowPermissionToShow = listPermission?.filter((data: any) =>
-    permissionVendor.role[dataUserPermission?.role?.name].component.includes(data.name)
   );
 
   const watchCustomerId = useWatch({
@@ -400,7 +395,8 @@ export default function VendorDetail() {
             />
 
             <Row gap="16px">
-              {allowPermissionToShow?.map((data: any) => data.name)?.includes("Delete Vendor") && (
+              {listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Delete")
+							.length > 0 && (
                 <Button
                   size="big"
                   variant={"tertiary"}
@@ -422,7 +418,8 @@ export default function VendorDetail() {
               >
                 {isLoadingConvertCustomer ? "Loading..." : " Convert to Customer"}
               </Button>
-              {allowPermissionToShow?.map((data: any) => data.name)?.includes("Update Vendor") && (
+              {listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Update")
+							.length > 0 && (
                 <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
                   {isLoadingUpdateVendor ? "Loading..." : "Save"}
                 </Button>

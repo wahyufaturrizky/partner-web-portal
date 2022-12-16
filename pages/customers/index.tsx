@@ -4,7 +4,6 @@ import { lang } from "lang";
 import { mdmDownloadService } from "lib/client";
 import { useRouter } from "next/router";
 import { queryClient } from "pages/_app";
-import { permissionCustomer } from "permission/customer";
 import {
   Button,
   Col,
@@ -62,10 +61,6 @@ export default function Customer() {
     (filtering: any) => filtering.menu === "Customer"
   );
 
-  const allowPermissionToShow = listPermission?.filter((data: any) =>
-    permissionCustomer.role[dataUserPermission?.role?.name].component.includes(data.name)
-  );
-
   const columns = [
     {
       title: lang[t].customer.customerId,
@@ -83,7 +78,7 @@ export default function Customer() {
       title: lang[t].customer.salesman,
       dataIndex: "salesman",
     },
-    ...(allowPermissionToShow?.some((el: any) => el.name === "View Customer")
+    ...(listPermission?.some((el: any) => el.viewTypes[0]?.viewType.name === "View")
       ? [
           {
             title: lang[t].customer.action,
@@ -147,9 +142,9 @@ export default function Customer() {
 
   const actDrowpdown = [
     {
-      ...(allowPermissionToShow
-        ?.map((data: any) => data.name)
-        ?.includes("Download Template Customer") && {
+      ...(listPermission?.filter(
+        (data: any) => data.viewTypes[0]?.viewType.name === "Download Template"
+      ).length > 0 && {
         key: 1,
         value: (
           <ButtonAction>
@@ -160,7 +155,9 @@ export default function Customer() {
       }),
     },
     {
-      ...(allowPermissionToShow?.map((data: any) => data.name)?.includes("Upload Customer") && {
+      ...(listPermission?.filter(
+        (data: any) => data.viewTypes[0]?.viewType.name === "Upload"
+      ).length > 0 && {
         key: 2,
         value: (
           <ButtonAction disabled>
@@ -171,9 +168,9 @@ export default function Customer() {
       }),
     },
     {
-      ...(allowPermissionToShow
-        ?.map((data: any) => data.name)
-        ?.includes("Download Data Customer") && {
+      ...(listPermission?.filter(
+        (data: any) => data.viewTypes[0]?.viewType.name === "Download Data"
+      ).length > 0 && {
         key: 3,
         value: (
           <ButtonAction>
@@ -222,9 +219,9 @@ export default function Customer() {
             onChange={({ target }: any) => setSearch(target.value)}
           />
           <Row gap="16px">
-            {allowPermissionToShow
-              ?.map((data: any) => data.name)
-              ?.includes("Delete Postal Code") && (
+            {listPermission?.filter(
+											(data: any) => data.viewTypes[0]?.viewType.name === "Delete"
+										).length > 0 && (
               <Button
                 size="big"
                 variant={"tertiary"}
@@ -235,15 +232,14 @@ export default function Customer() {
               </Button>
             )}
 
-            {(allowPermissionToShow
-              ?.map((data: any) => data.name)
-              ?.includes("Download Template Customer") ||
-              allowPermissionToShow
-                ?.map((data: any) => data.name)
-                ?.includes("Download Data Customer") ||
-              allowPermissionToShow
-                ?.map((data: any) => data.name)
-                ?.includes("Upload Customer")) && (
+            {(listPermission?.filter(
+							(data: any) => data.viewTypes[0]?.viewType.name === "Download Template"
+						).length > 0 ||
+							listPermission?.filter(
+								(data: any) => data.viewTypes[0]?.viewType.name === "Download Data"
+							).length > 0 ||
+							listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Upload")
+								.length > 0) && (
               <DropdownMenu
                 title={lang[t].customer.tertier.more}
                 buttonVariant={"secondary"}
@@ -269,7 +265,8 @@ export default function Customer() {
                 menuList={actDrowpdown}
               />
             )}
-            {allowPermissionToShow?.map((data: any) => data.name)?.includes("Create Customer") && (
+            {listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Create")
+							.length > 0 && (
               <Button size="big" variant="primary" onClick={() => router.push("/customers/create")}>
                 {lang[t].customer.primary.create}
               </Button>

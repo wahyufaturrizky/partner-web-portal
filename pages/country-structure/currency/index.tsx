@@ -345,7 +345,8 @@ const CountryStructureCurrency = () => {
 								]}
 							/>
 						)}
-						{allowPermissionToShow?.map((data: any) => data.name)?.includes("Create Currency") && (
+						{listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Create")
+							.length > 0 && (
 							<Button
 								size="big"
 								variant="primary"

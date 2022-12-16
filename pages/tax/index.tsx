@@ -22,7 +22,6 @@ import { ICDownload, ICUpload } from "../../assets/icons";
 import { mdmDownloadService } from "../../lib/client";
 import { useRouter } from "next/router";
 import { useUserPermissions } from "hooks/user-config/usePermission";
-import { permissionTax } from "permission/tax";
 
 interface TaxTable { 
   key: string; 
@@ -84,10 +83,6 @@ const Tax = () => {
     (filtering: any) => filtering.menu === "Tax"
   );
 
-  const allowPermissionToShow = listPermission?.filter((data: any) =>
-    permissionTax.role[dataUserPermission?.role?.name].component.includes(data.name)
-  );
-
   const columns = [
     {
       title: "Tax ID",
@@ -99,7 +94,7 @@ const Tax = () => {
       dataIndex: "taxCountryName",
       key: 'taxCountryName'
     },
-    ...(allowPermissionToShow?.some((el: any) => el.name === "View Tax")
+    ...(listPermission?.some((el: any) => el.viewTypes[0]?.viewType.name === "View")
     ? [
         {
           title: "Action",
@@ -197,15 +192,14 @@ const Tax = () => {
             onChange={(e: any) => {setSearch(e.target.value)}}
           />
           <Row gap="16px">
-          {(allowPermissionToShow
-              ?.map((data: any) => data.name)
-              ?.includes("Download Template Tax") ||
-              allowPermissionToShow
-                ?.map((data: any) => data.name)
-                ?.includes("Download Data Tax") ||
-              allowPermissionToShow
-                ?.map((data: any) => data.name)
-                ?.includes("Upload Tax")) && (
+          {(listPermission?.filter(
+							(data: any) => data.viewTypes[0]?.viewType.name === "Download Template"
+						).length > 0 ||
+							listPermission?.filter(
+								(data: any) => data.viewTypes[0]?.viewType.name === "Download Data"
+							).length > 0 ||
+							listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Upload")
+								.length > 0) && (
                       <DropdownMenu
                       title={"More"}
                       buttonVariant={"secondary"}
@@ -232,9 +226,9 @@ const Tax = () => {
                       }}
                       menuList={[
                         {
-                          ...(allowPermissionToShow
-                            ?.map((data: any) => data.name)
-                            ?.includes("Download Template Tax") &&    {
+                          ...(listPermission?.filter(
+                            (data: any) => data.viewTypes[0]?.viewType.name === "Download Template"
+                          ).length > 0 && {
                               key: 1,
                               value: (
                                 <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
@@ -245,9 +239,9 @@ const Tax = () => {
                             }),
                         },
                         {
-                          ...(allowPermissionToShow
-                            ?.map((data: any) => data.name)
-                            ?.includes("Upload Tax") &&   {
+                          ...(listPermission?.filter(
+                            (data: any) => data.viewTypes[0]?.viewType.name === "Upload"
+                          ).length > 0 &&   {
                               key: 2,
                               value: (
                                 <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
@@ -258,9 +252,9 @@ const Tax = () => {
                             }),
                         },
                         {
-                        ...(allowPermissionToShow
-                          ?.map((data: any) => data.name)
-                          ?.includes("Download Data Tax") &&   {
+                        ...(listPermission?.filter(
+                          (data: any) => data.viewTypes[0]?.viewType.name === "Download Data"
+                        ).length > 0 &&   {
                             key: 3,
                             value: (
                               <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
@@ -273,7 +267,6 @@ const Tax = () => {
                       ]}
                     />
                   )}
-           
           </Row>
         </Row>
       </Card>

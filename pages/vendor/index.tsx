@@ -25,7 +25,6 @@ import { ModalDeleteConfirmation } from "components/elements/Modal/ModalConfirma
 import ModalVendorGroup from "components/elements/Modal/ModalVendorGroup";
 import Icon from "@ant-design/icons";
 import { useUserPermissions } from "hooks/user-config/usePermission";
-import { permissionVendor } from "permission/vendor";
 
 const PackageSvg = () => <ICPackage />;
 
@@ -68,10 +67,6 @@ export default function Vendor() {
 
   const listPermission = dataUserPermission?.permission?.filter(
     (filtering: any) => filtering.menu === "Vendor"
-  );
-
-  const allowPermissionToShow = listPermission?.filter((data: any) =>
-    permissionVendor.role[dataUserPermission?.role?.name].component.includes(data.name)
   );
 
   const {
@@ -166,7 +161,7 @@ export default function Vendor() {
         );
       },
     },
-    ...(allowPermissionToShow?.some((el: any) => el.name === "View Vendor")
+    ...(listPermission?.some((el: any) => el.viewTypes[0]?.viewType.name === "View")
       ? [
           {
             title: "Action",
@@ -208,7 +203,8 @@ export default function Vendor() {
             }}
           />
           <Row gap="16px">
-            {allowPermissionToShow?.map((data: any) => data.name)?.includes("Delete Vendor") && (
+            {listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Delete")
+              .length > 0 && (
               <Button
                 size="big"
                 variant={"tertiary"}
@@ -219,94 +215,89 @@ export default function Vendor() {
               </Button>
             )}
 
-            {(allowPermissionToShow
-              ?.map((data: any) => data.name)
-              ?.includes("Download Template Vendor") ||
-              allowPermissionToShow
-                ?.map((data: any) => data.name)
-                ?.includes("Download Data Vendor") ||
-              allowPermissionToShow?.map((data: any) => data.name)?.includes("Upload Vendor")) && (
-              <DropdownMenu
-                title={"More"}
-                buttonVariant={"secondary"}
-                buttonSize={"big"}
-                textVariant={"button"}
-                textColor={"pink.regular"}
-                iconStyle={{ fontSize: "12px" }}
-                onClick={(e: any) => {
-                  switch (parseInt(e.key)) {
-                    case 1:
-                      downloadFile({ with_data: "N" });
-                      break;
-                    case 2:
-                      setShowUpload(true);
-                      break;
-                    case 3:
-                      downloadFile({ with_data: "Y" });
-                      break;
-                    case 4:
-                      setShowVendorGroup(true);
-                      break;
-                    default:
-                      break;
-                  }
-                }}
-                menuList={[
-                  {
-                    ...(allowPermissionToShow
-                      ?.map((data: any) => data.name)
-                      ?.includes("Download Template Vendor") && {
-                      key: 1,
-                      value: (
-                        <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                          <ICDownload />
-                          <p style={{ margin: "0" }}>Download Template</p>
-                        </div>
-                      ),
-                    }),
-                  },
-                  {
-                    ...(allowPermissionToShow
-                      ?.map((data: any) => data.name)
-                      ?.includes("Upload Vendor") && {
-                      key: 2,
-                      value: (
-                        <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                          <ICUpload />
-                          <p style={{ margin: "0" }}>Upload Template</p>
-                        </div>
-                      ),
-                    }),
-                  },
-                  {
-                    ...(allowPermissionToShow
-                      ?.map((data: any) => data.name)
-                      ?.includes("Download Data Vendor") && {
-                      key: 3,
-                      value: (
-                        <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                          <ICDownload />
-                          <p style={{ margin: "0" }}>Download Data</p>
-                        </div>
-                      ),
-                    }),
-                  },
-                  {
-                    key: 4,
+            <DropdownMenu
+              title={"More"}
+              buttonVariant={"secondary"}
+              buttonSize={"big"}
+              textVariant={"button"}
+              textColor={"pink.regular"}
+              iconStyle={{ fontSize: "12px" }}
+              onClick={(e: any) => {
+                switch (parseInt(e.key)) {
+                  case 1:
+                    downloadFile({ with_data: "N" });
+                    break;
+                  case 2:
+                    setShowUpload(true);
+                    break;
+                  case 3:
+                    downloadFile({ with_data: "Y" });
+                    break;
+                  case 4:
+                    setShowVendorGroup(true);
+                    break;
+                  default:
+                    break;
+                }
+              }}
+              menuList={[
+                {
+                  ...(listPermission?.filter(
+                    (data: any) => data.viewTypes[0]?.viewType.name === "Download Template"
+                  ).length > 0 && {
+                    key: 1,
                     value: (
                       <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                        <PackageIcon style={{ color: "black" }} />
-                        <p style={{ margin: "0" }}>Manage Vendor Group</p>
+                        <ICDownload />
+                        <p style={{ margin: "0" }}>Download Template</p>
                       </div>
                     ),
-                  },
-                ]}
-              />
-            )}
+                  }),
+                },
+                {
+                  ...(listPermission?.filter(
+                    (data: any) => data.viewTypes[0]?.viewType.name === "Upload"
+                  ).length > 0 && {
+                    key: 2,
+                    value: (
+                      <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                        <ICUpload />
+                        <p style={{ margin: "0" }}>Upload Template</p>
+                      </div>
+                    ),
+                  }),
+                },
+                {
+                  ...(listPermission?.filter(
+                    (data: any) => data.viewTypes[0]?.viewType.name === "Download Data"
+                  ).length > 0 && {
+                    key: 3,
+                    value: (
+                      <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                        <ICDownload />
+                        <p style={{ margin: "0" }}>Download Data</p>
+                      </div>
+                    ),
+                  }),
+                },
+                {
+                  key: 4,
+                  value: (
+                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                      <PackageIcon style={{ color: "black" }} />
+                      <p style={{ margin: "0" }}>Manage Vendor Group</p>
+                    </div>
+                  ),
+                },
+              ]}
+            />
 
-            <Button size="big" variant="primary" onClick={() => router.push("/vendor/create")}>
-              Create
-            </Button>
+            {listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Create")
+              .length > 0 && (
+              <Button size="big" variant="primary" onClick={() => router.push("/vendor/create")}>
+                Create
+              </Button>
+            )}
           </Row>
         </Row>
       </Card>
