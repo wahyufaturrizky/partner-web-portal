@@ -15,7 +15,11 @@ import styled from "styled-components";
 
 import ArrowLeft from "assets/icons/arrow-left.svg";
 import { ModalConfirmation } from "components/elements/Modal/ModalConfirmation";
-import { useFetchDetailSalesman, useUpdateSalesman } from "hooks/mdm/salesman/useSalesman";
+import {
+  useApprovalSalesman,
+  useFetchDetailSalesman,
+  useUpdateSalesman,
+} from "hooks/mdm/salesman/useSalesman";
 import { useFetchSalesmanDivision } from "hooks/mdm/salesman/useSalesmanDivision";
 import { dropdownStatus } from "./constants";
 import ActionButton from "./fragments/ActionButton";
@@ -25,8 +29,8 @@ import { lang } from "lang";
 
 export default function ComponentDetailSalesman({ listCustomers, isLoading }: any) {
   const t = localStorage.getItem("lan") || "en-US";
-  const companyId = localStorage.getItem("companyId")
-  const companyCode = localStorage.getItem("companyCode")
+  const companyId = localStorage.getItem("companyId");
+  const companyCode = localStorage.getItem("companyCode");
   const router = useRouter();
   const { status, salesman_id, name, idCard, division: queryDivision }: any = router.query || {};
   const [search, setSearch] = useState<string>("");
@@ -73,6 +77,14 @@ export default function ComponentDetailSalesman({ listCustomers, isLoading }: an
       },
     },
     id: salesman_id,
+  });
+
+  const { mutate: handleApproveAndRejectSalesman } = useApprovalSalesman({
+    options: {
+      onSuccess: () => {
+        router.push("/salesman");
+      },
+    },
   });
 
   const columns = [
@@ -126,7 +138,7 @@ export default function ComponentDetailSalesman({ listCustomers, isLoading }: an
         return (
           <ActionButton
             status={status}
-            onSubmit={_handleUpdateSalesman}
+            onSubmit={_handleApproveSalesman}
             isDisabled={payloads?.code?.length > 1}
             onReject={() => setModalConfirmation({ ...modalConfirmation, Rejected: true })}
           />
@@ -154,7 +166,7 @@ export default function ComponentDetailSalesman({ listCustomers, isLoading }: an
 
   const _handleUpdateSalesman = () => {
     const stt = status === "Draft" ? 2 : 0;
-    const setTobe = status === "Waiting for Approval" ? -1 : 0;
+    const setTobe = status === "Waiting for Approval" ? -1 : status === "Draft" ? 2 : 0;
     const dataUpdated: any = {
       ...payloads,
       division: setDvs,
@@ -165,12 +177,22 @@ export default function ComponentDetailSalesman({ listCustomers, isLoading }: an
     handleUpdateSalesman(dataUpdated);
   };
 
+  const _handleApproveSalesman = () => {
+    const dataUpdated: any = {
+      code: salesman_id,
+      approval_status: "APPROVED",
+      remark: "APPROVED",
+    };
+
+    handleApproveAndRejectSalesman(dataUpdated);
+  };
+
   const _handleDraftedSalesman = () => {
     const dataUpdated: any = {
       ...payloads,
       division: division,
       status: 4,
-      tobe: -1,
+      tobe: 4,
     };
 
     handleUpdateSalesman(dataUpdated);
@@ -200,13 +222,11 @@ export default function ComponentDetailSalesman({ listCustomers, isLoading }: an
 
   const onhandleRejected = () => {
     const dataUpdated: any = {
-      ...payloads,
-      division: setDvs,
+      code: salesman_id,
+      approval_status: "REJECTED",
       remark: remarks,
-      status: 3,
-      tobe: -1,
     };
-    return handleUpdateSalesman(dataUpdated);
+    return handleApproveAndRejectSalesman(dataUpdated);
   };
 
   return (

@@ -108,7 +108,7 @@ export const ModalDetailAccountGroup: any = ({
                     placeholder="Select"
                     width="100%"
                     items={parents}
-                    defaultValue={value}
+                    defaultValue={accountGroup?.parents?.groupName}
                     handleChange={(value: any) => {
                       onChange(value);
                     }}

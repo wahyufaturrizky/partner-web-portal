@@ -61,7 +61,8 @@ function useCreatePermission({ options }) {
 }
 
 const fetchPermission = async ({ role_id }) => {
-  return client(`/partner-role/${role_id}`).then((data) => data);
+  const companyCode = localStorage.getItem('companyCode');
+  return client(`/partner-role/${companyCode}/${role_id}`).then((data) => data);
 };
 
 const useRole = ({ role_id, options }) => {
