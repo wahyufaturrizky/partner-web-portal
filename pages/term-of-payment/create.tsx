@@ -130,6 +130,12 @@ const TermOfPaymentCreate = () => {
     (filtering: any) => filtering.menu === "Term Of Payment"
   );
 
+  const checkUserPermission = (permissionGranted) => {
+    return listPermission?.find(
+      (data: any) => data?.viewTypes?.[0]?.viewType?.name === permissionGranted
+    );
+  };
+
   const onSubmit = (data: any) => {
     const mappedTermListRequest = termList.map((el: any) => {
       return {
@@ -164,9 +170,7 @@ const TermOfPaymentCreate = () => {
               <Button size="big" variant={"tertiary"} onClick={() => router.back()}>
                 {lang[t].termOfPayment.tertier.cancel}
               </Button>
-              {listPermission?.find(
-                (data: any) => data?.viewTypes?.[0]?.viewType?.name === "Create"
-              ) && (
+              {checkUserPermission("Create") && (
                 <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
                   {isLoadingTermOfPayment ? "Loading..." : lang[t].termOfPayment.primary.save}
                 </Button>
@@ -192,9 +196,7 @@ const TermOfPaymentCreate = () => {
             <Spacer size={10} />
 
             <Row width={"150px"}>
-              {listPermission?.find(
-                (data: any) => data?.viewTypes?.[0]?.viewType?.name === "Create"
-              ) && (
+              {checkUserPermission("Create") && (
                 <Button
                   size="small"
                   variant={"tertiary"}

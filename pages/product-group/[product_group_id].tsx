@@ -222,14 +222,18 @@ const ProductGroupDetail = () => {
     (filtering: any) => filtering.menu === "Product Group"
   );
 
+  const checkUserPermission = (permissionGranted) => {
+    return listPermission?.find(
+      (data: any) => data?.viewTypes?.[0]?.viewType?.name === permissionGranted
+    );
+  };
+
   if ((isLoadingProductGroup || isFetchingProductGroup) && !isSuccessGetAllData)
     return (
       <Center>
         <Spin tip="Loading data..." />
       </Center>
     );
-
-    
 
   return (
     <>
@@ -244,17 +248,17 @@ const ProductGroupDetail = () => {
         <Card padding="20px">
           <Row justifyContent="flex-end" alignItems="center" nowrap>
             <Row gap="16px">
-							{listPermission?.map((data: any) => data.name)?.includes("Delete Product Group") && (
-              <Button size="big" variant={"tertiary"} onClick={() => setShowDeleteModal(true)}>
-                {lang[t].productGroup.list.button.delete}
-              </Button>
+              {checkUserPermission("Delete") && (
+                <Button size="big" variant={"tertiary"} onClick={() => setShowDeleteModal(true)}>
+                  {lang[t].productGroup.list.button.delete}
+                </Button>
               )}
-							{listPermission?.map((data: any) => data.name)?.includes("Create Product Group") && (
-              <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
-                {isLoadingUpdateProductGroup
-                  ? "Loading..."
-                  : lang[t].productGroup.detail.button.save}
-              </Button>
+              {checkUserPermission("Create") && (
+                <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
+                  {isLoadingUpdateProductGroup
+                    ? "Loading..."
+                    : lang[t].productGroup.detail.button.save}
+                </Button>
               )}
             </Row>
           </Row>

@@ -169,51 +169,56 @@ const TermOfPayment = () => {
     (filtering: any) => filtering.menu === "Term Of Payment"
   );
 
-  console.log(listPermission, "<<<< cariin");
-
   const onSubmitFile = (file: any) => {
     const formData = new FormData();
     formData.append("company_id", companyCode);
     formData.append("file", file);
-
     uploadFileTop(formData);
   };
 
   let menuList: any[] = [];
 
+  const checkUserPermission = (permissionGranted) => {
+    return listPermission?.find(
+      (data: any) => data?.viewTypes?.[0]?.viewType?.name === permissionGranted
+    );
+  };
+
   if (listPermission) {
     menuList = [
-      listPermission?.find(
-        (data: any) => data?.viewTypes?.[0]?.viewType?.name === "Download Template"
-      ) && {
-        key: 1,
-        value: (
-          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-            <ICDownload />
-            <p style={{ margin: "0" }}>{lang[t].termOfPayment.ghost.downloadTemplate}</p>
-          </div>
-        ),
-      },
-      listPermission?.find((data: any) => data?.viewTypes?.[0]?.viewType?.name === "Upload") && {
-        key: 2,
-        value: (
-          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-            <ICUpload />
-            <p style={{ margin: "0" }}>{lang[t].termOfPayment.ghost.uploadTemplate}</p>
-          </div>
-        ),
-      },
-      listPermission?.find(
-        (data: any) => data?.viewTypes?.[0]?.viewType?.name === "Download Data"
-      ) && {
-        key: 3,
-        value: (
-          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-            <ICDownload />
-            <p style={{ margin: "0" }}>{lang[t].termOfPayment.ghost.downloadData}</p>
-          </div>
-        ),
-      },
+      checkUserPermission("Download Template")
+        ? {
+            key: 1,
+            value: (
+              <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                <ICDownload />
+                <p style={{ margin: "0" }}>{lang[t].termOfPayment.ghost.downloadTemplate}</p>
+              </div>
+            ),
+          }
+        : "",
+      checkUserPermission("Upload")
+        ? {
+            key: 2,
+            value: (
+              <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                <ICUpload />
+                <p style={{ margin: "0" }}>{lang[t].termOfPayment.ghost.uploadTemplate}</p>
+              </div>
+            ),
+          }
+        : "",
+      checkUserPermission("Download Data")
+        ? {
+            key: 3,
+            value: (
+              <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                <ICDownload />
+                <p style={{ margin: "0" }}>{lang[t].termOfPayment.ghost.downloadData}</p>
+              </div>
+            ),
+          }
+        : "",
     ];
   }
 
@@ -233,9 +238,7 @@ const TermOfPayment = () => {
             }}
           />
           <Row gap="16px">
-            {listPermission?.find(
-              (data: any) => data?.viewTypes?.[0]?.viewType?.name === "Delete"
-            ) && (
+            {checkUserPermission("Delete") && (
               <Button
                 size="big"
                 variant={"tertiary"}
@@ -251,35 +254,37 @@ const TermOfPayment = () => {
                 {lang[t].termOfPayment.tertier.delete}
               </Button>
             )}
-            <DropdownMenu
-              title={lang[t].termOfPayment.secondary.more}
-              buttonVariant={"secondary"}
-              buttonSize={"big"}
-              textVariant={"button"}
-              textColor={"pink.regular"}
-              iconStyle={{ fontSize: "12px" }}
-              onClick={(e: any) => {
-                switch (parseInt(e.key)) {
-                  case 1:
-                    downloadFile({ with_data: "N", company_id: companyCode });
-                    break;
-                  case 2:
-                    setShowUpload(true);
-                    break;
-                  case 3:
-                    downloadFile({ with_data: "Y", company_id: companyCode });
-                    break;
-                  case 4:
-                    break;
-                  default:
-                    break;
-                }
-              }}
-              menuList={menuList}
-            />
-            {listPermission?.find(
-              (data: any) => data?.viewTypes?.[0]?.viewType?.name === "Create"
-            ) && (
+            {checkUserPermission("Download Template") &&
+              checkUserPermission("Upload") &&
+              checkUserPermission("Download Data") && (
+                <DropdownMenu
+                  title={lang[t].termOfPayment.secondary.more}
+                  buttonVariant={"secondary"}
+                  buttonSize={"big"}
+                  textVariant={"button"}
+                  textColor={"pink.regular"}
+                  iconStyle={{ fontSize: "12px" }}
+                  onClick={(e: any) => {
+                    switch (parseInt(e.key)) {
+                      case 1:
+                        downloadFile({ with_data: "N", company_id: companyCode });
+                        break;
+                      case 2:
+                        setShowUpload(true);
+                        break;
+                      case 3:
+                        downloadFile({ with_data: "Y", company_id: companyCode });
+                        break;
+                      case 4:
+                        break;
+                      default:
+                        break;
+                    }
+                  }}
+                  menuList={menuList}
+                />
+              )}
+            {checkUserPermission("Create") && (
               <Button
                 size="big"
                 variant="primary"

@@ -31,8 +31,8 @@ import { useUserPermissions } from "hooks/user-config/useUser";
 
 const ProductGroup = () => {
   const t = localStorage.getItem("lan") || "en-US";
-  const companyId = localStorage.getItem("companyId")
-  const companyCode = localStorage.getItem("companyCode")
+  const companyId = localStorage.getItem("companyId");
+  const companyCode = localStorage.getItem("companyCode");
   const router = useRouter();
   const pagination = usePagination({
     page: 1,
@@ -164,47 +164,59 @@ const ProductGroup = () => {
   };
 
   const { data: dataUserPermission } = useUserPermissions({
-		options: {
-			onSuccess: () => {},
-		},
-	});
+    options: {
+      onSuccess: () => {},
+    },
+  });
 
-	const listPermission = dataUserPermission?.permission?.filter(
-		(filtering: any) => filtering.menu === "Product Group"
-	);
+  const listPermission = dataUserPermission?.permission?.filter(
+    (filtering: any) => filtering.menu === "Product Group"
+  );
 
-  let menuList: any[] = []
+  const checkUserPermission = (permissionGranted) => {
+    return listPermission?.find(
+      (data: any) => data?.viewTypes?.[0]?.viewType?.name === permissionGranted
+    );
+  };
 
-  if(listPermission){
+  let menuList: any[] = [];
+
+  if (listPermission) {
     menuList = [
-      listPermission?.map((data: any) => data.name)?.includes("Download Template Product Group") && {
-        key: 1,
-        value: (
-          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-            <ICDownload />
-            <p style={{ margin: "0" }}>{lang[t].termOfPayment.ghost.downloadTemplate}</p>
-          </div>
-        ),
-      },
-      listPermission?.map((data: any) => data.name)?.includes("Upload Template Product Group") &&{
-        key: 2,
-        value: (
-          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-            <ICUpload />
-            <p style={{ margin: "0" }}>{lang[t].termOfPayment.ghost.uploadTemplate}</p>
-          </div>
-        ),
-      },
-      listPermission?.map((data: any) => data.name)?.includes("Download Data Product Group") && {
-        key: 3,
-        value: (
-          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-            <ICDownload />
-            <p style={{ margin: "0" }}>{lang[t].termOfPayment.ghost.downloadData}</p>
-          </div>
-        ),
-      },
-    ]
+      checkUserPermission("Download Template")
+        ? {
+            key: 1,
+            value: (
+              <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                <ICDownload />
+                <p style={{ margin: "0" }}>{lang[t].termOfPayment.ghost.downloadTemplate}</p>
+              </div>
+            ),
+          }
+        : "",
+      checkUserPermission("Upload")
+        ? {
+            key: 2,
+            value: (
+              <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                <ICUpload />
+                <p style={{ margin: "0" }}>{lang[t].termOfPayment.ghost.uploadTemplate}</p>
+              </div>
+            ),
+          }
+        : "",
+      checkUserPermission("Download Data")
+        ? {
+            key: 3,
+            value: (
+              <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                <ICDownload />
+                <p style={{ margin: "0" }}>{lang[t].termOfPayment.ghost.downloadData}</p>
+              </div>
+            ),
+          }
+        : "",
+    ];
   }
 
   const onSubmitFile = (file: any) => {
@@ -235,57 +247,61 @@ const ProductGroup = () => {
             }}
           />
           <Row gap="16px">
-							{listPermission?.map((data: any) => data.name)?.includes("Delete Product Group") && (
-            <Button
-              size="big"
-              variant={"tertiary"}
-              onClick={() =>
-                setShowDelete({
-                  open: true,
-                  type: "selection",
-                  data: { productsGroupData, selectedRowKeys },
-                })
-              }
-              disabled={rowSelection.selectedRowKeys?.length === 0}
-            >
-              {lang[t].productGroup.list.button.delete}
-            </Button>
-              )}
-            <DropdownMenu
-              title={lang[t].productGroup.list.button.more}
-              buttonVariant={"secondary"}
-              buttonSize={"big"}
-              textVariant={"button"}
-              textColor={"pink.regular"}
-              iconStyle={{ fontSize: "12px" }}
-              onClick={(e: any) => {
-                switch (parseInt(e.key)) {
-                  case 1:
-                    downloadFile({ with_data: "N", company_id: companyCode });
-                    break;
-                  case 2:
-                    setShowUpload(true);
-                    break;
-                  case 3:
-                    downloadFile({ with_data: "Y", company_id: companyCode });
-                    break;
-                  case 4:
-                    break;
-                  default:
-                    break;
+            {checkUserPermission("Delete") && (
+              <Button
+                size="big"
+                variant={"tertiary"}
+                onClick={() =>
+                  setShowDelete({
+                    open: true,
+                    type: "selection",
+                    data: { productsGroupData, selectedRowKeys },
+                  })
                 }
-              }}
-              menuList={menuList}
-            />
-							{listPermission?.map((data: any) => data.name)?.includes("Create Product Group") && (
-            <Button
-              size="big"
-              variant="primary"
-              onClick={() => router.push("/product-group/create")}
-            >
-              {lang[t].productGroup.list.button.create}
-            </Button>
+                disabled={rowSelection.selectedRowKeys?.length === 0}
+              >
+                {lang[t].productGroup.list.button.delete}
+              </Button>
+            )}
+            {checkUserPermission("Download Template") &&
+              checkUserPermission("Upload") &&
+              checkUserPermission("Download Data") && (
+                <DropdownMenu
+                  title={lang[t].productGroup.list.button.more}
+                  buttonVariant={"secondary"}
+                  buttonSize={"big"}
+                  textVariant={"button"}
+                  textColor={"pink.regular"}
+                  iconStyle={{ fontSize: "12px" }}
+                  onClick={(e: any) => {
+                    switch (parseInt(e.key)) {
+                      case 1:
+                        downloadFile({ with_data: "N", company_id: companyCode });
+                        break;
+                      case 2:
+                        setShowUpload(true);
+                        break;
+                      case 3:
+                        downloadFile({ with_data: "Y", company_id: companyCode });
+                        break;
+                      case 4:
+                        break;
+                      default:
+                        break;
+                    }
+                  }}
+                  menuList={menuList}
+                />
               )}
+            {checkUserPermission("Create") && (
+              <Button
+                size="big"
+                variant="primary"
+                onClick={() => router.push("/product-group/create")}
+              >
+                {lang[t].productGroup.list.button.create}
+              </Button>
+            )}
           </Row>
         </Row>
       </Card>

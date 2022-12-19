@@ -170,31 +170,16 @@ const TermOfPaymentEdit = () => {
       onSuccess: () => {},
     },
   });
-  // nanti ganti sama atas
-  // const { data: dataUserPermission } = usePartnerConfigPermissionLists({
-  //   query: {
-  //     limit: 10000
-  //   },
-  //   options: {
-  // 		onSuccess: () => {},
-  // 	},
-  // });
 
   const listPermission = dataUserPermission?.permission?.filter(
     (filtering: any) => filtering.menu === "Term Of Payment"
   );
-  // nanti ganti sama atas
-  // const listPermission = dataUserPermission?.rows?.filter(
-  // 	(filtering: any) => filtering?.menu?.name === "Term Of Payment"
-  // );
 
-  // const allowPermissionToShow = listPermission?.filter((data: any) =>
-  // 	// permissionTermOfPayment.role[dataUserPermission?.role?.name].component.includes(data.name)
-  // );
-  // nanti ganti sama atas
-  // const allowPermissionToShow = listPermission?.filter((data: any) =>{
-  // 	return permissionTermOfPayment.role["Admin"].component.includes(data.name)
-  // });
+  const checkUserPermission = (permissionGranted) => {
+    return listPermission?.find(
+      (data: any) => data?.viewTypes?.[0]?.viewType?.name === permissionGranted
+    );
+  };
 
   const onSubmit = (data: any) => {
     const mappedTermListRequest = termList.map((el: any) => {
@@ -224,7 +209,6 @@ const TermOfPaymentEdit = () => {
       </Center>
     );
 
-  // console.log(listPermission?.map((data: any) => data.name)?.includes("Delete Term Of Payment"), '<<<<list')
   return (
     <>
       <Col>
@@ -238,16 +222,12 @@ const TermOfPaymentEdit = () => {
         <Card padding="20px">
           <Row justifyContent="flex-end" alignItems="center" nowrap>
             <Row gap="16px">
-              {listPermission?.find(
-                (data: any) => data?.viewTypes?.[0]?.viewType?.name === "Delete"
-              ) && (
+              {checkUserPermission("Delete") && (
                 <Button size="big" variant={"tertiary"} onClick={() => setShowDeleteModal(true)}>
                   {lang[t].termOfPayment.tertier.delete}
                 </Button>
               )}
-              {listPermission?.find(
-                (data: any) => data?.viewTypes?.[0]?.viewType?.name === "Update"
-              ) && (
+              {checkUserPermission("Update") && (
                 <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
                   {isLoadingUpdateTermOfPayment ? "Loading..." : lang[t].termOfPayment.primary.save}
                 </Button>
@@ -274,9 +254,7 @@ const TermOfPaymentEdit = () => {
             <Spacer size={10} />
 
             <Row width={"150px"}>
-              {listPermission?.find(
-                (data: any) => data?.viewTypes?.[0]?.viewType?.name === "Create"
-              ) && (
+              {checkUserPermission("Create") && (
                 <Button
                   size="small"
                   variant={"tertiary"}

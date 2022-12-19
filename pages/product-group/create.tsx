@@ -129,16 +129,21 @@ const ProductGroupCreate = () => {
   useEffect(() => {}, [pagination.fromItem, pagination.itemsPerPage]);
 
   const { data: dataUserPermission } = useUserPermissions({
-		options: {
-			onSuccess: () => {},
-		},
-	});
+    options: {
+      onSuccess: () => {},
+    },
+  });
 
-	const listPermission = dataUserPermission?.permission?.filter(
-		(filtering: any) => filtering.menu === "Product Group"
-	);
+  const listPermission = dataUserPermission?.permission?.filter(
+    (filtering: any) => filtering.menu === "Product Group"
+  );
 
-  
+  const checkUserPermission = (permissionGranted) => {
+    return listPermission?.find(
+      (data: any) => data?.viewTypes?.[0]?.viewType?.name === permissionGranted
+    );
+  };
+
   return (
     <>
       <Col>
@@ -154,10 +159,10 @@ const ProductGroupCreate = () => {
               <Button size="big" variant={"tertiary"} onClick={() => router.back()}>
                 {lang[t].productGroup.list.tertier.cancel}
               </Button>
-							{listPermission?.map((data: any) => data.name)?.includes("Create Product Group") && (
-              <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
-                {isLoadingProductGroup ? "Loading..." : lang[t].productGroup.list.primary.save}
-              </Button>
+              {checkUserPermission("Create") && (
+                <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
+                  {isLoadingProductGroup ? "Loading..." : lang[t].productGroup.list.primary.save}
+                </Button>
               )}
             </Row>
           </Row>

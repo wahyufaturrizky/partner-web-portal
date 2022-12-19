@@ -17,6 +17,7 @@ import { useSortable, SortableContext, verticalListSortingStrategy } from "@dnd-
 import styled from "styled-components";
 import { usePartnerConfigPermissionLists } from "hooks/user-config/usePermission";
 import { permissionTermOfPayment } from "permission/term-of-payment";
+import { useUserPermissions } from "hooks/user-config/useUser";
 
 const getTypeName = (type: any) => {
   switch (type) {
@@ -114,37 +115,22 @@ const DraggableTable = ({ termList, isLoading, onDrag, onEdit, onDelete }: any) 
       dataIndex: "option",
     },
   ];
-  
-  // const { data: dataUserPermission } = useUserPermissions({
-	// 	options: {
-	// 		onSuccess: () => {},
-	// 	},
-	// });
-  // nanti ganti sama atas
-  const { data: dataUserPermission } = usePartnerConfigPermissionLists({
-    query: {
-      limit: 10000
-    },
+
+  const { data: dataUserPermission } = useUserPermissions({
     options: {
-			onSuccess: () => {},
-		},
-	});
+      onSuccess: () => {},
+    },
+  });
 
-	// const listPermission = dataUserPermission?.permission?.filter(
-	// 	(filtering: any) => filtering.menu === "Term Of Payment"
-	// );
-  // nanti ganti sama atas
-	const listPermission = dataUserPermission?.rows?.filter(
-		(filtering: any) => filtering?.menu?.name === "Term Of Payment"
-	);
+  const listPermission = dataUserPermission?.permission?.filter(
+    (filtering: any) => filtering.menu === "Term Of Payment"
+  );
 
-	// const allowPermissionToShow = listPermission?.filter((data: any) =>
-	// 	// permissionTermOfPayment.role[dataUserPermission?.role?.name].component.includes(data.name)
-	// );
-  // nanti ganti sama atas
-	const allowPermissionToShow = listPermission?.filter((data: any) =>{
-		return permissionTermOfPayment.role["Admin"].component.includes(data.name)
-	});
+  const checkUserPermission = (permissionGranted) => {
+    return listPermission?.find(
+      (data: any) => data?.viewTypes?.[0]?.viewType?.name === permissionGranted
+    );
+  };
 
   return (
     <DndContext
@@ -228,37 +214,37 @@ const DraggableTable = ({ termList, isLoading, onDrag, onEdit, onDelete }: any) 
                   }}
                 />
                 <Spacer size={5} />
-							{allowPermissionToShow?.map((data: any) => data.name)?.includes("Update Term Of Payment") && (
-                <EditOutlined
-                  style={{
-                    cursor: "pointer",
-                    borderRadius: 3,
-                    backgroundColor: "#D5FAFD",
-                    color: "#2BBECB",
-                    padding: 4,
-                    fontSize: "18px",
-                  }}
-                  onClick={() => {
-                    onEdit && onEdit(props.data);
-                  }}
-                />
-              )}
+                {checkUserPermission("Update") && (
+                  <EditOutlined
+                    style={{
+                      cursor: "pointer",
+                      borderRadius: 3,
+                      backgroundColor: "#D5FAFD",
+                      color: "#2BBECB",
+                      padding: 4,
+                      fontSize: "18px",
+                    }}
+                    onClick={() => {
+                      onEdit && onEdit(props.data);
+                    }}
+                  />
+                )}
                 <Spacer size={5} />
-							{allowPermissionToShow?.map((data: any) => data.name)?.includes("Delete Term Of Payment") && (
-                <DeleteOutlined
-                  style={{
-                    cursor: "pointer",
-                    borderRadius: 3,
-                    backgroundColor: "#D5FAFD",
-                    color: "#EB008B",
-                    padding: 4,
-                    fontSize: "18px",
-                  }}
-                  onClick={() => {
-                    onDelete && onDelete(props.data);
-                  }}
-                />
-              )}
+                {checkUserPermission("Delete") && (
+                  <DeleteOutlined
+                    style={{
+                      cursor: "pointer",
+                      borderRadius: 3,
+                      backgroundColor: "#D5FAFD",
+                      color: "#EB008B",
+                      padding: 4,
+                      fontSize: "18px",
+                    }}
+                    onClick={() => {
+                      onDelete && onDelete(props.data);
+                    }}
+                  />
+                )}
               </div>
             </td>
             <td>{props.data.index + 1}</td>
