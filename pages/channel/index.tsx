@@ -191,7 +191,7 @@ const ChannelMDM = () => {
       title: lang[t].salesChannel.table.salesChannelName,
       dataIndex: "name",
     },
-    ...(allowPermissionToShow?.some((el: any) => el.name === "View Channel")
+    ...(listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "View").length > 0
       ? [
           {
             title: lang[t].salesChannel.table.action,
@@ -233,7 +233,10 @@ const ChannelMDM = () => {
   };
   let menuList: any[] = [];
 
-  if (allowPermissionToShow?.map((data: any) => data.name)?.includes("Download Template Channel")) {
+  if (
+    listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Download Template")
+      .length > 0
+  ) {
     menuList = [
       ...menuList,
       {
@@ -247,7 +250,10 @@ const ChannelMDM = () => {
       },
     ];
   }
-  if (allowPermissionToShow?.map((data: any) => data.name)?.includes("Upload Template Channel")) {
+  if (
+    listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Updload Template")
+      .length > 0
+  ) {
     menuList = [
       ...menuList,
       {
@@ -261,7 +267,7 @@ const ChannelMDM = () => {
       },
     ];
   }
-  if (allowPermissionToShow?.map((data: any) => data.name)?.includes("Download Data Channel")) {
+  if (listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Download").length > 0) {
     menuList = [
       ...menuList,
       {
@@ -292,7 +298,8 @@ const ChannelMDM = () => {
             }}
           />
           <Row gap="16px">
-            {allowPermissionToShow?.some((el: any) => el.name === "Delete Channel") && (
+            {listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Delete").length >
+              0 && (
               <Button
                 size="big"
                 variant={"tertiary"}
@@ -336,7 +343,8 @@ const ChannelMDM = () => {
                 menuList={menuList}
               />
             )}
-            {allowPermissionToShow?.some((el: any) => el.name === "Create Channel") && (
+            {listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Create").length >
+              0 && (
               <Button
                 size="big"
                 variant="primary"
@@ -412,7 +420,8 @@ const ChannelMDM = () => {
                     >
                       {lang[t].salesChannel.tertier.cancel}
                     </Button>
-                    {allowPermissionToShow?.some((el: any) => el.name === "Create Channel") && (
+                    {listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Create")
+                      .length > 0 && (
                       <Button onClick={handleSubmit(onSubmit)} variant="primary" size="big">
                         {isLoadingcreateChannelMDM || isLoadingupdateChannelMDM
                           ? lang[t].salesChannel.loading
@@ -422,7 +431,8 @@ const ChannelMDM = () => {
                   </>
                 ) : (
                   <>
-                    {allowPermissionToShow?.some((el: any) => el.name === "Delete Channel") && (
+                    {listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Delete")
+                      .length > 0 && (
                       <Button
                         size="big"
                         variant={"tertiary"}
@@ -439,7 +449,8 @@ const ChannelMDM = () => {
                         {lang[t].salesChannel.tertier.delete}
                       </Button>
                     )}
-                    {allowPermissionToShow?.some((el: any) => el.name === "Update Channel") && (
+                    {listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Update")
+                      .length > 0 && (
                       <Button onClick={handleSubmit(onSubmit)} variant="primary" size="big">
                         {isLoadingcreateChannelMDM || isLoadingupdateChannelMDM
                           ? lang[t].salesChannel.loading
