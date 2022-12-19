@@ -9,7 +9,6 @@ import { useDeleteProcessList, useProcessLists } from "../../../hooks/business-p
 import { colors } from "../../../utils/color";
 import { lang } from "lang";
 import { useUserPermissions } from "hooks/user-config/usePermission";
-import { permissionProcess } from "permission/process";
 
 const ProcessList: any = () => {
 	const t = localStorage.getItem("lan") || "en-US";
@@ -35,10 +34,6 @@ const ProcessList: any = () => {
 	
 	  const listPermission = dataUserPermission?.permission?.filter(
 		(filtering: any) => filtering.menu === "Process"
-	  );
-	
-	  const allowPermissionToShow = listPermission?.filter((data: any) =>
-		permissionProcess.role[dataUserPermission?.role?.name].component.includes(data.name)
 	  );
 
 	const {
@@ -94,7 +89,7 @@ const ProcessList: any = () => {
 			dataIndex: "field_module",
 			width: "42%",
 		},
-		...(allowPermissionToShow?.some((el: any) => el.name === "View Process")
+		...(listPermission?.some((el: any) => el.viewTypes[0]?.viewType.name === "View")
 		? [
 			{
 				title: lang[t].process.permissionList.action,
@@ -182,19 +177,28 @@ const ProcessList: any = () => {
 								rounded
 							/>
 						</Row>
-						{/* <Row gap="16px">
-							<Button
-								size="big"
-								variant={"tertiary"}
-								onClick={() => setModalDelete({ open: true })}
-								disabled={rowSelection.selectedRowKeys?.length === 0}
-							>
-								Delete
-							</Button>
-							<Button size="big" variant={"primary"} onClick={() => Router.push("/business-process/process/create")}>
-								Create
-							</Button>
-						</Row> */}
+						<Row gap="16px">
+							{ listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Delete")
+								.length > 0 && 	
+								<Button
+									size="big"
+									variant={"tertiary"}
+									onClick={() => setModalDelete({ open: true })}
+									disabled={rowSelection.selectedRowKeys?.length === 0}
+								>
+									Delete
+								</Button>
+							}
+
+							{listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Create")
+								.length > 0 && 
+								<Button size="big" variant={"primary"} onClick={() => Router.push("/business-process/process/create")}>
+									Create
+								</Button>
+							}
+						
+							
+						</Row>
 					</Row>
 				</Card>
 				<Spacer size={10} />

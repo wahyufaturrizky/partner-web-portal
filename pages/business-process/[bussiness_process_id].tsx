@@ -31,7 +31,6 @@ import DraggableTable from "../../components/pages/BusinessProcess/DraggableTabl
 import DraggableGrids from "../../components/pages/BusinessProcess/DraggableGrid";
 import { lang } from "lang";
 import { useUserPermissions } from "hooks/user-config/usePermission";
-import { permissionBusinessProcess } from "permission/businessProcess";
 
 const BussinessProcessDetail = () => {
   const t = localStorage.getItem("lan") || "en-US";
@@ -61,11 +60,7 @@ const BussinessProcessDetail = () => {
   });
 
   const listPermission = dataUserPermission?.permission?.filter(
-    (filtering: any) => filtering.menu === "Postal Code"
-  );
-
-  const allowPermissionToShow = listPermission?.filter((data: any) =>
-    permissionBusinessProcess.role[dataUserPermission?.role?.name].component.includes(data.name)
+    (filtering: any) => filtering.menu === "Business Process"
   );
 
   const {
@@ -337,16 +332,14 @@ const BussinessProcessDetail = () => {
             />
 
             <Row gap="16px">
-              {allowPermissionToShow
-                ?.map((data: any) => data.name)
-                ?.includes("Delete Business Process") && (
+              {listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Delete")
+							.length > 0 && (
                 <Button size="big" variant={"tertiary"} onClick={() => setShowDeleteModal(true)}>
                   Delete
                 </Button>
               )}
-              {allowPermissionToShow
-                ?.map((data: any) => data.name)
-                ?.includes("Update Business Process") && (
+              {listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Update")
+							.length > 0 && (
                 <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
                   {isLoadingUpdateBusinessProcess
                     ? "...Loading"

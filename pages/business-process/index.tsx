@@ -14,7 +14,6 @@ import useDebounce from "../../lib/useDebounce";
 import { queryClient } from "../_app";
 import { lang } from "lang";
 import { useUserPermissions } from "hooks/user-config/usePermission";
-import { permissionBusinessProcess } from "permission/businessProcess";
 
 const BusinessProcess = () => {
   const t = localStorage.getItem("lan") || "en-US";
@@ -42,10 +41,6 @@ const BusinessProcess = () => {
 
   const listPermission = dataUserPermission?.permission?.filter(
     (filtering: any) => filtering.menu === "Business Process"
-  );
-
-  const allowPermissionToShow = listPermission?.filter((data: any) =>
-    permissionBusinessProcess.role[dataUserPermission?.role?.name].component.includes(data.name)
   );
 
   const {
@@ -115,7 +110,7 @@ const BusinessProcess = () => {
         </Lozenge>
       ),
     },
-    ...(allowPermissionToShow?.some((el: any) => el.name === "View Business Process")
+    ...(listPermission?.some((el: any) => el.viewTypes[0]?.viewType.name === "View")
       ? [
           {
             title: lang[t].businessProcess.businessProcessAction,
@@ -146,9 +141,8 @@ const BusinessProcess = () => {
               }}
             />
             <Row gap="16px">
-              {allowPermissionToShow
-                ?.map((data: any) => data.name)
-                ?.includes("Delete Business Process") && (
+              {listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Delete")
+							.length > 0 && (
                 <Button
                   size="big"
                   variant={"tertiary"}
@@ -158,9 +152,8 @@ const BusinessProcess = () => {
                   Delete
                 </Button>
               )}
-              {allowPermissionToShow
-                ?.map((data: any) => data.name)
-                ?.includes("Create Business Process") && (
+              {listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Create")
+							.length > 0 && (
                 <Button
                   size="big"
                   variant="primary"
