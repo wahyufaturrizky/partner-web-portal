@@ -1,5 +1,6 @@
 import { useMutation } from "react-query";
-import { client } from "../../lib/client";
+import { client } from "lib/clientHermes";
+import { toSnakeCase } from "lib/caseConverter";
 
 const fetchAuth = async () => {
   return client("/auth/verify-token", { method: "POST" }).then((data) => data);
@@ -12,9 +13,9 @@ const useAuth = ({ options }) => {
 };
 
 const signInUser = async (data = {}) => {
-  return client("/auth/login", { method: "POST", data }).then((data) => {
-    localStorage.setItem("token", data.tokenCode);
-    localStorage.setItem("refresh_token", data.refreshToken);
+  return client("/auth/login", { method: "POST", data: toSnakeCase(data) }).then((res) => {
+    localStorage.setItem("token", res.data.token_code);
+    localStorage.setItem("refresh_token", res.data.refresh_token);
     return data;
   });
 };

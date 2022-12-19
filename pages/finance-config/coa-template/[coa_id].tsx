@@ -106,6 +106,7 @@ const DetailCoa: any = () => {
     source: "",
   });
   const [copyCoaId, setCopyCoaId] = useState(coa_id);
+  const [isModalDelete, setIsModalDelete] = useState({open: false});
 
   const columns = [
     {
@@ -252,8 +253,8 @@ const DetailCoa: any = () => {
     },
     coa_id,
   });
-
-  const { mutate: deleteCoa } = useDeleteCoa({
+  console.log(coa_id)
+  const { mutate: deleteCoa, isLoading: isLoadingDeleteCoa } = useDeleteCoa({
     options: {
       onSuccess: () => {
         router.push("/finance-config/coa-template");
@@ -481,7 +482,7 @@ const DetailCoa: any = () => {
                       <Button
                         size="big"
                         variant={"tertiary"}
-                        onClick={() => setModalDelete({ open: true })}
+                        onClick={() => setIsModalDelete({ open: true })}
                       >
                         {lang[t].coaTemplate.list.button.delete}
                       </Button>
@@ -873,6 +874,17 @@ const DetailCoa: any = () => {
             }}
           />
         )}
+
+      {isModalDelete.open && (
+        <ModalDeleteConfirmation
+          totalSelected={selectedRowKeys?.length}
+          itemTitle={ coaData?.name}
+          isLoading={isLoadingDeleteCoa}
+          visible={isModalDelete.open}
+          onCancel={() => setIsModalDelete({ open: false })}
+          onOk={() => deleteCoa({ ids: [coa_id], company_id: companyCode })}
+        />
+      )}
       </Col>
     </>
   );

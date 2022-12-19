@@ -170,10 +170,10 @@ const Login: any = () => {
       const storage = globalThis?.sessionStorage;
       if (storage) referer = storage.getItem("prevPath");
 
-      if (referer) {
+      if (referer !== "null") {
         window.location.assign(referer);
       } else {
-        window.location.assign(window.location);
+        window.location.reload();
       }
 
     },
