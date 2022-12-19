@@ -81,33 +81,28 @@ const Calculation = () => {
     twelveMonths: false,
   });
 
+  const { data: dataUserPermission } = useUserPermissions({
+    options: {
+      onSuccess: () => {},
+    },
+  });
+
+  const listPermission = dataUserPermission?.permission?.filter(
+    (filtering: any) => filtering.menu === "Term Of Payment"
+  );
+
+  const checkUserPermission = (permissionGranted) => {
+    return listPermission?.find(
+      (data: any) => data?.viewTypes?.[0]?.viewType?.name === permissionGranted
+    );
+  };
+
   const debounceSearch = useDebounce(search, 1000);
 
   const [companyList, setCompanyList] = useState([]);
   const [totalRowsCompanyList, setTotalRowsCompanyList] = useState(0);
   const [searchCompany, setSearchCompany] = useState("");
   const debounceFetchCompany = useDebounce(searchCompany, 1000);
-
-  const { data: dataUserPermission } = useUserPermissions({
-    options: {
-      onSuccess: () => {},
-    },
-  });
-  console.log(dataUserPermission, "<<<<<usernya");
-
-  const listPermission = dataUserPermission?.permission?.filter(
-    (filtering: any) => filtering.menu === "Calculation"
-  );
-
-  // const allowPermissionToShow = listPermission?.filter((data: any) =>
-  // 	// permissionCalculation.role[dataUserPermission?.role?.name].component.includes(data.name)
-  // );
-  // nanti ganti sama atas
-  const allowPermissionToShow = listPermission?.filter((data: any) => {
-    return permissionCalculation.role["Admin"].component.includes(data.name);
-  });
-
-  console.log(allowPermissionToShow, "<<<<allow");
 
   const {
     data: calculationData,
@@ -131,9 +126,7 @@ const Calculation = () => {
             .filter((el) => el.companyId === element.companyId)[0]
             ?.value?.split(" - ")[0];
           const newMenu = element.modules?.map((el: { name: string }) => el.name);
-          console.log(newMenu);
           payment += +element?.totalPayment;
-          console.log(payment);
           return {
             key: element.id,
             id: element.id,
@@ -147,9 +140,7 @@ const Calculation = () => {
               "IDR " + IDR_formatter.format(element?.totalFee?.split(".")[0])?.split("Rp")[1],
             action: (
               <div style={{ display: "flex", justifyContent: "left" }}>
-                {allowPermissionToShow
-                  ?.map((data: any) => data.name)
-                  ?.includes("Update Calculation") && (
+                {checkUserPermission("Update") && (
                   <EditOutlined
                     style={{
                       cursor: "pointer",
@@ -170,9 +161,7 @@ const Calculation = () => {
                   />
                 )}
                 <Spacer size={5} />
-                {allowPermissionToShow
-                  ?.map((data: any) => data.name)
-                  ?.includes("Delete Calculation") && (
+                {checkUserPermission("Delete") && (
                   <DeleteOutlined
                     style={{
                       cursor: "pointer",
@@ -191,7 +180,6 @@ const Calculation = () => {
             ),
           };
         });
-        console.log(mappedData, "<<<mapped");
         paymentButton?.threeMonths
           ? (payment = payment * 3 - payment * 3 * 0.1)
           : paymentButton?.sixMonths
@@ -447,7 +435,7 @@ const Calculation = () => {
         <Spacer size={20} />
 
         <Row gap="16px">
-          {allowPermissionToShow?.map((data: any) => data.name)?.includes("Create Calculation") && (
+          {checkUserPermission("Create") && (
             <Button
               size="big"
               variant="primary"
