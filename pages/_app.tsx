@@ -1,19 +1,18 @@
 import { NextComponentType } from "next";
 import { AppContext, AppInitialProps, AppProps } from "next/app";
-import toast, { Toaster, resolveValue } from "react-hot-toast";
+import { Toaster, resolveValue } from "react-hot-toast";
 import { Hydrate } from "react-query/hydration";
 import styled from "styled-components";
-import { QueryCache } from "react-query";
-import { QueryClient, QueryClientProvider } from "react-query";
+import { QueryCache, QueryClient, QueryClientProvider } from "react-query";
 
+import { useRouter } from "next/router";
+import { useEffect } from "react";
 import { AuthProvider } from "../context/AuthContext";
 import DashboardLayout from "../layouts/Layout";
 import { ICExclamation } from "../assets";
 
 import "pink-lava-ui/index.css";
 import "../styles/globals.css";
-import { useRouter } from "next/router";
-import { useEffect } from "react";
 
 const queryCache = new QueryCache({});
 export const queryClient = new QueryClient({
@@ -23,7 +22,7 @@ export const queryClient = new QueryClient({
       refetchOnMount: true,
       cacheTime: 0,
       staleTime: Infinity,
-      retry: true,
+      retry: 3,
     },
   },
   queryCache,
@@ -54,7 +53,7 @@ const App: NextComponentType<AppContext, AppInitialProps, AppProps> = ({
     storage.setItem("prevPath", prevPath);
     storage.setItem("currentPath", globalThis.location.pathname);
   }
-  
+
   return (
     <QueryClientProvider client={queryClient}>
       <Hydrate state={pageProps.dehydratedState}>
