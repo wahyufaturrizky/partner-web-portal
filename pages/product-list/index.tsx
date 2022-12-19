@@ -26,7 +26,7 @@ import {
 import { mdmDownloadService } from "../../lib/client";
 import useDebounce from "../../lib/useDebounce";
 import { queryClient } from "../_app";
-import { useProductCategoryInfiniteLists } from 'hooks/mdm/product-category/useProductCategory';
+import { useProductCategoryInfiniteLists } from "hooks/mdm/product-category/useProductCategory";
 import { lang } from "lang";
 import { useUserPermissions } from "hooks/user-config/usePermission";
 import { permissionProductList } from "permission/product-list";
@@ -46,8 +46,7 @@ const renderConfirmationText = (type: any, data: any) => {
       return data.selectedRowKeys.length > 1
         ? `Are you sure to delete ${data.selectedRowKeys.length} items ?`
         : `Are you sure to delete Product Name ${
-            data?.productListData?.data.find((el: any) => el.key === data.selectedRowKeys[0])
-              ?.name
+            data?.productListData?.data.find((el: any) => el.key === data.selectedRowKeys[0])?.name
           } ?`;
     case "detail":
       return `Are you sure to delete Product Name ${data.productName} ?`;
@@ -60,9 +59,9 @@ const renderConfirmationText = (type: any, data: any) => {
 const Product = () => {
   const router = useRouter();
   const t = localStorage.getItem("lan") || "en-US";
-  const companyId = localStorage.getItem("companyId")
-  const companyCode = localStorage.getItem("companyCode")
-  
+  const companyId = localStorage.getItem("companyId");
+  const companyCode = localStorage.getItem("companyCode");
+
   const pagination = usePagination({
     page: 1,
     itemsPerPage: 20,
@@ -72,11 +71,11 @@ const Product = () => {
     totalItems: 100,
   });
 
-  const [productCategory, setProductCategory] = useState("")
+  const [productCategory, setProductCategory] = useState("");
   const [search, setSearch] = useState("");
   const [isShowDelete, setShowDelete] = useState({ open: false, type: "selection", data: {} });
   const [isShowUpload, setShowUpload] = useState(false);
-  const modalForm  = {
+  const modalForm = {
     open: false,
     data: {},
     typeForm: "create",
@@ -94,7 +93,7 @@ const Product = () => {
       page: pagination.page,
       limit: pagination.itemsPerPage,
       company_id: companyCode,
-      category_id: productCategory
+      category_id: productCategory,
     },
     options: {
       onSuccess: (data: any) => {
@@ -109,7 +108,7 @@ const Product = () => {
             status: element.status,
             productCategoryName: element.productCategoryName,
             hasVariant: element.hasVariant,
-            variant: element?.productVariants?.length ?? '-',
+            variant: element?.productVariants?.length ?? "-",
             action: (
               <div style={{ display: "flex", justifyContent: "left" }}>
                 <Button
@@ -131,18 +130,17 @@ const Product = () => {
     },
   });
 
-  const { mutate: deleteProductList, isLoading: isLoadingDeleteProductList } =
-    useDeleteProduct({
-      options: {
-        onSuccess: () => {
-          setShowDelete({ open: false, data: {}, type: "" });
-          setSelectedRowKeys([]);
-          queryClient.invalidateQueries(["product-list"]);
-        },
+  const { mutate: deleteProductList, isLoading: isLoadingDeleteProductList } = useDeleteProduct({
+    options: {
+      onSuccess: () => {
+        setShowDelete({ open: false, data: {}, type: "" });
+        setSelectedRowKeys([]);
+        queryClient.invalidateQueries(["product-list"]);
       },
-    });
+    },
+  });
 
-  const { mutate: uploadFileProduct, isLoading: isLoadingUploadFileProduct} = useUploadFileProduct(
+  const { mutate: uploadFileProduct, isLoading: isLoadingUploadFileProduct } = useUploadFileProduct(
     {
       options: {
         onSuccess: () => {
@@ -160,12 +158,8 @@ const Product = () => {
   });
 
   const listPermission = dataUserPermission?.permission?.filter(
-    (filtering: any) => filtering.menu === "Product List"
+    (filtering: any) => filtering.menu === "Product"
   );
-  const allowPermissionToShow = listPermission?.filter((data: any) =>
-    permissionProductList.role[dataUserPermission?.role?.name].component.includes(data.name)
-  );
-  
   const columns = [
     {
       title: lang[t].productList.list.table.productId,
@@ -191,16 +185,16 @@ const Product = () => {
           {status === "active" ? "Active" : "Inactive"}
         </Lozenge>
       ),
-    },  
-    ...(allowPermissionToShow?.some((el: any) => el.name === "View Product List")
-    ? [
-        {
-          title: lang[t].productList.list.table.action,
-          dataIndex: "action",
-          width: "15%",
-        },
-      ]
-    : [])
+    },
+    ...(listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "View").length > 0
+      ? [
+          {
+            title: lang[t].productList.list.table.action,
+            dataIndex: "action",
+            width: "15%",
+          },
+        ]
+      : []),
   ];
 
   const rowSelection = {
@@ -223,7 +217,7 @@ const Product = () => {
     uploadFileProduct(formData);
   };
 
-  const [listProductCategory , setListProductCategory] = useState<any[]>([]);
+  const [listProductCategory, setListProductCategory] = useState<any[]>([]);
   const [totalRowsProductCategory, setTotalRowsProductCategory] = useState(0);
   const [searchProductCategory, setSearchProductCategory] = useState("");
   const debounceFetchProductCategory = useDebounce(searchProductCategory, 1000);
@@ -245,7 +239,7 @@ const Product = () => {
         const mappedData = data?.pages?.map((group: any) => {
           return group.rows?.map((element: any) => {
             return {
-              label: element.name, 
+              label: element.name,
               value: element.productCategoryId,
             };
           });
@@ -264,7 +258,10 @@ const Product = () => {
   });
   let menuList: any[] = [];
 
-  if (allowPermissionToShow?.map((data: any) => data.name)?.includes("Download Template Product List")) {
+  if (
+    listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Download Template")
+      .length > 0
+  ) {
     menuList = [
       ...menuList,
       {
@@ -279,7 +276,7 @@ const Product = () => {
     ];
   }
 
-  if (allowPermissionToShow?.map((data: any) => data.name)?.includes("Upload Template Product List")) {
+  if (listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Upload").length > 0) {
     menuList = [
       ...menuList,
       {
@@ -294,7 +291,9 @@ const Product = () => {
     ];
   }
 
-  if (allowPermissionToShow?.map((data: any) => data.name)?.includes("Download Data Product List")) {
+  if (
+    listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Download Data").length > 0
+  ) {
     menuList = [
       ...menuList,
       {
@@ -326,7 +325,7 @@ const Product = () => {
             />
             <Col width="200px">
               <CustomFormSelect
-                style={{ width: "100%", height: '48px' }}
+                style={{ width: "100%", height: "48px" }}
                 size={"large"}
                 placeholder={lang[t].productList.list.field.productCategory}
                 borderColor={"#AAAAAA"}
@@ -345,7 +344,7 @@ const Product = () => {
                     : listProductCategory
                 }
                 onChange={(value: any) => {
-                  setProductCategory(value)
+                  setProductCategory(value);
                 }}
                 onSearch={(value: any) => {
                   setSearchProductCategory(value);
@@ -355,34 +354,35 @@ const Product = () => {
           </Row>
           <Row gap="16px">
             {menuList.length > 0 && (
-            <DropdownMenu
-              title={lang[t].productList.list.button.more}
-              buttonVariant={"secondary"}
-              buttonSize={"big"}
-              textVariant={"button"}
-              textColor={"pink.regular"}
-              iconStyle={{ fontSize: "12px" }}
-              onClick={(e: any) => {
-                switch (parseInt(e.key)) {
-                  case 1:
-                    downloadFile({ with_data: "N", company_id: companyCode });
-                    break;
-                  case 2:
-                    setShowUpload(true);
-                    break;
-                  case 3:
-                    downloadFile({ with_data: "Y", company_id: companyCode });
-                    break;
-                  case 4:
-                    break;
-                  default:
-                    break;
-                }
-              }}
-              menuList={menuList}
-            />
+              <DropdownMenu
+                title={lang[t].productList.list.button.more}
+                buttonVariant={"secondary"}
+                buttonSize={"big"}
+                textVariant={"button"}
+                textColor={"pink.regular"}
+                iconStyle={{ fontSize: "12px" }}
+                onClick={(e: any) => {
+                  switch (parseInt(e.key)) {
+                    case 1:
+                      downloadFile({ with_data: "N", company_id: companyCode });
+                      break;
+                    case 2:
+                      setShowUpload(true);
+                      break;
+                    case 3:
+                      downloadFile({ with_data: "Y", company_id: companyCode });
+                      break;
+                    case 4:
+                      break;
+                    default:
+                      break;
+                  }
+                }}
+                menuList={menuList}
+              />
             )}
-            {allowPermissionToShow?.some((el: any) => el.name === "Create Product List") && (
+            {listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Create").length >
+              0 && (
               <Button
                 size="big"
                 variant="primary"
@@ -473,7 +473,6 @@ const Product = () => {
 };
 
 const CustomFormSelect = styled(FormSelect)`
-  
   .ant-select-selection-placeholder {
     line-height: 48px !important;
   }
@@ -491,7 +490,7 @@ const CustomFormSelect = styled(FormSelect)`
     display: flex;
     align-items: center;
   }
-`
+`;
 
 const Label = styled.div`
   font-weight: bold;

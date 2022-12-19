@@ -38,11 +38,11 @@ import { queryClient } from "../../../pages/_app";
 import { useProductCategoryInfiniteLists } from "hooks/mdm/product-category/useProductCategory";
 import { lang } from "lang";
 
-export default function CreateProduct({ isCreateProductVariant = true ,allowPermissionToShow}:any) {
+export default function CreateProduct({ isCreateProductVariant = true, listPermission }: any) {
   const router = useRouter();
   const t = localStorage.getItem("lan") || "en-US";
-  const companyId = localStorage.getItem("companyId")
-  const companyCode = localStorage.getItem("companyCode")
+  const companyId = localStorage.getItem("companyId");
+  const companyCode = localStorage.getItem("companyCode");
 
   const { id } = router.query;
   const isUpdate = !!id;
@@ -153,8 +153,8 @@ export default function CreateProduct({ isCreateProductVariant = true ,allowPerm
         tax_country_id: "",
         tax_id: "",
         tax_type: "",
-        tax_code: ""
-      }
+        tax_code: "",
+      },
     },
   });
 
@@ -175,36 +175,42 @@ export default function CreateProduct({ isCreateProductVariant = true ,allowPerm
       onSuccess: (data: any) => {
         data = toSnakeCase(data);
         Object.keys(data).forEach((key) => {
-          if(key === 'uom_conversion'){
-            setValue('uom', data[key]?.map((data:any, index:any) => ({
-              baseUom: data.base_uom_name,
-              conversionNumber: data.conversion_number,
-              id: data.id,
-              index,
-              key: data.id,
-              levelId: data?.level_id,
-              qty: data?.qty,
-              uomConversionItemId: data.conversion_id,
-              name: data.name,
-              uomName: data?.uom_name
-            })))
-          } else if(key === 'registrations') {
-            setValue('registration', data[key])
-          } else if(key === 'branch') {
-              let branchIds:any = []
-              data[key].forEach((branch:any) => {
-                branchIds.push(...branch.branchs.map((branch:any) => branch.id))
-              })
-              let branch = {
-                ids: branchIds
-              }
-              setValue(key, branch)
-          } else if(key === 'tax') {
-            setValue('tax.tax_type', data?.tax?.tax_type);
-            setValue('tax.tax_code', data?.tax?.tax_code);
-            setValue('tax.tax_id', data?.tax?.tax_detail?.id);
-            setValue('tax.tax_country_id', data?.tax?.tax_country?.id);
-            setValue('tax.tax_vendors', data?.tax?.tax_vendors?.map((tax: any) => tax.id));
+          if (key === "uom_conversion") {
+            setValue(
+              "uom",
+              data[key]?.map((data: any, index: any) => ({
+                baseUom: data.base_uom_name,
+                conversionNumber: data.conversion_number,
+                id: data.id,
+                index,
+                key: data.id,
+                levelId: data?.level_id,
+                qty: data?.qty,
+                uomConversionItemId: data.conversion_id,
+                name: data.name,
+                uomName: data?.uom_name,
+              }))
+            );
+          } else if (key === "registrations") {
+            setValue("registration", data[key]);
+          } else if (key === "branch") {
+            let branchIds: any = [];
+            data[key].forEach((branch: any) => {
+              branchIds.push(...branch.branchs.map((branch: any) => branch.id));
+            });
+            let branch = {
+              ids: branchIds,
+            };
+            setValue(key, branch);
+          } else if (key === "tax") {
+            setValue("tax.tax_type", data?.tax?.tax_type);
+            setValue("tax.tax_code", data?.tax?.tax_code);
+            setValue("tax.tax_id", data?.tax?.tax_detail?.id);
+            setValue("tax.tax_country_id", data?.tax?.tax_country?.id);
+            setValue(
+              "tax.tax_vendors",
+              data?.tax?.tax_vendors?.map((tax: any) => tax.id)
+            );
           } else {
             setValue(key, data[key]);
           }
@@ -212,7 +218,7 @@ export default function CreateProduct({ isCreateProductVariant = true ,allowPerm
           setCanBePurchased(data.can_be_purchased);
           setCanBeSold(data.can_be_sold);
           setCanManufacture(data.can_be_manufactured);
-          setIsShareable(data.can_be_shared)
+          setIsShareable(data.can_be_shared);
         });
         return data;
       },
@@ -312,10 +318,10 @@ export default function CreateProduct({ isCreateProductVariant = true ,allowPerm
         }
       },
       onError: (e: any) => {
-        if(e?.data?.message?.includes('already exist')){
-          setError('name', {message:  e.data.message, type: "focus" }, { shouldFocus: true })
+        if (e?.data?.message?.includes("already exist")) {
+          setError("name", { message: e.data.message, type: "focus" }, { shouldFocus: true });
         }
-      }
+      },
     },
   });
 
@@ -365,7 +371,7 @@ export default function CreateProduct({ isCreateProductVariant = true ,allowPerm
       "variants",
       "registration",
       "accounting",
-      "tax"
+      "tax",
     ]);
 
     payload.uom_conversion = [];
@@ -421,20 +427,21 @@ export default function CreateProduct({ isCreateProductVariant = true ,allowPerm
         transportation_type: data?.inventory?.storage_management?.transportation_type?.id,
       },
     };
-    payload.registration = data?.registration?.map((data) => ({
-      number_type: data?.number_type,
-      number: data?.number,
-      valid_from: data.valid_from?.includes("/")
-        ? moment(data.valid_from, "DD/MM/YYYY").utc().toString()
-        : moment(data.valid_from).utc().toString(),
-      valid_to: data.valid_to?.includes("/")
-        ? moment(data.valid_to, "DD/MM/YYYY").utc().toString()
-        : moment(data.valid_to).utc().toString(),
-    })) || [];
+    payload.registration =
+      data?.registration?.map((data) => ({
+        number_type: data?.number_type,
+        number: data?.number,
+        valid_from: data.valid_from?.includes("/")
+          ? moment(data.valid_from, "DD/MM/YYYY").utc().toString()
+          : moment(data.valid_from).utc().toString(),
+        valid_to: data.valid_to?.includes("/")
+          ? moment(data.valid_to, "DD/MM/YYYY").utc().toString()
+          : moment(data.valid_to).utc().toString(),
+      })) || [];
 
-    payload.variants = data?.variants.map(({id, ...rest}: any) => ({
-      ...rest
-    }))
+    payload.variants = data?.variants.map(({ id, ...rest }: any) => ({
+      ...rest,
+    }));
 
     payload.product_category_id = data?.category?.id;
     if (isUpdate) {
@@ -450,7 +457,7 @@ export default function CreateProduct({ isCreateProductVariant = true ,allowPerm
     getValues,
     register,
     control,
-    errors
+    errors,
   };
 
   const propsRegistrations = {
@@ -465,7 +472,7 @@ export default function CreateProduct({ isCreateProductVariant = true ,allowPerm
   const propsAccounting = {
     control,
     accounting: {},
-    setValue
+    setValue,
   };
 
   const branchForm = useWatch({
@@ -474,29 +481,34 @@ export default function CreateProduct({ isCreateProductVariant = true ,allowPerm
   });
 
   const switchTabItem = () => {
-      return (
+    return (
       <>
-        <div style={{display: tabAktived === 'Registration' ? 'block': 'none'}}>
+        <div style={{ display: tabAktived === "Registration" ? "block" : "none" }}>
           <Registration {...propsRegistrations} />
-          </div>
-        <div style={{display: tabAktived === 'Branch' ? 'block': 'none'}}>
+        </div>
+        <div style={{ display: tabAktived === "Branch" ? "block" : "none" }}>
           <Branch setValue={setValue} branch={branchForm} isUpdate={isUpdate} />
         </div>
-        <div style={{display: tabAktived === 'Purchasing' ? 'block': 'none'}}>
-          <Purchasing control={control} setValue={setValue} register={register} productData={productData} />
+        <div style={{ display: tabAktived === "Purchasing" ? "block" : "none" }}>
+          <Purchasing
+            control={control}
+            setValue={setValue}
+            register={register}
+            productData={productData}
+          />
         </div>
-        <div style={{display: tabAktived === 'Accounting' ? 'block': 'none'}}>
+        <div style={{ display: tabAktived === "Accounting" ? "block" : "none" }}>
           <Accounting {...propsAccounting} />
         </div>
-        <div style={{display: tabAktived === 'Inventory' ? 'block': 'none'}}>
+        <div style={{ display: tabAktived === "Inventory" ? "block" : "none" }}>
           <Inventory {...propsInventory} />
         </div>
-        <div style={{display: tabAktived === 'Detail' ? 'block': 'none'}}>
+        <div style={{ display: tabAktived === "Detail" ? "block" : "none" }}>
           <Detail {...propsDetail} />
         </div>
       </>
-      )
-  }
+    );
+  };
 
   const productForm = useWatch({
     control,
@@ -526,7 +538,6 @@ export default function CreateProduct({ isCreateProductVariant = true ,allowPerm
     control,
     name: "name",
   });
-
 
   const inventoryWatch = useWatch({
     control,
@@ -561,7 +572,10 @@ export default function CreateProduct({ isCreateProductVariant = true ,allowPerm
       return false;
     });
 
-    if (options?.length > 0 && options.map((data) => data?.option_items.map((data) => data?.id))?.length > 0) {
+    if (
+      options?.length > 0 &&
+      options.map((data) => data?.option_items.map((data) => data?.id))?.length > 0
+    ) {
       let allValues = options.map((data) =>
         data?.option_items.map((data) => data?.name || data?.label)
       );
@@ -578,7 +592,7 @@ export default function CreateProduct({ isCreateProductVariant = true ,allowPerm
       }));
       replaceProductVariants(finalVariants);
     } else {
-      replaceProductVariants([])
+      replaceProductVariants([]);
     }
   };
 
@@ -705,11 +719,10 @@ export default function CreateProduct({ isCreateProductVariant = true ,allowPerm
                   checked={isShareable}
                   onChange={() => setIsShareable(!isShareable)}
                 />
-                <div
-                  style={{ cursor: "pointer" }}
-                  onClick={() => setIsShareable(!isShareable)}
-                >
-                  <Text variant={"h6"}>{lang[t].productList.create.checkbox.isShareable || "Is Shareable"}</Text>
+                <div style={{ cursor: "pointer" }} onClick={() => setIsShareable(!isShareable)}>
+                  <Text variant={"h6"}>
+                    {lang[t].productList.create.checkbox.isShareable || "Is Shareable"}
+                  </Text>
                 </div>
               </Row>
             </Col>
@@ -740,43 +753,52 @@ export default function CreateProduct({ isCreateProductVariant = true ,allowPerm
               <Row gap="16px">
                 {isUpdate ? (
                   <>
-                  {allowPermissionToShow?.some((el: any) => el.name === "Update Product List") && (
-                    <Button size="big" variant={"primary"} onClick={(e: any) => {
-                      if(!inventoryWatch?.weight?.net){
-                        setTabAktived('Inventory')
-                        handleSubmit(onSubmit)(e)
-                      } else {
-                        handleSubmit(onSubmit)(e)
-                      }
-                    }}>
-                      {isLoadingCreateProduct || isLoadingUploadImage || isLoadingUpdateProduct
-                        ? "Loading..."
-                        : lang[t].productList.list.button.save}
-                    </Button>
-                  )}
+                    {listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Update")
+                      .length > 0 && (
+                      <Button
+                        size="big"
+                        variant={"primary"}
+                        onClick={(e: any) => {
+                          if (!inventoryWatch?.weight?.net) {
+                            setTabAktived("Inventory");
+                            handleSubmit(onSubmit)(e);
+                          } else {
+                            handleSubmit(onSubmit)(e);
+                          }
+                        }}
+                      >
+                        {isLoadingCreateProduct || isLoadingUploadImage || isLoadingUpdateProduct
+                          ? "Loading..."
+                          : lang[t].productList.list.button.save}
+                      </Button>
+                    )}
                   </>
                 ) : (
                   <>
-                  <Button size="big" variant={"tertiary"} onClick={() => router.back()}>
-                    {lang[t].productList.list.button.cancel}
-                  </Button>
-                  {allowPermissionToShow?.some((el: any) => el.name === "Create Product List") && (
-                  <Button size="big" variant={"primary"} onClick={(e: any) => {
-                    if(!inventoryWatch?.weight?.net){
-                      setTabAktived('Inventory')
-                      handleSubmit(onSubmit)(e)
-                    } else {
-                      handleSubmit(onSubmit)(e)
-                    }
-                  }}>
-                    {isLoadingCreateProduct || isLoadingUploadImage || isLoadingUpdateProduct
-                      ? "Loading..."
-                      : lang[t].productList.list.button.save}
-                  </Button>
-                  )}
+                    <Button size="big" variant={"tertiary"} onClick={() => router.back()}>
+                      {lang[t].productList.list.button.cancel}
+                    </Button>
+                    {listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Create")
+                      .length > 0 && (
+                      <Button
+                        size="big"
+                        variant={"primary"}
+                        onClick={(e: any) => {
+                          if (!inventoryWatch?.weight?.net) {
+                            setTabAktived("Inventory");
+                            handleSubmit(onSubmit)(e);
+                          } else {
+                            handleSubmit(onSubmit)(e);
+                          }
+                        }}
+                      >
+                        {isLoadingCreateProduct || isLoadingUploadImage || isLoadingUpdateProduct
+                          ? "Loading..."
+                          : lang[t].productList.list.button.save}
+                      </Button>
+                    )}
                   </>
                 )}
-                
               </Row>
             </Row>
           </Card>
@@ -785,7 +807,9 @@ export default function CreateProduct({ isCreateProductVariant = true ,allowPerm
 
           <Accordion>
             <Accordion.Item key={1}>
-              <Accordion.Header variant="blue">{lang[t].productList.create.accordion.general}</Accordion.Header>
+              <Accordion.Header variant="blue">
+                {lang[t].productList.create.accordion.general}
+              </Accordion.Header>
               <Accordion.Body>
                 <UploadImage control={control} productForm={productForm} />
                 <Spacer size={20} />
@@ -837,7 +861,9 @@ export default function CreateProduct({ isCreateProductVariant = true ,allowPerm
                       render={({ field: { onChange } }) => (
                         <Col width="100%">
                           <span>
-                            <Label style={{ display: "inline" }}>{lang[t].productList.create.field.productCategory}</Label>{" "}
+                            <Label style={{ display: "inline" }}>
+                              {lang[t].productList.create.field.productCategory}
+                            </Label>{" "}
                             <span></span>
                           </span>
 
@@ -884,7 +910,10 @@ export default function CreateProduct({ isCreateProductVariant = true ,allowPerm
                       render={({ field: { onChange } }) => (
                         <>
                           <span>
-                            <Label style={{ display: "inline" }}>{lang[t].productList.create.field.productBrand}</Label> <span></span>
+                            <Label style={{ display: "inline" }}>
+                              {lang[t].productList.create.field.productBrand}
+                            </Label>{" "}
+                            <span></span>
                           </span>
 
                           <Spacer size={3} />
@@ -947,7 +976,9 @@ export default function CreateProduct({ isCreateProductVariant = true ,allowPerm
                           onChange={(date: any, dateString: any) => onChange(dateString)}
                           label={lang[t].productList.create.field.discontinueDate}
                           format={"DD/MM/YYYY"}
-                          defaultValue={productData?.expiredDate ? moment(productData?.expiredDate) : undefined}
+                          defaultValue={
+                            productData?.expiredDate ? moment(productData?.expiredDate) : undefined
+                          }
                         />
                       )}
                     />
@@ -962,7 +993,9 @@ export default function CreateProduct({ isCreateProductVariant = true ,allowPerm
 
           <Accordion>
             <Accordion.Item key={1}>
-              <Accordion.Header variant="blue">{lang[t].productList.create.accordion.productInformation}</Accordion.Header>
+              <Accordion.Header variant="blue">
+                {lang[t].productList.create.accordion.productInformation}
+              </Accordion.Header>
               <Accordion.Body>
                 <Tabs
                   activeKey={tabAktived}
