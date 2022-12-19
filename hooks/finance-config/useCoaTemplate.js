@@ -2,6 +2,7 @@ import { useQuery, useMutation, useInfiniteQuery } from "react-query";
 import { client } from "../../lib/client";
 
 const fetchListCoa = async ({ query = {} }) => {
+  const companyCode = localStorage.getItem('companyCode')
   return client(`/coa`, {
     params: {
       search: "",
@@ -10,25 +11,27 @@ const fetchListCoa = async ({ query = {} }) => {
       sortBy: "id",
       sortOrder: "asc",
       ...query,
+      company_id: companyCode
     },
   }).then((data) => data);
 };
 
 const fetchDetailCoa = async ({ coa_id, query }) => {
+  const companyCode = localStorage.getItem("companyCode");
   return client(`/coa/detail/${coa_id}`, {
     data: {
       page: 1,
-      search: "lancar",
+      search: "",
       limit: 10,
       sortBy: "account_name",
       sortOrder: "DESC",
       ...query,
+      company_id: companyCode,
     },
     method: "PUT",
     skipSnakeCase: true,
   }).then((data) => data);
 };
-
 
 const fetchInfiniteCoaLists = async ({ pageParam = 1, queryKey }) => {
   const searchQuery = queryKey[1].search;
@@ -100,7 +103,7 @@ const useDeleteCoa = ({ options }) => {
     (ids) =>
       client(`/coa/delete`, {
         method: "POST",
-        data: ids,
+        data: { ...ids },
       }),
     {
       ...options,

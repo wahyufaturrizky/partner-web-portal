@@ -155,10 +155,10 @@ const DetailRoleConfig: any = () => {
 		},
 	});
 
-	// const activeStatus = [
-	// 	{ id: "Y", value: '<div key="1" style="color:green;">Active</div>' },
-	// 	{ id: "N", value: '<div key="2" style="color:red;">Non Active</div>' },
-	// ];
+	const activeStatus = [
+		{ id: "Y", value: '<div key="1" style="color:green;">Active</div>' },
+		{ id: "N", value: '<div key="2" style="color:red;">Non Active</div>' },
+	];
 
 	const onSubmit = (data: any) => {
 		const payload = {
@@ -277,8 +277,8 @@ const DetailRoleConfig: any = () => {
 							<Text variant={"h4"}>{role?.name}</Text>
 						</Row>
 						<Spacer size={12} />
-						{/* <Card>
-							<Row justifyContent="flex-end" alignItems="center" nowrap>
+						<Card>
+							<Row justifyContent="space-between" alignItems="center" nowrap>
 								<Dropdown
 									label=""
 									isHtml
@@ -298,9 +298,10 @@ const DetailRoleConfig: any = () => {
 									</Button>
 								</Row>
 							</Row>
-						</Card> */}
+						</Card>
 
-						{/* <Spacer size={20} /> */}
+						<Spacer size={20} />
+						
 						{role?.role?.reasonRejection && (
 							<>
 								<Alert>
@@ -327,7 +328,7 @@ const DetailRoleConfig: any = () => {
 										/>
 										<Controller
 											control={control}
-											defaultValue={""}
+											defaultValue={role?.companyId}
 											name="company_id"
 											render={({ field: { onChange }, formState: { errors } }) => (
 												<Col>
@@ -441,7 +442,7 @@ const DetailRoleConfig: any = () => {
 													name={menu.name}
 													checked={permissionsIds}
 													onChange={(data: any) => setPermissions(data)}
-													disabled={true}
+													// disabled={true}
 												/>
 											))}
 										</Col>

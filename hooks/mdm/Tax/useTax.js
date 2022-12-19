@@ -1,42 +1,34 @@
 import { useQuery, useMutation, useInfiniteQuery } from "react-query";
 import { mdmService } from "../../../lib/client";
 
-const fetchTaxes = async ({ query = {} }) => {
-  return mdmService(`/tax`, {
-    params: {
-      search: "",
-      page: 1,
-      limit: 10,
-      sortBy: "country_id",
-      sortOrder: "DESC",
-      ...query,
-    },
-  }).then((data) => data);
-};
+const fetchTaxes = async ({ query = {} }) => mdmService(`/tax`, {
+  params: {
+    search: "",
+    page: 1,
+    limit: 10,
+    sortBy: "country_id",
+    sortOrder: "DESC",
+    ...query,
+  },
+}).then((data) => data);
 
-const useTaxes = ({ query = {}, options }) => {
-  return useQuery(["tax-list", query], () => fetchTaxes({ query }), {
-    ...options,
-  });
-};
+const useTaxes = ({ query = {}, options }) => useQuery(["tax-list", query], () => fetchTaxes({ query }), {
+  ...options,
+});
 
-const fetchTax = async ({ query = {} }) => {
-  return mdmService(`/tax`, {
-    params: {
-      search: "",
-      page: 1,
-      limit: 10,
-      sortOrder: "DESC",
-      ...query,
-    },
-  }).then((data) => data);
-};
+const fetchTax = async ({ query = {} }) => mdmService(`/tax`, {
+  params: {
+    search: "",
+    page: 1,
+    limit: 10,
+    sortOrder: "DESC",
+    ...query,
+  },
+}).then((data) => data);
 
-const useTax = ({ query = {}, options }) => {
-  return useQuery(["tax-detail", query], () => fetchTax({ query }), {
-    ...options,
-  });
-};
+const useTax = ({ query = {}, options }) => useQuery(["tax-detail", query], () => fetchTax({ query }), {
+  ...options,
+});
 
 const fetchInfiniteTaxLists = async ({ pageParam = 1, queryKey }) => {
   const searchQuery = queryKey[1].search;
@@ -52,30 +44,24 @@ const fetchInfiniteTaxLists = async ({ pageParam = 1, queryKey }) => {
   }).then((data) => data);
 };
 
-const useTaxInfiniteLists = ({ query = {}, options }) => {
-  return useInfiniteQuery(["tax/infinite", query], fetchInfiniteTaxLists, {
-    keepPreviousData: true,
-    ...options,
-  });
-};
+const useTaxInfiniteLists = ({ query = {}, options }) => useInfiniteQuery(["tax/infinite", query], fetchInfiniteTaxLists, {
+  keepPreviousData: true,
+  ...options,
+});
 
-const fetchCountryTaxes = async ({ query = {} }) => {
-  return mdmService(`/tax`, {
-    params: {
-      search: "",
-      page: 1,
-      limit: 10,
-      sortOrder: "DESC",
-      ...query,
-    },
-  }).then((data) => data);
-};
+const fetchCountryTaxes = async ({ query = {} }) => mdmService(`/tax`, {
+  params: {
+    search: "",
+    page: 1,
+    limit: 10,
+    sortOrder: "DESC",
+    ...query,
+  },
+}).then((data) => data);
 
-const useCountryTaxes = ({ query = {}, options }) => {
-  return useQuery(["tax-detail", query], () => fetchCountryTaxes({ query }), {
-    ...options,
-  });
-};
+const useCountryTaxes = ({ query = {}, options }) => useQuery(["tax-detail", query], () => fetchCountryTaxes({ query }), {
+  ...options,
+});
 
 const fetchInfiniteeCountryTaxLists = async ({ pageParam = 1, queryKey }) => {
   const searchQuery = queryKey[1].search;
@@ -91,101 +77,80 @@ const fetchInfiniteeCountryTaxLists = async ({ pageParam = 1, queryKey }) => {
   }).then((data) => data);
 };
 
-const useCountryTaxInfiniteLists = ({ query = {}, options }) => {
-  return useInfiniteQuery(["tax/country/infinite", query], fetchInfiniteeCountryTaxLists, {
-    keepPreviousData: true,
-    ...options,
-  });
-};
+const useCountryTaxInfiniteLists = ({ query = {}, options }) => useInfiniteQuery(["tax/country/infinite", query], fetchInfiniteeCountryTaxLists, {
+  keepPreviousData: true,
+  ...options,
+});
 
 function useCreateTax({ options }) {
   return useMutation(
-    (data) =>
-      mdmService(`/tax-item`, {
-        method: "POST",
-        data,
-      }),
+    (data) => mdmService(`/tax-item`, {
+      method: "POST",
+      data,
+    }),
     {
       ...options,
-    }
+    },
   );
 }
 
 function useUpdateTax({ id, taxItem, options }) {
   return useMutation(
-    (data) =>
-      mdmService(`/tax-item/${id}/${taxItem}`, {
-        method: "PUT",
-        data,
-      }),
+    (data) => mdmService(`/tax-item/${id}/${taxItem}`, {
+      method: "PUT",
+      data,
+    }),
     {
       ...options,
-    }
+    },
   );
 }
 
-const useDeletTax = ({ options }) => {
-  return useMutation(
-    (data) =>
-      mdmService(`/tax`, {
-        method: "DELETE",
-        data,
-      }),
-    {
-      ...options,
-    }
-  );
-};
-
-const useUploadFileTax = ({ options }) => {
-  return useMutation(
-    (data) =>
-      mdmService(`/tax/upload`, {
-        method: "POST",
-        data,
-      }),
-    {
-      ...options,
-    }
-  );
-};
-
-const useDeleteTaxItem = ({ options }) => {
-  return useMutation(
-    (data) =>
-      mdmService(`/tax-item`, {
-        method: "DELETE",
-        data,
-      }),
-    {
-      ...options,
-    }
-  );
-};
-
-const useDeleteTaxItemDetail = ({ options }) => {
-  return useMutation(
-    (data) =>
-      mdmService(`/tax-item-detail`, {
-        method: "DELETE",
-        data,
-      }),
-    {
-      ...options,
-    }
-  );
-};
-
-const fetchDetailTaxItem = async ({ id, taxId }) => {
-  return mdmService(`/tax-item/${taxId}/${id}`).then((data) => data);
-};
-
-const useDetailTaxItem = ({ id, taxId, options }) => {
-  console.log(id);
-  return useQuery(["tax-item-detail", id], () => fetchDetailTaxItem({ id, taxId }), {
+const useDeletTax = ({ options }) => useMutation(
+  (data) => mdmService(`/tax`, {
+    method: "DELETE",
+    data,
+  }),
+  {
     ...options,
-  });
-};
+  },
+);
+
+const useUploadFileTax = ({ options }) => useMutation(
+  (data) => mdmService(`/tax/upload`, {
+    method: "POST",
+    data,
+  }),
+  {
+    ...options,
+  },
+);
+
+const useDeleteTaxItem = ({ options }) => useMutation(
+  (data) => mdmService(`/tax-item`, {
+    method: "DELETE",
+    data,
+  }),
+  {
+    ...options,
+  },
+);
+
+const useDeleteTaxItemDetail = ({ options }) => useMutation(
+  (data) => mdmService(`/tax-item-detail`, {
+    method: "DELETE",
+    data,
+  }),
+  {
+    ...options,
+  },
+);
+
+const fetchDetailTaxItem = async ({ id, taxId }) => mdmService(`/tax-item/${taxId}/${id}`).then((data) => data);
+
+const useDetailTaxItem = ({ id, taxId, options }) => useQuery(["tax-item-detail", id], () => fetchDetailTaxItem({ id, taxId }), {
+  ...options,
+});
 
 export {
   useTaxes,

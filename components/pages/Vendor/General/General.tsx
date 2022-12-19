@@ -258,6 +258,8 @@ const General = ({ type, formType }: any) => {
     },
   });
 
+  console.log("errors?.individu?.title", errors?.individu?.title)
+
   return (
     <div style={{ height: "650px" }}>
       <Row width="100%" noWrap>
@@ -372,7 +374,7 @@ const General = ({ type, formType }: any) => {
                         { id: "Mr.", value: "Mr." },
                         { id: "Ms.", value: "Ms." },
                       ]}
-                      handleChange={(value: any) => {
+                      onChange={(value: any) => {
                         onChange(value);
                       }}
                     />
@@ -468,6 +470,10 @@ const General = ({ type, formType }: any) => {
         )}
       </Row>
 
+      <ErrorText>
+        {errors?.individu?.title?.type === "required" && "This field is required"}
+      </ErrorText>
+      
       <Spacer size={20} />
 
       <Row width="100%" noWrap gap={"10px"} alignItems={"center"}>
@@ -803,5 +809,11 @@ const Center = styled.div`
   justify-content: center;
   align-items: center;
 `;
+
+const ErrorText = styled.p`
+    color: #ED1C24;
+    font-size: 12px;
+    line-height: 18px;
+`
 
 export default General;
