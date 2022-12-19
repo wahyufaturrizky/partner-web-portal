@@ -27,6 +27,8 @@ import ICArrowRight from "./ic-arrow-right.svg";
 import ICArrowRightDiagram from "./arrow-right.svg";
 import ICEhash from "./ic-ehash.svg";
 import ICSuccessCheck from "./ic-success-check.svg";
+import CheckmarkIcon from "./checkmark.svg";
+
 export {
   IconAdd,
   ICField,
@@ -57,4 +59,5 @@ export {
   ICArrowRightDiagram,
   ICEhash,
   ICSuccessCheck,
+  CheckmarkIcon,
 };

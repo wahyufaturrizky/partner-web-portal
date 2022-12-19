@@ -235,7 +235,7 @@ const TransportationGroup = () => {
 
   const onSubmitFile = (file: any) => {
     const formData = new FormData();
-    // formData.append("company_id", "KSNI");
+    formData.append("company_id", companyCode);
     formData.append("upload_file", file);
 
     uploadFileTransportation(formData);

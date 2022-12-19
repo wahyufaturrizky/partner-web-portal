@@ -20,6 +20,7 @@ const schema = yup
 
 const BranchCreate = () => {
   const router = useRouter();
+  const companyCode = localStorage.getItem("companyCode");
 
   const [searchBranchParent, setSearchBranchParent] = useState("")
   const [searchSalesOrganization, setSearchSalesOrganization] = useState("");
@@ -62,7 +63,7 @@ const BranchCreate = () => {
   } = useBranchParent({
     query: {
       // company_id: branch_id && branch_id[0],
-      company_id: "KSNI",
+      company_id: companyCode,
       is_group: true,
       search: debounceFetchBranchParent
     },
@@ -262,7 +263,7 @@ const BranchCreate = () => {
   }
   const onSubmit = (data: any) => {
     const formData = {
-      company_id: "KSNI",
+      company_id: companyCode,
       ...data,
       timezone: data?.timezone?.toString(),
       calendar_id: data?.calendar_id?.toString(),

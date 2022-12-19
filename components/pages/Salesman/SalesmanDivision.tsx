@@ -74,11 +74,12 @@ export default function ComponentSalesmanDivision() {
     },
     query: {
       search,
+      company: companyCode,
       page: pagination.page,
       limit: pagination.itemsPerPage,
     }
   })
-
+  
   const { mutate: handleDeleteDivision }: { mutate: any } =
   useDeleteSalesmanDivision({
     options: {

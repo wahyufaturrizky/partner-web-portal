@@ -13,7 +13,7 @@ const fetchListSalesman = async ({ query, company_id }) => {
   }).then((data) => data);
 };
 
-const fetchCountTabItems = async ({company_id}) => {
+const fetchCountTabItems = async ({ company_id }) => {
   return mdmService("/salesman/count/stats", {
     params: { company: company_id },
   }).then((data) => data);
@@ -82,6 +82,17 @@ const useUploadDocumentSalesman = ({ options }) => {
   );
 };
 
+const useApprovalSalesman = ({ options }) => {
+  return useMutation(
+    (data) =>
+      mdmService("/salesman/approval", {
+        method: "POST",
+        data,
+      }),
+    { ...options }
+  );
+};
+
 const useFetchCountTabItems = ({ query, options, company_id }) => {
   return useQuery(["count-tab-items", query], () => fetchCountTabItems({ query, company_id }), {
     keepPreviousData: true,
@@ -96,4 +107,5 @@ export {
   useFetchListSalesman,
   useFetchDetailSalesman,
   useFetchSalesmanCustomerDetail,
+  useApprovalSalesman,
 };

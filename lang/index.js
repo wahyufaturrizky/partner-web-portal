@@ -233,7 +233,7 @@ export const lang = {
         createApproval: "Create Approval",
       },
       searchBar: {
-        processList: "Search Proces sList Name",
+        processList: "Search Process Name",
       },
       tertier: {
         viewDetail: "View Detail",
@@ -1180,6 +1180,9 @@ export const lang = {
       salesmanName: "Salesman Name",
       branch: "Branch",
       idCard: "ID Card",
+      divisionName: "Division Name",
+      mobileNumber: "Mobile Number",
+      email: "Email",
     },
     userList: {
       list: {
@@ -1195,10 +1198,10 @@ export const lang = {
           upload: "Upload Template",
         },
         field: {
-          searchBar: "Search UserList, User List ID,User List Name",
+          searchBar: "Search User ID, Name",
         },
         table: {
-          employeeId: "Employee ID",
+          employeeId: "User ID",
           name: "Name",
           status: "Status",
           action: "Action",
@@ -1300,17 +1303,20 @@ export const lang = {
       },
       primary: {
         create: "Create",
-        save: "Menyimpan",
+        save: "Save",
+        yes: "Yes",
       },
       confirmDelete: "Confirm Delete",
-      yes: "Yes",
     },
     trainingType: {
       tertier: {
         viewDetail: "View Detail",
         more: "More",
+        cancel: "Cancel",
+        delete: "Delete",
       },
       trainingTypeId: "Training Type ID",
+      createTrainingType: "Create Training Type",
       trainingTypeName: "Training Type Name",
       action: "Action",
       title: "Training Type",
@@ -1320,7 +1326,9 @@ export const lang = {
         uploadTemplate: "Upload Template",
         downloadData: "Download Data",
       },
-      primary: { create: "Membuat", save: "Menyimpan", yes: "Iya" },
+      primary: { create: "Create", save: "Save", yes: "Yes" },
+      confirmDelete: "Confirm Delete",
+      areYouSureToDelete: "Are you sure to delete",
     },
     customer: {
       customerId: "Customer Id",
@@ -1373,7 +1381,7 @@ export const lang = {
           addNew: "Add New",
           cancel: "Cancel",
           download: "Download Template",
-          downloadData: "Upload Data",
+          downloadData: "Download Data",
           upload: "Upload Template",
           yes: "Yes",
           view: "View",
@@ -1492,7 +1500,7 @@ export const lang = {
           addNew: "Add New",
           cancel: "Cancel",
           download: "Download Template",
-          downloadData: "Upload Data",
+          downloadData: "Download Data",
           upload: "Upload Template",
           yes: "Yes",
           view: "View",
@@ -2818,15 +2826,17 @@ export const lang = {
       primary: {
         create: "Membuat",
         save: "Menyimpan",
+        yes: "Iya",
       },
       confirmDelete: "Konfirmasi Hapus",
-      yes: "Iya",
     },
     trainingType: {
+      createTrainingType: "Membuat Jenis Pelatihan",
       tertier: {
         viewDetail: "Lihat Detail",
         cancel: "Membatalkan",
         more: "Lebih",
+        delete: "Menghapus",
       },
       trainingTypeId: "ID Jenis Pelatihan",
       trainingTypeName: "Nama Jenis Pelatihan",
@@ -2846,6 +2856,7 @@ export const lang = {
       createTrainingType: "Buat Jenis Pelatihan",
       confirmDelete: "Konfirmasi Hapus",
       areYouSureToDelete: "Apakah Anda yakin untuk menghapus?",
+      confirmDelete: "Konfirmasi Hapus",
     },
     customer: {
       customerId: "ID Pelanggan",
