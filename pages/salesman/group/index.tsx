@@ -38,8 +38,8 @@ import { useUserPermissions } from "hooks/user-config/useUser";
 
 const SalesmanGroup = () => {
   const t = localStorage.getItem("lan") || "en-US";
-  const companyId = localStorage.getItem("companyId")
-  const companyCode = localStorage.getItem("companyCode")
+  const companyId = localStorage.getItem("companyId");
+  const companyCode = localStorage.getItem("companyCode");
 
   const pagination = usePagination({
     page: 1,
@@ -290,48 +290,60 @@ const SalesmanGroup = () => {
   };
 
   const { data: dataUserPermission } = useUserPermissions({
-		options: {
-			onSuccess: () => {},
-		},
-	});
+    options: {
+      onSuccess: () => {},
+    },
+  });
 
-	const listPermission = dataUserPermission?.permission?.filter(
-		(filtering: any) => filtering.menu === "Salesman Group"
-	);
+  const listPermission = dataUserPermission?.permission?.filter(
+    (filtering: any) => filtering.menu === "Salesman Group"
+  );
 
-  console.log(dataUserPermission, '<<<<allow')
-  let menuList: any[] = []
+  const checkUserPermission = (permissionGranted) => {
+    return listPermission?.find(
+      (data: any) => data?.viewTypes?.[0]?.viewType?.name === permissionGranted
+    );
+  };
 
-  if(listPermission){
+  console.log(dataUserPermission, "<<<<allow");
+  let menuList: any[] = [];
+
+  if (listPermission) {
     menuList = [
-      listPermission?.map((data: any) => data.name)?.includes("Download Template Salesman Group") && {
-        key: 1,
-        value: (
-          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-            <ICDownload />
-            <p style={{ margin: "0" }}>{lang[t].termOfPayment.ghost.downloadTemplate}</p>
-          </div>
-        ),
-      },
-      listPermission?.map((data: any) => data.name)?.includes("Upload Template Salesman Group") &&{
-        key: 2,
-        value: (
-          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-            <ICUpload />
-            <p style={{ margin: "0" }}>{lang[t].termOfPayment.ghost.uploadTemplate}</p>
-          </div>
-        ),
-      },
-      listPermission?.map((data: any) => data.name)?.includes("Download Data Salesman Group") && {
-        key: 3,
-        value: (
-          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-            <ICDownload />
-            <p style={{ margin: "0" }}>{lang[t].termOfPayment.ghost.downloadData}</p>
-          </div>
-        ),
-      },
-    ]
+      checkUserPermission("Download Template")
+        ? {
+            key: 1,
+            value: (
+              <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                <ICDownload />
+                <p style={{ margin: "0" }}>{lang[t].termOfPayment.ghost.downloadTemplate}</p>
+              </div>
+            ),
+          }
+        : "",
+      checkUserPermission("Upload Template")
+        ? {
+            key: 2,
+            value: (
+              <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                <ICUpload />
+                <p style={{ margin: "0" }}>{lang[t].termOfPayment.ghost.uploadTemplate}</p>
+              </div>
+            ),
+          }
+        : "",
+      checkUserPermission("Download Data")
+        ? {
+            key: 3,
+            value: (
+              <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                <ICDownload />
+                <p style={{ margin: "0" }}>{lang[t].termOfPayment.ghost.downloadData}</p>
+              </div>
+            ),
+          }
+        : "",
+    ];
   }
 
   const onSubmitFile = (file: any) => {
@@ -357,60 +369,64 @@ const SalesmanGroup = () => {
             }}
           />
           <Row gap="16px">
-							{listPermission?.map((data: any) => data.name)?.includes("Delete Salesman Group") && (
-            <Button
-              size="big"
-              variant={"tertiary"}
-              onClick={() =>
-                setShowDelete({
-                  open: true,
-                  type: "selection",
-                  data: { salesmanGroupDatas: salesmanGroupsData, selectedRowKeys },
-                })
-              }
-              disabled={rowSelection.selectedRowKeys?.length === 0}
-            >
-              {lang[t].salesmanGroup.tertier.delete}
-            </Button>
-              )}
-            <DropdownMenu
-              title={lang[t].salesmanGroup.tertier.more}
-              buttonVariant={"secondary"}
-              buttonSize={"big"}
-              textVariant={"button"}
-              textColor={"pink.regular"}
-              iconStyle={{ fontSize: "12px" }}
-              onClick={(e: any) => {
-                switch (parseInt(e.key)) {
-                  case 1:
-                    downloadFile({ with_data: "N", company_id: companyCode });
-                    break;
-                  case 2:
-                    setShowUpload(true);
-                    break;
-                  case 3:
-                    downloadFile({ with_data: "Y", company_id: companyCode });
-                    break;
-                  case 4:
-                    break;
-                  default:
-                    break;
+            {checkUserPermission("Delete") && (
+              <Button
+                size="big"
+                variant={"tertiary"}
+                onClick={() =>
+                  setShowDelete({
+                    open: true,
+                    type: "selection",
+                    data: { salesmanGroupDatas: salesmanGroupsData, selectedRowKeys },
+                  })
                 }
-              }}
-              menuList={menuList}
-            />
-							{listPermission?.map((data: any) => data.name)?.includes("Create Salesman Group") && (
-            <Button
-              size="big"
-              variant="primary"
-              onClick={() => {
-                setSalesmanGroupParentId(0);
-                setModalForm({ open: true, typeForm: "create", data: {} });
-              }}
-            >
-              {lang[t].salesmanGroup.primary.create}
-            </Button>
+                disabled={rowSelection.selectedRowKeys?.length === 0}
+              >
+                {lang[t].salesmanGroup.tertier.delete}
+              </Button>
+            )}
+            {checkUserPermission("Download Template") &&
+              checkUserPermission("Upload") &&
+              checkUserPermission("Download Data") && (
+                <DropdownMenu
+                  title={lang[t].salesmanGroup.tertier.more}
+                  buttonVariant={"secondary"}
+                  buttonSize={"big"}
+                  textVariant={"button"}
+                  textColor={"pink.regular"}
+                  iconStyle={{ fontSize: "12px" }}
+                  onClick={(e: any) => {
+                    switch (parseInt(e.key)) {
+                      case 1:
+                        downloadFile({ with_data: "N", company_id: companyCode });
+                        break;
+                      case 2:
+                        setShowUpload(true);
+                        break;
+                      case 3:
+                        downloadFile({ with_data: "Y", company_id: companyCode });
+                        break;
+                      case 4:
+                        break;
+                      default:
+                        break;
+                    }
+                  }}
+                  menuList={menuList}
+                />
               )}
+            {checkUserPermission("Create") && (
+              <Button
+                size="big"
+                variant="primary"
+                onClick={() => {
+                  setSalesmanGroupParentId(0);
+                  setModalForm({ open: true, typeForm: "create", data: {} });
+                }}
+              >
+                {lang[t].salesmanGroup.primary.create}
+              </Button>
+            )}
           </Row>
         </Row>
       </Card>
@@ -554,19 +570,19 @@ const SalesmanGroup = () => {
                     >
                       {lang[t].salesmanGroup.tertier.cancel}
                     </Button>
-							      {salesmanGroupFormData && listPermission?.map((data: any) => data.name)?.includes("Update Salesman Group") && (
-                    <Button full onClick={handleSubmit(onSubmit)} variant="primary" size="big">
-                      {isLoadingCreateSalesmanGroup || isLoadingUpdateSalesmanGroup
-                        ? "Loading..."
-                        : lang[t].salesmanGroup.primary.save}
-                    </Button>
+                    {salesmanGroupFormData && checkUserPermission("Update") && (
+                      <Button full onClick={handleSubmit(onSubmit)} variant="primary" size="big">
+                        {isLoadingCreateSalesmanGroup || isLoadingUpdateSalesmanGroup
+                          ? "Loading..."
+                          : lang[t].salesmanGroup.primary.save}
+                      </Button>
                     )}
-							      {listPermission?.map((data: any) => data.name)?.includes("Create Salesman Group") && (
-                    <Button full onClick={handleSubmit(onSubmit)} variant="primary" size="big">
-                      {isLoadingCreateSalesmanGroup || isLoadingUpdateSalesmanGroup
-                        ? "Loading..."
-                        : lang[t].salesmanGroup.primary.save}
-                    </Button>
+                    {checkUserPermission("Create") && (
+                      <Button full onClick={handleSubmit(onSubmit)} variant="primary" size="big">
+                        {isLoadingCreateSalesmanGroup || isLoadingUpdateSalesmanGroup
+                          ? "Loading..."
+                          : lang[t].salesmanGroup.primary.save}
+                      </Button>
                     )}
                   </div>
                 </div>
