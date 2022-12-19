@@ -16,9 +16,7 @@ import {
 import { useState } from "react";
 import styled from "styled-components";
 import { ICDownload } from "../../assets/icons";
-import {
-  useRetailPricingList,
-} from "../../hooks/mdm/retail-pricing/useRetailPricingList";
+import { useRetailPricingList } from "../../hooks/mdm/retail-pricing/useRetailPricingList";
 import { mdmDownloadService } from "../../lib/client";
 import useDebounce from "../../lib/useDebounce";
 
@@ -33,8 +31,8 @@ const downloadFile = (params: any) =>
 
 const RetailPricing = () => {
   const router = useRouter();
-  const companyId = localStorage.getItem("companyId")
-  const companyCode = localStorage.getItem("companyCode")
+  const companyId = localStorage.getItem("companyId");
+  const companyCode = localStorage.getItem("companyCode");
   const pagination = usePagination({
     page: 1,
     itemsPerPage: 5,
@@ -99,10 +97,8 @@ const RetailPricing = () => {
   const listPermission = dataUserPermission?.permission?.filter(
     (filtering: any) => filtering.menu === "Retail Pricing"
   );
-  const allowPermissionToShow = listPermission?.filter((data: any) =>
-    permissionRetailPricing.role[dataUserPermission?.role?.name].component.includes(data.name)
-  );
-  
+  console.log(listPermission);
+
   const columns = [
     {
       title: "Retail Price ID",
@@ -116,14 +112,15 @@ const RetailPricing = () => {
       title: "Based on",
       dataIndex: "based_on",
     },
-    // ...(allowPermissionToShow?.some((el: any) => el.name === "View Retail Pricing")
-    // ? [
-        {
-          title: "Action",
-          dataIndex: "action",
-          width: "15%",
-        },
-    // ]:[])
+    ...(listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "View").length > 0
+      ? [
+          {
+            title: "Action",
+            dataIndex: "action",
+            width: "15%",
+          },
+        ]
+      : []),
   ];
 
   return (
@@ -142,39 +139,41 @@ const RetailPricing = () => {
             }}
           />
           <Row gap="16px">
-            {allowPermissionToShow?.some((el: any) => el.name === "Download Data Retail Pricing") && (
-            <DropdownMenu
-              title={"More"}
-              buttonVariant={"secondary"}
-              buttonSize={"big"}
-              textVariant={"button"}
-              textColor={"pink.regular"}
-              iconStyle={{ fontSize: "12px" }}
-              onClick={(e: any) => {
-                switch (parseInt(e.key)) {
-                  case 1:
-                    downloadFile({ with_data: "Y", company_id: companyCode });
-                    break;
-                  case 4:
-                    break;
-                  default:
-                    break;
-                }
-              }}
-              menuList={[
-                {
-                  key: 1,
-                  value: (
-                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                      <ICDownload />
-                      <p style={{ margin: "0" }}>Download Data</p>
-                    </div>
-                  ),
-                },
-              ]}
-            />
+            {listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Download Data")
+              .length > 0 && (
+              <DropdownMenu
+                title={"More"}
+                buttonVariant={"secondary"}
+                buttonSize={"big"}
+                textVariant={"button"}
+                textColor={"pink.regular"}
+                iconStyle={{ fontSize: "12px" }}
+                onClick={(e: any) => {
+                  switch (parseInt(e.key)) {
+                    case 1:
+                      downloadFile({ with_data: "Y", company_id: companyCode });
+                      break;
+                    case 4:
+                      break;
+                    default:
+                      break;
+                  }
+                }}
+                menuList={[
+                  {
+                    key: 1,
+                    value: (
+                      <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                        <ICDownload />
+                        <p style={{ margin: "0" }}>Download Data</p>
+                      </div>
+                    ),
+                  },
+                ]}
+              />
             )}
-            {allowPermissionToShow?.some((el: any) => el.name === "Create Retail Pricing") && (
+            {listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Create").length >
+              0 && (
               <Button
                 size="big"
                 variant="primary"
