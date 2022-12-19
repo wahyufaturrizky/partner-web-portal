@@ -21,6 +21,7 @@ import ModalCalendar from "components/elements/Modal/ModalCalendar";
 import ArrowLeft from "../../assets/icons/arrow-left.svg";
 import { ModalDeleteConfirmation } from "components/elements/Modal/ModalConfirmationDelete";
 import moment from "moment";
+import { useUserPermissions } from "hooks/user-config/usePermission";
 
 const WorldSvg = () => <ICWorld />;
 
@@ -68,6 +69,16 @@ const WorkingCalendarCreate = () => {
     control,
     name: "public_holidays",
   });
+
+  const { data: dataUserPermission } = useUserPermissions({
+    options: {
+      onSuccess: () => {},
+    },
+  });
+
+  const listPermission = dataUserPermission?.permission?.filter(
+    (filtering: any) => filtering.menu === "Postal Code"
+  );
 
   const {
     data: workingCalendarData,
@@ -165,9 +176,13 @@ const WorkingCalendarCreate = () => {
         <Card>
           <Row justifyContent="flex-end" alignItems="center" nowrap>
             <Row gap="16px">
-              <Button size="big" variant={"tertiary"} onClick={() => setShowDeleteModal(true)}>
-                Delete
-              </Button>
+              {listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Delete")
+                .length > 0 && (
+                <Button size="big" variant={"tertiary"} onClick={() => setShowDeleteModal(true)}>
+                  Delete
+                </Button>
+              )}
+
               <Button
                 size="big"
                 variant={"secondary"}
@@ -177,9 +192,12 @@ const WorkingCalendarCreate = () => {
               >
                 Preview Calendar
               </Button>
-              <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
-                {isLoadingUpdateWorkingCalendar ? "Loading..." : "Save"}
-              </Button>
+              {listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Update")
+                .length > 0 && (
+                <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
+                  {isLoadingUpdateWorkingCalendar ? "Loading..." : "Save"}
+                </Button>
+              )}
             </Row>
           </Row>
         </Card>
