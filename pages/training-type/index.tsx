@@ -31,8 +31,8 @@ import { lang } from "lang";
 
 const TrainingType = () => {
   const t = localStorage.getItem("lan") || "en-US";
-  const companyId = localStorage.getItem("companyId")
-  const companyCode = localStorage.getItem("companyCode")
+  const companyId = localStorage.getItem("companyId");
+  const companyCode = localStorage.getItem("companyCode");
   const pagination = usePagination({
     page: 1,
     itemsPerPage: 20,
@@ -68,13 +68,13 @@ const TrainingType = () => {
     switch (type) {
       case "selection":
         return data.selectedRowKeys.length > 1
-          ? `${lang[t].areYouSureToDelete} ${data.selectedRowKeys.length} items ?`
-          : `${lang[t].areYouSureToDelete} ${
+          ? `${lang[t].trainingType.areYouSureToDelete} ${data.selectedRowKeys.length} items ?`
+          : `${lang[t].trainingType.areYouSureToDelete} ${
               data?.trainingTypeData?.data.find((el: any) => el.key === data.selectedRowKeys[0])
                 ?.name
             } ?`;
       case "detail":
-        return `${lang[t].areYouSureToDelete} ${data.name} ?`;
+        return `${lang[t].trainingType.areYouSureToDelete} ${data.name} ?`;
 
       default:
         break;
@@ -245,7 +245,7 @@ const TrainingType = () => {
               }
               disabled={rowSelection.selectedRowKeys?.length === 0}
             >
-              {lang[t].trainingType.palceholderSearch}
+              {lang[t].trainingType.tertier.delete}
             </Button>
             <DropdownMenu
               title={lang[t].trainingType.tertier.more}
@@ -373,7 +373,7 @@ const TrainingType = () => {
                     type="primary"
                     onClick={() => setModalForm({ open: false, data: {}, typeForm: "" })}
                   >
-                    {lang[t].trainingType.tertier.delete}
+                    {lang[t].trainingType.tertier.cancel}
                   </Button>
                 ) : (
                   <Button

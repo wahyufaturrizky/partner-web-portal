@@ -82,7 +82,7 @@ const FinanceConfigCoATemplate: any = () => {
     },
   });
 
-  const { mutate: deleteFields } = useDeleteCoa({
+  const { mutate: deleteFields, isLoading: isLoadingDeleteCoa } = useDeleteCoa({
     options: {
       onSuccess: () => {
         setSelectedRowKeys([]);
@@ -155,9 +155,10 @@ const FinanceConfigCoATemplate: any = () => {
           itemTitle={
             coaData?.data?.find((element: any) => element.key === selectedRowKeys[0])?.field_name
           }
+          isLoading={isLoadingDeleteCoa}
           visible={modalDelete.open}
           onCancel={() => setModalDelete({ open: false })}
-          onOk={() => deleteFields({ ids: selectedRowKeys })}
+          onOk={() => deleteFields({ ids: selectedRowKeys, company_id: companyCode })}
         />
       )}
     </>
