@@ -29,7 +29,6 @@ import { useUserPermissions } from "hooks/user-config/useUser";
 import { permissionTermOfPayment } from "permission/term-of-payment";
 import { usePartnerConfigPermissionLists } from "hooks/user-config/usePermission";
 
-
 const downloadFile = (params: any) =>
   mdmDownloadService("/top/download", { params }).then((res) => {
     let dataUrl = window.URL.createObjectURL(new Blob([res.data]));
@@ -161,15 +160,17 @@ const TermOfPayment = () => {
   };
 
   const { data: dataUserPermission } = useUserPermissions({
-		options: {
-			onSuccess: () => {},
-		},
-	});
+    options: {
+      onSuccess: () => {},
+    },
+  });
 
-	const listPermission = dataUserPermission?.permission?.filter(
-		(filtering: any) => filtering.menu === "Term Of Payment"
-	);
-    
+  const listPermission = dataUserPermission?.permission?.filter(
+    (filtering: any) => filtering.menu === "Term Of Payment"
+  );
+
+  console.log(listPermission, "<<<< cariin");
+
   const onSubmitFile = (file: any) => {
     const formData = new FormData();
     formData.append("company_id", companyCode);
@@ -178,11 +179,13 @@ const TermOfPayment = () => {
     uploadFileTop(formData);
   };
 
-  let menuList: any[] = []
+  let menuList: any[] = [];
 
-  if(listPermission){
+  if (listPermission) {
     menuList = [
-      listPermission?.map((data: any) => data.name)?.includes("Download Template Term Of Payment") && {
+      listPermission?.find(
+        (data: any) => data?.viewTypes?.[0]?.viewType?.name === "Download Template"
+      ) && {
         key: 1,
         value: (
           <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
@@ -191,7 +194,7 @@ const TermOfPayment = () => {
           </div>
         ),
       },
-      listPermission?.map((data: any) => data.name)?.includes("Upload Term Of Payment") &&{
+      listPermission?.find((data: any) => data?.viewTypes?.[0]?.viewType?.name === "Upload") && {
         key: 2,
         value: (
           <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
@@ -200,7 +203,9 @@ const TermOfPayment = () => {
           </div>
         ),
       },
-      listPermission?.map((data: any) => data.name)?.includes("Download Data Term Of Payment") && {
+      listPermission?.find(
+        (data: any) => data?.viewTypes?.[0]?.viewType?.name === "Download Data"
+      ) && {
         key: 3,
         value: (
           <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
@@ -209,7 +214,7 @@ const TermOfPayment = () => {
           </div>
         ),
       },
-    ]
+    ];
   }
 
   return (
@@ -228,22 +233,24 @@ const TermOfPayment = () => {
             }}
           />
           <Row gap="16px">
-							{listPermission?.map((data: any) => data.name)?.includes("Delete Term Of Payment") && (
-            <Button
-              size="big"
-              variant={"tertiary"}
-              onClick={() =>
-                setShowDelete({
-                  open: true,
-                  type: "selection",
-                  data: { topData: TopData, selectedRowKeys },
-                })
-              }
-              disabled={rowSelection.selectedRowKeys?.length === 0}
-            >
-              {lang[t].termOfPayment.tertier.delete}
-            </Button>
-              )}
+            {listPermission?.find(
+              (data: any) => data?.viewTypes?.[0]?.viewType?.name === "Delete"
+            ) && (
+              <Button
+                size="big"
+                variant={"tertiary"}
+                onClick={() =>
+                  setShowDelete({
+                    open: true,
+                    type: "selection",
+                    data: { topData: TopData, selectedRowKeys },
+                  })
+                }
+                disabled={rowSelection.selectedRowKeys?.length === 0}
+              >
+                {lang[t].termOfPayment.tertier.delete}
+              </Button>
+            )}
             <DropdownMenu
               title={lang[t].termOfPayment.secondary.more}
               buttonVariant={"secondary"}
@@ -253,7 +260,7 @@ const TermOfPayment = () => {
               iconStyle={{ fontSize: "12px" }}
               onClick={(e: any) => {
                 switch (parseInt(e.key)) {
-                    case 1:
+                  case 1:
                     downloadFile({ with_data: "N", company_id: companyCode });
                     break;
                   case 2:
@@ -270,15 +277,17 @@ const TermOfPayment = () => {
               }}
               menuList={menuList}
             />
-							{listPermission?.map((data: any) => data.name)?.includes("Create Term Of Payment") && (
-            <Button
-              size="big"
-              variant="primary"
-              onClick={() => router.push("/term-of-payment/create")}
-            >
-              {lang[t].termOfPayment.primary.create}
-            </Button>
-              )}
+            {listPermission?.find(
+              (data: any) => data?.viewTypes?.[0]?.viewType?.name === "Create"
+            ) && (
+              <Button
+                size="big"
+                variant="primary"
+                onClick={() => router.push("/term-of-payment/create")}
+              >
+                {lang[t].termOfPayment.primary.create}
+              </Button>
+            )}
           </Row>
         </Row>
       </Card>

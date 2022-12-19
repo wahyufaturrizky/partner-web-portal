@@ -20,8 +20,8 @@ import { useUserPermissions } from "hooks/user-config/useUser";
 const TermOfPaymentCreate = () => {
   const t = localStorage.getItem("lan") || "en-US";
   const router = useRouter();
-  const companyId = localStorage.getItem("companyId")
-  const companyCode = localStorage.getItem("companyCode")
+  const companyId = localStorage.getItem("companyId");
+  const companyCode = localStorage.getItem("companyCode");
   const [showTermForm, setShowTermForm] = useState({ type: "", open: false, data: {} });
   const [showDisableTerm, setShowDisableTerm] = useState(false);
   const [termList, setTermList] = useState<any[]>([]);
@@ -121,14 +121,14 @@ const TermOfPaymentCreate = () => {
   };
 
   const { data: dataUserPermission } = useUserPermissions({
-		options: {
-			onSuccess: () => {},
-		},
-	});
+    options: {
+      onSuccess: () => {},
+    },
+  });
 
-	const listPermission = dataUserPermission?.permission?.filter(
-		(filtering: any) => filtering.menu === "Term Of Payment"
-	);
+  const listPermission = dataUserPermission?.permission?.filter(
+    (filtering: any) => filtering.menu === "Term Of Payment"
+  );
 
   const onSubmit = (data: any) => {
     const mappedTermListRequest = termList.map((el: any) => {
@@ -164,10 +164,12 @@ const TermOfPaymentCreate = () => {
               <Button size="big" variant={"tertiary"} onClick={() => router.back()}>
                 {lang[t].termOfPayment.tertier.cancel}
               </Button>
-							{listPermission?.map((data: any) => data.name)?.includes("Create Term Of Payment") && (
-              <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
-                {isLoadingTermOfPayment ? "Loading..." : lang[t].termOfPayment.primary.save}
-              </Button>
+              {listPermission?.find(
+                (data: any) => data?.viewTypes?.[0]?.viewType?.name === "Create"
+              ) && (
+                <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
+                  {isLoadingTermOfPayment ? "Loading..." : lang[t].termOfPayment.primary.save}
+                </Button>
               )}
             </Row>
           </Row>
@@ -190,22 +192,24 @@ const TermOfPaymentCreate = () => {
             <Spacer size={10} />
 
             <Row width={"150px"}>
-							{listPermission?.map((data: any) => data.name)?.includes("Create Term Of Payment") && (
-              <Button
-                size="small"
-                variant={"tertiary"}
-                onClick={() => {
-                  const fileTypeOne = termList.filter((el) => el.type === 1);
+              {listPermission?.find(
+                (data: any) => data?.viewTypes?.[0]?.viewType?.name === "Create"
+              ) && (
+                <Button
+                  size="small"
+                  variant={"tertiary"}
+                  onClick={() => {
+                    const fileTypeOne = termList.filter((el) => el.type === 1);
 
-                  if (fileTypeOne.length > 0) {
-                    setShowDisableTerm(true);
-                  } else {
-                    setShowTermForm({ type: "add", open: true, data: {} });
-                  }
-                }}
-              >
-                + Add Terms
-              </Button>
+                    if (fileTypeOne.length > 0) {
+                      setShowDisableTerm(true);
+                    } else {
+                      setShowTermForm({ type: "add", open: true, data: {} });
+                    }
+                  }}
+                >
+                  + Add Terms
+                </Button>
               )}
             </Row>
 

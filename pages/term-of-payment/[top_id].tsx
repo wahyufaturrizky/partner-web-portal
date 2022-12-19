@@ -24,8 +24,8 @@ import { useUserPermissions } from "hooks/user-config/useUser";
 const TermOfPaymentEdit = () => {
   const t = localStorage.getItem("lan") || "en-US";
   const router = useRouter();
-  const companyId = localStorage.getItem("companyId")
-  const companyCode = localStorage.getItem("companyCode")
+  const companyId = localStorage.getItem("companyId");
+  const companyCode = localStorage.getItem("companyCode");
   const { top_id } = router.query;
 
   const [showTermForm, setShowTermForm] = useState({ type: "", open: false, data: {} });
@@ -166,36 +166,35 @@ const TermOfPaymentEdit = () => {
   };
 
   const { data: dataUserPermission } = useUserPermissions({
-		options: {
-			onSuccess: () => {},
-		},
-	});
+    options: {
+      onSuccess: () => {},
+    },
+  });
   // nanti ganti sama atas
   // const { data: dataUserPermission } = usePartnerConfigPermissionLists({
   //   query: {
   //     limit: 10000
   //   },
   //   options: {
-	// 		onSuccess: () => {},
-	// 	},
-	// });
+  // 		onSuccess: () => {},
+  // 	},
+  // });
 
-	const listPermission = dataUserPermission?.permission?.filter(
-		(filtering: any) => filtering.menu === "Term Of Payment"
-	);
+  const listPermission = dataUserPermission?.permission?.filter(
+    (filtering: any) => filtering.menu === "Term Of Payment"
+  );
   // nanti ganti sama atas
-	// const listPermission = dataUserPermission?.rows?.filter(
-	// 	(filtering: any) => filtering?.menu?.name === "Term Of Payment"
-	// );
+  // const listPermission = dataUserPermission?.rows?.filter(
+  // 	(filtering: any) => filtering?.menu?.name === "Term Of Payment"
+  // );
 
-	// const allowPermissionToShow = listPermission?.filter((data: any) =>
-	// 	// permissionTermOfPayment.role[dataUserPermission?.role?.name].component.includes(data.name)
-	// );
+  // const allowPermissionToShow = listPermission?.filter((data: any) =>
+  // 	// permissionTermOfPayment.role[dataUserPermission?.role?.name].component.includes(data.name)
+  // );
   // nanti ganti sama atas
-	// const allowPermissionToShow = listPermission?.filter((data: any) =>{
-	// 	return permissionTermOfPayment.role["Admin"].component.includes(data.name)
-	// });
-
+  // const allowPermissionToShow = listPermission?.filter((data: any) =>{
+  // 	return permissionTermOfPayment.role["Admin"].component.includes(data.name)
+  // });
 
   const onSubmit = (data: any) => {
     const mappedTermListRequest = termList.map((el: any) => {
@@ -224,8 +223,8 @@ const TermOfPaymentEdit = () => {
         <Spin tip="Loading data..." />
       </Center>
     );
-    
-    // console.log(listPermission?.map((data: any) => data.name)?.includes("Delete Term Of Payment"), '<<<<list')
+
+  // console.log(listPermission?.map((data: any) => data.name)?.includes("Delete Term Of Payment"), '<<<<list')
   return (
     <>
       <Col>
@@ -239,15 +238,19 @@ const TermOfPaymentEdit = () => {
         <Card padding="20px">
           <Row justifyContent="flex-end" alignItems="center" nowrap>
             <Row gap="16px">
-							{listPermission?.map((data: any) => data.name)?.includes("Delete Term Of Payment") && (
-              <Button size="big" variant={"tertiary"} onClick={() => setShowDeleteModal(true)}>
-                {lang[t].termOfPayment.tertier.delete}
-              </Button>
+              {listPermission?.find(
+                (data: any) => data?.viewTypes?.[0]?.viewType?.name === "Delete"
+              ) && (
+                <Button size="big" variant={"tertiary"} onClick={() => setShowDeleteModal(true)}>
+                  {lang[t].termOfPayment.tertier.delete}
+                </Button>
               )}
-							{listPermission?.map((data: any) => data.name)?.includes("Update Term Of Payment") && (
-              <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
-                {isLoadingUpdateTermOfPayment ? "Loading..." : lang[t].termOfPayment.primary.save}
-              </Button>
+              {listPermission?.find(
+                (data: any) => data?.viewTypes?.[0]?.viewType?.name === "Update"
+              ) && (
+                <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
+                  {isLoadingUpdateTermOfPayment ? "Loading..." : lang[t].termOfPayment.primary.save}
+                </Button>
               )}
             </Row>
           </Row>
@@ -271,22 +274,24 @@ const TermOfPaymentEdit = () => {
             <Spacer size={10} />
 
             <Row width={"150px"}>
-							{listPermission?.map((data: any) => data.name)?.includes("Create Term Of Payment") && (
-              <Button
-                size="small"
-                variant={"tertiary"}
-                onClick={() => {
-                  const fileTypeOne = termList.filter((el) => el.type === 1);
+              {listPermission?.find(
+                (data: any) => data?.viewTypes?.[0]?.viewType?.name === "Create"
+              ) && (
+                <Button
+                  size="small"
+                  variant={"tertiary"}
+                  onClick={() => {
+                    const fileTypeOne = termList.filter((el) => el.type === 1);
 
-                  if (fileTypeOne.length > 0) {
-                    setShowDisableTerm(true);
-                  } else {
-                    setShowTermForm({ type: "add", open: true, data: {} });
-                  }
-                }}
-              >
-                + Add Terms
-              </Button>
+                    if (fileTypeOne.length > 0) {
+                      setShowDisableTerm(true);
+                    } else {
+                      setShowTermForm({ type: "add", open: true, data: {} });
+                    }
+                  }}
+                >
+                  + Add Terms
+                </Button>
               )}
             </Row>
 
@@ -302,8 +307,7 @@ const TermOfPaymentEdit = () => {
                 onEdit={(data: any) => {
                   setShowTermForm({ type: "edit", open: true, data });
                 }}
-                onDelete={
-                  (data: any) => {
+                onDelete={(data: any) => {
                   if (data.id !== 0) {
                     setRemoveList((prevList: any) => {
                       return [...prevList, { id: data.id }];
