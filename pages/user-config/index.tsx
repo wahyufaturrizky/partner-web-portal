@@ -133,7 +133,7 @@ const UserConfigUser: any = () => {
         <Lozenge variant={STATUS_APPROVAL_VARIANT[text]}>{STATUS_APPROVAL_TEXT[text]}</Lozenge>
       ),
     },
-    ...(allowPermissionToShow?.some((el: any) => el.name === "View User List")
+    ...(listPermission?.filter((x :any) => x.viewTypes[0]?.viewType.name === "View").length > 0
     ? [
         {
           title: lang[t].userList.list.table.action,
@@ -213,7 +213,7 @@ const UserConfigUser: any = () => {
               onChange={(e: any) => setSearch(e.target.value)}
             />
             <Row gap="16px">
-              {allowPermissionToShow?.some((el: any) => el.name === "Delete User List") && (
+              {listPermission?.filter((x :any) => x.viewTypes[0]?.viewType.name === "Delete").length > 0 && (
                 <Button
                   size="big"
                   variant={"tertiary"}
@@ -247,7 +247,7 @@ const UserConfigUser: any = () => {
                   menuList={menuList}
                 />
               )}
-              {allowPermissionToShow?.some((el: any) => el.name === "Create User List") && (
+              {listPermission?.filter((x :any) => x.viewTypes[0]?.viewType.name === "Create").length > 0 && (
               <Button
                 size="big"
                 variant={"primary"}

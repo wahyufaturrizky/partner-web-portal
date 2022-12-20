@@ -137,9 +137,6 @@ const UpdateUserConfig: any = () => {
 	const listPermission = dataUserPermission?.permission?.filter(
 		(filtering: any) => filtering.menu === "User List"
 	);
-	const allowPermissionToShow = listPermission?.filter((data: any) =>
-		permissionUserList.role[dataUserPermission?.role?.name].component.includes(data.name)
-	);
 	
 	const { 
 		isFetching: isFetchingEmployee,
@@ -255,12 +252,12 @@ const UpdateUserConfig: any = () => {
 						/>
 						<Row>
 							<Row gap="16px">
-								{allowPermissionToShow?.some((el: any) => el.name === "Delete User List") && (
+								{listPermission?.filter((x :any) => x.viewTypes[0]?.viewType.name === "Delete").length > 0 && (
 								<Button size="big" variant={"tertiary"} onClick={() => deleteUser({ids: [user_id]})}>
 									{lang[t].userList.list.button.delete}
 								</Button>
 								)}
-								{allowPermissionToShow?.some((el: any) => el.name === "Update User List") && (
+								{listPermission?.filter((x :any) => x.viewTypes[0]?.viewType.name === "Update").length > 0 && (
 								<Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
 									{lang[t].userList.list.button.save}
 								</Button>
@@ -403,7 +400,7 @@ const UpdateUserConfig: any = () => {
 											withSearch
 											isLoading={isFetchingTimezone}
 											isLoadingMore={isFetchingMoreTimezone}
-											defaultValue={listTimezone?.filter(timezone => timezone?.value === defaultValues?.timezone)[0].label}
+											defaultValue={listTimezone?.filter(timezone => timezone?.value === defaultValues?.timezone)[0]?.label}
 											fetchMore={() => {
 											if (timezoneHasNextPage) {
 												timezoneFetchNextPage();
@@ -436,7 +433,7 @@ const UpdateUserConfig: any = () => {
 									/>
 								</Row>
 								<Row width="100%" gap="20px" noWrap>
-									{allowPermissionToShow?.some((el: any) => el.name === "Delete User List") && (
+									{listPermission?.filter((x :any) => x.viewTypes[0]?.viewType.name === "Delete").length > 0 && (
 									<Button size="big" variant={"tertiary"} onClick={() => Router.push("https://accounts.edot.id/infopribadi")}>
 										Reset Password
 									</Button>
