@@ -24,6 +24,7 @@ import usePagination from "@lucasmogari/react-pagination";
 
 import { useDeletUOMConversion, useUOMConversion, useUpdateUOMConversion } from "hooks/mdm/unit-of-measure-conversion/useUOMConversion";
 import { useUOMInfiniteLists } from "hooks/mdm/unit-of-measure/useUOM";
+import { useUserPermissions } from "hooks/user-config/usePermission";
 
 const renderConfirmationText = (type: any, data: any) => {
 switch (type) {
@@ -69,7 +70,17 @@ const UOMConversionDetail = () => {
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
 
 
-  const { register, control, handleSubmit } = useForm();
+  const { register, control, handleSubmit, setValue } = useForm();
+
+  const { data: dataUserPermission } = useUserPermissions({
+    options: {
+      onSuccess: () => {},
+    },
+  });
+
+  const listPermission = dataUserPermission?.permission?.filter(
+    (filtering: any) => filtering.menu === "UoM Conversion"
+  );
 
   const {
     isFetching: isFetchingUomCategory,
@@ -164,13 +175,20 @@ const UOMConversionDetail = () => {
           // base_uom_id: any; 
           id: number;
           uom_id: any; conversion_number: any; qty: any; active_status: any; }[] = []
+
+        const parent = {
+          name: data?.uomConversionItem?.parent?.name,
+          baseUom: data?.uomConversionItem?.parent?.baseUomName,
+          baseUomId: data?.uomConversionItem?.parent?.baseUomId
+        }
+
         data?.uomConversionItem?.rows?.forEach((uomConversion: any, i: number) => {
           mappedData.push({
             id: uomConversion.id,
             key: uomConversion.id,
-            uom: uomConversion.uom?.name,
+            baseUom: uomConversion?.uomConversion?.name,
             conversionNumber: uomConversion.conversionNumber,
-            baseUom: data?.baseUom?.name,
+            uom: uomConversion?.uom?.name,
             qty: uomConversion.qty,
             active: uomConversion.activeStatus
           })
@@ -182,7 +200,9 @@ const UOMConversionDetail = () => {
             active_status: uomConversion.activeStatus,
           })
         });
-        return { dataForUpdate: dataForUpdate, data: mappedData, totalRow: data?.uomConversion?.totalRow, name: data?.name, baseUomId: data?.baseUomId, baseUomName: data?.baseUom?.name}
+
+        setValue("baseUom", parent?.baseUomId)
+        return { parent, dataForUpdate: dataForUpdate, data: mappedData, totalRow: data?.uomConversion?.totalRow, name: data?.name, baseUomId: data?.baseUomId, baseUomName: data?.baseUom?.name}
       },
     },
   });
@@ -325,7 +345,7 @@ const UOMConversionDetail = () => {
       <Col>
         <Row gap="4px">
           <ArrowLeft style={{ cursor: "pointer" }} onClick={() => router.back()} />
-          <Text variant={"h4"}>{UomData?.name}</Text>
+          <Text variant={"h4"}>{UomData?.parent?.name}</Text>
         </Row>
 
         <Spacer size={20} />
@@ -335,16 +355,23 @@ const UOMConversionDetail = () => {
             <Row gap="16px"></Row>
 
             <Row gap="16px">
-              <Button size="big" variant={"tertiary"} onClick={() => setShowDeleteModal(true)}>
-                Delete
-              </Button>
-              <Button size="big" variant={"primary"} onClick={(e) => {
-                handleSubmit(onSave)(e)
-                router.back()
-              }
-              }>
-                {isLoadingUpdateUom ? "Loading..." : "Save"}
-              </Button>
+             {listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Delete")
+							.length > 0 && (
+                  <Button size="big" variant={"tertiary"} onClick={() => setShowDeleteModal(true)}>
+                  Delete
+                </Button>
+              )}
+            
+              {listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Update")
+							.length > 0 && (
+                    <Button size="big" variant={"primary"} onClick={(e) => {
+                      handleSubmit(onSave)(e)
+                      router.back()
+                    }}>
+                      {isLoadingUpdateUom ? "Loading..." : "Save"}
+                    </Button>
+                )}
+         
             </Row>
           </Row>
         </Card>
@@ -361,7 +388,7 @@ const UOMConversionDetail = () => {
                   label="Uom Conversion Name"
                   height="40px"
                   required
-                  defaultValue={UomData?.name}
+                  defaultValue={UomData?.parent?.name}
                   placeholder={"e.g gram"}
                   {...register("name", { required: "Please enter name." })}
                 />
@@ -373,7 +400,7 @@ const UOMConversionDetail = () => {
               <Controller
                 control={control}
                 name="baseUom"
-                defaultValue={UomData?.baseUomId}
+                defaultValue={UomData?.parent?.baseUom}
                 render={({ field: { onChange } }) => (
                   <>
                     <div style={{
@@ -384,7 +411,7 @@ const UOMConversionDetail = () => {
                     </div>
                     <Spacer size={3} />
                     <FormSelect
-                      defaultValue={UomData?.baseUomId}
+                      defaultValue={UomData?.parent?.baseUom}
                       style={{ width: "100%" }}
                       size={"large"}
                       required

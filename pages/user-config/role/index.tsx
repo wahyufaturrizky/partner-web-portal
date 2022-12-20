@@ -120,7 +120,7 @@ const UserConfigRole: any = () => {
               placeholder={lang[t].roleList.searchBar.roleList}
               onChange={(e: any) => setSearch(e.target.value)}
             />
-            <Row gap="16px">
+            {/* <Row gap="16px">
               <Button
                 size="big"
                 variant={"primary"}
@@ -130,7 +130,7 @@ const UserConfigRole: any = () => {
               >
                 {lang[t].roleList.primary.create}
               </Button>
-            </Row>
+            </Row> */}
           </Row>
         </Card>
         <Spacer size={10} />
