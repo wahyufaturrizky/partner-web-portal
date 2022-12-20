@@ -21,6 +21,7 @@ import {
 import useDebounce from "../../lib/useDebounce";
 import { queryClient } from "../_app";
 import { useRouter } from "next/router";
+import { useUserPermissions } from "hooks/user-config/usePermission";
 
 const renderConfirmationText = (type: any, data: any) => {
   switch (type) {
@@ -60,6 +61,16 @@ const WorkingCalendar = () => {
   const debounceSearch = useDebounce(search, 1000);
 
   const initialRender = useRef(true);
+
+  const { data: dataUserPermission } = useUserPermissions({
+    options: {
+      onSuccess: () => {},
+    },
+  });
+
+  const listPermission = dataUserPermission?.permission?.filter(
+    (filtering: any) => filtering.menu === "Working Calendar"
+  );
 
   const { mutate: updateWorkingCalendar, isLoading: isLoadingUpdateWorkingCalendar } =
     useUpdateActiveWorkingCalendar({
@@ -168,12 +179,16 @@ const WorkingCalendar = () => {
       title: "Active",
       dataIndex: "active",
     },
-    {
-      title: "Action",
-      dataIndex: "action",
-      width: "15%",
-      align: "left",
-    },
+    ...(listPermission?.some((el: any) => el.viewTypes[0]?.viewType.name === "View")
+      ? [
+          {
+            title: "Action",
+            dataIndex: "action",
+            width: "15%",
+            align: "left",
+          },
+        ]
+      : []),
   ];
 
   const rowSelection = {
@@ -208,27 +223,34 @@ const WorkingCalendar = () => {
             }}
           />
           <Row gap="16px">
-            <Button
-              size="big"
-              variant={"tertiary"}
-              onClick={() =>
-                setShowDelete({
-                  open: true,
-                  type: "selection",
-                  data: { workingCalendarData, selectedRowKeys },
-                })
-              }
-              disabled={rowSelection.selectedRowKeys?.length === 0}
-            >
-              Delete
-            </Button>
-            <Button
-              size="big"
-              variant="primary"
-              onClick={() => router.push(`/working-calendar/create`)}
-            >
-              Create
-            </Button>
+            {listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Delete")
+							.length > 0 && (
+              <Button
+                size="big"
+                variant={"tertiary"}
+                onClick={() =>
+                  setShowDelete({
+                    open: true,
+                    type: "selection",
+                    data: { workingCalendarData, selectedRowKeys },
+                  })
+                }
+                disabled={rowSelection.selectedRowKeys?.length === 0}
+              >
+                Delete
+              </Button>
+            )}
+
+            {listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Create")
+							.length > 0 && (
+              <Button
+                size="big"
+                variant="primary"
+                onClick={() => router.push(`/working-calendar/create`)}
+              >
+                Create
+              </Button>
+            )}
           </Row>
         </Row>
       </Card>
