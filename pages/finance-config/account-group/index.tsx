@@ -14,6 +14,7 @@ import {
 } from "../../../hooks/finance-config/useAccountGroup";
 import useDebounce from "lib/useDebounce";
 import { lang } from "lang";
+import { useUserPermissions } from "hooks/user-config/usePermission";
 
 const FinanceConfigAccountGroud: any = () => {
   const pagination = usePagination({
@@ -34,6 +35,16 @@ const FinanceConfigAccountGroud: any = () => {
   const t = localStorage.getItem("lan") || "en-US";
   const companyCode = localStorage.getItem("companyCode");
 
+  const { data: dataUserPermission } = useUserPermissions({
+    options: {
+      onSuccess: () => {},
+    },
+  });
+
+  const listPermission = dataUserPermission?.permission?.filter(
+    (filtering: any) => filtering.menu === "Account Group"
+  );
+  
   const columns = [
     {
       title: lang[t].accountGroup.checkBoxAccountGroupID,
@@ -47,11 +58,15 @@ const FinanceConfigAccountGroud: any = () => {
       title: lang[t].accountGroup.accountGroupParent,
       dataIndex: "parent",
     },
-    {
-      title: lang[t].accountGroup.accountGroupAction,
-      dataIndex: "action",
-      width: 160,
-    },
+    ...(listPermission?.filter((x) => x.viewTypes[0]?.viewType.name === "View").length > 0
+      ? [
+          {
+            title: lang[t].accountGroup.accountGroupAction,
+            dataIndex: "action",
+            width: 160,
+          },
+        ]
+    : []),
   ];
 
   const onSelectChange = (selectedRowKeys: any) => {
@@ -160,17 +175,21 @@ const FinanceConfigAccountGroud: any = () => {
               <Spacer size={16} />
             </Row>
             <Row gap="16px">
-              <Button
-                size="big"
-                variant={"tertiary"}
-                onClick={() => setModalDelete({ open: true })}
-                disabled={rowSelection.selectedRowKeys?.length === 0}
-              >
-                {lang[t].accountGroup.tertier.delete}
-              </Button>
-              <Button size="big" variant={"primary"} onClick={() => setModalCreate({ open: true })}>
-                {lang[t].accountGroup.primary.create}
-              </Button>
+              {listPermission?.filter((x) => x.viewTypes[0]?.viewType.name === "Delete").length > 0 && (
+                <Button
+                  size="big"
+                  variant={"tertiary"}
+                  onClick={() => setModalDelete({ open: true })}
+                  disabled={rowSelection.selectedRowKeys?.length === 0}
+                >
+                  {lang[t].accountGroup.tertier.delete}
+                </Button>
+              )}
+              {listPermission?.filter((x) => x.viewTypes[0]?.viewType.name === "Create").length > 0 && (
+                <Button size="big" variant={"primary"} onClick={() => setModalCreate({ open: true })}>
+                  {lang[t].accountGroup.primary.create}
+                </Button>
+              )}
             </Row>
           </Row>
         </Card>
@@ -195,6 +214,7 @@ const FinanceConfigAccountGroud: any = () => {
           onCancel={() => setModalDetail({ open: false, data: {}, id: 0 })}
           onOk={(data: any) => updateAccountGroup(data)}
           id={modalDetail?.id}
+          permission={listPermission}
         />
       )}
 
