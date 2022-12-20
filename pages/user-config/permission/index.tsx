@@ -76,8 +76,9 @@ const UserConfigPermission: any = () => {
   });
 
   const listPermission = dataUserPermission?.permission?.filter(
-    (filtering: any) => filtering.menu === "Channel"
+    (filtering: any) => filtering.menu === "Permission List"
   );
+  console.log(dataUserPermission);
 
   const columns = [
     {

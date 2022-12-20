@@ -81,6 +81,15 @@ const DetailPartnerConfigPermissionList: any = () => {
     },
     partnerConfigPermissionListId: permission_id,
   });
+  const { data: dataUserPermission } = useUserPermissions({
+    options: {
+      onSuccess: () => {},
+    },
+  });
+
+  const listPermission = dataUserPermission?.permission?.filter(
+    (filtering: any) => filtering.menu === "Permission List"
+  );
 
   const { data: dataPartnerConfigPermissionList, isLoading: isLoadingPartnerConfigPermissionList } =
     usePartnerConfigPermissionList({
@@ -104,15 +113,7 @@ const DetailPartnerConfigPermissionList: any = () => {
   });
   const menus = menuLists?.rows?.map((menu: any) => ({ id: menu.id, value: menu.name }));
   const onSubmit = (data: any) => mutateUpdatePartnerConfigPermissionList(data);
-  const { data: dataUserPermission } = useUserPermissions({
-    options: {
-      onSuccess: () => {},
-    },
-  });
 
-  const listPermission = dataUserPermission?.permission?.filter(
-    (filtering: any) => filtering.menu === "Channel"
-  );
   const activeStatus = [
     { id: "Y", value: '<div key="1" style="color:green;">Active</div>' },
     { id: "N", value: '<div key="2" style="color:red;">Non Active</div>' },
@@ -318,13 +319,16 @@ const DetailPartnerConfigPermissionList: any = () => {
 
         <Row>
           <Col>
-            <Button
-              size="big"
-              variant={"secondary"}
-              onClick={() => window.open("/user-config/approval/create", "_self")}
-            >
-              {lang[t].permissionList.secondary.createApproval}
-            </Button>
+            {listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Update").length >
+              0 && (
+              <Button
+                size="big"
+                variant={"secondary"}
+                onClick={() => window.open("/user-config/approval/create", "_self")}
+              >
+                {lang[t].permissionList.secondary.createApproval}
+              </Button>
+            )}
           </Col>
         </Row>
 
