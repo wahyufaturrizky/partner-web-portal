@@ -1303,7 +1303,7 @@ export const lang = {
       },
       primary: {
         create: "Create",
-        save: "Menyimpan",
+        save: "Save",
         yes: "Yes",
       },
       confirmDelete: "Confirm Delete",

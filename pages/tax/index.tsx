@@ -21,6 +21,7 @@ import { queryClient } from "../_app";
 import { ICDownload, ICUpload } from "../../assets/icons";
 import { mdmDownloadService } from "../../lib/client";
 import { useRouter } from "next/router";
+import { useUserPermissions } from "hooks/user-config/usePermission";
 
 interface TaxTable { 
   key: string; 
@@ -55,26 +56,6 @@ const renderConfirmationText = (type: any, data: any) => {
   }
 };
 
-const columns = [
-  {
-    title: "Tax ID",
-    dataIndex: "id",
-    key: 'id',
-  },
-  {
-    title: "Country",
-    dataIndex: "taxCountryName",
-    key: 'taxCountryName'
-  },
-  {
-    title: "Action",
-    dataIndex: "action",
-    width: "15%",
-    align: "left",
-  },
-];
-
-
 const Tax = () => {
   const router = useRouter();
   const companyCode = localStorage.getItem("companyCode");
@@ -92,6 +73,39 @@ const Tax = () => {
 
   const debounceSearch = useDebounce(search, 1000);
 
+  const { data: dataUserPermission } = useUserPermissions({
+    options: {
+      onSuccess: () => {},
+    },
+  });
+
+  const listPermission = dataUserPermission?.permission?.filter(
+    (filtering: any) => filtering.menu === "Tax"
+  );
+
+  const columns = [
+    {
+      title: "Tax ID",
+      dataIndex: "id",
+      key: 'id',
+    },
+    {
+      title: "Country",
+      dataIndex: "taxCountryName",
+      key: 'taxCountryName'
+    },
+    ...(listPermission?.some((el: any) => el.viewTypes[0]?.viewType.name === "View")
+    ? [
+        {
+          title: "Action",
+          dataIndex: "action",
+          width: "15%",
+          align: "left",
+        },
+      ]
+    : []),
+  ];  
+
   const {
     data: TaxData,
     isLoading: isLoadingTax,
@@ -105,7 +119,7 @@ const Tax = () => {
     },
     options: {
       onSuccess: (data: any) => {
-        pagination.setTotalItems(data?.totalRow);
+        pagination.setTotalItems(data?.totalRow ?? 1);
       },
       select: (data: any) => {
         const mappedData: TaxTable[] = [];
@@ -178,60 +192,81 @@ const Tax = () => {
             onChange={(e: any) => {setSearch(e.target.value)}}
           />
           <Row gap="16px">
-            <DropdownMenu
-              title={"More"}
-              buttonVariant={"secondary"}
-              buttonSize={"big"}
-              textVariant={"button"}
-              textColor={"pink.regular"}
-              iconStyle={{ fontSize: "12px" }}
-              onClick={(e: any) => {
-                switch (parseInt(e.key)) {
-                  case 1:
-                    downloadFile({ with_data: "N", country_id: "MCS-1015229" });
-                    break;
-                  case 2:
-                    setShowUpload(true);
-                    break;
-                  case 3:
-                    downloadFile({ with_data: "Y", country_id: "MCS-1015229" });
-                    break;
-                  case 4:
-                    break;
-                  default:
-                    break;
-                }
-              }}
-              menuList={[
-                {
-                  key: 1,
-                  value: (
-                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                      <ICDownload />
-                      <p style={{ margin: "0" }}>Download Template</p>
-                    </div>
-                  ),
-                },
-                {
-                  key: 2,
-                  value: (
-                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                      <ICUpload />
-                      <p style={{ margin: "0" }}>Upload Template</p>
-                    </div>
-                  ),
-                },
-                {
-                  key: 3,
-                  value: (
-                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                      <ICDownload />
-                      <p style={{ margin: "0" }}>Download Data</p>
-                    </div>
-                  ),
-                },
-              ]}
-            />
+          {(listPermission?.filter(
+							(data: any) => data.viewTypes[0]?.viewType.name === "Download Template"
+						).length > 0 ||
+							listPermission?.filter(
+								(data: any) => data.viewTypes[0]?.viewType.name === "Download Data"
+							).length > 0 ||
+							listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Upload")
+								.length > 0) && (
+                      <DropdownMenu
+                      title={"More"}
+                      buttonVariant={"secondary"}
+                      buttonSize={"big"}
+                      textVariant={"button"}
+                      textColor={"pink.regular"}
+                      iconStyle={{ fontSize: "12px" }}
+                      onClick={(e: any) => {
+                        switch (parseInt(e.key)) {
+                          case 1:
+                            downloadFile({ with_data: "N", country_id: "MCS-1015229" });
+                            break;
+                          case 2:
+                            setShowUpload(true);
+                            break;
+                          case 3:
+                            downloadFile({ with_data: "Y", country_id: "MCS-1015229" });
+                            break;
+                          case 4:
+                            break;
+                          default:
+                            break;
+                        }
+                      }}
+                      menuList={[
+                        {
+                          ...(listPermission?.filter(
+                            (data: any) => data.viewTypes[0]?.viewType.name === "Download Template"
+                          ).length > 0 && {
+                              key: 1,
+                              value: (
+                                <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                                  <ICDownload />
+                                  <p style={{ margin: "0" }}>Download Template</p>
+                                </div>
+                              ),
+                            }),
+                        },
+                        {
+                          ...(listPermission?.filter(
+                            (data: any) => data.viewTypes[0]?.viewType.name === "Upload"
+                          ).length > 0 &&   {
+                              key: 2,
+                              value: (
+                                <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                                  <ICUpload />
+                                  <p style={{ margin: "0" }}>Upload Template</p>
+                                </div>
+                              ),
+                            }),
+                        },
+                        {
+                        ...(listPermission?.filter(
+                          (data: any) => data.viewTypes[0]?.viewType.name === "Download Data"
+                        ).length > 0 &&   {
+                            key: 3,
+                            value: (
+                              <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                                <ICDownload />
+                                <p style={{ margin: "0" }}>Download Data</p>
+                              </div>
+                            ),
+                          }),
+                        },
+                      ]}
+                    />
+                  )}
           </Row>
         </Row>
       </Card>

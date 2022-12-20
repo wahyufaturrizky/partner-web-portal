@@ -33,6 +33,7 @@ import { ModalManageDataEdit } from "../../components/elements/Modal/ModalManage
 import styled from "styled-components";
 import { COUNTRY_CODE } from "utils/country_code_constant";
 import { PHONE_CODE } from "utils/phone_code_constant";
+import { useUserPermissions } from "hooks/user-config/usePermission";
 
 const CreateConfig = () => {
 	const router = useRouter();
@@ -70,6 +71,16 @@ const CreateConfig = () => {
 	const [checkCountryName, setCheckCountryName] = useState(false);
 	const [isCountryNameDuplicate, setIsCountryNameDuplicate] = useState(false)
 	const [isCountryNameFocused, setIsCountryNameFocused] = useState(false)
+
+	const { data: dataUserPermission } = useUserPermissions({
+		options: {
+			onSuccess: () => {},
+		},
+	});
+
+	const listPermission = dataUserPermission?.permission?.filter(
+		(filtering: any) => filtering.menu === "Country"
+	);
 
 	const onUploadStructure = (data: any) => {
 		let idsCountryStructure = countryStructure.map((data: any) => data.id);
@@ -434,16 +445,22 @@ const CreateConfig = () => {
 						<Row justifyContent="flex-end" alignItems="center" nowrap>
 							<Row>
 								<Row gap="16px">
-									<Button
-										size="big"
-										variant={"tertiary"}
-										onClick={() => setModalDeleteCountry({ open: true })}
-									>
-										Delete
-									</Button>
-									<Button disabled={errors?.name || isCountryNameFocused} size="big" variant={"primary"} onClick={onSubmit}>
-										Save
-									</Button>
+									{listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Delete")
+										.length > 0 && (
+										<Button
+											size="big"
+											variant={"tertiary"}
+											onClick={() => setModalDeleteCountry({ open: true })}
+										>
+											Delete
+										</Button>
+									)}
+									{listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Update")
+										.length > 0 && (
+										<Button disabled={errors?.name || isCountryNameFocused} size="big" variant={"primary"} onClick={onSubmit}>
+											Save
+										</Button>
+									)}
 								</Row>
 							</Row>
 						</Row>
@@ -649,11 +666,13 @@ const CreateConfig = () => {
 					itemTitle={modalDelete.structure.name}
 				/>
 			)}
-			<FileUploadModal
+			{showUploadStructure && 
+			<FileUploaderExcel
 				setVisible={setShowUploadStructure}
 				visible={showUploadStructure}
-				onSubmit={submitUploadFile}
-			/>
+				onSubmit={onUploadStructure}
+			/>}
+			
 			{showManageData.visible && (
 				<ModalManageDataEdit
 					updateAllStructure={updateAllStructure}

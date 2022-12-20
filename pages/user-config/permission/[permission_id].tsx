@@ -10,7 +10,7 @@ import {
   Spacer,
   Spin,
   Text,
-  FormSelectCustom,
+  FormSelect,
 } from "pink-lava-ui";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -221,7 +221,7 @@ const DetailPartnerConfigPermissionList: any = () => {
 				</Alert>
 				<Spacer size={20} /> */}
 
-        <Accordion style={{ position: "relative" }} id="area">
+        <Accordion style={{ position: "relative" }} id="area2">
           <Accordion.Item key={1}>
             <Accordion.Header variant="blue">
               {lang[t].permissionList.accordion.general}
@@ -245,6 +245,7 @@ const DetailPartnerConfigPermissionList: any = () => {
                     isShowActionLabel
                     actionLabel="Add New Associated Menu"
                     width={"100%"}
+                    containerId="area2"
                     defaultValue={dataPartnerConfigPermissionList?.menuId}
                     items={menus}
                     placeholder={"Select"}
@@ -269,6 +270,7 @@ const DetailPartnerConfigPermissionList: any = () => {
                           height="48px"
                           style={{ width: "100%" }}
                           size={"large"}
+                          containerId="area2"
                           placeholder={"Select"}
                           borderColor={"#AAAAAA"}
                           arrowColor={"#000"}
@@ -280,7 +282,6 @@ const DetailPartnerConfigPermissionList: any = () => {
                           //     fetchNextPageViewTypeList();
                           //   }
                           // }}
-												  containerId={"area"}
                           items={
                             isFetchingViewTypeList && !isFetchingMoreViewTypeList
                               ? []
@@ -396,7 +397,7 @@ const Lozenge = styled.div`
   line-height: 24px;
 `
 
-const CustomFormSelect = styled(FormSelectCustom)`
+const CustomFormSelect = styled(FormSelect)`
   
   .ant-select-selection-placeholder {
     line-height: 48px !important;

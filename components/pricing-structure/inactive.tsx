@@ -63,6 +63,7 @@ const InActivePricingStructure: any = (props: any) => {
         page: pagination.page,
         limit: pagination.itemsPerPage,
         status: "INACTIVE",
+        company_id: companyCode
       },
     });
 

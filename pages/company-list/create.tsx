@@ -48,6 +48,7 @@ import { useInfiniteIndustry } from "hooks/industry/useIndustries";
 import useDebounce from "lib/useDebounce";
 import { colors } from "utils/color";
 import { useUpdateTemplateGeneral } from "hooks/template-general/useTemplateGeneral";
+import { useExchangeRates } from "hooks/mdm/exchange-rate/useExchangeRate";
 
 const CompanyTypeDataFake = [
   {
@@ -345,7 +346,7 @@ const NumberOfEmployeeDataFake = [
 const schema = yup
   .object({
     name: yup.string().required("Name is Required"),
-    code: yup.string().required("Company code is Required"),
+    code: yup.string().required("Company code is Required").test('len', 'Maximum 4 Characters', val => val.toString().length <= 4),
     email: yup.string().email("Email not validated").required("Email is required"),
     phone_number: yup.string().required("Phone Number is Required"),
     address: yup.string().required("Addres is required").default(""),
@@ -435,6 +436,7 @@ const CreateCompany: any = () => {
   const [companyParent, setCompanyParent] = useState("");
   const [language, setLanguage] = useState("");
   
+  const [dataCurrency, setDataCurrency] = useState("")
   const debounceFetch = useDebounce(
       searchCountry ||
       searchSegment ||
@@ -465,6 +467,7 @@ const CreateCompany: any = () => {
     setValue,
     control,
     formState: { errors },
+    setError
   } = useForm({
     resolver: yupResolver(schema),
     defaultValues: defaultValue,
@@ -502,6 +505,7 @@ const CreateCompany: any = () => {
       company_id: companyCode
     },
   });
+
   const {
     isFetching: isFetchingCountry,
     isFetchingNextPage: isFetchingMoreCountry,
@@ -533,6 +537,44 @@ const CreateCompany: any = () => {
         } else {
           return undefined;
         }
+      },
+    },
+  });
+
+  const {
+    data: ExchangeData,
+    isLoading: isLoadingExchange,
+    isFetching: isFetchingExchange,
+  } = useExchangeRates({
+    query: {
+      // search: debounceSearch,
+      page: pagination.page,
+      limit: pagination.itemsPerPage,
+      company_id: companyCode,
+      // currency: dataCurrency,
+      // start_date: dataFromDate,
+      // end_date: dataToDate,
+    },
+    options: {
+      onSuccess: (data: any) => {
+        pagination.setTotalItems(data.totalRow);
+      },
+      select: (data: any) => {
+        const mappedData = data?.rows?.map((element: any) => {
+          return {
+            id: element.exchangeRateId,
+            value: element.currencyName,
+            // key: element.exchangeRateId,
+            // id: element.exchangeRateId,
+            // exchangeCode: element.currencyCode,
+            // exchangeName: element.currencyName,
+            // exchangeValue: element.value,
+            // exchangeSell: element.sell,
+            // exchangeBuy: element.buy,
+            // exchangeLastUpdated: moment(element.modifiedAt).format("DD/MM/YYYY"),
+          };
+        });
+        return { data: mappedData, totalRow: data.totalRow };
       },
     },
   });
@@ -673,6 +715,11 @@ const CreateCompany: any = () => {
         alert("Create Success!");
         router.push("/company-list");
       },
+      onError: (error: any) => {
+       if (error?.data?.message?.includes("already exits")) {
+        setError('code', {message: error?.data?.message, type: "focus" }, { shouldFocus: true })
+       }
+      }
     },
   });  
 
@@ -1157,18 +1204,21 @@ const CreateCompany: any = () => {
               <Spacer size={10} />
               <Row width="100%" gap="20px" noWrap>
                 <Col width="50%">
-                  {isLoadingCurrencyList ? (
+                  {/* {isLoadingCurrencyList ? (
                     <Spin tip="Loading data..." />
-                  ) : (
+                  ) : ( */}
                     <Dropdown
                       label={lang[t].companyList.currency}
                       width={"100%"}
-                      items={currencyData.rows.map((data) => ({
+                      items={!isLoadingCurrencyList ? currencyData?.rows?.map((data) => ({
                         value: `${data.currency} - ${data.currencyName}`,
                         id: `${data.currency} - ${data.currencyName}`,
-                      }))}
+                      })) : []}
                       placeholder={"Select"}
-                      handleChange={(value) => setValue("currency", value)}
+                      handleChange={(value) => {
+                        setDataCurrency(value?.split("-")[0])
+                        setValue("currency", value)
+                      }}
                       onSearch={(search) => setSearchCurrency(search)}
                       required
                       error={errors?.currency?.message}
@@ -1176,15 +1226,17 @@ const CreateCompany: any = () => {
                       key={templateGeneralData?.currencyFormat?.format}
                       {...register("currency", { required: true })}
                     />
-                  )}
+                  {/* )} */}
                 </Col>
                 <Col width="50%">
                   <Dropdown
                     label={lang[t].companyList.sourceExchangeRate}
                     width="100%"
-                    items={[]}
+                    items={ExchangeData?.data}
                     placeholder={"Select"}
-                    handleChange={(value: string) => setValue("source_exchange", value)}
+                    handleChange={(value) => {
+                      setValue("source_exchange", value)
+                    }}
                     onSearch={(value: string) => setSearch({ ...search, sourceExchange: value })}
                     {...register("source_exchange", { required: true })}
                   />

@@ -11,6 +11,7 @@ import {
 	useUpdateProcessList,
 } from "../../../hooks/business-process/useProcess";
 import { lang } from "lang";
+import { useUserPermissions } from "hooks/user-config/usePermission";
 
 const DetailProcessList: any = () => {
 	const t = localStorage.getItem("lan") || "en-US";
@@ -22,6 +23,16 @@ const DetailProcessList: any = () => {
 		name: "",
 	});
 	const { name } = stateFieldInput;
+
+	const { data: dataUserPermission } = useUserPermissions({
+		options: {
+		  onSuccess: () => {},
+		},
+	  });
+	
+	  const listPermission = dataUserPermission?.permission?.filter(
+		(filtering: any) => filtering.menu === "Process"
+	  );
 
 	const {
 		data: dataConfigsModule,
@@ -120,16 +131,23 @@ const DetailProcessList: any = () => {
 					<Row justifyContent="flex-end" alignItems="center" nowrap>
 						<Row>
 							<Row gap="16px">
-								{/* <Button
-									size="big"
-									variant={"tertiary"}
-									onClick={() => setModalDelete({ open: true })}
-								>
-									Delete
-								</Button> */}
-								<Button size="big" variant={"primary"} onClick={handleUpdateProcessList}>
-									{isLoading ? "loading..." : lang[t].process.primary.save}
-								</Button>
+								{listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Delete")
+									.length > 0 &&
+									<Button
+										size="big"
+										variant={"tertiary"}
+										onClick={() => setModalDelete({ open: true })}
+									>
+										Delete
+									</Button>
+								}
+								
+								{listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Update")
+									.length > 0 && (
+										<Button size="big" variant={"primary"} onClick={handleUpdateProcessList}>
+											{isLoading ? "loading..." : lang[t].process.primary.save}
+										</Button>
+								)}
 							</Row>
 						</Row>
 					</Row>

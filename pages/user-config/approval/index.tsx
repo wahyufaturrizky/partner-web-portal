@@ -201,7 +201,7 @@ const UserConfigApproval: any = () => {
 					visible={modalDelete.open}
 					isLoading={isLoadingDeleteProcessList}
 					onCancel={() => setModalDelete({ open: false })}
-					onOk={() => deleteFields({ ids: selectedRowKeys })}
+					onOk={() => deleteFields({ ids: selectedRowKeys, company_id:companyCode })}
 				/>
 			)}
 		</>

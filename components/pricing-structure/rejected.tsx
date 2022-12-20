@@ -66,6 +66,7 @@ const RejectedPricingStructure: any = (props: any) => {
       page: pagination.page,
       limit: pagination.itemsPerPage,
       status: "REJECTED",
+      company_id: companyCode
     },
   });
 

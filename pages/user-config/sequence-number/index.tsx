@@ -1,4 +1,5 @@
 import usePagination from "@lucasmogari/react-pagination";
+import { useUserPermissions } from "hooks/user-config/usePermission";
 import Router, { useRouter } from "next/router";
 import { Button, Col, Dropdown, Pagination, Row, Search, Spacer, Table, Text } from "pink-lava-ui";
 import React, { useState } from "react";
@@ -22,6 +23,16 @@ const SequenceNumber = () => {
     totalItems: 100,
   });
 
+  const { data: dataUserPermission } = useUserPermissions({
+    options: {
+      onSuccess: () => {},
+    },
+  });
+
+  const listPermission = dataUserPermission?.permission?.filter(
+    (filtering: any) => filtering.menu === "Sequence Number"
+  );
+
   const columns = [
     {
       title: "Company",
@@ -31,11 +42,16 @@ const SequenceNumber = () => {
       title: "Branch Name",
       dataIndex: "branchName",
     },
-    {
-      title: "Action",
-      dataIndex: "action",
-      width: "15%",
-    },
+    ...(listPermission?.some((el: any) => el.viewTypes[0]?.viewType.name === "View")
+		? [
+      {
+        title: "Action",
+        dataIndex: "action",
+        width: "15%",
+      },
+		  ]
+		: []),
+
   ];
 
   const {
@@ -124,13 +140,15 @@ const SequenceNumber = () => {
               onChange={(e) => setSearch(e.target.value)}
             />
           </Row>
-          <Button
-            size="big"
-            variant={"primary"}
-            onClick={() => Router.push("/user-config/sequence-number/create")}
-          >
-            Create
-          </Button>
+          {listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Create")
+							.length > 0 && <Button
+              size="big"
+              variant={"primary"}
+              onClick={() => Router.push("/user-config/sequence-number/create")}
+            >
+              Create
+            </Button>}
+          
         </Row>
       </Card>
       <Spacer size={10} />
