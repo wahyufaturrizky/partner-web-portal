@@ -10,6 +10,7 @@ import { colors } from "../../utils/color";
 
 import styled from "styled-components";
 import { lang } from "lang";
+import { useUserPermissions } from "hooks/user-config/usePermission";
 
 const MenuConfigList: any = () => {
   const companyCode = localStorage.getItem("companyCode");
@@ -62,6 +63,15 @@ const MenuConfigList: any = () => {
       },
     },
   });
+  const { data: dataUserPermission } = useUserPermissions({
+    options: {
+      onSuccess: () => {},
+    },
+  });
+
+  const listPermission = dataUserPermission?.permission?.filter(
+    (filtering: any) => filtering.menu === "Channel"
+  );
 
   const columns = [
     {
@@ -74,11 +84,15 @@ const MenuConfigList: any = () => {
       dataIndex: "field_type",
       width: "42%",
     },
-    {
-      title: lang[t].menuList.menuList.action,
-      dataIndex: "action",
-      width: "15%",
-    },
+    ...(listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "View").length > 0
+      ? [
+          {
+            title: lang[t].menuList.menuList.action,
+            dataIndex: "action",
+            width: "15%",
+          },
+        ]
+      : []),
   ];
 
   const data: any = [];
