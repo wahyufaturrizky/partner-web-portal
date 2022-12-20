@@ -287,6 +287,7 @@ export default function CustomersDetail() {
     setValue,
     getValues,
     router,
+    type:"edit"
   };
 
   return <CreateCustomers isUpdate {...propsDropdownField} />;

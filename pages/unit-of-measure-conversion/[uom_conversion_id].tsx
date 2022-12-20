@@ -24,6 +24,7 @@ import usePagination from "@lucasmogari/react-pagination";
 
 import { useDeletUOMConversion, useUOMConversion, useUpdateUOMConversion } from "hooks/mdm/unit-of-measure-conversion/useUOMConversion";
 import { useUOMInfiniteLists } from "hooks/mdm/unit-of-measure/useUOM";
+import { useUserPermissions } from "hooks/user-config/usePermission";
 
 const renderConfirmationText = (type: any, data: any) => {
 switch (type) {
@@ -70,6 +71,16 @@ const UOMConversionDetail = () => {
 
 
   const { register, control, handleSubmit, setValue } = useForm();
+
+  const { data: dataUserPermission } = useUserPermissions({
+    options: {
+      onSuccess: () => {},
+    },
+  });
+
+  const listPermission = dataUserPermission?.permission?.filter(
+    (filtering: any) => filtering.menu === "UoM Conversion"
+  );
 
   const {
     isFetching: isFetchingUomCategory,
@@ -344,16 +355,23 @@ const UOMConversionDetail = () => {
             <Row gap="16px"></Row>
 
             <Row gap="16px">
-              <Button size="big" variant={"tertiary"} onClick={() => setShowDeleteModal(true)}>
-                Delete
-              </Button>
-              <Button size="big" variant={"primary"} onClick={(e) => {
-                handleSubmit(onSave)(e)
-                router.back()
-              }
-              }>
-                {isLoadingUpdateUom ? "Loading..." : "Save"}
-              </Button>
+             {listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Delete")
+							.length > 0 && (
+                  <Button size="big" variant={"tertiary"} onClick={() => setShowDeleteModal(true)}>
+                  Delete
+                </Button>
+              )}
+            
+              {listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Update")
+							.length > 0 && (
+                    <Button size="big" variant={"primary"} onClick={(e) => {
+                      handleSubmit(onSave)(e)
+                      router.back()
+                    }}>
+                      {isLoadingUpdateUom ? "Loading..." : "Save"}
+                    </Button>
+                )}
+         
             </Row>
           </Row>
         </Card>

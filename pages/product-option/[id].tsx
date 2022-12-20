@@ -16,22 +16,33 @@ import {
 import { queryClient } from "../_app";
 import { ModalDeleteConfirmation } from "../../components/elements/Modal/ModalConfirmationDelete";
 import { lang } from "lang";
+import { useUserPermissions } from "hooks/user-config/usePermission";
 
 const ProductOptionDetail = () => {
   const t = localStorage.getItem("lan") || "en-US";
   const router = useRouter();
-  const companyId = localStorage.getItem("companyId")
-  const companyCode = localStorage.getItem("companyCode")
+  const companyId = localStorage.getItem("companyId");
+  const companyCode = localStorage.getItem("companyCode");
   const { id } = router.query;
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [dataItem, setDataItem] = useState([]);
-  const [modalChannelForm, setModalChannelForm] = useState <any>({
+  const [modalChannelForm, setModalChannelForm] = useState<any>({
     open: false,
     data: {},
     typeForm: "create",
   });
 
   const { register, handleSubmit } = useForm({ shouldUseNativeValidation: true });
+
+  const { data: dataUserPermission } = useUserPermissions({
+    options: {
+      onSuccess: () => {},
+    },
+  });
+
+  const listPermission = dataUserPermission?.permission?.filter(
+    (filtering: any) => filtering.menu === "Product Option"
+  );
 
   const {
     data: dataProductOption,
@@ -176,12 +187,18 @@ const ProductOptionDetail = () => {
         <Card padding="20px">
           <Row justifyContent="flex-end" alignItems="center" nowrap>
             <Row gap="16px">
-              <Button size="big" variant={"tertiary"} onClick={() => setShowDeleteModal(true)}>
-                {lang[t].productOption.tertier.delete}
-              </Button>
-              <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
-                {isLoadingUpdateProductOption ? "Loading..." : lang[t].productOption.primary.save}
-              </Button>
+              {listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Delete")
+							.length > 0 && (
+                <Button size="big" variant={"tertiary"} onClick={() => setShowDeleteModal(true)}>
+                  {lang[t].productOption.tertier.delete}
+                </Button>
+              )}
+              {listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Update")
+							.length > 0 && (
+                <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
+                  {isLoadingUpdateProductOption ? "Loading..." : lang[t].productOption.primary.save}
+                </Button>
+              )}
             </Row>
           </Row>
         </Card>
@@ -190,7 +207,9 @@ const ProductOptionDetail = () => {
 
         <Accordion>
           <Accordion.Item key={1}>
-            <Accordion.Header variant="blue">{lang[t].productOption.accordion.general}</Accordion.Header>
+            <Accordion.Header variant="blue">
+              {lang[t].productOption.accordion.general}
+            </Accordion.Header>
             <Accordion.Body>
               <Row width="100%" noWrap>
                 <Col width={"50%"}>
@@ -212,7 +231,9 @@ const ProductOptionDetail = () => {
 
         <Accordion>
           <Accordion.Item key={1}>
-            <Accordion.Header variant="blue">{lang[t].productOption.accordion.productOptionItem}</Accordion.Header>
+            <Accordion.Header variant="blue">
+              {lang[t].productOption.accordion.productOptionItem}
+            </Accordion.Header>
             <Accordion.Body>
               <Button
                 size="big"
@@ -250,7 +271,9 @@ const ProductOptionDetail = () => {
             visible={modalChannelForm.open}
             onCancel={() => setModalChannelForm({ open: false, data: {}, typeForm: "" })}
             title={
-              modalChannelForm.typeForm === "create" ? lang[t].productOption.modalTitleCreate.addProductOption : lang[t].productOption.modalTitleUpdate.productOption
+              modalChannelForm.typeForm === "create"
+                ? lang[t].productOption.modalTitleCreate.addProductOption
+                : lang[t].productOption.modalTitleUpdate.productOption
             }
             footer={null}
             content={

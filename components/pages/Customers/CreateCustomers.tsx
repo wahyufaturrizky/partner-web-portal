@@ -39,6 +39,7 @@ import { queryClient } from "pages/_app";
 import Contacts from "./fragments/Contacts";
 import Addresses from "./fragments/Addresses";
 import { ICSuccessCheck } from "assets";
+import { useUserPermissions } from "hooks/user-config/usePermission";
 
 export default function CreateCustomers({
   detailCustomer,
@@ -87,6 +88,7 @@ export default function CreateCustomers({
   zoneLabel,
   postalCodeLabel,
   longitudeLabel,
+  type,
 }: any) {
   const dataWatchCustomer = useWatch({
     control,
@@ -349,6 +351,7 @@ export default function CreateCustomers({
   });
 
   const propsHeaderForm = {
+    type,
     control,
     router,
     onSubmit: handleSubmit(onSubmit),
@@ -822,7 +825,18 @@ const HeaderActionForm = ({
   isLoadingConvertVendor,
   isLoadingCreateCustomer,
   isLoadingUpdateCustomer,
+  type,
 }: any) => {
+  const { data: dataUserPermission } = useUserPermissions({
+    options: {
+      onSuccess: () => {},
+    },
+  });
+
+  const listPermission = dataUserPermission?.permission?.filter(
+    (filtering: any) => filtering.menu === "Customer"
+  );
+
   return (
     <Card>
       <Row justifyContent="space-between" alignItems="center" nowrap>
@@ -866,14 +880,31 @@ const HeaderActionForm = ({
             </Button>
           )}
 
-          <Button
-            disabled={isLoadingCreateCustomer || isLoadingUpdateCustomer}
-            size="big"
-            variant="primary"
-            onClick={onSubmit}
-          >
-            {isLoadingCreateCustomer || isLoadingUpdateCustomer ? "Loading..." : "Save"}
-          </Button>
+          {type === "edit" &&
+            listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Update")
+              .length > 0 && (
+              <Button
+                disabled={isLoadingCreateCustomer || isLoadingUpdateCustomer}
+                size="big"
+                variant="primary"
+                onClick={onSubmit}
+              >
+                {isLoadingCreateCustomer || isLoadingUpdateCustomer ? "Loading..." : "Save"}
+              </Button>
+            )}
+
+          {type === "create" &&
+            listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Create")
+              .length > 0 && (
+              <Button
+                disabled={isLoadingCreateCustomer || isLoadingUpdateCustomer}
+                size="big"
+                variant="primary"
+                onClick={onSubmit}
+              >
+                {isLoadingCreateCustomer || isLoadingUpdateCustomer ? "Loading..." : "Save"}
+              </Button>
+            )}
         </Row>
       </Row>
     </Card>
