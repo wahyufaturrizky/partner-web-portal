@@ -3,13 +3,13 @@ import styled from "styled-components";
 import { Text, Button, Col, Row, Spacer, Search, Table, Pagination, Switch } from "pink-lava-ui";
 import usePagination from "@lucasmogari/react-pagination";
 import { useRouter } from "next/router";
-import { useCompanyList, useStatusCompany } from "../../hooks/company-list/useCompany";
 import { lang } from "lang";
+import { useCompanyList, useStatusCompany } from "../../hooks/company-list/useCompany";
 
 const CompanyList: any = () => {
   const router = useRouter();
-  const companyId = localStorage.getItem("companyId")
-  const companyCode = localStorage.getItem("companyCode")
+  const companyId = localStorage.getItem("companyId");
+  const companyCode = localStorage.getItem("companyCode");
   const t = localStorage.getItem("lan") || "en-US";
   const pagination = usePagination({
     page: 1,
@@ -24,6 +24,16 @@ const CompanyList: any = () => {
   const [search, setSearch] = useState("");
   const [toggleSelectedId, setToggleSelectedId] = useState();
   const [statusToggle, setStatusToggle] = useState(0);
+
+  const { data: dataUserPermission } = useUserPermissions({
+    options: {
+      onSuccess: () => {},
+    },
+  });
+
+  const listPermission = dataUserPermission?.permission?.filter(
+    (filtering: any) => filtering.menu === "Company"
+  );
 
   const columns = [
     {
@@ -97,11 +107,12 @@ const CompanyList: any = () => {
       // active: field.status ? 'active' : 'inactive',
       active: (
         <Switch
-          defaultChecked={field.isActive ? true : false}
+          defaultChecked={!!field.isActive}
           onChange={() => handleChangeStatus(field.id, field.isActive)}
         />
       ),
-      action: (
+      action: listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "View")
+        .length > 0 && (
         <div style={{ display: "flex", justifyContent: "left" }}>
           <Button
             size="small"
@@ -137,19 +148,18 @@ const CompanyList: any = () => {
   };
 
   return (
-    <>
-      <Col>
-        <Text variant={"h4"}>{lang[t].companyList.companyList}</Text>
-        <Spacer size={20} />
-        <Card>
-          <Row justifyContent="space-between">
-            <Search
-              width="380px"
-              placeholder={lang[t].companyList.placeholderSearchCompanyName}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-            <Row gap="16px">
-              {/* <Button
+    <Col>
+      <Text variant="h4">{lang[t].companyList.companyList}</Text>
+      <Spacer size={20} />
+      <Card>
+        <Row justifyContent="space-between">
+          <Search
+            width="380px"
+            placeholder={lang[t].companyList.placeholderSearchCompanyName}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+          <Row gap="16px">
+            {/* <Button
                 size="big"
                 variant={"tertiary"}
                 onClick={() => setModalDelete({ open: true })}
@@ -157,32 +167,29 @@ const CompanyList: any = () => {
               >
                 Delete
               </Button> */}
-              <Button
-                size="big"
-                variant={"primary"}
-                onClick={() => {
-                  router.push("/company-list/create");
-                }}
-              >
-                {lang[t].companyList.addNewCompany}
-              </Button>
-            </Row>
+            <Button
+              size="big"
+              variant="primary"
+              onClick={() => {
+                router.push("/company-list/create");
+              }}
+            >
+              {lang[t].companyList.addNewCompany}
+            </Button>
           </Row>
-        </Card>
-        <Spacer size={10} />
-        {!isLoading && (
-          <Card style={{ padding: "16px 20px" }}>
-            <Col gap="60px">
-              {!isLoadingData && (
-                <Table columns={columns} data={paginateField} />
-              )}
+        </Row>
+      </Card>
+      <Spacer size={10} />
+      {!isLoading && (
+        <Card style={{ padding: "16px 20px" }}>
+          <Col gap="60px">
+            {!isLoadingData && <Table columns={columns} data={paginateField} />}
 
-              <Pagination pagination={pagination} />
-            </Col>
-          </Card>
-        )}
-      </Col>
-    </>
+            <Pagination pagination={pagination} />
+          </Col>
+        </Card>
+      )}
+    </Col>
   );
 };
 

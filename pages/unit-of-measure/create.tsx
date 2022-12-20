@@ -13,33 +13,49 @@ import {
 import styled from "styled-components";
 import { Controller, useForm } from "react-hook-form";
 import { useRouter } from "next/router";
+import { lang } from "lang";
+import * as yup from "yup";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { useUserPermissions } from "hooks/user-config/usePermission";
 import { useCreateUOM } from "../../hooks/mdm/unit-of-measure/useUOM";
 import { queryClient } from "../_app";
 import useDebounce from "../../lib/useDebounce";
 import { useUOMCategoryInfiniteLists } from "../../hooks/mdm/unit-of-measure-category/useUOMCategory";
-import { lang } from "lang";
 
-import * as yup from "yup";
-import { yupResolver } from "@hookform/resolvers/yup";
 const schema = yup
-	.object({
-		name: yup.string().required("Name is Required"),
-		format: yup.string().required("format is Required"),
-		uom_category_id: yup.string().required("Category is Required"),
-	})
-	.required();
+  .object({
+    name: yup.string().required("Name is Required"),
+    format: yup.string().required("format is Required"),
+    uom_category_id: yup.string().required("Category is Required"),
+  })
+  .required();
 
 const UOMCreate = () => {
   const t = localStorage.getItem("lan") || "en-US";
   const router = useRouter();
-  const companyId = localStorage.getItem("companyId")
-  const companyCode = localStorage.getItem("companyCode")
+  const companyId = localStorage.getItem("companyId");
+  const companyCode = localStorage.getItem("companyCode");
   const [listUomCategory, setListUomCategory] = useState<any[]>([]);
   const [totalRows, setTotalRows] = useState(0);
   const [search, setSearch] = useState("");
   const debounceFetch = useDebounce(search, 1000);
 
-  const { register, control, handleSubmit, formState: { errors }, } = useForm({resolver: yupResolver(schema),});
+  const { data: dataUserPermission } = useUserPermissions({
+    options: {
+      onSuccess: () => {},
+    },
+  });
+
+  const listPermission = dataUserPermission?.permission?.filter(
+    (filtering: any) => filtering.menu === "Unit of Measure"
+  );
+
+  const {
+    register,
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({ resolver: yupResolver(schema) });
 
   const {
     isFetching: isFetchingUomCategory,
@@ -55,23 +71,20 @@ const UOMCreate = () => {
     options: {
       onSuccess: (data: any) => {
         setTotalRows(data.pages[0].totalRow);
-        const mappedData = data?.pages?.map((group: any) => {
-          return group.rows?.map((element: any) => {
-            return {
-              value: element.uomCategoryId,
-              label: element.name,
-            };
-          });
-        });
+        const mappedData = data?.pages?.map((group: any) =>
+          group.rows?.map((element: any) => ({
+            value: element.uomCategoryId,
+            label: element.name,
+          }))
+        );
         const flattenArray = [].concat(...mappedData);
         setListUomCategory(flattenArray);
       },
       getNextPageParam: (_lastPage: any, pages: any) => {
         if (listUomCategory.length < totalRows) {
           return pages.length + 1;
-        } else {
-          return undefined;
         }
+        return undefined;
       },
     },
   });
@@ -96,7 +109,7 @@ const UOMCreate = () => {
   return (
     <Col>
       <Row gap="4px">
-        <Text variant={"h4"}>{lang[t].unitOfMeasure.pageTitle.create}</Text>
+        <Text variant="h4">{lang[t].unitOfMeasure.pageTitle.create}</Text>
       </Row>
 
       <Spacer size={20} />
@@ -106,7 +119,7 @@ const UOMCreate = () => {
           <Controller
             control={control}
             name="active_status"
-            defaultValue={"ACTIVE"}
+            defaultValue="ACTIVE"
             render={({ field: { onChange } }) => (
               <Dropdown
                 label=""
@@ -125,12 +138,16 @@ const UOMCreate = () => {
           />
 
           <Row gap="16px">
-            <Button size="big" variant={"tertiary"} onClick={() => router.back()}>
+            <Button size="big" variant="tertiary" onClick={() => router.back()}>
               {lang[t].unitOfMeasure.tertier.cancel}
             </Button>
-            <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
-              {isLoadingCreateUom ? "Loading..." : lang[t].unitOfMeasure.primary.save}
-            </Button>
+
+            {listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Create")
+              .length > 0 && (
+              <Button size="big" variant="primary" onClick={handleSubmit(onSubmit)}>
+                {isLoadingCreateUom ? "Loading..." : lang[t].unitOfMeasure.primary.save}
+              </Button>
+            )}
           </Row>
         </Row>
       </Card>
@@ -139,16 +156,18 @@ const UOMCreate = () => {
 
       <Accordion>
         <Accordion.Item key={1}>
-          <Accordion.Header variant="blue">{lang[t].unitOfMeasure.accordion.general}</Accordion.Header>
+          <Accordion.Header variant="blue">
+            {lang[t].unitOfMeasure.accordion.general}
+          </Accordion.Header>
           <Accordion.Body>
             <Row width="100%" noWrap>
-              <Col width={"100%"}>
+              <Col width="100%">
                 <Input
                   width="100%"
                   label="Uom Name"
                   height="40px"
                   required
-                  placeholder={"e.g gram"}
+                  placeholder="e.g gram"
                   error={errors?.name?.message}
                   {...register("name")}
                 />
@@ -161,19 +180,21 @@ const UOMCreate = () => {
                   name="uom_category_id"
                   render={({ field: { onChange } }) => (
                     <>
-                    <div style={{
-                      display: 'flex'
-                      }}>
-                      <Label>UoM Category</Label>
-                      <Span>&#42;</Span>
-                    </div>
+                      <div
+                        style={{
+                          display: "flex",
+                        }}
+                      >
+                        <Label>UoM Category</Label>
+                        <Span>&#42;</Span>
+                      </div>
                       <Spacer size={3} />
                       <FormSelect
                         style={{ width: "100%" }}
-                        size={"large"}
-                        placeholder={"select uom category"}
-                        borderColor={"#AAAAAA"}
-                        arrowColor={"#000"}
+                        size="large"
+                        placeholder="select uom category"
+                        borderColor="#AAAAAA"
+                        arrowColor="#000"
                         withSearch
                         required
                         error={errors?.uom_category_id?.message}
@@ -216,7 +237,7 @@ const UOMCreate = () => {
                 height="40px"
                 required
                 error={errors?.format?.message}
-                placeholder={"e.g gr"}
+                placeholder="e.g gr"
                 {...register("format")}
               />
             </Row>

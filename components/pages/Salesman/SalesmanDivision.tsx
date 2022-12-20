@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState } from "react";
 import {
   FileUploadModal,
   DropdownMenu,
@@ -9,28 +9,32 @@ import {
   Table,
   Row,
   Text,
-} from 'pink-lava-ui'
-import styled from 'styled-components'
-import usePagination from '@lucasmogari/react-pagination';
+} from "pink-lava-ui";
+import styled from "styled-components";
+import usePagination from "@lucasmogari/react-pagination";
 
 import { queryClient } from "pages/_app";
 import { ModalDeleteConfirmation } from "components/elements/Modal/ModalConfirmationDelete";
-import { columnsSalesDivision, downloadFileSalesDivision, downloadOptions } from 'components/pages/Salesman/constants'
-import ModalAddSalesDivision from 'components/elements/Modal/ModalAddSalesDivision'
-import { useProductList } from 'hooks/mdm/product-list/useProductList';
+import {
+  columnsSalesDivision,
+  downloadFileSalesDivision,
+  downloadOptions,
+} from "components/pages/Salesman/constants";
+import ModalAddSalesDivision from "components/elements/Modal/ModalAddSalesDivision";
+import { useProductList } from "hooks/mdm/product-list/useProductList";
 import {
   useUploadDocumentSalesDivision,
   useCreateSalesmanDivision,
   useDeleteSalesmanDivision,
   useFetchSalesmanDivision,
-  useUpdateSalesmanDivision
-} from 'hooks/mdm/salesman/useSalesmanDivision'
-import ModalUpdateSalesDivision from 'components/elements/Modal/ModalUpdateSalesDivision';
-
+  useUpdateSalesmanDivision,
+} from "hooks/mdm/salesman/useSalesmanDivision";
+import ModalUpdateSalesDivision from "components/elements/Modal/ModalUpdateSalesDivision";
+import { useUserPermissions } from "hooks/user-config/usePermission";
 
 export default function ComponentSalesmanDivision() {
-  const companyId = localStorage.getItem("companyId")
-  const companyCode = localStorage.getItem("companyCode")
+  const companyId = localStorage.getItem("companyId");
+  const companyCode = localStorage.getItem("companyCode");
   const pagination = usePagination({
     page: 1,
     itemsPerPage: 20,
@@ -39,10 +43,10 @@ export default function ComponentSalesmanDivision() {
     arrows: true,
     totalItems: 100,
   });
-  const [search, setSearch] = useState<string>('')
-  const [formsUpdate, setFormsUpdate] = useState<any>({})
-  const [singleTitle, setSingleTitile] = useState('')
-  const [selectedItems, setSelectedItems] = useState<string[]>([])
+  const [search, setSearch] = useState<string>("");
+  const [formsUpdate, setFormsUpdate] = useState<any>({});
+  const [singleTitle, setSingleTitile] = useState("");
+  const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [visible, setVisible] = useState({
     delete: false,
     create: false,
@@ -50,155 +54,171 @@ export default function ComponentSalesmanDivision() {
     update: false,
   });
 
+  const { data: dataUserPermission } = useUserPermissions({
+    options: {
+      onSuccess: () => {},
+    },
+  });
+
+  const listPermission = dataUserPermission?.permission?.filter(
+    (filtering: any) => filtering.menu === "Sales Division"
+  );
+
   const rowSelection = {
     selectedItems,
     onChange: async (value: any) => {
-      const findName = await data?.rows?.find((el: any) => el.id === value[0])
-      setSelectedItems(value)
-      setSingleTitile(findName?.divisiName)
-    }
-  }
+      const findName = await data?.rows?.find((el: any) => el.id === value[0]);
+      setSelectedItems(value);
+      setSingleTitile(findName?.divisiName);
+    },
+  };
 
   const isLabelConfirmationDelete = (): any => {
     if (selectedItems.length > 1) {
-      selectedItems?.map((label: string) => label)
+      selectedItems?.map((label: string) => label);
     } else {
-      return singleTitle
+      return singleTitle;
     }
-  }
+  };
 
-  const { data, isLoading, refetch } =
-  useFetchSalesmanDivision({
+  const { data, isLoading, refetch } = useFetchSalesmanDivision({
     options: {
-      onSuccess: ({ totalRow }: any) => pagination.setTotalItems(totalRow)
+      onSuccess: ({ totalRow }: any) => pagination.setTotalItems(totalRow),
     },
     query: {
       search,
       company: companyCode,
       page: pagination.page,
       limit: pagination.itemsPerPage,
-    }
-  })
-  
-  const { mutate: handleDeleteDivision }: { mutate: any } =
-  useDeleteSalesmanDivision({
+    },
+  });
+
+  const { mutate: handleDeleteDivision }: { mutate: any } = useDeleteSalesmanDivision({
     options: {
       onSuccess: () => {
-        setVisible({ ...visible, delete: false })
-        refetch()
+        setVisible({ ...visible, delete: false });
+        refetch();
       },
       onError: ({ data }: any) => {
-        alert(`Ups sorry ${data?.data}`)
-        setVisible({ ...visible, delete: false })
-      }
-    }
-  })
+        alert(`Ups sorry ${data?.data}`);
+        setVisible({ ...visible, delete: false });
+      },
+    },
+  });
 
   const { mutate: handleCreateSalesDivision }: { mutate: any } = useCreateSalesmanDivision({
-    options: { onSuccess: () => {
-      refetch()
-      setVisible({ ...visible, create: false })
-    } }
-  })
-  
+    options: {
+      onSuccess: () => {
+        refetch();
+        setVisible({ ...visible, create: false });
+      },
+    },
+  });
+
   const { mutate: handleUpdateSalesDivision }: { mutate: any } = useUpdateSalesmanDivision({
     options: {
       onSuccess: () => {
-        refetch()
-        setVisible({ ...visible, update: false })
-      }
+        refetch();
+        setVisible({ ...visible, update: false });
+      },
     },
-    id: formsUpdate?.id
-  })
+    id: formsUpdate?.id,
+  });
 
   const { data: { rows: listProducts } = {} } = useProductList({
     options: { onSuccess: () => {} },
-    query: { company_id: companyCode }
-  })
+    query: { company_id: companyCode },
+  });
 
   const { mutate: handleUploadDocuments } = useUploadDocumentSalesDivision({
     options: {
       onSuccess: () => {
-        refetch()
-        setVisible({ ...visible, upload: false })
+        refetch();
+        setVisible({ ...visible, upload: false });
         queryClient.invalidateQueries(["sales-division"]);
-      }
-    }
-  })
+      },
+    },
+  });
 
   const _handleCreateSalesDivision = (items: {
-    name: string, description?: string, itemSelected: string[]
+    name: string;
+    description?: string;
+    itemSelected: string[];
   }) => {
     handleCreateSalesDivision({
       company: companyCode,
       divisi_name: items?.name,
       short_desc: items?.description,
-      product: items?.itemSelected
-    })
-  }
+      product: items?.itemSelected,
+    });
+  };
 
   const _handleUpdateSalesDivision = (items: {
-    name: string, description?: string, itemSelected: string[]
+    name: string;
+    description?: string;
+    itemSelected: string[];
   }) => {
     handleUpdateSalesDivision({
       company: companyCode,
       divisi_name: items?.name,
       short_desc: items?.description,
-      product: items?.itemSelected
-    })
-  }
+      product: items?.itemSelected,
+    });
+  };
 
   const _handleDropdownMore = ({ key }: { key: string }) => {
     switch (key) {
-      case '1':
-        return downloadFileSalesDivision({ company_id: companyCode, with_data: 'n' })
-      case '2':
-        return setVisible({ ...visible, upload: true })
-      case '3':
-        return downloadFileSalesDivision({ company_id: companyCode, with_data: 'y' })
+      case "1":
+        return downloadFileSalesDivision({ company_id: companyCode, with_data: "n" });
+      case "2":
+        return setVisible({ ...visible, upload: true });
+      case "3":
+        return downloadFileSalesDivision({ company_id: companyCode, with_data: "y" });
       default:
-        return null
+        return null;
     }
-  }
+  };
 
   const submitDocumentsUploader = (file: any) => {
     const formData: any = new FormData();
     formData.append("upload_file", file);
-    handleUploadDocuments(formData)
-  }
+    handleUploadDocuments(formData);
+  };
 
   const columnsSalesDivision = [
     {
       title: "Division ID",
       dataIndex: "code",
-      width: "30%"
+      width: "30%",
     },
     {
       title: "Division Name",
       dataIndex: "divisiName",
-      width: "30%"
+      width: "30%",
     },
     {
       title: "Product",
       dataIndex: "product",
-      width: "20%"
+      width: "20%",
     },
     {
       title: "Action",
-      render: (items: any) => (
-        <Button
-          size="small"
-          onClick={() => {
-            setFormsUpdate({ ...items })
-            setVisible({ ...visible, update: true })
-          }}
-          variant="tertiary"
-        >
-          View Detail
-        </Button>
-      )
+      render: (items: any) =>
+        listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "View").length >
+          0 && (
+          <Button
+            size="small"
+            onClick={() => {
+              setFormsUpdate({ ...items });
+              setVisible({ ...visible, update: true });
+            }}
+            variant="tertiary"
+          >
+            View Detail
+          </Button>
+        ),
     },
-  ]
+  ];
 
   return (
     <div>
@@ -241,7 +261,7 @@ export default function ComponentSalesmanDivision() {
           loading={isLoading}
           columns={columnsSalesDivision}
           data={data?.rows?.map((item: any) => ({ ...item, key: item?.id }))}
-          />
+        />
         <Spacer size={50} />
         <Pagination pagination={pagination} />
       </Card>
@@ -263,7 +283,7 @@ export default function ComponentSalesmanDivision() {
         onCancel={() => setVisible({ ...visible, create: false })}
         onOk={(items: any) => _handleCreateSalesDivision(items)}
       />
-      
+
       {/* modal update sales division */}
       <ModalUpdateSalesDivision
         listProducts={listProducts}
@@ -280,17 +300,17 @@ export default function ComponentSalesmanDivision() {
         onSubmit={submitDocumentsUploader}
       />
     </div>
-  )
+  );
 }
 
 const FlexElement = styled.div`
   display: flex;
   align-items: center;
   gap: 1rem;
-`
+`;
 
 const Card = styled.div`
-	background: #ffffff;
-	border-radius: 16px;
-	padding: 16px;
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 16px;
 `;

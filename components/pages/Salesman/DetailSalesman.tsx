@@ -21,11 +21,12 @@ import {
   useUpdateSalesman,
 } from "hooks/mdm/salesman/useSalesman";
 import { useFetchSalesmanDivision } from "hooks/mdm/salesman/useSalesmanDivision";
+import { lang } from "lang";
+import { useUserPermissions } from "hooks/user-config/usePermission";
 import { dropdownStatus } from "./constants";
 import ActionButton from "./fragments/ActionButton";
 import ContentDetailCustomer from "./fragments/ContentDetailCustomers";
 import Forms from "./fragments/Forms";
-import { lang } from "lang";
 
 export default function ComponentDetailSalesman({ listCustomers, isLoading }: any) {
   const t = localStorage.getItem("lan") || "en-US";
@@ -53,6 +54,16 @@ export default function ComponentDetailSalesman({ listCustomers, isLoading }: an
     Rejected: false,
     Waiting: false,
   });
+
+  const { data: dataUserPermission } = useUserPermissions({
+    options: {
+      onSuccess: () => {},
+    },
+  });
+
+  const listPermission = dataUserPermission?.permission?.filter(
+    (filtering: any) => filtering.menu === "Sales Division"
+  );
 
   const { data } = useFetchDetailSalesman({
     id: salesman_id,
@@ -107,7 +118,7 @@ export default function ComponentDetailSalesman({ listCustomers, isLoading }: an
     },
   ];
 
-  let setDvs = status === "Waiting for Approval" ? data?.division : division;
+  const setDvs = status === "Waiting for Approval" ? data?.division : division;
   const payloads = {
     code: data?.code,
     company: data?.company,
@@ -190,7 +201,7 @@ export default function ComponentDetailSalesman({ listCustomers, isLoading }: an
   const _handleDraftedSalesman = () => {
     const dataUpdated: any = {
       ...payloads,
-      division: division,
+      division,
       status: 4,
       tobe: 4,
     };
@@ -310,13 +321,11 @@ export default function ComponentDetailSalesman({ listCustomers, isLoading }: an
           visible={modal.visible}
           content={[
             modal.confirmation === true && modal.reason === false ? (
-              <>
-                <TextConfirmation>
-                  {lang[t].salesmanGroup.areYouSureTo} {modalActive}{" "}
-                  {lang[t].salesmanGroup.thisSalesman}
-                  <Spacer size={30} />
-                </TextConfirmation>
-              </>
+              <TextConfirmation>
+                {lang[t].salesmanGroup.areYouSureTo} {modalActive}{" "}
+                {lang[t].salesmanGroup.thisSalesman}
+                <Spacer size={30} />
+              </TextConfirmation>
             ) : (
               <>
                 <Spacer size={20} />

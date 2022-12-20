@@ -15,17 +15,22 @@ import {
   FileUploadModal,
 } from "pink-lava-ui";
 import usePagination from "@lucasmogari/react-pagination";
+import { useRouter } from "next/router";
+import {
+  useCostCenters,
+  useDeletCostCenter,
+  useUploadFileCostCenter,
+} from "hooks/mdm/cost-center/useCostCenter";
+import { useUserPermissions } from "hooks/user-config/usePermission";
 import useDebounce from "../../lib/useDebounce";
 import { queryClient } from "../_app";
 import { ICDownload, ICUpload } from "../../assets/icons";
 import { mdmDownloadService } from "../../lib/client";
-import { useRouter } from "next/router";
-import { useCostCenters, useDeletCostCenter, useUploadFileCostCenter } from "hooks/mdm/cost-center/useCostCenter";
 
 const downloadFile = (params: any) =>
   mdmDownloadService("/cost-center/download", { params }).then((res) => {
-    let dataUrl = window.URL.createObjectURL(new Blob([res.data]));
-    let tempLink = document.createElement("a");
+    const dataUrl = window.URL.createObjectURL(new Blob([res.data]));
+    const tempLink = document.createElement("a");
     tempLink.href = dataUrl;
     tempLink.setAttribute("download", `cost_center_${new Date().getTime()}.xlsx`);
     tempLink.click();
@@ -49,8 +54,8 @@ const renderConfirmationText = (type: any, data: any) => {
 
 const CostCenter = () => {
   const router = useRouter();
-  const companyId = localStorage.getItem("companyId")
-  const companyCode = localStorage.getItem("companyCode")
+  const companyId = localStorage.getItem("companyId");
+  const companyCode = localStorage.getItem("companyCode");
   const pagination = usePagination({
     page: 1,
     itemsPerPage: 20,
@@ -67,6 +72,16 @@ const CostCenter = () => {
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const debounceSearch = useDebounce(search, 1000);
 
+  const { data: dataUserPermission } = useUserPermissions({
+    options: {
+      onSuccess: () => {},
+    },
+  });
+
+  const listPermission = dataUserPermission?.permission?.filter(
+    (filtering: any) => filtering.menu === "Cost Center"
+  );
+
   const {
     data: costCenterData,
     isLoading: isLoadingCostCenter,
@@ -76,35 +91,34 @@ const CostCenter = () => {
       search: debounceSearch,
       page: pagination.page,
       limit: pagination.itemsPerPage,
-      company_id : companyCode,
+      company_id: companyCode,
     },
     options: {
       onSuccess: (data: any) => {
         pagination.setTotalItems(data.totalRow);
       },
       select: (data: any) => {
-        const mappedData = data?.rows?.map((element: any) => {
-          return {
-            key: element.costCenterId,
-            id: element.costCenterId,
-            companyId: element.companyId,
-            code: element.code,
-            name: element.name,
-            action: (
-              <div style={{ display: "flex", justifyContent: "left" }}>
-                <Button
-                  size="small"
-                  onClick={() => {
-                    router.push(`/cost-center/${element.companyId}/${element.costCenterId}`);
-                  }}
-                  variant="tertiary"
-                >
-                  View Detail
-                </Button>
-              </div>
-            ),
-          };
-        });
+        const mappedData = data?.rows?.map((element: any) => ({
+          key: element.costCenterId,
+          id: element.costCenterId,
+          companyId: element.companyId,
+          code: element.code,
+          name: element.name,
+          action: listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "View")
+            .length > 0 && (
+            <div style={{ display: "flex", justifyContent: "left" }}>
+              <Button
+                size="small"
+                onClick={() => {
+                  router.push(`/cost-center/${element.companyId}/${element.costCenterId}`);
+                }}
+                variant="tertiary"
+              >
+                View Detail
+              </Button>
+            </div>
+          ),
+        }));
         return { data: mappedData, totalRow: data.totalRow };
       },
     },
@@ -120,34 +134,35 @@ const CostCenter = () => {
     },
   });
 
-  const { mutate: uploadFileCostCenter, isLoading: isLoadingUploadFileCostCenter } = useUploadFileCostCenter({
-    query: {
-      with_data: "N",
-      company_id: costCenterData?.data[0]?.companyId,
-    },
-    options: {
-      onSuccess: () => {
-        queryClient.invalidateQueries(["cost-centers"]);
-        setShowUpload(false);
+  const { mutate: uploadFileCostCenter, isLoading: isLoadingUploadFileCostCenter } =
+    useUploadFileCostCenter({
+      query: {
+        with_data: "N",
+        company_id: costCenterData?.data[0]?.companyId,
       },
-    },
-  });
+      options: {
+        onSuccess: () => {
+          queryClient.invalidateQueries(["cost-centers"]);
+          setShowUpload(false);
+        },
+      },
+    });
 
   const columns = [
     {
       title: "Cost Center ID",
       dataIndex: "id",
-      key: 'id',
+      key: "id",
     },
     {
       title: "Cost Center Code",
       dataIndex: "code",
-      key: 'profitCenterCode'
+      key: "profitCenterCode",
     },
     {
       title: "Cost Center Name",
       dataIndex: "name",
-      key: 'profitCenterCode'
+      key: "profitCenterCode",
     },
     {
       title: "Action",
@@ -156,12 +171,11 @@ const CostCenter = () => {
       align: "left",
     },
   ];
-  
 
   const rowSelection = {
     selectedRowKeys,
     onChange: (selectedRowKeys: any, selectedRows: any) => {
-      if(!selectedRowKeys) {
+      if (!selectedRowKeys) {
       }
       setSelectedRowKeys(selectedRowKeys);
     },
@@ -173,43 +187,44 @@ const CostCenter = () => {
     formData.append("file", file);
     const uploadedData = {
       file: formData,
-      company_id: costCenterData?.data[0]?.companyId
-    }
+      company_id: costCenterData?.data[0]?.companyId,
+    };
     uploadFileCostCenter(formData);
   };
 
-  const handleDelete = (ids: any[], rows: { id: string | number; companyId: any; }[]) => {
+  const handleDelete = (ids: any[], rows: { id: string | number; companyId: any }[]) => {
     const deletedCostCenter = {
-        cost_center_ids :[...ids],
-        company_ids :[]
-    }
-    let filteredCostCenter = {}
+      cost_center_ids: [...ids],
+      company_ids: [],
+    };
+    const filteredCostCenter = {};
     ids.forEach((id: any) => {
-        rows.forEach((costCenter: { id: string | number; companyId: any; }) => {
-            if(id === costCenter?.id) {
-                if(!filteredCostCenter[costCenter?.id]) {
-                    deletedCostCenter.company_ids.push(costCenter.companyId)
-                    filteredCostCenter[costCenter?.id] = 1
-                }
-            }
-        });
+      rows.forEach((costCenter: { id: string | number; companyId: any }) => {
+        if (id === costCenter?.id) {
+          if (!filteredCostCenter[costCenter?.id]) {
+            deletedCostCenter.company_ids.push(costCenter.companyId);
+            filteredCostCenter[costCenter?.id] = 1;
+          }
+        }
+      });
     });
-    if(deletedCostCenter?.company_ids?.length > 0) {
-      deleteCostCenter(deletedCostCenter)
+    if (deletedCostCenter?.company_ids?.length > 0) {
+      deleteCostCenter(deletedCostCenter);
     }
-  }
+  };
 
-  if(isLoadingCostCenter || isLoadingUploadFileCostCenter){
-  return (
-    <Center>
-      <Spin tip="Loading data..." />
-    </Center>
-  )}
+  if (isLoadingCostCenter || isLoadingUploadFileCostCenter) {
+    return (
+      <Center>
+        <Spin tip="Loading data..." />
+      </Center>
+    );
+  }
 
   return (
     <>
       <Col>
-        <Text variant={"h4"}>Cost Center List</Text>
+        <Text variant="h4">Cost Center List</Text>
         <Spacer size={20} />
       </Col>
       <Card>
@@ -222,29 +237,33 @@ const CostCenter = () => {
             }}
           />
           <Row gap="16px">
-            <Button
-              size="big"
-              variant={"tertiary"}
-              onClick={() =>
-                setShowDelete({
-                  open: true,
-                  type: "selection",
-                  data: { uomData: costCenterData?.data, selectedRowKeys },
-                })
-              }
-              disabled={rowSelection.selectedRowKeys?.length === 0}
-            >
-              Delete
-            </Button>
+            {listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Delete")
+              .length > 0 && (
+              <Button
+                size="big"
+                variant="tertiary"
+                onClick={() =>
+                  setShowDelete({
+                    open: true,
+                    type: "selection",
+                    data: { uomData: costCenterData?.data, selectedRowKeys },
+                  })
+                }
+                disabled={rowSelection.selectedRowKeys?.length === 0}
+              >
+                Delete
+              </Button>
+            )}
+
             <DropdownMenu
-              title={"More"}
-              buttonVariant={"secondary"}
-              buttonSize={"big"}
-              textVariant={"button"}
-              textColor={"pink.regular"}
+              title="More"
+              buttonVariant="secondary"
+              buttonSize="big"
+              textVariant="button"
+              textColor="pink.regular"
               iconStyle={{ fontSize: "12px" }}
               onClick={(e: any) => {
-                const companyId = costCenterData?.data[0]?.companyId
+                const companyId = costCenterData?.data[0]?.companyId;
                 switch (parseInt(e.key)) {
                   case 1:
                     downloadFile({ with_data: "N", company_id: companyId });
@@ -291,11 +310,7 @@ const CostCenter = () => {
                 },
               ]}
             />
-            <Button
-              size="big"
-              variant="primary"
-              onClick={() => router.push("/cost-center/create")}
-            >
+            <Button size="big" variant="primary" onClick={() => router.push("/cost-center/create")}>
               Create
             </Button>
           </Row>
@@ -303,13 +318,13 @@ const CostCenter = () => {
       </Card>
       <Spacer size={10} />
       <Card style={{ padding: "16px 20px" }}>
-        <Col gap={"60px"}>
+        <Col gap="60px">
           <Table
             loading={isLoadingCostCenter || isFetchingCostCenter}
             columns={columns}
             data={costCenterData?.data}
             rowSelection={rowSelection}
-            rowKey={"id"}
+            rowKey="id"
           />
           <Pagination pagination={pagination} />
         </Col>
@@ -321,7 +336,7 @@ const CostCenter = () => {
           centered
           visible={isShowDelete.open}
           onCancel={() => setShowDelete({ open: false, type: "", data: {} })}
-          title={"Confirm Delete"}
+          title="Confirm Delete"
           footer={null}
           content={
             <TopButtonHolder>
@@ -369,17 +384,17 @@ const Card = styled.div`
 `;
 
 const DeleteCardButtonHolder = styled.div`
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    margin-bottom: 20px;
-`
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 20px;
+`;
 
 const TopButtonHolder = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: center;
-`
+`;
 const Center = styled.div`
   display: flex;
   justify-content: center;

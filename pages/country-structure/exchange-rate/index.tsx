@@ -15,23 +15,23 @@ import {
   FormSelect,
 } from "pink-lava-ui";
 import usePagination from "@lucasmogari/react-pagination";
-import {
-  useExchangeRates,
-  useUploadFileExchangeRate,
-} from "../../../hooks/mdm/exchange-rate/useExchangeRate";
-import useDebounce from "../../../lib/useDebounce";
-import { queryClient } from "../../_app";
-import { ICDownload, ICUpload } from "../../../assets/icons";
 import { useRouter } from "next/router";
 import { Controller, useForm } from "react-hook-form";
 import moment from "moment";
 import { mdmDownloadService } from "lib/client";
 import { useCurrenciesInfiniteLists } from "hooks/mdm/country-structure/useCurrencyMDM";
+import { ICDownload, ICUpload } from "../../../assets/icons";
+import { queryClient } from "../../_app";
+import useDebounce from "../../../lib/useDebounce";
+import {
+  useExchangeRates,
+  useUploadFileExchangeRate,
+} from "../../../hooks/mdm/exchange-rate/useExchangeRate";
 
 const downloadFile = (params: any) =>
   mdmDownloadService("/exchange-rate/download", { params }).then((res) => {
-    let dataUrl = window.URL.createObjectURL(new Blob([res.data]));
-    let tempLink = document.createElement("a");
+    const dataUrl = window.URL.createObjectURL(new Blob([res.data]));
+    const tempLink = document.createElement("a");
     tempLink.href = dataUrl;
     tempLink.setAttribute("download", `exchange-rate${new Date().getTime()}.xlsx`);
     tempLink.click();
@@ -39,8 +39,8 @@ const downloadFile = (params: any) =>
 
 const ExchangeRate = () => {
   const router = useRouter();
-  const companyId = localStorage.getItem("companyId")
-  const companyCode = localStorage.getItem("companyCode")
+  const companyId = localStorage.getItem("companyId");
+  const companyCode = localStorage.getItem("companyCode");
 
   const [dataAccess, setDataAccess] = useState("1");
   const [dataCurrency, setDataCurrency] = useState("");
@@ -50,6 +50,16 @@ const ExchangeRate = () => {
   const [currenciesInfiniteList, setCurrenciesInfiniteList] = useState<any[]>([]);
   const [searchCurrenciesInfinite, setSearchCurrenciesInfinite] = useState("");
   const debounceFetchCurrenciesInfinite = useDebounce(searchCurrenciesInfinite, 1000);
+
+  const { data: dataUserPermission } = useUserPermissions({
+    options: {
+      onSuccess: () => {},
+    },
+  });
+
+  const listPermission = dataUserPermission?.permission?.filter(
+    (filtering: any) => filtering.menu === "Exchange Rate"
+  );
 
   const {
     control,
@@ -93,18 +103,16 @@ const ExchangeRate = () => {
         pagination.setTotalItems(data.totalRow);
       },
       select: (data: any) => {
-        const mappedData = data?.rows?.map((element: any) => {
-          return {
-            key: element.exchangeRateId,
-            id: element.exchangeRateId,
-            exchangeCode: element.currencyCode,
-            exchangeName: element.currencyName,
-            exchangeValue: element.value,
-            exchangeSell: element.sell,
-            exchangeBuy: element.buy,
-            exchangeLastUpdated: moment(element.modifiedAt).format("DD/MM/YYYY"),
-          };
-        });
+        const mappedData = data?.rows?.map((element: any) => ({
+          key: element.exchangeRateId,
+          id: element.exchangeRateId,
+          exchangeCode: element.currencyCode,
+          exchangeName: element.currencyName,
+          exchangeValue: element.value,
+          exchangeSell: element.sell,
+          exchangeBuy: element.buy,
+          exchangeLastUpdated: moment(element.modifiedAt).format("DD/MM/YYYY"),
+        }));
 
         return { data: mappedData, totalRow: data.totalRow };
       },
@@ -135,24 +143,21 @@ const ExchangeRate = () => {
     options: {
       onSuccess: (data: any) => {
         setTotalRowsCurrenciesInfiniteList(data.pages[0].totalRow);
-        const mappedData = data?.pages?.map((group: any) => {
-          return group.rows?.map((element: any) => {
-            return {
-              ...element,
-              value: element.currency,
-              label: `${element.currency} - ${element.currencyName}`,
-            };
-          });
-        });
+        const mappedData = data?.pages?.map((group: any) =>
+          group.rows?.map((element: any) => ({
+            ...element,
+            value: element.currency,
+            label: `${element.currency} - ${element.currencyName}`,
+          }))
+        );
         const flattenArray = [].concat(...mappedData);
         setCurrenciesInfiniteList(flattenArray);
       },
       getNextPageParam: (_lastPage: any, pages: any) => {
         if (currenciesInfiniteList.length < totalRowsCurrenciesInfiniteList) {
           return pages.length + 1;
-        } else {
-          return undefined;
         }
+        return undefined;
       },
     },
   });
@@ -217,7 +222,7 @@ const ExchangeRate = () => {
 
   const onSubmit = (data) => {
     console.log(data);
-    
+
     if (dataAccess == "1") {
       setDataCurrency(data.currency);
       setDataFromDate(data.from_date_daily);
@@ -232,7 +237,7 @@ const ExchangeRate = () => {
   return (
     <>
       <Col>
-        <Text variant={"h4"}>Exchange Rate</Text>
+        <Text variant="h4">Exchange Rate</Text>
         <Spacer size={20} />
       </Col>
       <Card>
@@ -256,11 +261,11 @@ const ExchangeRate = () => {
           </Row>
           <Row gap="16px">
             <DropdownMenu
-              title={"More"}
-              buttonVariant={"secondary"}
-              buttonSize={"big"}
-              textVariant={"button"}
-              textColor={"pink.regular"}
+              title="More"
+              buttonVariant="secondary"
+              buttonSize="big"
+              textVariant="button"
+              textColor="pink.regular"
               iconStyle={{ fontSize: "12px" }}
               onClick={(e: any) => {
                 switch (parseInt(e.key)) {
@@ -315,7 +320,7 @@ const ExchangeRate = () => {
       <Spacer size={10} />
       <Card style={{ padding: "16px 20px" }}>
         <Row width="100%" gap="14px" noWrap>
-          <Col width={"40%"}>
+          <Col width="40%">
             <Controller
               control={control}
               name="currency"
@@ -328,10 +333,10 @@ const ExchangeRate = () => {
                     error={error?.message}
                     height="48px"
                     style={{ width: "100%" }}
-                    size={"large"}
-                    placeholder={"Select"}
+                    size="large"
+                    placeholder="Select"
                     borderColor={error?.message ? "#ED1C24" : "#AAAAAA"}
-                    arrowColor={"#000"}
+                    arrowColor="#000"
                     withSearch
                     isLoading={isFetchingCurrenciesInfinite}
                     isLoadingMore={isFetchingMoreCurrenciesInfinite}
@@ -357,16 +362,16 @@ const ExchangeRate = () => {
               )}
             />
           </Col>
-          <Col width={"40%"}>
+          <Col width="40%">
             <Dropdown
               label="Data Access"
-              width={"100%"}
+              width="100%"
               items={dailyAccess}
               handleChange={(value: string) => setDataAccess(value)}
               defaultValue={dataAccess}
               valueSelectedItems={dataAccess}
               noSearch
-              placeholder={"Select"}
+              placeholder="Select"
             />
           </Col>
         </Row>
@@ -374,10 +379,10 @@ const ExchangeRate = () => {
         <Row width="100%" gap="14px" noWrap>
           {dataAccess == "2" ? (
             <>
-              <Col width={"40%"}>
+              <Col width="40%">
                 <Controller
                   control={control}
-                  name={`from_date`}
+                  name="from_date"
                   defaultValue={moment().format("DD/MM/YYYY")}
                   render={({ field: { onChange } }) => (
                     <DatePickerInput
@@ -385,15 +390,15 @@ const ExchangeRate = () => {
                       onChange={(date: any, dateString: any) => onChange(dateString)}
                       label="From Date"
                       defaultValue={moment()}
-                      format={"DD/MM/YYYY"}
+                      format="DD/MM/YYYY"
                     />
                   )}
                 />
               </Col>
-              <Col width={"40%"}>
+              <Col width="40%">
                 <Controller
                   control={control}
-                  name={`to_date`}
+                  name="to_date"
                   defaultValue={moment().format("DD/MM/YYYY")}
                   render={({ field: { onChange } }) => (
                     <DatePickerInput
@@ -401,42 +406,45 @@ const ExchangeRate = () => {
                       onChange={(date: any, dateString: any) => onChange(dateString)}
                       label="To Date"
                       defaultValue={moment()}
-                      format={"DD/MM/YYYY"}
+                      format="DD/MM/YYYY"
                     />
                   )}
                 />
               </Col>
             </>
           ) : (
-            <Col width={"40%"}>
+            <Col width="40%">
               <Controller
                 control={control}
-                name={`from_date_daily`}
+                name="from_date_daily"
                 render={({ field: { onChange } }) => (
                   <DatePickerInput
                     fullWidth
                     onChange={(date: any, dateString: any) => onChange(dateString)}
                     label="Daily Date"
-                    format={"DD/MM/YYYY"}
+                    format="DD/MM/YYYY"
                   />
                 )}
               />
             </Col>
           )}
 
-          <Col
-            justifyContent="flex-end"
-            alignItems="center"
-            style={{ paddingBottom: "5px" }}
-            nowrap
-          >
-            <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
-              View
-            </Button>
-          </Col>
+          {listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "View")
+            .length > 0 && (
+            <Col
+              justifyContent="flex-end"
+              alignItems="center"
+              style={{ paddingBottom: "5px" }}
+              nowrap
+            >
+              <Button size="big" variant="primary" onClick={handleSubmit(onSubmit)}>
+                View
+              </Button>
+            </Col>
+          )}
         </Row>
         <Spacer size={20} />
-        <Col gap={"60px"}>
+        <Col gap="60px">
           <Table
             loading={isLoadingExchange || isFetchingExchange}
             columns={columns}

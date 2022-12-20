@@ -15,18 +15,19 @@ import {
   Lozenge,
 } from "pink-lava-ui";
 import usePagination from "@lucasmogari/react-pagination";
+import { useRouter } from "next/router";
+import { lang } from "lang";
+import { useUserPermissions } from "hooks/user-config/usePermission";
 import { useUOMList, useUploadFileUOM, useDeletUOM } from "../../hooks/mdm/unit-of-measure/useUOM";
 import useDebounce from "../../lib/useDebounce";
 import { queryClient } from "../_app";
 import { ICDownload, ICUpload } from "../../assets/icons";
 import { mdmDownloadService } from "../../lib/client";
-import { useRouter } from "next/router";
-import { lang } from "lang";
 
 const downloadFile = (params: any) =>
   mdmDownloadService("/uom/download", { params }).then((res) => {
-    let dataUrl = window.URL.createObjectURL(new Blob([res.data]));
-    let tempLink = document.createElement("a");
+    const dataUrl = window.URL.createObjectURL(new Blob([res.data]));
+    const tempLink = document.createElement("a");
     tempLink.href = dataUrl;
     tempLink.setAttribute("download", `uom_${new Date().getTime()}.xlsx`);
     tempLink.click();
@@ -51,8 +52,8 @@ const renderConfirmationText = (type: any, data: any) => {
 const UOM = () => {
   const t = localStorage.getItem("lan") || "en-US";
   const router = useRouter();
-  const companyId = localStorage.getItem("companyId")
-  const companyCode = localStorage.getItem("companyCode")
+  const companyId = localStorage.getItem("companyId");
+  const companyCode = localStorage.getItem("companyCode");
   const pagination = usePagination({
     page: 1,
     itemsPerPage: 20,
@@ -73,6 +74,16 @@ const UOM = () => {
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const debounceSearch = useDebounce(search, 1000);
 
+  const { data: dataUserPermission } = useUserPermissions({
+    options: {
+      onSuccess: () => {},
+    },
+  });
+
+  const listPermission = dataUserPermission?.permission?.filter(
+    (filtering: any) => filtering.menu === "Unit of Measure"
+  );
+
   const {
     data: UOMData,
     isLoading: isLoadingUOM,
@@ -89,28 +100,27 @@ const UOM = () => {
         pagination.setTotalItems(data.totalRow);
       },
       select: (data: any) => {
-        const mappedData = data?.rows?.map((element: any) => {
-          return {
-            key: element.uomId,
-            id: element.uomId,
-            uomName: element.name,
-            uomCategoryName: element.uomCategoryName,
-            status: element.activeStatus,
-            action: (
-              <div style={{ display: "flex", justifyContent: "left" }}>
-                <Button
-                  size="small"
-                  onClick={() => {
-                    router.push(`/unit-of-measure/${element.uomId}`);
-                  }}
-                  variant="tertiary"
-                >
-                  {lang[t].unitOfMeasure.tertier.viewDetail}
-                </Button>
-              </div>
-            ),
-          };
-        });
+        const mappedData = data?.rows?.map((element: any) => ({
+          key: element.uomId,
+          id: element.uomId,
+          uomName: element.name,
+          uomCategoryName: element.uomCategoryName,
+          status: element.activeStatus,
+          action: listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "View")
+            .length > 0 && (
+            <div style={{ display: "flex", justifyContent: "left" }}>
+              <Button
+                size="small"
+                onClick={() => {
+                  router.push(`/unit-of-measure/${element.uomId}`);
+                }}
+                variant="tertiary"
+              >
+                {lang[t].unitOfMeasure.tertier.viewDetail}
+              </Button>
+            </div>
+          ),
+        }));
 
         return { data: mappedData, totalRow: data.totalRow };
       },
@@ -184,7 +194,7 @@ const UOM = () => {
   return (
     <>
       <Col>
-        <Text variant={"h4"}>{lang[t].unitOfMeasure.pageTitle.uoM}</Text>
+        <Text variant="h4">{lang[t].unitOfMeasure.pageTitle.uoM}</Text>
         <Spacer size={20} />
       </Col>
       <Card>
@@ -197,26 +207,30 @@ const UOM = () => {
             }}
           />
           <Row gap="16px">
-            <Button
-              size="big"
-              variant={"tertiary"}
-              onClick={() =>
-                setShowDelete({
-                  open: true,
-                  type: "selection",
-                  data: { uomData: UOMData, selectedRowKeys },
-                })
-              }
-              disabled={rowSelection.selectedRowKeys?.length === 0}
-            >
-              {lang[t].unitOfMeasure.tertier.delete}
-            </Button>
+            {listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Delete")
+              .length > 0 && (
+              <Button
+                size="big"
+                variant="tertiary"
+                onClick={() =>
+                  setShowDelete({
+                    open: true,
+                    type: "selection",
+                    data: { uomData: UOMData, selectedRowKeys },
+                  })
+                }
+                disabled={rowSelection.selectedRowKeys?.length === 0}
+              >
+                {lang[t].unitOfMeasure.tertier.delete}
+              </Button>
+            )}
+
             <DropdownMenu
               title={lang[t].unitOfMeasure.secondary.more}
-              buttonVariant={"secondary"}
-              buttonSize={"big"}
-              textVariant={"button"}
-              textColor={"pink.regular"}
+              buttonVariant="secondary"
+              buttonSize="big"
+              textVariant="button"
+              textColor="pink.regular"
               iconStyle={{ fontSize: "12px" }}
               onClick={(e: any) => {
                 switch (parseInt(e.key)) {
@@ -277,7 +291,7 @@ const UOM = () => {
       </Card>
       <Spacer size={10} />
       <Card style={{ padding: "16px 20px" }}>
-        <Col gap={"60px"}>
+        <Col gap="60px">
           <Table
             loading={isLoadingUOM || isFetchingUOM}
             columns={columns}
@@ -294,7 +308,7 @@ const UOM = () => {
           centered
           visible={isShowDelete.open}
           onCancel={() => setShowDelete({ open: false, type: "", data: {} })}
-          title={"Confirm Delete"}
+          title="Confirm Delete"
           footer={null}
           content={
             <div
