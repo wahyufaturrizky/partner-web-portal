@@ -5,7 +5,10 @@ import React, { useState } from "react";
 import styled from "styled-components";
 
 import { ModalDeleteConfirmation } from "../../../components/elements/Modal/ModalConfirmationDelete";
-import { useDeletePartnerConfigApprovalList, usePartnerConfigApprovalLists} from "../../../hooks/user-config/useApproval";
+import {
+  useDeletePartnerConfigApprovalList,
+  usePartnerConfigApprovalLists,
+} from "../../../hooks/user-config/useApproval";
 import { useProcessLists } from "../../../hooks/business-process/useProcess";
 import { colors } from "../../../utils/color";
 import { lang } from "lang";
@@ -13,224 +16,229 @@ import { useUserPermissions } from "hooks/user-config/usePermission";
 import { permissionApprovalList } from "permission/approval-list";
 
 const UserConfigApproval: any = () => {
-	const companyCode = localStorage.getItem("companyCode");
-	const pagination = usePagination({
-		page: 1,
-		itemsPerPage: 20,
-		maxPageItems: Infinity,
-		numbers: true,
-		arrows: true,
-		totalItems: 100,
-	});
+  const companyCode = localStorage.getItem("companyCode");
+  const pagination = usePagination({
+    page: 1,
+    itemsPerPage: 20,
+    maxPageItems: Infinity,
+    numbers: true,
+    arrows: true,
+    totalItems: 100,
+  });
 
-	const [search, setSearch] = useState("");
-	const [dataListDropdownProcess, setDataListDropdownProcess] = useState(null);
-	const [modalDelete, setModalDelete] = useState({ open: false });
-	const t = localStorage.getItem("lan") || "en-US";
-	
-	const { data: dataFieldsProcessLists, isLoading: isLoadingieldsProcessLists } = useProcessLists({
-		options: {
-		},
-		query: {
-			company_id: companyCode,
-		},
-	});
+  const [search, setSearch] = useState("");
+  const [dataListDropdownProcess, setDataListDropdownProcess] = useState(null);
+  const [modalDelete, setModalDelete] = useState({ open: false });
+  const t = localStorage.getItem("lan") || "en-US";
 
-	const {
-		data: fields,
-		refetch: refetchFields,
-		isLoading: isLoadingField,
-	} = usePartnerConfigApprovalLists({
-		options: {
-			onSuccess: (data: any) => {
-				pagination.setTotalItems(data.totalRow);
-			},
-		},
-		query: {
-			search,
-			page: pagination.page,
-			limit: pagination.itemsPerPage,
-			process_id: dataListDropdownProcess,
-			company_id: companyCode,
-		},
-	});
+  const { data: dataFieldsProcessLists, isLoading: isLoadingieldsProcessLists } = useProcessLists({
+    options: {},
+    query: {
+      company_id: companyCode,
+    },
+  });
 
-	const { mutate: deleteFields, isLoading: isLoadingDeleteProcessList } =
-		useDeletePartnerConfigApprovalList({
-			options: {
-				onSuccess: () => {
-					refetchFields();
-					setModalDelete({ open: false });
-					setSelectedRowKeys([]);
-				},
-			},
-		});
+  const {
+    data: fields,
+    refetch: refetchFields,
+    isLoading: isLoadingField,
+  } = usePartnerConfigApprovalLists({
+    options: {
+      onSuccess: (data: any) => {
+        pagination.setTotalItems(data.totalRow);
+      },
+    },
+    query: {
+      search,
+      page: pagination.page,
+      limit: pagination.itemsPerPage,
+      process_id: dataListDropdownProcess,
+      company_id: companyCode,
+    },
+  });
 
-	const { data: dataUserPermission } = useUserPermissions({
-		options: {
-		onSuccess: () => {},
-		},
-	});
+  const { mutate: deleteFields, isLoading: isLoadingDeleteProcessList } =
+    useDeletePartnerConfigApprovalList({
+      options: {
+        onSuccess: () => {
+          refetchFields();
+          setModalDelete({ open: false });
+          setSelectedRowKeys([]);
+        },
+      },
+    });
 
-	const listPermission = dataUserPermission?.permission?.filter(
-		(filtering: any) => filtering.menu === "Approval List"
-	);
-	const allowPermissionToShow = listPermission?.filter((data: any) =>
-		permissionApprovalList.role[dataUserPermission?.role?.name]?.component.includes(data.name)
-	);
+  const { data: dataUserPermission } = useUserPermissions({
+    options: {
+      onSuccess: () => {},
+    },
+  });
 
-	const columns = [
-		{
-			title: lang[t].approvalList.approvalListName,
-			dataIndex: "field_name",
-		},
-		{
-			title: lang[t].approvalList.approvalListProses,
-			dataIndex: "",
-		},
-		{
-			title: lang[t].approvalList.approvalListModul,
-			dataIndex: "field_module",
-		},
-		{
-			title: lang[t].approvalList.approvalListAction,
-			dataIndex: "action",
-		},
-	];
+  const listPermission = dataUserPermission?.permission?.filter(
+    (filtering: any) => filtering.menu === "Approval List"
+  );
 
-	const data: any = [];
-	fields?.rows?.map((field: any) => {
-		data.push({
-			key: field.id,
-			field_name: field.name,
-			field_module: field?.module?.name,
-			action: (
-				<Button
-					size="small"
-					onClick={() => Router.push(`/partner-config-approval/${field.id}`)}
-					variant="tertiary"
-				>
-					{lang[t].approvalList.tertier.viewDetail}
-				</Button>
-			),
-		});
-	});
+  const columns = [
+    {
+      title: lang[t].approvalList.approvalListName,
+      dataIndex: "field_name",
+    },
+    {
+      title: lang[t].approvalList.approvalListProses,
+      dataIndex: "",
+    },
+    {
+      title: lang[t].approvalList.approvalListModul,
+      dataIndex: "field_module",
+    },
+    ...(listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "View").length > 0
+      ? [
+          {
+            title: lang[t].approvalList.approvalListAction,
+            dataIndex: "action",
+          },
+        ]
+      : []),
+  ];
 
-	const paginateField: any = data;
-	const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+  const data: any = [];
+  fields?.rows?.map((field: any) => {
+    data.push({
+      key: field.id,
+      field_name: field.name,
+      field_module: field?.module?.name,
+      action: (
+        <Button
+          size="small"
+          onClick={() => Router.push(`/user-config/approval/${field.id}`)}
+          variant="tertiary"
+        >
+          {lang[t].approvalList.tertier.viewDetail}
+        </Button>
+      ),
+    });
+  });
 
-	const onSelectChange = (selectedRowKeys: any) => {
-		setSelectedRowKeys(selectedRowKeys);
-	};
+  const paginateField: any = data;
+  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
 
-	const rowSelection = {
-		selectedRowKeys,
-		onChange: onSelectChange,
-	};
+  const onSelectChange = (selectedRowKeys: any) => {
+    setSelectedRowKeys(selectedRowKeys);
+  };
 
-	const handleChangeDropdown = (value: any) => {
-		setDataListDropdownProcess(value);
-	};
+  const rowSelection = {
+    selectedRowKeys,
+    onChange: onSelectChange,
+  };
 
-	const handleClearDropdownApproval = () => {
-		setDataListDropdownProcess(null);
-	};
+  const handleChangeDropdown = (value: any) => {
+    setDataListDropdownProcess(value);
+  };
 
-	return (
-		<>
-			<Col>
-				<Text variant={"h4"}>{lang[t].approvalList.pageTitle.approvalList}</Text>
-				<Spacer size={20} />
-				<Card>
-					<Row justifyContent="space-between">
-						<Row alignItems="center">
-							<Search
-								width="380px"
-								nameIcon="SearchOutlined"
-								placeholder={lang[t].approvalList.searchBar.approvalName}
-								colorIcon={colors.grey.regular}
-								onChange={(e: any) => setSearch(e.target.value)}
-							/>
-							<Spacer size={8} />
-							<Dropdown
-								width="200px"
-								allowClear
-								onClear={handleClearDropdownApproval}
-								loading={isLoadingieldsProcessLists}
-								items={
-									dataFieldsProcessLists &&
-									dataFieldsProcessLists?.rows.map((data: any) => ({ id: data.id, value: data.name }))
-								}
-								placeholder={lang[t].approvalList.filterbar.process}
-								handleChange={handleChangeDropdown}
-								noSearch
-								rounded
-							/>
-						</Row>
-						<Row gap="16px">
-							{allowPermissionToShow?.some((el: any) => el.name === "Delete Approval List") && (
-								<Button
-									size="big"
-									variant={"tertiary"}
-									onClick={() => setModalDelete({ open: true })}
-									disabled={rowSelection.selectedRowKeys?.length === 0}
-								>
-									{lang[t].approvalList.tertier.delete}
-								</Button>
-							)}
-							{allowPermissionToShow?.some((el: any) => el.name === "Create Approval List") && (
-							<Button
-								size="big"
-								variant={"primary"}
-								onClick={() => Router.push("/user-config/approval/create")}
-							>
-								{lang[t].approvalList.primary.create}
-							</Button>
-							)}
-						</Row>
-					</Row>
-				</Card>
-				<Spacer size={10} />
-				<Card style={{ padding: "16px 20px" }}>
-					<Col gap="60px">
-						<Table
-							loading={isLoadingField}
-							columns={columns.filter(
-								(filtering) =>
-									filtering.dataIndex !== "id" &&
-									filtering.dataIndex !== "created_at" &&
-									filtering.dataIndex !== "modified_by" &&
-									filtering.dataIndex !== "modified_at" &&
-									filtering.dataIndex !== "deleted_by" &&
-									filtering.dataIndex !== "deleted_at" &&
-									filtering.dataIndex !== "created_by"
-							)}
-							data={paginateField}
-							rowSelection={rowSelection}
-						/>
-						<Pagination pagination={pagination} />
-					</Col>
-				</Card>
-			</Col>
+  const handleClearDropdownApproval = () => {
+    setDataListDropdownProcess(null);
+  };
 
-			{modalDelete.open && (
-				<ModalDeleteConfirmation
-					totalSelected={selectedRowKeys?.length}
-					itemTitle={paginateField?.find((menu) => menu.key === selectedRowKeys[0])?.field_name}
-					visible={modalDelete.open}
-					isLoading={isLoadingDeleteProcessList}
-					onCancel={() => setModalDelete({ open: false })}
-					onOk={() => deleteFields({ ids: selectedRowKeys })}
-				/>
-			)}
-		</>
-	);
+  return (
+    <>
+      <Col>
+        <Text variant={"h4"}>{lang[t].approvalList.pageTitle.approvalList}</Text>
+        <Spacer size={20} />
+        <Card>
+          <Row justifyContent="space-between">
+            <Row alignItems="center">
+              <Search
+                width="380px"
+                nameIcon="SearchOutlined"
+                placeholder={lang[t].approvalList.searchBar.approvalName}
+                colorIcon={colors.grey.regular}
+                onChange={(e: any) => setSearch(e.target.value)}
+              />
+              <Spacer size={8} />
+              <Dropdown
+                width="200px"
+                allowClear
+                onClear={handleClearDropdownApproval}
+                loading={isLoadingieldsProcessLists}
+                items={
+                  dataFieldsProcessLists &&
+                  dataFieldsProcessLists?.rows.map((data: any) => ({
+                    id: data.id,
+                    value: data.name,
+                  }))
+                }
+                placeholder={lang[t].approvalList.filterbar.process}
+                handleChange={handleChangeDropdown}
+                noSearch
+                rounded
+              />
+            </Row>
+            <Row gap="16px">
+              {listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Delete")
+                .length > 0 && (
+                <Button
+                  size="big"
+                  variant={"tertiary"}
+                  onClick={() => setModalDelete({ open: true })}
+                  disabled={rowSelection.selectedRowKeys?.length === 0}
+                >
+                  {lang[t].approvalList.tertier.delete}
+                </Button>
+              )}
+              {listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Create")
+                .length > 0 && (
+                <Button
+                  size="big"
+                  variant={"primary"}
+                  onClick={() => Router.push("/user-config/approval/create")}
+                >
+                  {lang[t].approvalList.primary.create}
+                </Button>
+              )}
+            </Row>
+          </Row>
+        </Card>
+        <Spacer size={10} />
+        <Card style={{ padding: "16px 20px" }}>
+          <Col gap="60px">
+            <Table
+              loading={isLoadingField}
+              columns={columns.filter(
+                (filtering) =>
+                  filtering.dataIndex !== "id" &&
+                  filtering.dataIndex !== "created_at" &&
+                  filtering.dataIndex !== "modified_by" &&
+                  filtering.dataIndex !== "modified_at" &&
+                  filtering.dataIndex !== "deleted_by" &&
+                  filtering.dataIndex !== "deleted_at" &&
+                  filtering.dataIndex !== "created_by"
+              )}
+              data={paginateField}
+              rowSelection={rowSelection}
+            />
+            <Pagination pagination={pagination} />
+          </Col>
+        </Card>
+      </Col>
+
+      {modalDelete.open && (
+        <ModalDeleteConfirmation
+          totalSelected={selectedRowKeys?.length}
+          itemTitle={paginateField?.find((menu) => menu.key === selectedRowKeys[0])?.field_name}
+          visible={modalDelete.open}
+          isLoading={isLoadingDeleteProcessList}
+          onCancel={() => setModalDelete({ open: false })}
+          onOk={() => deleteFields({ ids: selectedRowKeys, company_id: companyCode })}
+        />
+      )}
+    </>
+  );
 };
 
 const Card = styled.div`
-	background: #ffffff;
-	border-radius: 16px;
-	padding: 16px;
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 16px;
 `;
 
 export default UserConfigApproval;
