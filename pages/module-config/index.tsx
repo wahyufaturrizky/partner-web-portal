@@ -85,9 +85,6 @@ const ModuleConfig: any = () => {
   const listPermission = dataUserPermission?.permission?.filter(
     (filtering: any) => filtering.menu === "Module Config"
   );
-  const allowPermissionToShow = listPermission?.filter((data: any) =>
-    permissionModuleConfig.role[dataUserPermission?.role?.name]?.component.includes(data.name)
-  );
 
   const columns = [
     {
@@ -98,7 +95,7 @@ const ModuleConfig: any = () => {
       title: lang[t].moduleConfig.modulConfigParent,
       dataIndex: "parent",
     },
-    ...(allowPermissionToShow?.some((el: any) => el.name === "View Module Config")
+    ...(listPermission?.filter((x :any) => x.viewTypes[0]?.viewType.name === "View").length > 0
     ? [
         {
           title: lang[t].moduleConfig.modulConfigAction,

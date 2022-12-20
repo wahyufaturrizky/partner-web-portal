@@ -60,9 +60,6 @@ const ConfigDetail: any = () => {
 	const listPermission = dataUserPermission?.permission?.filter(
 		(filtering: any) => filtering.menu === "Module Config"
 	);
-	const allowPermissionToShow = listPermission?.filter((data: any) =>
-		permissionModuleConfig.role[dataUserPermission?.role?.name]?.component.includes(data.name)
-	);
 	const { data: configs, isLoading: isLoadingParent } = useConfigs({
 		options: {},
 		query: {
@@ -158,7 +155,7 @@ const ConfigDetail: any = () => {
 									>
 										Delete
 									</Button> */}
-									{allowPermissionToShow?.some((el: any) => el.name === "Update Module Config") && (
+									{listPermission?.filter((x :any) => x.viewTypes[0]?.viewType.name === "Update").length > 0 && (
 										<Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
 											{lang[t].moduleConfig.primary.save}
 										</Button>
