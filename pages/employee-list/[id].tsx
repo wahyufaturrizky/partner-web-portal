@@ -1,6 +1,8 @@
+import { useUserPermissions } from "hooks/user-config/usePermission";
 import moment from "moment";
 import Image from "next/image";
 import { useRouter } from "next/router";
+import { permissionEmployeeList } from "permission/employee.list";
 import {
   Accordion,
   Button,
@@ -169,6 +171,15 @@ const EmployeeDetail = () => {
     },
   });
 
+  const { data: dataUserPermission } = useUserPermissions({
+    options: {
+      onSuccess: () => {},
+    },
+  });
+  const listPermission = dataUserPermission?.permission?.filter(
+    (filtering: any) => filtering.menu === "Employee List"
+  );
+
   const { data: dataEmployee, isLoading: isLoadingEmployee } = useEmployeeListMDM({
     options: {
       onSuccess: (data: any) => {
@@ -199,6 +210,7 @@ const EmployeeDetail = () => {
         setValue("personal.mobile", data.personal.mobile);
         setValue("personal.visa", data.personal.visa);
         setValue("personal.visa_expire", data.personal.visaExpire);
+        setValue("personal.insurance", data.personal.insurance);
         setValue(
           "address",
           data.address.map((data: any) => ({
@@ -1443,12 +1455,18 @@ const EmployeeDetail = () => {
           </Row>
 
           <Row gap="16px">
-            <Button size="big" variant={"tertiary"} onClick={() => setShowDeleteModal(true)}>
-              Delete
-            </Button>
-            <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
-              {isLoadingUpdateEmployeeList ? "Loading..." : "Save"}
-            </Button>
+            {listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Delete").length >
+              0 && (
+              <Button size="big" variant={"tertiary"} onClick={() => setShowDeleteModal(true)}>
+                Delete
+              </Button>
+            )}
+            {listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Update").length >
+              0 && (
+              <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
+                {isLoadingUpdateEmployeeList ? "Loading..." : "Save"}
+              </Button>
+            )}
           </Row>
         </Row>
       </Card>
@@ -2019,6 +2037,7 @@ const EmployeeDetail = () => {
                           <Spacer size={3} />
                           <Dropdown
                             noSearch
+                            defaultValue={dataEmployee?.personal?.blood}
                             width="100%"
                             items={[
                               { id: "A", value: "A" },
@@ -2046,6 +2065,7 @@ const EmployeeDetail = () => {
                           <Spacer size={3} />
                           <Dropdown
                             noSearch
+                            defaultValue={dataEmployee?.personal?.religion}
                             width="100%"
                             items={[
                               { id: "Moslem", value: "Moslem" },
@@ -2071,6 +2091,7 @@ const EmployeeDetail = () => {
                     <Input
                       type="number"
                       width="100%"
+                      defaultValue={dataEmployee?.personal?.insurance}
                       error={errors.personal?.insurance?.message}
                       label="Medical Number (Insurance)"
                       height="48px"
@@ -2091,6 +2112,7 @@ const EmployeeDetail = () => {
                       width="100%"
                       label="Personal Email"
                       height="48px"
+                      defaultValue={dataEmployee?.personal?.email}
                       error={errors.personal?.email?.message}
                       placeholder={"e.g you@email.com"}
                       {...register("personal.email", {
@@ -2279,6 +2301,9 @@ const EmployeeDetail = () => {
                                   borderColor={"#AAAAAA"}
                                   arrowColor={"#000"}
                                   withSearch
+                                  defaultValue={
+                                    dataEmployee?.address?.[index]?.countryLevelsOptions?.name
+                                  }
                                   isLoading={isFetchingCountry}
                                   isLoadingMore={isFetchingMoreCountry}
                                   fetchMore={() => {

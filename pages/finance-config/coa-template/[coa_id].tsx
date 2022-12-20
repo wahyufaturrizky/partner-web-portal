@@ -16,7 +16,7 @@ import {
   Switch,
   Spin,
   DropdownMenuOptionGroupCustom,
-  FormSelect
+  FormSelect,
 } from "pink-lava-ui";
 import {
   useDeleteCoa,
@@ -39,23 +39,25 @@ import { useCountryInfiniteLists } from "hooks/mdm/country-structure/useCountrie
 import useDebounce from "lib/useDebounce";
 import { Controller, useForm } from "react-hook-form";
 import { colors } from "utils/color";
+import { permissionCoaTemplate } from "permission/coa-template";
+import { useUserPermissions } from "hooks/user-config/usePermission";
 
 const DetailCoa: any = () => {
   const {
-		register,
-		handleSubmit,
-		formState: { errors },
-		control,
-	} = useForm({});
+    register,
+    handleSubmit,
+    formState: { errors },
+    control,
+  } = useForm({});
 
   const router = useRouter();
   const t = localStorage.getItem("lan") || "en-US";
-  const companyCode = localStorage.getItem("companyCode")
+  const companyCode = localStorage.getItem("companyCode");
   const { coa_id } = router.query;
   const [coaName, setCoaName] = useState("");
   const [countryId, setCountryId] = useState("");
-	const [industryId, setIndustryId] = useState("");
-	const [segmentId, setSegmentId] = useState("");
+  const [industryId, setIndustryId] = useState("");
+  const [segmentId, setSegmentId] = useState("");
   const [coaItems, setCoaItems] = useState([]);
   const [coaItemsNew, setCoaItemsNew] = useState([]);
   const [error, setError] = useState("");
@@ -77,13 +79,18 @@ const DetailCoa: any = () => {
   const [searchCountry, setSearchCountry] = useState("");
   const [searchIndustry, setSearchIndustry] = useState("");
   const [searchSegment, setSearchSegment] = useState("");
-  
-  const debounceFetch = useDebounce(
-      searchCountry ||
-      searchSegment ||
-      searchIndustry,
-    1000
+
+  const { data: dataUserPermission } = useUserPermissions({
+    options: {
+      onSuccess: () => {},
+    },
+  });
+
+  const listPermission = dataUserPermission?.permission?.filter(
+    (filtering: any) => filtering.menu === "Coa Template"
   );
+
+  const debounceFetch = useDebounce(searchCountry || searchSegment || searchIndustry, 1000);
   let allCoaItems = [];
   allCoaItems = [...coaItemsNew, ...coaItems];
   allCoaItems = allCoaItems?.filter((item) => !coaItemsDeleted?.includes(item?.accountCode));
@@ -106,6 +113,7 @@ const DetailCoa: any = () => {
     source: "",
   });
   const [copyCoaId, setCopyCoaId] = useState(coa_id);
+  const [isModalDelete, setIsModalDelete] = useState({ open: false });
 
   const columns = [
     {
@@ -184,7 +192,7 @@ const DetailCoa: any = () => {
     query: {
       search: debounceFetch,
       limit: 10,
-      industry_id : industryId
+      industry_id: industryId,
     },
     options: {
       onSuccess: (data: any) => {
@@ -209,41 +217,41 @@ const DetailCoa: any = () => {
       },
     },
   });
-  
-	const {
-		isLoading: isLoadingIndustry,
-		isFetching: isFetchingIndustry,
-		isFetchingNextPage: isFetchingMoreIndustry,
-		hasNextPage: hasNextIndustry,
-		fetchNextPage: fetchNextIndustry,
-	} = useInfiniteIndustry({
-		query: {
-			search: debounceFetch,
-			limit: 10,
-		},
-		options: {
-			onSuccess: (data: any) => {
-				setTotalRowsIndustryList(data.pages[0].totalRow);
-				const mappedData = data?.pages?.map((group: any) => {
-					return group.rows?.map((element: any) => {
-						return {
-							label: element.name,
-							value: element.id,
-						};
-					});
-				});
-				const flattenArray = [].concat(...mappedData);
-				setIndustryList(flattenArray);
-			},
-			getNextPageParam: (_lastPage: any, pages: any) => {
-				if (industryList.length < totalRowsIndustryList) {
-					return pages.length + 1;
-				} else {
-					return undefined;
-				}
-			},
-		},
-	});
+
+  const {
+    isLoading: isLoadingIndustry,
+    isFetching: isFetchingIndustry,
+    isFetchingNextPage: isFetchingMoreIndustry,
+    hasNextPage: hasNextIndustry,
+    fetchNextPage: fetchNextIndustry,
+  } = useInfiniteIndustry({
+    query: {
+      search: debounceFetch,
+      limit: 10,
+    },
+    options: {
+      onSuccess: (data: any) => {
+        setTotalRowsIndustryList(data.pages[0].totalRow);
+        const mappedData = data?.pages?.map((group: any) => {
+          return group.rows?.map((element: any) => {
+            return {
+              label: element.name,
+              value: element.id,
+            };
+          });
+        });
+        const flattenArray = [].concat(...mappedData);
+        setIndustryList(flattenArray);
+      },
+      getNextPageParam: (_lastPage: any, pages: any) => {
+        if (industryList.length < totalRowsIndustryList) {
+          return pages.length + 1;
+        } else {
+          return undefined;
+        }
+      },
+    },
+  });
   const { mutate: updateCoa } = useUpdateCoa({
     options: {
       onSuccess: () => {
@@ -252,8 +260,8 @@ const DetailCoa: any = () => {
     },
     coa_id,
   });
-
-  const { mutate: deleteCoa } = useDeleteCoa({
+  console.log(coa_id);
+  const { mutate: deleteCoa, isLoading: isLoadingDeleteCoa } = useDeleteCoa({
     options: {
       onSuccess: () => {
         router.push("/finance-config/coa-template");
@@ -261,7 +269,7 @@ const DetailCoa: any = () => {
     },
   });
 
-  const onSubmitCoa = (value:any) => {
+  const onSubmitCoa = (value: any) => {
     const newCoaItems = coaItemsNew.map((data: any) => ({
       accountCode: data.accountCode,
       accountName: data.accountName,
@@ -280,10 +288,10 @@ const DetailCoa: any = () => {
     }));
 
     const payload: any = {
-			name: value.name,
-			industry_id : value.industry_id,
-			segment_id : value.segment_id,
-			country_id : value.country_id,
+      name: value.name,
+      industry_id: value.industry_id,
+      segment_id: value.segment_id,
+      country_id: value.country_id,
       company_id: companyCode,
       coa_items: {
         copyFrom: coa_id === copyCoaId ? "" : copyCoaId,
@@ -315,10 +323,10 @@ const DetailCoa: any = () => {
       enabled: !!copyCoaId,
       onSuccess: (data) => {
         setCoaItems(data.coaItems.rows);
-				setCoaName(data.name);
-				setCountryId(data.countryId);
-				setIndustryId(data.industryId);
-				setSegmentId(data.segmentId);
+        setCoaName(data.name);
+        setCountryId(data.countryId);
+        setIndustryId(data.industryId);
+        setSegmentId(data.segmentId);
         paginationCoaAccount.setTotalItems(data.coaItems.totalRow);
       },
     },
@@ -328,6 +336,7 @@ const DetailCoa: any = () => {
       search: searchAccountGroup,
       account_group_id: accountGroupId,
       code: accountCode,
+      company_id: "KSNI",
     },
   });
 
@@ -342,6 +351,7 @@ const DetailCoa: any = () => {
       search: searchAccountGroup,
       account_group_id: accountGroupId,
       code: accountCode,
+      company_id: "KSNI",
     },
   });
 
@@ -478,16 +488,24 @@ const DetailCoa: any = () => {
                 <Card style={{ height: "88px" }}>
                   <Row alignItems="center" justifyContent="space-between" gap="20" noWrap>
                     <Row justifyContent="flex-end" width="100%" gap="16px">
-                      <Button
-                        size="big"
-                        variant={"tertiary"}
-                        onClick={() => setModalDelete({ open: true })}
-                      >
-                        {lang[t].coaTemplate.list.button.delete}
-                      </Button>
-                      <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmitCoa)}>
-                        {lang[t].coaTemplate.list.button.save}
-                      </Button>
+                      {listPermission?.filter(
+                        (x: any) => x.viewTypes[0]?.viewType.name === "Delete"
+                      ).length > 0 && (
+                        <Button
+                          size="big"
+                          variant={"tertiary"}
+                          onClick={() => setIsModalDelete({ open: true })}
+                        >
+                          {lang[t].coaTemplate.list.button.delete}
+                        </Button>
+                      )}
+                      {listPermission?.filter(
+                        (x: any) => x.viewTypes[0]?.viewType.name === "Update"
+                      ).length > 0 && (
+                        <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmitCoa)}>
+                          {lang[t].coaTemplate.list.button.save}
+                        </Button>
+                      )}
                     </Row>
                   </Row>
                 </Card>
@@ -510,7 +528,7 @@ const DetailCoa: any = () => {
                       <Controller
                         control={control}
                         name="country_id"
-                        defaultValue={countryId ? countryId : "" }
+                        defaultValue={countryId ? countryId : ""}
                         rules={{
                           required: {
                             value: true,
@@ -524,7 +542,7 @@ const DetailCoa: any = () => {
                             </Label>
                             <Spacer size={3} />
                             <FormSelect
-                              defaultValue={countryId ? countryId : "" }
+                              defaultValue={countryId ? countryId : ""}
                               error={error?.message}
                               height="48px"
                               style={{ width: "100%" }}
@@ -552,13 +570,13 @@ const DetailCoa: any = () => {
                         )}
                       />
                     </Col>
-									</Row>
-									<Row width="100%" gap="20px" noWrap>
+                  </Row>
+                  <Row width="100%" gap="20px" noWrap>
                     <Col width="100%">
                       <Controller
                         control={control}
                         name="industry_id"
-                        defaultValue={industryId ? industryId : "" }
+                        defaultValue={industryId ? industryId : ""}
                         rules={{
                           required: {
                             value: true,
@@ -572,7 +590,7 @@ const DetailCoa: any = () => {
                             </Label>
                             <Spacer size={3} />
                             <FormSelect
-                              defaultValue={industryId ? industryId : "" }
+                              defaultValue={industryId ? industryId : ""}
                               error={error?.message}
                               height="48px"
                               style={{ width: "100%" }}
@@ -588,7 +606,9 @@ const DetailCoa: any = () => {
                                   fetchNextIndustry();
                                 }
                               }}
-                              items={isFetchingIndustry && !isFetchingMoreIndustry ? [] : industryList}
+                              items={
+                                isFetchingIndustry && !isFetchingMoreIndustry ? [] : industryList
+                              }
                               onChange={(value: any) => {
                                 onChange(value);
                                 setIndustryId(value);
@@ -647,8 +667,7 @@ const DetailCoa: any = () => {
                         )}
                       />
                     </Col>
-                   
-									</Row>                  
+                  </Row>
                   <Spacer size={10} />
                   <Col gap="30px">
                     {allCoaItems.length !== 0 || isSearchAndFilter ? (
@@ -676,14 +695,14 @@ const DetailCoa: any = () => {
                           </Row>
 
                           <Row gap="20px">
-														<Button
-															size="big"
-															variant={"tertiary"}
-															onClick={() => setModalDelete({ open: true })}
-															disabled={rowSelection.selectedRowKeys?.length === 0}
-														>
-															Delete
-														</Button>
+                            <Button
+                              size="big"
+                              variant={"tertiary"}
+                              onClick={() => setModalDelete({ open: true })}
+                              disabled={rowSelection.selectedRowKeys?.length === 0}
+                            >
+                              Delete
+                            </Button>
                             <Button
                               size="big"
                               variant={"tertiary"}
@@ -871,6 +890,17 @@ const DetailCoa: any = () => {
                 }
               }
             }}
+          />
+        )}
+
+        {isModalDelete.open && (
+          <ModalDeleteConfirmation
+            totalSelected={selectedRowKeys?.length}
+            itemTitle={coaData?.name}
+            isLoading={isLoadingDeleteCoa}
+            visible={isModalDelete.open}
+            onCancel={() => setIsModalDelete({ open: false })}
+            onOk={() => deleteCoa({ ids: [coa_id], company_id: companyCode })}
           />
         )}
       </Col>

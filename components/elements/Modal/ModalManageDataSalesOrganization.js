@@ -120,7 +120,7 @@ export const ModalManageDataEdit = ({
   const { mutate: updateSalesOrganizationHirarcy } = useCreateSalesOrganizationHirarcy({
     options: {
       onSuccess: () => {},
-      retry: true
+      retry: true,
     },
   });
 
@@ -128,6 +128,7 @@ export const ModalManageDataEdit = ({
     structure_id: structure.id,
     options: {
       onSuccess: (data) => {
+        console.log(data, "<<<<datanya");
         setTempAllStructure(data);
         pagination.setTotalItems(data.length);
       },
@@ -174,11 +175,13 @@ export const ModalManageDataEdit = ({
       delete data.actionType;
       return data;
     });
+    console.log(updateStructureClone, "<<<<update clone");
     updateSalesOrganizationHirarcy(updateStructureClone);
     onSubmit();
   };
 
   const onAddStructure = () => {
+    console.log("masuk");
     let parentData = allParentData.find((data) => data?.id === parent?.id);
     if (!parentData) {
       parentData = {
@@ -202,6 +205,7 @@ export const ModalManageDataEdit = ({
 
     let updateStructureClone = _.cloneDeep(updateStructure);
     updateStructureClone.add.push(newData);
+    console.log(updateStructureClone, "<<<<clone");
     setUpdateStructure(updateStructureClone);
   };
 

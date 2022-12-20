@@ -1,30 +1,58 @@
 {
+	"env": {
+		"browser": true,
+		"es2021": true,
+		"node": true
+	},
+	"extends": [
+			"plugin:react/recommended",
+			"airbnb"
+	],
 	"parser": "@typescript-eslint/parser",
 	"parserOptions": {
-		"project": "./tsconfig.eslint.json"
+			"ecmaFeatures": {
+					"jsx": true
+			},
+			"ecmaVersion": "latest",
+			"sourceType": "module"
 	},
-	"plugins": ["@typescript-eslint", "sonarjs"],
-	"extends": [
-		"eslint:recommended",
-		"plugin:react/recommended",
-		"plugin:@typescript-eslint/eslint-recommended",
-		"plugin:@typescript-eslint/recommended",
-		"plugin:@typescript-eslint/recommended-requiring-type-checking",
-		"plugin:sonarjs/recommended",
-		"prettier",
-		"plugin:prettier/recommended"
+	"plugins": [
+			"react",
+			"@typescript-eslint"
 	],
+	"globals": {
+			"JSX": true
+	},
 	"rules": {
 		"@typescript-eslint/no-empty-interface": "off",
 		"@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
 		"@typescript-eslint/no-use-before-define": "off",
-		"@typescript-eslint/explicit-function-return-type": ["error", { "allowExpressions": true }],
+		// "@typescript-eslint/explicit-function-return-type": ["error", { "allowExpressions": true }],
 		"react/react-in-jsx-scope": "off",
-		"react/prop-types": "off"
-	},
-	"settings": {
-		"react": {
-			"version": "detect"
-		}
+		"react/prop-types": "off",
+		"react-hooks/rules-of-hooks": "off",
+		"react/jsx-filename-extension": [1, { "extensions": [".ts", ".tsx"] }],
+		"import/no-unresolved": "off",
+		"import/extensions": "off",
+		"global-require": "off",
+		"jsx-a11y/label-has-associated-control": "off",
+		"jsx-a11y/control-has-associated-label": "off",
+		"jsx-a11y/no-noninteractive-element-interactions": "off",
+		"jsx-a11y/click-events-have-key-events": "off",
+		"react/jsx-props-no-spreading": "off",
+		"no-unused-expressions": ["error", { "allowShortCircuit": true, "allowTernary": true }],
+		"linebreak-style": "off",
+		"jsx-a11y/anchor-is-valid": "off",
+		"react/no-array-index-key": "off",
+		"max-len": ["error", { "ignoreComments": true, "code": 300 }],
+		"new-cap": "off",
+		"import/no-extraneous-dependencies": "off",
+		"react/require-default-props": "off",
+		"import/prefer-default-export": "off",
+		"react/function-component-definition": "off",
+		"no-use-before-define": "off",
+		"@typescript-eslint/explicit-function-return-type": "off",
+		"quotes": "off",
+		"consistent-return": "warn"
 	}
 }

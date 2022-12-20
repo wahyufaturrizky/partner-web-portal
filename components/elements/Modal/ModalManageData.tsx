@@ -466,7 +466,7 @@ export const ModalManageData = ({
 							placeholder={`Search ${structure.name} Name`}
 							onChange={(e: any) => setSearchTable(e.target.value)}
 						/>
-						<ActionButton lists={lists} />
+						{/* <ActionButton lists={lists} /> */}
 						<Button
 							variant="tertiary"
 							size="big"

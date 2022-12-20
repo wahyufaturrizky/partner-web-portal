@@ -452,6 +452,7 @@ const CreateCountries = () => {
 										<Button
 											variant="tertiary"
 											size="big"
+											disabled={true}
 											onClick={() => setShowUploadStructure(true)}
 										>
 											Upload Template

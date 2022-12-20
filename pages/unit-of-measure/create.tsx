@@ -19,6 +19,16 @@ import useDebounce from "../../lib/useDebounce";
 import { useUOMCategoryInfiniteLists } from "../../hooks/mdm/unit-of-measure-category/useUOMCategory";
 import { lang } from "lang";
 
+import * as yup from "yup";
+import { yupResolver } from "@hookform/resolvers/yup";
+const schema = yup
+	.object({
+		name: yup.string().required("Name is Required"),
+		format: yup.string().required("format is Required"),
+		uom_category_id: yup.string().required("Category is Required"),
+	})
+	.required();
+
 const UOMCreate = () => {
   const t = localStorage.getItem("lan") || "en-US";
   const router = useRouter();
@@ -29,7 +39,7 @@ const UOMCreate = () => {
   const [search, setSearch] = useState("");
   const debounceFetch = useDebounce(search, 1000);
 
-  const { register, control, handleSubmit } = useForm();
+  const { register, control, handleSubmit, formState: { errors }, } = useForm({resolver: yupResolver(schema),});
 
   const {
     isFetching: isFetchingUomCategory,
@@ -137,7 +147,9 @@ const UOMCreate = () => {
                   width="100%"
                   label="Uom Name"
                   height="40px"
+                  required
                   placeholder={"e.g gram"}
+                  error={errors?.name?.message}
                   {...register("name")}
                 />
               </Col>
@@ -149,7 +161,12 @@ const UOMCreate = () => {
                   name="uom_category_id"
                   render={({ field: { onChange } }) => (
                     <>
+                    <div style={{
+                      display: 'flex'
+                      }}>
                       <Label>UoM Category</Label>
+                      <Span>&#42;</Span>
+                    </div>
                       <Spacer size={3} />
                       <FormSelect
                         style={{ width: "100%" }}
@@ -158,6 +175,8 @@ const UOMCreate = () => {
                         borderColor={"#AAAAAA"}
                         arrowColor={"#000"}
                         withSearch
+                        required
+                        error={errors?.uom_category_id?.message}
                         isLoading={isFetchingUomCategory}
                         isLoadingMore={isFetchingMoreUomCategory}
                         fetchMore={() => {
@@ -195,6 +214,8 @@ const UOMCreate = () => {
                 width="100%"
                 label="Uom Format"
                 height="40px"
+                required
+                error={errors?.format?.message}
                 placeholder={"e.g gr"}
                 {...register("format")}
               />
@@ -217,6 +238,12 @@ const Label = styled.div`
   font-size: 16px;
   line-height: 24px;
   color: #000000;
+`;
+
+const Span = styled.span`
+  color: #ed1c24;
+  margin-left: 5px;
+  font-weight: bold;
 `;
 
 export default UOMCreate;

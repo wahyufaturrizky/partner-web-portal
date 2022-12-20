@@ -8,11 +8,13 @@ import { useCoa, useDeleteCoa } from "../../../hooks/finance-config/useCoaTempla
 import useDebounce from "lib/useDebounce";
 import { queryClient } from "pages/_app";
 import { lang } from "lang";
+import { useUserPermissions } from "hooks/user-config/usePermission";
+import { permissionCoaTemplate } from "permission/coa-template";
 
 const FinanceConfigCoATemplate: any = () => {
   const router = useRouter();
   const t = localStorage.getItem("lan") || "en-US";
-  const companyCode = localStorage.getItem("companyCode")
+  const companyCode = localStorage.getItem("companyCode");
   const pagination = usePagination({
     page: 1,
     itemsPerPage: 20,
@@ -27,17 +29,31 @@ const FinanceConfigCoATemplate: any = () => {
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const debounceSearch = useDebounce(search, 1000);
 
+  const { data: dataUserPermission } = useUserPermissions({
+    options: {
+      onSuccess: () => {},
+    },
+  });
+
+  const listPermission = dataUserPermission?.permission?.filter(
+    (filtering: any) => filtering.menu === "Coa Template"
+  );
+
   const columns = [
     {
       title: lang[t].coaTemplate.list.table.name,
       dataIndex: "field_name",
     },
-    {
-      title: lang[t].coaTemplate.list.table.action,
-      dataIndex: "action",
-      width: "15%",
-      align: "left",
-    },
+    ...(listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "View").length > 0
+      ? [
+          {
+            title: lang[t].coaTemplate.list.table.action,
+            dataIndex: "action",
+            width: "15%",
+            align: "left",
+          },
+        ]
+      : []),
   ];
 
   const {
@@ -50,7 +66,7 @@ const FinanceConfigCoATemplate: any = () => {
       search: debounceSearch,
       page: pagination.page,
       limit: pagination.itemsPerPage,
-      company_id : companyCode,
+      company_id: companyCode,
     },
     options: {
       onSuccess: (data: any) => {
@@ -82,7 +98,7 @@ const FinanceConfigCoATemplate: any = () => {
     },
   });
 
-  const { mutate: deleteFields } = useDeleteCoa({
+  const { mutate: deleteFields, isLoading: isLoadingDeleteCoa } = useDeleteCoa({
     options: {
       onSuccess: () => {
         setSelectedRowKeys([]);
@@ -114,23 +130,29 @@ const FinanceConfigCoATemplate: any = () => {
               onChange={(e: any) => setSearch(e.target.value)}
             />
             <Row gap="16px">
-              <Button
-                size="big"
-                variant="tertiary"
-                onClick={() => setModalDelete({ open: true })}
-                disabled={rowSelection.selectedRowKeys?.length === 0}
-              >
-                {lang[t].coaTemplate.list.button.delete}
-              </Button>
-              <Button
-                size="big"
-                variant={"primary"}
-                onClick={() => {
-                  router.push(`/finance-config/coa-template/create`);
-                }}
-              >
-                {lang[t].coaTemplate.list.button.create}
-              </Button>
+              {listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Delete")
+                .length > 0 && (
+                <Button
+                  size="big"
+                  variant="tertiary"
+                  onClick={() => setModalDelete({ open: true })}
+                  disabled={rowSelection.selectedRowKeys?.length === 0}
+                >
+                  {lang[t].coaTemplate.list.button.delete}
+                </Button>
+              )}
+              {listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Create")
+                .length > 0 && (
+                <Button
+                  size="big"
+                  variant={"primary"}
+                  onClick={() => {
+                    router.push(`/finance-config/coa-template/create`);
+                  }}
+                >
+                  {lang[t].coaTemplate.list.button.create}
+                </Button>
+              )}
             </Row>
           </Row>
         </Card>
@@ -155,9 +177,10 @@ const FinanceConfigCoATemplate: any = () => {
           itemTitle={
             coaData?.data?.find((element: any) => element.key === selectedRowKeys[0])?.field_name
           }
+          isLoading={isLoadingDeleteCoa}
           visible={modalDelete.open}
           onCancel={() => setModalDelete({ open: false })}
-          onOk={() => deleteFields({ ids: selectedRowKeys })}
+          onOk={() => deleteFields({ ids: selectedRowKeys, company_id: companyCode })}
         />
       )}
     </>

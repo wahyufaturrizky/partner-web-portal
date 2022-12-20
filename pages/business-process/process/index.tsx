@@ -8,6 +8,7 @@ import { useConfigs } from "../../../hooks/config/useConfig";
 import { useDeleteProcessList, useProcessLists } from "../../../hooks/business-process/useProcess";
 import { colors } from "../../../utils/color";
 import { lang } from "lang";
+import { useUserPermissions } from "hooks/user-config/usePermission";
 
 const ProcessList: any = () => {
 	const t = localStorage.getItem("lan") || "en-US";
@@ -24,6 +25,16 @@ const ProcessList: any = () => {
 	const [search, setSearch] = useState("");
 	const [dataListDropdownModul, setDataListDropdownModul] = useState(null);
 	const [modalDelete, setModalDelete] = useState({ open: false });
+
+	const { data: dataUserPermission } = useUserPermissions({
+		options: {
+		  onSuccess: () => {},
+		},
+	  });
+	
+	  const listPermission = dataUserPermission?.permission?.filter(
+		(filtering: any) => filtering.menu === "Process"
+	  );
 
 	const {
 		data: dataConfigsModule,
@@ -78,11 +89,16 @@ const ProcessList: any = () => {
 			dataIndex: "field_module",
 			width: "42%",
 		},
-		{
-			title: lang[t].process.permissionList.action,
-			dataIndex: "action",
-			width: "15%",
-		},
+		...(listPermission?.some((el: any) => el.viewTypes[0]?.viewType.name === "View")
+		? [
+			{
+				title: lang[t].process.permissionList.action,
+				dataIndex: "action",
+				width: "15%",
+			},
+		  ]
+		: []),
+
 	];
 
 	const data: any[] = [];
@@ -161,19 +177,28 @@ const ProcessList: any = () => {
 								rounded
 							/>
 						</Row>
-						{/* <Row gap="16px">
-							<Button
-								size="big"
-								variant={"tertiary"}
-								onClick={() => setModalDelete({ open: true })}
-								disabled={rowSelection.selectedRowKeys?.length === 0}
-							>
-								Delete
-							</Button>
-							<Button size="big" variant={"primary"} onClick={() => Router.push("/business-process/process/create")}>
-								Create
-							</Button>
-						</Row> */}
+						<Row gap="16px">
+							{ listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Delete")
+								.length > 0 && 	
+								<Button
+									size="big"
+									variant={"tertiary"}
+									onClick={() => setModalDelete({ open: true })}
+									disabled={rowSelection.selectedRowKeys?.length === 0}
+								>
+									Delete
+								</Button>
+							}
+
+							{listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Create")
+								.length > 0 && 
+								<Button size="big" variant={"primary"} onClick={() => Router.push("/business-process/process/create")}>
+									Create
+								</Button>
+							}
+						
+							
+						</Row>
 					</Row>
 				</Card>
 				<Spacer size={10} />

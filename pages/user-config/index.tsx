@@ -133,14 +133,15 @@ const UserConfigUser: any = () => {
         <Lozenge variant={STATUS_APPROVAL_VARIANT[text]}>{STATUS_APPROVAL_TEXT[text]}</Lozenge>
       ),
     },
-    ...(listPermission?.filter((x :any) => x.viewTypes[0]?.viewType.name === "View").length > 0
-    ? [
-        {
-          title: lang[t].userList.list.table.action,
-          dataIndex: "action",
-          width: "20%",
-        },
-    ]:[])
+    ...(listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "View").length > 0
+      ? [
+          {
+            title: lang[t].userList.list.table.action,
+            dataIndex: "action",
+            width: "20%",
+          },
+        ]
+      : []),
   ];
 
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
@@ -172,7 +173,9 @@ const UserConfigUser: any = () => {
 
   let menuList: any[] = [];
 
-  if (allowPermissionToShow?.map((data: any) => data.name)?.includes("Download Template User List")) {
+  if (
+    allowPermissionToShow?.map((data: any) => data.name)?.includes("Download Template User List")
+  ) {
     menuList = [
       ...menuList,
       {
@@ -189,15 +192,15 @@ const UserConfigUser: any = () => {
   if (allowPermissionToShow?.map((data: any) => data.name)?.includes("Upload Template User List")) {
     menuList = [
       ...menuList,
-    {
-      key: 2,
-      value: (
-        <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-          <UploadSvg />
-          <p style={{ margin: "0" }}>{lang[t].userList.list.button.upload}</p>
-        </div>
-      ),
-    },
+      {
+        key: 2,
+        value: (
+          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+            <UploadSvg />
+            <p style={{ margin: "0" }}>{lang[t].userList.list.button.upload}</p>
+          </div>
+        ),
+      },
     ];
   }
   return (
@@ -213,7 +216,8 @@ const UserConfigUser: any = () => {
               onChange={(e: any) => setSearch(e.target.value)}
             />
             <Row gap="16px">
-              {listPermission?.filter((x :any) => x.viewTypes[0]?.viewType.name === "Delete").length > 0 && (
+              {listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Delete")
+                .length > 0 && (
                 <Button
                   size="big"
                   variant={"tertiary"}
@@ -247,14 +251,15 @@ const UserConfigUser: any = () => {
                   menuList={menuList}
                 />
               )}
-              {listPermission?.filter((x :any) => x.viewTypes[0]?.viewType.name === "Create").length > 0 && (
-              <Button
-                size="big"
-                variant={"primary"}
-                onClick={() => router.push("/user-config/create")}
-              >
-                {lang[t].userList.list.button.create}
-              </Button>
+              {listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Create")
+                .length > 0 && (
+                <Button
+                  size="big"
+                  variant={"primary"}
+                  onClick={() => router.push("/user-config/create")}
+                >
+                  {lang[t].userList.list.button.create}
+                </Button>
               )}
             </Row>
           </Row>

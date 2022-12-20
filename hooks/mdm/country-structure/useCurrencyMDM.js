@@ -1,25 +1,21 @@
 import { useQuery, useMutation, useInfiniteQuery } from "react-query";
 import { mdmService } from "../../../lib/client";
 
-const fetchCurrenciesMDM = async ({ query = {} }) => {
-  return mdmService(`/currency`, {
-    params: {
-      search: "",
-      page: 1,
-      limit: 10000,
-      sortBy: "id",
-      sortOrder: "DESC",
-      ...query,
-    },
-  }).then((data) => data);
-};
+const fetchCurrenciesMDM = async ({ query = {} }) => mdmService(`/currency`, {
+  params: {
+    search: "",
+    page: 1,
+    limit: 10000,
+    sortBy: "id",
+    sortOrder: "DESC",
+    ...query,
+  },
+}).then((data) => data);
 
-const useCurrenciesMDM = ({ query = {}, options }) => {
-  return useQuery(["currencies-mdm", query], () => fetchCurrenciesMDM({ query }), {
-    keepPreviousData: true,
-    ...options,
-  });
-};
+const useCurrenciesMDM = ({ query = {}, options }) => useQuery(["currencies-mdm", query], () => fetchCurrenciesMDM({ query }), {
+  keepPreviousData: true,
+  ...options,
+});
 
 const fetchInfiniteCurrenciesLists = async ({ pageParam = 1, queryKey }) => {
   const searchQuery = queryKey[1].search;
@@ -35,74 +31,60 @@ const fetchInfiniteCurrenciesLists = async ({ pageParam = 1, queryKey }) => {
   }).then((data) => data);
 };
 
-const useCurrenciesInfiniteLists = ({ query = {}, options }) => {
-  return useInfiniteQuery(["currency/infinite", query], fetchInfiniteCurrenciesLists, {
-    keepPreviousData: true,
-    ...options,
-  });
-};
+const useCurrenciesInfiniteLists = ({ query = {}, options }) => useInfiniteQuery(["currency/infinite", query], fetchInfiniteCurrenciesLists, {
+  keepPreviousData: true,
+  ...options,
+});
 
-const fetchCurrencyMDM = async ({ id }) => {
-  return mdmService(`/currency/${id}`).then((data) => data);
-};
+const fetchCurrencyMDM = async ({ id }) => mdmService(`/currency/${id}`).then((data) => data);
 
-const useCurrencyMDM = ({ id, options }) => {
-  return useQuery(["currency", id], () => fetchCurrencyMDM({ id }), {
-    ...options,
-  });
-};
+const useCurrencyMDM = ({ id, options }) => useQuery(["currency", id], () => fetchCurrencyMDM({ id }), {
+  ...options,
+});
 
 function useCreateCurrencyMDM({ options }) {
   return useMutation(
-    (data) =>
-      mdmService(`/currency`, {
-        method: "POST",
-        data,
-      }),
+    (data) => mdmService(`/currency`, {
+      method: "POST",
+      data,
+    }),
     {
       ...options,
-    }
+    },
   );
 }
 
 function useUpdateCurrencyMDM({ id, options }) {
   return useMutation(
-    (data) =>
-      mdmService(`/currency/${id}`, {
-        method: "PUT",
-        data,
-      }),
+    (data) => mdmService(`/currency/${id}`, {
+      method: "PUT",
+      data,
+    }),
     {
       ...options,
-    }
+    },
   );
 }
 
-const useDeletCurrencyMDM = ({ options }) => {
-  return useMutation(
-    (ids) =>
-      mdmService(`/currency`, {
-        method: "DELETE",
-        data: ids,
-      }),
-    {
-      ...options,
-    }
-  );
-};
+const useDeletCurrencyMDM = ({ options }) => useMutation(
+  (ids) => mdmService(`/currency`, {
+    method: "DELETE",
+    data: ids,
+  }),
+  {
+    ...options,
+  },
+);
 
-const useUploadFileCurrencyMDM = ({ options }) => {
-  return useMutation(
-    (data) =>
-      mdmService(`/currency/upload`, {
-        method: "POST",
-        data,
-      }),
-    {
-      ...options,
-    }
-  );
-};
+const useUploadFileCurrencyMDM = ({ options }) => useMutation(
+  (data) => mdmService(`/currency/upload`, {
+    method: "POST",
+    data,
+  }),
+  {
+    ...options,
+  },
+);
 
 export {
   useCurrenciesMDM,
