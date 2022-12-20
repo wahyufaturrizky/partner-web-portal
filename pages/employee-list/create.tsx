@@ -708,10 +708,10 @@ const EmployeeListCreate = () => {
         delete dataAddress.zone;
       }
     });
-    const positionTesterId = jobPositionList?.filter(jobLabel => jobLabel.label === "Position Tester")?.[0]?.value
+    // const positionTesterId = jobPositionList?.filter(jobLabel => jobLabel.label === "Position Tester")?.[0]?.value
     const formData = {
       ...data,
-      job_position: data?.job_position === "" ? positionTesterId : data?.job_position,
+      // job_position: data?.job_position === "" ? positionTesterId : data?.job_position,
       company: companyCode,
     };
 
