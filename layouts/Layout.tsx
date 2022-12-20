@@ -1,3 +1,6 @@
+/* eslint-disable jsx-a11y/no-static-element-interactions */
+/* eslint-disable eqeqeq */
+/* eslint-disable no-shadow */
 import Router from "next/router";
 import {
   Col,
@@ -10,9 +13,11 @@ import {
   Spacer,
   Text,
 } from "pink-lava-ui";
-import { useEffect } from "react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+
 import styled from "styled-components";
+import { lang } from "lang";
+import axios from "axios";
 import {
   ICCalendar,
   ICDollar,
@@ -38,8 +43,6 @@ import ICPercent from "../assets/icons/ic-percent.svg";
 import ICSalesman from "../assets/icons/ic-salesman.svg";
 import ICAccountSetting from "../assets/icons/ic-setting.svg";
 import ICTransportation from "../assets/icons/ic-transportation.svg";
-import { lang } from "lang";
-import axios from "axios";
 
 const menuConfig = [
   { type: "title", title: "Overview" },
@@ -170,7 +173,7 @@ const menuConfig = [
     children: [
       {
         key: "account-group",
-        title: "Acount Group",
+        title: "Account Group",
         content: () => "Account Group",
         onClick: () => Router.push("/finance-config/account-group"),
       },
@@ -504,11 +507,30 @@ const menuMdm = [
     icon: ICCalendar,
     onClick: () => Router.push("/working-calendar"),
   },
+  {
+    key: "master-data",
+    title: "Master Data",
+    icon: ICInventory,
+    children: [
+      {
+        key: "gl-account",
+        title: "G/L Account",
+        content: () => "G/L Account",
+        onClick: () => Router.push("/master-data/gl-account"),
+      },
+      {
+        key: "bank-account",
+        title: "Bank Account",
+        content: () => "Bank Account",
+        onClick: () => Router.push("/master-data/bank-account"),
+      },
+    ],
+  },
 ];
 
 let t;
 if (typeof window !== "undefined") {
-	t = localStorage.getItem("lan") || "en-US";
+  t = localStorage.getItem("lan") || "en-US";
 }
 
 const itemsMenu = [{ label: "Config" }, { label: "Master Data Management" }];
@@ -552,24 +574,24 @@ const flexStyles = {
 const AdminLayout = (props: any) => {
   const [current, setCurrent] = useState("0");
   const [isChangeLang, setIsChangeLang] = useState(false);
-  const [companies, setCompanies] = useState([])
-  const [isLoading, setIsLoading] = useState(false)
+  const [companies, setCompanies] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleCLickTabNav = (e: any) => {
     setCurrent(e.key);
     Router.push("/dashboard");
   };
 
-  const handleLogout = (e: any) => {
+  const handleLogout = () => {
     localStorage.clear();
     window.location.href = "/login";
   };
 
   useEffect(() => {
     async function getCompanyList() {
-      let token = localStorage.getItem("token");
-      let apiURL = process.env.NEXT_PUBLIC_API_BASE;
-      setIsLoading(true)
+      const token = localStorage.getItem("token");
+      const apiURL = process.env.NEXT_PUBLIC_API_BASE;
+      setIsLoading(true);
       await axios.get(`${apiURL}/hermes/company`, {
         params: {
           account_id: 0,
@@ -582,63 +604,60 @@ const AdminLayout = (props: any) => {
           Authorization: `Bearer ${token}`,
         },
       })
-      .then((res) => {
-        const defaultCompany = res.data.data.rows[0]
-        localStorage.setItem('companyId', defaultCompany.id)
-        localStorage.setItem('companyCode', defaultCompany.code)
-        setCompanies(res.data.data.rows)
-        setIsLoading(false)
-      })
-      .catch((err) => {
-        console.log(err.response.status)
-        localStorage.setItem('companyId', "2")
-        localStorage.setItem('companyCode', "KSNI")
-        setCompanies([])
-        setIsLoading(false)
-      })
+        .then((res) => {
+          const defaultCompany = res.data.data.rows[0];
+          localStorage.setItem('companyId', defaultCompany.id);
+          localStorage.setItem('companyCode', defaultCompany.code);
+          setCompanies(res.data.data.rows);
+          setIsLoading(false);
+        })
+        .catch(() => {
+          localStorage.setItem('companyId', "2");
+          localStorage.setItem('companyCode', "KSNI");
+          setCompanies([]);
+          setIsLoading(false);
+        });
     }
     // localStorage.setItem('companyId', "2")
     // localStorage.setItem('companyCode', "KSNI")
-    getCompanyList()
+    getCompanyList();
   }, []);
 
   const menuConfigFunc = (companies) => {
-
     const handleChangeCompany = (value) => {
-      const selectedCompany = companies.filter((comp) => comp.name == value)
-      localStorage.setItem('companyId', selectedCompany[0].id)
-      localStorage.setItem('companyCode', selectedCompany[0].code)
-    }
-  
+      const selectedCompany = companies.filter((comp) => comp.name == value);
+      localStorage.setItem('companyId', selectedCompany[0].id);
+      localStorage.setItem('companyCode', selectedCompany[0].code);
+    };
+
     return [
-      { 
+      {
         type: "dropdown",
         items: companies,
         onChange: (value) => handleChangeCompany(value),
-        default: companies[0]
+        default: companies[0],
       },
-      ...menuConfig
-    ]
-  }
+      ...menuConfig,
+    ];
+  };
 
   const menuMdmFunc = (companies) => {
-
     const handleChangeCompany = (value) => {
-      const selectedCompany = companies.filter((comp) => comp.name == value)
-      localStorage.setItem('companyId', selectedCompany[0].id)
-      localStorage.setItem('companyCode', selectedCompany[0].code)
-    }
-  
+      const selectedCompany = companies.filter((comp) => comp.name == value);
+      localStorage.setItem('companyId', selectedCompany[0].id);
+      localStorage.setItem('companyCode', selectedCompany[0].code);
+    };
+
     return [
-      { 
+      {
         type: "dropdown",
         items: companies,
         onChange: (value) => handleChangeCompany(value),
-        default: companies[0]
+        default: companies[0],
       },
-      ...menuMdm
-    ]
-  }
+      ...menuMdm,
+    ];
+  };
 
   return (
     <Layout style={{ height: "100vh" }}>
@@ -646,7 +665,7 @@ const AdminLayout = (props: any) => {
         logo="/icons/logo-nabati.svg"
         // menu={current === "0" ? menuConfig : menuMdm}
         menu={!isLoading && current === "0" ? menuConfigFunc(companies) : menuMdmFunc(companies)}
-        defaultMenu={"dashboard"}
+        defaultMenu="dashboard"
       />
       <Layout
         className="site-layout"
@@ -705,7 +724,7 @@ const AdminLayout = (props: any) => {
               </LanguageOption>
             ) : (
               <MenuLogout
-                menu={
+                menu={(
                   <WrapperMenuLogout>
                     <WrapeprProfile>
                       <ICAccount />
@@ -738,11 +757,13 @@ const AdminLayout = (props: any) => {
                       <p>Logout</p>
                     </div>
                   </WrapperMenuLogout>
-                }
+                )}
               >
                 <MenuDropdown>
                   <div
-                    style={{ gap: "5px", display: "flex", alignItems: "center", fontSize: "14px" }}
+                    style={{
+                      gap: "5px", display: "flex", alignItems: "center", fontSize: "14px",
+                    }}
                   >
                     <ICAccount size={64} />
                     <p>Admin</p>

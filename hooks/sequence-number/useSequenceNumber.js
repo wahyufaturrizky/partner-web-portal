@@ -46,10 +46,12 @@ const useAllSequenceNumber = ({ query = {}, options }) => {
 // };
 
 const fetchSequenceNumber = async ({ query = {}, id }) => {
+  const companyCode = localStorage.getItem('companyCode')
   // return client(`/sequence/list?parent_id=${id}`).then((data) => data);
   return client(`/sequence/list?parent_id=${id}`, {
     params: {
       ...query,
+      company_id: companyCode
     },
   }).then((data) => data);
 };
