@@ -1,6 +1,8 @@
 import usePagination from "@lucasmogari/react-pagination";
 import { useJobPositions } from "hooks/mdm/job-position/useJobPositon";
+import { useUserPermissions } from "hooks/user-config/usePermission";
 import { useRouter } from "next/router";
+import { permissionEmployeeList } from "permission/employee.list";
 import {
   Button,
   Col,
@@ -167,6 +169,16 @@ const EmployeeList = () => {
       },
     });
 
+  const { data: dataUserPermission } = useUserPermissions({
+    options: {
+      onSuccess: () => {},
+    },
+  });
+  const listPermission = dataUserPermission?.permission?.filter(
+    (filtering: any) => filtering.menu === "Employee List"
+  );
+  console.log(listPermission);
+
   const columns = [
     {
       title: "Employee ID",
@@ -184,11 +196,15 @@ const EmployeeList = () => {
       title: "Employee Type",
       dataIndex: "employeeType",
     },
-    {
-      title: "Action",
-      dataIndex: "action",
-      width: 160,
-    },
+    ...(listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "View").length > 0
+      ? [
+          {
+            title: "Action",
+            dataIndex: "action",
+            width: 160,
+          },
+        ]
+      : []),
   ];
 
   const rowSelection = {
@@ -205,7 +221,56 @@ const EmployeeList = () => {
 
     uploadFileEmployee(formData);
   };
+  let menuList: any[] = [];
 
+  if (
+    listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Download Template")
+      .length > 0
+  ) {
+    menuList = [
+      ...menuList,
+      {
+        key: 1,
+        value: (
+          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+            <ICDownload />
+            <p style={{ margin: "0" }}>Download Template</p>
+          </div>
+        ),
+      },
+    ];
+  }
+  if (
+    listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Updload Template")
+      .length > 0
+  ) {
+    menuList = [
+      ...menuList,
+      {
+        key: 2,
+        value: (
+          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+            <ICDownload />
+            <p style={{ margin: "0" }}>Upload Template</p>
+          </div>
+        ),
+      },
+    ];
+  }
+  if (listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Download").length > 0) {
+    menuList = [
+      ...menuList,
+      {
+        key: 3,
+        value: (
+          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+            <ICDownload />
+            <p style={{ margin: "0" }}>Download Data</p>
+          </div>
+        ),
+      },
+    ];
+  }
   const listFilterEmployeeList = [
     {
       label: "By Position",
@@ -276,20 +341,23 @@ const EmployeeList = () => {
           </Row>
 
           <Row gap="16px">
-            <Button
-              size="big"
-              variant={"tertiary"}
-              onClick={() =>
-                setShowDelete({
-                  open: true,
-                  type: "selection",
-                  data: { employeeListData: employeeListData, selectedRowKeys },
-                })
-              }
-              disabled={rowSelection.selectedRowKeys?.length === 0}
-            >
-              Delete
-            </Button>
+            {listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Delete").length >
+              0 && (
+              <Button
+                size="big"
+                variant={"tertiary"}
+                onClick={() =>
+                  setShowDelete({
+                    open: true,
+                    type: "selection",
+                    data: { employeeListData: employeeListData, selectedRowKeys },
+                  })
+                }
+                disabled={rowSelection.selectedRowKeys?.length === 0}
+              >
+                Delete
+              </Button>
+            )}
             <DropdownMenu
               title={"More"}
               buttonVariant={"secondary"}
@@ -314,43 +382,18 @@ const EmployeeList = () => {
                     break;
                 }
               }}
-              menuList={[
-                {
-                  key: 1,
-                  value: (
-                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                      <ICDownload />
-                      <p style={{ margin: "0" }}>Download Template</p>
-                    </div>
-                  ),
-                },
-                {
-                  key: 2,
-                  value: (
-                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                      <ICUpload />
-                      <p style={{ margin: "0" }}>Upload Template</p>
-                    </div>
-                  ),
-                },
-                {
-                  key: 3,
-                  value: (
-                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                      <ICDownload />
-                      <p style={{ margin: "0" }}>Download Data</p>
-                    </div>
-                  ),
-                },
-              ]}
+              menuList={menuList}
             />
-            <Button
-              size="big"
-              variant="primary"
-              onClick={() => router.push("/employee-list/create")}
-            >
-              Create
-            </Button>
+            {listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Create").length >
+              0 && (
+              <Button
+                size="big"
+                variant="primary"
+                onClick={() => router.push("/employee-list/create")}
+              >
+                Create
+              </Button>
+            )}
           </Row>
         </Row>
       </Card>
