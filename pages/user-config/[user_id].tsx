@@ -55,6 +55,7 @@ const UpdateUserConfig: any = () => {
 		resolver: yupResolver(schema),
 		defaultValues: defaultValues,
 	});
+	
 	const [searchTimezone, setSearchTimezone] = useState("")
 	const [searchEmployee, setSearchEmployee] = useState("")
 
@@ -67,7 +68,6 @@ const UpdateUserConfig: any = () => {
 	const [listTimezone, setListTimezone] = useState<any[]>([])
 	const [listEmployee, setListEmployee] = useState<any[]>([])
 	const [employeeLanguages, setEmployeeLanguages] = useState("")
-
 
     const {
         data: UserData,
@@ -246,6 +246,7 @@ const UpdateUserConfig: any = () => {
 								<Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
 									{lang[t].userList.list.button.save}
 								</Button>
+						
 							</Row>
 						</Row>
 					</Row>

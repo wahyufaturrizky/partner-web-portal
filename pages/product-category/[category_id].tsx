@@ -1,26 +1,9 @@
 import React, { useState } from "react";
-import {
-  Text,
-  Col,
-  Row,
-  Spacer,
-  Dropdown,
-  Button,
-  Accordion,
-  Input,
-  TextArea,
-  Dropdown2,
-  Switch,
-  FileUploaderAllFiles,
-  Spin,
-} from "pink-lava-ui";
+import { Text, Col, Row, Spacer, Dropdown, Button, Accordion, Input, Spin } from "pink-lava-ui";
 import styled from "styled-components";
 import Router, { useRouter } from "next/router";
 import ArrowLeft from "../../assets/icons/arrow-left.svg";
-import * as yup from "yup";
-import { yupResolver } from "@hookform/resolvers/yup";
 import { useForm } from "react-hook-form";
-import usePagination from "@lucasmogari/react-pagination";
 import {
   useCoaList,
   useCoaListAll,
@@ -30,6 +13,7 @@ import {
   useUpdateProductCategory,
 } from "hooks/mdm/product-category/useProductCategory";
 import { useCoa } from "hooks/finance-config/useCoaTemplate";
+import { useUserPermissions } from "hooks/user-config/usePermission";
 
 const costingMethodData = [
   {
@@ -48,8 +32,7 @@ const costingMethodData = [
 
 const UpdateProductCategory: any = () => {
   const router = useRouter();
-  const companyId = localStorage.getItem("companyId")
-  const companyCode = localStorage.getItem("companyCode")
+  const companyCode = localStorage.getItem("companyCode");
   const { category_id } = router.query;
 
   const [automate, setAutomate] = useState("");
@@ -59,8 +42,7 @@ const UpdateProductCategory: any = () => {
   const [searchAllCoa, setSearchAllCoa] = useState("");
   const [searchReceivable, setSearchReceivable] = useState("");
   const [searchPayable, setSearchPayable] = useState("");
-  
-  
+
   const {
     register,
     handleSubmit,
@@ -70,6 +52,16 @@ const UpdateProductCategory: any = () => {
     // resolver: yupResolver(schema),
     // defaultValues: defaultValue,
   });
+
+  const { data: dataUserPermission } = useUserPermissions({
+    options: {
+      onSuccess: () => {},
+    },
+  });
+
+  const listPermission = dataUserPermission?.permission?.filter(
+    (filtering: any) => filtering.menu === "Product Category"
+  );
 
   const { data: categoryData, isLoading: isLoadingCategoryData } = useProductCategory({
     id: category_id,
@@ -87,7 +79,7 @@ const UpdateProductCategory: any = () => {
         setValue("stock_journal", data.stockJournal);
         setValue("stock_input_account", data.stockInputAccount);
         setValue("stock_output_account", data.stockOutputAccount);
-        setAutomate(data.inventoryValuation)
+        setAutomate(data.inventoryValuation);
       },
     },
   });
@@ -111,7 +103,7 @@ const UpdateProductCategory: any = () => {
     status: "payable",
     query: {
       company_code: companyCode,
-      search: searchPayable
+      search: searchPayable,
     },
     options: {
       onSuccess: (data: any) => {},
@@ -167,14 +159,18 @@ const UpdateProductCategory: any = () => {
       name: data.name,
       parent: data.parent || "",
       costing_method: data.costing_method || "",
-      inventory_valuation:  data.inventory_valuation || "",
-      price_difference_account: data.inventory_valuation == "Manual" ? "" : data.price_difference_account || "",
+      inventory_valuation: data.inventory_valuation || "",
+      price_difference_account:
+        data.inventory_valuation == "Manual" ? "" : data.price_difference_account || "",
       expense_account: data.expense_account || "",
       income_account: data.income_account || "",
-      stock_valuation_account: data.inventory_valuation == "Manual" ? "" : data.stock_valuation_account || "",
+      stock_valuation_account:
+        data.inventory_valuation == "Manual" ? "" : data.stock_valuation_account || "",
       stock_journal: data.inventory_valuation == "Manual" ? "" : data.stock_journal || "",
-      stock_input_account: data.inventory_valuation == "Manual" ? "" : data.stock_input_account || "",
-      stock_output_account: data.inventory_valuation == "Manual" ? "" : data.stock_output_account || "",
+      stock_input_account:
+        data.inventory_valuation == "Manual" ? "" : data.stock_input_account || "",
+      stock_output_account:
+        data.inventory_valuation == "Manual" ? "" : data.stock_output_account || "",
     };
     updateProductCategory(payload);
   };
@@ -193,9 +189,13 @@ const UpdateProductCategory: any = () => {
               <Button size="big" variant={"tertiary"} onClick={() => Router.back()}>
                 Cancel
               </Button>
-              <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
-                Save
-              </Button>
+
+              {listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Update")
+							.length > 0 && (
+                <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
+                  Save
+                </Button>
+              )}
             </Row>
           </Card>
 
@@ -284,8 +284,8 @@ const UpdateProductCategory: any = () => {
             <Accordion.Item key={3}>
               <Accordion.Header variant="blue">Account Properties</Accordion.Header>
               <Accordion.Body>
-              <Row width="49%" gap="20px" noWrap>
-                  {(automate == "" || automate == "Automated") &&  (
+                <Row width="49%" gap="20px" noWrap>
+                  {(automate == "" || automate == "Automated") && (
                     <Dropdown
                       label="Price Difference Account"
                       width={"100%"}
@@ -319,8 +319,8 @@ const UpdateProductCategory: any = () => {
                     label="Expense Account"
                     width={"100%"}
                     items={coaListPayable?.rows?.map((data) => ({
-                        id: `${data.accountCode} ${data.accountName}`,
-                        value: `${data.accountCode} ${data.accountName}`,
+                      id: `${data.accountCode} ${data.accountName}`,
+                      value: `${data.accountCode} ${data.accountName}`,
                     }))}
                     placeholder={"Select"}
                     handleChange={(value) => setValue("expense_account", value)}
@@ -330,7 +330,7 @@ const UpdateProductCategory: any = () => {
                   />
                 </Row>
                 <Spacer size={10} />
-                {(automate == "" || automate == "Automated") &&  (
+                {(automate == "" || automate == "Automated") && (
                   <>
                     <Row>
                       <Label>Account Stock Properties</Label>

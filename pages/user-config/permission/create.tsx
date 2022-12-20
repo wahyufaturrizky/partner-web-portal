@@ -69,7 +69,7 @@ const CreatePartnerConfigPermissionList: any = () => {
   });
 
   const { data: menuLists } = useMenuLists({
-    query: { limit: 0, owner: "HERMES", company_id: companyCode , search: debounceSearchAssociatedMenu},
+    query: { limit: 1000, owner: "HERMES", company_id: companyCode , search: debounceSearchAssociatedMenu},
     options: {
       refetchOnWindowFocus: "always",
     },
@@ -179,7 +179,7 @@ const CreatePartnerConfigPermissionList: any = () => {
 				</Alert>
 				<Spacer size={20} /> */}
 
-        <Accordion style={{display:"relative"}} id="area2">
+        <Accordion style={{display :"relative"}} id="area">
           <Accordion.Item key={1}>
             <Accordion.Header variant="blue">General</Accordion.Header>
             <Accordion.Body>
@@ -192,6 +192,7 @@ const CreatePartnerConfigPermissionList: any = () => {
                   {...register("name", { required: true })}
                 />
                 <Dropdown
+                  containerId={"area"}
                   label="Associated Menu"
                   handleClickActionLabel={handleAddNewAssociated}
                   isShowActionLabel
@@ -228,7 +229,7 @@ const CreatePartnerConfigPermissionList: any = () => {
                       <Spacer size={5} />
                       <FormSelect
                         showArrow
-  											containerId="area2"
+                        containerId={"area"}
                         height="48px"
                         style={{ width: "100%" }}
                         size={"large"}
@@ -238,16 +239,16 @@ const CreatePartnerConfigPermissionList: any = () => {
                         withSearch
                         isLoading={isFetchingViewTypeList}
                         isLoadingMore={isFetchingMoreViewTypeList}
-                        // fetchMore={() => {
-                        //   if (hasNextPageViewTypeList) {
-                        //     fetchNextPageViewTypeList();
-                        //   }
-                        // }}
+                        fetchMore={() => {
+                          // if (hasNextPageViewTypeList) {
+                          //   fetchNextPageViewTypeList();
+                          // }
+                        }}
                         items={
                           isFetchingViewTypeList && !isFetchingMoreViewTypeList ? [] : viewTypeList
                         }
                         onChange={(value: any) => {
-                          setValue("viewType", value);
+                          setValue("viewTypes", [value]);
                         }}
                         onSearch={(value: any) => {
                           setSearchViewType(value);

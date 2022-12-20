@@ -32,6 +32,7 @@ import {
   useUploadFileCustomerGroupMDM,
 } from "../../../hooks/mdm/customers/useCustomersGroupMDM";
 import { lang } from "lang";
+import { useUserPermissions } from "hooks/user-config/usePermission";
 
 const downloadFile = (params: any) =>
   mdmDownloadService("/customer-group/template/download", { params }).then((res) => {
@@ -47,11 +48,13 @@ const renderConfirmationText = (type: any, data: any) => {
     case "selection":
       return data.selectedRowKeys.length > 1
         ? `Are you sure to delete ${data.selectedRowKeys.length} items ?`
-        : `By deleting it will affect data that already uses customer group ${data?.customerGroupData?.data.find((el: any) => el.key === data.selectedRowKeys[0])
-          ?.name
-        }-${data?.customerGroupData?.data.find((el: any) => el.key === data.selectedRowKeys[0])
-          ?.customerGroupCode
-        }`;
+        : `By deleting it will affect data that already uses customer group ${
+            data?.customerGroupData?.data.find((el: any) => el.key === data.selectedRowKeys[0])
+              ?.name
+          }-${
+            data?.customerGroupData?.data.find((el: any) => el.key === data.selectedRowKeys[0])
+              ?.customerGroupCode
+          }`;
     case "detail":
       return `By deleting it will affect data that already uses customer group ${data.name}-${data.customerGroupCode}`;
 
@@ -63,8 +66,8 @@ const renderConfirmationText = (type: any, data: any) => {
 const CustomerGroupMDM = () => {
   const t = localStorage.getItem("lan") || "en-US";
   const router = useRouter();
-  const companyId = localStorage.getItem("companyId")
-  const companyCode = localStorage.getItem("companyCode")
+  const companyId = localStorage.getItem("companyId");
+  const companyCode = localStorage.getItem("companyCode");
   const pagination = usePagination({
     page: 1,
     itemsPerPage: 20,
@@ -88,6 +91,16 @@ const CustomerGroupMDM = () => {
   const { register, handleSubmit, setValue } = useForm({
     defaultValues: { parent: "" },
   });
+
+  const { data: dataUserPermission } = useUserPermissions({
+    options: {
+      onSuccess: () => {},
+    },
+  });
+
+  const listPermission = dataUserPermission?.permission?.filter(
+    (filtering: any) => filtering.menu === "Customer Group"
+  );
 
   const {
     data: customerGroupsMDMData,
@@ -194,12 +207,16 @@ const CustomerGroupMDM = () => {
       title: "Company",
       dataIndex: "company",
     },
-    {
-      title: lang[t].customerGroup.customergroupAction,
-      dataIndex: "action",
-      width: "15%",
-      align: "left",
-    },
+    ...(listPermission?.some((el: any) => el.viewTypes[0]?.viewType.name === "View")
+      ? [
+          {
+            title: lang[t].customerGroup.customergroupAction,
+            dataIndex: "action",
+            width: "15%",
+            align: "left",
+          },
+        ]
+      : []),
   ];
 
   const rowSelection = {
@@ -246,83 +263,116 @@ const CustomerGroupMDM = () => {
             }}
           />
           <Row gap="16px">
-            <Button
-              size="big"
-              variant={"tertiary"}
-              onClick={() =>
-                setShowDelete({
-                  open: true,
-                  type: "selection",
-                  data: { customerGroupData: customerGroupsMDMData, selectedRowKeys },
-                })
-              }
-              disabled={rowSelection.selectedRowKeys?.length === 0}
-            >
-              {lang[t].customerGroup.tertier.delete}
-            </Button>
-            <DropdownMenu
-              title={lang[t].customerGroup.secondary.more}
-              buttonVariant={"secondary"}
-              buttonSize={"big"}
-              textVariant={"button"}
-              textColor={"pink.regular"}
-              iconStyle={{ fontSize: "12px" }}
-              onClick={(e: any) => {
-                switch (parseInt(e.key)) {
-                  case 1:
-                    downloadFile({ with_data: "N", company_id: companyCode });
-                    break;
-                  case 2:
-                    setShowUpload(true);
-                    break;
-                  case 3:
-                    downloadFile({ with_data: "Y", company_id: companyCode });
-                    break;
-                  case 4:
-                    break;
-                  default:
-                    break;
+            {listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Delete")
+							.length > 0 && (
+              <Button
+                size="big"
+                variant={"tertiary"}
+                onClick={() =>
+                  setShowDelete({
+                    open: true,
+                    type: "selection",
+                    data: { customerGroupData: customerGroupsMDMData, selectedRowKeys },
+                  })
                 }
-              }}
-              menuList={[
-                {
-                  key: 1,
-                  value: (
-                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                      <ICDownload />
-                      <p style={{ margin: "0" }}>{lang[t].customerGroup.ghost.downloadTemplate}</p>
-                    </div>
-                  ),
-                },
-                {
-                  key: 2,
-                  value: (
-                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                      <ICUpload />
-                      <p style={{ margin: "0" }}>{lang[t].customerGroup.ghost.uploadTemplate}</p>
-                    </div>
-                  ),
-                },
-                {
-                  key: 3,
-                  value: (
-                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                      <ICDownload />
-                      <p style={{ margin: "0" }}>{lang[t].customerGroup.ghost.downloadData}</p>
-                    </div>
-                  ),
-                },
-              ]}
-            />
-            <Button
-              size="big"
-              variant="primary"
-              onClick={() =>
-                setModalCustomerGroupForm({ open: true, typeForm: "create", data: {} })
-              }
-            >
-              {lang[t].customerGroup.primary.create}
-            </Button>
+                disabled={rowSelection.selectedRowKeys?.length === 0}
+              >
+                {lang[t].customerGroup.tertier.delete}
+              </Button>
+            )}
+
+            {(listPermission?.filter(
+							(data: any) => data.viewTypes[0]?.viewType.name === "Download Template"
+						).length > 0 ||
+							listPermission?.filter(
+								(data: any) => data.viewTypes[0]?.viewType.name === "Download Data"
+							).length > 0 ||
+							listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Upload")
+								.length > 0) && (
+              <DropdownMenu
+                title={lang[t].customerGroup.secondary.more}
+                buttonVariant={"secondary"}
+                buttonSize={"big"}
+                textVariant={"button"}
+                textColor={"pink.regular"}
+                iconStyle={{ fontSize: "12px" }}
+                onClick={(e: any) => {
+                  switch (parseInt(e.key)) {
+                    case 1:
+                      downloadFile({ with_data: "N", company: companyCode });
+                      break;
+                    case 2:
+                      setShowUpload(true);
+                      break;
+                    case 3:
+                      downloadFile({ with_data: "Y", company: companyCode });
+                      break;
+                    case 4:
+                      break;
+                    default:
+                      break;
+                  }
+                }}
+                menuList={[
+                  {
+                    ...(listPermission?.filter(
+											(data: any) => data.viewTypes[0]?.viewType.name === "Download Template"
+										).length > 0 && {
+                      key: 1,
+                      value: (
+                        <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                          <ICDownload />
+                          <p style={{ margin: "0" }}>
+                            {lang[t].customerGroup.ghost.downloadTemplate}
+                          </p>
+                        </div>
+                      ),
+                    }),
+                  },
+                  {
+                    ...(listPermission?.filter(
+											(data: any) => data.viewTypes[0]?.viewType.name === "Upload"
+										).length > 0 && {
+                      key: 2,
+                      value: (
+                        <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                          <ICUpload />
+                          <p style={{ margin: "0" }}>
+                            {lang[t].customerGroup.ghost.uploadTemplate}
+                          </p>
+                        </div>
+                      ),
+                    }),
+                  },
+                  {
+                    ...(listPermission?.filter(
+											(data: any) => data.viewTypes[0]?.viewType.name === "Download Data"
+										).length > 0 && {
+                      key: 3,
+                      value: (
+                        <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                          <ICDownload />
+                          <p style={{ margin: "0" }}>{lang[t].customerGroup.ghost.downloadData}</p>
+                        </div>
+                      ),
+                    }),
+                  },
+                ]}
+              />
+            )}
+
+            {listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Create")
+							.length > 0 && (
+              <Button
+                size="big"
+                variant="primary"
+                onClick={() =>
+                  setModalCustomerGroupForm({ open: true, typeForm: "create", data: {} })
+                }
+              >
+                {lang[t].customerGroup.primary.create}
+              </Button>
+            )}
           </Row>
         </Row>
       </Card>
