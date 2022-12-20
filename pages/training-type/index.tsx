@@ -204,7 +204,7 @@ const TrainingType = () => {
       setSelectedRowKeys(selectedRowKeys);
     },
   };
-	if (allowPermissionToShow?.map((data: any) => data.name)?.includes("Download Training Type")) {
+	if (listPermission?.filter((x :any) => x.viewTypes[0]?.viewType.name === "Download Template").length > 0) {
 		  menuList = [
 			...menuList, 
       {
@@ -218,7 +218,7 @@ const TrainingType = () => {
       },
 		];
 	}
-	if (allowPermissionToShow?.map((data: any) => data.name)?.includes("Upload Training Type")) {
+	if (listPermission?.filter((x :any) => x.viewTypes[0]?.viewType.name === "Upload Template").length > 0) {
 		  menuList = [
 			...menuList, 
       {
@@ -232,7 +232,7 @@ const TrainingType = () => {
       },
 		];
 	}
-	if (allowPermissionToShow?.map((data: any) => data.name)?.includes("Download Training Type")) {
+	if (listPermission?.filter((x :any) => x.viewTypes[0]?.viewType.name === "Download").length > 0) {
 	menuList = [
 		...menuList, 
     {
@@ -330,7 +330,7 @@ const TrainingType = () => {
               menuList={menuList}
             />
             )}
-            {allowPermissionToShow?.some((el: any) => el.name === "Create Training Type") && (
+            {listPermission?.filter((x :any) => x.viewTypes[0]?.viewType.name === "Create").length > 0 && (
             <Button
               size="big"
               variant="primary"
@@ -397,7 +397,7 @@ const TrainingType = () => {
               >
                 {modalForm.typeForm === "create" ? (
                   <>
-                  {allowPermissionToShow?.some((el: any) => el.name === "Delete Training Type") && (
+                  {listPermission?.filter((x :any) => x.viewTypes[0]?.viewType.name === "Delete").length > 0 && (
                     <Button
                       full
                       size="big"
@@ -417,7 +417,7 @@ const TrainingType = () => {
                   </>
                 ) : (
                   <>
-                    {allowPermissionToShow?.some((el: any) => el.name === "Delete Training Type") && (
+                    {listPermission?.filter((x :any) => x.viewTypes[0]?.viewType.name === "Delete").length > 0 && (
                       <Button
                         full
                         size="big"
@@ -431,7 +431,7 @@ const TrainingType = () => {
                         {lang[t].trainingType.tertier.delete}
                       </Button>
                     )}
-                    {allowPermissionToShow?.some((el: any) => el.name === "Update Training Type") && (
+                    {listPermission?.filter((x :any) => x.viewTypes[0]?.viewType.name === "Update").length > 0 && (
                       <Button full onClick={handleSubmit(onSubmit)} variant="primary" size="big">
                         {isLoadingCreateTrainingType || isLoadingUpdateTrainingType
                           ? "Loading..."
