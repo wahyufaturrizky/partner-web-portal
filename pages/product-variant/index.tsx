@@ -26,8 +26,9 @@ import {
 import { mdmDownloadService } from "../../lib/client";
 import useDebounce from "../../lib/useDebounce";
 import { queryClient } from "../_app";
-import { useProductCategoryInfiniteLists } from 'hooks/mdm/product-category/useProductCategory';
+import { useProductCategoryInfiniteLists } from "hooks/mdm/product-category/useProductCategory";
 import { lang } from "lang";
+import { useUserPermissions } from "hooks/user-config/usePermission";
 
 const downloadFile = (params: any) =>
   mdmDownloadService("/product-variant/download", { params }).then((res) => {
@@ -58,8 +59,8 @@ const renderConfirmationText = (type: any, data: any) => {
 const ProductVariant = () => {
   const router = useRouter();
   const t = localStorage.getItem("lan") || "en-US";
-  const companyId = localStorage.getItem("companyId")
-  const companyCode = localStorage.getItem("companyCode")
+  const companyId = localStorage.getItem("companyId");
+  const companyCode = localStorage.getItem("companyCode");
 
   const pagination = usePagination({
     page: 1,
@@ -70,11 +71,11 @@ const ProductVariant = () => {
     totalItems: 100,
   });
 
-  const [productCategory, setProductCategory] = useState("")
+  const [productCategory, setProductCategory] = useState("");
   const [search, setSearch] = useState("");
   const [isShowDelete, setShowDelete] = useState({ open: false, type: "selection", data: {} });
   const [isShowUpload, setShowUpload] = useState(false);
-  const modalForm  = {
+  const modalForm = {
     open: false,
     data: {},
     typeForm: "create",
@@ -92,7 +93,7 @@ const ProductVariant = () => {
       page: pagination.page,
       limit: pagination.itemsPerPage,
       company_id: companyCode,
-      category_id: productCategory
+      category_id: productCategory,
     },
     options: {
       onSuccess: (data: any) => {
@@ -107,7 +108,7 @@ const ProductVariant = () => {
             status: element.status,
             productCategoryName: element.productCategoryName,
             hasVariant: element.hasVariant,
-            variant: element?.productVariants?.length ?? '-',
+            variant: element?.productVariants?.length ?? "-",
             action: (
               <div style={{ display: "flex", justifyContent: "left" }}>
                 <Button
@@ -140,16 +141,25 @@ const ProductVariant = () => {
       },
     });
 
-  const { mutate: uploadFileProductVariant, isLoading: isLoadingUploadFileProductVariant} = useUploadFileProductVariant(
-    {
+  const { mutate: uploadFileProductVariant, isLoading: isLoadingUploadFileProductVariant } =
+    useUploadFileProductVariant({
       options: {
         onSuccess: () => {
           queryClient.invalidateQueries(["product-variant"]);
           setShowUpload(false);
         },
       },
-    }
+    });
+  const { data: dataUserPermission } = useUserPermissions({
+    options: {
+      onSuccess: () => {},
+    },
+  });
+
+  const listPermission = dataUserPermission?.permission?.filter(
+    (filtering: any) => filtering.menu === "Product Variant"
   );
+  console.log(listPermission);
 
   const columns = [
     {
@@ -172,12 +182,16 @@ const ProductVariant = () => {
           {status === "active" ? "Active" : "Inactive"}
         </Lozenge>
       ),
-    },  
-    {
-      title: lang[t].productList.list.table.action,
-      dataIndex: "action",
-      width: "15%",
     },
+    ...(listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "View").length > 0
+      ? [
+          {
+            title: lang[t].productList.list.table.action,
+            dataIndex: "action",
+            width: "15%",
+          },
+        ]
+      : []),
   ];
 
   const onSubmitFile = (file: any) => {
@@ -189,7 +203,56 @@ const ProductVariant = () => {
     uploadFileProductVariant(formData);
   };
 
-  const [listProductCategory , setListProductCategory] = useState<any[]>([]);
+  let menuList: any[] = [];
+
+  if (
+    listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Download Template")
+      .length > 0
+  ) {
+    menuList = [
+      ...menuList,
+      {
+        key: 1,
+        value: (
+          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+            <ICDownload />
+            <p style={{ margin: "0" }}>Download Template</p>
+          </div>
+        ),
+      },
+    ];
+  }
+  if (listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Upload").length > 0) {
+    menuList = [
+      ...menuList,
+      {
+        key: 2,
+        value: (
+          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+            <ICUpload />
+            <p style={{ margin: "0" }}>{lang[t].productVariant.list.button.upload}</p>
+          </div>
+        ),
+      },
+    ];
+  }
+  if (
+    listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Download Data").length > 0
+  ) {
+    menuList = [
+      ...menuList,
+      {
+        key: 3,
+        value: (
+          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+            <ICDownload />
+            <p style={{ margin: "0" }}>{lang[t].productVariant.list.button.downloadData}</p>
+          </div>
+        ),
+      },
+    ];
+  }
+  const [listProductCategory, setListProductCategory] = useState<any[]>([]);
   const [totalRowsProductCategory, setTotalRowsProductCategory] = useState(0);
   const [searchProductCategory, setSearchProductCategory] = useState("");
   const debounceFetchProductCategory = useDebounce(searchProductCategory, 1000);
@@ -211,7 +274,7 @@ const ProductVariant = () => {
         const mappedData = data?.pages?.map((group: any) => {
           return group.rows?.map((element: any) => {
             return {
-              label: element.name, 
+              label: element.name,
               value: element.productCategoryId,
             };
           });
@@ -247,7 +310,7 @@ const ProductVariant = () => {
             />
             <Col width="200px">
               <CustomFormSelect
-                style={{ width: "100%", height: '48px' }}
+                style={{ width: "100%", height: "48px" }}
                 size={"large"}
                 placeholder={"Product Category"}
                 borderColor={"#AAAAAA"}
@@ -266,7 +329,7 @@ const ProductVariant = () => {
                     : listProductCategory
                 }
                 onChange={(value: any) => {
-                  setProductCategory(value)
+                  setProductCategory(value);
                 }}
                 onSearch={(value: any) => {
                   setSearchProductCategory(value);
@@ -299,43 +362,18 @@ const ProductVariant = () => {
                     break;
                 }
               }}
-              menuList={[
-                {
-                  key: 1,
-                  value: (
-                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                      <ICDownload />
-                      <p style={{ margin: "0" }}>{lang[t].productVariant.list.button.download}</p>
-                    </div>
-                  ),
-                },
-                {
-                  key: 2,
-                  value: (
-                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                      <ICUpload />
-                      <p style={{ margin: "0" }}>{lang[t].productVariant.list.button.upload}</p>
-                    </div>
-                  ),
-                },
-                {
-                  key: 3,
-                  value: (
-                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                      <ICDownload />
-                      <p style={{ margin: "0" }}>{lang[t].productVariant.list.button.downloadData}</p>
-                    </div>
-                  ),
-                },
-              ]}
+              menuList={menuList}
             />
-            <Button
-              size="big"
-              variant="primary"
-              onClick={() => router.push("/product-variant/create")}
-            >
-              {lang[t].productVariant.list.button.create}
-            </Button>
+            {listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Create").length >
+              0 && (
+              <Button
+                size="big"
+                variant="primary"
+                onClick={() => router.push("/product-variant/create")}
+              >
+                {lang[t].productVariant.list.button.create}
+              </Button>
+            )}
           </Row>
         </Row>
       </Card>
@@ -418,7 +456,6 @@ const ProductVariant = () => {
 };
 
 const CustomFormSelect = styled(FormSelect)`
-  
   .ant-select-selection-placeholder {
     line-height: 48px !important;
   }
@@ -436,7 +473,7 @@ const CustomFormSelect = styled(FormSelect)`
     display: flex;
     align-items: center;
   }
-`
+`;
 
 const Label = styled.div`
   font-weight: bold;
