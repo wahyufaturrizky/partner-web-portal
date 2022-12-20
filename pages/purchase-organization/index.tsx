@@ -1,4 +1,5 @@
 import usePagination from "@lucasmogari/react-pagination";
+import { useUserPermissions } from "hooks/user-config/usePermission";
 import { lang } from "lang";
 import { useRouter } from "next/router";
 import {
@@ -29,8 +30,8 @@ import { queryClient } from "../_app";
 
 const downloadFile = (params: any) =>
   mdmDownloadService("/purchase-organization/download", { params }).then((res) => {
-    let dataUrl = window.URL.createObjectURL(new Blob([res.data]));
-    let tempLink = document.createElement("a");
+    const dataUrl = window.URL.createObjectURL(new Blob([res.data]));
+    const tempLink = document.createElement("a");
     tempLink.href = dataUrl;
     tempLink.setAttribute("download", `purchase-organization_${new Date().getTime()}.xlsx`);
     tempLink.click();
@@ -54,8 +55,8 @@ const renderConfirmationText = (type: any, data: any) => {
 
 const ChannelMDM = () => {
   const t = localStorage.getItem("lan") || "en-US";
-  const companyId = localStorage.getItem("companyId")
-  const companyCode = localStorage.getItem("companyCode")
+  const companyId = localStorage.getItem("companyId");
+  const companyCode = localStorage.getItem("companyCode");
 
   const router = useRouter();
   const pagination = usePagination({
@@ -78,6 +79,16 @@ const ChannelMDM = () => {
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const debounceSearch = useDebounce(search, 1000);
 
+  const { data: dataUserPermission } = useUserPermissions({
+    options: {
+      onSuccess: () => {},
+    },
+  });
+
+  const listPermission = dataUserPermission?.permission?.filter(
+    (filtering: any) => filtering.menu === "Purchase Organization"
+  );
+
   const { register, handleSubmit } = useForm();
 
   const {
@@ -89,33 +100,32 @@ const ChannelMDM = () => {
       search: debounceSearch,
       page: pagination.page,
       limit: pagination.itemsPerPage,
-      company: companyCode
+      company: companyCode,
     },
     options: {
       onSuccess: (data: any) => {
         pagination.setTotalItems(data.totalRow);
       },
       select: (data: any) => {
-        const mappedData = data?.rows?.map((element: any) => {
-          return {
-            key: element.id,
-            id: element.id,
-            code: element.code,
-            name: element.name,
-            parent: element.parent,
-            action: (
-              <div style={{ display: "flex", justifyContent: "left" }}>
-                <Button
-                  size="small"
-                  onClick={() => router.push(`purchase-organization/${element.id}`)}
-                  variant="tertiary"
-                >
-                  {lang[t].purchaseOrg.tertier.viewDetail}
-                </Button>
-              </div>
-            ),
-          };
-        });
+        const mappedData = data?.rows?.map((element: any) => ({
+          key: element.id,
+          id: element.id,
+          code: element.code,
+          name: element.name,
+          parent: element.parent,
+          action: listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "View")
+            .length > 0 && (
+            <div style={{ display: "flex", justifyContent: "left" }}>
+              <Button
+                size="small"
+                onClick={() => router.push(`purchase-organization/${element.id}`)}
+                variant="tertiary"
+              >
+                {lang[t].purchaseOrg.tertier.viewDetail}
+              </Button>
+            </div>
+          ),
+        }));
 
         return { data: mappedData, totalRow: data.totalRow };
       },
@@ -181,7 +191,7 @@ const ChannelMDM = () => {
   return (
     <>
       <Col>
-        <Text variant={"h4"}>{lang[t].purchaseOrg.pageTitle.purchaseOrganization}</Text>
+        <Text variant="h4">{lang[t].purchaseOrg.pageTitle.purchaseOrganization}</Text>
         <Spacer size={20} />
       </Col>
       <Card>
@@ -194,26 +204,31 @@ const ChannelMDM = () => {
             }}
           />
           <Row gap="16px">
-            <Button
-              size="big"
-              variant={"tertiary"}
-              onClick={() =>
-                setShowDelete({
-                  open: true,
-                  type: "selection",
-                  data: { channelData: dataPurchaseOrganizations, selectedRowKeys },
-                })
-              }
-              disabled={rowSelection.selectedRowKeys?.length === 0}
-            >
-              {lang[t].purchaseOrg.tertier.delete}
-            </Button>
+            {listPermission?.filter(
+              (data: any) => data.viewTypes[0]?.viewType.name === "Download Template"
+            ).length > 0 && (
+              <Button
+                size="big"
+                variant="tertiary"
+                onClick={() =>
+                  setShowDelete({
+                    open: true,
+                    type: "selection",
+                    data: { channelData: dataPurchaseOrganizations, selectedRowKeys },
+                  })
+                }
+                disabled={rowSelection.selectedRowKeys?.length === 0}
+              >
+                {lang[t].purchaseOrg.tertier.delete}
+              </Button>
+            )}
+
             <DropdownMenu
               title={lang[t].purchaseOrg.secondary.more}
-              buttonVariant={"secondary"}
-              buttonSize={"big"}
-              textVariant={"button"}
-              textColor={"pink.regular"}
+              buttonVariant="secondary"
+              buttonSize="big"
+              textVariant="button"
+              textColor="pink.regular"
               iconStyle={{ fontSize: "12px" }}
               onClick={(e: any) => {
                 switch (parseInt(e.key)) {
@@ -235,7 +250,9 @@ const ChannelMDM = () => {
               menuList={[
                 {
                   key: 1,
-                  value: (
+                  value: listPermission?.filter(
+                    (data: any) => data.viewTypes[0]?.viewType.name === "Download Template"
+                  ).length > 0 && (
                     <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
                       <ICDownload />
                       <p style={{ margin: "0" }}>{lang[t].purchaseOrg.ghost.downloadTemplate}</p>
@@ -244,7 +261,9 @@ const ChannelMDM = () => {
                 },
                 {
                   key: 2,
-                  value: (
+                  value: listPermission?.filter(
+                    (data: any) => data.viewTypes[0]?.viewType.name === "Upload"
+                  ).length > 0 && (
                     <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
                       <ICUpload />
                       <p style={{ margin: "0" }}>{lang[t].purchaseOrg.ghost.uploadTemplate}</p>
@@ -253,7 +272,9 @@ const ChannelMDM = () => {
                 },
                 {
                   key: 3,
-                  value: (
+                  value: listPermission?.filter(
+                    (data: any) => data.viewTypes[0]?.viewType.name === "Download Data"
+                  ).length > 0 && (
                     <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
                       <ICDownload />
                       <p style={{ margin: "0" }}>{lang[t].purchaseOrg.ghost.downloadData}</p>
@@ -274,7 +295,7 @@ const ChannelMDM = () => {
       </Card>
       <Spacer size={10} />
       <Card style={{ padding: "16px 20px" }}>
-        <Col gap={"60px"}>
+        <Col gap="60px">
           <Table
             loading={isLoadingPurchaseOrganizations || isFetchingPurchaseOrganizations}
             columns={columns}
@@ -291,7 +312,7 @@ const ChannelMDM = () => {
           centered
           visible={isShowDelete.open}
           onCancel={() => setShowDelete({ open: false, type: "", data: {} })}
-          title={"Confirm Delete"}
+          title="Confirm Delete"
           footer={null}
           content={
             <div

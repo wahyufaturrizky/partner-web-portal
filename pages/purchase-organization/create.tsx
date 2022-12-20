@@ -1,5 +1,6 @@
 import usePagination from "@lucasmogari/react-pagination";
 import { useProductCategoryList } from "hooks/mdm/product-category/useProductCategory";
+import { useUserPermissions } from "hooks/user-config/useUser";
 import { lang } from "lang";
 import Router from "next/router";
 import {
@@ -74,6 +75,16 @@ const CreateMenuList: any = () => {
     totalItems: 100,
   });
 
+  const { data: dataUserPermission } = useUserPermissions({
+    options: {
+      onSuccess: () => {},
+    },
+  });
+
+  const listPermission = dataUserPermission?.permission?.filter(
+    (filtering: any) => filtering.menu === "Purchase Organization"
+  );
+
   const { data: fieldsTablePermission } = useProductCategoryList({
     options: {
       onSuccess: (data) => {
@@ -97,7 +108,6 @@ const CreateMenuList: any = () => {
         },
       },
     });
-
 
   useEffect(() => {
     if (fieldsTablePermissionFilter && selectedFilter.length > 0) {
@@ -241,7 +251,7 @@ const CreateMenuList: any = () => {
 
   const { data: dataParentPurchaseOrganization, isLoading: isLoadingParentPurchaseOrganization } =
     useParentPurchaseOrganizationMDM({
-      id: 0 + `/${companyCode}`,
+      id: `${0}/${companyCode}`,
     });
 
   const handleSelectedField = () => {
@@ -328,12 +338,18 @@ const CreateMenuList: any = () => {
         stateFieldInput[thereIsEmptyField] === ""
     );
 
-    let product_categories = ""
-    dataAssociatedPermissionsField?.forEach((permission, i )=> product_categories += i !== dataAssociatedPermissionsField?.length - 1 ? permission?.key + ',' : permission?.key)
+    let product_categories = "";
+    dataAssociatedPermissionsField?.forEach(
+      (permission, i) =>
+        (product_categories +=
+          i !== dataAssociatedPermissionsField?.length - 1
+            ? `${permission?.key},`
+            : permission?.key)
+    );
     const data = {
       company: companyCode,
       name: stateFieldInput?.name,
-      parent: parent,
+      parent,
       product_categories,
       // process_name: stateFieldInput?.process_name,
       // isZeus: isZeus ? "Y" : "N",
@@ -379,19 +395,23 @@ const CreateMenuList: any = () => {
     <>
       <Col>
         <Row gap="4px">
-          <Text variant={"h4"}>{lang[t].purchaseOrg.pageTitle.createPurchaseOrganization}</Text>
+          <Text variant="h4">{lang[t].purchaseOrg.pageTitle.createPurchaseOrganization}</Text>
         </Row>
         <Spacer size={12} />
         <Card padding="20px">
           <Row justifyContent="flex-end" alignItems="center" nowrap>
             <Row>
               <Row gap="16px">
-                <Button size="big" variant={"tertiary"} onClick={() => Router.back()}>
+                <Button size="big" variant="tertiary" onClick={() => Router.back()}>
                   {lang[t].purchaseOrg.tertier.cancel}
                 </Button>
-                <Button size="big" variant={"primary"} onClick={handleCreateMenuList}>
-                  {isLoadingurchaseOrganization ? "loading..." : lang[t].purchaseOrg.primary.save}
-                </Button>
+                {listPermission?.filter(
+                  (data: any) => data.viewTypes[0]?.viewType.name === "Create"
+                ).length > 0 && (
+                  <Button size="big" variant="primary" onClick={handleCreateMenuList}>
+                    {isLoadingurchaseOrganization ? "loading..." : lang[t].purchaseOrg.primary.save}
+                  </Button>
+                )}
               </Row>
             </Row>
           </Row>
@@ -401,7 +421,9 @@ const CreateMenuList: any = () => {
 
         <Accordion>
           <Accordion.Item key={1}>
-            <Accordion.Header variant="blue">{lang[t].purchaseOrg.accordion.purchaseOrg}</Accordion.Header>
+            <Accordion.Header variant="blue">
+              {lang[t].purchaseOrg.accordion.purchaseOrg}
+            </Accordion.Header>
             <Accordion.Body>
               <Row width="100%" gap="20px" noWrap>
                 <Input
@@ -409,7 +431,7 @@ const CreateMenuList: any = () => {
                   width="100%"
                   label={lang[t].purchaseOrg.emptyState.purchaseGroupName}
                   height="48px"
-                  placeholder={"e.g Packaging Material"}
+                  placeholder="e.g Packaging Material"
                   onChange={handleChangeInput}
                 />
 
@@ -425,7 +447,7 @@ const CreateMenuList: any = () => {
                         value: data.name,
                         id: data.code,
                       }))}
-                      placeholder={"Select"}
+                      placeholder="Select"
                       handleChange={(text) => setParent(text)}
                       noSearch
                     />
@@ -529,7 +551,7 @@ const CreateMenuList: any = () => {
                 ) : (
                   <Button
                     size="big"
-                    variant={"primary"}
+                    variant="primary"
                     onClick={() => setModalCreate({ open: true })}
                   >
                     Register

@@ -1,5 +1,6 @@
 import usePagination from "@lucasmogari/react-pagination";
 import { useProductCategoryList } from "hooks/mdm/product-category/useProductCategory";
+import { useUserPermissions } from "hooks/user-config/useUser";
 import { lang } from "lang";
 import Router from "next/router";
 import {
@@ -81,25 +82,34 @@ const DetailMenuList: any = () => {
     totalItems: 100,
   });
 
-  const { data: fieldsTablePermission, isLoading: isLoadingPermissions } =
-  useProductCategoryList({
-      options: {
-        onSuccess: (data) => {
-          paginationTablePermission.setTotalItems(data.totalRow);
-          setIsLoading(false);
-        },
+  const { data: dataUserPermission } = useUserPermissions({
+    options: {
+      onSuccess: () => {},
+    },
+  });
+
+  const listPermission = dataUserPermission?.permission?.filter(
+    (filtering: any) => filtering.menu === "Purchase Organization"
+  );
+
+  const { data: fieldsTablePermission, isLoading: isLoadingPermissions } = useProductCategoryList({
+    options: {
+      onSuccess: (data) => {
+        paginationTablePermission.setTotalItems(data.totalRow);
+        setIsLoading(false);
       },
-      query: {
-        search: searchTablePermission,
-        page: paginationTablePermission.page,
-        limit: paginationTablePermission.itemsPerPage,
-      },
-    });
+    },
+    query: {
+      search: searchTablePermission,
+      page: paginationTablePermission.page,
+      limit: paginationTablePermission.itemsPerPage,
+    },
+  });
 
   const { data: dataParentPurchaseOrganization, isLoading: isLoadingParentPurchaseOrganization } =
-  useParentPurchaseOrganizationMDM({
-    id: Router.query.id + `/${companyCode}`,
-  });
+    useParentPurchaseOrganizationMDM({
+      id: `${Router.query.id}/${companyCode}`,
+    });
 
   const { isLoading: isLoadingPurchaseOrganization } = usePurchaseOrganizationMDM({
     options: {
@@ -128,7 +138,7 @@ const DetailMenuList: any = () => {
 
         // setIsZeus(data.menu.isZeus === "Y" ? true : false);
         // setIsHermes(data.menu.isHermes === "Y" ? true : false);
-        
+
         setParentInit(data.parent);
         setStateFieldInput({
           ...stateFieldInput,
@@ -140,15 +150,18 @@ const DetailMenuList: any = () => {
         // onSelectChangeTablePermission(tempDataAssociatePermission.map((data) => data.key));
 
         // onSelectChangeTableField(tempDataAllowedField.map((data) => data.key));
-        let existingAssociate = []
-        const initialAssociate = data?.productCategories?.split(",")
-        setSelectedRowKeysTablePermission(initialAssociate)
-        if(fieldsTablePermission && !isLoadingPermissions){
-          existingAssociate = fieldsTablePermission?.rows?.filter(field => initialAssociate.includes(field.productCategoryId))
+        let existingAssociate = [];
+        const initialAssociate = data?.productCategories?.split(",");
+        setSelectedRowKeysTablePermission(initialAssociate);
+        if (fieldsTablePermission && !isLoadingPermissions) {
+          existingAssociate = fieldsTablePermission?.rows?.filter((field) =>
+            initialAssociate.includes(field.productCategoryId)
+          );
         }
-        const dataAssociated = existingAssociate?.map(existingData => {
-          return {key: existingData.productCategoryId, name: existingData.name}
-        })
+        const dataAssociated = existingAssociate?.map((existingData) => ({
+          key: existingData.productCategoryId,
+          name: existingData.name,
+        }));
         setDataAssociatedPermissionsField(dataAssociated);
 
         if (name) {
@@ -160,17 +173,19 @@ const DetailMenuList: any = () => {
   });
 
   useEffect(() => {
-    let parentsData = []
-    if(parentInit){
-      parentsData = dataParentPurchaseOrganization?.filter(parentPurchase => parentPurchase.name === parentInit)
+    let parentsData = [];
+    if (parentInit) {
+      parentsData = dataParentPurchaseOrganization?.filter(
+        (parentPurchase) => parentPurchase.name === parentInit
+      );
     }
-    if(parentsData?.length > 0){
-      setParent(parentsData[0].code)
+    if (parentsData?.length > 0) {
+      setParent(parentsData[0].code);
     }
-  }, [dataParentPurchaseOrganization])
+  }, [dataParentPurchaseOrganization]);
 
-  console.log(parent, 'parent')
-  console.log(parentInit, 'init')
+  console.log(parent, "parent");
+  console.log(parentInit, "init");
   const {
     mutate: reqBodyFilterListPermission,
     data: fieldsTablePermissionFilter,
@@ -425,15 +440,15 @@ const DetailMenuList: any = () => {
     const data = {
       company: companyCode,
       name: stateFieldInput?.name,
-      parent: parent,
-      product_categories: selectedRowKeysTablePermission?.join(','),
+      parent,
+      product_categories: selectedRowKeysTablePermission?.join(","),
       // process_name: stateFieldInput?.process_name,
       // field: dataAllowedField.map((data) => data.key),
       // is_config: isZeus ? "Y" : "N",
       // is_partner: isHermes ? "Y" : "N",
       // permission: dataAssociatedPermissionsField.map((data) => data.key),
     };
-    console.log(data, '<<<update')
+    console.log(data, "<<<update");
     updatePurchaseOrganization(data);
 
     // if (!isEmptyField) {
@@ -492,14 +507,12 @@ const DetailMenuList: any = () => {
     isLoadingFilterListPermissions,
   ]);
 
-  
-
   return (
     <>
       <Col>
         <Row gap="4px">
           <ArrowLeft style={{ cursor: "pointer" }} onClick={() => Router.back()} />
-          <Text variant={"h4"}>{stateFieldInput?.name}</Text>
+          <Text variant="h4">{stateFieldInput?.name}</Text>
         </Row>
 
         <Spacer size={12} />
@@ -507,16 +520,27 @@ const DetailMenuList: any = () => {
           <Row justifyContent="flex-end" alignItems="center" nowrap>
             <Row>
               <Row gap="16px">
-                <Button
-                  size="big"
-                  variant={"tertiary"}
-                  onClick={() => setModalDelete({ open: true })}
-                >
-                  {lang[t].purchaseOrg.tertier.delete}
-                </Button>
-                <Button size="big" variant={"primary"} onClick={handleUpdateMenuList}>
-                  {isLoadingUpdatePurchaseOrganization ? "loading..." : lang[t].purchaseOrg.primary.save}
-                </Button>
+                {listPermission?.filter(
+                  (data: any) => data.viewTypes[0]?.viewType.name === "Delete"
+                ).length > 0 && (
+                  <Button
+                    size="big"
+                    variant="tertiary"
+                    onClick={() => setModalDelete({ open: true })}
+                  >
+                    {lang[t].purchaseOrg.tertier.delete}
+                  </Button>
+                )}
+
+                {listPermission?.filter(
+                  (data: any) => data.viewTypes[0]?.viewType.name === "Upload"
+                ).length > 0 && (
+                  <Button size="big" variant="primary" onClick={handleUpdateMenuList}>
+                    {isLoadingUpdatePurchaseOrganization
+                      ? "loading..."
+                      : lang[t].purchaseOrg.primary.save}
+                  </Button>
+                )}
               </Row>
             </Row>
           </Row>
@@ -526,7 +550,9 @@ const DetailMenuList: any = () => {
 
         <Accordion>
           <Accordion.Item key={1}>
-            <Accordion.Header variant="blue">{lang[t].purchaseOrg.accordion.purchaseOrg}</Accordion.Header>
+            <Accordion.Header variant="blue">
+              {lang[t].purchaseOrg.accordion.purchaseOrg}
+            </Accordion.Header>
             <Accordion.Body>
               <Row width="100%" gap="20px" noWrap>
                 <Input
@@ -535,7 +561,7 @@ const DetailMenuList: any = () => {
                   label={lang[t].purchaseOrg.emptyState.purchaseGroupName}
                   value={name}
                   height="48px"
-                  placeholder={"e.g Shipment and Delivery"}
+                  placeholder="e.g Shipment and Delivery"
                   onChange={handleChangeInput}
                 />
 
@@ -552,9 +578,9 @@ const DetailMenuList: any = () => {
                         value: data.name,
                         id: data.code,
                       }))}
-                      placeholder={"Select"}
+                      placeholder="Select"
                       handleChange={(text) => {
-                        setParent(text)
+                        setParent(text);
                       }}
                       noSearch
                     />
@@ -564,7 +590,10 @@ const DetailMenuList: any = () => {
                 )}
               </Row>
 
-              {!isLoadingPurchaseOrganization && !isLoadingFilterListPermissions && !isLoadingPermissions && dataAssociatedPermissionsField ? (
+              {!isLoadingPurchaseOrganization &&
+              !isLoadingFilterListPermissions &&
+              !isLoadingPermissions &&
+              dataAssociatedPermissionsField ? (
                 <DropdownMenuOptionCustome
                   loading={isLoading}
                   handleOpenTotalBadge={() =>
@@ -663,7 +692,7 @@ const DetailMenuList: any = () => {
                 ) : (
                   <Button
                     size="big"
-                    variant={"primary"}
+                    variant="primary"
                     onClick={() => setModalCreate({ open: true })}
                   >
                     Register
