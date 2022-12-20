@@ -108,7 +108,7 @@ const CreateProductCategory: any = () => {
       onSuccess: (data: any) => {},
     },
   });
-  
+
   const { mutate: createProductCategory } = useCreateProductCategory({
     options: {
       onSuccess: () => {

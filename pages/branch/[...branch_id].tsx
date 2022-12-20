@@ -11,6 +11,7 @@ import { useSalesOrganizationHirarcy, useSalesOrganizationInfiniteLists } from "
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { useCountryInfiniteLists } from "hooks/mdm/country-structure/useCountries";
+import { useUserPermissions } from "hooks/user-config/usePermission";
 
 const schema = yup
 	.object({
@@ -79,6 +80,15 @@ const BranchDetail = () => {
     { value: 3, label: '40125' },
   ])
 
+  const { data: dataUserPermission } = useUserPermissions({
+    options: {
+      onSuccess: () => {},
+    },
+  });
+
+  const listPermission = dataUserPermission?.permission?.filter(
+    (filtering: any) => filtering.menu === "Branch"
+  );
 
   // const { register, control, handleSubmit } = useForm();
   const {
@@ -330,7 +340,7 @@ const BranchDetail = () => {
 
   const onSubmit = (data: any) => {
     const formData = {
-      company_id: "KSNI",
+      company_id: companyCode,
       ...data,
       start_working_day: calendarDetailData?.start? calendarDetailData?.start : branchDetailData?.startWorkingDay,
       end_working_day: calendarDetailData?.end ? calendarDetailData?.end : branchDetailData?.endWorkingDay,
@@ -358,9 +368,12 @@ const BranchDetail = () => {
           <Button size="big" variant={"tertiary"} onClick={() => router.back()}>
             Cancel
           </Button>
-          <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
-            {isLoadingUpdateBranch ? "Loading..." : "Save"}
-          </Button>
+          {listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Update")
+							.length > 0 && (
+              <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
+                {isLoadingUpdateBranch ? "Loading..." : "Save"}
+              </Button>
+          )}
         </Row>
       </Card>
 

@@ -10,7 +10,7 @@ import {
   Spacer,
   Spin,
   Text,
-  FormSelectCustom,
+  FormSelect,
 } from "pink-lava-ui";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -23,10 +23,12 @@ import {
   useDeletePartnerConfigPermissionList,
   usePartnerConfigPermissionList,
   useUpdatePartnerConfigPermissionList,
+  useUserPermissions,
 } from "../../../hooks/user-config/usePermission";
 import { useRolePermissions, useViewTypeListInfiniteList } from "../../../hooks/role/useRole";
 import { lang } from "lang";
 import useDebounce from "lib/useDebounce";
+import Link from "next/link";
 
 const schema = yup
   .object({
@@ -49,8 +51,8 @@ const DetailPartnerConfigPermissionList: any = () => {
 
   const debounceFetchViewType = useDebounce(searchViewType, 1000);
 
-  const [searchAssociatedMenu, setSearchAssociatedMenu] = useState("")
-	const debounceSearchAssociatedMenu = useDebounce(searchAssociatedMenu, 1000);
+  const [searchAssociatedMenu, setSearchAssociatedMenu] = useState("");
+  const debounceSearchAssociatedMenu = useDebounce(searchAssociatedMenu, 1000);
 
   const { permission_id } = Router.query;
   const t = localStorage.getItem("lan") || "en-US";
@@ -59,7 +61,7 @@ const DetailPartnerConfigPermissionList: any = () => {
     handleSubmit,
     setValue,
     formState: { errors },
-    watch
+    watch,
   }: any = useForm({
     resolver: yupResolver(schema),
     defaultValues: defaultValue,
@@ -102,7 +104,15 @@ const DetailPartnerConfigPermissionList: any = () => {
   });
   const menus = menuLists?.rows?.map((menu: any) => ({ id: menu.id, value: menu.name }));
   const onSubmit = (data: any) => mutateUpdatePartnerConfigPermissionList(data);
+  const { data: dataUserPermission } = useUserPermissions({
+    options: {
+      onSuccess: () => {},
+    },
+  });
 
+  const listPermission = dataUserPermission?.permission?.filter(
+    (filtering: any) => filtering.menu === "Channel"
+  );
   const activeStatus = [
     { id: "Y", value: '<div key="1" style="color:green;">Active</div>' },
     { id: "N", value: '<div key="2" style="color:red;">Non Active</div>' },
@@ -138,6 +148,12 @@ const DetailPartnerConfigPermissionList: any = () => {
       company_id: companyCode,
     },
   });
+  // const { data: fieldRole, isLoading: isLoadingFieldRole } = usePartnerConfigPermissionList({
+  //   options: {},
+  //   query: {
+  //     company_id: companyCode,
+  //   },
+  // });
 
   const {
     isFetching: isFetchingViewTypeList,
@@ -173,8 +189,9 @@ const DetailPartnerConfigPermissionList: any = () => {
       },
     },
   });
-
-  const systemConfig = watch("isSystemConfig")
+  console.log(dataPartnerConfigPermissionList, "<<<<partner");
+  console.log(fieldRole, "<<<<role");
+  const systemConfig = watch("isSystemConfig");
   return (
     <>
       <Col>
@@ -190,16 +207,15 @@ const DetailPartnerConfigPermissionList: any = () => {
           <Row justifyContent="flex-end" alignItems="center" nowrap>
             <Row>
               <Row gap="16px">
-                <Button
-                  size="big"
-                  variant={"tertiary"}
-                  onClick={() => router.back()}
-                >
+                <Button size="big" variant={"tertiary"} onClick={() => router.back()}>
                   Cancel
                 </Button>
-                <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
-                  {lang[t].permissionList.primary.save}
-                </Button>
+                {listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Update")
+                  .length > 0 && (
+                  <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
+                    {lang[t].permissionList.primary.save}
+                  </Button>
+                )}
               </Row>
             </Row>
           </Row>
@@ -213,7 +229,7 @@ const DetailPartnerConfigPermissionList: any = () => {
 				</Alert>
 				<Spacer size={20} /> */}
 
-        <Accordion>
+        <Accordion style={{ position: "relative" }} id="area2">
           <Accordion.Item key={1}>
             <Accordion.Header variant="blue">
               {lang[t].permissionList.accordion.general}
@@ -237,6 +253,7 @@ const DetailPartnerConfigPermissionList: any = () => {
                     isShowActionLabel
                     actionLabel="Add New Associated Menu"
                     width={"100%"}
+                    containerId="area2"
                     defaultValue={dataPartnerConfigPermissionList?.menuId}
                     items={menus}
                     placeholder={"Select"}
@@ -261,17 +278,18 @@ const DetailPartnerConfigPermissionList: any = () => {
                           height="48px"
                           style={{ width: "100%" }}
                           size={"large"}
+                          containerId="area2"
                           placeholder={"Select"}
                           borderColor={"#AAAAAA"}
                           arrowColor={"#000"}
                           withSearch
                           isLoading={isFetchingViewTypeList}
                           isLoadingMore={isFetchingMoreViewTypeList}
-                          fetchMore={() => {
-                            if (hasNextPageViewTypeList) {
-                              fetchNextPageViewTypeList();
-                            }
-                          }}
+                          // fetchMore={() => {
+                          //   if (hasNextPageViewTypeList) {
+                          //     fetchNextPageViewTypeList();
+                          //   }
+                          // }}
                           items={
                             isFetchingViewTypeList && !isFetchingMoreViewTypeList
                               ? []
@@ -288,11 +306,7 @@ const DetailPartnerConfigPermissionList: any = () => {
                     )}
                   </Col>
                   <div style={{ visibility: "hidden", width: "100%" }}>
-                    <Input
-                      label="Name"
-                      height="48px"
-                      placeholder={"e.g 10000000"}
-                    />
+                    <Input label="Name" height="48px" placeholder={"e.g 10000000"} />
                   </div>
                 </Row>
               </Accordion.Body>
@@ -329,19 +343,24 @@ const DetailPartnerConfigPermissionList: any = () => {
                 <Accordion.Item key={1}>
                   <Accordion.Header>{lang[t].permissionList.permissionListRole}</Accordion.Header>
                   <Accordion.Body padding="0px">
-                    {isLoadingFieldRole ? (
+                    {isLoadingPartnerConfigPermissionList ? (
                       <Spin tip="Loading roles..." />
                     ) : (
-                      fieldRole.rows.map((data: any) => (
+                      dataPartnerConfigPermissionList?.associatedRole?.map((data: any) => (
                         <Record borderTop key={data.id}>
                           {data.name}
 
                           <Button
                             size="small"
-                            onClick={() => Router.push(`/role/${data.id}`)}
+                            // href={}
+                            // onClick={() => router.push(`/user-config/role/${data.id}`)}
                             variant="tertiary"
                           >
-                            {lang[t].permissionList.tertier.viewDetail}
+                            <Link href={`/user-config/role/${data.id}`}>
+                              <p style={{ color: "#EB008B" }}>
+                                {lang[t].permissionList.tertier.viewDetail}
+                              </p>
+                            </Link>
                           </Button>
                         </Record>
                       ))
@@ -367,7 +386,7 @@ const DetailPartnerConfigPermissionList: any = () => {
 };
 
 const Lozenge = styled.div`
-  background: #DDDDDD;
+  background: #dddddd;
   border-radius: 64px;
   padding: 4px 8px;
   color: #666666;
@@ -378,10 +397,9 @@ const Lozenge = styled.div`
   font-weight: 600;
   font-size: 14px;
   line-height: 24px;
-`
+`;
 
-const CustomFormSelect = styled(FormSelectCustom)`
-  
+const CustomFormSelect = styled(FormSelect)`
   .ant-select-selection-placeholder {
     line-height: 48px !important;
   }
@@ -398,7 +416,7 @@ const CustomFormSelect = styled(FormSelectCustom)`
     display: flex;
     align-items: center;
   }
-`
+`;
 
 const Label = styled.div`
   font-weight: bold;

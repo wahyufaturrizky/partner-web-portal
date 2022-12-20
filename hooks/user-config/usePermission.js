@@ -41,7 +41,8 @@ function useCreatePartnerConfigPermissionList({ options }) {
 }
 
 const fetchPartnerConfigPermissionList = async ({ partner_config_menu_list_id }) => {
-  return client(`/partner-permission/${partner_config_menu_list_id}`).then((data) => data);
+  const companyCode = localStorage.getItem("companyCode");
+  return client(`/partner-permission/${partner_config_menu_list_id}/${companyCode}`).then((data) => data);
 };
 
 const usePartnerConfigPermissionList = ({ partner_config_menu_list_id, options }) => {
@@ -81,10 +82,26 @@ const useDeletePartnerConfigPermissionList = ({ options }) => {
   );
 };
 
+const fetchUserPermissions = async ({ query = {} }) => {
+  return client(`/partner-user/permission`, {
+    params: {
+      ...query,
+    },
+  }).then((data) => data);
+};
+
+const useUserPermissions = ({ query = {}, options } = {}) => {
+  return useQuery(["user-permissions", query], () => fetchUserPermissions({ query }), {
+    keepPreviousData: true,
+    ...options,
+  });
+};
+
 export {
   usePartnerConfigPermissionLists,
   usePartnerConfigPermissionList,
   useCreatePartnerConfigPermissionList,
   useUpdatePartnerConfigPermissionList,
   useDeletePartnerConfigPermissionList,
+  useUserPermissions,
 };
