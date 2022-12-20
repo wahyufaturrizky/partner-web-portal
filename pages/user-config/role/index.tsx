@@ -27,7 +27,7 @@ const UserConfigRole: any = () => {
 
   const [search, setSearch] = useState("");
   const [modalDelete, setModalDelete] = useState({ open: false });
-  const debounceSearch = useDebounce(search, 1000)
+  const debounceSearch = useDebounce(search, 1000);
 
   const {
     data: fields,
@@ -41,7 +41,7 @@ const UserConfigRole: any = () => {
     },
     query: {
       // company_id: companyCode,
-      search : debounceSearch,
+      search: debounceSearch,
       page: pagination.page,
       limit: pagination.itemsPerPage,
     },
@@ -81,15 +81,16 @@ const UserConfigRole: any = () => {
       dataIndex: "company",
       width: "42%",
     },
-    // ...(allowPermissionToShow?.some((el: any) => el.name === "View Role List")
-    // ? [
-    {
-      title: lang[t].roleList.userListAction,
-      dataIndex: "action",
-      width: "15%",
-      align: "left",
-    },
-  // ]:[]),
+    ...(listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "View").length > 0
+      ? [
+          {
+            title: lang[t].roleList.userListAction,
+            dataIndex: "action",
+            width: "15%",
+            align: "left",
+          },
+        ]
+      : []),
   ];
 
   const data: any = [];
@@ -139,28 +140,24 @@ const UserConfigRole: any = () => {
               onChange={(e: any) => setSearch(e.target.value)}
             />
             <Row gap="16px">
-            {allowPermissionToShow?.some((el: any) => el.name === "Create Role List") && (
-              <Button
-                size="big"
-                variant={"primary"}
-                onClick={() => {
-                  router.push("/user-config/role/create");
-                }}
-              >
-                {lang[t].roleList.primary.create}
-              </Button>
-            )}
+              {allowPermissionToShow?.some((el: any) => el.name === "Create Role List") && (
+                <Button
+                  size="big"
+                  variant={"primary"}
+                  onClick={() => {
+                    router.push("/user-config/role/create");
+                  }}
+                >
+                  {lang[t].roleList.primary.create}
+                </Button>
+              )}
             </Row>
           </Row>
         </Card>
         <Spacer size={10} />
         <Card style={{ padding: "16px 20px" }}>
           <Col gap="60px">
-            <Table
-              loading={isLoadingField}
-              columns={columns}
-              data={paginateField}
-            />
+            <Table loading={isLoadingField} columns={columns} data={paginateField} />
             <Pagination pagination={pagination} />
           </Col>
         </Card>

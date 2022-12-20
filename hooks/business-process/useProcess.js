@@ -38,7 +38,8 @@ function useCreateProcessList({ options }) {
 }
 
 const fetchProcessList = async ({ process_list_id }) => {
-  return client(`/process/${process_list_id}`).then((data) => data);
+  const companyCode = localStorage.getItem("companyCode")
+  return client(`/process/${process_list_id}/${companyCode}`).then((data) => data);
 };
 
 const useProcessList = ({ process_list_id, options }) => {

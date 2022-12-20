@@ -36,36 +36,39 @@ const CreateConfig = () => {
     const [isNew, setIsNew] = useState(true);
 
 	const onUploadStructure = (data: ({ [s: string]: unknown; } | ArrayLike<unknown>)[]) => {
-		let idCountryStructure = countryStructure[0];
+		const formData = new FormData();
+        formData.append("upload_file", data);
 
-        const payload = {
-            add: [],
-            update: []
-        }
+        console.log(formData, "<<<<form")
 
-        if(idCountryStructure){
-            payload.delete = idCountryStructure.id;
-        }
+        // let idCountryStructure = countryStructure[0];
 
-        updateSalesOrganization(payload)
+        // const payload = {
+        //     add: [],
+        //     update: []
+        // }
 
-		const datas = Object.values(data[0]).filter(data => !!data).map((data, index) => ({
-			name: data,
-			level: index + 1,
-            actionType: 'NEW'
-		}));
+        // if(idCountryStructure){
+        //     payload.delete = idCountryStructure.id;
+        // }
+        // updateSalesOrganization(payload)
 
-        setCountryStructure(datas)
+		// const datas = Object.values(data[0]).filter(data => !!data).map((data, index) => ({
+		// 	name: data,
+		// 	level: index + 1,
+        //     actionType: 'NEW'
+		// }));
+        // setCountryStructure(datas)
 
-        const datasPayload = datas.map(({actionType, ...rest}) => ({
-            ...rest
-        }));
+        // const datasPayload = datas.map(({actionType, ...rest}) => ({
+        //     ...rest
+        // }));
 
-        const payloadUpdate = {
-            add: datasPayload,
-            update: []
-        }
-        updateSalesOrganization(payloadUpdate)
+        // const payloadUpdate = {
+        //     add: datasPayload,
+        //     update: []
+        // }
+        // updateSalesOrganization(payloadUpdate)
 	};
 
 	function stringifyNumber(n) {
@@ -173,6 +176,7 @@ const CreateConfig = () => {
 	};
 
     const onSubmit = () => {
+        console.log("masuk")
         let payload = {}
         if(isNew){
             payload = {
@@ -191,6 +195,13 @@ const CreateConfig = () => {
                 }))
             }
         }
+        const addIsEmpty = payload?.add?.find(data => data.name === "")
+        const updateIsEmpty = payload?.update?.find(data => data.name === "")
+        
+        if(addIsEmpty || updateIsEmpty){
+            return ""
+        }
+        
 	    isNew ? createSalesOrganization(payload) : updateSalesOrganization(payload);
 	};
 
@@ -303,7 +314,7 @@ const CreateConfig = () => {
                                             variant="primary"
                                             size="big"
                                             onClick={() => {
-                                                onSubmit();
+                                                // onSubmit();
                                                 setShowManageData({ visible: true, index })
                                             }}
                                             disabled={isDisabled}

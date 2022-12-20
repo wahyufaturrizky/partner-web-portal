@@ -14,7 +14,8 @@ const fetchAccountGroups = async ({ query = {} }) => {
   }).then((data) => data);
 };
 const fetchAccountGroupParent = async ({ query = {} }) => {
-  return client(`/account-group/parent`).then((data) => data);
+  const companyCode = localStorage.getItem('companyCode');
+  return client(`/account-group/parent?company_id=${companyCode}`).then((data) => data);
 };
 
 const useAccountGroups = ({ query = {}, options } = {}) => {
@@ -32,7 +33,8 @@ const useAccountGroupParent = ({ query = {}, options } = {}) => {
 };
 
 const fetchAccountGroupDetail = async ({ query = {}, id }) => {
-  return client(`/account-group/${id}`).then((data) => data);
+  const companyCode = localStorage.getItem('companyCode');
+  return client(`/account-group/${companyCode}/${id}`).then((data) => data);
 };
 
 const useAccountGroupsDetail = ({ query = {}, options, id } = {}) => {
