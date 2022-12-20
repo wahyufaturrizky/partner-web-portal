@@ -1,6 +1,8 @@
+import { useUserPermissions } from "hooks/user-config/usePermission";
 import moment from "moment";
 import Image from "next/image";
 import { useRouter } from "next/router";
+import { permissionEmployeeList } from "permission/employee.list";
 import {
   Accordion,
   Button,
@@ -168,6 +170,15 @@ const EmployeeDetail = () => {
       },
     },
   });
+
+  const { data: dataUserPermission } = useUserPermissions({
+    options: {
+      onSuccess: () => {},
+    },
+  });
+  const listPermission = dataUserPermission?.permission?.filter(
+    (filtering: any) => filtering.menu === "Employee List"
+  );
 
   const { data: dataEmployee, isLoading: isLoadingEmployee } = useEmployeeListMDM({
     options: {
@@ -1444,12 +1455,18 @@ const EmployeeDetail = () => {
           </Row>
 
           <Row gap="16px">
-            <Button size="big" variant={"tertiary"} onClick={() => setShowDeleteModal(true)}>
-              Delete
-            </Button>
-            <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
-              {isLoadingUpdateEmployeeList ? "Loading..." : "Save"}
-            </Button>
+            {listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Delete").length >
+              0 && (
+              <Button size="big" variant={"tertiary"} onClick={() => setShowDeleteModal(true)}>
+                Delete
+              </Button>
+            )}
+            {listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Update").length >
+              0 && (
+              <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
+                {isLoadingUpdateEmployeeList ? "Loading..." : "Save"}
+              </Button>
+            )}
           </Row>
         </Row>
       </Card>
@@ -2284,7 +2301,9 @@ const EmployeeDetail = () => {
                                   borderColor={"#AAAAAA"}
                                   arrowColor={"#000"}
                                   withSearch
-                                  defaultValue={dataEmployee?.address?.[index]?.countryLevelsOptions?.name} 
+                                  defaultValue={
+                                    dataEmployee?.address?.[index]?.countryLevelsOptions?.name
+                                  }
                                   isLoading={isFetchingCountry}
                                   isLoadingMore={isFetchingMoreCountry}
                                   fetchMore={() => {

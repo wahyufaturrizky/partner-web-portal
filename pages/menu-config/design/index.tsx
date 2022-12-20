@@ -9,6 +9,7 @@ import { ModalDeleteConfirmation } from "components/elements/Modal/ModalConfirma
 import { lang } from "lang";
 
 import styled from "styled-components";
+import { useUserPermissions } from "hooks/user-config/usePermission";
 
 const MenuConfigDesign: any = () => {
   const pagination = usePagination({
@@ -24,6 +25,16 @@ const MenuConfigDesign: any = () => {
   const [search, setSearch] = useState("");
   const [modalDelete, setModalDelete] = useState({ open: false });
 
+  const { data: dataUserPermission } = useUserPermissions({
+    options: {
+      onSuccess: () => {},
+    },
+  });
+
+  const listPermission = dataUserPermission?.permission?.filter(
+    (filtering: any) => filtering.menu === "Menu Design"
+  );
+
   const {
     data: fields,
     refetch: refetchFields,
@@ -34,7 +45,7 @@ const MenuConfigDesign: any = () => {
       search,
       page: pagination.page,
       limit: pagination.itemsPerPage,
-      company_id: companyCode
+      company_id: companyCode,
     },
     options: {
       onSuccess: (data: any) => {
@@ -85,12 +96,16 @@ const MenuConfigDesign: any = () => {
       dataIndex: "field_name",
       width: "80%",
     },
-    {
-      title: lang[t].menuDesign.menuDesignAction,
-      dataIndex: "action",
-      width: "15%",
-      align: "left",
-    },
+    ...(listPermission?.some((el: any) => el.viewTypes[0]?.viewType.name === "View")
+      ? [
+          {
+            title: lang[t].menuDesign.menuDesignAction,
+            dataIndex: "action",
+            width: "15%",
+            align: "left",
+          },
+        ]
+      : []),
   ];
 
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
@@ -118,23 +133,30 @@ const MenuConfigDesign: any = () => {
               colorIcon={colors.grey.regular}
               onChange={({ target }: any) => setSearch(target.value)}
             />
-            {/* <Row gap="16px">
-              <Button
-                size="big"
-                variant={"tertiary"}
-                onClick={() => setModalDelete({ open: true })}
-                disabled={rowSelection.selectedRowKeys?.length === 0}
-              >
-                Delete
-              </Button>
-              <Button
-                size="big"
-                variant={"primary"}
-                onClick={() => Router.push("/menu-config/design/create")}
-              >
-                Create
-              </Button>
-            </Row> */}
+            <Row gap="16px">
+              {listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Delete")
+                .length > 0 && (
+                <Button
+                  size="big"
+                  variant={"tertiary"}
+                  onClick={() => setModalDelete({ open: true })}
+                  disabled={rowSelection.selectedRowKeys?.length === 0}
+                >
+                  Delete
+                </Button>
+              )}
+
+              {listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Create")
+                .length > 0 && (
+                <Button
+                  size="big"
+                  variant={"primary"}
+                  onClick={() => Router.push("/menu-config/design/create")}
+                >
+                  Create
+                </Button>
+              )}
+            </Row>
           </Row>
         </Card>
         <Spacer size={10} />

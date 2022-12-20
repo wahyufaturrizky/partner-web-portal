@@ -15,6 +15,9 @@ import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
 import { CSS } from "@dnd-kit/utilities";
 import { useSortable, SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import styled from "styled-components";
+import { usePartnerConfigPermissionLists } from "hooks/user-config/usePermission";
+import { permissionTermOfPayment } from "permission/term-of-payment";
+import { useUserPermissions } from "hooks/user-config/useUser";
 
 const getTypeName = (type: any) => {
   switch (type) {
@@ -113,6 +116,22 @@ const DraggableTable = ({ termList, isLoading, onDrag, onEdit, onDelete }: any) 
     },
   ];
 
+  const { data: dataUserPermission } = useUserPermissions({
+    options: {
+      onSuccess: () => {},
+    },
+  });
+
+  const listPermission = dataUserPermission?.permission?.filter(
+    (filtering: any) => filtering.menu === "Term Of Payment"
+  );
+
+  const checkUserPermission = (permissionGranted) => {
+    return listPermission?.find(
+      (data: any) => data?.viewTypes?.[0]?.viewType?.name === permissionGranted
+    );
+  };
+
   return (
     <DndContext
       sensors={sensors}
@@ -195,33 +214,37 @@ const DraggableTable = ({ termList, isLoading, onDrag, onEdit, onDelete }: any) 
                   }}
                 />
                 <Spacer size={5} />
-                <EditOutlined
-                  style={{
-                    cursor: "pointer",
-                    borderRadius: 3,
-                    backgroundColor: "#D5FAFD",
-                    color: "#2BBECB",
-                    padding: 4,
-                    fontSize: "18px",
-                  }}
-                  onClick={() => {
-                    onEdit && onEdit(props.data);
-                  }}
-                />
+                {checkUserPermission("Update") && (
+                  <EditOutlined
+                    style={{
+                      cursor: "pointer",
+                      borderRadius: 3,
+                      backgroundColor: "#D5FAFD",
+                      color: "#2BBECB",
+                      padding: 4,
+                      fontSize: "18px",
+                    }}
+                    onClick={() => {
+                      onEdit && onEdit(props.data);
+                    }}
+                  />
+                )}
                 <Spacer size={5} />
-                <DeleteOutlined
-                  style={{
-                    cursor: "pointer",
-                    borderRadius: 3,
-                    backgroundColor: "#D5FAFD",
-                    color: "#EB008B",
-                    padding: 4,
-                    fontSize: "18px",
-                  }}
-                  onClick={() => {
-                    onDelete && onDelete(props.data);
-                  }}
-                />
+                {checkUserPermission("Delete") && (
+                  <DeleteOutlined
+                    style={{
+                      cursor: "pointer",
+                      borderRadius: 3,
+                      backgroundColor: "#D5FAFD",
+                      color: "#EB008B",
+                      padding: 4,
+                      fontSize: "18px",
+                    }}
+                    onClick={() => {
+                      onDelete && onDelete(props.data);
+                    }}
+                  />
+                )}
               </div>
             </td>
             <td>{props.data.index + 1}</td>
