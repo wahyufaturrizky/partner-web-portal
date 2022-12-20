@@ -17,12 +17,15 @@ import ModalAddTerm from "../../components/elements/Modal/ModalAddTerm";
 import DraggableTable from "../../components/pages/TermOfPayment/DraggableTable";
 import { ExclamationCircleOutlined } from "@ant-design/icons";
 import { lang } from "lang";
+import { usePartnerConfigPermissionLists } from "hooks/user-config/usePermission";
+import { permissionTermOfPayment } from "permission/term-of-payment";
+import { useUserPermissions } from "hooks/user-config/useUser";
 
 const TermOfPaymentEdit = () => {
   const t = localStorage.getItem("lan") || "en-US";
   const router = useRouter();
-  const companyId = localStorage.getItem("companyId")
-  const companyCode = localStorage.getItem("companyCode")
+  const companyId = localStorage.getItem("companyId");
+  const companyCode = localStorage.getItem("companyCode");
   const { top_id } = router.query;
 
   const [showTermForm, setShowTermForm] = useState({ type: "", open: false, data: {} });
@@ -162,6 +165,22 @@ const TermOfPaymentEdit = () => {
     }
   };
 
+  const { data: dataUserPermission } = useUserPermissions({
+    options: {
+      onSuccess: () => {},
+    },
+  });
+
+  const listPermission = dataUserPermission?.permission?.filter(
+    (filtering: any) => filtering.menu === "Term Of Payment"
+  );
+
+  const checkUserPermission = (permissionGranted) => {
+    return listPermission?.find(
+      (data: any) => data?.viewTypes?.[0]?.viewType?.name === permissionGranted
+    );
+  };
+
   const onSubmit = (data: any) => {
     const mappedTermListRequest = termList.map((el: any) => {
       return {
@@ -203,12 +222,16 @@ const TermOfPaymentEdit = () => {
         <Card padding="20px">
           <Row justifyContent="flex-end" alignItems="center" nowrap>
             <Row gap="16px">
-              <Button size="big" variant={"tertiary"} onClick={() => setShowDeleteModal(true)}>
-                {lang[t].termOfPayment.tertier.delete}
-              </Button>
-              <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
-                {isLoadingUpdateTermOfPayment ? "Loading..." : lang[t].termOfPayment.primary.save}
-              </Button>
+              {checkUserPermission("Delete") && (
+                <Button size="big" variant={"tertiary"} onClick={() => setShowDeleteModal(true)}>
+                  {lang[t].termOfPayment.tertier.delete}
+                </Button>
+              )}
+              {checkUserPermission("Update") && (
+                <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
+                  {isLoadingUpdateTermOfPayment ? "Loading..." : lang[t].termOfPayment.primary.save}
+                </Button>
+              )}
             </Row>
           </Row>
         </Card>
@@ -231,21 +254,23 @@ const TermOfPaymentEdit = () => {
             <Spacer size={10} />
 
             <Row width={"150px"}>
-              <Button
-                size="small"
-                variant={"tertiary"}
-                onClick={() => {
-                  const fileTypeOne = termList.filter((el) => el.type === 1);
+              {checkUserPermission("Create") && (
+                <Button
+                  size="small"
+                  variant={"tertiary"}
+                  onClick={() => {
+                    const fileTypeOne = termList.filter((el) => el.type === 1);
 
-                  if (fileTypeOne.length > 0) {
-                    setShowDisableTerm(true);
-                  } else {
-                    setShowTermForm({ type: "add", open: true, data: {} });
-                  }
-                }}
-              >
-                + Add Terms
-              </Button>
+                    if (fileTypeOne.length > 0) {
+                      setShowDisableTerm(true);
+                    } else {
+                      setShowTermForm({ type: "add", open: true, data: {} });
+                    }
+                  }}
+                >
+                  + Add Terms
+                </Button>
+              )}
             </Row>
 
             <Spacer size={10} />

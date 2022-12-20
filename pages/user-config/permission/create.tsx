@@ -75,13 +75,7 @@ const CreatePartnerConfigPermissionList: any = () => {
     },
   });
   const menus = menuLists?.rows?.map((menu: any) => ({ id: menu.id, value: menu.name }));
-  const onSubmit = (data: any) => {
-    const formData = {
-      ...data,
-      company_id : companyCode
-    }
-    mutatePartnerConfigPermissionList(formData)
-  };
+  const onSubmit = (data: any) => mutatePartnerConfigPermissionList({...data, company_id: companyCode});
 
   const activeStatus = [
     { id: "Y", value: '<div key="1" style="color:green;">Active</div>' },
