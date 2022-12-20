@@ -32,11 +32,14 @@ import { useForm, Controller } from "react-hook-form";
 import { ICDownload, ICUpload } from "../../../assets/icons";
 import { mdmDownloadService } from "../../../lib/client";
 import { lang } from "lang";
+import { usePartnerConfigPermissionLists } from "hooks/user-config/usePermission";
+import { permissionSalesmanGroup } from "permission/salesman-group";
+import { useUserPermissions } from "hooks/user-config/useUser";
 
 const SalesmanGroup = () => {
   const t = localStorage.getItem("lan") || "en-US";
-  const companyId = localStorage.getItem("companyId")
-  const companyCode = localStorage.getItem("companyCode")
+  const companyId = localStorage.getItem("companyId");
+  const companyCode = localStorage.getItem("companyCode");
 
   const pagination = usePagination({
     page: 1,
@@ -286,6 +289,63 @@ const SalesmanGroup = () => {
     }
   };
 
+  const { data: dataUserPermission } = useUserPermissions({
+    options: {
+      onSuccess: () => {},
+    },
+  });
+
+  const listPermission = dataUserPermission?.permission?.filter(
+    (filtering: any) => filtering.menu === "Salesman Group"
+  );
+
+  const checkUserPermission = (permissionGranted) => {
+    return listPermission?.find(
+      (data: any) => data?.viewTypes?.[0]?.viewType?.name === permissionGranted
+    );
+  };
+
+  console.log(dataUserPermission, "<<<<allow");
+  let menuList: any[] = [];
+
+  if (listPermission) {
+    menuList = [
+      checkUserPermission("Download Template")
+        ? {
+            key: 1,
+            value: (
+              <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                <ICDownload />
+                <p style={{ margin: "0" }}>{lang[t].termOfPayment.ghost.downloadTemplate}</p>
+              </div>
+            ),
+          }
+        : "",
+      checkUserPermission("Upload Template")
+        ? {
+            key: 2,
+            value: (
+              <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                <ICUpload />
+                <p style={{ margin: "0" }}>{lang[t].termOfPayment.ghost.uploadTemplate}</p>
+              </div>
+            ),
+          }
+        : "",
+      checkUserPermission("Download Data")
+        ? {
+            key: 3,
+            value: (
+              <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                <ICDownload />
+                <p style={{ margin: "0" }}>{lang[t].termOfPayment.ghost.downloadData}</p>
+              </div>
+            ),
+          }
+        : "",
+    ];
+  }
+
   const onSubmitFile = (file: any) => {
     const formData = new FormData();
     formData.append("upload_file", file);
@@ -309,84 +369,64 @@ const SalesmanGroup = () => {
             }}
           />
           <Row gap="16px">
-            <Button
-              size="big"
-              variant={"tertiary"}
-              onClick={() =>
-                setShowDelete({
-                  open: true,
-                  type: "selection",
-                  data: { salesmanGroupDatas: salesmanGroupsData, selectedRowKeys },
-                })
-              }
-              disabled={rowSelection.selectedRowKeys?.length === 0}
-            >
-              {lang[t].salesmanGroup.tertier.delete}
-            </Button>
-            <DropdownMenu
-              title={lang[t].salesmanGroup.tertier.more}
-              buttonVariant={"secondary"}
-              buttonSize={"big"}
-              textVariant={"button"}
-              textColor={"pink.regular"}
-              iconStyle={{ fontSize: "12px" }}
-              onClick={(e: any) => {
-                switch (parseInt(e.key)) {
-                  case 1:
-                    downloadFile({ with_data: "N", company_id: companyCode });
-                    break;
-                  case 2:
-                    setShowUpload(true);
-                    break;
-                  case 3:
-                    downloadFile({ with_data: "Y", company_id: companyCode });
-                    break;
-                  case 4:
-                    break;
-                  default:
-                    break;
+            {checkUserPermission("Delete") && (
+              <Button
+                size="big"
+                variant={"tertiary"}
+                onClick={() =>
+                  setShowDelete({
+                    open: true,
+                    type: "selection",
+                    data: { salesmanGroupDatas: salesmanGroupsData, selectedRowKeys },
+                  })
                 }
-              }}
-              menuList={[
-                {
-                  key: 1,
-                  value: (
-                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                      <ICDownload />
-                      <p style={{ margin: "0" }}>{lang[t].salesmanGroup.ghost.downloadTemplate}</p>
-                    </div>
-                  ),
-                },
-                {
-                  key: 2,
-                  value: (
-                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                      <ICUpload />
-                      <p style={{ margin: "0" }}>{lang[t].salesmanGroup.ghost.uploadTemplate}</p>
-                    </div>
-                  ),
-                },
-                {
-                  key: 3,
-                  value: (
-                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                      <ICDownload />
-                      <p style={{ margin: "0" }}>{lang[t].salesmanGroup.ghost.downloadData}</p>
-                    </div>
-                  ),
-                },
-              ]}
-            />
-            <Button
-              size="big"
-              variant="primary"
-              onClick={() => {
-                setSalesmanGroupParentId(0);
-                setModalForm({ open: true, typeForm: "create", data: {} });
-              }}
-            >
-              {lang[t].salesmanGroup.primary.create}
-            </Button>
+                disabled={rowSelection.selectedRowKeys?.length === 0}
+              >
+                {lang[t].salesmanGroup.tertier.delete}
+              </Button>
+            )}
+            {checkUserPermission("Download Template") &&
+              checkUserPermission("Upload") &&
+              checkUserPermission("Download Data") && (
+                <DropdownMenu
+                  title={lang[t].salesmanGroup.tertier.more}
+                  buttonVariant={"secondary"}
+                  buttonSize={"big"}
+                  textVariant={"button"}
+                  textColor={"pink.regular"}
+                  iconStyle={{ fontSize: "12px" }}
+                  onClick={(e: any) => {
+                    switch (parseInt(e.key)) {
+                      case 1:
+                        downloadFile({ with_data: "N", company_id: companyCode });
+                        break;
+                      case 2:
+                        setShowUpload(true);
+                        break;
+                      case 3:
+                        downloadFile({ with_data: "Y", company_id: companyCode });
+                        break;
+                      case 4:
+                        break;
+                      default:
+                        break;
+                    }
+                  }}
+                  menuList={menuList}
+                />
+              )}
+            {checkUserPermission("Create") && (
+              <Button
+                size="big"
+                variant="primary"
+                onClick={() => {
+                  setSalesmanGroupParentId(0);
+                  setModalForm({ open: true, typeForm: "create", data: {} });
+                }}
+              >
+                {lang[t].salesmanGroup.primary.create}
+              </Button>
+            )}
           </Row>
         </Row>
       </Card>
@@ -530,12 +570,20 @@ const SalesmanGroup = () => {
                     >
                       {lang[t].salesmanGroup.tertier.cancel}
                     </Button>
-
-                    <Button full onClick={handleSubmit(onSubmit)} variant="primary" size="big">
-                      {isLoadingCreateSalesmanGroup || isLoadingUpdateSalesmanGroup
-                        ? "Loading..."
-                        : lang[t].salesmanGroup.primary.save}
-                    </Button>
+                    {salesmanGroupFormData && checkUserPermission("Update") && (
+                      <Button full onClick={handleSubmit(onSubmit)} variant="primary" size="big">
+                        {isLoadingCreateSalesmanGroup || isLoadingUpdateSalesmanGroup
+                          ? "Loading..."
+                          : lang[t].salesmanGroup.primary.save}
+                      </Button>
+                    )}
+                    {checkUserPermission("Create") && (
+                      <Button full onClick={handleSubmit(onSubmit)} variant="primary" size="big">
+                        {isLoadingCreateSalesmanGroup || isLoadingUpdateSalesmanGroup
+                          ? "Loading..."
+                          : lang[t].salesmanGroup.primary.save}
+                      </Button>
+                    )}
                   </div>
                 </div>
               )}

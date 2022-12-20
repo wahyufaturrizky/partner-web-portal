@@ -25,11 +25,14 @@ import { ICDownload, ICUpload } from "../../assets/icons";
 import { mdmDownloadService } from "../../lib/client";
 import { useRouter } from "next/router";
 import { lang } from "lang";
+import { usePartnerConfigPermissionLists } from "hooks/user-config/usePermission";
+import { permissionProductGroup } from "permission/product-group";
+import { useUserPermissions } from "hooks/user-config/useUser";
 
 const ProductGroup = () => {
   const t = localStorage.getItem("lan") || "en-US";
-  const companyId = localStorage.getItem("companyId")
-  const companyCode = localStorage.getItem("companyCode")
+  const companyId = localStorage.getItem("companyId");
+  const companyCode = localStorage.getItem("companyCode");
   const router = useRouter();
   const pagination = usePagination({
     page: 1,
@@ -160,6 +163,62 @@ const ProductGroup = () => {
     },
   };
 
+  const { data: dataUserPermission } = useUserPermissions({
+    options: {
+      onSuccess: () => {},
+    },
+  });
+
+  const listPermission = dataUserPermission?.permission?.filter(
+    (filtering: any) => filtering.menu === "Product Group"
+  );
+
+  const checkUserPermission = (permissionGranted) => {
+    return listPermission?.find(
+      (data: any) => data?.viewTypes?.[0]?.viewType?.name === permissionGranted
+    );
+  };
+
+  let menuList: any[] = [];
+
+  if (listPermission) {
+    menuList = [
+      checkUserPermission("Download Template")
+        ? {
+            key: 1,
+            value: (
+              <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                <ICDownload />
+                <p style={{ margin: "0" }}>{lang[t].termOfPayment.ghost.downloadTemplate}</p>
+              </div>
+            ),
+          }
+        : "",
+      checkUserPermission("Upload")
+        ? {
+            key: 2,
+            value: (
+              <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                <ICUpload />
+                <p style={{ margin: "0" }}>{lang[t].termOfPayment.ghost.uploadTemplate}</p>
+              </div>
+            ),
+          }
+        : "",
+      checkUserPermission("Download Data")
+        ? {
+            key: 3,
+            value: (
+              <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                <ICDownload />
+                <p style={{ margin: "0" }}>{lang[t].termOfPayment.ghost.downloadData}</p>
+              </div>
+            ),
+          }
+        : "",
+    ];
+  }
+
   const onSubmitFile = (file: any) => {
     const formData = new FormData();
     formData.append("company_id", companyCode);
@@ -188,85 +247,61 @@ const ProductGroup = () => {
             }}
           />
           <Row gap="16px">
-            <Button
-              size="big"
-              variant={"tertiary"}
-              onClick={() =>
-                setShowDelete({
-                  open: true,
-                  type: "selection",
-                  data: { productsGroupData, selectedRowKeys },
-                })
-              }
-              disabled={rowSelection.selectedRowKeys?.length === 0}
-            >
-              {lang[t].productGroup.list.button.delete}
-            </Button>
-            <DropdownMenu
-              title={lang[t].productGroup.list.button.more}
-              buttonVariant={"secondary"}
-              buttonSize={"big"}
-              textVariant={"button"}
-              textColor={"pink.regular"}
-              iconStyle={{ fontSize: "12px" }}
-              onClick={(e: any) => {
-                switch (parseInt(e.key)) {
-                  case 1:
-                    downloadFile({ with_data: "N", company_id: companyCode });
-                    break;
-                  case 2:
-                    setShowUpload(true);
-                    break;
-                  case 3:
-                    downloadFile({ with_data: "Y", company_id: companyCode });
-                    break;
-                  case 4:
-                    break;
-                  default:
-                    break;
+            {checkUserPermission("Delete") && (
+              <Button
+                size="big"
+                variant={"tertiary"}
+                onClick={() =>
+                  setShowDelete({
+                    open: true,
+                    type: "selection",
+                    data: { productsGroupData, selectedRowKeys },
+                  })
                 }
-              }}
-              menuList={[
-                {
-                  key: 1,
-                  value: (
-                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                      <ICDownload />
-                      <p style={{ margin: "0" }}>
-                        {lang[t].productGroup.list.ghost.downloadTemplate}
-                      </p>
-                    </div>
-                  ),
-                },
-                {
-                  key: 2,
-                  value: (
-                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                      <ICUpload />
-                      <p style={{ margin: "0" }}>
-                        {lang[t].productGroup.list.ghost.uploadTemplate}
-                      </p>
-                    </div>
-                  ),
-                },
-                {
-                  key: 3,
-                  value: (
-                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                      <ICDownload />
-                      <p style={{ margin: "0" }}>{lang[t].productGroup.list.ghost.downloadData}</p>
-                    </div>
-                  ),
-                },
-              ]}
-            />
-            <Button
-              size="big"
-              variant="primary"
-              onClick={() => router.push("/product-group/create")}
-            >
-              {lang[t].productGroup.list.button.create}
-            </Button>
+                disabled={rowSelection.selectedRowKeys?.length === 0}
+              >
+                {lang[t].productGroup.list.button.delete}
+              </Button>
+            )}
+            {checkUserPermission("Download Template") &&
+              checkUserPermission("Upload") &&
+              checkUserPermission("Download Data") && (
+                <DropdownMenu
+                  title={lang[t].productGroup.list.button.more}
+                  buttonVariant={"secondary"}
+                  buttonSize={"big"}
+                  textVariant={"button"}
+                  textColor={"pink.regular"}
+                  iconStyle={{ fontSize: "12px" }}
+                  onClick={(e: any) => {
+                    switch (parseInt(e.key)) {
+                      case 1:
+                        downloadFile({ with_data: "N", company_id: companyCode });
+                        break;
+                      case 2:
+                        setShowUpload(true);
+                        break;
+                      case 3:
+                        downloadFile({ with_data: "Y", company_id: companyCode });
+                        break;
+                      case 4:
+                        break;
+                      default:
+                        break;
+                    }
+                  }}
+                  menuList={menuList}
+                />
+              )}
+            {checkUserPermission("Create") && (
+              <Button
+                size="big"
+                variant="primary"
+                onClick={() => router.push("/product-group/create")}
+              >
+                {lang[t].productGroup.list.button.create}
+              </Button>
+            )}
           </Row>
         </Row>
       </Card>

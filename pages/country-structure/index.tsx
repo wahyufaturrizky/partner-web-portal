@@ -19,10 +19,10 @@ import {
 import {useDataCountries, useDeleteDataCountries, useUploadFileCountries} from '../../hooks/mdm/country-structure/useCountries'
 import DownloadSvg from "../../assets/icons/ic-download.svg";
 import UploadSvg from "../../assets/icons/ic-upload.svg";
-import SyncSvg from "../../assets/icons/ic-sync.svg";
 
 import styled from "styled-components";
 import { mdmDownloadService } from "../../lib/client";
+import { useUserPermissions } from "hooks/user-config/usePermission";
 
 const dropdownStyles = {cursor: "pointer", display: "flex", alignItems: "center", gap: 5}
 
@@ -43,6 +43,15 @@ const ListTemplateMenu = () => {
 	const [search, setSearch] = useState<string>("");
 	const [selectedItem, setSelectedItem] = useState([]);
 
+	const { data: dataUserPermission } = useUserPermissions({
+		options: {
+			onSuccess: () => {},
+		},
+	});
+
+	const listPermission = dataUserPermission?.permission?.filter(
+		(filtering: any) => filtering.menu === "Country"
+	);
 
 	// event function
 	const columns = [
@@ -56,14 +65,18 @@ const ListTemplateMenu = () => {
 			dataIndex: "countryName",
 			key: "countryName",
 		},
-		{
-			title: "Action",
-			render: ({ countryID }: { countryID: string }) => (
-				<Button size="small" onClick={() => router.push(`/country-structure/${countryID}`)} variant="tertiary">
-					View Detail
-				</Button>
-			),
-		},
+		...(listPermission?.some((el: any) => el.viewTypes[0]?.viewType.name === "View")
+		? [
+			{
+				title: "Action",
+				render: ({ countryID }: { countryID: string }) => (
+					<Button size="small" onClick={() => router.push(`/country-structure/${countryID}`)} variant="tertiary">
+						View Detail
+					</Button>
+				),
+			},
+		  ]
+		: []),
 	];
 
 	const rowSelection = {
@@ -145,6 +158,8 @@ const ListTemplateMenu = () => {
 							}
 						/>
 						<Row gap="16px">
+						{listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Delete")
+							.length > 0 && (
 							<Button
 								size="big"
 								variant="tertiary"
@@ -153,55 +168,89 @@ const ListTemplateMenu = () => {
 							>
 								Delete
 							</Button>
+						)}
+						{(listPermission?.filter(
+							(data: any) => data.viewTypes[0]?.viewType.name === "Download Template"
+							).length > 0 ||
+							listPermission?.filter(
+								(data: any) => data.viewTypes[0]?.viewType.name === "Download Data"
+							).length > 0 ||
+							listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Upload")
+								.length > 0) && (
 							<DropdownMenu
-							title={"More"}
-							buttonVariant={"secondary"}
-							buttonSize={"big"}
-							textVariant={"button"}
-							textColor={"pink.regular"}
-							iconStyle={{ fontSize: "12px" }}
-							menuList={[
-								{
-									key: 1,
-									value: (
-										<div onClick={() => handleDownloadFile({ with_data: "Y" })} style={dropdownStyles}>
-											<DownloadSvg />
-											<p style={{ margin: "0" }}>Download Template</p>
-										</div>
-									),
-								},
-								{
-									key: 2,
-									value: (
-										<div onClick={() => setVisible({ delete: false, upload: true })} style={dropdownStyles}>
-											<UploadSvg />
-											<p style={{ margin: "0" }}>Upload Template</p>
-										</div>
-									),
-								},
-								{
-									key: 3,
-									value: (
-										<div onClick={() => handleDownloadFile({ with_data: "N" })} style={dropdownStyles}>
-											<DownloadSvg />
-											<p style={{ margin: "0" }}>Download Data</p>
-										</div>
-									),
-								},
-								{
-									key: 4,
-									value: (
-										<div onClick={() => {}} style={dropdownStyles}>
-											<SyncSvg />
-											<p style={{ margin: "0" }}>Sync Data</p>
-										</div>
-									),
-								},
-							]}
-						/>
+								title={"More"}
+								buttonVariant={"secondary"}
+								buttonSize={"big"}
+								textVariant={"button"}
+								textColor={"pink.regular"}
+								iconStyle={{ fontSize: "12px" }}
+								onClick={(e: any) => {
+									switch (parseInt(e.key)) {
+										case 1:
+											handleDownloadFile({ with_data: "N" });
+											break;
+										case 2:
+											setVisible({ delete: false, upload: true })
+											break;
+										case 3:
+											handleDownloadFile({ with_data: "Y" });
+											break;
+										case 4:
+											break;
+										default:
+											break;
+									}
+								}}
+								menuList={[
+									{
+										...(listPermission?.filter(
+											(data: any) => data.viewTypes[0]?.viewType.name === "Download Template"
+										).length > 0 && {
+											key: 1,
+											value: (
+												<div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+													<DownloadSvg />
+													<p style={{ margin: "0" }}>Download Template</p>
+												</div>
+											),
+										}),
+									},
+									{
+										...(listPermission?.filter(
+											(data: any) => data.viewTypes[0]?.viewType.name === "Download Data"
+										).length > 0 && {
+											key: 2,
+											value: (
+												<div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+													<UploadSvg />
+													<p style={{ margin: "0" }}>Upload Template</p>
+												</div>
+											),
+										}),
+									},
+									{
+										...(listPermission?.filter(
+											(data: any) => data.viewTypes[0]?.viewType.name === "Upload"
+										).length > 0 && {
+											key: 3,
+											value: (
+												<div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+													<DownloadSvg />
+													<p style={{ margin: "0" }}>Download Data</p>
+												</div>
+											),
+										}),
+									},
+								]}
+							/>
+						)}	
+						{listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Create")
+							.length > 0 && (
 							<Button size="big" variant="primary" onClick={() => router.push("/country-structure/create")}>
 								Create
 							</Button>
+						)}
+							
 						</Row>
 					</Row>
 				</Card>
@@ -217,19 +266,24 @@ const ListTemplateMenu = () => {
 				</Card>
 			</Col>
 
+			{visible.upload && 
 			<FileUploadModal
 				visible={visible.upload}
 				setVisible={() => setVisible({ upload: false, delete: false })}
 				onSubmit={submitUploadFile}
 			/>
+}
 
+			
+			{visible.delete && 
 			<ModalDeleteConfirmation
 				totalSelected={0}
 				itemTitle={`ID ${selectedItem}`}
 				visible={visible.delete}
 				onOk={() => deleteDataCountries({ ids: selectedItem })}
 				onCancel={() => setVisible({ delete: false, upload: false })}
-			/>
+			/>}
+			
 		</>
 	);
 };
