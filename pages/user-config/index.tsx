@@ -124,6 +124,7 @@ const UserConfigUser: any = () => {
       dataIndex: "action",
       width: "20%",
     },
+
   ];
 
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
@@ -167,61 +168,64 @@ const UserConfigUser: any = () => {
             />
             <Row gap="16px">
               <Button
-                size="big"
-                variant={"tertiary"}
-                onClick={() => setModalDelete({ open: true })}
-                disabled={rowSelection.selectedRowKeys?.length === 0}
-              >
-                {lang[t].userList.list.button.delete}
-              </Button>
-              <DropdownMenu
-                title={lang[t].userList.list.button.more}
-                buttonVariant="secondary"
-                buttonSize="big"
-                textVariant="button"
-                textColor="pink.regular"
-                iconStyle={{ fontSize: "12px" }}
-                onClick={(e: any) => {
-                  switch (parseInt(e.key)) {
-                    case 1:
-                      downloadFile({ with_data: "N" });
-                      break;
-                    case 2:
-                      setShowUpload(true);
-                      break;
+                  size="big"
+                  variant={"tertiary"}
+                  onClick={() => setModalDelete({ open: true })}
+                  disabled={rowSelection.selectedRowKeys?.length === 0}
+                >
+                  {lang[t].userList.list.button.delete}
+                </Button>
 
-                    default:
-                      break;
-                  }
-                }}
-                menuList={[
-                  {
-                    key: 1,
-                    value: (
-                      <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                        <DownloadSvg />
-                        <p style={{ margin: "0" }}>{lang[t].userList.list.button.download}</p>
-                      </div>
-                    ),
-                  },
-                  {
-                    key: 2,
-                    value: (
-                      <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                        <UploadSvg />
-                        <p style={{ margin: "0" }}>{lang[t].userList.list.button.upload}</p>
-                      </div>
-                    ),
-                  },
-                ]}
-              />
-              <Button
-                size="big"
-                variant={"primary"}
-                onClick={() => router.push("/user-config/create")}
-              >
-                {lang[t].userList.list.button.create}
-              </Button>
+                <DropdownMenu
+                    title={lang[t].userList.list.button.more}
+                    buttonVariant="secondary"
+                    buttonSize="big"
+                    textVariant="button"
+                    textColor="pink.regular"
+                    iconStyle={{ fontSize: "12px" }}
+                    onClick={(e: any) => {
+                      switch (parseInt(e.key)) {
+                        case 1:
+                          downloadFile({ with_data: "N" });
+                          break;
+                        case 2:
+                          setShowUpload(true);
+                          break;
+    
+                        default:
+                          break;
+                      }
+                    }}
+                    menuList={[
+                      {
+                        key: 1,
+                        value: (
+                          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                            <DownloadSvg />
+                            <p style={{ margin: "0" }}>{lang[t].userList.list.button.download}</p>
+                          </div>
+                        ),
+                      },
+                      {
+                        key: 2,
+                        value: (
+                          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                            <UploadSvg />
+                            <p style={{ margin: "0" }}>{lang[t].userList.list.button.upload}</p>
+                          </div>
+                        ),
+                      }
+                    ]}
+                  />
+             
+                <Button
+                  size="big"
+                  variant={"primary"}
+                  onClick={() => router.push("/user-config/create")}
+                >
+                  {lang[t].userList.list.button.create}
+                </Button>
+              
             </Row>
           </Row>
         </Card>

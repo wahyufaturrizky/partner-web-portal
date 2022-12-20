@@ -26,6 +26,8 @@ import {
 	useUpdateConfig,
 } from "../../hooks/config/useConfig";
 import { lang } from "lang";
+import { useUserPermissions } from "hooks/user-config/usePermission";
+import { permissionModuleConfig } from "permission/module-config";
 
 const schema = yup
 	.object({
@@ -49,6 +51,15 @@ const ConfigDetail: any = () => {
 		resolver: yupResolver(schema),
 	});
 
+	const { data: dataUserPermission } = useUserPermissions({
+		options: {
+		onSuccess: () => {},
+		},
+	});
+
+	const listPermission = dataUserPermission?.permission?.filter(
+		(filtering: any) => filtering.menu === "Module Config"
+	);
 	const { data: configs, isLoading: isLoadingParent } = useConfigs({
 		options: {},
 		query: {
@@ -144,9 +155,11 @@ const ConfigDetail: any = () => {
 									>
 										Delete
 									</Button> */}
-									<Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
-										{lang[t].moduleConfig.primary.save}
-									</Button>
+									{listPermission?.filter((x :any) => x.viewTypes[0]?.viewType.name === "Update").length > 0 && (
+										<Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
+											{lang[t].moduleConfig.primary.save}
+										</Button>
+									)}
 								</Row>
 							</Row>
 						</Row>

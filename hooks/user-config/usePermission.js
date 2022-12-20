@@ -82,10 +82,26 @@ const useDeletePartnerConfigPermissionList = ({ options }) => {
   );
 };
 
+const fetchUserPermissions = async ({ query = {} }) => {
+  return client(`/partner-user/permission`, {
+    params: {
+      ...query,
+    },
+  }).then((data) => data);
+};
+
+const useUserPermissions = ({ query = {}, options } = {}) => {
+  return useQuery(["user-permissions", query], () => fetchUserPermissions({ query }), {
+    keepPreviousData: true,
+    ...options,
+  });
+};
+
 export {
   usePartnerConfigPermissionLists,
   usePartnerConfigPermissionList,
   useCreatePartnerConfigPermissionList,
   useUpdatePartnerConfigPermissionList,
   useDeletePartnerConfigPermissionList,
+  useUserPermissions,
 };

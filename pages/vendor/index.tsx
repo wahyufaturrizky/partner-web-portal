@@ -24,6 +24,7 @@ import { queryClient } from "pages/_app";
 import { ModalDeleteConfirmation } from "components/elements/Modal/ModalConfirmationDelete";
 import ModalVendorGroup from "components/elements/Modal/ModalVendorGroup";
 import Icon from "@ant-design/icons";
+import { useUserPermissions } from "hooks/user-config/usePermission";
 
 const PackageSvg = () => <ICPackage />;
 
@@ -57,6 +58,16 @@ export default function Vendor() {
   const [showVendorGroup, setShowVendorGroup] = useState(false);
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const debounceSearch = useDebounce(search, 1000);
+
+  const { data: dataUserPermission } = useUserPermissions({
+    options: {
+      onSuccess: () => {},
+    },
+  });
+
+  const listPermission = dataUserPermission?.permission?.filter(
+    (filtering: any) => filtering.menu === "Vendor"
+  );
 
   const {
     data: vendorData,
@@ -150,12 +161,16 @@ export default function Vendor() {
         );
       },
     },
-    {
-      title: "Action",
-      dataIndex: "action",
-      width: "15%",
-      align: "left",
-    },
+    ...(listPermission?.some((el: any) => el.viewTypes[0]?.viewType.name === "View")
+      ? [
+          {
+            title: "Action",
+            dataIndex: "action",
+            width: "15%",
+            align: "left",
+          },
+        ]
+      : []),
   ];
 
   const rowSelection = {
@@ -188,14 +203,18 @@ export default function Vendor() {
             }}
           />
           <Row gap="16px">
-            <Button
-              size="big"
-              variant={"tertiary"}
-              onClick={() => setShowDelete(true)}
-              disabled={rowSelection.selectedRowKeys?.length === 0}
-            >
-              Delete
-            </Button>
+            {listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Delete")
+              .length > 0 && (
+              <Button
+                size="big"
+                variant={"tertiary"}
+                onClick={() => setShowDelete(true)}
+                disabled={rowSelection.selectedRowKeys?.length === 0}
+              >
+                Delete
+              </Button>
+            )}
+
             <DropdownMenu
               title={"More"}
               buttonVariant={"secondary"}
@@ -223,31 +242,43 @@ export default function Vendor() {
               }}
               menuList={[
                 {
-                  key: 1,
-                  value: (
-                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                      <ICDownload />
-                      <p style={{ margin: "0" }}>Download Template</p>
-                    </div>
-                  ),
+                  ...(listPermission?.filter(
+                    (data: any) => data.viewTypes[0]?.viewType.name === "Download Template"
+                  ).length > 0 && {
+                    key: 1,
+                    value: (
+                      <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                        <ICDownload />
+                        <p style={{ margin: "0" }}>Download Template</p>
+                      </div>
+                    ),
+                  }),
                 },
                 {
-                  key: 2,
-                  value: (
-                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                      <ICUpload />
-                      <p style={{ margin: "0" }}>Upload Template</p>
-                    </div>
-                  ),
+                  ...(listPermission?.filter(
+                    (data: any) => data.viewTypes[0]?.viewType.name === "Upload"
+                  ).length > 0 && {
+                    key: 2,
+                    value: (
+                      <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                        <ICUpload />
+                        <p style={{ margin: "0" }}>Upload Template</p>
+                      </div>
+                    ),
+                  }),
                 },
                 {
-                  key: 3,
-                  value: (
-                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                      <ICDownload />
-                      <p style={{ margin: "0" }}>Download Data</p>
-                    </div>
-                  ),
+                  ...(listPermission?.filter(
+                    (data: any) => data.viewTypes[0]?.viewType.name === "Download Data"
+                  ).length > 0 && {
+                    key: 3,
+                    value: (
+                      <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                        <ICDownload />
+                        <p style={{ margin: "0" }}>Download Data</p>
+                      </div>
+                    ),
+                  }),
                 },
                 {
                   key: 4,
@@ -260,9 +291,13 @@ export default function Vendor() {
                 },
               ]}
             />
-            <Button size="big" variant="primary" onClick={() => router.push("/vendor/create")}>
-              Create
-            </Button>
+
+            {listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Create")
+              .length > 0 && (
+              <Button size="big" variant="primary" onClick={() => router.push("/vendor/create")}>
+                Create
+              </Button>
+            )}
           </Row>
         </Row>
       </Card>
