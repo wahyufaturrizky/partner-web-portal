@@ -1,4 +1,5 @@
 import usePagination from "@lucasmogari/react-pagination";
+import { useProductCategoryList } from "hooks/mdm/product-category/useProductCategory";
 import { lang } from "lang";
 import Router from "next/router";
 import {
@@ -63,6 +64,7 @@ const CreateMenuList: any = () => {
     arrows: true,
     totalItems: 100,
   });
+
   const paginationTablePermission = usePagination({
     page: 1,
     itemsPerPage: 20,
@@ -72,7 +74,7 @@ const CreateMenuList: any = () => {
     totalItems: 100,
   });
 
-  const { data: fieldsTablePermission } = usePartnerConfigPermissionLists({
+  const { data: fieldsTablePermission } = useProductCategoryList({
     options: {
       onSuccess: (data) => {
         paginationTablePermission.setTotalItems(data.totalRow);
@@ -96,6 +98,7 @@ const CreateMenuList: any = () => {
       },
     });
 
+
   useEffect(() => {
     if (fieldsTablePermissionFilter && selectedFilter.length > 0) {
       setDataTableAssociatePermission(fieldsTablePermissionFilter);
@@ -116,11 +119,11 @@ const CreateMenuList: any = () => {
 
   dataTableAssociatePermission?.rows?.map((field) => {
     dataTablePermission.push({
-      key: field.id,
+      key: field.productCategoryId,
       field_name: field.name,
     });
     datFieldPermission.push({
-      value: field.id,
+      value: field.productCategoryId,
       label: field.name,
     });
   });
@@ -205,7 +208,6 @@ const CreateMenuList: any = () => {
       limit: paginationTableField.itemsPerPage,
     },
   });
-
   const dataTableField = [];
   tableFieldData?.rows?.map((field) => {
     dataTableField.push({
@@ -326,11 +328,13 @@ const CreateMenuList: any = () => {
         stateFieldInput[thereIsEmptyField] === ""
     );
 
+    let product_categories = ""
+    dataAssociatedPermissionsField?.forEach((permission, i )=> product_categories += i !== dataAssociatedPermissionsField?.length - 1 ? permission?.key + ',' : permission?.key)
     const data = {
       company: companyCode,
       name: stateFieldInput?.name,
       parent: parent,
-      product_categories: "",
+      product_categories,
       // process_name: stateFieldInput?.process_name,
       // isZeus: isZeus ? "Y" : "N",
       // isHermes: isHermes ? "Y" : "N",
@@ -386,7 +390,7 @@ const CreateMenuList: any = () => {
                   {lang[t].purchaseOrg.tertier.cancel}
                 </Button>
                 <Button size="big" variant={"primary"} onClick={handleCreateMenuList}>
-                  {isLoading ? "loading..." : lang[t].purchaseOrg.primary.save}
+                  {isLoadingurchaseOrganization ? "loading..." : lang[t].purchaseOrg.primary.save}
                 </Button>
               </Row>
             </Row>

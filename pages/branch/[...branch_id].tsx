@@ -330,7 +330,7 @@ const BranchDetail = () => {
 
   const onSubmit = (data: any) => {
     const formData = {
-      company_id: "KSNI",
+      company_id: companyCode,
       ...data,
       start_working_day: calendarDetailData?.start? calendarDetailData?.start : branchDetailData?.startWorkingDay,
       end_working_day: calendarDetailData?.end ? calendarDetailData?.end : branchDetailData?.endWorkingDay,

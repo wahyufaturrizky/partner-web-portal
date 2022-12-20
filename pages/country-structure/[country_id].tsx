@@ -14,7 +14,8 @@ import {
 	FileUploaderExcel,
 	Spin,
 	Checkbox,
-	FormInput
+	FormInput,
+	FileUploadModal
 } from "pink-lava-ui";
 
 import ArrowLeft from "../../assets/icons/arrow-left.svg";
@@ -24,7 +25,8 @@ import {
 	useFetchDetailCountry,
 	useUpdateCountry,
 	useDeleteDataCountries,
-	useCheckCountryName
+	useCheckCountryName,
+	useUploadFileCountryStructure
 } from "../../hooks/mdm/country-structure/useCountries";
 import { ModalManageDataEdit } from "../../components/elements/Modal/ModalManageDataEdit";
 
@@ -399,6 +401,22 @@ const CreateConfig = () => {
 		}
 	});
 
+	const { mutate: uploadFileCountries } = useUploadFileCountryStructure({
+		options: {
+			onSuccess: () => {
+				setShowUploadStructure(false)
+			}
+		}
+	})
+
+	const submitUploadFile = (file: any) => {
+		const formData: any = new FormData()
+		formData.append('upload_file', file)
+		formData.append('country_id', country?.id)
+		
+		uploadFileCountries(formData)
+	}
+
 	return (
 		<>
 			{isLoadingCurrencies || isLoading ? (
@@ -631,10 +649,10 @@ const CreateConfig = () => {
 					itemTitle={modalDelete.structure.name}
 				/>
 			)}
-			<FileUploaderExcel
+			<FileUploadModal
 				setVisible={setShowUploadStructure}
 				visible={showUploadStructure}
-				onSubmit={onUploadStructure}
+				onSubmit={submitUploadFile}
 			/>
 			{showManageData.visible && (
 				<ModalManageDataEdit

@@ -33,8 +33,8 @@ import { permissionTrainingType } from "permission/training-type";
 
 const TrainingType = () => {
   const t = localStorage.getItem("lan") || "en-US";
-  const companyId = localStorage.getItem("companyId")
-  const companyCode = localStorage.getItem("companyCode")
+  const companyId = localStorage.getItem("companyId");
+  const companyCode = localStorage.getItem("companyCode");
   const pagination = usePagination({
     page: 1,
     itemsPerPage: 20,
@@ -70,13 +70,13 @@ const TrainingType = () => {
     switch (type) {
       case "selection":
         return data.selectedRowKeys.length > 1
-          ? `${lang[t].areYouSureToDelete} ${data.selectedRowKeys.length} items ?`
-          : `${lang[t].areYouSureToDelete} ${
+          ? `${lang[t].trainingType.areYouSureToDelete} ${data.selectedRowKeys.length} items ?`
+          : `${lang[t].trainingType.areYouSureToDelete} ${
               data?.trainingTypeData?.data.find((el: any) => el.key === data.selectedRowKeys[0])
                 ?.name
             } ?`;
       case "detail":
-        return `${lang[t].areYouSureToDelete} ${data.name} ?`;
+        return `${lang[t].trainingType.areYouSureToDelete} ${data.name} ?`;
 
       default:
         break;
@@ -173,14 +173,14 @@ const TrainingType = () => {
     options: {
       onSuccess: () => {},
     },
-  });  
+  });
   const listPermission = dataUserPermission?.permission?.filter(
     (filtering: any) => filtering.menu === "Term Of Payment"
   );
   const allowPermissionToShow = listPermission?.filter((data: any) =>
     permissionTrainingType.role[dataUserPermission?.role?.name]?.component.includes(data.name)
   );
-  let menuList :any = []
+  let menuList: any = [];
   const columns = [
     {
       title: lang[t].trainingType.trainingTypeId,
@@ -204,9 +204,12 @@ const TrainingType = () => {
       setSelectedRowKeys(selectedRowKeys);
     },
   };
-	if (listPermission?.filter((x :any) => x.viewTypes[0]?.viewType.name === "Download Template").length > 0) {
-		  menuList = [
-			...menuList, 
+  if (
+    listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Download Template")
+      .length > 0
+  ) {
+    menuList = [
+      ...menuList,
       {
         key: 1,
         value: (
@@ -216,11 +219,14 @@ const TrainingType = () => {
           </div>
         ),
       },
-		];
-	}
-	if (listPermission?.filter((x :any) => x.viewTypes[0]?.viewType.name === "Upload Template").length > 0) {
-		  menuList = [
-			...menuList, 
+    ];
+  }
+  if (
+    listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Upload Template").length >
+    0
+  ) {
+    menuList = [
+      ...menuList,
       {
         key: 2,
         value: (
@@ -230,22 +236,22 @@ const TrainingType = () => {
           </div>
         ),
       },
-		];
-	}
-	if (listPermission?.filter((x :any) => x.viewTypes[0]?.viewType.name === "Download").length > 0) {
-	menuList = [
-		...menuList, 
-    {
-      key: 3,
-      value: (
-        <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-          <ICDownload />
-          <p style={{ margin: "0" }}>{lang[t].trainingType.ghost.downloadData}</p>
-        </div>
-      ),
-    },
-	];
-	}
+    ];
+  }
+  if (listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Download").length > 0) {
+    menuList = [
+      ...menuList,
+      {
+        key: 3,
+        value: (
+          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+            <ICDownload />
+            <p style={{ margin: "0" }}>{lang[t].trainingType.ghost.downloadData}</p>
+          </div>
+        ),
+      },
+    ];
+  }
   const onSubmit = (data: any) => {
     switch (modalForm.typeForm) {
       case "create":
@@ -300,44 +306,45 @@ const TrainingType = () => {
               }
               disabled={rowSelection.selectedRowKeys?.length === 0}
             >
-              {lang[t].trainingType.palceholderSearch}
+              {lang[t].trainingType.tertier.delete}
             </Button>
             {menuList.length > 0 && (
-            <DropdownMenu
-              title={lang[t].trainingType.tertier.more}
-              buttonVariant={"secondary"}
-              buttonSize={"big"}
-              textVariant={"button"}
-              textColor={"pink.regular"}
-              iconStyle={{ fontSize: "12px" }}
-              onClick={(e: any) => {
-                switch (parseInt(e.key)) {
-                  case 1:
-                    downloadFile({ with_data: "N", company_id: companyCode });
-                    break;
-                  case 2:
-                    setShowUpload(true);
-                    break;
-                  case 3:
-                    downloadFile({ with_data: "Y", company_id: companyCode });
-                    break;
-                  case 4:
-                    break;
-                  default:
-                    break;
-                }
-              }}
-              menuList={menuList}
-            />
+              <DropdownMenu
+                title={lang[t].trainingType.tertier.more}
+                buttonVariant={"secondary"}
+                buttonSize={"big"}
+                textVariant={"button"}
+                textColor={"pink.regular"}
+                iconStyle={{ fontSize: "12px" }}
+                onClick={(e: any) => {
+                  switch (parseInt(e.key)) {
+                    case 1:
+                      downloadFile({ with_data: "N", company_id: companyCode });
+                      break;
+                    case 2:
+                      setShowUpload(true);
+                      break;
+                    case 3:
+                      downloadFile({ with_data: "Y", company_id: companyCode });
+                      break;
+                    case 4:
+                      break;
+                    default:
+                      break;
+                  }
+                }}
+                menuList={menuList}
+              />
             )}
-            {listPermission?.filter((x :any) => x.viewTypes[0]?.viewType.name === "Create").length > 0 && (
-            <Button
-              size="big"
-              variant="primary"
-              onClick={() => setModalForm({ open: true, typeForm: "create", data: {} })}
-            >
-              {lang[t].trainingType.primary.create}
-            </Button>
+            {listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Create").length >
+              0 && (
+              <Button
+                size="big"
+                variant="primary"
+                onClick={() => setModalForm({ open: true, typeForm: "create", data: {} })}
+              >
+                {lang[t].trainingType.primary.create}
+              </Button>
             )}
           </Row>
         </Row>
@@ -397,18 +404,19 @@ const TrainingType = () => {
               >
                 {modalForm.typeForm === "create" ? (
                   <>
-                  {listPermission?.filter((x :any) => x.viewTypes[0]?.viewType.name === "Delete").length > 0 && (
-                    <Button
-                      full
-                      size="big"
-                      variant={"tertiary"}
-                      key="submit"
-                      type="primary"
-                      onClick={() => setModalForm({ open: false, data: {}, typeForm: "" })}
-                    >
-                      {lang[t].trainingType.tertier.delete}
-                    </Button>
-                  )}
+                    {listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Delete")
+                      .length > 0 && (
+                      <Button
+                        full
+                        size="big"
+                        variant={"tertiary"}
+                        key="submit"
+                        type="primary"
+                        onClick={() => setModalForm({ open: false, data: {}, typeForm: "" })}
+                      >
+                        {lang[t].trainingType.tertier.cancel}
+                      </Button>
+                    )}
                     <Button full onClick={handleSubmit(onSubmit)} variant="primary" size="big">
                       {isLoadingCreateTrainingType || isLoadingUpdateTrainingType
                         ? "Loading..."
@@ -417,7 +425,8 @@ const TrainingType = () => {
                   </>
                 ) : (
                   <>
-                    {listPermission?.filter((x :any) => x.viewTypes[0]?.viewType.name === "Delete").length > 0 && (
+                    {listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Delete")
+                      .length > 0 && (
                       <Button
                         full
                         size="big"
@@ -431,7 +440,8 @@ const TrainingType = () => {
                         {lang[t].trainingType.tertier.delete}
                       </Button>
                     )}
-                    {listPermission?.filter((x :any) => x.viewTypes[0]?.viewType.name === "Update").length > 0 && (
+                    {listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Update")
+                      .length > 0 && (
                       <Button full onClick={handleSubmit(onSubmit)} variant="primary" size="big">
                         {isLoadingCreateTrainingType || isLoadingUpdateTrainingType
                           ? "Loading..."
@@ -440,8 +450,6 @@ const TrainingType = () => {
                     )}
                   </>
                 )}
-
-                
               </div>
             </div>
           }
