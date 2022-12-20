@@ -1,6 +1,8 @@
 import usePagination from "@lucasmogari/react-pagination";
+import { useUserPermissions } from "hooks/user-config/usePermission";
 import { lang } from "lang";
 import { useRouter } from "next/router";
+import { permissionModuleConfig } from "permission/module-config";
 import {
   Button,
   Col,
@@ -74,6 +76,16 @@ const ModuleConfig: any = () => {
     },
   });
 
+  const { data: dataUserPermission } = useUserPermissions({
+    options: {
+      onSuccess: () => {},
+    },
+  });
+
+  const listPermission = dataUserPermission?.permission?.filter(
+    (filtering: any) => filtering.menu === "Module Config"
+  );
+
   const columns = [
     {
       title: lang[t].moduleConfig.modulConfigName,
@@ -83,11 +95,14 @@ const ModuleConfig: any = () => {
       title: lang[t].moduleConfig.modulConfigParent,
       dataIndex: "parent",
     },
-    {
-      title: lang[t].moduleConfig.modulConfigAction,
-      dataIndex: "action",
-      width: 160,
-    },
+    ...(listPermission?.filter((x :any) => x.viewTypes[0]?.viewType.name === "View").length > 0
+    ? [
+        {
+          title: lang[t].moduleConfig.modulConfigAction,
+          dataIndex: "action",
+          width: 160,
+        },
+    ]:[])
   ];
 
   const data: any = [];

@@ -26,6 +26,7 @@ import ArrowLeft from "../../assets/icons/arrow-left.svg";
 import { ModalDeleteConfirmation } from "../../components/elements/Modal/ModalConfirmationDelete";
 import ConditionalField from "../../components/pages/ProductGroup/ConditionalField";
 import { lang } from "lang";
+import { useUserPermissions } from "hooks/user-config/useUser";
 
 const itemDefaultValue = [
   { id: 0, group: null, condition: null, value_from: "0", value_to: "0", values: "0" },
@@ -211,6 +212,22 @@ const ProductGroupDetail = () => {
     }
   }, [isLoadingProductGroup, isFetchingProductGroup, isFetchingProductBrand]);
 
+  const { data: dataUserPermission } = useUserPermissions({
+    options: {
+      onSuccess: () => {},
+    },
+  });
+
+  const listPermission = dataUserPermission?.permission?.filter(
+    (filtering: any) => filtering.menu === "Product Group"
+  );
+
+  const checkUserPermission = (permissionGranted) => {
+    return listPermission?.find(
+      (data: any) => data?.viewTypes?.[0]?.viewType?.name === permissionGranted
+    );
+  };
+
   if ((isLoadingProductGroup || isFetchingProductGroup) && !isSuccessGetAllData)
     return (
       <Center>
@@ -231,14 +248,18 @@ const ProductGroupDetail = () => {
         <Card padding="20px">
           <Row justifyContent="flex-end" alignItems="center" nowrap>
             <Row gap="16px">
-              <Button size="big" variant={"tertiary"} onClick={() => setShowDeleteModal(true)}>
-                {lang[t].productGroup.list.button.delete}
-              </Button>
-              <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
-                {isLoadingUpdateProductGroup
-                  ? "Loading..."
-                  : lang[t].productGroup.detail.button.save}
-              </Button>
+              {checkUserPermission("Delete") && (
+                <Button size="big" variant={"tertiary"} onClick={() => setShowDeleteModal(true)}>
+                  {lang[t].productGroup.list.button.delete}
+                </Button>
+              )}
+              {checkUserPermission("Create") && (
+                <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
+                  {isLoadingUpdateProductGroup
+                    ? "Loading..."
+                    : lang[t].productGroup.detail.button.save}
+                </Button>
+              )}
             </Row>
           </Row>
         </Card>

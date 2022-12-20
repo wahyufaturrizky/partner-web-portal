@@ -28,6 +28,8 @@ import { useForm } from "react-hook-form";
 import { ICDownload, ICUpload } from "../../assets/icons";
 import { mdmDownloadService } from "../../lib/client";
 import { lang } from "lang";
+import { useUserPermissions } from "hooks/user-config/usePermission";
+import { permissionDepartment } from "permission/department";
 
 const JobPosition = () => {
   const t = localStorage.getItem("lan") || "en-US";
@@ -164,6 +166,17 @@ const JobPosition = () => {
       },
     });
 
+  const { data: dataUserPermission } = useUserPermissions({
+    options: {
+      onSuccess: () => {},
+    },
+  });  
+  const listPermission = dataUserPermission?.permission?.filter(
+    (filtering: any) => filtering.menu === "Department"
+  );
+  const allowPermissionToShow = listPermission?.filter((data: any) =>
+    permissionDepartment.role["Admin"].component.includes(data.name)
+  );
   const columns = [
     {
       title: lang[t].department.departmentID,
@@ -173,12 +186,16 @@ const JobPosition = () => {
       title: lang[t].department.departmentName,
       dataIndex: "name",
     },
+        ...(listPermission?.filter((x :any) => x.viewTypes[0]?.viewType.name === "View").length > 0
+      ? [
     {
       title: lang[t].department.action,
       dataIndex: "action",
       width: "15%",
       align: "left",
     },
+            ]
+      : []),
   ];
 
   const rowSelection = {
@@ -213,7 +230,56 @@ const JobPosition = () => {
 
     uploadFileDepartment(formData);
   };
+  let menuList: any[] = [];
 
+  if (
+    listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Download Template")
+      .length > 0
+  ) {
+    menuList = [
+      ...menuList,
+      {
+        key: 1,
+        value: (
+          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+            <ICDownload />
+            <p style={{ margin: "0" }}>Download Template</p>
+          </div>
+        ),
+      },
+    ];
+  }
+  if (
+    listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Updload Template")
+      .length > 0
+  ) {
+    menuList = [
+      ...menuList,
+      {
+        key: 2,
+        value: (
+          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+            <ICDownload />
+            <p style={{ margin: "0" }}>Upload Template</p>
+          </div>
+        ),
+      },
+    ];
+  }
+  if (listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Download").length > 0) {
+    menuList = [
+      ...menuList,
+      {
+        key: 3,
+        value: (
+          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+            <ICDownload />
+            <p style={{ margin: "0" }}>Download Data</p>
+          </div>
+        ),
+      },
+    ];
+  }
   return (
     <>
       <Col>
@@ -230,6 +296,7 @@ const JobPosition = () => {
             }}
           />
           <Row gap="16px">
+            {listPermission?.filter((x :any) => x.viewTypes[0]?.viewType.name === "Delete").length > 0 && (
             <Button
               size="big"
               variant={"tertiary"}
@@ -244,6 +311,7 @@ const JobPosition = () => {
             >
               {lang[t].department.tertier.delete}
             </Button>
+            )}
             <DropdownMenu
               title={"More"}
               buttonVariant={"secondary"}
@@ -268,36 +336,9 @@ const JobPosition = () => {
                     break;
                 }
               }}
-              menuList={[
-                {
-                  key: 1,
-                  value: (
-                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                      <ICDownload />
-                      <p style={{ margin: "0" }}>{lang[t].department.ghost.downloadTemplate}</p>
-                    </div>
-                  ),
-                },
-                {
-                  key: 2,
-                  value: (
-                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                      <ICUpload />
-                      <p style={{ margin: "0" }}>{lang[t].department.ghost.uploadTemplate}</p>
-                    </div>
-                  ),
-                },
-                {
-                  key: 3,
-                  value: (
-                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                      <ICDownload />
-                      <p style={{ margin: "0" }}>{lang[t].department.ghost.downloadData}</p>
-                    </div>
-                  ),
-                },
-              ]}
+              menuList={menuList}
             />
+            {listPermission?.filter((x :any) => x.viewTypes[0]?.viewType.name === "Create").length > 0 && (
             <Button
               size="big"
               variant="primary"
@@ -305,6 +346,7 @@ const JobPosition = () => {
             >
               {lang[t].department.primary.create}
             </Button>
+            )}
           </Row>
         </Row>
       </Card>
@@ -358,17 +400,26 @@ const JobPosition = () => {
                 }}
               >
                 {modalForm.typeForm === "create" ? (
-                  <Button
-                    full
-                    size="big"
-                    variant={"tertiary"}
-                    key="submit"
-                    type="primary"
-                    onClick={() => setModalForm({ open: false, data: {}, typeForm: "" })}
-                  >
-                    {lang[t].department.tertier.cancel}
-                  </Button>
+                  <>
+                    <Button
+                      full
+                      size="big"
+                      variant={"tertiary"}
+                      key="submit"
+                      type="primary"
+                      onClick={() => setModalForm({ open: false, data: {}, typeForm: "" })}
+                    >
+                      {lang[t].department.tertier.cancel}
+                    </Button>
+                    <Button full onClick={handleSubmit(onSubmit)} variant="primary" size="big">
+                      {isLoadingCreateDepartment || isLoadingUpdateDepartment
+                        ? "Loading..."
+                        : lang[t].department.primary.save}
+                    </Button>
+                  </>
                 ) : (
+                  <>
+                  {listPermission?.filter((x :any) => x.viewTypes[0]?.viewType.name === "Delete").length > 0 && (
                   <Button
                     full
                     size="big"
@@ -381,13 +432,18 @@ const JobPosition = () => {
                   >
                     {lang[t].department.tertier.delete}
                   </Button>
+                  )}
+                  {listPermission?.filter((x :any) => x.viewTypes[0]?.viewType.name === "Update").length > 0 && (
+                  <Button full onClick={handleSubmit(onSubmit)} variant="primary" size="big">
+                      {isLoadingCreateDepartment || isLoadingUpdateDepartment
+                        ? "Loading..."
+                        : lang[t].department.primary.save}
+                    </Button>
+                  )}
+                  </>
                 )}
 
-                <Button full onClick={handleSubmit(onSubmit)} variant="primary" size="big">
-                  {isLoadingCreateDepartment || isLoadingUpdateDepartment
-                    ? "Loading..."
-                    : lang[t].department.primary.save}
-                </Button>
+
               </div>
             </div>
           }

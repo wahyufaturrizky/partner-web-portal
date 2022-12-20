@@ -25,13 +25,14 @@ import {
   useDeletePartnerConfigApprovalList,
   usePartnerConfigApprovalList,
   useUpdatePartnerConfigApprovalList,
-  usePartnerConfigApprovalLists
+  usePartnerConfigApprovalLists,
 } from "../../../hooks/user-config/useApproval";
 import { lang } from "lang";
 import ArrowLeft from "assets/icons/arrow-left.svg";
 import { useForm, Controller } from "react-hook-form";
 import usePagination from "@lucasmogari/react-pagination";
 import AssociateUserRole from "components/pages/userConfig/Approval/AssociateUserRole";
+import { useUserPermissions } from "hooks/user-config/usePermission";
 
 export interface ConfigModuleList {}
 
@@ -151,7 +152,7 @@ const DetailUserConfigApproval: any = () => {
   const { data: dataPartnerConfigApprovalList, isLoading: isLoadingPartnerConfigApprovalList } =
     usePartnerConfigApprovalList({
       partner_config_approval_list_id: approval_id,
-      company_id:companyCode,
+      company_id: companyCode,
       options: {
         onSuccess: (data: any) => {
           const mappingApprovalStages = data?.partnerApprovalStages?.map((el: any) => {
@@ -265,7 +266,15 @@ const DetailUserConfigApproval: any = () => {
       ),
     },
   ];
+  const { data: dataUserPermission } = useUserPermissions({
+    options: {
+      onSuccess: () => {},
+    },
+  });
 
+  const listPermission = dataUserPermission?.permission?.filter(
+    (filtering: any) => filtering.menu === "Approval List"
+  );
   const onSubmit = (data: any) => {
     const length = numberOfApprovalStage === "" ? 1 : numberOfApprovalStage;
 
@@ -344,11 +353,15 @@ const DetailUserConfigApproval: any = () => {
                 <Button size="big" variant={"tertiary"} onClick={() => Router.back()}>
                   {lang[t].approvalList.tertier.cancel}
                 </Button>
-                <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
-                  {isLoadingUpdatePartnerConfigApprovalList
-                    ? "loading..."
-                    : lang[t].approvalList.primary.save}
-                </Button>
+
+                {listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Update")
+                  .length > 0 && (
+                  <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
+                    {isLoadingUpdatePartnerConfigApprovalList
+                      ? "loading..."
+                      : lang[t].approvalList.primary.save}
+                  </Button>
+                )}
               </Row>
             </Row>
           </Row>
