@@ -1,5 +1,7 @@
 import usePagination from "@lucasmogari/react-pagination";
+import { useUserPermissions } from "hooks/user-config/usePermission";
 import { lang } from "lang";
+import { permissionChannel } from "permission/channel";
 import {
   Button,
   Col,
@@ -31,8 +33,8 @@ import { queryClient } from "../_app";
 
 const ChannelMDM = () => {
   const t = localStorage.getItem("lan") || "en-US";
-  const companyId = localStorage.getItem("companyId")
-  const companyCode = localStorage.getItem("companyCode")
+  const companyId = localStorage.getItem("companyId");
+  const companyCode = localStorage.getItem("companyCode");
   const pagination = usePagination({
     page: 1,
     itemsPerPage: 20,
@@ -92,7 +94,7 @@ const ChannelMDM = () => {
       search: debounceSearch,
       page: pagination.page,
       limit: pagination.itemsPerPage,
-      company_id: companyCode
+      company_id: companyCode,
     },
     options: {
       onSuccess: (data: any) => {
@@ -167,6 +169,19 @@ const ChannelMDM = () => {
       },
     });
 
+  const { data: dataUserPermission } = useUserPermissions({
+    options: {
+      onSuccess: () => {},
+    },
+  });
+
+  const listPermission = dataUserPermission?.permission?.filter(
+    (filtering: any) => filtering.menu === "Channel"
+  );
+  const allowPermissionToShow = listPermission?.filter((data: any) =>
+    permissionChannel.role[dataUserPermission?.role?.name]?.component.includes(data.name)
+  );
+
   const columns = [
     {
       title: lang[t].salesChannel.table.salesChannelId,
@@ -176,12 +191,16 @@ const ChannelMDM = () => {
       title: lang[t].salesChannel.table.salesChannelName,
       dataIndex: "name",
     },
-    {
-      title: lang[t].salesChannel.table.action,
-      dataIndex: "action",
-      width: "15%",
-      align: "left",
-    },
+    ...(listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "View").length > 0
+      ? [
+          {
+            title: lang[t].salesChannel.table.action,
+            dataIndex: "action",
+            width: "15%",
+            align: "left",
+          },
+        ]
+      : []),
   ];
 
   const rowSelection = {
@@ -212,6 +231,56 @@ const ChannelMDM = () => {
 
     uploadFileChannelMDM(formData);
   };
+  let menuList: any[] = [];
+
+  if (
+    listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Download Template")
+      .length > 0
+  ) {
+    menuList = [
+      ...menuList,
+      {
+        key: 1,
+        value: (
+          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+            <ICDownload />
+            <p style={{ margin: "0" }}>Download Template</p>
+          </div>
+        ),
+      },
+    ];
+  }
+  if (
+    listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Updload Template")
+      .length > 0
+  ) {
+    menuList = [
+      ...menuList,
+      {
+        key: 2,
+        value: (
+          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+            <ICDownload />
+            <p style={{ margin: "0" }}>Upload Template</p>
+          </div>
+        ),
+      },
+    ];
+  }
+  if (listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Download").length > 0) {
+    menuList = [
+      ...menuList,
+      {
+        key: 3,
+        value: (
+          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+            <ICDownload />
+            <p style={{ margin: "0" }}>Download Data</p>
+          </div>
+        ),
+      },
+    ];
+  }
 
   return (
     <>
@@ -229,81 +298,61 @@ const ChannelMDM = () => {
             }}
           />
           <Row gap="16px">
-            <Button
-              size="big"
-              variant={"tertiary"}
-              onClick={() =>
-                setShowDelete({
-                  open: true,
-                  type: "selection",
-                  data: { channelData: channelsMDMData, selectedRowKeys },
-                })
-              }
-              disabled={rowSelection.selectedRowKeys?.length === 0}
-            >
-              {lang[t].salesChannel.tertier.delete}
-            </Button>
-            <DropdownMenu
-              title={lang[t].salesChannel.tertier.more}
-              buttonVariant={"secondary"}
-              buttonSize={"big"}
-              textVariant={"button"}
-              textColor={"pink.regular"}
-              iconStyle={{ fontSize: "12px" }}
-              onClick={(e: any) => {
-                switch (parseInt(e.key)) {
-                  case 1:
-                    downloadFile({ with_data: "N", company_id: companyCode });
-                    break;
-                  case 2:
-                    setShowUpload(true);
-                    break;
-                  case 3:
-                    downloadFile({ with_data: "Y", company_id: companyCode });
-                    break;
-                  case 4:
-                    break;
-                  default:
-                    break;
+            {listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Delete").length >
+              0 && (
+              <Button
+                size="big"
+                variant={"tertiary"}
+                onClick={() =>
+                  setShowDelete({
+                    open: true,
+                    type: "selection",
+                    data: { channelData: channelsMDMData, selectedRowKeys },
+                  })
                 }
-              }}
-              menuList={[
-                {
-                  key: 1,
-                  value: (
-                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                      <ICDownload />
-                      <p style={{ margin: "0" }}>Download Template</p>
-                    </div>
-                  ),
-                },
-                {
-                  key: 2,
-                  value: (
-                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                      <ICUpload />
-                      <p style={{ margin: "0" }}>Upload Template</p>
-                    </div>
-                  ),
-                },
-                {
-                  key: 3,
-                  value: (
-                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                      <ICDownload />
-                      <p style={{ margin: "0" }}>Download Data</p>
-                    </div>
-                  ),
-                },
-              ]}
-            />
-            <Button
-              size="big"
-              variant="primary"
-              onClick={() => setModalChannelForm({ open: true, typeForm: "create", data: {} })}
-            >
-              {lang[t].salesChannel.primary.create}
-            </Button>
+                disabled={rowSelection.selectedRowKeys?.length === 0}
+              >
+                {lang[t].salesChannel.tertier.delete}
+              </Button>
+            )}
+            {menuList.length > 0 && (
+              <DropdownMenu
+                title={lang[t].salesChannel.tertier.more}
+                buttonVariant={"secondary"}
+                buttonSize={"big"}
+                textVariant={"button"}
+                textColor={"pink.regular"}
+                iconStyle={{ fontSize: "12px" }}
+                onClick={(e: any) => {
+                  switch (parseInt(e.key)) {
+                    case 1:
+                      downloadFile({ with_data: "N", company_id: companyCode });
+                      break;
+                    case 2:
+                      setShowUpload(true);
+                      break;
+                    case 3:
+                      downloadFile({ with_data: "Y", company_id: companyCode });
+                      break;
+                    case 4:
+                      break;
+                    default:
+                      break;
+                  }
+                }}
+                menuList={menuList}
+              />
+            )}
+            {listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Create").length >
+              0 && (
+              <Button
+                size="big"
+                variant="primary"
+                onClick={() => setModalChannelForm({ open: true, typeForm: "create", data: {} })}
+              >
+                {lang[t].salesChannel.primary.create}
+              </Button>
+            )}
           </Row>
         </Row>
       </Card>
@@ -361,34 +410,55 @@ const ChannelMDM = () => {
                 }}
               >
                 {modalChannelForm.typeForm === "create" ? (
-                  <Button
-                    size="big"
-                    variant={"tertiary"}
-                    key="submit"
-                    type="primary"
-                    onClick={() => setModalChannelForm({ open: false, data: {}, typeForm: "" })}
-                  >
-                    {lang[t].salesChannel.tertier.cancel}
-                  </Button>
+                  <>
+                    <Button
+                      size="big"
+                      variant={"tertiary"}
+                      key="submit"
+                      type="primary"
+                      onClick={() => setModalChannelForm({ open: false, data: {}, typeForm: "" })}
+                    >
+                      {lang[t].salesChannel.tertier.cancel}
+                    </Button>
+                    {listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Create")
+                      .length > 0 && (
+                      <Button onClick={handleSubmit(onSubmit)} variant="primary" size="big">
+                        {isLoadingcreateChannelMDM || isLoadingupdateChannelMDM
+                          ? lang[t].salesChannel.loading
+                          : lang[t].salesChannel.primary.save}
+                      </Button>
+                    )}
+                  </>
                 ) : (
-                  <Button
-                    size="big"
-                    variant={"tertiary"}
-                    key="submit"
-                    type="primary"
-                    onClick={() => {
-                      setShowDelete({ open: true, type: "detail", data: modalChannelForm.data });
-                    }}
-                  >
-                    {lang[t].salesChannel.tertier.delete}
-                  </Button>
+                  <>
+                    {listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Delete")
+                      .length > 0 && (
+                      <Button
+                        size="big"
+                        variant={"tertiary"}
+                        key="submit"
+                        type="primary"
+                        onClick={() => {
+                          setShowDelete({
+                            open: true,
+                            type: "detail",
+                            data: modalChannelForm.data,
+                          });
+                        }}
+                      >
+                        {lang[t].salesChannel.tertier.delete}
+                      </Button>
+                    )}
+                    {listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Update")
+                      .length > 0 && (
+                      <Button onClick={handleSubmit(onSubmit)} variant="primary" size="big">
+                        {isLoadingcreateChannelMDM || isLoadingupdateChannelMDM
+                          ? lang[t].salesChannel.loading
+                          : lang[t].salesChannel.primary.save}
+                      </Button>
+                    )}
+                  </>
                 )}
-
-                <Button onClick={handleSubmit(onSubmit)} variant="primary" size="big">
-                  {isLoadingcreateChannelMDM || isLoadingupdateChannelMDM
-                    ? lang[t].salesChannel.loading
-                    : lang[t].salesChannel.primary.save}
-                </Button>
               </div>
             </div>
           }
