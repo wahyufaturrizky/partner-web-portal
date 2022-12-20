@@ -58,7 +58,7 @@ const WaitingApprovalPricingStructure: any = (props: any) => {
     arrows: true,
     totalItems: 100,
   });
-  const companyCode = localStorage.getItem("companyCode")
+  const companyCode = localStorage.getItem("companyCode");
 
   const [search, setSearch] = useState("");
 
@@ -75,7 +75,7 @@ const WaitingApprovalPricingStructure: any = (props: any) => {
       page: pagination.page,
       limit: pagination.itemsPerPage,
       status: "WAITING",
-      company_id: companyCode
+      company_id: companyCode,
     },
   });
 
@@ -244,7 +244,8 @@ const WaitingApprovalPricingStructure: any = (props: any) => {
                 },
               ]}
             />
-            {props.allowPermissionToShow?.some((el:any) => el.name === "Create Pricing Structure") && (
+            {props.listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Create")
+              .length > 0 && (
               <Button
                 size="big"
                 variant={"primary"}

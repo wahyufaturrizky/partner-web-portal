@@ -136,10 +136,12 @@ const PricingStructureList: any = () => {
   const listPermission = dataUserPermission?.permission?.filter(
     (filtering: any) => filtering.menu === "Pricing Structure"
   );
+  console.log(listPermission);
+
   const allowPermissionToShow = listPermission?.filter((data: any) =>
     permissionPricingStructure.role["Admin"].component.includes(data.name)
   );
-  
+
   const {
     data: pricingStructureLists,
     isLoading: isLoadingPricingStructureList,
@@ -150,7 +152,7 @@ const PricingStructureList: any = () => {
     },
     query: {
       status: "ACTIVE",
-      company_id: companyCode
+      company_id: companyCode,
     },
   });
 
@@ -599,31 +601,35 @@ const PricingStructureList: any = () => {
             <ActivePricingStructure
               modalPricingStructureForm={modalPricingStructureForm}
               setModalPricingStructureForm={setModalPricingStructureForm}
-              allowPermissionToShow={allowPermissionToShow}
+              listPermission={listPermission}
             />
           ) : tab === "inactive" ? (
             <InActivePricingStructure
               modalPricingStructureForm={modalPricingStructureForm}
               setModalPricingStructureForm={setModalPricingStructureForm}
               refetchCount={refetch}
+              listPermission={listPermission}
             />
           ) : tab === "draft" ? (
             <DraftPricingStructure
               modalPricingStructureForm={modalPricingStructureForm}
               setModalPricingStructureForm={setModalPricingStructureForm}
               refetchCount={refetch}
+              listPermission={listPermission}
             />
           ) : tab === "rejected" ? (
             <RejectedPricingStructure
               modalPricingStructureForm={modalPricingStructureForm}
               setModalPricingStructureForm={setModalPricingStructureForm}
               refetchCount={refetch}
+              listPermission={listPermission}
             />
           ) : (
             <WaitingApprovalPricingStructure
               modalPricingStructureForm={modalPricingStructureForm}
               setModalPricingStructureForm={setModalPricingStructureForm}
               refetchCount={refetch}
+              listPermission={listPermission}
             />
           )}
         </Col>
