@@ -28,6 +28,8 @@ import { useForm } from "react-hook-form";
 import { ICDownload, ICUpload } from "../../assets/icons";
 import { mdmDownloadService } from "../../lib/client";
 import { lang } from "lang";
+import { useUserPermissions } from "hooks/user-config/usePermission";
+import { permissionTrainingType } from "permission/training-type";
 
 const TrainingType = () => {
   const t = localStorage.getItem("lan") || "en-US";
@@ -167,6 +169,18 @@ const TrainingType = () => {
       },
     });
 
+  const { data: dataUserPermission } = useUserPermissions({
+    options: {
+      onSuccess: () => {},
+    },
+  });
+  const listPermission = dataUserPermission?.permission?.filter(
+    (filtering: any) => filtering.menu === "Term Of Payment"
+  );
+  const allowPermissionToShow = listPermission?.filter((data: any) =>
+    permissionTrainingType.role[dataUserPermission?.role?.name]?.component.includes(data.name)
+  );
+  let menuList: any = [];
   const columns = [
     {
       title: lang[t].trainingType.trainingTypeId,
@@ -190,7 +204,54 @@ const TrainingType = () => {
       setSelectedRowKeys(selectedRowKeys);
     },
   };
-
+  if (
+    listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Download Template")
+      .length > 0
+  ) {
+    menuList = [
+      ...menuList,
+      {
+        key: 1,
+        value: (
+          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+            <ICDownload />
+            <p style={{ margin: "0" }}>{lang[t].trainingType.ghost.downloadTemplate}</p>
+          </div>
+        ),
+      },
+    ];
+  }
+  if (
+    listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Upload Template").length >
+    0
+  ) {
+    menuList = [
+      ...menuList,
+      {
+        key: 2,
+        value: (
+          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+            <ICUpload />
+            <p style={{ margin: "0" }}>{lang[t].trainingType.ghost.uploadTemplate}</p>
+          </div>
+        ),
+      },
+    ];
+  }
+  if (listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Download").length > 0) {
+    menuList = [
+      ...menuList,
+      {
+        key: 3,
+        value: (
+          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+            <ICDownload />
+            <p style={{ margin: "0" }}>{lang[t].trainingType.ghost.downloadData}</p>
+          </div>
+        ),
+      },
+    ];
+  }
   const onSubmit = (data: any) => {
     switch (modalForm.typeForm) {
       case "create":
@@ -247,67 +308,44 @@ const TrainingType = () => {
             >
               {lang[t].trainingType.tertier.delete}
             </Button>
-            <DropdownMenu
-              title={lang[t].trainingType.tertier.more}
-              buttonVariant={"secondary"}
-              buttonSize={"big"}
-              textVariant={"button"}
-              textColor={"pink.regular"}
-              iconStyle={{ fontSize: "12px" }}
-              onClick={(e: any) => {
-                switch (parseInt(e.key)) {
-                  case 1:
-                    downloadFile({ with_data: "N", company_id: companyCode });
-                    break;
-                  case 2:
-                    setShowUpload(true);
-                    break;
-                  case 3:
-                    downloadFile({ with_data: "Y", company_id: companyCode });
-                    break;
-                  case 4:
-                    break;
-                  default:
-                    break;
-                }
-              }}
-              menuList={[
-                {
-                  key: 1,
-                  value: (
-                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                      <ICDownload />
-                      <p style={{ margin: "0" }}>{lang[t].trainingType.ghost.downloadTemplate}</p>
-                    </div>
-                  ),
-                },
-                {
-                  key: 2,
-                  value: (
-                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                      <ICUpload />
-                      <p style={{ margin: "0" }}>{lang[t].trainingType.ghost.uploadTemplate}</p>
-                    </div>
-                  ),
-                },
-                {
-                  key: 3,
-                  value: (
-                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                      <ICDownload />
-                      <p style={{ margin: "0" }}>{lang[t].trainingType.ghost.downloadData}</p>
-                    </div>
-                  ),
-                },
-              ]}
-            />
-            <Button
-              size="big"
-              variant="primary"
-              onClick={() => setModalForm({ open: true, typeForm: "create", data: {} })}
-            >
-              {lang[t].trainingType.primary.create}
-            </Button>
+            {menuList.length > 0 && (
+              <DropdownMenu
+                title={lang[t].trainingType.tertier.more}
+                buttonVariant={"secondary"}
+                buttonSize={"big"}
+                textVariant={"button"}
+                textColor={"pink.regular"}
+                iconStyle={{ fontSize: "12px" }}
+                onClick={(e: any) => {
+                  switch (parseInt(e.key)) {
+                    case 1:
+                      downloadFile({ with_data: "N", company_id: companyCode });
+                      break;
+                    case 2:
+                      setShowUpload(true);
+                      break;
+                    case 3:
+                      downloadFile({ with_data: "Y", company_id: companyCode });
+                      break;
+                    case 4:
+                      break;
+                    default:
+                      break;
+                  }
+                }}
+                menuList={menuList}
+              />
+            )}
+            {listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Create").length >
+              0 && (
+              <Button
+                size="big"
+                variant="primary"
+                onClick={() => setModalForm({ open: true, typeForm: "create", data: {} })}
+              >
+                {lang[t].trainingType.primary.create}
+              </Button>
+            )}
           </Row>
         </Row>
       </Card>
@@ -365,36 +403,53 @@ const TrainingType = () => {
                 }}
               >
                 {modalForm.typeForm === "create" ? (
-                  <Button
-                    full
-                    size="big"
-                    variant={"tertiary"}
-                    key="submit"
-                    type="primary"
-                    onClick={() => setModalForm({ open: false, data: {}, typeForm: "" })}
-                  >
-                    {lang[t].trainingType.tertier.cancel}
-                  </Button>
+                  <>
+                    {listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Delete")
+                      .length > 0 && (
+                      <Button
+                        full
+                        size="big"
+                        variant={"tertiary"}
+                        key="submit"
+                        type="primary"
+                        onClick={() => setModalForm({ open: false, data: {}, typeForm: "" })}
+                      >
+                        {lang[t].trainingType.tertier.cancel}
+                      </Button>
+                    )}
+                    <Button full onClick={handleSubmit(onSubmit)} variant="primary" size="big">
+                      {isLoadingCreateTrainingType || isLoadingUpdateTrainingType
+                        ? "Loading..."
+                        : lang[t].trainingType.primary.save}
+                    </Button>
+                  </>
                 ) : (
-                  <Button
-                    full
-                    size="big"
-                    variant={"tertiary"}
-                    key="submit"
-                    type="primary"
-                    onClick={() => {
-                      setShowDelete({ open: true, type: "detail", data: modalForm.data });
-                    }}
-                  >
-                    {lang[t].trainingType.tertier.delete}
-                  </Button>
+                  <>
+                    {listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Delete")
+                      .length > 0 && (
+                      <Button
+                        full
+                        size="big"
+                        variant={"tertiary"}
+                        key="submit"
+                        type="primary"
+                        onClick={() => {
+                          setShowDelete({ open: true, type: "detail", data: modalForm.data });
+                        }}
+                      >
+                        {lang[t].trainingType.tertier.delete}
+                      </Button>
+                    )}
+                    {listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Update")
+                      .length > 0 && (
+                      <Button full onClick={handleSubmit(onSubmit)} variant="primary" size="big">
+                        {isLoadingCreateTrainingType || isLoadingUpdateTrainingType
+                          ? "Loading..."
+                          : lang[t].trainingType.primary.save}
+                      </Button>
+                    )}
+                  </>
                 )}
-
-                <Button full onClick={handleSubmit(onSubmit)} variant="primary" size="big">
-                  {isLoadingCreateTrainingType || isLoadingUpdateTrainingType
-                    ? "Loading..."
-                    : lang[t].trainingType.primary.save}
-                </Button>
               </div>
             </div>
           }
