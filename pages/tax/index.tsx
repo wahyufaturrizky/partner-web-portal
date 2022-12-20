@@ -105,7 +105,7 @@ const Tax = () => {
     },
     options: {
       onSuccess: (data: any) => {
-        pagination.setTotalItems(data?.totalRow);
+        pagination.setTotalItems(data?.totalRow ?? 1);
       },
       select: (data: any) => {
         const mappedData: TaxTable[] = [];

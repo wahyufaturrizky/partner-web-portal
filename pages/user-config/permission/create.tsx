@@ -10,7 +10,7 @@ import {
   Spacer,
   Spin,
   Text,
-  FormSelectCustom,
+  FormSelect,
 } from "pink-lava-ui";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -75,7 +75,7 @@ const CreatePartnerConfigPermissionList: any = () => {
     },
   });
   const menus = menuLists?.rows?.map((menu: any) => ({ id: menu.id, value: menu.name }));
-  const onSubmit = (data: any) => mutatePartnerConfigPermissionList(data);
+  const onSubmit = (data: any) => mutatePartnerConfigPermissionList({...data, company_id: companyCode});
 
   const activeStatus = [
     { id: "Y", value: '<div key="1" style="color:green;">Active</div>' },
@@ -179,7 +179,7 @@ const CreatePartnerConfigPermissionList: any = () => {
 				</Alert>
 				<Spacer size={20} /> */}
 
-        <Accordion>
+        <Accordion style={{display:"relative"}} id="area2">
           <Accordion.Item key={1}>
             <Accordion.Header variant="blue">General</Accordion.Header>
             <Accordion.Body>
@@ -198,6 +198,7 @@ const CreatePartnerConfigPermissionList: any = () => {
                   actionLabel="Add New Associated Menu"
                   width={"100%"}
                   items={menus}
+                  containerId="area2"
                   placeholder={"Select"}
                   handleChange={(value) => setValue("menuId", value)}
                   onSearch={(search) => setSearchAssociatedMenu(search)}
@@ -208,6 +209,7 @@ const CreatePartnerConfigPermissionList: any = () => {
                   <Dropdown
                     label="Is System Config"
                     width={"100%"}
+                    containerId="area2"
                     items={valueIsSystemConfig}
                     placeholder={"Select"}
                     handleChange={(value) => setValue("isSystemConfig", value)}
@@ -224,8 +226,9 @@ const CreatePartnerConfigPermissionList: any = () => {
                     <>
                       <Label>View Type</Label>
                       <Spacer size={5} />
-                      <FormSelectCustom
+                      <FormSelect
                         showArrow
+  											containerId="area2"
                         height="48px"
                         style={{ width: "100%" }}
                         size={"large"}
@@ -235,11 +238,11 @@ const CreatePartnerConfigPermissionList: any = () => {
                         withSearch
                         isLoading={isFetchingViewTypeList}
                         isLoadingMore={isFetchingMoreViewTypeList}
-                        fetchMore={() => {
-                          if (hasNextPageViewTypeList) {
-                            fetchNextPageViewTypeList();
-                          }
-                        }}
+                        // fetchMore={() => {
+                        //   if (hasNextPageViewTypeList) {
+                        //     fetchNextPageViewTypeList();
+                        //   }
+                        // }}
                         items={
                           isFetchingViewTypeList && !isFetchingMoreViewTypeList ? [] : viewTypeList
                         }

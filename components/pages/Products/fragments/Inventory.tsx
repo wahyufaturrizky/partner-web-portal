@@ -27,7 +27,7 @@ export default function Inventory(props: any) {
   const storageCondition = [
     { id: 'cold', label: 'Cold', value: 'Cold' },
     { id: 'chilled', label: 'Chilled', value: 'Chilled' },
-    { id: 'dry', label: 'Dry', value: 'Dry' },
+    { id: 'dried', label: 'Dry', value: 'Dry' },
   ]
 
   const shelfLifeUnit = [
