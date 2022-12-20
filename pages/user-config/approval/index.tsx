@@ -92,7 +92,7 @@ const UserConfigApproval: any = () => {
 			action: (
 				<Button
 					size="small"
-					onClick={() => Router.push(`/partner-config-approval/${field.id}`)}
+					onClick={() => Router.push(`/user-config/approval/${field.id}`)}
 					variant="tertiary"
 				>
 					{lang[t].approvalList.tertier.viewDetail}
@@ -201,7 +201,7 @@ const UserConfigApproval: any = () => {
 					visible={modalDelete.open}
 					isLoading={isLoadingDeleteProcessList}
 					onCancel={() => setModalDelete({ open: false })}
-					onOk={() => deleteFields({ ids: selectedRowKeys })}
+					onOk={() => deleteFields({ ids: selectedRowKeys, company_id:companyCode })}
 				/>
 			)}
 		</>

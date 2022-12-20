@@ -10,7 +10,7 @@ import {
   Spacer,
   Spin,
   Text,
-  FormSelectCustom,
+  FormSelect,
 } from "pink-lava-ui";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -27,6 +27,7 @@ import {
 import { useRolePermissions, useViewTypeListInfiniteList } from "../../../hooks/role/useRole";
 import { lang } from "lang";
 import useDebounce from "lib/useDebounce";
+import Link from "next/link";
 
 const schema = yup
   .object({
@@ -138,6 +139,12 @@ const DetailPartnerConfigPermissionList: any = () => {
       company_id: companyCode,
     },
   });
+  // const { data: fieldRole, isLoading: isLoadingFieldRole } = usePartnerConfigPermissionList({
+  //   options: {},
+  //   query: {
+  //     company_id: companyCode,
+  //   },
+  // });
 
   const {
     isFetching: isFetchingViewTypeList,
@@ -173,7 +180,8 @@ const DetailPartnerConfigPermissionList: any = () => {
       },
     },
   });
-
+  console.log(dataPartnerConfigPermissionList, '<<<<partner')
+  console.log(fieldRole, '<<<<role')
   const systemConfig = watch("isSystemConfig")
   return (
     <>
@@ -213,7 +221,7 @@ const DetailPartnerConfigPermissionList: any = () => {
 				</Alert>
 				<Spacer size={20} /> */}
 
-        <Accordion>
+        <Accordion style={{ position: "relative" }} id="area2">
           <Accordion.Item key={1}>
             <Accordion.Header variant="blue">
               {lang[t].permissionList.accordion.general}
@@ -237,6 +245,7 @@ const DetailPartnerConfigPermissionList: any = () => {
                     isShowActionLabel
                     actionLabel="Add New Associated Menu"
                     width={"100%"}
+                    containerId="area2"
                     defaultValue={dataPartnerConfigPermissionList?.menuId}
                     items={menus}
                     placeholder={"Select"}
@@ -261,17 +270,18 @@ const DetailPartnerConfigPermissionList: any = () => {
                           height="48px"
                           style={{ width: "100%" }}
                           size={"large"}
+                          containerId="area2"
                           placeholder={"Select"}
                           borderColor={"#AAAAAA"}
                           arrowColor={"#000"}
                           withSearch
                           isLoading={isFetchingViewTypeList}
                           isLoadingMore={isFetchingMoreViewTypeList}
-                          fetchMore={() => {
-                            if (hasNextPageViewTypeList) {
-                              fetchNextPageViewTypeList();
-                            }
-                          }}
+                          // fetchMore={() => {
+                          //   if (hasNextPageViewTypeList) {
+                          //     fetchNextPageViewTypeList();
+                          //   }
+                          // }}
                           items={
                             isFetchingViewTypeList && !isFetchingMoreViewTypeList
                               ? []
@@ -329,19 +339,26 @@ const DetailPartnerConfigPermissionList: any = () => {
                 <Accordion.Item key={1}>
                   <Accordion.Header>{lang[t].permissionList.permissionListRole}</Accordion.Header>
                   <Accordion.Body padding="0px">
-                    {isLoadingFieldRole ? (
+                    {isLoadingPartnerConfigPermissionList ? (
                       <Spin tip="Loading roles..." />
                     ) : (
-                      fieldRole.rows.map((data: any) => (
+                      dataPartnerConfigPermissionList?.associatedRole?.map((data: any) => (
                         <Record borderTop key={data.id}>
                           {data.name}
 
                           <Button
                             size="small"
-                            onClick={() => Router.push(`/role/${data.id}`)}
+                            // href={}
+                            // onClick={() => router.push(`/user-config/role/${data.id}`)}
                             variant="tertiary"
                           >
+                          <Link href={`/user-config/role/${data.id}`}>
+                            <p
+                            style={{color: "#EB008B"}}
+                            >
                             {lang[t].permissionList.tertier.viewDetail}
+                            </p>
+                            </Link>
                           </Button>
                         </Record>
                       ))
@@ -380,7 +397,7 @@ const Lozenge = styled.div`
   line-height: 24px;
 `
 
-const CustomFormSelect = styled(FormSelectCustom)`
+const CustomFormSelect = styled(FormSelect)`
   
   .ant-select-selection-placeholder {
     line-height: 48px !important;

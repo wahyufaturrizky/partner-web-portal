@@ -135,6 +135,17 @@ const useUploadFileCountries = ({ options }) => {
   );
 };
 
+const useUploadFileCountryStructure = ({ options }) => {
+  return useMutation(
+    (data) =>
+      mdmService("/country/upload-structure", {
+        method: "POST",
+        data,
+      }),
+    { ...options }
+  );
+};
+
 const fetchAvailableName = async ({ name }) => {
   return mdmService(`/country/name/available/${name}`).then((data) => data);
 }
@@ -151,6 +162,7 @@ export {
   useDataCountries,
   useDeleteDataCountries,
   useUploadFileCountries,
+  useUploadFileCountryStructure,
   useCreateCountries,
   useFetchDetailCountry,
   useUpdateCountry,
