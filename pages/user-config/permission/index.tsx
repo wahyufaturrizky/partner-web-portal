@@ -5,7 +5,10 @@ import usePagination from "@lucasmogari/react-pagination";
 import { Text, Button, Col, Row, Spacer, Search, Table, Pagination, Dropdown } from "pink-lava-ui";
 
 import { useMenuLists } from "../../../hooks/menu-config/useMenuConfig";
-import { usePartnerConfigPermissionLists } from "../../../hooks/user-config/usePermission";
+import {
+  usePartnerConfigPermissionLists,
+  useUserPermissions,
+} from "../../../hooks/user-config/usePermission";
 import { lang } from "lang";
 
 const UserConfigPermission: any = () => {
@@ -66,6 +69,15 @@ const UserConfigPermission: any = () => {
       company_id: companyCode,
     },
   });
+  const { data: dataUserPermission } = useUserPermissions({
+    options: {
+      onSuccess: () => {},
+    },
+  });
+
+  const listPermission = dataUserPermission?.permission?.filter(
+    (filtering: any) => filtering.menu === "Channel"
+  );
 
   const columns = [
     {
@@ -82,10 +94,14 @@ const UserConfigPermission: any = () => {
       dataIndex: "field_is_system_config",
       render: (text: any) => `${text}`,
     },
-    {
-      title: lang[t].permissionList.permissionList.action,
-      dataIndex: "action",
-    },
+    ...(listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "View").length > 0
+      ? [
+          {
+            title: lang[t].permissionList.permissionList.action,
+            dataIndex: "action",
+          },
+        ]
+      : []),
   ];
 
   const data: any[] = [];
