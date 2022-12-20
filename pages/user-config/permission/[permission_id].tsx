@@ -51,8 +51,8 @@ const DetailPartnerConfigPermissionList: any = () => {
 
   const debounceFetchViewType = useDebounce(searchViewType, 1000);
 
-  const [searchAssociatedMenu, setSearchAssociatedMenu] = useState("")
-	const debounceSearchAssociatedMenu = useDebounce(searchAssociatedMenu, 1000);
+  const [searchAssociatedMenu, setSearchAssociatedMenu] = useState("");
+  const debounceSearchAssociatedMenu = useDebounce(searchAssociatedMenu, 1000);
 
   const { permission_id } = Router.query;
   const t = localStorage.getItem("lan") || "en-US";
@@ -61,7 +61,7 @@ const DetailPartnerConfigPermissionList: any = () => {
     handleSubmit,
     setValue,
     formState: { errors },
-    watch
+    watch,
   }: any = useForm({
     resolver: yupResolver(schema),
     defaultValues: defaultValue,
@@ -81,15 +81,15 @@ const DetailPartnerConfigPermissionList: any = () => {
     },
     partnerConfigPermissionListId: permission_id,
   });
-	const { data: dataUserPermission } = useUserPermissions({
-		options: {
-			onSuccess: () => {},
-		},
-	});
+  const { data: dataUserPermission } = useUserPermissions({
+    options: {
+      onSuccess: () => {},
+    },
+  });
 
-	const listPermission = dataUserPermission?.permission?.filter(
-		(filtering: any) => filtering.menu === "Permission List"
-	);
+  const listPermission = dataUserPermission?.permission?.filter(
+    (filtering: any) => filtering.menu === "Permission List"
+  );
 
   const { data: dataPartnerConfigPermissionList, isLoading: isLoadingPartnerConfigPermissionList } =
     usePartnerConfigPermissionList({
@@ -190,9 +190,9 @@ const DetailPartnerConfigPermissionList: any = () => {
       },
     },
   });
-  console.log(dataPartnerConfigPermissionList, '<<<<partner')
-  console.log(fieldRole, '<<<<role')
-  const systemConfig = watch("isSystemConfig")
+  console.log(dataPartnerConfigPermissionList, "<<<<partner");
+  console.log(fieldRole, "<<<<role");
+  const systemConfig = watch("isSystemConfig");
   return (
     <>
       <Col>
@@ -208,14 +208,11 @@ const DetailPartnerConfigPermissionList: any = () => {
           <Row justifyContent="flex-end" alignItems="center" nowrap>
             <Row>
               <Row gap="16px">
-                <Button
-                  size="big"
-                  variant={"tertiary"}
-                  onClick={() => router.back()}
-                >
+                <Button size="big" variant={"tertiary"} onClick={() => router.back()}>
                   Cancel
                 </Button>
-                {listPermission?.filter((x:any) => x.viewTypes[0]?.viewType.name === "Update").length > 0 && (
+                {listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Update")
+                  .length > 0 && (
                   <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
                     {lang[t].permissionList.primary.save}
                   </Button>
@@ -310,11 +307,7 @@ const DetailPartnerConfigPermissionList: any = () => {
                     )}
                   </Col>
                   <div style={{ visibility: "hidden", width: "100%" }}>
-                    <Input
-                      label="Name"
-                      height="48px"
-                      placeholder={"e.g 10000000"}
-                    />
+                    <Input label="Name" height="48px" placeholder={"e.g 10000000"} />
                   </div>
                 </Row>
               </Accordion.Body>
@@ -326,7 +319,8 @@ const DetailPartnerConfigPermissionList: any = () => {
 
         <Row>
           <Col>
-            {listPermission?.filter((x:any) => x.viewTypes[0]?.viewType.name === "Update").length > 0 && (
+            {listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Update").length >
+              0 && (
               <Button
                 size="big"
                 variant={"secondary"}
@@ -366,12 +360,10 @@ const DetailPartnerConfigPermissionList: any = () => {
                             // onClick={() => router.push(`/user-config/role/${data.id}`)}
                             variant="tertiary"
                           >
-                          <Link href={`/user-config/role/${data.id}`}>
-                            <p
-                            style={{color: "#EB008B"}}
-                            >
-                            {lang[t].permissionList.tertier.viewDetail}
-                            </p>
+                            <Link href={`/user-config/role/${data.id}`}>
+                              <p style={{ color: "#EB008B" }}>
+                                {lang[t].permissionList.tertier.viewDetail}
+                              </p>
                             </Link>
                           </Button>
                         </Record>
@@ -398,7 +390,7 @@ const DetailPartnerConfigPermissionList: any = () => {
 };
 
 const Lozenge = styled.div`
-  background: #DDDDDD;
+  background: #dddddd;
   border-radius: 64px;
   padding: 4px 8px;
   color: #666666;
@@ -409,10 +401,9 @@ const Lozenge = styled.div`
   font-weight: 600;
   font-size: 14px;
   line-height: 24px;
-`
+`;
 
 const CustomFormSelect = styled(FormSelect)`
-  
   .ant-select-selection-placeholder {
     line-height: 48px !important;
   }
@@ -429,7 +420,7 @@ const CustomFormSelect = styled(FormSelect)`
     display: flex;
     align-items: center;
   }
-`
+`;
 
 const Label = styled.div`
   font-weight: bold;
