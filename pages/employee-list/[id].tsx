@@ -176,13 +176,8 @@ const EmployeeDetail = () => {
       onSuccess: () => {},
     },
   });
-  console.log("dataUserPermission",dataUserPermission);
-  
   const listPermission = dataUserPermission?.permission?.filter(
     (filtering: any) => filtering.menu === "Employee List"
-  );
-  const allowPermissionToShow = listPermission?.filter((data: any) =>
-    permissionEmployeeList.role["Admin"].component.includes(data.name)
   );
 
   const { data: dataEmployee, isLoading: isLoadingEmployee } = useEmployeeListMDM({
@@ -1460,12 +1455,14 @@ const EmployeeDetail = () => {
           </Row>
 
           <Row gap="16px">
-            {allowPermissionToShow?.some((el: any) => el.name === "Delete Employee List") && (
+            {listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Delete").length >
+              0 && (
               <Button size="big" variant={"tertiary"} onClick={() => setShowDeleteModal(true)}>
                 Delete
               </Button>
             )}
-            {allowPermissionToShow?.some((el: any) => el.name === "Save Employee List") && (
+            {listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Update").length >
+              0 && (
               <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
                 {isLoadingUpdateEmployeeList ? "Loading..." : "Save"}
               </Button>
@@ -2304,7 +2301,9 @@ const EmployeeDetail = () => {
                                   borderColor={"#AAAAAA"}
                                   arrowColor={"#000"}
                                   withSearch
-                                  defaultValue={dataEmployee?.address?.[index]?.countryLevelsOptions?.name} 
+                                  defaultValue={
+                                    dataEmployee?.address?.[index]?.countryLevelsOptions?.name
+                                  }
                                   isLoading={isFetchingCountry}
                                   isLoadingMore={isFetchingMoreCountry}
                                   fetchMore={() => {

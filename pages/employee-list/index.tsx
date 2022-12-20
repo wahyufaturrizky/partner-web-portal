@@ -171,14 +171,10 @@ const EmployeeList = () => {
       onSuccess: () => {},
     },
   });
-  console.log("dataUserPermission",dataUserPermission);
-  
   const listPermission = dataUserPermission?.permission?.filter(
     (filtering: any) => filtering.menu === "Employee List"
   );
-  const allowPermissionToShow = listPermission?.filter((data: any) =>
-    permissionEmployeeList.role["Admin"].component.includes(data.name)
-  );
+  console.log(listPermission);
 
   const columns = [
     {
@@ -197,11 +193,15 @@ const EmployeeList = () => {
       title: "Employee Type",
       dataIndex: "employeeType",
     },
-    {
-      title: "Action",
-      dataIndex: "action",
-      width: 160,
-    },
+    ...(listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "View").length > 0
+      ? [
+          {
+            title: "Action",
+            dataIndex: "action",
+            width: 160,
+          },
+        ]
+      : []),
   ];
 
   const rowSelection = {
@@ -218,7 +218,56 @@ const EmployeeList = () => {
 
     uploadFileEmployee(formData);
   };
+  let menuList: any[] = [];
 
+  if (
+    listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Download Template")
+      .length > 0
+  ) {
+    menuList = [
+      ...menuList,
+      {
+        key: 1,
+        value: (
+          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+            <ICDownload />
+            <p style={{ margin: "0" }}>Download Template</p>
+          </div>
+        ),
+      },
+    ];
+  }
+  if (
+    listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Updload Template")
+      .length > 0
+  ) {
+    menuList = [
+      ...menuList,
+      {
+        key: 2,
+        value: (
+          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+            <ICDownload />
+            <p style={{ margin: "0" }}>Upload Template</p>
+          </div>
+        ),
+      },
+    ];
+  }
+  if (listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Download").length > 0) {
+    menuList = [
+      ...menuList,
+      {
+        key: 3,
+        value: (
+          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+            <ICDownload />
+            <p style={{ margin: "0" }}>Download Data</p>
+          </div>
+        ),
+      },
+    ];
+  }
   const listFilterEmployeeList = [
     {
       label: "By Position",
@@ -289,7 +338,8 @@ const EmployeeList = () => {
           </Row>
 
           <Row gap="16px">
-            {allowPermissionToShow?.some((el: any) => el.name === "Delete Employee List") && (
+            {listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Delete").length >
+              0 && (
               <Button
                 size="big"
                 variant={"tertiary"}
@@ -329,44 +379,17 @@ const EmployeeList = () => {
                     break;
                 }
               }}
-              menuList={[
-                {
-                  key: 1,
-                  value: (
-                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                      <ICDownload />
-                      <p style={{ margin: "0" }}>Download Template</p>
-                    </div>
-                  ),
-                },
-                {
-                  key: 2,
-                  value: (
-                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                      <ICUpload />
-                      <p style={{ margin: "0" }}>Upload Template</p>
-                    </div>
-                  ),
-                },
-                {
-                  key: 3,
-                  value: (
-                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                      <ICDownload />
-                      <p style={{ margin: "0" }}>Download Data</p>
-                    </div>
-                  ),
-                },
-              ]}
+              menuList={menuList}
             />
-            {allowPermissionToShow?.some((el: any) => el.name === "Create Employee List") && (
-            <Button
-              size="big"
-              variant="primary"
-              onClick={() => router.push("/employee-list/create")}
-            >
-              Create
-            </Button>
+            {listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Create").length >
+              0 && (
+              <Button
+                size="big"
+                variant="primary"
+                onClick={() => router.push("/employee-list/create")}
+              >
+                Create
+              </Button>
             )}
           </Row>
         </Row>
