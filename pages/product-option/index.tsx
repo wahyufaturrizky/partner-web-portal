@@ -25,6 +25,7 @@ import { mdmDownloadService } from "../../lib/client";
 import useDebounce from "../../lib/useDebounce";
 import { queryClient } from "../_app";
 import { lang } from "lang";
+import { useUserPermissions } from "hooks/user-config/usePermission";
 
 const downloadFile = (params: any) =>
   mdmDownloadService("/product-option/download", { params }).then((res) => {
@@ -55,8 +56,8 @@ const renderConfirmationText = (type: any, data: any) => {
 const ProductOption = () => {
   const t = localStorage.getItem("lan") || "en-US";
   const router = useRouter();
-  const companyId = localStorage.getItem("companyId")
-  const companyCode = localStorage.getItem("companyCode")
+  const companyId = localStorage.getItem("companyId");
+  const companyCode = localStorage.getItem("companyCode");
   const pagination = usePagination({
     page: 1,
     itemsPerPage: 20,
@@ -76,6 +77,16 @@ const ProductOption = () => {
   });
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const debounceSearch = useDebounce(search, 1000);
+
+  const { data: dataUserPermission } = useUserPermissions({
+    options: {
+      onSuccess: () => {},
+    },
+  });
+
+  const listPermission = dataUserPermission?.permission?.filter(
+    (filtering: any) => filtering.menu === "Product Option"
+  );
 
   const {
     data: ProductOptionData,
@@ -153,12 +164,16 @@ const ProductOption = () => {
       title: "Company Id",
       dataIndex: "companyId",
     },
-    {
-      title: lang[t].productOption.productOptionAction,
-      dataIndex: "action",
-      width: "15%",
-      align: "left",
-    },
+    ...(listPermission?.some((el: any) => el.viewTypes[0]?.viewType.name === "View")
+      ? [
+          {
+            title: lang[t].productOption.productOptionAction,
+            dataIndex: "action",
+            width: "15%",
+            align: "left",
+          },
+        ]
+      : []),
   ];
 
   const rowSelection = {
@@ -192,81 +207,114 @@ const ProductOption = () => {
             }}
           />
           <Row gap="16px">
-            <Button
-              size="big"
-              variant={"tertiary"}
-              onClick={() =>
-                setShowDelete({
-                  open: true,
-                  type: "selection",
-                  data: { ProductOptionData: ProductOptionData, selectedRowKeys },
-                })
-              }
-              disabled={rowSelection.selectedRowKeys?.length === 0}
-            >
-              {lang[t].productOption.tertier.delete}
-            </Button>
-            <DropdownMenu
-              title={lang[t].productOption.secondary.more}
-              buttonVariant={"secondary"}
-              buttonSize={"big"}
-              textVariant={"button"}
-              textColor={"pink.regular"}
-              iconStyle={{ fontSize: "12px" }}
-              onClick={(e: any) => {
-                switch (parseInt(e.key)) {
-                  case 1:
-                    downloadFile({ with_data: "N", company_id: companyCode });
-                    break;
-                  case 2:
-                    setShowUpload(true);
-                    break;
-                  case 3:
-                    downloadFile({ with_data: "Y", company_id: companyCode });
-                    break;
-                  case 4:
-                    break;
-                  default:
-                    break;
+            {listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Delete")
+							.length > 0 && (
+              <Button
+                size="big"
+                variant={"tertiary"}
+                onClick={() =>
+                  setShowDelete({
+                    open: true,
+                    type: "selection",
+                    data: { ProductOptionData: ProductOptionData, selectedRowKeys },
+                  })
                 }
-              }}
-              menuList={[
-                {
-                  key: 1,
-                  value: (
-                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                      <ICDownload />
-                      <p style={{ margin: "0" }}>{lang[t].productOption.ghost.downloadTemplate}</p>
-                    </div>
-                  ),
-                },
-                {
-                  key: 2,
-                  value: (
-                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                      <ICUpload />
-                      <p style={{ margin: "0" }}>{lang[t].productOption.ghost.uploadTemplate}</p>
-                    </div>
-                  ),
-                },
-                {
-                  key: 3,
-                  value: (
-                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                      <ICDownload />
-                      <p style={{ margin: "0" }}>{lang[t].productOption.ghost.downloadData}</p>
-                    </div>
-                  ),
-                },
-              ]}
-            />
-            <Button
-              size="big"
-              variant="primary"
-              onClick={() => router.push("/product-option/create")}
-            >
-              {lang[t].productOption.primary.create}
-            </Button>
+                disabled={rowSelection.selectedRowKeys?.length === 0}
+              >
+                {lang[t].productOption.tertier.delete}
+              </Button>
+            )}
+
+            {(listPermission?.filter(
+							(data: any) => data.viewTypes[0]?.viewType.name === "Download Template"
+						).length > 0 ||
+							listPermission?.filter(
+								(data: any) => data.viewTypes[0]?.viewType.name === "Download Data"
+							).length > 0 ||
+							listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Upload")
+								.length > 0) && (
+              <DropdownMenu
+                title={lang[t].productOption.secondary.more}
+                buttonVariant={"secondary"}
+                buttonSize={"big"}
+                textVariant={"button"}
+                textColor={"pink.regular"}
+                iconStyle={{ fontSize: "12px" }}
+                onClick={(e: any) => {
+                  switch (parseInt(e.key)) {
+                    case 1:
+                      downloadFile({ with_data: "N", company_id: companyCode });
+                      break;
+                    case 2:
+                      setShowUpload(true);
+                      break;
+                    case 3:
+                      downloadFile({ with_data: "Y", company_id: companyCode });
+                      break;
+                    case 4:
+                      break;
+                    default:
+                      break;
+                  }
+                }}
+                menuList={[
+                  {
+                    ...(listPermission?.filter(
+											(data: any) => data.viewTypes[0]?.viewType.name === "Download Template"
+										).length > 0 && {
+                      key: 1,
+                      value: (
+                        <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                          <ICDownload />
+                          <p style={{ margin: "0" }}>
+                            {lang[t].productOption.ghost.downloadTemplate}
+                          </p>
+                        </div>
+                      ),
+                    }),
+                  },
+                  {
+                    ...(listPermission?.filter(
+											(data: any) => data.viewTypes[0]?.viewType.name === "Upload"
+										).length > 0 && {
+                      key: 2,
+                      value: (
+                        <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                          <ICUpload />
+                          <p style={{ margin: "0" }}>
+                            {lang[t].productOption.ghost.uploadTemplate}
+                          </p>
+                        </div>
+                      ),
+                    }),
+                  },
+                  {
+                    ...(listPermission?.filter(
+											(data: any) => data.viewTypes[0]?.viewType.name === "Download Data"
+										).length > 0 && {
+                      key: 3,
+                      value: (
+                        <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                          <ICDownload />
+                          <p style={{ margin: "0" }}>{lang[t].productOption.ghost.downloadData}</p>
+                        </div>
+                      ),
+                    }),
+                  },
+                ]}
+              />
+            )}
+
+            {listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Create")
+							.length > 0 && (
+              <Button
+                size="big"
+                variant="primary"
+                onClick={() => router.push("/product-option/create")}
+              >
+                {lang[t].productOption.primary.create}
+              </Button>
+            )}
           </Row>
         </Row>
       </Card>

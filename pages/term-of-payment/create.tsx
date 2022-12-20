@@ -13,12 +13,15 @@ import ModalAddTerm from "../../components/elements/Modal/ModalAddTerm";
 import DraggableTable from "../../components/pages/TermOfPayment/DraggableTable";
 import { ExclamationCircleOutlined } from "@ant-design/icons";
 import { lang } from "lang";
+import { permissionTermOfPayment } from "permission/term-of-payment";
+import { usePartnerConfigPermissionLists } from "hooks/user-config/usePermission";
+import { useUserPermissions } from "hooks/user-config/useUser";
 
 const TermOfPaymentCreate = () => {
   const t = localStorage.getItem("lan") || "en-US";
   const router = useRouter();
-  const companyId = localStorage.getItem("companyId")
-  const companyCode = localStorage.getItem("companyCode")
+  const companyId = localStorage.getItem("companyId");
+  const companyCode = localStorage.getItem("companyCode");
   const [showTermForm, setShowTermForm] = useState({ type: "", open: false, data: {} });
   const [showDisableTerm, setShowDisableTerm] = useState(false);
   const [termList, setTermList] = useState<any[]>([]);
@@ -117,6 +120,22 @@ const TermOfPaymentCreate = () => {
     }
   };
 
+  const { data: dataUserPermission } = useUserPermissions({
+    options: {
+      onSuccess: () => {},
+    },
+  });
+
+  const listPermission = dataUserPermission?.permission?.filter(
+    (filtering: any) => filtering.menu === "Term Of Payment"
+  );
+
+  const checkUserPermission = (permissionGranted) => {
+    return listPermission?.find(
+      (data: any) => data?.viewTypes?.[0]?.viewType?.name === permissionGranted
+    );
+  };
+
   const onSubmit = (data: any) => {
     const mappedTermListRequest = termList.map((el: any) => {
       return {
@@ -151,9 +170,11 @@ const TermOfPaymentCreate = () => {
               <Button size="big" variant={"tertiary"} onClick={() => router.back()}>
                 {lang[t].termOfPayment.tertier.cancel}
               </Button>
-              <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
-                {isLoadingTermOfPayment ? "Loading..." : lang[t].termOfPayment.primary.save}
-              </Button>
+              {checkUserPermission("Create") && (
+                <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
+                  {isLoadingTermOfPayment ? "Loading..." : lang[t].termOfPayment.primary.save}
+                </Button>
+              )}
             </Row>
           </Row>
         </Card>
@@ -175,21 +196,23 @@ const TermOfPaymentCreate = () => {
             <Spacer size={10} />
 
             <Row width={"150px"}>
-              <Button
-                size="small"
-                variant={"tertiary"}
-                onClick={() => {
-                  const fileTypeOne = termList.filter((el) => el.type === 1);
+              {checkUserPermission("Create") && (
+                <Button
+                  size="small"
+                  variant={"tertiary"}
+                  onClick={() => {
+                    const fileTypeOne = termList.filter((el) => el.type === 1);
 
-                  if (fileTypeOne.length > 0) {
-                    setShowDisableTerm(true);
-                  } else {
-                    setShowTermForm({ type: "add", open: true, data: {} });
-                  }
-                }}
-              >
-                + Add Terms
-              </Button>
+                    if (fileTypeOne.length > 0) {
+                      setShowDisableTerm(true);
+                    } else {
+                      setShowTermForm({ type: "add", open: true, data: {} });
+                    }
+                  }}
+                >
+                  + Add Terms
+                </Button>
+              )}
             </Row>
 
             <Spacer size={10} />

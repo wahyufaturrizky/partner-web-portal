@@ -118,9 +118,12 @@ const EmployeeList = () => {
             key: element.code,
             id: element.code,
             name: element.name,
-            jobPosition: jobPositionsData.rows.find((findingJobPosition: any) =>
-              findingJobPosition.jobPositionId.includes(element.jobPosition)
-            ).name,
+            // jobPosition: jobPositionsData.rows.find((findingJobPosition: any) =>
+            //   findingJobPosition.jobPositionId.includes(element.jobPosition)
+            // ).name,
+            jobPosition: jobPositionsData?.rows?.find(
+              (job) => job?.jobPositionId === element?.jobPosition
+            )?.name,
             employeeType: element.type,
             action: (
               <div style={{ display: "flex", justifyContent: "left" }}>

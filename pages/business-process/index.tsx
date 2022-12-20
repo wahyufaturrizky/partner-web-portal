@@ -13,10 +13,11 @@ import { STATUS_BUSINESS_PROCESS } from "../../utils/constant";
 import useDebounce from "../../lib/useDebounce";
 import { queryClient } from "../_app";
 import { lang } from "lang";
+import { useUserPermissions } from "hooks/user-config/usePermission";
 
 const BusinessProcess = () => {
   const t = localStorage.getItem("lan") || "en-US";
-	const companyCode = localStorage.getItem("companyCode");
+  const companyCode = localStorage.getItem("companyCode");
   const router = useRouter();
   const pagination = usePagination({
     page: 1,
@@ -32,6 +33,16 @@ const BusinessProcess = () => {
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const debounceSearch = useDebounce(search, 1000);
 
+  const { data: dataUserPermission } = useUserPermissions({
+    options: {
+      onSuccess: () => {},
+    },
+  });
+
+  const listPermission = dataUserPermission?.permission?.filter(
+    (filtering: any) => filtering.menu === "Business Process"
+  );
+
   const {
     data: businessProcessesData,
     isLoading: isLoadingBP,
@@ -41,7 +52,7 @@ const BusinessProcess = () => {
       search: debounceSearch,
       page: pagination.page,
       limit: pagination.itemsPerPage,
-      company_id: companyCode
+      company_id: companyCode,
     },
     options: {
       onSuccess: (data: any) => {
@@ -99,11 +110,15 @@ const BusinessProcess = () => {
         </Lozenge>
       ),
     },
-    {
-      title: lang[t].businessProcess.businessProcessAction,
-      dataIndex: "action",
-      align: "left",
-    },
+    ...(listPermission?.some((el: any) => el.viewTypes[0]?.viewType.name === "View")
+      ? [
+          {
+            title: lang[t].businessProcess.businessProcessAction,
+            dataIndex: "action",
+            align: "left",
+          },
+        ]
+      : []),
   ];
 
   const rowSelection = {
@@ -126,21 +141,27 @@ const BusinessProcess = () => {
               }}
             />
             <Row gap="16px">
-              <Button
-                size="big"
-                variant={"tertiary"}
-                onClick={() => setShow(true)}
-                disabled={rowSelection.selectedRowKeys?.length === 0}
-              >
-                Delete
-              </Button>
-              <Button
-                size="big"
-                variant="primary"
-                onClick={() => router.push("/business-process/create")}
-              >
-                {lang[t].businessProcess.primary.create}
-              </Button>
+              {listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Delete")
+							.length > 0 && (
+                <Button
+                  size="big"
+                  variant={"tertiary"}
+                  onClick={() => setShow(true)}
+                  disabled={rowSelection.selectedRowKeys?.length === 0}
+                >
+                  Delete
+                </Button>
+              )}
+              {listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Create")
+							.length > 0 && (
+                <Button
+                  size="big"
+                  variant="primary"
+                  onClick={() => router.push("/business-process/create")}
+                >
+                  {lang[t].businessProcess.primary.create}
+                </Button>
+              )}
             </Row>
           </Row>
         </Card>
