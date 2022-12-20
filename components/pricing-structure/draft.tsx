@@ -41,10 +41,12 @@ const DraftPricingStructure: any = ({
   refetchCount,
   modalPricingStructureForm,
   setModalPricingStructureForm,
+  listPermission,
 }: {
   refetchCount: any;
   modalPricingStructureForm: any;
   setModalPricingStructureForm: any;
+  listPermission: any;
 }) => {
   const router = useRouter();
   const pagination = usePagination({
@@ -55,7 +57,7 @@ const DraftPricingStructure: any = ({
     arrows: true,
     totalItems: 100,
   });
-  const companyCode = localStorage.getItem("companyCode")
+  const companyCode = localStorage.getItem("companyCode");
 
   const [search, setSearch] = useState("");
   const [isShowUpload, setShowUpload] = useState(false);
@@ -79,7 +81,7 @@ const DraftPricingStructure: any = ({
       page: pagination.page,
       limit: pagination.itemsPerPage,
       status: "DRAFTED",
-      company_id: companyCode
+      company_id: companyCode,
     },
   });
 
@@ -258,16 +260,18 @@ const DraftPricingStructure: any = ({
                 },
               ]}
             />
-
-            <Button
-              size="big"
-              variant={"primary"}
-              onClick={() => {
-                router.push("/pricing-structure/create");
-              }}
-            >
-              Create
-            </Button>
+            {listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Create").length >
+              0 && (
+              <Button
+                size="big"
+                variant={"primary"}
+                onClick={() => {
+                  router.push("/pricing-structure/create");
+                }}
+              >
+                Create
+              </Button>
+            )}
           </Row>
         </Row>
       </Card>

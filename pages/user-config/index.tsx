@@ -24,6 +24,8 @@ import { lang } from "lang";
 import useDebounce from "lib/useDebounce";
 import { clientDownloadService } from "lib/client";
 import { queryClient } from "pages/_app";
+import { useUserPermissions } from "hooks/user-config/usePermission";
+import { permissionUserList } from "permission/user-list";
 
 const UserConfigUser: any = () => {
   const router = useRouter();
@@ -102,6 +104,18 @@ const UserConfigUser: any = () => {
         },
       },
     });
+  const { data: dataUserPermission } = useUserPermissions({
+    options: {
+      onSuccess: () => {},
+    },
+  });
+
+  const listPermission = dataUserPermission?.permission?.filter(
+    (filtering: any) => filtering.menu === "User List"
+  );
+  const allowPermissionToShow = listPermission?.filter((data: any) =>
+    permissionUserList.role[dataUserPermission?.role?.name]?.component.includes(data.name)
+  );
 
   const columns = [
     {
@@ -119,12 +133,15 @@ const UserConfigUser: any = () => {
         <Lozenge variant={STATUS_APPROVAL_VARIANT[text]}>{STATUS_APPROVAL_TEXT[text]}</Lozenge>
       ),
     },
-    {
-      title: lang[t].userList.list.table.action,
-      dataIndex: "action",
-      width: "20%",
-    },
-
+    ...(listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "View").length > 0
+      ? [
+          {
+            title: lang[t].userList.list.table.action,
+            dataIndex: "action",
+            width: "20%",
+          },
+        ]
+      : []),
   ];
 
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
@@ -154,6 +171,38 @@ const UserConfigUser: any = () => {
     uploadFileUserConfig(formData);
   };
 
+  let menuList: any[] = [];
+
+  if (
+    allowPermissionToShow?.map((data: any) => data.name)?.includes("Download Template User List")
+  ) {
+    menuList = [
+      ...menuList,
+      {
+        key: 1,
+        value: (
+          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+            <DownloadSvg />
+            <p style={{ margin: "0" }}>{lang[t].userList.list.button.download}</p>
+          </div>
+        ),
+      },
+    ];
+  }
+  if (allowPermissionToShow?.map((data: any) => data.name)?.includes("Upload Template User List")) {
+    menuList = [
+      ...menuList,
+      {
+        key: 2,
+        value: (
+          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+            <UploadSvg />
+            <p style={{ margin: "0" }}>{lang[t].userList.list.button.upload}</p>
+          </div>
+        ),
+      },
+    ];
+  }
   return (
     <>
       <Col>
@@ -167,7 +216,9 @@ const UserConfigUser: any = () => {
               onChange={(e: any) => setSearch(e.target.value)}
             />
             <Row gap="16px">
-              <Button
+              {listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Delete")
+                .length > 0 && (
+                <Button
                   size="big"
                   variant={"tertiary"}
                   onClick={() => setModalDelete({ open: true })}
@@ -175,49 +226,33 @@ const UserConfigUser: any = () => {
                 >
                   {lang[t].userList.list.button.delete}
                 </Button>
-
+              )}
+              {menuList.length > 0 && (
                 <DropdownMenu
-                    title={lang[t].userList.list.button.more}
-                    buttonVariant="secondary"
-                    buttonSize="big"
-                    textVariant="button"
-                    textColor="pink.regular"
-                    iconStyle={{ fontSize: "12px" }}
-                    onClick={(e: any) => {
-                      switch (parseInt(e.key)) {
-                        case 1:
-                          downloadFile({ with_data: "N" });
-                          break;
-                        case 2:
-                          setShowUpload(true);
-                          break;
-    
-                        default:
-                          break;
-                      }
-                    }}
-                    menuList={[
-                      {
-                        key: 1,
-                        value: (
-                          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                            <DownloadSvg />
-                            <p style={{ margin: "0" }}>{lang[t].userList.list.button.download}</p>
-                          </div>
-                        ),
-                      },
-                      {
-                        key: 2,
-                        value: (
-                          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                            <UploadSvg />
-                            <p style={{ margin: "0" }}>{lang[t].userList.list.button.upload}</p>
-                          </div>
-                        ),
-                      }
-                    ]}
-                  />
-             
+                  title={lang[t].userList.list.button.more}
+                  buttonVariant="secondary"
+                  buttonSize="big"
+                  textVariant="button"
+                  textColor="pink.regular"
+                  iconStyle={{ fontSize: "12px" }}
+                  onClick={(e: any) => {
+                    switch (parseInt(e.key)) {
+                      case 1:
+                        downloadFile({ with_data: "N" });
+                        break;
+                      case 2:
+                        setShowUpload(true);
+                        break;
+
+                      default:
+                        break;
+                    }
+                  }}
+                  menuList={menuList}
+                />
+              )}
+              {listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Create")
+                .length > 0 && (
                 <Button
                   size="big"
                   variant={"primary"}
@@ -225,7 +260,7 @@ const UserConfigUser: any = () => {
                 >
                   {lang[t].userList.list.button.create}
                 </Button>
-              
+              )}
             </Row>
           </Row>
         </Card>

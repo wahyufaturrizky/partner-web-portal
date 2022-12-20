@@ -42,7 +42,8 @@ const renderConfirmationText = (type: any, data: any) => {
       return data.selectedRowKeys.length > 1
         ? `Are you sure to delete ${data.selectedRowKeys.length} items ?`
         : `Are you sure to delete Profit Center ${
-            data?.profitData?.data.find((el: any) => el.key === data.selectedRowKeys[0])?.profCenName
+            data?.profitData?.data.find((el: any) => el.key === data.selectedRowKeys[0])
+              ?.profCenName
           } ?`;
     case "detail":
       return `Are you sure to delete Profit Center ${data.profCenName} ?`;
@@ -54,8 +55,8 @@ const renderConfirmationText = (type: any, data: any) => {
 
 const ProfitCenter = () => {
   const router = useRouter();
-  const companyId = localStorage.getItem("companyId")
-  const companyCode = localStorage.getItem("companyCode")
+  const companyId = localStorage.getItem("companyId");
+  const companyCode = localStorage.getItem("companyCode");
   const pagination = usePagination({
     page: 1,
     itemsPerPage: 20,
@@ -83,7 +84,7 @@ const ProfitCenter = () => {
       company_id: companyCode,
     },
     options: {
-      onSuccess: (data: any) => {        
+      onSuccess: (data: any) => {
         pagination.setTotalItems(data.totalRow);
       },
       select: (data: any) => {
@@ -124,14 +125,16 @@ const ProfitCenter = () => {
     },
   });
 
-  const { mutate: uploadFileProfit, isLoading: isLoadingUploadFileTop } = useUploadFileProfitCenter({
-    options: {
-      onSuccess: () => {
-        queryClient.invalidateQueries(["profit-list"]);
-        setShowUpload(false);
+  const { mutate: uploadFileProfit, isLoading: isLoadingUploadFileTop } = useUploadFileProfitCenter(
+    {
+      options: {
+        onSuccess: () => {
+          queryClient.invalidateQueries(["profit-list"]);
+          setShowUpload(false);
+        },
       },
-    },
-  });
+    }
+  );
 
   const { data: dataUserPermission } = useUserPermissions({
     options: {
@@ -141,9 +144,6 @@ const ProfitCenter = () => {
 
   const listPermission = dataUserPermission?.permission?.filter(
     (filtering: any) => filtering.menu === "Profit Center"
-  );
-  const allowPermissionToShow = listPermission?.filter((data: any) =>
-    permissionProfitCenter.role["Admin"].component.includes(data.name)
   );
 
   const columns = [
@@ -181,7 +181,56 @@ const ProfitCenter = () => {
 
     uploadFileProfit(formData);
   };
+  let menuList: any[] = [];
 
+  if (
+    listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Download Template")
+      .length > 0
+  ) {
+    menuList = [
+      ...menuList,
+      {
+        key: 1,
+        value: (
+          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+            <ICDownload />
+            <p style={{ margin: "0" }}>Download Template</p>
+          </div>
+        ),
+      },
+    ];
+  }
+  if (
+    listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Updload Template")
+      .length > 0
+  ) {
+    menuList = [
+      ...menuList,
+      {
+        key: 2,
+        value: (
+          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+            <ICDownload />
+            <p style={{ margin: "0" }}>Upload Template</p>
+          </div>
+        ),
+      },
+    ];
+  }
+  if (listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Download").length > 0) {
+    menuList = [
+      ...menuList,
+      {
+        key: 3,
+        value: (
+          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+            <ICDownload />
+            <p style={{ margin: "0" }}>Download Data</p>
+          </div>
+        ),
+      },
+    ];
+  }
   return (
     <>
       <Col>
@@ -198,7 +247,8 @@ const ProfitCenter = () => {
             }}
           />
           <Row gap="16px">
-            {allowPermissionToShow?.some((el:any) => el.name === "Delete Profit Center") && (
+            {listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Delete").length >
+              0 && (
               <Button
                 size="big"
                 variant={"tertiary"}
@@ -238,44 +288,17 @@ const ProfitCenter = () => {
                     break;
                 }
               }}
-              menuList={[
-                {
-                  key: 1,
-                  value: (
-                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                      <ICDownload />
-                      <p style={{ margin: "0" }}>Download Template</p>
-                    </div>
-                  ),
-                },
-                {
-                  key: 2,
-                  value: (
-                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                      <ICUpload />
-                      <p style={{ margin: "0" }}>Upload Template</p>
-                    </div>
-                  ),
-                },
-                {
-                  key: 3,
-                  value: (
-                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                      <ICDownload />
-                      <p style={{ margin: "0" }}>Download Data</p>
-                    </div>
-                  ),
-                },
-              ]}
+              menuList={menuList}
             />
-            {allowPermissionToShow?.some((el:any) => el.name === "Create Profit Center") && (
-            <Button
-              size="big"
-              variant="primary"
-              onClick={() => router.push("/profit-center/create")}
-            >
-              Create
-            </Button>
+            {listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "View").length >
+              0 && (
+              <Button
+                size="big"
+                variant="primary"
+                onClick={() => router.push("/profit-center/create")}
+              >
+                Create
+              </Button>
             )}
           </Row>
         </Row>
@@ -333,7 +356,10 @@ const ProfitCenter = () => {
                   variant="primary"
                   size="big"
                   onClick={() => {
-                    deleteProfit({ profit_center_ids: selectedRowKeys, company_ids: [companyCode] });
+                    deleteProfit({
+                      profit_center_ids: selectedRowKeys,
+                      company_ids: [companyCode],
+                    });
                   }}
                 >
                   {isLoadingDeleteProfit ? "loading..." : "Yes"}
@@ -360,4 +386,4 @@ const Card = styled.div`
   padding: 16px;
 `;
 
-export default ProfitCenter
+export default ProfitCenter;

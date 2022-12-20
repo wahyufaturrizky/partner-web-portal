@@ -23,6 +23,7 @@ export const ModalDetailAccountGroup: any = ({
   onCancel,
   onOk,
   id,
+  permission
 }: any) => {
   const {
     control,
@@ -74,9 +75,11 @@ export const ModalDetailAccountGroup: any = ({
             gap: "12px",
           }}
         >
-          <Button onClick={handleSubmit(onSubmit)} variant="primary" size="big">
-            {lang[t].accountGroup.primary.save}
-          </Button>
+          {permission?.filter((x) => x.viewTypes[0]?.viewType.name === "Update").length > 0 && (
+            <Button onClick={handleSubmit(onSubmit)} variant="primary" size="big">
+              {lang[t].accountGroup.primary.save}
+            </Button>
+          )}
         </div>
       }
       content={

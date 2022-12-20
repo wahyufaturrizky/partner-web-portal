@@ -1229,7 +1229,7 @@ const DetailPricingStructure: any = () => {
                   variant={"primary"}
                   onClick={handleSubmit(onSubmitDraft)}
                 >
-                  {isLoadingPricingStructureDraft ? "Loading..." : "Save"}
+                  {isLoadingPricingStructureDraft ? "Loading..." : "Savse"}
                 </Button>
               </Row>
             </Card>

@@ -45,7 +45,7 @@ const ActivePricingStructure: any = (props: any) => {
     arrows: true,
     totalItems: 100,
   });
-  const companyCode = localStorage.getItem("companyCode")
+  const companyCode = localStorage.getItem("companyCode");
 
   const [isShowUpload, setShowUpload] = useState(false);
 
@@ -67,7 +67,7 @@ const ActivePricingStructure: any = (props: any) => {
       page: pagination.page,
       limit: pagination.itemsPerPage,
       status: "ACTIVE",
-      company_id: companyCode
+      company_id: companyCode,
     },
   });
 
@@ -223,16 +223,18 @@ const ActivePricingStructure: any = (props: any) => {
                 },
               ]}
             />
-
-            <Button
-              size="big"
-              variant={"primary"}
-              onClick={() => {
-                router.push("/pricing-structure/create");
-              }}
-            >
-              Create
-            </Button>
+            {props.listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Create")
+              .length > 0 && (
+              <Button
+                size="big"
+                variant={"primary"}
+                onClick={() => {
+                  router.push("/pricing-structure/create");
+                }}
+              >
+                Create
+              </Button>
+            )}
           </Row>
         </Row>
       </Card>
