@@ -186,12 +186,16 @@ const JobPosition = () => {
       title: lang[t].department.departmentName,
       dataIndex: "name",
     },
+        ...(listPermission?.filter((x :any) => x.viewTypes[0]?.viewType.name === "View").length > 0
+      ? [
     {
       title: lang[t].department.action,
       dataIndex: "action",
       width: "15%",
       align: "left",
     },
+            ]
+      : []),
   ];
 
   const rowSelection = {
@@ -226,7 +230,56 @@ const JobPosition = () => {
 
     uploadFileDepartment(formData);
   };
+  let menuList: any[] = [];
 
+  if (
+    listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Download Template")
+      .length > 0
+  ) {
+    menuList = [
+      ...menuList,
+      {
+        key: 1,
+        value: (
+          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+            <ICDownload />
+            <p style={{ margin: "0" }}>Download Template</p>
+          </div>
+        ),
+      },
+    ];
+  }
+  if (
+    listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Updload Template")
+      .length > 0
+  ) {
+    menuList = [
+      ...menuList,
+      {
+        key: 2,
+        value: (
+          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+            <ICDownload />
+            <p style={{ margin: "0" }}>Upload Template</p>
+          </div>
+        ),
+      },
+    ];
+  }
+  if (listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Download").length > 0) {
+    menuList = [
+      ...menuList,
+      {
+        key: 3,
+        value: (
+          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+            <ICDownload />
+            <p style={{ margin: "0" }}>Download Data</p>
+          </div>
+        ),
+      },
+    ];
+  }
   return (
     <>
       <Col>
@@ -243,7 +296,7 @@ const JobPosition = () => {
             }}
           />
           <Row gap="16px">
-            {allowPermissionToShow?.some((el: any) => el.name === "Delete Department") && (
+            {listPermission?.filter((x :any) => x.viewTypes[0]?.viewType.name === "Delete").length > 0 && (
             <Button
               size="big"
               variant={"tertiary"}
@@ -283,37 +336,9 @@ const JobPosition = () => {
                     break;
                 }
               }}
-              menuList={[
-                {
-                  key: 1,
-                  value: (
-                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                      <ICDownload />
-                      <p style={{ margin: "0" }}>{lang[t].department.ghost.downloadTemplate}</p>
-                    </div>
-                  ),
-                },
-                {
-                  key: 2,
-                  value: (
-                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                      <ICUpload />
-                      <p style={{ margin: "0" }}>{lang[t].department.ghost.uploadTemplate}</p>
-                    </div>
-                  ),
-                },
-                {
-                  key: 3,
-                  value: (
-                    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                      <ICDownload />
-                      <p style={{ margin: "0" }}>{lang[t].department.ghost.downloadData}</p>
-                    </div>
-                  ),
-                },
-              ]}
+              menuList={menuList}
             />
-            {allowPermissionToShow?.some((el: any) => el.name === "Create Department") && (
+            {listPermission?.filter((x :any) => x.viewTypes[0]?.viewType.name === "Create").length > 0 && (
             <Button
               size="big"
               variant="primary"
@@ -394,7 +419,7 @@ const JobPosition = () => {
                   </>
                 ) : (
                   <>
-                  {allowPermissionToShow?.some((el: any) => el.name === "Delete Department") && (
+                  {listPermission?.filter((x :any) => x.viewTypes[0]?.viewType.name === "Delete").length > 0 && (
                   <Button
                     full
                     size="big"
@@ -408,7 +433,7 @@ const JobPosition = () => {
                     {lang[t].department.tertier.delete}
                   </Button>
                   )}
-                  {allowPermissionToShow?.some((el: any) => el.name === "Update Department") && (
+                  {listPermission?.filter((x :any) => x.viewTypes[0]?.viewType.name === "Update").length > 0 && (
                   <Button full onClick={handleSubmit(onSubmit)} variant="primary" size="big">
                       {isLoadingCreateDepartment || isLoadingUpdateDepartment
                         ? "Loading..."
