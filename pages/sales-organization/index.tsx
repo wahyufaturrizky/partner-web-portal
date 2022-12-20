@@ -1,411 +1,470 @@
 import React, { useState } from "react";
 import {
-	Text, Col, Row,
-	Spacer, Button, Input,
-	Switch, FileUploaderExcel, Spin,
+  Text,
+  Col,
+  Row,
+  Spacer,
+  Button,
+  Input,
+  Switch,
+  FileUploaderExcel,
+  Spin,
 } from "pink-lava-ui";
 import styled from "styled-components";
-import { ModalDeleteConfirmation } from "../../components/elements/Modal/ModalConfirmationDelete";
 import _ from "lodash";
-import { useSalesOrganization, useUpdateSalesOrganization, useCreateSalesOrganization } from "../../hooks/sales-organization/useSalesOrganization";
-import { ModalManageDataEdit } from "../../components/elements/Modal/ModalManageDataSalesOrganization";
 import axios from "axios";
 import { lang } from "lang";
-
+import { useUserPermissions } from "hooks/user-config/usePermission";
+import { ModalDeleteConfirmation } from "../../components/elements/Modal/ModalConfirmationDelete";
+import {
+  useSalesOrganization,
+  useUpdateSalesOrganization,
+  useCreateSalesOrganization,
+} from "../../hooks/sales-organization/useSalesOrganization";
+import { ModalManageDataEdit } from "../../components/elements/Modal/ModalManageDataSalesOrganization";
 
 let token;
-let apiURL = process.env.NEXT_PUBLIC_API_BASE3;
+const apiURL = process.env.NEXT_PUBLIC_API_BASE3;
 
 if (typeof window !== "undefined") {
-	token = localStorage.getItem("token");
+  token = localStorage.getItem("token");
 }
 
 const CreateConfig = () => {
-    const t = localStorage.getItem("lan") || "en-US";
-    
-    const COMPANY_CODE = localStorage.getItem("companyCode");
+  const t = localStorage.getItem("lan") || "en-US";
 
-	const [countryStructure, setCountryStructure] = useState([]);
-	const [modalDelete, setModalDelete] = useState({ index: -1, open: false, structure: {} });
-	const [showUploadStructure, setShowUploadStructure] = useState();
-    const [isEditMode, setIsEditMode] = useState(false);
-    const [showManageData, setShowManageData] = useState({
-		visible: false,
-		index: null,
-	});
-    const [isNew, setIsNew] = useState(true);
+  const COMPANY_CODE = localStorage.getItem("companyCode");
 
-	const onUploadStructure = (data: ({ [s: string]: unknown; } | ArrayLike<unknown>)[]) => {
-		const formData = new FormData();
-        formData.append("upload_file", data);
+  const [countryStructure, setCountryStructure] = useState([]);
+  const [modalDelete, setModalDelete] = useState({ index: -1, open: false, structure: {} });
+  const [showUploadStructure, setShowUploadStructure] = useState();
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [showManageData, setShowManageData] = useState({
+    visible: false,
+    index: null,
+  });
+  const [isNew, setIsNew] = useState(true);
 
-        console.log(formData, "<<<<form")
+  const { data: dataUserPermission } = useUserPermissions({
+    options: {
+      onSuccess: () => {},
+    },
+  });
 
-        // let idCountryStructure = countryStructure[0];
+  const listPermission = dataUserPermission?.permission?.filter(
+    (filtering: any) => filtering.menu === "Sales Organization"
+  );
 
-        // const payload = {
-        //     add: [],
-        //     update: []
-        // }
+  const onUploadStructure = (data: ({ [s: string]: unknown } | ArrayLike<unknown>)[]) => {
+    const formData = new FormData();
+    formData.append("upload_file", data);
 
-        // if(idCountryStructure){
-        //     payload.delete = idCountryStructure.id;
-        // }
-        // updateSalesOrganization(payload)
+    console.log(formData, "<<<<form");
 
-		// const datas = Object.values(data[0]).filter(data => !!data).map((data, index) => ({
-		// 	name: data,
-		// 	level: index + 1,
-        //     actionType: 'NEW'
-		// }));
-        // setCountryStructure(datas)
+    // let idCountryStructure = countryStructure[0];
 
-        // const datasPayload = datas.map(({actionType, ...rest}) => ({
-        //     ...rest
-        // }));
+    // const payload = {
+    //     add: [],
+    //     update: []
+    // }
 
-        // const payloadUpdate = {
-        //     add: datasPayload,
-        //     update: []
-        // }
-        // updateSalesOrganization(payloadUpdate)
-	};
+    // if(idCountryStructure){
+    //     payload.delete = idCountryStructure.id;
+    // }
+    // updateSalesOrganization(payload)
 
-	function stringifyNumber(n) {
-		const special = [
-			"1st",
-			"2nd",
-			"3rd",
-			"4th",
-			"5th",
-			"6th",
-			"7th",
-			"8th",
-			"9th",
-			"10th",
-            "11th",
-            "12th",
-            "13th",
-            "14th",
-            "15th",
-            "16th",
-            "17th",
-            "18th",
-            "19th",
-            "20th"
-		];
-		return special[n];
-	}
+    // const datas = Object.values(data[0]).filter(data => !!data).map((data, index) => ({
+    // 	name: data,
+    // 	level: index + 1,
+    //     actionType: 'NEW'
+    // }));
+    // setCountryStructure(datas)
 
-	const onChangeStructureName = (e, index, isNew) => {
-		let newStructure = _.cloneDeep(countryStructure);
-		newStructure[index].name = e.target.value;
-        newStructure[index].actionType = isNew ? "NEW" : "UPDATE"
-		setCountryStructure(newStructure);
-	};
+    // const datasPayload = datas.map(({actionType, ...rest}) => ({
+    //     ...rest
+    // }));
 
-	const { isLoading, refetch: refetchSalesOrganization } = useSalesOrganization({
+    // const payloadUpdate = {
+    //     add: datasPayload,
+    //     update: []
+    // }
+    // updateSalesOrganization(payloadUpdate)
+  };
+
+  function stringifyNumber(n) {
+    const special = [
+      "1st",
+      "2nd",
+      "3rd",
+      "4th",
+      "5th",
+      "6th",
+      "7th",
+      "8th",
+      "9th",
+      "10th",
+      "11th",
+      "12th",
+      "13th",
+      "14th",
+      "15th",
+      "16th",
+      "17th",
+      "18th",
+      "19th",
+      "20th",
+    ];
+    return special[n];
+  }
+
+  const onChangeStructureName = (e, index, isNew) => {
+    const newStructure = _.cloneDeep(countryStructure);
+    newStructure[index].name = e.target.value;
+    newStructure[index].actionType = isNew ? "NEW" : "UPDATE";
+    setCountryStructure(newStructure);
+  };
+
+  const { isLoading, refetch: refetchSalesOrganization } = useSalesOrganization({
+    company_code: COMPANY_CODE,
+    options: {
+      onSuccess: (data: any) => {
+        setIsNew(false);
+        setCountryStructure(
+          data.salesOrganizationStructures.map((data: any, index: string) => ({
+            name: data.name,
+            level: index + 1,
+            id: data.id,
+          }))
+        );
+      },
+    },
+  });
+
+  const { mutate: updateSalesOrganization } = useUpdateSalesOrganization({
+    company_code: COMPANY_CODE,
+    options: {
+      onSuccess: () => {
+        refetchSalesOrganization();
+      },
+      retry: true,
+    },
+  });
+
+  const { mutate: createSalesOrganization } = useCreateSalesOrganization({
+    options: {
+      onSuccess: () => {
+        refetchSalesOrganization();
+      },
+      retry: true,
+    },
+  });
+
+  const onDeleteStructure = () => {
+    if (modalDelete.structure.id) {
+      onDeleteOldStructure();
+    } else {
+      onDeleteNewStructure();
+    }
+  };
+
+  const onDeleteNewStructure = () => {
+    setModalDelete({ open: false, index: -1, structure: {} });
+    const newCountryStructure = countryStructure.slice(0, modalDelete.index);
+    setCountryStructure(newCountryStructure);
+  };
+
+  const onDeleteOldStructure = () => {
+    setModalDelete({ open: false, index: -1, structure: {} });
+    const currentStructure = { ...countryStructure[modalDelete.index] };
+
+    const payload = {
+      add: [],
+      update: [],
+      delete: currentStructure.id,
+    };
+    updateSalesOrganization(payload);
+  };
+
+  const addStructure = () => {
+    const newStructure = countryStructure.slice();
+    newStructure.push({
+      level: countryStructure.length + 1,
+      name: "",
+      actionType: "NEW",
+    });
+    setCountryStructure(newStructure);
+  };
+
+  const onSubmit = () => {
+    console.log("masuk");
+    let payload = {};
+    if (isNew) {
+      payload = {
         company_code: COMPANY_CODE,
-		options: {
-			onSuccess: (data: any) => {
-                setIsNew(false);
-				setCountryStructure(
-					data.salesOrganizationStructures.map((data: any, index: string) => ({
-						name: data.name,
-						level: index + 1,
-						id: data.id
-					}))
-				);
-			},
-		}
-	});
+        data: countryStructure
+          .filter((data) => data.actionType === "NEW")
+          .map(({ actionType, ...rest }) => ({
+            ...rest,
+          })),
+      };
+    } else {
+      payload = {
+        add: countryStructure
+          .filter((data) => data.actionType === "NEW")
+          .map(({ actionType, ...rest }) => ({
+            ...rest,
+          })),
+        update: countryStructure
+          .filter((data) => data.actionType === "UPDATE")
+          .map(({ actionType, level, ...rest }) => ({
+            ...rest,
+          })),
+      };
+    }
+    const addIsEmpty = payload?.add?.find((data) => data.name === "");
+    const updateIsEmpty = payload?.update?.find((data) => data.name === "");
 
-    const { mutate: updateSalesOrganization } = useUpdateSalesOrganization({
-        company_code: COMPANY_CODE,
-		options: {
-			onSuccess: () => {
-				refetchSalesOrganization()
-			},
-            retry: true
-		}
-	});
-
-    const { mutate: createSalesOrganization } = useCreateSalesOrganization({
-		options: {
-			onSuccess: () => {
-				refetchSalesOrganization()
-			},
-            retry: true
-		},
-	});
-
-    const onDeleteStructure = () => {
-        if(modalDelete.structure.id){
-            onDeleteOldStructure()
-        } else {
-            onDeleteNewStructure();
-        }
+    if (addIsEmpty || updateIsEmpty) {
+      return "";
     }
 
-    const onDeleteNewStructure = () => {
-        setModalDelete({ open: false, index: -1, structure: {} })
-        const newCountryStructure = countryStructure.slice(0, modalDelete.index);
-		setCountryStructure(newCountryStructure);
-	};
+    isNew ? createSalesOrganization(payload) : updateSalesOrganization(payload);
+  };
 
-    const onDeleteOldStructure = () => {
-        setModalDelete({ open: false, index: -1, structure: {} })
-        let currentStructure = { ...countryStructure[modalDelete.index] };
+  const isDisabled = !isEditMode;
 
-        const payload = {
-            add: [],
-            update: [],
-            delete: currentStructure.id
-        }
-        updateSalesOrganization(payload)
-	};
+  const donwloadStructure = async (value) =>
+    await axios
+      .get(`${apiURL}/sales-org/structure/${COMPANY_CODE}`, {
+        responseType: "blob",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      })
+      .then((response) => {
+        const data = new Blob([response?.data], { type: "application / vnd. MS Excel" });
+        const csvURL = window.URL.createObjectURL(data);
+        const tempLink = document.createElement("a");
+        tempLink.href = csvURL;
+        tempLink.setAttribute("download", `sales_organization_structure_template.xlsx`);
+        tempLink.click();
+      });
 
-    const addStructure = () => {
-		let newStructure = countryStructure.slice();
-		newStructure.push({
-			level: countryStructure.length + 1,
-			name: "",
-            actionType: "NEW"
-		});
-		setCountryStructure(newStructure);
-	};
+  return (
+    <>
+      {isLoading ? (
+        <Center>
+          <Spin tip="Loading data..." />
+        </Center>
+      ) : (
+        <Col>
+          <Row gap="4px" alignItems="center" justifyContent="space-between">
+            <Text variant="h4">{lang[t].salesOrganization.pageTitle.salesOrganization}</Text>
+            <Button
+              size="big"
+              variant="primary"
+              onClick={() => {
+                if (isEditMode) {
+                  onSubmit();
+                  setIsEditMode(false);
+                } else {
+                  setIsEditMode(true);
+                }
+              }}
+            >
+              {isEditMode
+                ? lang[t].salesOrganization.primary.save
+                : lang[t].salesOrganization.primary.edit}
+            </Button>
+          </Row>
 
-    const onSubmit = () => {
-        console.log("masuk")
-        let payload = {}
-        if(isNew){
-            payload = {
-                company_code: COMPANY_CODE,
-                data: countryStructure.filter(data => data.actionType === "NEW").map(({actionType, ...rest}) => ({
-                    ...rest
-                }))
-            }
-        } else {
-            payload = {
-                add: countryStructure.filter(data => data.actionType === "NEW").map(({actionType, ...rest}) => ({
-                    ...rest
-                })),
-                update: countryStructure.filter(data => data.actionType === "UPDATE").map(({actionType, level, ...rest}) => ({
-                    ...rest
-                }))
-            }
-        }
-        const addIsEmpty = payload?.add?.find(data => data.name === "")
-        const updateIsEmpty = payload?.update?.find(data => data.name === "")
-        
-        if(addIsEmpty || updateIsEmpty){
-            return ""
-        }
-        
-	    isNew ? createSalesOrganization(payload) : updateSalesOrganization(payload);
-	};
+          <Spacer size={20} />
 
-    const isDisabled = !isEditMode;
+          <Card>
+            <Row width="100%" gap="20px" noWrap>
+              <DownloadUploadContainer>
+                <Text variant="headingMedium">
+                  {lang[t].salesOrganization.salesOrganizationDownloadandFill}
+                </Text>
+                <Spacer size={4} />
+                <Text variant="body2" color="black.dark">
+                  {lang[t].salesOrganization.emptyState.labelTemplate}
+                </Text>
+                <Spacer size={10} />
+                <Button
+                  variant="tertiary"
+                  size="big"
+                  disabled={isDisabled}
+                  onClick={donwloadStructure}
+                >
+                  {lang[t].salesOrganization.ghost.downloadTemplate}
+                </Button>
+              </DownloadUploadContainer>
 
-    const donwloadStructure = async(value) => {
-		return await axios
-		.get(apiURL + `/sales-org/structure/${COMPANY_CODE}`, {
-			responseType: 'blob',
-			headers: {
-				Authorization: "Bearer " + token,
-				"Content-Type": "application/json",
-			},
-		})
-		.then((response) => {
-			var data = new Blob([response?.data], { type: 'application / vnd. MS Excel'});
-			var csvURL = window.URL.createObjectURL(data);
-			var tempLink = document.createElement('a');
-			tempLink.href = csvURL;
-			tempLink.setAttribute('download', `sales_organization_structure_template.xlsx`);
-			tempLink.click();
-		});
-	}
+              <DownloadUploadContainer>
+                <Text variant="headingMedium">
+                  {lang[t].salesOrganization.salesOrganizationUploadTemplate}
+                </Text>
+                <Spacer size={4} />
+                <Text variant="body2" color="black.dark">
+                  {lang[t].salesOrganization.emptyState.labelUpload}
+                </Text>
+                <Spacer size={10} />
+                <Button
+                  variant="tertiary"
+                  size="big"
+                  onClick={() => setShowUploadStructure(true)}
+                  disabled={isDisabled}
+                >
+                  {lang[t].salesOrganization.ghost.uploadTemplate}
+                </Button>
+              </DownloadUploadContainer>
+            </Row>
 
-	return (
-		<>
-			{isLoading ? (
-				<Center>
-					<Spin tip="Loading data..." />
-				</Center>
-			) : (
-				<Col>
-					<Row gap="4px" alignItems="center" justifyContent="space-between">
-						<Text variant={"h4"}>{lang[t].salesOrganization.pageTitle.salesOrganization}</Text>
-                        <Button size="big" variant={"primary"} onClick={() => {
-                            if(isEditMode){
-                                onSubmit();
-                                setIsEditMode(false);
-                             } else {
-                                setIsEditMode(true)
-                             }
-                        }}>
-							{isEditMode ? lang[t].salesOrganization.primary.save : lang[t].salesOrganization.primary.edit}
-						</Button>
-					</Row>
+            <Spacer size={20} />
 
-					<Spacer size={20} />
+            <Divider />
 
-					<Card>
-                        <Row width="100%" gap="20px" noWrap>
-                            <DownloadUploadContainer>
-                                <Text variant="headingMedium">{lang[t].salesOrganization.salesOrganizationDownloadandFill}</Text>
-                                <Spacer size={4} />
-                                <Text variant="body2" color="black.dark">
-                                    {lang[t].salesOrganization.emptyState.labelTemplate}
-                                </Text>
-                                <Spacer size={10} />
-                                <Button variant="tertiary" size="big" disabled={isDisabled} onClick={donwloadStructure}>
-                                    {lang[t].salesOrganization.ghost.downloadTemplate}
-                                </Button>
-                            </DownloadUploadContainer>
+            <Spacer size={28} />
 
-                            <DownloadUploadContainer>
-                                <Text variant="headingMedium">{lang[t].salesOrganization.salesOrganizationUploadTemplate}</Text>
-                                <Spacer size={4} />
-                                <Text variant="body2" color="black.dark">
-                                    {lang[t].salesOrganization.emptyState.labelUpload}
-                                </Text>
-                                <Spacer size={10} />
-                                <Button
-                                    variant="tertiary"
-                                    size="big"
-                                    onClick={() => setShowUploadStructure(true)}
-                                    disabled={isDisabled}
-                                >
-                                    {lang[t].salesOrganization.ghost.uploadTemplate}
-                                </Button>
-                            </DownloadUploadContainer>
-                        </Row>
+            {countryStructure.map((structure: any, index: any) => (
+              <>
+                <Row key={index} width="100%" gap="16px" alignItems="flex-end" noWrap>
+                  <Input
+                    width="100%"
+                    label={`${t == "en-US" ? stringifyNumber(index) : ""} ${
+                      lang[t].salesOrganization.emptyState.levelName
+                    } ${
+                      t == "id-ID"
+                        ? stringifyNumber(index).substring(0, stringifyNumber(index).length - 2)
+                        : ""
+                    }`}
+                    height="48px"
+                    placeholder={`Type ${stringifyNumber(index)} Level Name`}
+                    value={structure.name || ""}
+                    onChange={(e: any) =>
+                      onChangeStructureName(e, index, structure.actionType === "NEW")
+                    }
+                    disabled={isDisabled}
+                  />
+                  <Row width="41%" noWrap style={{ marginBottom: "5px" }}>
+                    {listPermission?.filter(
+                      (data: any) => data.viewTypes[0]?.viewType.name === "Delete"
+                    ).length > 0 && (
+                      <Button
+                        variant="tertiary"
+                        size="big"
+                        onClick={() => setModalDelete({ open: true, index, structure })}
+                        disabled={isDisabled}
+                      >
+                        {lang[t].salesOrganization.tertier.delete}
+                      </Button>
+                    )}
 
-                        <Spacer size={20} />
+                    <Spacer size={16} />
+                    <Button
+                      variant="primary"
+                      size="big"
+                      onClick={() => {
+                        // onSubmit();
+                        setShowManageData({ visible: true, index });
+                      }}
+                      disabled={isDisabled}
+                    >
+                      {lang[t].salesOrganization.primary.manageData}
+                    </Button>
+                  </Row>
+                </Row>
+                <Spacer size={20} />
+                <Divider />
+                <Spacer size={20} />
+              </>
+            ))}
+            {countryStructure.length < 20 && (
+              <Button
+                disabled={isDisabled}
+                variant="ghost"
+                size="big"
+                onClick={() => addStructure()}
+              >
+                + {lang[t].salesOrganization.buttonAdd.structureLevel}
+              </Button>
+            )}
+          </Card>
+        </Col>
+      )}
+      {modalDelete.open && (
+        <ModalDeleteConfirmation
+          visible={modalDelete.open}
+          onCancel={() => setModalDelete({ open: false, index: -1, structure: {} })}
+          onOk={onDeleteStructure}
+          itemTitle={modalDelete.structure.name}
+        />
+      )}
+      {showUploadStructure && (
+        <FileUploaderExcel
+          setVisible={setShowUploadStructure}
+          visible={showUploadStructure}
+          onSubmit={onUploadStructure}
+        />
+      )}
 
-                        <Divider />
-
-                        <Spacer size={28} />
-
-                        {countryStructure.map((structure: any, index: any) => (
-                            <>
-                                <Row key={index} width="100%" gap="16px" alignItems="flex-end" noWrap>
-                                    <Input
-                                        width="100%"
-                                        label={`${t == "en-US" ? stringifyNumber(index) : ""} ${lang[t].salesOrganization.emptyState.levelName} ${t == "id-ID" ? stringifyNumber(index).substring(0, stringifyNumber(index).length - 2) : ""}`}
-                                        height="48px"
-                                        placeholder={`Type ${stringifyNumber(index)} Level Name`}
-                                        value={structure.name || ""}
-                                        onChange={(e: any) => onChangeStructureName(e, index, structure.actionType === "NEW")}
-                                        disabled={isDisabled}
-                                    />
-                                    <Row width="41%" noWrap style={{ marginBottom: "5px" }}>
-                                        <Button
-                                            variant="tertiary"
-                                            size="big"
-                                            onClick={() => setModalDelete({ open: true, index: index, structure })}
-                                            disabled={isDisabled}
-                                        >
-                                            {lang[t].salesOrganization.tertier.delete}
-                                        </Button>
-                                        <Spacer size={16} />
-                                        <Button
-                                            variant="primary"
-                                            size="big"
-                                            onClick={() => {
-                                                // onSubmit();
-                                                setShowManageData({ visible: true, index })
-                                            }}
-                                            disabled={isDisabled}
-                                        >
-                                            {lang[t].salesOrganization.primary.manageData}
-                                        </Button>
-                                    </Row>
-                                </Row>
-                                <Spacer size={20} />
-                                <Divider />
-                                <Spacer size={20} />
-                            </>
-                        ))}
-                        {countryStructure.length < 20 && (
-                            <Button disabled={isDisabled} variant="ghost" size="big" onClick={() => addStructure()}>
-                                + {lang[t].salesOrganization.buttonAdd.structureLevel}
-                            </Button>
-                        )}
-					</Card>
-				</Col>
-			)}
-			{modalDelete.open && (
-				<ModalDeleteConfirmation
-					visible={modalDelete.open}
-					onCancel={() => setModalDelete({ open: false, index: -1, structure: {} })}
-					onOk={onDeleteStructure}
-					itemTitle={modalDelete.structure.name}
-				/>
-			)}
-			{showUploadStructure && <FileUploaderExcel
-				setVisible={setShowUploadStructure}
-				visible={showUploadStructure}
-				onSubmit={onUploadStructure}
-			/>}
-
-            {showManageData.visible && (
-				<ModalManageDataEdit
-					visible={showManageData.visible}
-					onCancel={() => setShowManageData({ visible: false })}
-					structure={countryStructure[showManageData.index]}
-                    parentId={countryStructure?.[showManageData.index-1]?.id ?? null}
-					onSubmit={() => {
-                        onSubmit();
-                        setIsEditMode(false)
-                        setShowManageData({ visible: false });
-                    }}
-                    countryStructure={countryStructure}
-				/>
-			)}
-
-		</>
-	);
+      {showManageData.visible && (
+        <ModalManageDataEdit
+          visible={showManageData.visible}
+          onCancel={() => setShowManageData({ visible: false })}
+          structure={countryStructure[showManageData.index]}
+          parentId={countryStructure?.[showManageData.index - 1]?.id ?? null}
+          onSubmit={() => {
+            onSubmit();
+            setIsEditMode(false);
+            setShowManageData({ visible: false });
+          }}
+          countryStructure={countryStructure}
+        />
+      )}
+    </>
+  );
 };
 
 const Center = styled.div`
-	display: flex;
-	justify-content: center;
-	align-items: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 `;
 
 const Divider = styled.div`
-	border: 1px dashed #dddddd;
+  border: 1px dashed #dddddd;
 `;
 
 const Link = styled.a`
-	text-decoration: none;
-	color: inherit;
+  text-decoration: none;
+  color: inherit;
 
-	:hover,
-	:focus,
-	:active {
-		text-decoration: none;
-		color: inherit;
-	}
+  :hover,
+  :focus,
+  :active {
+    text-decoration: none;
+    color: inherit;
+  }
 `;
 
 const DownloadUploadContainer = styled.div`
-	background: #ffffff;
-	border: 1px solid #aaaaaa;
-	border-radius: 8px;
-	width: 100%;
-	padding: 20px 20px 20px 20px;
-	display: flex;
-	align-items: center;
-	flex-direction: column;
+  background: #ffffff;
+  border: 1px solid #aaaaaa;
+  border-radius: 8px;
+  width: 100%;
+  padding: 20px 20px 20px 20px;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
 `;
 
 const Card = styled.div`
-	background: #ffffff;
-	border-radius: 16px;
-	padding: ${(p) => (p.padding ? p.padding : "16px")};
+  background: #ffffff;
+  border-radius: 16px;
+  padding: ${(p) => (p.padding ? p.padding : "16px")};
 `;
 
 export default CreateConfig;
