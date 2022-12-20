@@ -75,6 +75,7 @@ const WaitingApprovalPricingStructure: any = (props: any) => {
       page: pagination.page,
       limit: pagination.itemsPerPage,
       status: "WAITING",
+      company_id: companyCode
     },
   });
 

@@ -67,6 +67,7 @@ const ActivePricingStructure: any = (props: any) => {
       page: pagination.page,
       limit: pagination.itemsPerPage,
       status: "ACTIVE",
+      company_id: companyCode
     },
   });
 

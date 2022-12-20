@@ -79,6 +79,7 @@ const DraftPricingStructure: any = ({
       page: pagination.page,
       limit: pagination.itemsPerPage,
       status: "DRAFTED",
+      company_id: companyCode
     },
   });
 

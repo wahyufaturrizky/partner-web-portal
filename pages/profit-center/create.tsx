@@ -59,13 +59,13 @@ function ProfitCenterCreate({isUpdate,detailProfitCenter,isLoadingProfit,isFetch
     },
     query: {
       search: searchCompany,
+      limit: 10000
     },
   });
   const companyList = companyData?.rows?.map((company: any) => ({
     id: company.code,
     value: company.name,
   }));
-
   const profitForm = useWatch({
     control
   });
