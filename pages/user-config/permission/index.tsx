@@ -100,7 +100,7 @@ const UserConfigPermission: any = () => {
         <Button
           size="small"
           onClick={() => {
-            router.push(`/user-config/permission//${field.id}`);
+            router.push(`/user-config/permission/${field.id}`);
           }}
           variant="tertiary"
         >

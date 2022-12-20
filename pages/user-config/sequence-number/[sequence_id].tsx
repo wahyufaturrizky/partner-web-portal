@@ -10,6 +10,7 @@ import {
   useSequenceNumber,
   useUpdateSequenceNumber,
 } from "../../../hooks/sequence-number/useSequenceNumber";
+import { useUserPermissions } from "hooks/user-config/usePermission";
 
 const DetailSequenceNumber: any = () => {
   const router = useRouter();
@@ -39,6 +40,16 @@ const DetailSequenceNumber: any = () => {
     // resolver: yupResolver(schema),
     // defaultValues: defaultValue,
   });
+
+  const { data: dataUserPermission } = useUserPermissions({
+		options: {
+			onSuccess: () => {},
+		},
+	});
+
+	const listPermission = dataUserPermission?.permission?.filter(
+		(filtering: any) => filtering.menu === "Sequence Number"
+	);
 
   const { data: field, isLoading: isLoadingData, refetch: refetchField } = useSequenceNumber({
     id: sequence_id,
@@ -161,6 +172,8 @@ const DetailSequenceNumber: any = () => {
                 </Row>
               </Col>
               <Col width="75%" style={{ padding: "12px" }}>
+                {listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Update")
+						    	.length > 0 && 
                 <Row justifyContent={"flex-end"}>
                   {!isEdit ? (
                     <Button size="big" variant={"primary"} onClick={() => setIsEdit(!isEdit)}>
@@ -173,6 +186,8 @@ const DetailSequenceNumber: any = () => {
                     </Button>
                   )}
                 </Row>
+              }
+              
                 <Spacer size={12} />
                 <Row>
                   <Input
