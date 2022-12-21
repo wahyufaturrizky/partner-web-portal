@@ -715,7 +715,13 @@ const AdminLayout = (props: any) => {
               background: "#fff",
             }}
           >
-            <Notification items={notifItems} totalUnread={totalUnread} />
+            <Notification
+              totalUnread={totalUnread}
+              items={notifItems}
+              viewAll={() => {
+                Router.push('/notification');
+              }}
+            />
             <Spacer size={15} />
 
             {isChangeLang ? (
