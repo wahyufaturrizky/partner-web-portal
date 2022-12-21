@@ -18,6 +18,7 @@ import { useEffect, useState } from "react";
 import styled from "styled-components";
 import { lang } from "lang";
 import axios from "axios";
+import { useNotification } from 'hooks/notification/useNotification';
 import {
   ICCalendar,
   ICDollar,
@@ -535,33 +536,6 @@ if (typeof window !== "undefined") {
 
 const itemsMenu = [{ label: "Config" }, { label: "Master Data Management" }];
 
-const notifItems = [
-  {
-    isRead: false,
-    content: (
-      <p style={{ fontWeight: "600", marginBottom: 0 }}>
-        Term of payment of the week, Please complete it before 01-01-2022
-      </p>
-    ),
-  },
-  {
-    isRead: false,
-    content: (
-      <p style={{ fontWeight: "600", marginBottom: 0 }}>
-        Term of payment following the month, Please complete it before 01-01-2022
-      </p>
-    ),
-  },
-  {
-    isRead: true,
-    content: <p style={{ fontWeight: "600", marginBottom: 0 }}>New Product Launch</p>,
-  },
-  {
-    isRead: true,
-    content: <p style={{ fontWeight: "600", marginBottom: 0 }}>{lang[t]?.notification.notificationReviewApproval}</p>,
-  },
-];
-
 const flexStyles = {
   display: "flex",
   alignItems: "center",
@@ -571,11 +545,24 @@ const flexStyles = {
   cursor: "pointer",
 };
 
+const getLinkViewDetail = (screenCode: any) => {
+  const approvalEngineScreen = {
+    "mdm.salesman": "salesman",
+    "mdm.pricing.structure": "pricing-structure",
+  };
+
+  const url = `/${approvalEngineScreen[screenCode]}`;
+  return url;
+};
+
 const AdminLayout = (props: any) => {
   const [current, setCurrent] = useState("0");
   const [isChangeLang, setIsChangeLang] = useState(false);
   const [companies, setCompanies] = useState([]);
+  const [notifItems, setNotifItems] = useState([]);
+  const [totalUnread, setTotalUnread] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+  const [companyCode, setCompanyCode] = useState("PTKSNI");
 
   const handleCLickTabNav = (e: any) => {
     setCurrent(e.key);
@@ -608,6 +595,7 @@ const AdminLayout = (props: any) => {
           const defaultCompany = res.data.data.rows[0];
           localStorage.setItem('companyId', defaultCompany.id);
           localStorage.setItem('companyCode', defaultCompany.code);
+          setCompanyCode(defaultCompany.code);
           setCompanies(res.data.data.rows);
           setIsLoading(false);
         })
@@ -618,9 +606,48 @@ const AdminLayout = (props: any) => {
           setIsLoading(false);
         });
     }
+
+    async function getNotification() {
+      const token = localStorage.getItem("token");
+      const apiURL = process.env.NEXT_PUBLIC_API_BASE;
+      setIsLoading(true);
+      await axios.get(`${apiURL}/notification`, {
+        params: {
+          search: "",
+          page: 1,
+          limit: 4,
+          status: "all",
+          company_id: companyCode,
+        },
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+        .then((res) => {
+          const totalUnread = res.data.data.total_unread;
+          const notifItems = res.data.data.rows?.map((items: any) => ({
+            key: items?.id,
+            id: items?.id,
+            isRead: !!items?.read_date,
+            content: items?.message || "-",
+            link: getLinkViewDetail(items?.screen_code),
+          }));
+
+          setNotifItems(notifItems);
+          setTotalUnread(totalUnread);
+        })
+        .catch(() => {
+          localStorage.setItem('companyId', "2");
+          localStorage.setItem('companyCode', "KSNI");
+          setCompanies([]);
+          setIsLoading(false);
+        });
+    }
+
     // localStorage.setItem('companyId', "2")
     // localStorage.setItem('companyCode', "KSNI")
     getCompanyList();
+    getNotification();
   }, []);
 
   const menuConfigFunc = (companies) => {
@@ -688,7 +715,7 @@ const AdminLayout = (props: any) => {
               background: "#fff",
             }}
           >
-            <Notification items={notifItems} />
+            <Notification items={notifItems} totalUnread={totalUnread} />
             <Spacer size={15} />
 
             {isChangeLang ? (

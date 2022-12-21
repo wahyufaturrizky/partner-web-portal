@@ -1,4 +1,5 @@
 import usePagination from "@lucasmogari/react-pagination";
+import { useNotification } from 'hooks/notification/useNotification';
 import { useRouter } from "next/router";
 import {
   Button,
@@ -12,6 +13,17 @@ import {
 } from "pink-lava-ui";
 import React, { useState } from "react";
 import styled from "styled-components";
+import moment from "moment";
+
+const getLinkViewDetail = (screenCode: any) => {
+  const approvalEngineScreen = {
+    "mdm.salesman" : "salesman",
+    "mdm.pricing.structure": "pricing-structure"
+  }
+
+  const url = `/${approvalEngineScreen[screenCode]}`
+  return url;
+}
 
 const Notification: any = () => {
   const router = useRouter();
@@ -27,6 +39,36 @@ const Notification: any = () => {
   const [search, setSearch] = useState("");
   const [tab, setTab] = useState("all");
 
+
+  const {
+    data: notification,
+  } = useNotification({
+    options: {
+      onSuccess: (items: any) => {
+        pagination.setTotalItems(items?.totalRow);
+      },
+      select: ({ rows, totalRow, totalWaiting }: any) => {
+        const data = rows?.map((items: any) => {
+          return {
+            key: items?.id,
+            id: items?.id,
+            link: getLinkViewDetail(items?.screenCode),
+            message: items?.message || "-",
+            createdAt: items?.createdAt
+          };
+        });
+        return { data, totalRow, totalWaiting };
+      },
+    },
+    query: {
+      search,
+      page: pagination.page,
+      limit: pagination.itemsPerPage,
+      status: tab,
+      company_id: companyCode
+    },
+  });
+
   const options = [
     {
       label: (
@@ -40,10 +82,10 @@ const Notification: any = () => {
       label: (
         <Flex>
           Waiting for Approval{" "}
-          <Notif>2</Notif>
+          {notification?.totalWaiting > 0 && <Notif>{notification?.totalWaiting}</Notif>}
         </Flex>
       ),
-      value: "waiting_for_approval",
+      value: "waiting",
     },
   ];
 
@@ -64,36 +106,30 @@ const Notification: any = () => {
             defaultValue={tab}
             onChange={(value: string) => {
               setTab(value);
-              // refetch();
             }}
           />
         </Row>
         <Spacer size={20} />
         <div style={{ display: 'flex', gap: '8px', flexDirection: "column", minHeight:'calc(100vh - 260px)' }}>
-          <NotificationList active>
-            <div>
-              <NotificationContent>You have <NotificationHighlight>Salesman, MSM-00000001</NotificationHighlight> that need to be approved.</NotificationContent>
-              <NotificationDate>Nov 22, 2022, 10.32</NotificationDate>
-            </div>
-            <Button
-              size="small"
-              variant="tertiary"
-            >
-              View Detail
-            </Button>
-          </NotificationList>
-          <NotificationList>
-            <div>
-              <NotificationContent>You have <NotificationHighlight>Salesman, MSM-00000001</NotificationHighlight> that need to be approved.</NotificationContent>
-              <NotificationDate>Nov 22, 2022, 10.32</NotificationDate>
-            </div>
-            <Button
-              size="small"
-              variant="tertiary"
-            >
-              View Detail
-            </Button>
-          </NotificationList>
+          {notification?.data?.map((notif: any) => (
+            <NotificationList active={!!notif.readDate}>
+              <div>
+                <NotificationContent>{notif?.message}</NotificationContent>
+                <NotificationDate>{moment(notif?.createdAt).format("MM DD, YYYY, HH.mm")}</NotificationDate>
+              </div>
+              <Button
+                size="small"
+                variant="tertiary"
+                onClick={
+                  () => {
+                    router.push(notif?.link)
+                  }
+                }
+              >
+                View Detail
+              </Button>
+            </NotificationList>
+          ))}
         </div>
         <Pagination pagination={pagination} />
       </Col>
