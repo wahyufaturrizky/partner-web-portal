@@ -17,13 +17,13 @@ import moment from "moment";
 
 const getLinkViewDetail = (screenCode: any) => {
   const approvalEngineScreen = {
-    "mdm.salesman" : "salesman",
-    "mdm.pricing.structure": "pricing-structure"
-  }
+    "mdm.salesman": "salesman",
+    "mdm.pricing.structure": "pricing-structure",
+  };
 
-  const url = `/${approvalEngineScreen[screenCode]}`
+  const url = `/${approvalEngineScreen[screenCode]}`;
   return url;
-}
+};
 
 const Notification: any = () => {
   const router = useRouter();
@@ -39,7 +39,6 @@ const Notification: any = () => {
   const [search, setSearch] = useState("");
   const [tab, setTab] = useState("all");
 
-
   const {
     data: notification,
   } = useNotification({
@@ -48,15 +47,13 @@ const Notification: any = () => {
         pagination.setTotalItems(items?.totalRow);
       },
       select: ({ rows, totalRow, totalWaiting }: any) => {
-        const data = rows?.map((items: any) => {
-          return {
-            key: items?.id,
-            id: items?.id,
-            link: getLinkViewDetail(items?.screenCode),
-            message: items?.message || "-",
-            createdAt: items?.createdAt
-          };
-        });
+        const data = rows?.map((items: any) => ({
+          key: items?.id,
+          id: items?.id,
+          link: getLinkViewDetail(items?.screenCode),
+          message: items?.message || "-",
+          createdAt: items?.createdAt,
+        }));
         return { data, totalRow, totalWaiting };
       },
     },
@@ -65,7 +62,7 @@ const Notification: any = () => {
       page: pagination.page,
       limit: pagination.itemsPerPage,
       status: tab,
-      company_id: companyCode
+      company_id: companyCode,
     },
   });
 
@@ -81,7 +78,8 @@ const Notification: any = () => {
     {
       label: (
         <Flex>
-          Waiting for Approval{" "}
+          Waiting for Approval
+          {" "}
           {notification?.totalWaiting > 0 && <Notif>{notification?.totalWaiting}</Notif>}
         </Flex>
       ),
@@ -90,50 +88,51 @@ const Notification: any = () => {
   ];
 
   return (
-    <>
-      <Col>
-        <Text variant={"h4"}>Notification</Text>
-        <Spacer size={20} />
-        <Row>
-          <Search
-            width="380px"
-            placeholder={"Search Approval, Info, Task, etc"}
-            onChange={(e: any) => setSearch(e.target.value)}
-          />
-          <Spacer size={8} />
-          <ContentSwitcher
-            options={options}
-            defaultValue={tab}
-            onChange={(value: string) => {
-              setTab(value);
-            }}
-          />
-        </Row>
-        <Spacer size={20} />
-        <div style={{ display: 'flex', gap: '8px', flexDirection: "column", minHeight:'calc(100vh - 260px)' }}>
-          {notification?.data?.map((notif: any) => (
-            <NotificationList active={!!notif.readDate}>
-              <div>
-                <NotificationContent>{notif?.message}</NotificationContent>
-                <NotificationDate>{moment(notif?.createdAt).format("MM DD, YYYY, HH.mm")}</NotificationDate>
-              </div>
-              <Button
-                size="small"
-                variant="tertiary"
-                onClick={
+    <Col>
+      <Text variant="h4">Notification</Text>
+      <Spacer size={20} />
+      <Row>
+        <Search
+          width="380px"
+          placeholder="Search Approval, Info, Task, etc"
+          onChange={(e: any) => setSearch(e.target.value)}
+        />
+        <Spacer size={8} />
+        <ContentSwitcher
+          options={options}
+          defaultValue={tab}
+          onChange={(value: string) => {
+            setTab(value);
+          }}
+        />
+      </Row>
+      <Spacer size={20} />
+      <div style={{
+        display: 'flex', gap: '8px', flexDirection: "column", minHeight: 'calc(100vh - 260px)',
+      }}
+      >
+        {notification?.data?.map((notif: any) => (
+          <NotificationList active={!!notif.readDate}>
+            <div>
+              <NotificationContent>{notif?.message}</NotificationContent>
+              <NotificationDate>{moment(notif?.createdAt).format("MM DD, YYYY, HH.mm")}</NotificationDate>
+            </div>
+            <Button
+              size="small"
+              variant="tertiary"
+              onClick={
                   () => {
-                    router.push(notif?.link)
+                    router.push(notif?.link);
                   }
                 }
-              >
-                View Detail
-              </Button>
-            </NotificationList>
-          ))}
-        </div>
-        <Pagination pagination={pagination} />
-      </Col>
-    </>
+            >
+              View Detail
+            </Button>
+          </NotificationList>
+        ))}
+      </div>
+      <Pagination pagination={pagination} />
+    </Col>
   );
 };
 
@@ -142,23 +141,23 @@ const NotificationHighlight = styled.span`
   font-size: 14px;
   line-height: 24px;
   color: #444444;
-`
+`;
 
 const NotificationContent = styled.p`
   font-weight: 400;
   font-size: 14px;
   line-height: 24px;
   color: #444444;
-`
+`;
 
 const NotificationDate = styled.p`
   font-weight: 400;
   font-size: 10px;
   line-height: 18px;
   color: #666666;
-`
+`;
 const NotificationList = styled.div`
-  background: ${({active} : any) => active ? "#F4FBFC" : "#FFFFFF"};
+  background: ${({ active } : any) => (active ? "#F4FBFC" : "#FFFFFF")};
   border-radius: 8px;
   padding: 16px;
   display: flex;
@@ -167,7 +166,7 @@ const NotificationList = styled.div`
   z-index: 10;
   cursor: pointer;
 
-`
+`;
 
 const Flex = styled.div`
   display: flex;

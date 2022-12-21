@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Button, Spacer, Modal, Accordion, Text, TextArea, Row, Col, Checkbox } from "pink-lava-ui";
 import styled from "styled-components";
-import { emptyPayloadPriceStructure } from "pages/pricing-structure/[price_structure_id]";
+import { emptyPayloadPriceStructure } from "pages/mdm/pricing-structure/[price_structure_id]";
 
 export const ModalRejectPriceStructure: any = ({
   visible,
