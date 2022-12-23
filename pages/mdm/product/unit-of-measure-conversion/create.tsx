@@ -208,7 +208,8 @@ const UOMConversionCreate = () => {
       base_uom_id: data.baseUom,
       items: savedTable,
     };
-    createUom(saveData);
+    console.log(saveData)
+    // createUom(saveData);
   };
 
   const columns = [

@@ -322,10 +322,10 @@ const Addresses = ({
                       value: 225,
                       message: "Max length exceeded",
                     },
-                    required: {
-                      value: true,
-                      message: "Please enter account street.",
-                    },
+                    // required: {
+                    //   value: true,
+                    //   message: "Please enter account street.",
+                    // },
                   }}
                   name={`address.${addressIndex}.street`}
                   render={({ field: { onChange, value }, formState: { errors } }) => (
@@ -334,7 +334,7 @@ const Addresses = ({
                       rows={2}
                       defaultValue={value}
                       onChange={onChange}
-                      required
+                      // required
                       error={errors?.["address"]?.[addressIndex]?.["street"]?.["message"]}
                       placeholder="e.g Front Groceries No. 5"
                       label={streetLabel}

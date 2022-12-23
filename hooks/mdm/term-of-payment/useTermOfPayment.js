@@ -2,6 +2,7 @@ import { useQuery, useMutation, useInfiniteQuery } from "react-query";
 import { mdmService } from "../../../lib/client";
 
 const fetchTermOfPayments = async ({ query = {} }) => {
+  const companyCode = localStorage.getItem("companyCode");
   return mdmService(`/top`, {
     params: {
       search: "",
@@ -9,6 +10,7 @@ const fetchTermOfPayments = async ({ query = {} }) => {
       limit: 10,
       sortBy: "created_at",
       sortOrder: "DESC",
+      company_id: companyCode,
       ...query,
     },
   }).then((data) => data);

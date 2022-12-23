@@ -2,6 +2,7 @@ import { useQuery, useMutation, useInfiniteQuery } from "react-query";
 import { client, client3, mdmService } from "../../../lib/client";
 
 const fetchBranchList = async ({ query = {} }) => {
+  const companyCode = localStorage.getItem("companyCode");
   return mdmService(`/branch`, {
     params: {
       search: "",
@@ -9,6 +10,7 @@ const fetchBranchList = async ({ query = {} }) => {
       limit: 10,
       sortBy: "branch_id",
       sortOrder: "DESC",
+      company_id: companyCode,
       ...query,
     },
   }).then((data) => data);
