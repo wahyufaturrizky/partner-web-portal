@@ -84,7 +84,7 @@ export default function ComponentDetailSalesman({ listCustomers, isLoading }: an
   const { mutate: handleUpdateSalesman } = useUpdateSalesman({
     options: {
       onSuccess: () => {
-        router.push("/salesman");
+        router.push("/mdm/salesman");
       },
     },
     id: salesman_id,
@@ -93,7 +93,7 @@ export default function ComponentDetailSalesman({ listCustomers, isLoading }: an
   const { mutate: handleApproveAndRejectSalesman } = useApprovalSalesman({
     options: {
       onSuccess: () => {
-        router.push("/salesman");
+        router.push("/mdm/salesman");
       },
     },
   });
