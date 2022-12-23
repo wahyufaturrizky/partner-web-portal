@@ -62,9 +62,11 @@ const useCountryPostalVendor = ({ countryId, level, options }) => {
 };
 
 const fetchCoaVendor = async ({ query = {} }) => {
+  const companyCode = localStorage.getItem('companyCode');
   return client(`/coa-list`, {
     params: {
       ...query,
+      company_code: companyCode
     },
   }).then((data) => data);
 };

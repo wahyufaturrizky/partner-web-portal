@@ -34,6 +34,7 @@ const fetchDetailCoa = async ({ coa_id, query }) => {
 };
 
 const fetchInfiniteCoaLists = async ({ pageParam = 1, queryKey }) => {
+  const companyCode = localStorage.getItem('companyCode');
   const searchQuery = queryKey[1].search;
   return client(`/coa-list`, {
     params: {
@@ -43,6 +44,7 @@ const fetchInfiniteCoaLists = async ({ pageParam = 1, queryKey }) => {
       sortBy: "created_at",
       sortOrder: "DESC",
       ...queryKey[1],
+      company_code: companyCode
     },
   }).then((data) => data);
 };
