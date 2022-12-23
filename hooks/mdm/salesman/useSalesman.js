@@ -5,11 +5,11 @@ const fetchListSalesman = async ({ query, company_id }) => {
   const companyCode = localStorage.getItem('companyCode');
   return mdmService(`/salesman`, {
     params: {
-      company: companyCode,
       sortOrder: "ASC",
       limit: 10,
       page: 1,
       ...query,
+      company: companyCode
     },
   }).then((data) => data);
 };
