@@ -33,6 +33,7 @@ import { useSegmentInfiniteLists } from "hooks/segment/useSegment";
 import useDebounce from "lib/useDebounce";
 import { useInfiniteIndustry } from "hooks/industry/useIndustries";
 import { colors } from "utils/color";
+import { useUserPermissions } from "hooks/user-config/usePermission";
 import { useTimezone } from "../../../hooks/timezone/useTimezone";
 import {
   useCoa,
@@ -435,11 +436,18 @@ const DetailCompany: any = () => {
   const [segmentId, setSegmentId] = useState("");
   const [companyParent, setCompanyParent] = useState("");
   const debounceFetch = useDebounce(
-    searchCountry
-      || searchSegment
-      || searchOtherCompany
-      || searchIndustry,
-    1000,
+    searchCountry || searchSegment || searchOtherCompany || searchIndustry,
+    1000
+  );
+
+  const { data: dataUserPermission } = useUserPermissions({
+    options: {
+      onSuccess: () => {},
+    },
+  });
+
+  const listPermission = dataUserPermission?.permission?.filter(
+    (filtering: any) => filtering.menu === "Company List"
   );
 
   const {
@@ -514,14 +522,23 @@ const DetailCompany: any = () => {
     }
     if (segmentId) {
       setQueryParam({
-        ...queryParam, country_id: countryId, industry_id: industryId, sector_id: segmentId,
+        ...queryParam,
+        country_id: countryId,
+        industry_id: industryId,
+        sector_id: segmentId,
       });
     }
   }, [countryId, industryId, segmentId]);
 
   const activeStatus = [
-    { id: "Active", value: `<div key="1" style="color:green;">${lang[t].companyList.tertier.active}</div>` },
-    { id: "Inactive", value: `<div key="2" style="color:red;">${lang[t].companyList.tertier.nonActive}</div>` },
+    {
+      id: "Active",
+      value: `<div key="1" style="color:green;">${lang[t].companyList.tertier.active}</div>`,
+    },
+    {
+      id: "Inactive",
+      value: `<div key="2" style="color:red;">${lang[t].companyList.tertier.nonActive}</div>`,
+    },
   ];
 
   const { data: dateFormatData, isLoading: isLoadingDateFormatList } = useDateFormatLists({
@@ -565,10 +582,12 @@ const DetailCompany: any = () => {
     options: {
       onSuccess: (data: any) => {
         setTotalRowsCountryList(data.pages[0].totalRow);
-        const mappedData = data?.pages?.map((group: any) => group.rows?.map((element: any) => ({
-          value: element.id,
-          label: element.name,
-        })));
+        const mappedData = data?.pages?.map((group: any) =>
+          group.rows?.map((element: any) => ({
+            value: element.id,
+            label: element.name,
+          }))
+        );
         const flattenArray = [].concat(...mappedData);
         setCountryList(flattenArray);
       },
@@ -595,12 +614,14 @@ const DetailCompany: any = () => {
     options: {
       onSuccess: (data: any) => {
         setTotalRowsSegmentList(data.pages[0].totalRow);
-        const mappedData = data?.pages?.map((group: any) => group.rows?.map((element: any) => ({
-          value: element.id,
-          label: element.name,
-        })));
+        const mappedData = data?.pages?.map((group: any) =>
+          group.rows?.map((element: any) => ({
+            value: element.id,
+            label: element.name,
+          }))
+        );
         const flattenArray = [].concat(...mappedData);
-        setSegmentList((industryId || companyData?.industryId) ? flattenArray : []);
+        setSegmentList(industryId || companyData?.industryId ? flattenArray : []);
       },
       getNextPageParam: (_lastPage: any, pages: any) => {
         if (segmentList.length < totalRowsSegmentList) {
@@ -625,10 +646,12 @@ const DetailCompany: any = () => {
     options: {
       onSuccess: (data: any) => {
         setTotalRowsIndustryList(data.pages[0].totalRow);
-        const mappedData = data?.pages?.map((group: any) => group.rows?.map((element: any) => ({
-          label: element.name,
-          value: element.id,
-        })));
+        const mappedData = data?.pages?.map((group: any) =>
+          group.rows?.map((element: any) => ({
+            label: element.name,
+            value: element.id,
+          }))
+        );
         const flattenArray = [].concat(...mappedData);
         setIndustryList(flattenArray);
       },
@@ -651,11 +674,13 @@ const DetailCompany: any = () => {
     options: {
       onSuccess: (data: any) => {
         setTotalRowsCompanyList(data.pages[0].totalRow);
-        const mappedData = data?.pages?.map((group: any) => group.rows?.map((element: any) => ({
-          id: element.id,
-          label: element.name,
-          value: element.name,
-        })));
+        const mappedData = data?.pages?.map((group: any) =>
+          group.rows?.map((element: any) => ({
+            id: element.id,
+            label: element.name,
+            value: element.name,
+          }))
+        );
         const flattenArray = [].concat(...mappedData);
         setCompanyList(flattenArray);
       },
@@ -770,7 +795,10 @@ const DetailCompany: any = () => {
   return (
     <Col>
       <Row gap="4px" alignItems="center">
-        <ArrowLeft style={{ cursor: "pointer" }} onClick={() => router.push("/config/company-list")} />
+        <ArrowLeft
+          style={{ cursor: "pointer" }}
+          onClick={() => router.push("/config/company-list")}
+        />
         <Text variant="h4">{companyData.name}</Text>
       </Row>
       <Spacer size={12} />
@@ -795,9 +823,12 @@ const DetailCompany: any = () => {
               >
                 {lang[t].companyList.tertier.cancel}
               </Button>
-              <Button size="big" variant="primary" onClick={handleSubmit(onSubmit)}>
-                {lang[t].companyList.primary.save}
-              </Button>
+              {listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "View")
+                .length > 0 && (
+                <Button size="big" variant="primary" onClick={handleSubmit(onSubmit)}>
+                  {lang[t].companyList.primary.save}
+                </Button>
+              )}
             </Row>
           </Row>
         </Row>
@@ -812,9 +843,9 @@ const DetailCompany: any = () => {
             <Row width="100%" gap="20px" noWrap>
               <FileUploaderAllFiles
                 label={lang[t].companyList.companyLogo}
-                  // onSubmit={(file) => setFoto(file)}
+                // onSubmit={(file) => setFoto(file)}
                 onSubmit={(file) => handleUploadLogo(file)}
-                  //   defaultFile="/placeholder-employee-photo.svg"
+                //   defaultFile="/placeholder-employee-photo.svg"
                 defaultFile={foto || `/placeholder-employee-photo.svg`}
                 withCrop
                 removeable
@@ -864,9 +895,7 @@ const DetailCompany: any = () => {
                       defaultValue={companyData.otherCompany}
                       render={({ field: { onChange }, fieldState: { error } }) => (
                         <>
-                          <Label>
-                            Other Company Name
-                          </Label>
+                          <Label>Other Company Name</Label>
                           <Spacer size={3} />
                           <FormSelect
                             defaultValue={companyData.otherCompany}
@@ -888,7 +917,9 @@ const DetailCompany: any = () => {
                             onChange={(value: any) => {
                               onChange(value);
                               setValue("other_company", value);
-                              setOtherCompanyId(companyList.filter((e: { value: any; }) => e.value === value)[0]?.id);
+                              setOtherCompanyId(
+                                companyList.filter((e: { value: any }) => e.value === value)[0]?.id
+                              );
                             }}
                             onSearch={(value: any) => {
                               setSearchOtherCompany(value);
@@ -970,9 +1001,7 @@ const DetailCompany: any = () => {
                   render={({ field: { onChange }, fieldState: { error } }) => (
                     <>
                       <Label>
-                        Country
-                        {' '}
-                        <span style={{ color: colors.red.regular }}>*</span>
+                        Country <span style={{ color: colors.red.regular }}>*</span>
                       </Label>
                       <Spacer size={3} />
                       <FormSelect
@@ -1026,9 +1055,7 @@ const DetailCompany: any = () => {
                   defaultValue={companyData.industryId}
                   render={({ field: { onChange }, fieldState: { error } }) => (
                     <>
-                      <Label>
-                        Industry
-                      </Label>
+                      <Label>Industry</Label>
                       <Spacer size={3} />
                       <FormSelect
                         height="48px"
@@ -1067,9 +1094,7 @@ const DetailCompany: any = () => {
                   defaultValue={companyData.sectorId}
                   render={({ field: { onChange }, fieldState: { error } }) => (
                     <>
-                      <Label>
-                        Segment
-                      </Label>
+                      <Label>Segment</Label>
                       <Spacer size={3} />
                       <FormSelect
                         error={error?.message}
@@ -1329,13 +1354,12 @@ const DetailCompany: any = () => {
                 <Text
                   variant="body1"
                   style={{
-                    display: 'flex',
-                    gap: '.25rem',
-                    paddingRight: '.25rem',
+                    display: "flex",
+                    gap: ".25rem",
+                    paddingRight: ".25rem",
                   }}
                 >
-                  {lang[t].companyList.companyUseAdvanceApproval}
-                  {" "}
+                  {lang[t].companyList.companyUseAdvanceApproval}{" "}
                   <Tooltip
                     overlayInnerStyle={{ width: "fit-content" }}
                     title="Advance Approval"
@@ -1353,13 +1377,12 @@ const DetailCompany: any = () => {
                 <Text
                   variant="body1"
                   style={{
-                    display: 'flex',
-                    gap: '.25rem',
-                    paddingRight: '.25rem',
+                    display: "flex",
+                    gap: ".25rem",
+                    paddingRight: ".25rem",
                   }}
                 >
-                  {lang[t].companyList.companyUseRetailPricing}
-                  {" "}
+                  {lang[t].companyList.companyUseRetailPricing}{" "}
                   <Tooltip
                     overlayInnerStyle={{ width: "fit-content" }}
                     title="Retail Pricing"
@@ -1377,13 +1400,12 @@ const DetailCompany: any = () => {
                 <Text
                   variant="body1"
                   style={{
-                    display: 'flex',
-                    gap: '.25rem',
-                    paddingRight: '.25rem',
+                    display: "flex",
+                    gap: ".25rem",
+                    paddingRight: ".25rem",
                   }}
                 >
-                  {lang[t].companyList.companyUsePricingStructure}
-                  {" "}
+                  {lang[t].companyList.companyUsePricingStructure}{" "}
                   <Tooltip
                     overlayInnerStyle={{ width: "fit-content" }}
                     title="Pricing Structure"
@@ -1438,9 +1460,11 @@ const DetailCompany: any = () => {
                       fullWidth
                       picker="year"
                       placeholder="YYYY"
-                      onChange={(date: any, dateString: any) => setValue("fiscal_year", Number(dateString))}
+                      onChange={(date: any, dateString: any) =>
+                        setValue("fiscal_year", Number(dateString))
+                      }
                       label={lang[t].companyList.fiscalYear}
-                      defaultValue={moment(companyData.fiscalYear, 'YYYY')}
+                      defaultValue={moment(companyData.fiscalYear, "YYYY")}
                       format="YYYY"
                     />
                   )}
