@@ -64,13 +64,15 @@ function useUpdateProcessList({ processListId, options }) {
 
 const useDeleteProcessList = ({ options }) => {
   return useMutation(
-    (ids) =>
+    (ids) => {
+      const companyCode = localStorage.getItem("companyCode")
       client("/process/delete/", {
         method: "POST",
-        data: ids,
+        data: { ...ids, company_id: companyCode },
       }),
-    {
-      ...options,
+      {
+        ...options,
+      }
     }
   );
 };
