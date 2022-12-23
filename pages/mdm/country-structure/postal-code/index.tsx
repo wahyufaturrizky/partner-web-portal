@@ -16,8 +16,13 @@ import {
 import React, { useState } from "react";
 import styled from "styled-components";
 
-import DownloadSvg from "../../../assets/icons/ic-download.svg";
-import UploadSvg from "../../../assets/icons/ic-upload.svg";
+import useDebounce from "lib/useDebounce";
+import { mdmDownloadService } from "lib/client";
+import { queryClient } from "pages/_app";
+import { lang } from "lang";
+import { useUserPermissions } from "hooks/user-config/usePermission";
+import DownloadSvg from "../../../../assets/icons/ic-download.svg";
+import UploadSvg from "../../../../assets/icons/ic-upload.svg";
 import { ModalCreatePostalCode } from "../../../../components/elements/Modal/ModalCreatePostalCode";
 import { ModalDeleteConfirmation } from "../../../../components/elements/Modal/ModalConfirmationDelete";
 import { ModalDetailPostalCode } from "../../../../components/elements/Modal/ModalDetailPostalCode";
@@ -28,20 +33,13 @@ import {
   usePostalCodesFilter,
 } from "../../../../hooks/mdm/postal-code/usePostalCode";
 
-import useDebounce from "lib/useDebounce";
-import { mdmDownloadService } from "lib/client";
-import { queryClient } from "pages/_app";
-import { lang } from "lang";
-import { useUserPermissions } from "hooks/user-config/usePermission";
-
-const downloadFile = (params: any) =>
-  mdmDownloadService("/postal-code/download", { params }).then((res) => {
-    let dataUrl = window.URL.createObjectURL(new Blob([res.data]));
-    let tempLink = document.createElement("a");
-    tempLink.href = dataUrl;
-    tempLink.setAttribute("download", `postal_code_${new Date().getTime()}.xlsx`);
-    tempLink.click();
-  });
+const downloadFile = (params: any) => mdmDownloadService("/postal-code/download", { params }).then((res) => {
+  const dataUrl = window.URL.createObjectURL(new Blob([res.data]));
+  const tempLink = document.createElement("a");
+  tempLink.href = dataUrl;
+  tempLink.setAttribute("download", `postal_code_${new Date().getTime()}.xlsx`);
+  tempLink.click();
+});
 
 const CountryPostalCode = () => {
   const t = localStorage.getItem("lan") || "en-US";
@@ -72,7 +70,7 @@ const CountryPostalCode = () => {
   });
 
   const listPermission = dataUserPermission?.permission?.filter(
-    (filtering: any) => filtering.menu === "Postal Code"
+    (filtering: any) => filtering.menu === "Postal Code",
   );
 
   const columns = [
@@ -90,11 +88,11 @@ const CountryPostalCode = () => {
     },
     ...(listPermission?.some((el: any) => el.viewTypes[0]?.viewType.name === "View")
       ? [
-          {
-            title: lang[t].postalCode.postalAction,
-            dataIndex: "action",
-          },
-        ]
+        {
+          title: lang[t].postalCode.postalAction,
+          dataIndex: "action",
+        },
+      ]
       : []),
   ];
 
@@ -102,12 +100,10 @@ const CountryPostalCode = () => {
     query: {},
     options: {
       onSuccess: (data: any) => {
-        const mappingFilter = data?.map((el: any) => {
-          return {
-            label: el.name,
-            value: el.id,
-          };
-        });
+        const mappingFilter = data?.map((el: any) => ({
+          label: el.name,
+          value: el.id,
+        }));
         setListCountry(mappingFilter);
       },
     },
@@ -130,23 +126,21 @@ const CountryPostalCode = () => {
         pagination.setTotalItems(data?.totalRow);
       },
       select: (data: any) => {
-        const mappedData = data?.rows?.map((element: any) => {
-          return {
-            key: element.id,
-            postal_code_id: element?.codeText,
-            postal_code: element?.code,
-            country_name: element?.countryRecord?.name,
-            action: (
-              <Button
-                size="small"
-                onClick={() => setModalDetail({ open: true, dataDetail: element })}
-                variant="tertiary"
-              >
-                {lang[t].postalCode.tertier.viewDetail}
-              </Button>
-            ),
-          };
-        });
+        const mappedData = data?.rows?.map((element: any) => ({
+          key: element.id,
+          postal_code_id: element?.codeText,
+          postal_code: element?.code,
+          country_name: element?.countryRecord?.name,
+          action: (
+            <Button
+              size="small"
+              onClick={() => setModalDetail({ open: true, dataDetail: element })}
+              variant="tertiary"
+            >
+              {lang[t].postalCode.tertier.viewDetail}
+            </Button>
+          ),
+        }));
 
         return { data: mappedData, totalRow: data.totalRow };
       },
@@ -206,7 +200,7 @@ const CountryPostalCode = () => {
   return (
     <>
       <Col>
-        <Text variant={"h4"}>{lang[t].postalCode.pageTitle.postalCode}</Text>
+        <Text variant="h4">{lang[t].postalCode.pageTitle.postalCode}</Text>
         <Spacer size={20} />
         <Card className="">
           <Row justifyContent="space-between">
@@ -215,15 +209,13 @@ const CountryPostalCode = () => {
                 width="380px"
                 nameIcon="SearchOutlined"
                 placeholder={lang[t].postalCode.searchBar.postalCode}
-                onChange={({ target }: React.ChangeEvent<HTMLInputElement>) =>
-                  setSearch(target.value)
-                }
+                onChange={({ target }: React.ChangeEvent<HTMLInputElement>) => setSearch(target.value)}
               />
               {isLoadingFilter ? (
-                <Spin tip={""} />
+                <Spin tip="" />
               ) : (
                 <DropdownMenuOptionGroupCustom
-                  showArrow={true}
+                  showArrow
                   showSearch={false}
                   showClearButton
                   handleClearValue={onHandleClear}
@@ -231,8 +223,8 @@ const CountryPostalCode = () => {
                   listItems={listFilterCountry}
                   label=""
                   width={194}
-                  roundedSelector={true}
-                  defaultValue={""}
+                  roundedSelector
+                  defaultValue=""
                   placeholder="Country"
                 />
               )}
@@ -250,85 +242,85 @@ const CountryPostalCode = () => {
               )}
 
               {(listPermission?.filter(
-					  	  (data: any) => data.viewTypes[0]?.viewType.name === "Download Template"
-					  	).length > 0 ||
-							listPermission?.filter(
-								(data: any) => data.viewTypes[0]?.viewType.name === "Download Data"
-							).length > 0 ||
-							listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Upload")
-								.length > 0) && (
-                <DropdownMenu
-                  title={"More"}
-                  buttonVariant={"secondary"}
-                  buttonSize={"big"}
-                  textVariant={"button"}
-                  textColor={"pink.regular"}
-                  iconStyle={{ fontSize: "12px" }}
-                  onClick={(e: any) => {
-                    switch (parseInt(e.key)) {
-                      case 1:
-                        downloadFile({ with_data: "N", company_id: companyCode });
-                        break;
-                      case 2:
-                        setShowUpload(true);
-                        break;
-                      case 3:
-                        downloadFile({ with_data: "Y", company_id: companyCode });
-                        break;
-                      case 4:
-                        break;
-                      default:
-                        break;
-                    }
-                  }}
-                  menuList={[
-                    {
-                      ...(listPermission?.filter(
-                        (data: any) => data.viewTypes[0]?.viewType.name === "Download Template"
-                      ).length > 0  && {
-                        key: 1,
-                        value: (
-                          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                            <DownloadSvg />
-                            <p style={{ margin: "0" }}>
-                              {lang[t].postalCode.ghost.downloadTemplate}
-                            </p>
-                          </div>
-                        ),
-                      }),
-                    },
-                    {
-                      ...(listPermission?.filter(
-                        (data: any) => data.viewTypes[0]?.viewType.name === "Upload"
-                      ).length > 0 && {
-                        key: 2,
-                        value: (
-                          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                            <UploadSvg />
-                            <p style={{ margin: "0" }}>{lang[t].postalCode.ghost.uploadTemplate}</p>
-                          </div>
-                        ),
-                      }),
-                    },
-                    {
-                      ...(listPermission?.filter(
-                        (data: any) => data.viewTypes[0]?.viewType.name === "Download Data"
-                      ).length > 0 && {
-                        key: 3,
-                        value: (
-                          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                            <DownloadSvg />
-                            <p style={{ margin: "0" }}>{lang[t].postalCode.ghost.downloadData}</p>
-                          </div>
-                        ),
-                      }),
-                    },
-                  ]}
-                />
+					  	  (data: any) => data.viewTypes[0]?.viewType.name === "Download Template",
+					  	).length > 0
+							|| listPermission?.filter(
+							  (data: any) => data.viewTypes[0]?.viewType.name === "Download Data",
+							).length > 0
+							|| listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Upload")
+							  .length > 0) && (
+<DropdownMenu
+  title="More"
+  buttonVariant="secondary"
+  buttonSize="big"
+  textVariant="button"
+  textColor="pink.regular"
+  iconStyle={{ fontSize: "12px" }}
+  onClick={(e: any) => {
+    switch (parseInt(e.key)) {
+      case 1:
+        downloadFile({ with_data: "N", company_id: companyCode });
+        break;
+      case 2:
+        setShowUpload(true);
+        break;
+      case 3:
+        downloadFile({ with_data: "Y", company_id: companyCode });
+        break;
+      case 4:
+        break;
+      default:
+        break;
+    }
+  }}
+  menuList={[
+    {
+      ...(listPermission?.filter(
+        (data: any) => data.viewTypes[0]?.viewType.name === "Download Template",
+      ).length > 0 && {
+        key: 1,
+        value: (
+          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+            <DownloadSvg />
+            <p style={{ margin: "0" }}>
+              {lang[t].postalCode.ghost.downloadTemplate}
+            </p>
+          </div>
+        ),
+      }),
+    },
+    {
+      ...(listPermission?.filter(
+        (data: any) => data.viewTypes[0]?.viewType.name === "Upload",
+      ).length > 0 && {
+        key: 2,
+        value: (
+          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+            <UploadSvg />
+            <p style={{ margin: "0" }}>{lang[t].postalCode.ghost.uploadTemplate}</p>
+          </div>
+        ),
+      }),
+    },
+    {
+      ...(listPermission?.filter(
+        (data: any) => data.viewTypes[0]?.viewType.name === "Download Data",
+      ).length > 0 && {
+        key: 3,
+        value: (
+          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+            <DownloadSvg />
+            <p style={{ margin: "0" }}>{lang[t].postalCode.ghost.downloadData}</p>
+          </div>
+        ),
+      }),
+    },
+  ]}
+/>
               )}
 
               {listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Create")
-							.length > 0 && (
+                .length > 0 && (
                 <Button size="big" variant="primary" onClick={() => setModalCreate({ open: true })}>
                   {lang[t].postalCode.primary.create}
                 </Button>

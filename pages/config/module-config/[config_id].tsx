@@ -27,7 +27,7 @@ import {
   useUpdateConfig,
 } from "../../../hooks/config/useConfig";
 import { ModalDeleteConfirmation } from "../../../components/elements/Modal/ModalConfirmationDelete";
-import ArrowLeft from "../../assets/icons/arrow-left.svg";
+import ArrowLeft from "../../../assets/icons/arrow-left.svg";
 
 const schema = yup
   .object({
@@ -89,7 +89,7 @@ const ConfigDetail: any = () => {
     config_id,
     options: {
       onSuccess: () => {
-        Router.push("/config/module-config");
+        router.push("/config/module-config");
       },
     },
   });
@@ -124,7 +124,7 @@ const ConfigDetail: any = () => {
     options: {
       onSuccess: () => {
         setModalDelete({ open: false });
-        router.push("/config/module-config");
+        router.push("/config/config");
       },
     },
   });

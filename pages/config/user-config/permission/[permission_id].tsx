@@ -19,7 +19,7 @@ import * as yup from "yup";
 import { lang } from "lang";
 import useDebounce from "lib/useDebounce";
 import Link from "next/link";
-import ArrowLeft from "../../../assets/icons/arrow-left.svg";
+import ArrowLeft from "../../../../assets/icons/arrow-left.svg";
 import { ModalDeleteConfirmation } from "../../../../components/elements/Modal/ModalConfirmationDelete";
 import { useMenuLists } from "../../../../hooks/menu-config/useMenuConfig";
 import {

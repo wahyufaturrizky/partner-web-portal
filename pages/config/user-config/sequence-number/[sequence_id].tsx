@@ -7,7 +7,7 @@ import {
 } from "pink-lava-ui";
 
 import { useUserPermissions } from "hooks/user-config/usePermission";
-import ArrowLeft from "../../../assets/icons/arrow-left.svg";
+import ArrowLeft from "../../../../assets/icons/arrow-left.svg";
 import AddSequenceNumber from "../../../../components/pages/SequenceNumber/AddSequenceNumber";
 import {
   useSequenceNumber,

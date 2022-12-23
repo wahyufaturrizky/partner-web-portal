@@ -1,8 +1,8 @@
 export const permissionProductVariant = {
-	role: {
-		["Admin"]: {
-			component: ["View Product Variant"],
-			field: [],
-		},
-	},
+  role: {
+    Admin: {
+      component: ["View Product Variant"],
+      field: [],
+    },
+  },
 };

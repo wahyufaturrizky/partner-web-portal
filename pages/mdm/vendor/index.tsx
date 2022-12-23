@@ -44,7 +44,7 @@ export default function Vendor() {
 
   const pagination = usePagination({
     page: 1,
-    itemsPerPage: 10,
+    itemsPerPage: 20,
     maxPageItems: Infinity,
     numbers: true,
     arrows: true,

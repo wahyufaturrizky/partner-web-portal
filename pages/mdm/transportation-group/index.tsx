@@ -17,32 +17,31 @@ import {
   FormInput,
 } from "pink-lava-ui";
 import usePagination from "@lucasmogari/react-pagination";
+import { useForm, Controller } from "react-hook-form";
+import { useUserPermissions } from "hooks/user-config/usePermission";
+import { permissionTransportationGroup } from "permission/transportationGroup";
 import {
   useTransportations,
   useCreateTransportation,
   useUpdateTransportation,
   useUploadFileTransportation,
   useDeleteTransportation,
-} from "../../hooks/mdm/transportation-group/useTransportationGroup";
-import useDebounce from "../../lib/useDebounce";
-import { queryClient } from "../_app";
-import { useForm, Controller } from "react-hook-form";
-import { ICDownload, ICUpload } from "../../assets/icons";
-import { mdmDownloadService } from "../../lib/client";
-import { useUserPermissions } from "hooks/user-config/usePermission";
-import { permissionTransportationGroup } from "permission/transportationGroup";
+} from "../../../hooks/mdm/transportation-group/useTransportationGroup";
+import useDebounce from "../../../lib/useDebounce";
+import { queryClient } from "../../_app";
+import { ICDownload, ICUpload } from "../../../assets/icons";
+import { mdmDownloadService } from "../../../lib/client";
 
-const downloadFile = (params: any) =>
-  mdmDownloadService(
-    `/transportation-group/download${params.with_data === "Y" ? "" : "/template"}`,
-    {}
-  ).then((res) => {
-    let dataUrl = window.URL.createObjectURL(new Blob([res.data]));
-    let tempLink = document.createElement("a");
-    tempLink.href = dataUrl;
-    tempLink.setAttribute("download", `transportation_group_${new Date().getTime()}.xlsx`);
-    tempLink.click();
-  });
+const downloadFile = (params: any) => mdmDownloadService(
+  `/transportation-group/download${params.with_data === "Y" ? "" : "/template"}`,
+  {},
+).then((res) => {
+  const dataUrl = window.URL.createObjectURL(new Blob([res.data]));
+  const tempLink = document.createElement("a");
+  tempLink.href = dataUrl;
+  tempLink.setAttribute("download", `transportation_group_${new Date().getTime()}.xlsx`);
+  tempLink.click();
+});
 
 const renderConfirmationText = (type: any, data: any) => {
   switch (type) {
@@ -50,9 +49,9 @@ const renderConfirmationText = (type: any, data: any) => {
       return data.selectedRowKeys.length > 1
         ? `Are you sure to delete ${data.selectedRowKeys.length} items ?`
         : `Are you sure to delete Transportation Name - ${
-            data?.transportationsData?.data.find((el: any) => el.key === data.selectedRowKeys[0])
-              ?.transportationGroup
-          } ?`;
+          data?.transportationsData?.data.find((el: any) => el.key === data.selectedRowKeys[0])
+            ?.transportationGroup
+        } ?`;
     case "detail":
       return `Are you sure to delete Transportation Name - ${data.transportationGroup} ?`;
 
@@ -92,7 +91,7 @@ const TransportationGroup = () => {
   });
 
   const listPermission = dataUserPermission?.permission?.filter(
-    (filtering: any) => filtering.menu === "Transportation Group"
+    (filtering: any) => filtering.menu === "Transportation Group",
   );
 
   const {
@@ -111,81 +110,75 @@ const TransportationGroup = () => {
         pagination.setTotalItems(data.totalRow);
       },
       select: (data: any) => {
-        const mappedData = data?.rows?.map((element: any) => {
-          return {
-            key: element.id,
-            id: element.transportationGroupId,
-            transportationGroup: element.transportationGroup,
-            transportationType: element.transportationType,
-            transportationVolume: `${element.volume ? element.volume + " mm3" : "-"}`,
-            transportationWeight: `${element.weight ? element.weight + " kg" : "-"}`,
-            transportationLength: element.length,
-            transportationWidth: element.width,
-            transportationHeight: element.height,
-            action: (
-              <div style={{ display: "flex", justifyContent: "left" }}>
-                <Button
-                  size="small"
-                  onClick={() => {
-                    setModalForm({ open: true, typeForm: "edit", data: element });
-                  }}
-                  variant="tertiary"
-                >
-                  View Detail
-                </Button>
-              </div>
-            ),
-          };
-        });
+        const mappedData = data?.rows?.map((element: any) => ({
+          key: element.id,
+          id: element.transportationGroupId,
+          transportationGroup: element.transportationGroup,
+          transportationType: element.transportationType,
+          transportationVolume: `${element.volume ? `${element.volume} mm3` : "-"}`,
+          transportationWeight: `${element.weight ? `${element.weight} kg` : "-"}`,
+          transportationLength: element.length,
+          transportationWidth: element.width,
+          transportationHeight: element.height,
+          action: (
+            <div style={{ display: "flex", justifyContent: "left" }}>
+              <Button
+                size="small"
+                onClick={() => {
+                  setModalForm({ open: true, typeForm: "edit", data: element });
+                }}
+                variant="tertiary"
+              >
+                View Detail
+              </Button>
+            </div>
+          ),
+        }));
 
         return { data: mappedData, totalRow: data.totalRow };
       },
     },
   });
 
-  const { mutate: createTransportation, isLoading: isLoadingCreateTransportation } =
-    useCreateTransportation({
-      options: {
-        onSuccess: () => {
-          setModalForm({ open: false, typeForm: "", data: {} });
-          queryClient.invalidateQueries(["transportations"]);
-        },
+  const { mutate: createTransportation, isLoading: isLoadingCreateTransportation } = useCreateTransportation({
+    options: {
+      onSuccess: () => {
+        setModalForm({ open: false, typeForm: "", data: {} });
+        queryClient.invalidateQueries(["transportations"]);
       },
-    });
+    },
+  });
 
-  const { mutate: updateTransportation, isLoading: isLoadingUpdateTransportation } =
-    useUpdateTransportation({
-      id: modalForm?.data?.id,
-      companyId: companyCode,
-      options: {
-        onSuccess: () => {
-          setModalForm({ open: false, typeForm: "", data: {} });
-          queryClient.invalidateQueries(["transportations"]);
-        },
+  const { mutate: updateTransportation, isLoading: isLoadingUpdateTransportation } = useUpdateTransportation({
+    id: modalForm?.data?.id,
+    companyId: companyCode,
+    options: {
+      onSuccess: () => {
+        setModalForm({ open: false, typeForm: "", data: {} });
+        queryClient.invalidateQueries(["transportations"]);
       },
-    });
+    },
+  });
 
-  const { mutate: deleteTransportation, isLoading: isLoadingDeleteUomCategory } =
-    useDeleteTransportation({
-      options: {
-        onSuccess: () => {
-          setShowDelete({ open: false, data: {}, type: "" });
-          setModalForm({ open: false, data: {}, typeForm: "" });
-          setSelectedRowKeys([]);
-          queryClient.invalidateQueries(["transportations"]);
-        },
+  const { mutate: deleteTransportation, isLoading: isLoadingDeleteUomCategory } = useDeleteTransportation({
+    options: {
+      onSuccess: () => {
+        setShowDelete({ open: false, data: {}, type: "" });
+        setModalForm({ open: false, data: {}, typeForm: "" });
+        setSelectedRowKeys([]);
+        queryClient.invalidateQueries(["transportations"]);
       },
-    });
+    },
+  });
 
-  const { mutate: uploadFileTransportation, isLoading: isLoadingUploadFileTransportation } =
-    useUploadFileTransportation({
-      options: {
-        onSuccess: () => {
-          queryClient.invalidateQueries(["transportations"]);
-          setShowUpload(false);
-        },
+  const { mutate: uploadFileTransportation, isLoading: isLoadingUploadFileTransportation } = useUploadFileTransportation({
+    options: {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["transportations"]);
+        setShowUpload(false);
       },
-    });
+    },
+  });
 
   const columns = [
     {
@@ -210,13 +203,13 @@ const TransportationGroup = () => {
     },
     ...(listPermission?.some((el: any) => el.viewTypes[0]?.viewType.name === "View")
       ? [
-          {
-            title: "Action",
-            dataIndex: "action",
-            width: "15%",
-            align: "left",
-          },
-        ]
+        {
+          title: "Action",
+          dataIndex: "action",
+          width: "15%",
+          align: "left",
+        },
+      ]
       : []),
   ];
 
@@ -260,7 +253,7 @@ const TransportationGroup = () => {
   return (
     <>
       <Col>
-        <Text variant={"h4"}>Transportation Group</Text>
+        <Text variant="h4">Transportation Group</Text>
         <Spacer size={20} />
       </Col>
       <Card>
@@ -277,14 +270,12 @@ const TransportationGroup = () => {
               .length > 0 && (
               <Button
                 size="big"
-                variant={"tertiary"}
-                onClick={() =>
-                  setShowDelete({
-                    open: true,
-                    type: "selection",
-                    data: { transportationsData, selectedRowKeys },
-                  })
-                }
+                variant="tertiary"
+                onClick={() => setShowDelete({
+                  open: true,
+                  type: "selection",
+                  data: { transportationsData, selectedRowKeys },
+                })}
                 disabled={rowSelection.selectedRowKeys?.length === 0}
               >
                 Delete
@@ -292,79 +283,79 @@ const TransportationGroup = () => {
             )}
 
             {(listPermission?.filter(
-              (data: any) => data.viewTypes[0]?.viewType.name === "Download Template"
-            ).length > 0 ||
-              listPermission?.filter(
-                (data: any) => data.viewTypes[0]?.viewType.name === "Download Data"
-              ).length > 0 ||
-              listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Upload")
+              (data: any) => data.viewTypes[0]?.viewType.name === "Download Template",
+            ).length > 0
+              || listPermission?.filter(
+                (data: any) => data.viewTypes[0]?.viewType.name === "Download Data",
+              ).length > 0
+              || listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Upload")
                 .length > 0) && (
-              <DropdownMenu
-                title={"More"}
-                buttonVariant={"secondary"}
-                buttonSize={"big"}
-                textVariant={"button"}
-                textColor={"pink.regular"}
-                iconStyle={{ fontSize: "12px" }}
-                onClick={(e: any) => {
-                  switch (parseInt(e.key)) {
-                    case 1:
-                      downloadFile({ with_data: "N", company_id: "KSNI" });
-                      break;
-                    case 2:
-                      setShowUpload(true);
-                      break;
-                    case 3:
-                      downloadFile({ with_data: "Y", company_id: "KSNI" });
-                      break;
-                    case 4:
-                      break;
-                    default:
-                      break;
-                  }
-                }}
-                menuList={[
-                  {
-                    ...(listPermission?.filter(
-                      (data: any) => data.viewTypes[0]?.viewType.name === "Download Template"
-                    ).length > 0 && {
-                      key: 1,
-                      value: (
-                        <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                          <ICDownload />
-                          <p style={{ margin: "0" }}>Download Template</p>
-                        </div>
-                      ),
-                    }),
-                  },
-                  {
-                    ...(listPermission?.filter(
-                      (data: any) => data.viewTypes[0]?.viewType.name === "Upload"
-                    ).length > 0 && {
-                      key: 2,
-                      value: (
-                        <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                          <ICUpload />
-                          <p style={{ margin: "0" }}>Upload Template</p>
-                        </div>
-                      ),
-                    }),
-                  },
-                  {
-                    ...(listPermission?.filter(
-                      (data: any) => data.viewTypes[0]?.viewType.name === "Download Data"
-                    ).length > 0 && {
-                      key: 3,
-                      value: (
-                        <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                          <ICDownload />
-                          <p style={{ margin: "0" }}>Download Data</p>
-                        </div>
-                      ),
-                    }),
-                  },
-                ]}
-              />
+                <DropdownMenu
+                  title="More"
+                  buttonVariant="secondary"
+                  buttonSize="big"
+                  textVariant="button"
+                  textColor="pink.regular"
+                  iconStyle={{ fontSize: "12px" }}
+                  onClick={(e: any) => {
+                    switch (parseInt(e.key)) {
+                      case 1:
+                        downloadFile({ with_data: "N", company_id: "KSNI" });
+                        break;
+                      case 2:
+                        setShowUpload(true);
+                        break;
+                      case 3:
+                        downloadFile({ with_data: "Y", company_id: "KSNI" });
+                        break;
+                      case 4:
+                        break;
+                      default:
+                        break;
+                    }
+                  }}
+                  menuList={[
+                    {
+                      ...(listPermission?.filter(
+                        (data: any) => data.viewTypes[0]?.viewType.name === "Download Template",
+                      ).length > 0 && {
+                        key: 1,
+                        value: (
+                          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                            <ICDownload />
+                            <p style={{ margin: "0" }}>Download Template</p>
+                          </div>
+                        ),
+                      }),
+                    },
+                    {
+                      ...(listPermission?.filter(
+                        (data: any) => data.viewTypes[0]?.viewType.name === "Upload",
+                      ).length > 0 && {
+                        key: 2,
+                        value: (
+                          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                            <ICUpload />
+                            <p style={{ margin: "0" }}>Upload Template</p>
+                          </div>
+                        ),
+                      }),
+                    },
+                    {
+                      ...(listPermission?.filter(
+                        (data: any) => data.viewTypes[0]?.viewType.name === "Download Data",
+                      ).length > 0 && {
+                        key: 3,
+                        value: (
+                          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                            <ICDownload />
+                            <p style={{ margin: "0" }}>Download Data</p>
+                          </div>
+                        ),
+                      }),
+                    },
+                  ]}
+                />
             )}
 
             {listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Create")
@@ -382,7 +373,7 @@ const TransportationGroup = () => {
       </Card>
       <Spacer size={10} />
       <Card style={{ padding: "16px 20px" }}>
-        <Col gap={"60px"}>
+        <Col gap="60px">
           <Table
             loading={isLoadingTransportations || isFetchingTransportations}
             columns={columns}
@@ -395,7 +386,7 @@ const TransportationGroup = () => {
 
       {modalForm.open && (
         <Modal
-          width={"700px"}
+          width="700px"
           centered
           visible={modalForm.open}
           onCancel={() => setModalForm({ open: false, data: {}, typeForm: "" })}
@@ -405,7 +396,7 @@ const TransportationGroup = () => {
               : "Transportation Group"
           }
           footer={null}
-          content={
+          content={(
             <div
               style={{
                 display: "flex",
@@ -415,21 +406,22 @@ const TransportationGroup = () => {
               }}
             >
               <Row width="100%" noWrap gap="10px">
-                <Col width={"100%"}>
+                <Col width="100%">
                   <Text variant="headingRegular">
-                    Transportation Group<span style={{ color: "#EB008B" }}>*</span>
+                    Transportation Group
+                    <span style={{ color: "#EB008B" }}>*</span>
                   </Text>
                   <Controller
                     control={control}
                     rules={{ required: true }}
-                    shouldUnregister={true}
+                    shouldUnregister
                     defaultValue={modalForm.data?.transportationGroup}
                     name="transportation_group"
                     render={({ field: { onChange }, formState: { errors } }) => (
                       <>
                         <FormSelect
                           style={{ width: "100%" }}
-                          size={"large"}
+                          size="large"
                           defaultValue={modalForm.data?.transportationGroup}
                           showArrow
                           items={[
@@ -437,13 +429,13 @@ const TransportationGroup = () => {
                             { label: "Air Freight", value: "Air Freight" },
                             { label: "Sea Freight", value: "Sea Freight" },
                           ]}
-                          placeholder={"Select"}
+                          placeholder="Select"
                           onChange={(value: any) => {
                             onChange(value);
                           }}
                         />
                         {errors?.transportation_group?.type === "required" && (
-                          <Text variant="alert" color={"red.regular"}>
+                          <Text variant="alert" color="red.regular">
                             This field is required
                           </Text>
                         )}
@@ -452,28 +444,29 @@ const TransportationGroup = () => {
                   />
                 </Col>
 
-                <Col width={"100%"}>
+                <Col width="100%">
                   <Text variant="headingRegular">
-                    Transportation Type<span style={{ color: "#EB008B" }}>*</span>
+                    Transportation Type
+                    <span style={{ color: "#EB008B" }}>*</span>
                   </Text>
                   <Controller
                     control={control}
                     rules={{ required: true }}
-                    shouldUnregister={true}
+                    shouldUnregister
                     defaultValue={modalForm.data?.transportationType}
                     name="transportation_type"
                     render={({ field: { onChange }, formState: { errors } }) => (
                       <>
                         <FormInput
                           defaultValue={modalForm.data?.transportationType}
-                          size={"large"}
-                          placeholder={"e.g Tronton Box"}
+                          size="large"
+                          placeholder="e.g Tronton Box"
                           onChange={(e: any) => {
                             onChange(e.target.value);
                           }}
                         />
                         {errors?.transportation_type?.type === "required" && (
-                          <Text variant="alert" color={"red.regular"}>
+                          <Text variant="alert" color="red.regular">
                             This field is required
                           </Text>
                         )}
@@ -486,11 +479,11 @@ const TransportationGroup = () => {
               <Spacer size={15} />
 
               <Row width="100%" noWrap gap="10px">
-                <Col width={"100%"}>
+                <Col width="100%">
                   <Text variant="headingRegular">Volume</Text>
                   <Controller
                     control={control}
-                    shouldUnregister={true}
+                    shouldUnregister
                     defaultValue={modalForm.data?.volume}
                     rules={{
                       validate: {
@@ -502,15 +495,15 @@ const TransportationGroup = () => {
                       <>
                         <FormInput
                           defaultValue={modalForm.data?.volume}
-                          size={"large"}
-                          placeholder={"e.g 55"}
+                          size="large"
+                          placeholder="e.g 55"
                           addonAfter="m3"
                           onChange={(e: any) => {
                             onChange(e.target.value);
                           }}
                         />
                         {errors?.volume?.type === "isNumber" && (
-                          <Text variant="alert" color={"red.regular"}>
+                          <Text variant="alert" color="red.regular">
                             Value must be a number
                           </Text>
                         )}
@@ -518,11 +511,11 @@ const TransportationGroup = () => {
                     )}
                   />
                 </Col>
-                <Col width={"100%"}>
+                <Col width="100%">
                   <Text variant="headingRegular">Weight</Text>
                   <Controller
                     control={control}
-                    shouldUnregister={true}
+                    shouldUnregister
                     defaultValue={modalForm.data?.weight}
                     rules={{
                       validate: {
@@ -534,15 +527,15 @@ const TransportationGroup = () => {
                       <>
                         <FormInput
                           defaultValue={modalForm.data?.weight}
-                          size={"large"}
-                          placeholder={"e.g 55"}
+                          size="large"
+                          placeholder="e.g 55"
                           addonAfter="kg"
                           onChange={(e: any) => {
                             onChange(e.target.value);
                           }}
                         />
                         {errors?.weight?.type === "isNumber" && (
-                          <Text variant="alert" color={"red.regular"}>
+                          <Text variant="alert" color="red.regular">
                             Value must be a number
                           </Text>
                         )}
@@ -554,18 +547,18 @@ const TransportationGroup = () => {
 
               <Spacer size={30} />
 
-              <Text variant="headingRegular" color={"blue.dark"} hoverColor={"blue.dark"}>
+              <Text variant="headingRegular" color="blue.dark" hoverColor="blue.dark">
                 Dimension
               </Text>
 
               <Spacer size={15} />
 
               <Row width="100%" noWrap gap="10px">
-                <Col width={"100%"}>
+                <Col width="100%">
                   <Text variant="headingRegular">length</Text>
                   <Controller
                     control={control}
-                    shouldUnregister={true}
+                    shouldUnregister
                     defaultValue={modalForm.data?.length}
                     rules={{
                       validate: {
@@ -577,15 +570,15 @@ const TransportationGroup = () => {
                       <>
                         <FormInput
                           defaultValue={modalForm.data?.length}
-                          size={"large"}
-                          placeholder={"e.g 55"}
+                          size="large"
+                          placeholder="e.g 55"
                           addonAfter="cm"
                           onChange={(e: any) => {
                             onChange(e.target.value);
                           }}
                         />
                         {errors?.length?.type === "isNumber" && (
-                          <Text variant="alert" color={"red.regular"}>
+                          <Text variant="alert" color="red.regular">
                             Value must be a number
                           </Text>
                         )}
@@ -593,11 +586,11 @@ const TransportationGroup = () => {
                     )}
                   />
                 </Col>
-                <Col width={"100%"}>
+                <Col width="100%">
                   <Text variant="headingRegular">Width</Text>
                   <Controller
                     control={control}
-                    shouldUnregister={true}
+                    shouldUnregister
                     defaultValue={modalForm.data?.width}
                     rules={{
                       validate: {
@@ -609,15 +602,15 @@ const TransportationGroup = () => {
                       <>
                         <FormInput
                           defaultValue={modalForm.data?.width}
-                          size={"large"}
-                          placeholder={"e.g 55"}
+                          size="large"
+                          placeholder="e.g 55"
                           addonAfter="cm"
                           onChange={(e: any) => {
                             onChange(e.target.value);
                           }}
                         />
                         {errors?.width?.type === "isNumber" && (
-                          <Text variant="alert" color={"red.regular"}>
+                          <Text variant="alert" color="red.regular">
                             Value must be a number
                           </Text>
                         )}
@@ -625,11 +618,11 @@ const TransportationGroup = () => {
                     )}
                   />
                 </Col>
-                <Col width={"100%"}>
+                <Col width="100%">
                   <Text variant="headingRegular">Height</Text>
                   <Controller
                     control={control}
-                    shouldUnregister={true}
+                    shouldUnregister
                     defaultValue={modalForm.data?.height}
                     rules={{
                       validate: {
@@ -641,15 +634,15 @@ const TransportationGroup = () => {
                       <>
                         <FormInput
                           defaultValue={modalForm.data?.height}
-                          size={"large"}
-                          placeholder={"e.g 55"}
+                          size="large"
+                          placeholder="e.g 55"
                           addonAfter="cm"
                           onChange={(e: any) => {
                             onChange(e.target.value);
                           }}
                         />
                         {errors?.height?.type === "isNumber" && (
-                          <Text variant="alert" color={"red.regular"}>
+                          <Text variant="alert" color="red.regular">
                             Value must be a number
                           </Text>
                         )}
@@ -670,7 +663,7 @@ const TransportationGroup = () => {
               >
                 <Button
                   size="big"
-                  variant={"tertiary"}
+                  variant="tertiary"
                   key="submit"
                   type="primary"
                   onClick={() => setModalForm({ open: false, data: {}, typeForm: "" })}
@@ -685,7 +678,7 @@ const TransportationGroup = () => {
                 </Button>
               </div>
             </div>
-          }
+          )}
         />
       )}
 
@@ -695,9 +688,9 @@ const TransportationGroup = () => {
           centered
           visible={isShowDelete.open}
           onCancel={() => setShowDelete({ open: false, type: "", data: {} })}
-          title={"Confirm Delete"}
+          title="Confirm Delete"
           footer={null}
-          content={
+          content={(
             <div
               style={{
                 display: "flex",
@@ -742,7 +735,7 @@ const TransportationGroup = () => {
                 </Button>
               </div>
             </div>
-          }
+          )}
         />
       )}
 

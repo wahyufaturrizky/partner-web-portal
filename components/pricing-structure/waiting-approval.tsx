@@ -144,7 +144,7 @@ const WaitingApprovalPricingStructure: any = (props: any) => {
         <Button
           size="small"
           onClick={() => {
-            router.push(`/pricing-structure/${element.id}`);
+            router.push(`/mdm/pricing/pricing-structure/${element.id}`);
           }}
           variant="tertiary"
         >
@@ -250,7 +250,7 @@ const WaitingApprovalPricingStructure: any = (props: any) => {
                 size="big"
                 variant={"primary"}
                 onClick={() => {
-                  router.push("/pricing-structure/create");
+                  router.push("/mdm/pricing/pricing-structure/create");
                 }}
               >
                 Create

@@ -75,7 +75,9 @@ export const lang = {
       createChannel: "Create Sales Channel",
       salesChannelName: "Sales Channel Name",
       placeHolder: { egModernTrade: "e.g Modern Trade" },
-      tertier: { more: "More", viewDetail: "View Detail", delete: "Delete", cancel: "Cancel" },
+      tertier: {
+        more: "More", viewDetail: "View Detail", delete: "Delete", cancel: "Cancel",
+      },
       primary: { create: "Create", save: "Save", yes: "Yes" },
       table: {
         salesChannelId: "Sales Channel ID",
@@ -374,17 +376,17 @@ export const lang = {
     },
     unitOfMeasure: {
       pageTitle: {
-        uoM: "Unit of Meansure",
-        create: "Create Unit of Meansure",
+        uoM: "Unit of Measure",
+        create: "Create Unit of Measure",
       },
       searchBar: {
-        uoM: "Search Unit of Meansure ID, Unit of MeansureName",
+        uoM: "Search Unit of Measure ID, Unit of Measure Name",
       },
       modalTitleCreate: {
-        uoM: "Create Unit of Meansure",
+        uoM: "Create Unit of Measure",
       },
       modalTitleUpdate: {
-        uoM: "Unit of Meansure",
+        uoM: "Unit of Measure",
       },
       tertier: {
         delete: "Delete",
@@ -405,9 +407,9 @@ export const lang = {
         status: "Status",
         category: "Uom Category",
       },
-      uoMID: "Unit of Meansure ID",
-      uoMName: "Unit of Meansure Name",
-      uoMCategory: "Unit of Meansure Category",
+      uoMID: "Unit of Measure ID",
+      uoMName: "Unit of Measure Name",
+      uoMCategory: "Unit of Measure Category",
       uoMAction: "Action",
 
       accordion: {

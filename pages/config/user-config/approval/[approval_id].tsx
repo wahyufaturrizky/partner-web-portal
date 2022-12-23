@@ -15,20 +15,20 @@ import {
   Pagination,
   EmptyState,
 } from "pink-lava-ui";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 
+import { usePartnerConfigPermissionLists, useUserPermissions } from "hooks/user-config/usePermission";
 import { lang } from "lang";
 import ArrowLeft from "assets/icons/arrow-left.svg";
 import { useForm, Controller } from "react-hook-form";
 import usePagination from "@lucasmogari/react-pagination";
 import AssociateUserRole from "components/pages/userConfig/Approval/AssociateUserRole";
-import { useUserPermissions } from "hooks/user-config/usePermission";
+import UserField from "components/pages/userConfig/Approval/UserField";
 import {
   useDeletePartnerConfigApprovalList,
   usePartnerConfigApprovalList,
   useUpdatePartnerConfigApprovalList,
-  usePartnerConfigApprovalLists,
 } from "../../../../hooks/user-config/useApproval";
 import { useConfigs } from "../../../../hooks/config/useConfig";
 import { ModalDeleteConfirmation } from "../../../../components/elements/Modal/ModalConfirmationDelete";
@@ -36,9 +36,9 @@ import { useProcessLists } from "../../../../hooks/business-process/useProcess";
 
 export interface ConfigModuleList {}
 
-const { approval_id } = Router.query;
-
 const DetailUserConfigApproval: any = () => {
+  const { approval_id } = Router.query;
+
   const t = localStorage.getItem("lan") || "en-US";
   const companyCode = localStorage.getItem("companyCode");
 
@@ -47,22 +47,26 @@ const DetailUserConfigApproval: any = () => {
   const [numberOfApprovalStage, setnumberOfApprovalStage] = useState<any>(1);
   const [associateRoleUserData, setAssociateRoleUserData] = useState([
     {
-      stage: 1, roles: [], users: [], cc_email: false,
+      stage: 1, roles: 0, users: 0, cc_email: false,
     },
   ]);
   const [roleList, setRoleList] = useState([]);
+  const [indexRole, setIndexRole] = useState(0);
+  const [roleId, setRoleId] = useState<any>(undefined);
   const [idPermission, setIdPermision] = useState<any>(undefined);
+  const [firstFetch, setFirstFetch] = useState(true);
 
   const {
     register,
     control,
     handleSubmit,
     formState: { errors },
+    setValue,
   } = useForm();
 
   const pagination = usePagination({
     page: 1,
-    itemsPerPage: 10,
+    itemsPerPage: 20,
     maxPageItems: Infinity,
     numbers: true,
     arrows: true,
@@ -118,7 +122,7 @@ const DetailUserConfigApproval: any = () => {
     },
   });
 
-  const { data: fieldsPermissionList, isLoading: isLoadingFieldsPermissionList } = usePartnerConfigApprovalLists({
+  const { data: fieldsPermissionList, isLoading: isLoadingFieldsPermissionList } = usePartnerConfigPermissionLists({
     query: {
       page: 1,
       limit: 1000,
@@ -144,7 +148,11 @@ const DetailUserConfigApproval: any = () => {
     },
   });
 
-  const { data: dataPartnerConfigApprovalList, isLoading: isLoadingPartnerConfigApprovalList } = usePartnerConfigApprovalList({
+  const {
+    data: dataPartnerConfigApprovalList,
+    isLoading: isLoadingPartnerConfigApprovalList,
+    isFetched,
+  } = usePartnerConfigApprovalList({
     partner_config_approval_list_id: approval_id,
     company_id: companyCode,
     options: {
@@ -156,19 +164,48 @@ const DetailUserConfigApproval: any = () => {
         setApprovalStages(mappingApprovalStages);
         setnumberOfApprovalStage(mappingApprovalStages?.length);
 
-        const mappingAssociateRoleUserData = data?.partnerApprovalStages?.map(
+        const sortAssociateRoleUserData = data?.partnerApprovalStages?.sort((a: any, b: any) => (a.stage > b.stage ? 1 : b.stage > a.stage ? -1 : 0)) ?? [];
+
+        const mappingAssociateRoleUserData = sortAssociateRoleUserData.map(
           (el: any, index: any) => ({
-            stage: index + 1,
-            partner_role_id: el?.partnerRoleId,
-            partner_user_id: 0,
+            stage: el.stage,
+            roles: el?.partnerRoleId,
+            users: el?.partnerUserId,
             cc_email: el?.isCcEmail,
           }),
         );
+
+        const mappingDefaultValue = sortAssociateRoleUserData.map((el: any, index: any) => ({
+          partner_role_id: el?.partnerRoleId,
+          partner_user_id: el?.partnerUserId,
+          is_cc_email: el?.isCcEmail,
+        }));
+
         setAssociateRoleUserData(mappingAssociateRoleUserData);
+        setValue("associate_role_user", mappingDefaultValue);
         setIdPermision(data?.partnerPermissionId);
+
+        const mappingApprovalStagesValue = sortAssociateRoleUserData.map((el: any, index: any) => ({
+          is_mandatory: el?.isMandatory,
+        }));
+
+        setValue("approval_stages", mappingApprovalStagesValue);
+
+        setValue("is_email_notification", data?.isEmailNotification);
+        setValue("reminder_day", data?.reminderDay);
+        setValue("name", data?.name);
+        setValue("module_id", data?.moduleId);
+        setValue("process_id", data?.processId);
+        setValue("partner_permission_id", data?.partnerPermissionId);
       },
     },
   });
+
+  useEffect(() => {
+    if (isFetched) {
+      setFirstFetch(false);
+    }
+  }, [isFetched]);
 
   const handleChangeInput = (e: any) => {
     // Set Approval Stage
@@ -193,7 +230,7 @@ const DetailUserConfigApproval: any = () => {
 
     for (let i = 0; i < lengthValue; i++) {
       associateRoleUser.push({
-        stage: i + 1, roles: [], users: [], cc_email: false,
+        stage: i + 1, roles: 0, users: 0, cc_email: false,
       });
     }
 
@@ -212,7 +249,7 @@ const DetailUserConfigApproval: any = () => {
     },
     {
       title: "Role",
-      dataIndex: "partner_role_id",
+      dataIndex: "roles",
       width: "15%",
       render: (value: any, record: any, index: any) => (
         <AssociateUserRole
@@ -220,6 +257,14 @@ const DetailUserConfigApproval: any = () => {
           index={index}
           control={control}
           roleList={roleList}
+          valueApprovalStages={numberOfApprovalStage}
+          handleRoleChange={() => {
+            // setValue(`associate_role_user.${index}.partner_user_id`, undefined);
+          }}
+          setRolesID={(id: any) => {
+            setRoleId(id);
+            setIndexRole(index);
+          }}
           setRoleList={(data: any) => {
             setRoleList(data);
           }}
@@ -229,10 +274,18 @@ const DetailUserConfigApproval: any = () => {
     },
     {
       title: "User",
-      dataIndex: "partner_user_id",
+      dataIndex: "users",
       width: "15%",
       render: (value: any, record: any, index: any) => (
-        <AssociateUserRole type="user" index={index} control={control} />
+        <UserField
+          control={control}
+          index={index}
+          roleId={roleId || record.roles}
+            // roleId={firstFetch ? record.roles : roleId}
+            // indexRole={indexRole}
+          indexRole={firstFetch ? index : indexRole}
+          type="update"
+        />
       ),
     },
     {
@@ -243,7 +296,7 @@ const DetailUserConfigApproval: any = () => {
       render: (value: any, record: any, index: any) => (
         <Controller
           control={control}
-          defaultValue={false}
+          defaultValue={value}
           shouldUnregister
           name={`associate_role_user.${index}.is_cc_email`}
           render={({ field: { onChange, value }, formState: { errors } }) => (
@@ -390,10 +443,11 @@ const DetailUserConfigApproval: any = () => {
                     defaultValue={null}
                     shouldUnregister
                     name="module_id"
-                    render={({ field: { onChange }, formState: { errors } }) => (
+                    render={({ field: { onChange, value }, formState: { errors } }) => (
                       <Dropdown
                         width="100%"
                         containerId="area"
+                        defaultValue={value}
                         label={lang[t].approvalList.filterbar.module}
                         id="Module"
                         loading={isLoadingConfigModule}
@@ -421,9 +475,10 @@ const DetailUserConfigApproval: any = () => {
                     control={control}
                     defaultValue={null}
                     name="process_id"
-                    render={({ field: { onChange }, formState: { errors } }) => (
+                    render={({ field: { onChange, value }, formState: { errors } }) => (
                       <Dropdown
                         width="100%"
+                        defaultValue={value}
                         containerId="area"
                         label={lang[t].approvalList.filterbar.process}
                         loading={isLoadingFieldListProcess}
@@ -450,9 +505,10 @@ const DetailUserConfigApproval: any = () => {
                     defaultValue={null}
                     rules={{ required: true }}
                     name="partner_permission_id"
-                    render={({ field: { onChange }, formState: { errors } }) => (
+                    render={({ field: { onChange, value }, formState: { errors } }) => (
                       <Dropdown
                         width="100%"
+                        defaultValue={value}
                         containerId="area"
                         label={lang[t].approvalList.filterbar.permission}
                         loading={isLoadingFieldsPermissionList}

@@ -17,6 +17,11 @@ import {
   Spin,
 } from "pink-lava-ui";
 import usePagination from "@lucasmogari/react-pagination";
+import { useForm, Controller } from "react-hook-form";
+import { lang } from "lang";
+import { usePartnerConfigPermissionLists } from "hooks/user-config/usePermission";
+import { permissionSalesmanGroup } from "permission/salesman-group";
+import { useUserPermissions } from "hooks/user-config/useUser";
 import {
   useSalesmanGroups,
   useSalesmanGroup,
@@ -28,13 +33,8 @@ import {
 } from "../../../../hooks/mdm/salesman-group/useSalesmanGroup";
 import useDebounce from "../../../../lib/useDebounce";
 import { queryClient } from "../../../_app";
-import { useForm, Controller } from "react-hook-form";
 import { ICDownload, ICUpload } from "../../../../assets/icons";
 import { mdmDownloadService } from "../../../../lib/client";
-import { lang } from "lang";
-import { usePartnerConfigPermissionLists } from "hooks/user-config/usePermission";
-import { permissionSalesmanGroup } from "permission/salesman-group";
-import { useUserPermissions } from "hooks/user-config/useUser";
 
 const SalesmanGroup = () => {
   const t = localStorage.getItem("lan") || "en-US";
@@ -80,26 +80,23 @@ const SalesmanGroup = () => {
       enabled: false,
       onSuccess: (data: any) => {},
       select: (data: any) => {
-        const mappedData = data?.map((element: any) => {
-          return {
-            value: element.code,
-            label: element.name,
-          };
-        });
+        const mappedData = data?.map((element: any) => ({
+          value: element.code,
+          label: element.name,
+        }));
 
         return mappedData;
       },
     },
   });
 
-  const downloadFile = (params: any) =>
-    mdmDownloadService("/salesman-group/template/download", { params }).then((res) => {
-      let dataUrl = window.URL.createObjectURL(new Blob([res.data]));
-      let tempLink = document.createElement("a");
-      tempLink.href = dataUrl;
-      tempLink.setAttribute("download", `salesman_group_${new Date().getTime()}.xlsx`);
-      tempLink.click();
-    });
+  const downloadFile = (params: any) => mdmDownloadService("/salesman-group/template/download", { params }).then((res) => {
+    const dataUrl = window.URL.createObjectURL(new Blob([res.data]));
+    const tempLink = document.createElement("a");
+    tempLink.href = dataUrl;
+    tempLink.setAttribute("download", `salesman_group_${new Date().getTime()}.xlsx`);
+    tempLink.click();
+  });
 
   const renderConfirmationText = (type: any, data: any) => {
     switch (type) {
@@ -107,9 +104,9 @@ const SalesmanGroup = () => {
         return data.selectedRowKeys.length > 1
           ? `${lang[t].salesmanGroup.areYouSureToDelete} ${data.selectedRowKeys.length} items ?`
           : `${lang[t].salesmanGroup.areYouSureToDelete} ${
-              data?.salesmanGroupDatas?.data.find((el: any) => el.key === data.selectedRowKeys[0])
-                ?.name
-            } ?`;
+            data?.salesmanGroupDatas?.data.find((el: any) => el.key === data.selectedRowKeys[0])
+              ?.name
+          } ?`;
       case "detail":
         return `${lang[t].salesmanGroup.areYouSureToDelete} ${data.name} ?`;
 
@@ -170,77 +167,71 @@ const SalesmanGroup = () => {
         pagination.setTotalItems(data.totalRow);
       },
       select: (data: any) => {
-        const mappedData = data?.rows?.map((element: any) => {
-          return {
-            key: element.id,
-            id: element.code,
-            name: element.name,
-            parent: element.parent,
-            action: (
-              <div style={{ display: "flex", justifyContent: "left" }}>
-                <Button
-                  size="small"
-                  onClick={() => {
-                    setModalForm({ open: true, typeForm: "edit", data: element });
-                    setSalesmanGroupId(element.id);
-                    setSalesmanGroupParentId(element.id);
-                  }}
-                  variant="tertiary"
-                >
-                  {lang[t].salesmanGroup.tertier.viewDetail}
-                </Button>
-              </div>
-            ),
-          };
-        });
+        const mappedData = data?.rows?.map((element: any) => ({
+          key: element.id,
+          id: element.code,
+          name: element.name,
+          parent: element.parent,
+          action: (
+            <div style={{ display: "flex", justifyContent: "left" }}>
+              <Button
+                size="small"
+                onClick={() => {
+                  setModalForm({ open: true, typeForm: "edit", data: element });
+                  setSalesmanGroupId(element.id);
+                  setSalesmanGroupParentId(element.id);
+                }}
+                variant="tertiary"
+              >
+                {lang[t].salesmanGroup.tertier.viewDetail}
+              </Button>
+            </div>
+          ),
+        }));
 
         return { data: mappedData, totalRow: data.totalRow };
       },
     },
   });
 
-  const { mutate: createSalesmanGroup, isLoading: isLoadingCreateSalesmanGroup } =
-    useCreateSalesmanGroup({
-      options: {
-        onSuccess: () => {
-          setModalForm({ open: false, typeForm: "", data: {} });
-          queryClient.invalidateQueries(["salesman-groups"]);
-        },
+  const { mutate: createSalesmanGroup, isLoading: isLoadingCreateSalesmanGroup } = useCreateSalesmanGroup({
+    options: {
+      onSuccess: () => {
+        setModalForm({ open: false, typeForm: "", data: {} });
+        queryClient.invalidateQueries(["salesman-groups"]);
       },
-    });
+    },
+  });
 
-  const { mutate: updateSalemanGroup, isLoading: isLoadingUpdateSalesmanGroup } =
-    useUpdateSalesmanGroup({
-      id: modalForm?.data?.id,
-      options: {
-        onSuccess: () => {
-          setModalForm({ open: false, typeForm: "", data: {} });
-          queryClient.invalidateQueries(["salesman-groups"]);
-        },
+  const { mutate: updateSalemanGroup, isLoading: isLoadingUpdateSalesmanGroup } = useUpdateSalesmanGroup({
+    id: modalForm?.data?.id,
+    options: {
+      onSuccess: () => {
+        setModalForm({ open: false, typeForm: "", data: {} });
+        queryClient.invalidateQueries(["salesman-groups"]);
       },
-    });
+    },
+  });
 
-  const { mutate: deleteSalesmanGroup, isLoading: isLoadingDeleteSalesmanGroup } =
-    useDeleteSalesmanGroup({
-      options: {
-        onSuccess: () => {
-          setShowDelete({ open: false, data: {}, type: "" });
-          setModalForm({ open: false, data: {}, typeForm: "" });
-          setSelectedRowKeys([]);
-          queryClient.invalidateQueries(["salesman-groups"]);
-        },
+  const { mutate: deleteSalesmanGroup, isLoading: isLoadingDeleteSalesmanGroup } = useDeleteSalesmanGroup({
+    options: {
+      onSuccess: () => {
+        setShowDelete({ open: false, data: {}, type: "" });
+        setModalForm({ open: false, data: {}, typeForm: "" });
+        setSelectedRowKeys([]);
+        queryClient.invalidateQueries(["salesman-groups"]);
       },
-    });
+    },
+  });
 
-  const { mutate: uploadFileSalesmanGroup, isLoading: isLoadingUploadFileSalesmanGroup } =
-    useUploadFileSalesmanGroup({
-      options: {
-        onSuccess: () => {
-          queryClient.invalidateQueries(["salesman-groups"]);
-          setShowUpload(false);
-        },
+  const { mutate: uploadFileSalesmanGroup, isLoading: isLoadingUploadFileSalesmanGroup } = useUploadFileSalesmanGroup({
+    options: {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["salesman-groups"]);
+        setShowUpload(false);
       },
-    });
+    },
+  });
 
   const columns = [
     {
@@ -296,14 +287,12 @@ const SalesmanGroup = () => {
   });
 
   const listPermission = dataUserPermission?.permission?.filter(
-    (filtering: any) => filtering.menu === "Salesman Group"
+    (filtering: any) => filtering.menu === "Salesman Group",
   );
 
-  const checkUserPermission = (permissionGranted) => {
-    return listPermission?.find(
-      (data: any) => data?.viewTypes?.[0]?.viewType?.name === permissionGranted
-    );
-  };
+  const checkUserPermission = (permissionGranted) => listPermission?.find(
+    (data: any) => data?.viewTypes?.[0]?.viewType?.name === permissionGranted,
+  );
 
   console.log(dataUserPermission, "<<<<allow");
   let menuList: any[] = [];
@@ -312,36 +301,36 @@ const SalesmanGroup = () => {
     menuList = [
       checkUserPermission("Download Template")
         ? {
-            key: 1,
-            value: (
-              <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                <ICDownload />
-                <p style={{ margin: "0" }}>{lang[t].termOfPayment.ghost.downloadTemplate}</p>
-              </div>
-            ),
-          }
+          key: 1,
+          value: (
+            <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+              <ICDownload />
+              <p style={{ margin: "0" }}>{lang[t].termOfPayment.ghost.downloadTemplate}</p>
+            </div>
+          ),
+        }
         : "",
       checkUserPermission("Upload Template")
         ? {
-            key: 2,
-            value: (
-              <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                <ICUpload />
-                <p style={{ margin: "0" }}>{lang[t].termOfPayment.ghost.uploadTemplate}</p>
-              </div>
-            ),
-          }
+          key: 2,
+          value: (
+            <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+              <ICUpload />
+              <p style={{ margin: "0" }}>{lang[t].termOfPayment.ghost.uploadTemplate}</p>
+            </div>
+          ),
+        }
         : "",
       checkUserPermission("Download Data")
         ? {
-            key: 3,
-            value: (
-              <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                <ICDownload />
-                <p style={{ margin: "0" }}>{lang[t].termOfPayment.ghost.downloadData}</p>
-              </div>
-            ),
-          }
+          key: 3,
+          value: (
+            <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+              <ICDownload />
+              <p style={{ margin: "0" }}>{lang[t].termOfPayment.ghost.downloadData}</p>
+            </div>
+          ),
+        }
         : "",
     ];
   }
@@ -356,7 +345,7 @@ const SalesmanGroup = () => {
   return (
     <>
       <Col>
-        <Text variant={"h4"}>{lang[t].salesmanGroup.title}</Text>
+        <Text variant="h4">{lang[t].salesmanGroup.title}</Text>
         <Spacer size={20} />
       </Col>
       <Card>
@@ -372,28 +361,26 @@ const SalesmanGroup = () => {
             {checkUserPermission("Delete") && (
               <Button
                 size="big"
-                variant={"tertiary"}
-                onClick={() =>
-                  setShowDelete({
-                    open: true,
-                    type: "selection",
-                    data: { salesmanGroupDatas: salesmanGroupsData, selectedRowKeys },
-                  })
-                }
+                variant="tertiary"
+                onClick={() => setShowDelete({
+                  open: true,
+                  type: "selection",
+                  data: { salesmanGroupDatas: salesmanGroupsData, selectedRowKeys },
+                })}
                 disabled={rowSelection.selectedRowKeys?.length === 0}
               >
                 {lang[t].salesmanGroup.tertier.delete}
               </Button>
             )}
-            {checkUserPermission("Download Template") &&
-              checkUserPermission("Upload") &&
-              checkUserPermission("Download Data") && (
+            {checkUserPermission("Download Template")
+              && checkUserPermission("Upload")
+              && checkUserPermission("Download Data") && (
                 <DropdownMenu
                   title={lang[t].salesmanGroup.tertier.more}
-                  buttonVariant={"secondary"}
-                  buttonSize={"big"}
-                  textVariant={"button"}
-                  textColor={"pink.regular"}
+                  buttonVariant="secondary"
+                  buttonSize="big"
+                  textVariant="button"
+                  textColor="pink.regular"
                   iconStyle={{ fontSize: "12px" }}
                   onClick={(e: any) => {
                     switch (parseInt(e.key)) {
@@ -414,7 +401,7 @@ const SalesmanGroup = () => {
                   }}
                   menuList={menuList}
                 />
-              )}
+            )}
             {checkUserPermission("Create") && (
               <Button
                 size="big"
@@ -432,7 +419,7 @@ const SalesmanGroup = () => {
       </Card>
       <Spacer size={10} />
       <Card style={{ padding: "16px 20px" }}>
-        <Col gap={"60px"}>
+        <Col gap="60px">
           <Table
             loading={isLoadingSalesmanGroups || isFetchingSalesmanGroups}
             columns={columns}
@@ -445,7 +432,7 @@ const SalesmanGroup = () => {
 
       {modalForm.open && (
         <Modal
-          width={"440px"}
+          width="440px"
           centered
           visible={modalForm.open}
           onCancel={() => {
@@ -456,11 +443,11 @@ const SalesmanGroup = () => {
             modalForm.typeForm === "create"
               ? lang[t].salesmanGroup.createSalesmanGroup
               : !isLoadingSalesmanGroup || !isFetchingSalesmanGroup
-              ? lang[t].salesmanGroup.title
-              : ""
+                ? lang[t].salesmanGroup.title
+                : ""
           }
           footer={null}
-          content={
+          content={(
             <>
               {isLoadingSalesmanGroup || isFetchingSalesmanGroup ? (
                 <Center>
@@ -480,7 +467,7 @@ const SalesmanGroup = () => {
                     width="100%"
                     label={lang[t].salesmanGroup.salesmanGroupName}
                     height="40px"
-                    placeholder={"e.g Motoris"}
+                    placeholder="e.g Motoris"
                     {...register("name", {
                       shouldUnregister: true,
                     })}
@@ -492,24 +479,25 @@ const SalesmanGroup = () => {
                     control={control}
                     name="parent"
                     defaultValue={salesmanGroupFormData?.parentId ?? ""}
-                    shouldUnregister={true}
+                    shouldUnregister
                     render={({ field: { onChange } }) => (
                       <>
                         <span>
                           <Label style={{ display: "inline" }}>
                             {lang[t].salesmanGroup.parent}
-                          </Label>{" "}
-                          <span>{"(Optional)"}</span>
+                          </Label>
+                          {" "}
+                          <span>(Optional)</span>
                         </span>
 
                         <Spacer size={3} />
                         <FormSelect
                           defaultValue={salesmanGroupFormData?.parent ?? ""}
                           style={{ width: "100%" }}
-                          size={"large"}
-                          placeholder={"Select"}
-                          borderColor={"#AAAAAA"}
-                          arrowColor={"#000"}
+                          size="large"
+                          placeholder="Select"
+                          borderColor="#AAAAAA"
+                          arrowColor="#000"
                           withSearch={salesmanGroupParentData?.length !== 0}
                           isLoading={isLoadingSalesmanGroupParent || isFetchingSalesmanGroupParent}
                           isLoadingMore={false}
@@ -541,7 +529,7 @@ const SalesmanGroup = () => {
                     width="100%"
                     label={lang[t].salesmanGroup.externalCode}
                     height="40px"
-                    placeholder={""}
+                    placeholder=""
                     {...register("external_code", {
                       shouldUnregister: true,
                     })}
@@ -559,7 +547,7 @@ const SalesmanGroup = () => {
                   >
                     <Button
                       size="big"
-                      variant={"tertiary"}
+                      variant="tertiary"
                       key="submit"
                       type="primary"
                       full
@@ -588,7 +576,7 @@ const SalesmanGroup = () => {
                 </div>
               )}
             </>
-          }
+          )}
         />
       )}
 
@@ -600,7 +588,7 @@ const SalesmanGroup = () => {
           onCancel={() => setShowDelete({ open: false, type: "", data: {} })}
           title={lang[t].salesmanGroup.confirmDelete}
           footer={null}
-          content={
+          content={(
             <div
               style={{
                 display: "flex",
@@ -639,7 +627,7 @@ const SalesmanGroup = () => {
                 </Button>
               </div>
             </div>
-          }
+          )}
         />
       )}
 

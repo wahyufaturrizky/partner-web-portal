@@ -1,7 +1,9 @@
 import React, { useState } from "react";
-import { Button, Spacer, Modal, Accordion, Text, TextArea, Row, Col, Checkbox } from "pink-lava-ui";
+import {
+  Button, Spacer, Modal, Accordion, Text, TextArea, Row, Col, Checkbox,
+} from "pink-lava-ui";
 import styled from "styled-components";
-import { emptyPayloadPriceStructure } from "pages/mdm/pricing-structure/[price_structure_id]";
+import { emptyPayloadPriceStructure } from "pages/mdm/pricing/pricing-structure/[price_structure_id]";
 
 export const ModalRejectPriceStructure: any = ({
   visible,
@@ -20,7 +22,7 @@ export const ModalRejectPriceStructure: any = ({
     let newPriceStructureAndProduct = JSON.parse(JSON.stringify(priceStructureAndProduct));
     if (newPriceStructureAndProduct.includes(value)) {
       newPriceStructureAndProduct = newPriceStructureAndProduct.filter(
-        (info: any) => info !== value
+        (info: any) => info !== value,
       );
     } else {
       newPriceStructureAndProduct.push(value);
@@ -36,7 +38,7 @@ export const ModalRejectPriceStructure: any = ({
 
     if (priceStructureAndProduct.length > 0) {
       data.rejectionDetails = Object.assign(
-        ...priceStructureAndProduct.map((k) => ({ [k]: true }))
+        ...priceStructureAndProduct.map((k) => ({ [k]: true })),
       );
     }
 
@@ -59,11 +61,11 @@ export const ModalRejectPriceStructure: any = ({
 
   return (
     <Modal
-      width={"880px"}
+      width="880px"
       visible={visible}
       onCancel={onCancel}
-      title={"Detail Field"}
-      footer={
+      title="Detail Field"
+      footer={(
         <div
           style={{
             display: "flex",
@@ -80,8 +82,8 @@ export const ModalRejectPriceStructure: any = ({
             Save
           </Button>
         </div>
-      }
-      content={
+      )}
+      content={(
         <>
           <Spacer size={12} />
           <Text color="blue.darker" variant="headingMedium">
@@ -95,7 +97,7 @@ export const ModalRejectPriceStructure: any = ({
                   <Checkbox
                     checked={priceStructureAndProduct.length === 4}
                     onChange={() => checkAllPriceStructureAndProduct()}
-                    stopPropagation={true}
+                    stopPropagation
                   />
                   <Text variant="headingMedium" bold>
                     Pricing Structure & Products
@@ -107,9 +109,7 @@ export const ModalRejectPriceStructure: any = ({
                   <Row width="164px" height="25px">
                     <Checkbox
                       checked={priceStructureAndProduct.includes("price_structure_config")}
-                      onChange={() =>
-                        handleChangePriceStructureAndProduct("price_structure_config")
-                      }
+                      onChange={() => handleChangePriceStructureAndProduct("price_structure_config")}
                     />
                     <Spacer size={8} display="inline-block" />
                     <Text variant="body1">Name</Text>
@@ -149,7 +149,7 @@ export const ModalRejectPriceStructure: any = ({
               <CustomTextArea
                 value={desc}
                 onChange={(e) => setDesc(e.target.value)}
-                label={
+                label={(
                   <Text
                     variant="headingMedium"
                     placeholder="Data has not been filled in."
@@ -157,13 +157,13 @@ export const ModalRejectPriceStructure: any = ({
                   >
                     Reason Rejected
                   </Text>
-                }
+                )}
               />
             </div>
           </Col>
           <Spacer size={18} />
         </>
-      }
+      )}
     />
   );
 };

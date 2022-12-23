@@ -1,6 +1,6 @@
-import React from 'react'
-import ComponentDetailSalesman from '../../../components/pages/Salesman/DetailSalesman'
-import { useListCustomers } from '../../../hooks/mdm/customers/useCustomersMDM'
+import React from 'react';
+import ComponentDetailSalesman from '../../../components/pages/Salesman/DetailSalesman';
+import { useListCustomers } from '../../../hooks/mdm/customers/useCustomersMDM';
 
 export default function DetailSalesman() {
   const { data: listCustomers, isLoading } = useListCustomers({
@@ -13,6 +13,5 @@ export default function DetailSalesman() {
       isLoading={isLoading}
       listCustomers={listCustomers?.rows}
     />
-  )
+  );
 }
-

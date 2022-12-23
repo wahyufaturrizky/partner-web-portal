@@ -17,7 +17,7 @@ import { useAllLibraryLanguage } from "hooks/mdm/library-language/useLibraryLang
 import { useLanguages } from "../../../hooks/languages/useLanguages";
 import { useRolePermissions } from "../../../hooks/role/useRole";
 import { useCreateUser } from "../../../hooks/user-config/useUser";
-import ArrowLeft from "../../assets/icons/arrow-left.svg";
+import ArrowLeft from "../../../assets/icons/arrow-left.svg";
 
 const phoneRegex = /^(\+?\d{0,4})?\s?-?\s?(\(?\d{3}\)?)\s?-?\s?(\(?\d{3}\)?)\s?-?\s?(\(?\d{4}\)?)?$/;
 const schema = yup
@@ -139,7 +139,7 @@ const CreateUserConfig: any = () => {
   const { mutate: createUser } = useCreateUser({
     options: {
       onSuccess: () => {
-        Router.push("/config/user-config");
+        router.push("/config/user-config");
       },
     },
   });
@@ -180,7 +180,7 @@ const CreateUserConfig: any = () => {
   return (
     <Col>
       <Row gap="4px" alignItems="center">
-        <ArrowLeft style={{ cursor: "pointer" }} onClick={() => Router.push("/config/user-config")} />
+        <ArrowLeft style={{ cursor: "pointer" }} onClick={() => router.push("/config/user-config")} />
         <Text variant="h4">{lang[t].userList.create.template.headerTitle}</Text>
       </Row>
 
@@ -200,7 +200,7 @@ const CreateUserConfig: any = () => {
           />
           <Row>
             <Row gap="16px">
-              <Button size="big" variant="tertiary" onClick={() => Router.push("/config/user-config")}>
+              <Button size="big" variant="tertiary" onClick={() => router.push("/config/user-config")}>
                 {lang[t].userList.list.button.cancel}
               </Button>
               <Button size="big" variant="primary" onClick={handleSubmit(onSubmit)}>

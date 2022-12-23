@@ -28,7 +28,7 @@ import { useCompanyInfiniteLists } from "hooks/company-list/useCompany";
 import useDebounce from "lib/useDebounce";
 import { lang } from "lang";
 import { useUserPermissions } from "hooks/user-config/usePermission";
-import ArrowLeft from "../../../assets/icons/arrow-left.svg";
+import ArrowLeft from "../../../../assets/icons/arrow-left.svg";
 import { ModalDeleteConfirmation } from "../../../../components/elements/Modal/ModalConfirmationDelete";
 import {
   useDeletePermission,
@@ -150,7 +150,7 @@ const DetailRoleConfig: any = () => {
     role_id,
     options: {
       onSuccess: () => {
-        Router.push("/config/user-config/role");
+        router.push("/config/user-config/role");
       },
     },
   });

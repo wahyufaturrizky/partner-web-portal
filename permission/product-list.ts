@@ -1,8 +1,8 @@
 export const permissionProductList = {
-	role: {
-		["Admin"]: {
-			component: ["View Product List"],
-			field: [],
-		},
-	},
+  role: {
+    Admin: {
+      component: ["View Product List"],
+      field: [],
+    },
+  },
 };

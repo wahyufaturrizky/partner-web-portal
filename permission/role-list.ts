@@ -1,8 +1,8 @@
 export const permissionRoleList = {
-	role: {
-		["Admin"]: {
-			component: ["View Role List"],
-			field: [],
-		},
-	},
+  role: {
+    Admin: {
+      component: ["View Role List"],
+      field: [],
+    },
+  },
 };

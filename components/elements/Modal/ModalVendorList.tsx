@@ -7,7 +7,7 @@ import { useVendors } from "hooks/mdm/vendor/useVendor";
 const ModalVendorList = ({ show, onCancel, selectedRowKeys, onAddMenu }: any) => {
   const pagination = usePagination({
     page: 1,
-    itemsPerPage: 10,
+    itemsPerPage: 20,
     maxPageItems: Infinity,
     numbers: true,
     arrows: true,
@@ -43,7 +43,7 @@ const ModalVendorList = ({ show, onCancel, selectedRowKeys, onAddMenu }: any) =>
             name: element.name,
             type: element.type,
             group: element.groupName,
-            validUntil: '-'
+            validUntil: "-",
           };
         });
 
@@ -54,22 +54,22 @@ const ModalVendorList = ({ show, onCancel, selectedRowKeys, onAddMenu }: any) =>
 
   const columns = [
     {
-      title: 'Vendor ID',
+      title: "Vendor ID",
       dataIndex: "id",
     },
     {
-      title: 'Vendor Name',
+      title: "Vendor Name",
       dataIndex: "name",
     },
     {
-      title: 'Vendor Type',
+      title: "Vendor Type",
       dataIndex: "type",
     },
     {
-      title: 'Vendor Group',
+      title: "Vendor Group",
       dataIndex: "group",
-    }
-  ]
+    },
+  ];
 
   const onSelectChange = (selectedRowKeys: any, selectedRows: any) => {
     setSelectedMenu(selectedRows);

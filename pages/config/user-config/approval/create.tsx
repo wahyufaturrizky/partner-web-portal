@@ -17,10 +17,11 @@ import {
 } from "pink-lava-ui";
 import styled from "styled-components";
 import usePagination from "@lucasmogari/react-pagination";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useForm, useFieldArray } from "react-hook-form";
 import { lang } from "lang";
 import { usePartnerConfigPermissionLists } from "hooks/user-config/usePermission";
 import AssociateUserRole from "components/pages/userConfig/Approval/AssociateUserRole";
+import UserField from "components/pages/userConfig/Approval/UserField";
 import { useProcessLists } from "../../../../hooks/business-process/useProcess";
 import { useCreatePartnerConfigApprovalList } from "../../../../hooks/user-config/useApproval";
 import { useConfigs } from "../../../../hooks/config/useConfig";
@@ -34,10 +35,12 @@ const CreatePartnerConfigApproval: any = () => {
   const [numberOfApprovalStage, setnumberOfApprovalStage] = useState<any>(1);
   const [associateRoleUserData, setAssociateRoleUserData] = useState([
     {
-      stage: 1, roles: [], users: [], cc_email: false,
+      stage: 1, roles: 0, users: 0, cc_email: false,
     },
   ]);
   const [roleList, setRoleList] = useState([]);
+  const [indexRole, setIndexRole] = useState(0);
+  const [roleId, setRoleId] = useState<any>(undefined);
   const [idPermission, setIdPermision] = useState<any>(undefined);
 
   const {
@@ -48,9 +51,30 @@ const CreatePartnerConfigApproval: any = () => {
     setValue,
   } = useForm();
 
+  // const {
+  //   register,
+  //   control,
+  //   handleSubmit,
+  //   formState: { errors },
+  //   setValue,
+  // } = useForm({
+  //   defaultValues: {
+  //     associate_role_user: [
+  //       { stage: 1, roles: 0, users: 0, cc_email: false },
+  //       { stage: 1, roles: 0, users: 0, cc_email: false },
+  //       { stage: 1, roles: 0, users: 0, cc_email: false },
+  //     ],
+  //   },
+  // });
+
+  // const { fields, append, prepend, remove, swap, move, insert } = useFieldArray({
+  //   control, // control props comes from useForm (optional: if you are using FormContext)
+  //   name: "associate_role_user", // unique name for your Field Array
+  // });
+
   const pagination = usePagination({
     page: 1,
-    itemsPerPage: 10,
+    itemsPerPage: 20,
     maxPageItems: Infinity,
     numbers: true,
     arrows: true,
@@ -174,8 +198,13 @@ const CreatePartnerConfigApproval: any = () => {
           index={index}
           control={control}
           roleList={roleList}
+          valueApprovalStages={numberOfApprovalStage}
           handleRoleChange={() => {
             // setValue(`associate_role_user.${index}.partner_user_id`, undefined);
+          }}
+          setRolesID={(id: any) => {
+            setRoleId(id);
+            setIndexRole(index);
           }}
           setRoleList={(data: any) => {
             setRoleList(data);
@@ -189,7 +218,13 @@ const CreatePartnerConfigApproval: any = () => {
       dataIndex: "partner_user_id",
       width: "15%",
       render: (value: any, record: any, index: any) => (
-        <AssociateUserRole type="user" index={index} control={control} />
+        <UserField
+          control={control}
+          index={index}
+          roleId={roleId}
+          indexRole={indexRole}
+          type=""
+        />
       ),
     },
     {
@@ -239,9 +274,9 @@ const CreatePartnerConfigApproval: any = () => {
       company_id: companyCode,
     };
 
-    console.log(formData);
+    // console.log(formData);
 
-    // mutateCreatePartnerConfigApprovalList(formData);
+    mutateCreatePartnerConfigApprovalList(formData);
   };
 
   return (
@@ -394,7 +429,7 @@ const CreatePartnerConfigApproval: any = () => {
                         setIdPermision(Number(value));
                         // reset
                         // setRoleList([]);
-                        // setValue("associate_role_user", []);
+                        setValue("associate_role_user", []);
                       }}
                       noSearch
                       required
@@ -458,21 +493,21 @@ const CreatePartnerConfigApproval: any = () => {
                         defaultValue={data?.is_mandatory}
                         name={`approval_stages.${index}.is_mandatory`}
                         render={({ field: { onChange, value }, formState: { errors } }) => (
-                            <>
-                              <Checkbox
-                                checked={value}
-                                onChange={() => {
-                                  onChange(!value);
-                                }}
-                              />
-                              <div>
-                                <Text variant="h6">
-                                  Stage
-                                  {index + 1}
-                                </Text>
-                              </div>
-                            </>
-                          )}
+                          <>
+                            <Checkbox
+                              checked={value}
+                              onChange={() => {
+                                onChange(!value);
+                              }}
+                            />
+                            <div>
+                              <Text variant="h6">
+                                Stage
+                                {index + 1}
+                              </Text>
+                            </div>
+                          </>
+                        )}
                       />
                     </Row>
                   </Col>
@@ -511,6 +546,7 @@ const CreatePartnerConfigApproval: any = () => {
                 </Text>
                 <Spacer size={20} />
                 <Table data={associateRoleUserData} columns={columnsAssociatedRoles} />
+                {/* <Table data={fields} columns={columnsAssociatedRoles} /> */}
                 {pagination.totalItems > 5 && <Pagination pagination={pagination} />}
               </Col>
             )}

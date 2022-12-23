@@ -18,7 +18,7 @@ import styled from "styled-components";
 import * as yup from "yup";
 import useDebounce from "lib/useDebounce";
 import { useEmployeeInfiniteLists } from "hooks/mdm/employee-list/useEmployeeListMDM";
-import ArrowLeft from "../../../assets/icons/arrow-left.svg";
+import ArrowLeft from "../../../../assets/icons/arrow-left.svg";
 
 import { useMenuLists } from "../../../../hooks/menu-config/useMenuConfig";
 import { useCreatePartnerConfigPermissionList } from "../../../../hooks/user-config/usePermission";
@@ -195,7 +195,6 @@ const CreatePartnerConfigPermissionList: any = () => {
                 actionLabel="Add New Associated Menu"
                 width="100%"
                 items={menus}
-                containerId="area2"
                 placeholder="Select"
                 handleChange={(value) => setValue("menuId", value)}
                 onSearch={(search) => setSearchAssociatedMenu(search)}
@@ -206,7 +205,7 @@ const CreatePartnerConfigPermissionList: any = () => {
                 <Dropdown
                   label="Is System Config"
                   width="100%"
-                  containerId="area2"
+                  containerId="area"
                   items={valueIsSystemConfig}
                   placeholder="Select"
                   handleChange={(value) => setValue("isSystemConfig", value)}

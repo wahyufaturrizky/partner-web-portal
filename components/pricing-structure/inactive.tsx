@@ -17,7 +17,9 @@ import {
 } from "pink-lava-ui";
 import { useState } from "react";
 import styled from "styled-components";
-import { ICDollarBlack, ICDownload, ICManageCustGroupBuyingPrice, ICUpload } from "../../assets";
+import {
+  ICDollarBlack, ICDownload, ICManageCustGroupBuyingPrice, ICUpload,
+} from "../../assets";
 import {
   usePricingStructureLists,
   useUploadFilePricingStructureMDM,
@@ -26,14 +28,13 @@ import { mdmDownloadService } from "../../lib/client";
 import { queryClient } from "../../pages/_app";
 import { STATUS_APPROVAL_TEXT, STATUS_APPROVAL_VARIANT } from "../../utils/utils";
 
-const downloadFile = (params: any) =>
-  mdmDownloadService("/price-structure/template/download", { params }).then((res) => {
-    let dataUrl = window.URL.createObjectURL(new Blob([res.data]));
-    let tempLink = document.createElement("a");
-    tempLink.href = dataUrl;
-    tempLink.setAttribute("download", `pricing-structure_${new Date().getTime()}.xlsx`);
-    tempLink.click();
-  });
+const downloadFile = (params: any) => mdmDownloadService("/price-structure/download", { params }).then((res) => {
+  const dataUrl = window.URL.createObjectURL(new Blob([res.data]));
+  const tempLink = document.createElement("a");
+  tempLink.href = dataUrl;
+  tempLink.setAttribute("download", `pricing-structure_${new Date().getTime()}.xlsx`);
+  tempLink.click();
+});
 
 const InActivePricingStructure: any = (props: any) => {
   const router = useRouter();
@@ -51,21 +52,20 @@ const InActivePricingStructure: any = (props: any) => {
 
   const [isShowUpload, setShowUpload] = useState(false);
 
-  const { data: pricingStructureLists, isLoading: isLoadingPricingStructureList } =
-    usePricingStructureLists({
-      options: {
-        onSuccess: (data: any) => {
-          pagination.setTotalItems(data.totalRow);
-        },
+  const { data: pricingStructureLists, isLoading: isLoadingPricingStructureList } = usePricingStructureLists({
+    options: {
+      onSuccess: (data: any) => {
+        pagination.setTotalItems(data.totalRow);
       },
-      query: {
-        search,
-        page: pagination.page,
-        limit: pagination.itemsPerPage,
-        status: "INACTIVE",
-        company_id: companyCode,
-      },
-    });
+    },
+    query: {
+      search,
+      page: pagination.page,
+      limit: pagination.itemsPerPage,
+      status: "INACTIVE",
+      company_id: companyCode,
+    },
+  });
 
   const { mutate: uploadFileProductBrandMDM } = useUploadFilePricingStructureMDM({
     options: {
@@ -115,7 +115,7 @@ const InActivePricingStructure: any = (props: any) => {
         <Button
           size="small"
           onClick={() => {
-            router.push(`/pricing-structure/${element.id}`);
+            router.push(`/mdm/pricing/pricing-structure/${element.id}`);
           }}
           variant="tertiary"
         >
@@ -144,11 +144,11 @@ const InActivePricingStructure: any = (props: any) => {
           />
           <Row gap="16px" justifyContent="flex-end">
             <DropdownMenu
-              title={"More"}
-              buttonVariant={"secondary"}
-              buttonSize={"big"}
-              textVariant={"button"}
-              textColor={"pink.regular"}
+              title="More"
+              buttonVariant="secondary"
+              buttonSize="big"
+              textVariant="button"
+              textColor="pink.regular"
               iconStyle={{ fontSize: "12px" }}
               onClick={(e: any) => {
                 switch (parseInt(e.key)) {
@@ -219,9 +219,9 @@ const InActivePricingStructure: any = (props: any) => {
               .length > 0 && (
               <Button
                 size="big"
-                variant={"primary"}
+                variant="primary"
                 onClick={() => {
-                  router.push("/pricing-structure/create");
+                  router.push("/mdm/pricing/pricing-structure/create");
                 }}
               >
                 Create
@@ -241,8 +241,8 @@ const InActivePricingStructure: any = (props: any) => {
             <Spacer size={20} />
             {isEmpty ? (
               <EmptyState
-                image={"/icons/empty-state.svg"}
-                title={"The Data You Are Looking for Cannot be Found"}
+                image="/icons/empty-state.svg"
+                title="The Data You Are Looking for Cannot be Found"
                 subtitle={`Don't worry you can Create a new pricing structure`}
                 height={400}
               />

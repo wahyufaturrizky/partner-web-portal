@@ -649,7 +649,7 @@ const CreateMenuList: any = () => {
                     variant="primary"
                     onClick={() => setModalCreate({ open: true })}
                   >
-    Register
+                    Register
                   </Button>
                 )}
               </Row>

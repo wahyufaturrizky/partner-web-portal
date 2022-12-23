@@ -104,7 +104,7 @@ export default function Salesman() {
             size="small"
             variant="tertiary"
             onClick={() => router.push({
-              pathname: "/mdm/salesman/[salesman_id]",
+              pathname: "/config/salesman/[salesman_id]",
               query: {
                 salesman_id: id,
                 status: statusText,

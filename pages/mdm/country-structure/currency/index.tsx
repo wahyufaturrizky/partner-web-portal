@@ -29,8 +29,8 @@ import { queryClient } from "../../../_app";
 import useDebounce from "../../../../lib/useDebounce";
 import { mdmDownloadService } from "../../../../lib/client";
 
-import DownloadSvg from "../../../assets/icons/ic-download.svg";
-import UploadSvg from "../../../assets/icons/ic-upload.svg";
+import DownloadSvg from "../../../../assets/icons/ic-download.svg";
+import UploadSvg from "../../../../assets/icons/ic-upload.svg";
 
 const downloadFile = (params: any) => mdmDownloadService("/currency/download", { params }).then((res) => {
   const dataUrl = window.URL.createObjectURL(new Blob([res.data]));
@@ -431,7 +431,7 @@ const CountryStructureCurrency = () => {
                   type="primary"
                   onClick={() => {
 										  setShowDelete({ open: true, type: "detail", data: modalCurrencyForm.data });
-                }}
+                  }}
                 >
                   {lang[t].currency.tertier.delete}
                 </Button>

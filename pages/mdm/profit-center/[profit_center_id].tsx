@@ -35,9 +35,9 @@ export default function ProfitCenterDetail() {
   });
 
   const listPermission = dataUserPermission?.permission?.filter(
-    (filtering: any) => filtering.menu === "Profit Center"
+    (filtering: any) => filtering.menu === "Profit Center",
   );
   return (
-    <ProfitCenterCreate isUpdate={true} {...propsDropdownField} listPermission={listPermission} />
+    <ProfitCenterCreate isUpdate {...propsDropdownField} listPermission={listPermission} />
   );
 }

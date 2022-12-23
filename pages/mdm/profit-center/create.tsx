@@ -25,7 +25,7 @@ import { defaultValuesCreate } from "components/pages/ProfitCenter/contants";
 import _ from "lodash";
 import { toSnakeCase } from "lib/caseConverter";
 import { queryClient } from "pages/_app";
-import ArrowLeft from "../../assets/icons/arrow-left.svg";
+import ArrowLeft from "../../../assets/icons/arrow-left.svg";
 
 function ProfitCenterCreate({
   isUpdate,
@@ -113,7 +113,7 @@ function ProfitCenterCreate({
 
   // action function
   const onSubmit = (data: any) => {
-    let payload: any = _.pick(data, [
+    const payload: any = _.pick(data, [
       "code",
       "name",
       "valid_from",
@@ -124,19 +124,17 @@ function ProfitCenterCreate({
       "person_responsible",
     ]);
     (payload.code = data.code),
-      (payload.name = data.name),
-      (payload.valid_from =
-        typeof data?.valid_from === "string"
-          ? data.valid_from
-          : moment(data.valid_from).utc().format("DD/MM/YYYY").toString()),
-      (payload.valid_to =
-        typeof data?.valid_to === "string"
-          ? data.valid_to
-          : moment(data.valid_to).utc().format("DD/MM/YYYY").toString()),
-      (payload.company_id = data.company_id),
-      (payload.external_code = data.external_code),
-      (payload.description = data.description),
-      (payload.person_responsible = data.person_responsible);
+    (payload.name = data.name),
+    (payload.valid_from = typeof data?.valid_from === "string"
+      ? data.valid_from
+      : moment(data.valid_from).utc().format("DD/MM/YYYY").toString()),
+    (payload.valid_to = typeof data?.valid_to === "string"
+      ? data.valid_to
+      : moment(data.valid_to).utc().format("DD/MM/YYYY").toString()),
+    (payload.company_id = data.company_id),
+    (payload.external_code = data.external_code),
+    (payload.description = data.description),
+    (payload.person_responsible = data.person_responsible);
 
     if (isUpdate && detailProfitCenter) {
       delete payload.company_id;
@@ -146,204 +144,201 @@ function ProfitCenterCreate({
     }
   };
 
-  if (isLoadingProfit || isFetchingProfit)
+  if (isLoadingProfit || isFetchingProfit) {
     return (
       <Center>
         <Spin tip="Loading data..." />
       </Center>
     );
+  }
   return (
-    <>
-      <Col>
-        <Row gap="4px" alignItems={"center"}>
-          {isUpdate ? (
-            <ArrowLeft style={{ cursor: "pointer" }} onClick={() => router.back()} />
-          ) : null}
-          <Text variant={"h4"}>{isUpdate ? profitForm?.name : "Create Profit Center"}</Text>
-        </Row>
+    <Col>
+      <Row gap="4px" alignItems="center">
+        {isUpdate ? (
+          <ArrowLeft style={{ cursor: "pointer" }} onClick={() => router.back()} />
+        ) : null}
+        <Text variant="h4">{isUpdate ? profitForm?.name : "Create Profit Center"}</Text>
+      </Row>
 
-        <Spacer size={20} />
+      <Spacer size={20} />
 
-        <Card>
-          <Row justifyContent="flex-end" alignItems="center" nowrap>
-            <Row gap="16px">
-              <Button size="big" variant={"tertiary"} onClick={() => router.back()}>
-                Cancel
-              </Button>
-              {isUpdate &&
-              listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "View").length >
-                0 ? (
-                <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
-                  Saves
-                </Button>
+      <Card>
+        <Row justifyContent="flex-end" alignItems="center" nowrap>
+          <Row gap="16px">
+            <Button size="big" variant="tertiary" onClick={() => router.back()}>
+              Cancel
+            </Button>
+            {isUpdate
+              && listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "View").length
+                > 0 ? (
+                  <Button size="big" variant="primary" onClick={handleSubmit(onSubmit)}>
+                    Saves
+                  </Button>
               ) : (
-                <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
+                <Button size="big" variant="primary" onClick={handleSubmit(onSubmit)}>
                   Saves
                 </Button>
               )}
-            </Row>
           </Row>
-        </Card>
+        </Row>
+      </Card>
 
+      <Spacer size={10} />
+      <Card>
+        <Row width="100%" gap="14px" noWrap>
+          <Col width="100%">
+            <Input
+              type="text"
+              width="100%"
+              label="Profit Center Code"
+              height="48px"
+              required
+              placeholder="e.g D01G011001"
+              defaultValue={profitForm?.code}
+              error={errors?.code?.message}
+              {...register("code", {
+                required: "Profit center code must be filled",
+              })}
+            />
+          </Col>
+
+          <Col width="100%">
+            <Input
+              type="text"
+              width="100%"
+              label="Profit Center Name"
+              height="48px"
+              placeholder="e.g Jakarta Barat"
+              defaultValue={profitForm?.name}
+              error={errors?.name?.message}
+              {...register("name", {
+                required: "Profit center name must be filled",
+              })}
+            />
+          </Col>
+        </Row>
         <Spacer size={10} />
-        <Card>
-          <Row width="100%" gap="14px" noWrap>
-            <Col width={"100%"}>
-              <Input
-                type="text"
-                width="100%"
-                label="Profit Center Code"
-                height="48px"
-                required
-                placeholder="e.g D01G011001"
-                defaultValue={profitForm?.code}
-                error={errors?.code?.message}
-                {...register("code", {
-                  required: "Profit center code must be filled",
-                })}
-              />
-            </Col>
-
-            <Col width={"100%"}>
-              <Input
-                type="text"
-                width="100%"
-                label="Profit Center Name"
-                height="48px"
-                placeholder="e.g Jakarta Barat"
-                defaultValue={profitForm?.name}
-                error={errors?.name?.message}
-                {...register("name", {
-                  required: "Profit center name must be filled",
-                })}
-              />
-            </Col>
-          </Row>
-          <Spacer size={10} />
-          <Row width="100%" gap="14px" noWrap>
-            <Col width={"100%"}>
-              <Controller
-                control={control}
-                name={`valid_from`}
-                rules={{ required: "Valid to must be filled" }}
-                render={({ field: { onChange, value } }) => {
-                  return (
-                    <DatePickerInput
-                      fullWidth
-                      onChange={(date: any, dateString: any) => {
-                        setValidFromValue(date);
-                        setValue("valid_from", dateString);
-                      }}
-                      label={`Valid From`}
-                      defaultValue={moment(profitForm.valid_from)}
-                      value={validFromValue}
-                      format={"DD/MM/YYYY"}
-                      error={errors?.valid_from?.message}
-                    />
-                  );
-                }}
-              />
-            </Col>
-
-            <Col width={"100%"}>
-              <Controller
-                control={control}
-                name={`valid_to`}
-                rules={{ required: "Valid to must be filled" }}
-                render={({ field: { onChange, value } }) => (
-                  <DatePickerInput
-                    fullWidth
-                    onChange={(date: any, dateString: any) => {
-                      setValidToValue(date);
-                      setValue("valid_to", dateString);
-                    }}
-                    label={`Valid To`}
-                    defaultValue={moment(profitForm.valid_to)}
-                    format={"DD/MM/YYYY"}
-                    value={validToValue}
-                    error={errors?.valid_to?.message}
-                  />
-                )}
-              />
-            </Col>
-          </Row>
-          <Spacer size={10} />
-          <Row width="100%" gap="14px" noWrap>
-            <Col width={"100%"}>
-              {isLoadingCompanyList ? (
-                <Spin tip="Loading data..." />
-              ) : (
-                <Dropdown
-                  label="Company"
-                  width={"100%"}
-                  items={companyList}
-                  placeholder={"Select"}
-                  handleChange={(value: any) => {
-                    setValue("company_id", value);
+        <Row width="100%" gap="14px" noWrap>
+          <Col width="100%">
+            <Controller
+              control={control}
+              name="valid_from"
+              rules={{ required: "Valid to must be filled" }}
+              render={({ field: { onChange, value } }) => (
+                <DatePickerInput
+                  fullWidth
+                  onChange={(date: any, dateString: any) => {
+                    setValidFromValue(date);
+                    setValue("valid_from", dateString);
                   }}
-                  onSearch={(search: any) => setSearchCompany(search)}
-                  defaultValue={profitForm.company_id}
-                  error={errors?.company_id?.message}
-                  {...register("company_id", {
-                    required: "Company must be filled",
-                  })}
+                  label="Valid From"
+                  defaultValue={moment(profitForm.valid_from)}
+                  value={validFromValue}
+                  format="DD/MM/YYYY"
+                  error={errors?.valid_from?.message}
                 />
               )}
-            </Col>
+            />
+          </Col>
 
-            <Col width={"100%"}>
-              <Input
-                type="Text"
+          <Col width="100%">
+            <Controller
+              control={control}
+              name="valid_to"
+              rules={{ required: "Valid to must be filled" }}
+              render={({ field: { onChange, value } }) => (
+                <DatePickerInput
+                  fullWidth
+                  onChange={(date: any, dateString: any) => {
+                    setValidToValue(date);
+                    setValue("valid_to", dateString);
+                  }}
+                  label="Valid To"
+                  defaultValue={moment(profitForm.valid_to)}
+                  format="DD/MM/YYYY"
+                  value={validToValue}
+                  error={errors?.valid_to?.message}
+                />
+              )}
+            />
+          </Col>
+        </Row>
+        <Spacer size={10} />
+        <Row width="100%" gap="14px" noWrap>
+          <Col width="100%">
+            {isLoadingCompanyList ? (
+              <Spin tip="Loading data..." />
+            ) : (
+              <Dropdown
+                label="Company"
                 width="100%"
-                label="External Code"
-                height="48px"
-                required
-                placeholder={"e.g 123456789"}
-                defaultValue={profitForm.external_code}
-                error={errors?.external_code?.message}
-                {...register("external_code", {
-                  required: "External Code must be filled",
+                items={companyList}
+                placeholder="Select"
+                handleChange={(value: any) => {
+                  setValue("company_id", value);
+                }}
+                onSearch={(search: any) => setSearchCompany(search)}
+                defaultValue={profitForm.company_id}
+                error={errors?.company_id?.message}
+                {...register("company_id", {
+                  required: "Company must be filled",
                 })}
               />
-            </Col>
-          </Row>
-          <Spacer size={10} />
-          <Row width="100%" gap="14px" noWrap>
-            <Col width={"100%"}>
-              <Input
-                type="texarea"
-                width="100%"
-                label="Description"
-                height="48px"
-                required
-                placeholder={"e.g New Profit Center"}
-                defaultValue={profitForm?.description}
-                error={errors?.description?.message}
-                {...register("description", {
-                  required: "Description must be filled",
-                })}
-              />
-            </Col>
+            )}
+          </Col>
 
-            <Col width={"100%"}>
-              <Input
-                type="text"
-                width="100%"
-                label="Person Responsible"
-                height="48px"
-                required
-                placeholder={"e.g TBD"}
-                defaultValue={profitForm?.person_responsible}
-                error={errors?.person_responsible?.message}
-                {...register("person_responsible", {
-                  required: "Person Responsible must be filled",
-                })}
-              />
-            </Col>
-          </Row>
-        </Card>
-      </Col>
-    </>
+          <Col width="100%">
+            <Input
+              type="Text"
+              width="100%"
+              label="External Code"
+              height="48px"
+              required
+              placeholder="e.g 123456789"
+              defaultValue={profitForm.external_code}
+              error={errors?.external_code?.message}
+              {...register("external_code", {
+                required: "External Code must be filled",
+              })}
+            />
+          </Col>
+        </Row>
+        <Spacer size={10} />
+        <Row width="100%" gap="14px" noWrap>
+          <Col width="100%">
+            <Input
+              type="texarea"
+              width="100%"
+              label="Description"
+              height="48px"
+              required
+              placeholder="e.g New Profit Center"
+              defaultValue={profitForm?.description}
+              error={errors?.description?.message}
+              {...register("description", {
+                required: "Description must be filled",
+              })}
+            />
+          </Col>
+
+          <Col width="100%">
+            <Input
+              type="text"
+              width="100%"
+              label="Person Responsible"
+              height="48px"
+              required
+              placeholder="e.g TBD"
+              defaultValue={profitForm?.person_responsible}
+              error={errors?.person_responsible?.message}
+              {...register("person_responsible", {
+                required: "Person Responsible must be filled",
+              })}
+            />
+          </Col>
+        </Row>
+      </Card>
+    </Col>
   );
 }
 const Card = styled.div`

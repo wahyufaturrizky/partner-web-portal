@@ -1,5 +1,4 @@
 import React, { useState, useMemo } from "react";
-import { queryClient } from "../../_app";
 import {
   Text,
   Col,
@@ -14,6 +13,11 @@ import {
 import { arrayMove } from "@dnd-kit/sortable";
 import { useForm, Controller } from "react-hook-form";
 import { useRouter } from "next/router";
+import styled from "styled-components";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
+import { lang } from "lang";
+import { queryClient } from "../../_app";
 import useDebounce from "../../../lib/useDebounce";
 import ModalAddBusinessProcess from "../../../components/elements/Modal/ModalAddBusinessProcess";
 import ModalEditProcess from "../../../components/elements/Modal/ModalEditProcess";
@@ -22,17 +26,12 @@ import { useCreateBusinessProcess } from "../../../hooks/business-process/useBus
 import DraggableTable from "../../../components/pages/BusinessProcess/DraggableTable";
 import DraggableGrids from "../../../components/pages/BusinessProcess/DraggableGrid";
 
-import styled from "styled-components";
-import { yupResolver } from "@hookform/resolvers/yup";
-import * as yup from "yup";
+const schema = yup
+  .object({
+    name: yup.string().required("Name is Required"),
+  })
+  .required();
 
-let schema = yup
-.object({
-	name: yup.string().required("Name is Required"),
-})
-.required();
-
-import { lang } from "lang";
 const CreateBusinessProcess = () => {
   const t = localStorage.getItem("lan") || "en-US";
   const router = useRouter();
@@ -49,11 +48,12 @@ const CreateBusinessProcess = () => {
   const [search, setSearch] = useState("");
   const debounceFetch = useDebounce(search, 1000);
 
-  const { register, handleSubmit, control, 
-		formState: { errors },
-	} = useForm({
-		resolver: yupResolver(schema),
-	});
+  const {
+    register, handleSubmit, control,
+    formState: { errors },
+  } = useForm({
+    resolver: yupResolver(schema),
+  });
 
   const {
     isFetching: isFetchingProcess,
@@ -68,36 +68,30 @@ const CreateBusinessProcess = () => {
     options: {
       onSuccess: (data: any) => {
         setTotalRows(data.pages[0].totalRow);
-        const mappedData = data?.pages?.map((group: any) => {
-          return group.rows?.map((element: any) => {
-            return {
-              label: element.name,
-              value: element.id,
-            };
-          });
-        });
+        const mappedData = data?.pages?.map((group: any) => group.rows?.map((element: any) => ({
+          label: element.name,
+          value: element.id,
+        })));
         const flattenArray = [].concat(...mappedData);
         setListItems(flattenArray);
       },
       getNextPageParam: (_lastPage: any, pages: any) => {
         if (listItems.length < totalRows) {
           return pages.length + 1;
-        } else {
-          return undefined;
         }
+        return undefined;
       },
     },
   });
 
-  const { mutate: createBusinessProcess, isLoading: isLoadingCreateBusinessProcess } =
-    useCreateBusinessProcess({
-      options: {
-        onSuccess: () => {
-          router.back();
-          queryClient.invalidateQueries(["bprocess"]);
-        },
+  const { mutate: createBusinessProcess, isLoading: isLoadingCreateBusinessProcess } = useCreateBusinessProcess({
+    options: {
+      onSuccess: () => {
+        router.back();
+        queryClient.invalidateQueries(["bprocess"]);
       },
-    });
+    },
+  });
 
   /** Key Identifier untuk sortable array ketika di drag */
   const keyItems = useMemo(() => processList.map(({ key }) => key), [processList]);
@@ -106,12 +100,10 @@ const CreateBusinessProcess = () => {
     setProcessList((data) => {
       const oldIndex = keyItems.indexOf(activeId);
       const newIndex = keyItems.indexOf(overId);
-      const changeSequenceProcessList = arrayMove(data, oldIndex, newIndex).map((el, index) => {
-        return {
-          ...el,
-          index,
-        };
-      });
+      const changeSequenceProcessList = arrayMove(data, oldIndex, newIndex).map((el, index) => ({
+        ...el,
+        index,
+      }));
       const changeSequenceDropdownList = changeSequenceProcessList.map((el) => ({
         label: el.name,
         value: el.id,
@@ -127,7 +119,7 @@ const CreateBusinessProcess = () => {
     const mappedProcessList = value.map((el: any, index) => {
       const findProcessList = processList.find((process) => process.id === el.value);
 
-      if (!!findProcessList) {
+      if (findProcessList) {
         return {
           key: `${index}`,
           index,
@@ -136,27 +128,23 @@ const CreateBusinessProcess = () => {
           is_mandatory: findProcessList.is_mandatory,
           status: findProcessList.status,
         };
-      } else {
-        return {
-          key: `${index}`,
-          index,
-          id: el.value,
-          name: el.label,
-          is_mandatory: isMandatory,
-          status: isActive.toUpperCase(),
-        };
       }
+      return {
+        key: `${index}`,
+        index,
+        id: el.value,
+        name: el.label,
+        is_mandatory: isMandatory,
+        status: isActive.toUpperCase(),
+      };
     });
-    let newProcessList = 
-      [...processList, ...mappedProcessList].map((data, index) => 
-        ({ ...data, index }));
+    const newProcessList = [...processList, ...mappedProcessList].map((data, index) => ({ ...data, index }));
 
     setProcessList(newProcessList);
     setShowAddProcessModal(false);
-    setMandatory("Is Mandatory")
-    setIsActive("Active")
-    setValue([])
-  
+    setMandatory("Is Mandatory");
+    setIsActive("Active");
+    setValue([]);
   };
 
   const editProcessList = () => {
@@ -170,22 +158,19 @@ const CreateBusinessProcess = () => {
           is_mandatory: isMandatory,
           status: isActive.toUpperCase(),
         };
-      } else {
-        return el;
       }
+      return el;
     });
     setProcessList(mappedProcessList);
     setShowEditProcessModal(false);
   };
 
   const onSubmit = (data: any) => {
-    const mappedProcessListRequest = processList.map((el: any) => {
-      return {
-        id: el.id,
-        is_mandatory: el.is_mandatory === "Is Mandatory",
-        status: el.status === "ACTIVE" ? "Y" : "N",
-      };
-    });
+    const mappedProcessListRequest = processList.map((el: any) => ({
+      id: el.id,
+      is_mandatory: el.is_mandatory === "Is Mandatory",
+      status: el.status === "ACTIVE" ? "Y" : "N",
+    }));
 
     createBusinessProcess({ ...data, processes: mappedProcessListRequest });
   };
@@ -203,7 +188,7 @@ const CreateBusinessProcess = () => {
             <Controller
               control={control}
               name="status"
-              defaultValue={"DRAFT"}
+              defaultValue="DRAFT"
               render={({ field: { onChange } }) => (
                 <Dropdown
                   label=""
@@ -214,7 +199,7 @@ const CreateBusinessProcess = () => {
                     { id: "PUBLISH", value: lang[t].businessProcess.ghost.published },
                   ]}
                   defaultValue="DRAFT"
-                  placeholder={"Select"}
+                  placeholder="Select"
                   handleChange={(value: any) => {
                     onChange(value);
                   }}
@@ -223,10 +208,10 @@ const CreateBusinessProcess = () => {
             />
 
             <Row gap="16px">
-              <Button size="big" variant={"tertiary"} onClick={() => router.back()}>
+              <Button size="big" variant="tertiary" onClick={() => router.back()}>
                 {lang[t].businessProcess.tertier.cancel}
               </Button>
-              <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
+              <Button size="big" variant="primary" onClick={handleSubmit(onSubmit)}>
                 {isLoadingCreateBusinessProcess ? "Loading..." : lang[t].businessProcess.primary.save}
               </Button>
             </Row>
@@ -245,7 +230,7 @@ const CreateBusinessProcess = () => {
                   width="100%"
                   label={lang[t].businessProcess.emptyState.name}
                   height="48px"
-									error={errors?.name?.message}
+                  error={errors?.name?.message}
                   required
                   placeholder={lang[t].businessProcess.pageTitle.ordertoCash}
                   {...register("name")}
@@ -261,11 +246,11 @@ const CreateBusinessProcess = () => {
           <Accordion.Item key={1}>
             <Accordion.Header variant="blue">{lang[t].businessProcess.accordion.processes}</Accordion.Header>
             <Accordion.Body>
-              {!!processList.length ? (
+              {processList.length ? (
                 <>
                   <Button
                     size="big"
-                    variant={"primary"}
+                    variant="primary"
                     onClick={() => setShowAddProcessModal(true)}
                   >
                     Add Process
@@ -296,15 +281,13 @@ const CreateBusinessProcess = () => {
                     }}
                     onDelete={(data: any) => {
                       const filterProcessList = processList.filter(
-                        (process) => process.id !== data.id
+                        (process) => process.id !== data.id,
                       );
 
-                      const mappedProcessList = filterProcessList.map((el, index) => {
-                        return {
-                          ...el,
-                          index,
-                        };
-                      });
+                      const mappedProcessList = filterProcessList.map((el, index) => ({
+                        ...el,
+                        index,
+                      }));
 
                       const filterDropdownValue = value.filter((value) => value.value !== data.id);
                       setProcessList(mappedProcessList);
@@ -315,16 +298,16 @@ const CreateBusinessProcess = () => {
               ) : (
                 <>
                   <EmptyState
-                    image={"/icons/empty-state.svg"}
-                    title={"No Data Company List"}
-                    subtitle={"Press Add Process First"}
+                    image="/icons/empty-state.svg"
+                    title="No Data Company List"
+                    subtitle="Press Add Process First"
                     height={325}
                   />
                   <Spacer size={10} />
                   <Center>
                     <Button
                       size="big"
-                      variant={"primary"}
+                      variant="primary"
                       onClick={() => setShowAddProcessModal(true)}
                     >
                       Add Process

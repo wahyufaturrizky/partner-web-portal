@@ -1,11 +1,12 @@
 import React, { useState } from "react";
-import { Text, Col, Row, Spacer, Button, Input, Table, DatePickerInput } from "pink-lava-ui";
+import {
+  Text, Col, Row, Spacer, Button, Input, Table, DatePickerInput,
+} from "pink-lava-ui";
 import styled from "styled-components";
-import { Controller, useForm, useFieldArray, useWatch } from "react-hook-form";
+import {
+  Controller, useForm, useFieldArray, useWatch,
+} from "react-hook-form";
 import { useRouter } from "next/router";
-import { queryClient } from "../../_app";
-import ICCompany from "../../assets/icons/ic-company.svg";
-import ICWorld from "../../assets/icons/ic-world.svg";
 import Icon, { DeleteOutlined } from "@ant-design/icons";
 import { useCreateWorkingCalendar } from "hooks/mdm/working-calendar/useWorkingCalendar";
 import WorkingDaysTable from "components/pages/WorkingCalendar/WorkingDaysTable";
@@ -14,6 +15,9 @@ import ConditionalFieldCountry from "components/pages/WorkingCalendar/Conditiona
 import StartEndWorkingField from "components/pages/WorkingCalendar/StartEndWorkingField";
 import CardSelection from "components/pages/WorkingCalendar/CardSelection";
 import ModalCalendar from "components/elements/Modal/ModalCalendar";
+import ICWorld from "../../../assets/icons/ic-world.svg";
+import ICCompany from "../../../assets/icons/ic-company.svg";
+import { queryClient } from "../../_app";
 
 const WorldSvg = () => <ICWorld />;
 
@@ -63,15 +67,14 @@ const WorkingCalendarCreate = () => {
     name: "public_holidays",
   });
 
-  const { mutate: createWorkingCalendar, isLoading: isLoadingCreateWorkingCalendar } =
-    useCreateWorkingCalendar({
-      options: {
-        onSuccess: () => {
-          router.back();
-          queryClient.invalidateQueries(["working-calendars"]);
-        },
+  const { mutate: createWorkingCalendar, isLoading: isLoadingCreateWorkingCalendar } = useCreateWorkingCalendar({
+    options: {
+      onSuccess: () => {
+        router.back();
+        queryClient.invalidateQueries(["working-calendars"]);
       },
-    });
+    },
+  });
 
   const onSubmit = (data: any) => {
     delete data?.branch;
@@ -94,7 +97,7 @@ const WorkingCalendarCreate = () => {
     <>
       <Col>
         <Row gap="4px">
-          <Text variant={"h4"}>Create Working Calendar</Text>
+          <Text variant="h4">Create Working Calendar</Text>
         </Row>
 
         <Spacer size={20} />
@@ -102,19 +105,19 @@ const WorkingCalendarCreate = () => {
         <Card>
           <Row justifyContent="flex-end" alignItems="center" nowrap>
             <Row gap="16px">
-              <Button size="big" variant={"tertiary"} onClick={() => router.back()}>
+              <Button size="big" variant="tertiary" onClick={() => router.back()}>
                 Cancel
               </Button>
               <Button
                 size="big"
-                variant={"secondary"}
+                variant="secondary"
                 onClick={() => {
                   setShow(true);
                 }}
               >
                 Preview Calendar
               </Button>
-              <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
+              <Button size="big" variant="primary" onClick={handleSubmit(onSubmit)}>
                 {isLoadingCreateWorkingCalendar ? "Loading..." : "Save"}
               </Button>
             </Row>
@@ -125,20 +128,21 @@ const WorkingCalendarCreate = () => {
 
         <Card>
           <Row width="100%" noWrap>
-            <Col width={"100%"}>
+            <Col width="100%">
               <Text variant="headingRegular">
-                Calendar Name<span style={{ color: "#EB008B" }}>*</span>
+                Calendar Name
+                <span style={{ color: "#EB008B" }}>*</span>
               </Text>
-              <Row width={"50%"}>
+              <Row width="50%">
                 <Input
                   width="50%"
                   height="40px"
                   label=""
-                  placeholder={"e.g NBT-ID"}
+                  placeholder="e.g NBT-ID"
                   {...register("calendar_name", { required: true })}
                 />
                 {errors?.calendar_name?.type === "required" && (
-                  <Text variant="alert" color={"red.regular"}>
+                  <Text variant="alert" color="red.regular">
                     This field is required
                   </Text>
                 )}
@@ -150,7 +154,7 @@ const WorkingCalendarCreate = () => {
 
               <Spacer size={20} />
 
-              <Text variant={"headingMedium"}>How do you want this type of calendar ?</Text>
+              <Text variant="headingMedium">How do you want this type of calendar ?</Text>
 
               <Spacer size={10} />
 
@@ -160,20 +164,20 @@ const WorkingCalendarCreate = () => {
                     setStatusCard(type);
                     setValue("country", "");
                   }}
-                  type={"country"}
+                  type="country"
                   selectedType={statusCard}
                   Icon={WorldIcon}
-                  title={"Use for country only"}
+                  title="Use for country only"
                 />
 
                 <CardSelection
                   onSelect={(type: any) => {
                     setStatusCard(type);
                   }}
-                  type={"company"}
+                  type="company"
                   selectedType={statusCard}
                   Icon={CompanyIcon}
-                  title={"Set custom for company"}
+                  title="Set custom for company"
                 />
               </Row>
 
@@ -200,19 +204,17 @@ const WorkingCalendarCreate = () => {
               <Spacer size={20} />
 
               <WorkingDaysTable
-                onChangeValue={(value: any) =>
-                  setWorkingDaysPayload(() => {
-                    const workingDaysObject = value[0];
-                    const workingDaysList = [];
+                onChangeValue={(value: any) => setWorkingDaysPayload(() => {
+                  const workingDaysObject = value[0];
+                  const workingDaysList = [];
 
-                    // Loop object working days
-                    for (const property in workingDaysObject) {
-                      workingDaysList.push(workingDaysObject[property]);
-                    }
+                  // Loop object working days
+                  for (const property in workingDaysObject) {
+                    workingDaysList.push(workingDaysObject[property]);
+                  }
 
-                    return workingDaysList;
-                  })
-                }
+                  return workingDaysList;
+                })}
               />
 
               <Spacer size={20} />
@@ -225,7 +227,7 @@ const WorkingCalendarCreate = () => {
 
               <Spacer size={20} />
 
-              <Text variant={"headingMedium"}>Public Holidays</Text>
+              <Text variant="headingMedium">Public Holidays</Text>
 
               <Spacer size={10} />
 
@@ -274,11 +276,11 @@ const WorkingCalendarCreate = () => {
                         <DatePickerInput
                           label=""
                           fullWidth
-                          placeholder={"01/01/2022"}
+                          placeholder="01/01/2022"
                           onChange={(date: any, dateString: any) => {
                             onChange(dateString);
                           }}
-                          format={"DD/MM/YYYY"}
+                          format="DD/MM/YYYY"
                         />
                       )}
                     />
@@ -288,7 +290,7 @@ const WorkingCalendarCreate = () => {
                       width="50%"
                       height="40px"
                       label=""
-                      placeholder={"e.g Happy New Year"}
+                      placeholder="e.g Happy New Year"
                       {...register(`public_holidays.${index}.holiday_name`)}
                     />
                   ),

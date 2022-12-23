@@ -1,10 +1,12 @@
 import React, { useState } from "react";
 import usePagination from "@lucasmogari/react-pagination";
 import styled from "styled-components";
-import { Col, Pagination, Row, Search, Spacer, Table, Text } from "pink-lava-ui";
+import {
+  Col, Pagination, Row, Search, Spacer, Table, Text,
+} from "pink-lava-ui";
 
-import { useNumberFormatLists } from "../../../../hooks/formating/useNumber";
 import { lang } from "lang";
+import { useNumberFormatLists } from "../../../../hooks/formating/useNumber";
 
 export default function FormatingNumber() {
   const t = localStorage.getItem("lan") || "en-US";
@@ -55,7 +57,7 @@ export default function FormatingNumber() {
   });
   return (
     <Col>
-      <Text variant={"h4"}>{lang[t].dateFormat.numberFormat}</Text>
+      <Text variant="h4">{lang[t].dateFormat.numberFormat}</Text>
       <Spacer size={20} />
       <Card>
         <Row justifyContent="flex-start">

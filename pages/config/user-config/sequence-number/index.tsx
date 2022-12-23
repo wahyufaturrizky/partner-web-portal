@@ -18,7 +18,7 @@ const SequenceNumber = () => {
   const companyCode = localStorage.getItem("companyCode");
   const pagination = usePagination({
     page: 1,
-    itemsPerPage: 10,
+    itemsPerPage: 20,
     maxPageItems: Infinity,
     numbers: true,
     arrows: true,
@@ -51,9 +51,8 @@ const SequenceNumber = () => {
           dataIndex: "action",
           width: "15%",
         },
-		  ]
+      ]
       : []),
-
   ];
 
   const {
@@ -103,7 +102,7 @@ const SequenceNumber = () => {
         key: field.id,
         // company: handleCompanyId(field.companyId),
         company: field.companyName,
-        branchName: field.branchName ? field.branchName : '-',
+        branchName: field.branchName ? field.branchName : "-",
         action: (
           <div>
             <Button
@@ -147,12 +146,11 @@ const SequenceNumber = () => {
             <Button
               size="big"
               variant="primary"
-              onClick={() => Router.push("/config/user-config/sequence-number/create")}
+              onClick={() => router.push("/config/user-config/sequence-number/create")}
             >
               Create
             </Button>
           )}
-
         </Row>
       </Card>
       <Spacer size={10} />

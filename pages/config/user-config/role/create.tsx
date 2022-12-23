@@ -26,7 +26,7 @@ import { useCompanyInfiniteLists } from "hooks/company-list/useCompany";
 import useDebounce from "lib/useDebounce";
 import { lang } from "lang";
 import { ModalDeleteConfirmation } from "../../../../components/elements/Modal/ModalConfirmationDelete";
-import ArrowLeft from "../../../assets/icons/arrow-left.svg";
+import ArrowLeft from "../../../../assets/icons/arrow-left.svg";
 import { useDeletePermission, useMenuPermissionLists } from "../../../../hooks/permission/usePermission";
 import { useCreatePermission } from "../../../../hooks/user-config/useRole";
 
@@ -246,7 +246,7 @@ const CreateRole: any = () => {
     <>
       <Col>
         <Row gap="4px" alignItems="center">
-          <ArrowLeft style={{ cursor: "pointer" }} onClick={() => Router.push("/config/user-config/role")} />
+          <ArrowLeft style={{ cursor: "pointer" }} onClick={() => router.push("/config/user-config/role")} />
           <Text variant="h4">{lang[t].roleList.pageTitle.createRole}</Text>
         </Row>
         <Spacer size={12} />
@@ -263,7 +263,7 @@ const CreateRole: any = () => {
 							defaultValue="Y"
 						/> */}
             <Row gap="16px">
-              <Button size="big" variant="tertiary" onClick={() => Router.push("/config/user-config/role")}>
+              <Button size="big" variant="tertiary" onClick={() => router.push("/config/user-config/role")}>
                 {lang[t].roleList.tertier.cancel}
               </Button>
               <Button size="big" variant="primary" onClick={handleSubmit(onSubmit)}>

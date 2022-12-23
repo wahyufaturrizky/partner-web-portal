@@ -2,7 +2,9 @@ import React, { useState } from "react";
 import ModalAddMenu from "components/elements/Modal/ModalAddMenu";
 import ModalAddModule from "components/elements/Modal/ModalAddModule";
 import { useRouter } from "next/router";
-import { Accordion, Button, Col, Dropdown, Input, Row, Spacer, Text, Spin } from "pink-lava-ui";
+import {
+  Accordion, Button, Col, Dropdown, Input, Row, Spacer, Text, Spin,
+} from "pink-lava-ui";
 import styled from "styled-components";
 import {
   useUpdateMenuDesignList,
@@ -24,7 +26,9 @@ const CreateMenuDesignList: any = () => {
   const companyCode = localStorage.getItem("companyCode");
   const { menu_design_id } = router.query;
 
-  const { register, handleSubmit, control, setValue } = useForm();
+  const {
+    register, handleSubmit, control, setValue,
+  } = useForm();
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showModuleConfig, setShowModuleConfig] = useState(false);
@@ -33,6 +37,7 @@ const CreateMenuDesignList: any = () => {
     moduleIndex: null,
     subModuleIndex: null,
     selectedRowKeyMenu: [],
+    selectedRowsMenu: [],
   });
 
   const [selectedRowKeysModule, setSelectedRowKeysModule] = useState([]);
@@ -47,7 +52,7 @@ const CreateMenuDesignList: any = () => {
   });
 
   const listPermission = dataUserPermission?.permission?.filter(
-    (filtering: any) => filtering.menu === "Menu Design"
+    (filtering: any) => filtering.menu === "Menu Design",
   );
 
   const {
@@ -58,34 +63,59 @@ const CreateMenuDesignList: any = () => {
     id: menu_design_id,
     options: {
       onSuccess: (data: any) => {
-        const mappingHierarchyData = data?.hierarchies?.map((module: any, moduleIndex: any) => {
-          return {
-            id: module?.module?.id,
-            moduleId: module?.module?.moduleId,
-            name: module?.module?.moduleName,
-            subModules: module?.subModules?.map((subModule: any, subModuleIndex: any) => {
-              return {
-                id: subModule?.subModule?.id,
-                key: `subModule-${subModule?.subModule?.moduleId}`,
-                title: (
-                  <span>
-                    {subModule?.subModule?.moduleName} <br />
-                    <span
-                      style={{ color: "#EB008B" }}
-                      onClick={() => {
-                        setShowMenuConfig({
-                          show: true,
-                          moduleIndex,
-                          subModuleIndex,
-                          selectedRowKeyMenu: [],
-                        });
-                      }}
-                    >
-                      + add menu
-                    </span>
-                  </span>
-                ),
-                icon: (
+        const mappingHierarchyData = data?.hierarchies?.map((module: any, moduleIndex: any) => ({
+          id: module?.module?.id,
+          moduleId: module?.module?.moduleId,
+          name: module?.module?.moduleName,
+          subModules: module?.subModules?.map((subModule: any, subModuleIndex: any) => ({
+            id: subModule?.subModule?.id,
+            key: `subModule-${subModule?.subModule?.moduleId}`,
+            title: (
+              <span>
+                {subModule?.subModule?.moduleName}
+                {' '}
+                <br />
+                <span
+                  style={{ color: "#EB008B" }}
+                  onClick={() => {
+                    const getMenuId = subModule?.menus?.map((menu: any) => parseInt(menu?.menuId));
+                    const getSelectedMenu = subModule?.menus?.map((menu: any) => ({
+                      key: menu.id,
+                      field_id: menu.id,
+                      field_name: menu.menuName,
+                      field_key: menu.id,
+                    }));
+
+                    setShowMenuConfig({
+                      show: true,
+                      moduleIndex,
+                      subModuleIndex,
+                      selectedRowKeyMenu: getMenuId ?? [],
+                      selectedRowsMenu: getSelectedMenu ?? [],
+                    });
+                  }}
+                >
+                  + add menu
+                </span>
+              </span>
+            ),
+            icon: (
+              <DragOutlined
+                style={{
+                  borderRadius: 3,
+                  backgroundColor: "#D5FAFD",
+                  color: "#2BBECB",
+                  padding: 4,
+                }}
+              />
+            ),
+            children: subModule?.menus?.map((menu: any) => ({
+              id: menu?.id,
+              key: `menu-${menu.menuId}-${subModuleIndex}`,
+              checkable: false,
+              title: menu.menuName,
+              icon: (
+                <div style={{ marginLeft: 5, marginRight: 3 }}>
                   <DragOutlined
                     style={{
                       borderRadius: 3,
@@ -94,65 +124,47 @@ const CreateMenuDesignList: any = () => {
                       padding: 4,
                     }}
                   />
-                ),
-                children: subModule?.menus?.map((menu: any) => {
-                  return {
-                    id: menu?.id,
-                    key: `menu-${menu.menuId}-${subModuleIndex}`,
-                    checkable: false,
-                    title: menu.menuName,
-                    icon: (
-                      <div style={{ marginLeft: 5, marginRight: 3 }}>
-                        <DragOutlined
-                          style={{
-                            borderRadius: 3,
-                            backgroundColor: "#D5FAFD",
-                            color: "#2BBECB",
-                            padding: 4,
-                          }}
-                        />
-                      </div>
-                    ),
-                  };
-                }),
-              };
-            }),
-          };
-        });
+                </div>
+              ),
+            })),
+          })),
+        }));
+
+        const mappingSelectedModule = data?.hierarchies?.map((module: any) => module?.module?.moduleId);
+
+        setSelectedRowKeysModule(mappingSelectedModule ?? []);
 
         setHierarchyData(mappingHierarchyData);
       },
     },
   });
 
-  const { mutate: updateMenuDesign, isLoading: isLoadingUpdateMenuDesign } =
-    useUpdateMenuDesignList({
-      id: menu_design_id,
-      options: {
-        onSuccess: (data: any) => {
-          router.back();
-          queryClient.invalidateQueries(["menu/design"]);
-        },
+  const { mutate: updateMenuDesign, isLoading: isLoadingUpdateMenuDesign } = useUpdateMenuDesignList({
+    id: menu_design_id,
+    options: {
+      onSuccess: (data: any) => {
+        router.back();
+        queryClient.invalidateQueries(["menu/design"]);
       },
-    });
+    },
+  });
 
-  const { mutate: deleteMenuDesign, isLoading: isLoadingDeleteMenuDesign }: any =
-    useDeleteMenuDesignList({
-      options: {
-        onSuccess: () => {
-          queryClient.invalidateQueries(["working-calendars"]);
-          setShowDeleteModal(false);
-          router.back();
-        },
+  const { mutate: deleteMenuDesign, isLoading: isLoadingDeleteMenuDesign }: any = useDeleteMenuDesignList({
+    options: {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["working-calendars"]);
+        setShowDeleteModal(false);
+        router.back();
       },
-    });
+    },
+  });
 
-  const handleOnDrop = (subModulesChange: any) => {
+  const handleOnDrop = (subModulesChange: any, Treeindex: any) => {
     const mappingHierarchy = hierarchyData.map((module: any, moduleIndex: any) => {
-      return {
-        ...module,
-        subModules: subModulesChange.map((subModule: any, subModuleIndex: any) => {
-          return {
+      if (moduleIndex === Treeindex) {
+        return {
+          ...module,
+          subModules: subModulesChange.map((subModule: any, subModuleIndex: any) => ({
             ...subModule,
             title: (
               <span>
@@ -166,6 +178,7 @@ const CreateMenuDesignList: any = () => {
                       moduleIndex,
                       subModuleIndex,
                       selectedRowKeyMenu: [],
+                      selectedRowsMenu: subModule?.children ?? [],
                     });
                   }}
                 >
@@ -173,9 +186,10 @@ const CreateMenuDesignList: any = () => {
                 </span>
               </span>
             ),
-          };
-        }),
-      };
+          })),
+        };
+      }
+      return module;
     });
     setHierarchyData(mappingHierarchy);
   };
@@ -183,54 +197,54 @@ const CreateMenuDesignList: any = () => {
   const handleAddModule = (modules: any) => {
     const mappingHierarchy = modules?.map((module: any, moduleIndex: any) => {
       const moduleObject = hierarchyData?.filter(
-        (filterModule: any) => filterModule?.moduleId === module?.module?.moduleId
+        (filterModule: any) => filterModule?.moduleId === module?.module?.moduleId,
       );
 
       if (moduleObject.length > 0) {
         return {
           ...moduleObject[0],
         };
-      } else {
-        return {
-          moduleId: module?.module?.moduleId,
-          name: module?.module?.moduleName,
-          subModules: module?.subModules?.map((subModule: any, subModuleIndex: any) => {
-            return {
-              key: `subModule-${subModule?.subModule?.moduleId}`,
-              title: (
-                <span>
-                  {subModule?.subModule?.moduleName} <br />
-                  <span
-                    style={{ color: "#EB008B" }}
-                    onClick={() => {
-                      console.log(subModuleIndex);
-                      setShowMenuConfig({
-                        show: true,
-                        moduleIndex,
-                        subModuleIndex,
-                        selectedRowKeyMenu: [],
-                      });
-                    }}
-                  >
-                    + add menu
-                  </span>
-                </span>
-              ),
-              icon: (
-                <DragOutlined
-                  style={{
-                    borderRadius: 3,
-                    backgroundColor: "#D5FAFD",
-                    color: "#2BBECB",
-                    padding: 4,
-                  }}
-                />
-              ),
-              children: [],
-            };
-          }),
-        };
       }
+      return {
+        moduleId: module?.module?.moduleId,
+        name: module?.module?.moduleName,
+        subModules: module?.subModules?.map((subModule: any, subModuleIndex: any) => ({
+          key: `subModule-${subModule?.subModule?.moduleId}`,
+          title: (
+            <span>
+              {subModule?.subModule?.moduleName}
+              {' '}
+              <br />
+              <span
+                style={{ color: "#EB008B" }}
+                onClick={() => {
+                  console.log(subModuleIndex);
+                  setShowMenuConfig({
+                    show: true,
+                    moduleIndex,
+                    subModuleIndex,
+                    selectedRowKeyMenu: [],
+                    selectedRowsMenu: [],
+                  });
+                }}
+              >
+                + add menu
+              </span>
+            </span>
+          ),
+          icon: (
+            <DragOutlined
+              style={{
+                borderRadius: 3,
+                backgroundColor: "#D5FAFD",
+                color: "#2BBECB",
+                padding: 4,
+              }}
+            />
+          ),
+          children: [],
+        })),
+      };
     });
     setHierarchyData(mappingHierarchy);
     setShowModuleConfig(false);
@@ -248,7 +262,9 @@ const CreateMenuDesignList: any = () => {
                   ...subModule,
                   title: (
                     <span>
-                      {subModule?.title?.props?.children[0]} <br />
+                      {subModule?.title?.props?.children[0]}
+                      {' '}
+                      <br />
                       <span
                         style={{ color: "#EB008B" }}
                         onClick={() => {
@@ -258,6 +274,7 @@ const CreateMenuDesignList: any = () => {
                             moduleIndex,
                             subModuleIndex,
                             selectedRowKeyMenu: getMenuId,
+                            selectedRowsMenu: menus,
                           });
                         }}
                       >
@@ -265,34 +282,30 @@ const CreateMenuDesignList: any = () => {
                       </span>
                     </span>
                   ),
-                  children: menus?.map((menu: any) => {
-                    return {
-                      key: `menu-${menu.key}-${subModuleIndex}`,
-                      checkable: false,
-                      title: menu.field_name,
-                      icon: (
-                        <div style={{ marginLeft: 5, marginRight: 3 }}>
-                          <DragOutlined
-                            style={{
-                              borderRadius: 3,
-                              backgroundColor: "#D5FAFD",
-                              color: "#2BBECB",
-                              padding: 4,
-                            }}
-                          />
-                        </div>
-                      ),
-                    };
-                  }),
+                  children: menus?.map((menu: any) => ({
+                    key: `menu-${menu.key}-${subModuleIndex}`,
+                    checkable: false,
+                    title: menu.field_name,
+                    icon: (
+                      <div style={{ marginLeft: 5, marginRight: 3 }}>
+                        <DragOutlined
+                          style={{
+                            borderRadius: 3,
+                            backgroundColor: "#D5FAFD",
+                            color: "#2BBECB",
+                            padding: 4,
+                          }}
+                        />
+                      </div>
+                    ),
+                  })),
                 };
-              } else {
-                return subModule;
               }
+              return subModule;
             }),
           };
-        } else {
-          return module;
         }
+        return module;
       });
 
       return mappingHierarcyMenu;
@@ -303,78 +316,66 @@ const CreateMenuDesignList: any = () => {
       moduleIndex: null,
       subModuleIndex: null,
       selectedRowKeyMenu: [],
+      selectedRowsMenu: [],
     });
   };
 
   const handleRemoveMenu = () => {
-    const filterHierarchyData = hierarchyData.map((module: any) => {
-      return {
-        ...module,
-        subModules: module?.subModules?.filter((subModule: any) => {
-          return !selectedRowKeyTree?.includes(subModule?.key);
-        }),
-      };
-    });
-    const mappingHierarchy = filterHierarchyData.map((module: any, moduleIndex: any) => {
-      return {
-        ...module,
-        subModules: module?.subModules?.map((subModule: any, subModuleIndex: any) => {
-          return {
-            ...subModule,
-            title: (
-              <span>
-                {subModule?.title?.props?.children[0]} <br />
-                <span
-                  style={{ color: "#EB008B" }}
-                  onClick={() => {
-                    const getMenuId = subModule?.children?.map((menu: any) =>
-                      parseInt(menu?.key?.split("-")[1])
-                    );
-                    setShowMenuConfig({
-                      show: true,
-                      moduleIndex,
-                      subModuleIndex,
-                      selectedRowKeyMenu: getMenuId ?? [],
-                    });
-                  }}
-                >
-                  + add menu
-                </span>
-              </span>
-            ),
-          };
-        }),
-      };
-    });
+    const filterHierarchyData = hierarchyData.map((module: any) => ({
+      ...module,
+      subModules: module?.subModules?.filter((subModule: any) => !selectedRowKeyTree?.includes(subModule?.key)),
+    }));
+    const mappingHierarchy = filterHierarchyData.map((module: any, moduleIndex: any) => ({
+      ...module,
+      subModules: module?.subModules?.map((subModule: any, subModuleIndex: any) => ({
+        ...subModule,
+        title: (
+          <span>
+            {subModule?.title?.props?.children[0]}
+            {' '}
+            <br />
+            <span
+              style={{ color: "#EB008B" }}
+              onClick={() => {
+                const getMenuId = subModule?.children?.map((menu: any) => parseInt(menu?.key?.split("-")[1]));
+                setShowMenuConfig({
+                  show: true,
+                  moduleIndex,
+                  subModuleIndex,
+                  selectedRowKeyMenu: getMenuId ?? [],
+                  selectedRowsMenu: subModule?.children ?? [],
+                });
+              }}
+            >
+              + add menu
+            </span>
+          </span>
+        ),
+      })),
+    }));
     setHierarchyData(mappingHierarchy);
   };
 
   const submit = (data: any) => {
-    const mappingHierarchiesPayload = hierarchyData?.map((module: any) => {
-      return {
-        module: {
-          id: module?.id,
-          module_id: module.moduleId,
+    const mappingHierarchiesPayload = hierarchyData?.map((module: any) => ({
+      module: {
+        id: module?.id,
+        module_id: module.moduleId,
+        flag_removal: false,
+      },
+      sub_modules: module.subModules.map((subModule: any) => ({
+        sub_module: {
+          id: subModule?.id,
+          module_id: parseInt(subModule?.key?.split("-")[1]),
           flag_removal: false,
         },
-        sub_modules: module.subModules.map((subModule: any) => {
-          return {
-            sub_module: {
-              id: subModule?.id,
-              module_id: parseInt(subModule?.key?.split("-")[1]),
-              flag_removal: false,
-            },
-            menus: subModule?.children.map((menu: any) => {
-              return {
-                id: menu?.id,
-                menu_id: parseInt(menu.key?.split("-")[1]),
-                flag_removal: false,
-              };
-            }),
-          };
-        }),
-      };
-    });
+        menus: subModule?.children.map((menu: any) => ({
+          id: menu?.id,
+          menu_id: parseInt(menu.key?.split("-")[1]),
+          flag_removal: false,
+        })),
+      })),
+    }));
 
     const formData = {
       ...data,
@@ -386,19 +387,24 @@ const CreateMenuDesignList: any = () => {
     updateMenuDesign(formData);
   };
 
-  if (isLoadingMenuDesign || isFetchingMenuDesign)
+  if (isLoadingMenuDesign || isFetchingMenuDesign) {
     return (
       <Center>
         <Spin tip="Loading data..." />
       </Center>
     );
+  }
 
   return (
     <>
       <Col>
         <Row gap="4px" alignItems="center">
           <ArrowLeft style={{ cursor: "pointer" }} onClick={() => router.back()} />
-          <Text variant={"h4"}>Menu Design - {menuDesignData?.name}</Text>
+          <Text variant="h4">
+            Menu Design -
+            {' '}
+            {menuDesignData?.name}
+          </Text>
         </Row>
         <Card padding="20px">
           <Row justifyContent="space-between" alignItems="center" nowrap>
@@ -407,36 +413,34 @@ const CreateMenuDesignList: any = () => {
               defaultValue={menuDesignData?.status}
               name="status"
               render={({ field: { onChange, value }, formState: { errors } }) => (
-                <>
-                  <Dropdown
-                    width="185px"
-                    label=""
-                    isHtml
-                    items={[
-                      { id: "Y", value: '<div key="1" style="color:green;">Active</div>' },
-                      { id: "N", value: '<div key="2" style="color:red;">Non Active</div>' },
-                    ]}
-                    defaultValue={value}
-                    placeholder={"Select"}
-                    handleChange={(value: any) => {
-                      onChange(value);
-                    }}
-                    noSearch
-                  />
-                </>
+                <Dropdown
+                  width="185px"
+                  label=""
+                  isHtml
+                  items={[
+                    { id: "Y", value: '<div key="1" style="color:green;">Active</div>' },
+                    { id: "N", value: '<div key="2" style="color:red;">Non Active</div>' },
+                  ]}
+                  defaultValue={value}
+                  placeholder="Select"
+                  handleChange={(value: any) => {
+                    onChange(value);
+                  }}
+                  noSearch
+                />
               )}
             />
 
             <Row gap="16px">
               {listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Delete")
-							.length > 0 && (
-                <Button size="big" variant={"tertiary"} onClick={() => setShowDeleteModal(true)}>
+                .length > 0 && (
+                <Button size="big" variant="tertiary" onClick={() => setShowDeleteModal(true)}>
                   {lang[t].menuDesign.tertier.delete}
                 </Button>
               )}
               {listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Update")
-							.length > 0 && (
-                <Button size="big" variant={"primary"} onClick={handleSubmit(submit)}>
+                .length > 0 && (
+                <Button size="big" variant="primary" onClick={handleSubmit(submit)}>
                   {isLoadingUpdateMenuDesign ? "loading..." : lang[t].menuDesign.primary.save}
                 </Button>
               )}
@@ -460,7 +464,7 @@ const CreateMenuDesignList: any = () => {
                     label="Name"
                     height="48px"
                     defaultValue={menuDesignData?.name}
-                    placeholder={"e.g Menu Design - FMCG Manufacture"}
+                    placeholder="e.g Menu Design - FMCG Manufacture"
                     {...register("name")}
                   />
                 </Col>
@@ -480,14 +484,14 @@ const CreateMenuDesignList: any = () => {
             </Accordion.Header>
             <Accordion.Body>
               <Row>
-                <Button size="big" variant={"primary"} onClick={() => setShowModuleConfig(true)}>
+                <Button size="big" variant="primary" onClick={() => setShowModuleConfig(true)}>
                   {lang[t].menuDesign.primary.addModule}
                 </Button>
 
                 <Spacer size={16} />
 
                 {selectedRowKeyTree?.length > 0 && (
-                  <Button size="big" variant={"secondary"} onClick={handleRemoveMenu}>
+                  <Button size="big" variant="secondary" onClick={handleRemoveMenu}>
                     {lang[t].menuDesign.tertier.remove}
                   </Button>
                 )}
@@ -499,10 +503,11 @@ const CreateMenuDesignList: any = () => {
                 <Accordion key={module.moduleId}>
                   <Accordion.Item key={index}>
                     <Accordion.Header>
-                      <Text variant={"headingMedium"}>{module.name}</Text>
+                      <Text variant="headingMedium">{module.name}</Text>
                     </Accordion.Header>
                     <Accordion.Body padding="10px">
                       <TreeMenuDesign
+                        treeIndex={index}
                         subModuleData={module.subModules}
                         onCheck={(checkedValue: any, info: any) => {
                           setSelectedRowKeyTree(checkedValue);
@@ -545,9 +550,11 @@ const CreateMenuDesignList: any = () => {
               moduleIndex: null,
               subModuleIndex: null,
               selectedRowKeyMenu: [],
+              selectedRowsMenu: [],
             });
           }}
           selectedRowKeys={showMenuConfig.selectedRowKeyMenu}
+          selectedRowsMenu={showMenuConfig.selectedRowsMenu}
           onAddMenu={handleAddMenu}
         />
       )}

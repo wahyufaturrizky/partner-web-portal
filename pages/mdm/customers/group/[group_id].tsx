@@ -14,16 +14,16 @@ import {
 import styled from "styled-components";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/router";
+import { useUserPermissions } from "hooks/user-config/usePermission";
 import { queryClient } from "../../../_app";
 import { ModalDeleteConfirmation } from "../../../../components/elements/Modal/ModalConfirmationDelete";
-import ArrowLeft from "../../../assets/icons/arrow-left.svg";
+import ArrowLeft from "../../../../assets/icons/arrow-left.svg";
 import {
   useCustomerGroupMDM,
   useDeleteCustomerGroupMDM,
   useParentCustomerGroupMDM,
   useUpdateCustomerGroupMDM,
 } from "../../../../hooks/mdm/customers/useCustomersGroupMDM";
-import { useUserPermissions } from "hooks/user-config/usePermission";
 
 const CustomerGroupDetail = () => {
   const router = useRouter();
@@ -44,7 +44,7 @@ const CustomerGroupDetail = () => {
   });
 
   const listPermission = dataUserPermission?.permission?.filter(
-    (filtering: any) => filtering.menu === "Customer Group"
+    (filtering: any) => filtering.menu === "Customer Group",
   );
 
   const {
@@ -52,40 +52,38 @@ const CustomerGroupDetail = () => {
     isLoading: isLoadingCustomerGroup,
     isFetching: isFetchingCustomerGroup,
   } = useCustomerGroupMDM({
-    id: id,
+    id,
     options: {
       onSuccess: (data: any) => {},
     },
   });
 
-  const { mutate: updateCreateCustomerGroup, isLoading: isLoadingUpdateCreateCustomerGroup } =
-    useUpdateCustomerGroupMDM({
-      id: id,
-      options: {
-        onSuccess: () => {
-          router.back();
-          queryClient.invalidateQueries(["customer-group"]);
-        },
+  const { mutate: updateCreateCustomerGroup, isLoading: isLoadingUpdateCreateCustomerGroup } = useUpdateCustomerGroupMDM({
+    id,
+    options: {
+      onSuccess: () => {
+        router.back();
+        queryClient.invalidateQueries(["customer-group"]);
       },
-    });
+    },
+  });
 
-  const { mutate: deleteCustomerGroup, isLoading: isLoadingDeleteCustomerGroup } =
-    useDeleteCustomerGroupMDM({
-      options: {
-        onSuccess: () => {
-          queryClient.invalidateQueries(["customer-group"]);
-          setShowDeleteModal(false);
-          router.back();
-        },
+  const { mutate: deleteCustomerGroup, isLoading: isLoadingDeleteCustomerGroup } = useDeleteCustomerGroupMDM({
+    options: {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["customer-group"]);
+        setShowDeleteModal(false);
+        router.back();
       },
-    });
+    },
+  });
 
   const {
     data: dataParentCustomerGroupMDM,
     isLoading: isLoadingParentCustomerGroupMDM,
     isFetching: isFetchingParentCustomerGroupMDM,
   } = useParentCustomerGroupMDM({
-    id: Number(id) + `/${companyCode}`,
+    id: `${Number(id)}/${companyCode}`,
     options: {
       onSuccess: (data: any) => {},
     },
@@ -96,16 +94,17 @@ const CustomerGroupDetail = () => {
   };
 
   if (
-    isLoadingCustomerGroup ||
-    isFetchingCustomerGroup ||
-    isLoadingParentCustomerGroupMDM ||
-    isFetchingParentCustomerGroupMDM
-  )
+    isLoadingCustomerGroup
+    || isFetchingCustomerGroup
+    || isLoadingParentCustomerGroupMDM
+    || isFetchingParentCustomerGroupMDM
+  ) {
     return (
       <Center>
         <Spin tip="Loading data..." />
       </Center>
     );
+  }
 
   const columnsCustomer = [
     {
@@ -151,7 +150,7 @@ const CustomerGroupDetail = () => {
       <Col>
         <Row gap="4px">
           <ArrowLeft style={{ cursor: "pointer" }} onClick={() => router.back()} />
-          <Text variant={"h4"}>{customerGroupData.name}</Text>
+          <Text variant="h4">{customerGroupData.name}</Text>
         </Row>
 
         <Spacer size={20} />
@@ -160,14 +159,14 @@ const CustomerGroupDetail = () => {
           <Row justifyContent="flex-end" alignItems="center" nowrap>
             <Row gap="16px">
               {listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Delete")
-							.length > 0 && (
-                <Button size="big" variant={"tertiary"} onClick={() => setShowDeleteModal(true)}>
+                .length > 0 && (
+                <Button size="big" variant="tertiary" onClick={() => setShowDeleteModal(true)}>
                   Delete
                 </Button>
               )}
               {listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Update")
-							.length > 0 && (
-                <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
+                .length > 0 && (
+                <Button size="big" variant="primary" onClick={handleSubmit(onSubmit)}>
                   {isLoadingUpdateCreateCustomerGroup ? "Loading..." : "Save"}
                 </Button>
               )}
@@ -182,13 +181,13 @@ const CustomerGroupDetail = () => {
             <Accordion.Header variant="blue">General</Accordion.Header>
             <Accordion.Body>
               <Row width="100%" noWrap>
-                <Col width={"100%"}>
+                <Col width="100%">
                   <Input
                     width="100%"
                     label="Name"
                     height="40px"
                     required
-                    placeholder={"e.g RTL-Retail Large"}
+                    placeholder="e.g RTL-Retail Large"
                     defaultValue={customerGroupData.name}
                     {...register("name", {
                       shouldUnregister: true,
@@ -211,7 +210,7 @@ const CustomerGroupDetail = () => {
                           value: data.name,
                           id: data.code,
                         }))}
-                        placeholder={"Select"}
+                        placeholder="Select"
                         handleChange={(text) => setValue("parent", text)}
                         noSearch
                       />
@@ -229,7 +228,7 @@ const CustomerGroupDetail = () => {
                   height="48px"
                   required
                   defaultValue={customerGroupData.externalCode}
-                  placeholder={"e.g 400000"}
+                  placeholder="e.g 400000"
                   {...register("external_code", {
                     shouldUnregister: true,
                   })}

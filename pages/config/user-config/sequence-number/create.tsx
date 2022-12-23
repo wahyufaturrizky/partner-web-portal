@@ -120,7 +120,7 @@ const CreateSequenceNumber: any = () => {
               <Button
                 size="big"
                 variant="tertiary"
-                onClick={() => Router.push("/config/user-config/sequence-number")}
+                onClick={() => router.push("/config/user-config/sequence-number")}
               >
                 Cancel
               </Button>

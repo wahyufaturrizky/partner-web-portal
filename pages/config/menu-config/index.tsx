@@ -165,7 +165,7 @@ const MenuConfigList: any = () => {
 							<Button
 								size="big"
 								variant={"primary"}
-								onClick={() => Router.push("/config/menu-config/create")}
+								onClick={() => router.push("/config/menu-config/create")}
 							>
 								Create
 							</Button>

@@ -1,8 +1,8 @@
 export const permissionChannel = {
-	role: {
-		["Admin"]: {
-			component: ["View Channel"],
-			field: [],
-		},
-	},
+  role: {
+    Admin: {
+      component: ["View Channel"],
+      field: [],
+    },
+  },
 };

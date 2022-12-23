@@ -38,7 +38,7 @@ import {
   RowLanguagesData,
   RowProfitCenter,
 } from "./cost_center_interface";
-import ArrowLeft from "../../assets/icons/arrow-left.svg";
+import ArrowLeft from "../../../assets/icons/arrow-left.svg";
 import useDebounce from "../../../lib/useDebounce";
 import { queryClient } from "../../_app";
 
@@ -140,7 +140,7 @@ const CostCenterCreate = () => {
   });
 
   const listPermission = dataUserPermission?.permission?.filter(
-    (filtering: any) => filtering.menu === "Cost Center"
+    (filtering: any) => filtering.menu === "Cost Center",
   );
 
   // const {
@@ -677,7 +677,9 @@ const CostCenterCreate = () => {
               render={({ field: { onChange }, fieldState: { error } }) => (
                 <>
                   <Label>
-                    Profit Center <span style={{ color: colors.red.regular }}>*</span>
+                    Profit Center
+                    {' '}
+                    <span style={{ color: colors.red.regular }}>*</span>
                   </Label>
                   <Spacer size={3} />
                   <FormSelect

@@ -20,6 +20,7 @@ import { Controller, useForm } from "react-hook-form";
 import moment from "moment";
 import { mdmDownloadService } from "lib/client";
 import { useCurrenciesInfiniteLists } from "hooks/mdm/country-structure/useCurrencyMDM";
+import { useUserPermissions } from "hooks/user-config/usePermission";
 import { ICDownload, ICUpload } from "../../../../assets/icons";
 import { queryClient } from "../../../_app";
 import useDebounce from "../../../../lib/useDebounce";
@@ -28,14 +29,13 @@ import {
   useUploadFileExchangeRate,
 } from "../../../../hooks/mdm/exchange-rate/useExchangeRate";
 
-const downloadFile = (params: any) =>
-  mdmDownloadService("/exchange-rate/download", { params }).then((res) => {
-    const dataUrl = window.URL.createObjectURL(new Blob([res.data]));
-    const tempLink = document.createElement("a");
-    tempLink.href = dataUrl;
-    tempLink.setAttribute("download", `exchange-rate${new Date().getTime()}.xlsx`);
-    tempLink.click();
-  });
+const downloadFile = (params: any) => mdmDownloadService("/exchange-rate/download", { params }).then((res) => {
+  const dataUrl = window.URL.createObjectURL(new Blob([res.data]));
+  const tempLink = document.createElement("a");
+  tempLink.href = dataUrl;
+  tempLink.setAttribute("download", `exchange-rate${new Date().getTime()}.xlsx`);
+  tempLink.click();
+});
 
 const ExchangeRate = () => {
   const router = useRouter();
@@ -58,7 +58,7 @@ const ExchangeRate = () => {
   });
 
   const listPermission = dataUserPermission?.permission?.filter(
-    (filtering: any) => filtering.menu === "Exchange Rate"
+    (filtering: any) => filtering.menu === "Exchange Rate",
   );
 
   const {
@@ -119,15 +119,14 @@ const ExchangeRate = () => {
     },
   });
 
-  const { mutate: uploadFileExchange, isLoading: isLoadingUploadFileExchange } =
-    useUploadFileExchangeRate({
-      options: {
-        onSuccess: () => {
-          queryClient.invalidateQueries(["exchange-rate-list"]);
-          setShowUpload(false);
-        },
+  const { mutate: uploadFileExchange, isLoading: isLoadingUploadFileExchange } = useUploadFileExchangeRate({
+    options: {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["exchange-rate-list"]);
+        setShowUpload(false);
       },
-    });
+    },
+  });
 
   const {
     isFetching: isFetchingCurrenciesInfinite,
@@ -143,13 +142,11 @@ const ExchangeRate = () => {
     options: {
       onSuccess: (data: any) => {
         setTotalRowsCurrenciesInfiniteList(data.pages[0].totalRow);
-        const mappedData = data?.pages?.map((group: any) =>
-          group.rows?.map((element: any) => ({
-            ...element,
-            value: element.currency,
-            label: `${element.currency} - ${element.currencyName}`,
-          }))
-        );
+        const mappedData = data?.pages?.map((group: any) => group.rows?.map((element: any) => ({
+          ...element,
+          value: element.currency,
+          label: `${element.currency} - ${element.currencyName}`,
+        })));
         const flattenArray = [].concat(...mappedData);
         setCurrenciesInfiniteList(flattenArray);
       },

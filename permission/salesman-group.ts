@@ -1,6 +1,6 @@
 export const permissionSalesmanGroup = {
   role: {
-    ["Admin"]: {
+    Admin: {
       component: [
         "View Salesman Group",
         "Create Salesman Group",

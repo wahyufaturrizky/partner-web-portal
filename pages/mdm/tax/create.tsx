@@ -23,7 +23,7 @@ import {
 import { queryClient } from "../../_app";
 import useDebounce from "../../../lib/useDebounce";
 import { ModalDeleteConfirmation } from "../../../components/elements/Modal/ModalConfirmationDelete";
-import ArrowLeft from "../../assets/icons/arrow-left.svg";
+import ArrowLeft from "../../../assets/icons/arrow-left.svg";
 import Tax from ".";
 
 const renderConfirmationText = (type: any, data: any) => {

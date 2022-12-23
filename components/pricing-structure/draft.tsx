@@ -29,9 +29,9 @@ import { queryClient } from "../../pages/_app";
 import { mdmDownloadService } from "../../lib/client";
 
 const downloadFile = (params: any) =>
-  mdmDownloadService("/price-structure/template/download", { params }).then((res) => {
-    let dataUrl = window.URL.createObjectURL(new Blob([res.data]));
-    let tempLink = document.createElement("a");
+  mdmDownloadService("/price-structure/download", { params }).then((res) => {
+    const dataUrl = window.URL.createObjectURL(new Blob([res.data]));
+    const tempLink = document.createElement("a");
     tempLink.href = dataUrl;
     tempLink.setAttribute("download", `pricing-structure_${new Date().getTime()}.xlsx`);
     tempLink.click();
@@ -144,7 +144,7 @@ const DraftPricingStructure: any = ({
         <Button
           size="small"
           onClick={() => {
-            router.push(`/pricing-structure/${element.id}`);
+            router.push(`/mdm/pricing/pricing-structure/${element.id}`);
           }}
           variant="tertiary"
         >
@@ -181,7 +181,7 @@ const DraftPricingStructure: any = ({
           <Row gap="16px">
             <Button
               size="big"
-              variant={"tertiary"}
+              variant="tertiary"
               onClick={() => setModalDelete({ open: true })}
               disabled={rowSelection.selectedRowKeys?.length === 0}
             >
@@ -189,11 +189,11 @@ const DraftPricingStructure: any = ({
             </Button>
 
             <DropdownMenu
-              title={"More"}
-              buttonVariant={"secondary"}
-              buttonSize={"big"}
-              textVariant={"button"}
-              textColor={"pink.regular"}
+              title="More"
+              buttonVariant="secondary"
+              buttonSize="big"
+              textVariant="button"
+              textColor="pink.regular"
               iconStyle={{ fontSize: "12px" }}
               onClick={(e: any) => {
                 switch (parseInt(e.key)) {
@@ -264,9 +264,9 @@ const DraftPricingStructure: any = ({
               0 && (
               <Button
                 size="big"
-                variant={"primary"}
+                variant="primary"
                 onClick={() => {
-                  router.push("/pricing-structure/create");
+                  router.push("/mdm/pricing/pricing-structure/create");
                 }}
               >
                 Create
@@ -286,8 +286,8 @@ const DraftPricingStructure: any = ({
             <Spacer size={20} />
             {isEmpty ? (
               <EmptyState
-                image={"/icons/empty-state.svg"}
-                title={"The Data You Are Looking for Cannot be Found"}
+                image="/icons/empty-state.svg"
+                title="The Data You Are Looking for Cannot be Found"
                 subtitle={`Don't worry you can Create a new pricing structure`}
                 height={400}
               />

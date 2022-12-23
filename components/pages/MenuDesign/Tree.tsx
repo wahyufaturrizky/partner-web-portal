@@ -2,7 +2,7 @@ import React from "react";
 import { DownOutlined } from "@ant-design/icons";
 import { Tree } from "pink-lava-ui";
 
-const TreeMenuDesign = ({ subModuleData, onCheck, onSelect, onDropMenu }: any) => {
+const TreeMenuDesign = ({ subModuleData, onCheck, onSelect, onDropMenu, treeIndex }: any) => {
   const onDragEnter = (info: any) => {
     // console.log(info);
   };
@@ -66,7 +66,7 @@ const TreeMenuDesign = ({ subModuleData, onCheck, onSelect, onDropMenu }: any) =
       }
     }
 
-    onDropMenu(data);
+    onDropMenu(data, treeIndex);
   };
 
   const onCheckTree = (checkedKeys: any, info: any) => {

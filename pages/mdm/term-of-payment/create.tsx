@@ -1,21 +1,23 @@
 import React, { useState, useMemo } from "react";
-import { Text, Col, Row, Spacer, Button, Input, EmptyState, Modal } from "pink-lava-ui";
+import {
+  Text, Col, Row, Spacer, Button, Input, EmptyState, Modal,
+} from "pink-lava-ui";
 import styled from "styled-components";
 import { useRouter } from "next/router";
 import { useForm } from "react-hook-form";
-import {
-  useCreateTermOfPayment,
-  useTopForm,
-} from "../../../hooks/mdm/term-of-payment/useTermOfPayment";
 import { arrayMove } from "@dnd-kit/sortable";
-import { queryClient } from "../../_app";
-import ModalAddTerm from "../../../components/elements/Modal/ModalAddTerm";
-import DraggableTable from "../../../components/pages/TermOfPayment/DraggableTable";
 import { ExclamationCircleOutlined } from "@ant-design/icons";
 import { lang } from "lang";
 import { permissionTermOfPayment } from "permission/term-of-payment";
 import { usePartnerConfigPermissionLists } from "hooks/user-config/usePermission";
 import { useUserPermissions } from "hooks/user-config/useUser";
+import DraggableTable from "../../../components/pages/TermOfPayment/DraggableTable";
+import ModalAddTerm from "../../../components/elements/Modal/ModalAddTerm";
+import { queryClient } from "../../_app";
+import {
+  useCreateTermOfPayment,
+  useTopForm,
+} from "../../../hooks/mdm/term-of-payment/useTermOfPayment";
 
 const TermOfPaymentCreate = () => {
   const t = localStorage.getItem("lan") || "en-US";
@@ -36,7 +38,7 @@ const TermOfPaymentCreate = () => {
           queryClient.invalidateQueries(["top-list"]);
         },
       },
-    }
+    },
   );
 
   const {
@@ -47,19 +49,15 @@ const TermOfPaymentCreate = () => {
     options: {
       onSuccess: (data: any) => {},
       select: (data: any) => {
-        const paymentTypeList = data?.paymentType?.map((element: any) => {
-          return {
-            label: element.name,
-            value: element.id,
-          };
-        });
+        const paymentTypeList = data?.paymentType?.map((element: any) => ({
+          label: element.name,
+          value: element.id,
+        }));
 
-        const optionsList = data?.options?.map((element: any) => {
-          return {
-            label: element.name,
-            value: element.id,
-          };
-        });
+        const optionsList = data?.options?.map((element: any) => ({
+          label: element.name,
+          value: element.id,
+        }));
 
         return { paymentTypeList, optionsList };
       },
@@ -73,12 +71,10 @@ const TermOfPaymentCreate = () => {
     setTermList((data) => {
       const oldIndex = keyItems.indexOf(activeId);
       const newIndex = keyItems.indexOf(overId);
-      const changeSequenceTermList = arrayMove(data, oldIndex, newIndex).map((el, index) => {
-        return {
-          ...el,
-          index,
-        };
-      });
+      const changeSequenceTermList = arrayMove(data, oldIndex, newIndex).map((el, index) => ({
+        ...el,
+        index,
+      }));
 
       return changeSequenceTermList;
     });
@@ -110,9 +106,8 @@ const TermOfPaymentCreate = () => {
               option: data.option,
               optionValue: data.option_value,
             };
-          } else {
-            return el;
           }
+          return el;
         });
         return mappedTermList;
       });
@@ -127,24 +122,20 @@ const TermOfPaymentCreate = () => {
   });
 
   const listPermission = dataUserPermission?.permission?.filter(
-    (filtering: any) => filtering.menu === "Term Of Payment"
+    (filtering: any) => filtering.menu === "Term Of Payment",
   );
 
-  const checkUserPermission = (permissionGranted) => {
-    return listPermission?.find(
-      (data: any) => data?.viewTypes?.[0]?.viewType?.name === permissionGranted
-    );
-  };
+  const checkUserPermission = (permissionGranted) => listPermission?.find(
+    (data: any) => data?.viewTypes?.[0]?.viewType?.name === permissionGranted,
+  );
 
   const onSubmit = (data: any) => {
-    const mappedTermListRequest = termList.map((el: any) => {
-      return {
-        type: el.type,
-        value: el.value,
-        option: el.option,
-        option_value: el.optionValue,
-      };
-    });
+    const mappedTermListRequest = termList.map((el: any) => ({
+      type: el.type,
+      value: el.value,
+      option: el.option,
+      option_value: el.optionValue,
+    }));
 
     const formData = {
       company_id: companyCode,
@@ -159,7 +150,7 @@ const TermOfPaymentCreate = () => {
     <>
       <Col>
         <Row gap="4px">
-          <Text variant={"h4"}>{lang[t].termOfPayment.modalTitleCreate.termOfPayment}</Text>
+          <Text variant="h4">{lang[t].termOfPayment.modalTitleCreate.termOfPayment}</Text>
         </Row>
 
         <Spacer size={20} />
@@ -167,11 +158,11 @@ const TermOfPaymentCreate = () => {
         <Card padding="20px">
           <Row justifyContent="flex-end" alignItems="center" nowrap>
             <Row gap="16px">
-              <Button size="big" variant={"tertiary"} onClick={() => router.back()}>
+              <Button size="big" variant="tertiary" onClick={() => router.back()}>
                 {lang[t].termOfPayment.tertier.cancel}
               </Button>
               {checkUserPermission("Create") && (
-                <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
+                <Button size="big" variant="primary" onClick={handleSubmit(onSubmit)}>
                   {isLoadingTermOfPayment ? "Loading..." : lang[t].termOfPayment.primary.save}
                 </Button>
               )}
@@ -188,18 +179,18 @@ const TermOfPaymentCreate = () => {
                 width="50%"
                 label={lang[t].termOfPayment.paymentTerm}
                 height="40px"
-                placeholder={"e.g 3 Days"}
+                placeholder="e.g 3 Days"
                 {...register("name")}
               />
             </Row>
 
             <Spacer size={10} />
 
-            <Row width={"150px"}>
+            <Row width="150px">
               {checkUserPermission("Create") && (
                 <Button
                   size="small"
-                  variant={"tertiary"}
+                  variant="tertiary"
                   onClick={() => {
                     const fileTypeOne = termList.filter((el) => el.type === 1);
 
@@ -230,12 +221,10 @@ const TermOfPaymentCreate = () => {
                 onDelete={(data: any) => {
                   const filterTermList = termList.filter((term) => term.key !== data.key);
 
-                  const mappedTermList = filterTermList.map((el, index) => {
-                    return {
-                      ...el,
-                      index,
-                    };
-                  });
+                  const mappedTermList = filterTermList.map((el, index) => ({
+                    ...el,
+                    index,
+                  }));
                   setTermList(mappedTermList);
                 }}
               />
@@ -264,9 +253,9 @@ const TermOfPaymentCreate = () => {
           visible={showDisableTerm}
           onCancel={() => setShowDisableTerm(false)}
           closable={false}
-          title={""}
+          title=""
           footer={<></>}
-          content={
+          content={(
             <>
               <Spacer size={14} />
               <Col justifyContent="center" alignItems="center">
@@ -275,13 +264,13 @@ const TermOfPaymentCreate = () => {
                   <Text variant="headingRegular">Info</Text>
                 </Row>
                 <Row>
-                  <Text variant={"caption"} textAlign={"center"} color={"grey.light"}>
+                  <Text variant="caption" textAlign="center" color="grey.light">
                     You can't add more term, if payment type "Balance" already used.
                   </Text>
                 </Row>
                 <Button
                   variant="primary"
-                  size={"small"}
+                  size="small"
                   full
                   onClick={() => setShowDisableTerm(false)}
                 >
@@ -289,7 +278,7 @@ const TermOfPaymentCreate = () => {
                 </Button>
               </Col>
             </>
-          }
+          )}
         />
       )}
     </>
@@ -311,9 +300,9 @@ const EmptyStateComponent = () => (
     <Spacer size={10} />
 
     <EmptyState
-      image={"/icons/empty-state.svg"}
-      title={"No Data Terms"}
-      subtitle={"Press + add terms button to add new terms"}
+      image="/icons/empty-state.svg"
+      title="No Data Terms"
+      subtitle="Press + add terms button to add new terms"
       height={325}
     />
   </>

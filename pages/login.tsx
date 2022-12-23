@@ -1,12 +1,15 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import Image from "next/image";
-import { Button, Col, Dropdown, Input, Modal, Row, Spacer, Text } from "pink-lava-ui";
+import {
+  Button, Col, Dropdown, Input, Modal, Row, Spacer, Text,
+} from "pink-lava-ui";
 import { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import OtpInput from "react-otp-input";
 import styled from "styled-components";
 import * as yup from "yup";
+import { lang } from "lang";
 import { ICEyeCrossed } from "../assets";
 import {
   useSendOtpPhoneSmsOrWaOrEmail,
@@ -17,7 +20,6 @@ import {
 
 import ICFlagIndonesia from "../assets/icons/ic-flag-idn.svg";
 import ICFlagEnglish from "../assets/icons/ic-flag-us.svg";
-import { lang } from "lang";
 
 const flexStyles = { display: "flex", alignItems: "center", gap: ".5rem" };
 
@@ -130,20 +132,19 @@ const Login: any = () => {
     },
   });
 
-  const { mutate: createReqBodyUpdatePassword, isLoading: isLoadingUpdatePassword } =
-    useUpdatePassword({
-      options: {
-        onSuccess: () => {
-          setStateModal({
-            isShowModal: true,
-            titleModal: "Success",
-          });
-        },
-        onError: (error) => {
-          window.alert(error.data.message);
-        },
+  const { mutate: createReqBodyUpdatePassword, isLoading: isLoadingUpdatePassword } = useUpdatePassword({
+    options: {
+      onSuccess: () => {
+        setStateModal({
+          isShowModal: true,
+          titleModal: "Success",
+        });
       },
-    });
+      onError: (error) => {
+        window.alert(error.data.message);
+      },
+    },
+  });
 
   const {
     register,
@@ -155,8 +156,8 @@ const Login: any = () => {
       isFlowCreateNewPassword
         ? schemaCreateNewPassword
         : isForgotPassword
-        ? schemaResetPassword
-        : schemaLogin
+          ? schemaResetPassword
+          : schemaLogin,
     ),
   });
 
@@ -175,13 +176,12 @@ const Login: any = () => {
       } else {
         window.location.reload();
       }
-
     },
     onError: (error: any) => {
       if (
-        error.status === 400 &&
-        error.data.status === "ERROR" &&
-        error.data.type === "VALIDATION_ERROR"
+        error.status === 400
+        && error.data.status === "ERROR"
+        && error.data.type === "VALIDATION_ERROR"
       ) {
         toast(error.data.message);
       }
@@ -273,28 +273,28 @@ const Login: any = () => {
                 {isFlowCreateNewPassword
                   ? "Set New Password"
                   : isShowOtpFlow
-                  ? "Enter OTP Code"
-                  : isResetWithPhone
-                  ? "Select Verification Method"
-                  : isForgotPassword
-                  ? "Reset Password"
-                  : lang[langValue].login.welcomeBack}
+                    ? "Enter OTP Code"
+                    : isResetWithPhone
+                      ? "Select Verification Method"
+                      : isForgotPassword
+                        ? "Reset Password"
+                        : lang[langValue].login.welcomeBack}
               </Text>
               <Spacer axis="vertical" size={4} />
               <Text textAlign="center" variant="body2" color="grey.light">
                 {isFlowCreateNewPassword
                   ? "Create easy to remember passwords and keep your passwords private."
                   : isShowOtpFlow
-                  ? `OTP code has been sent via WhatsApp to ********${getValues(
-                      "resetPassWithEmailAndPhone"
+                    ? `OTP code has been sent via WhatsApp to ********${getValues(
+                      "resetPassWithEmailAndPhone",
                     ).slice(8, 14)}`
-                  : isResetWithPhone
-                  ? `Choose one of the methods below to send the OTP code to ********${getValues(
-                      "resetPassWithEmailAndPhone"
-                    ).slice(8, 14)}`
-                  : isForgotPassword
-                  ? "Enter your registered email or mobile number. We will send a verification code or link to reset your password"
-                  : lang[langValue].login.subHeader}
+                    : isResetWithPhone
+                      ? `Choose one of the methods below to send the OTP code to ********${getValues(
+                        "resetPassWithEmailAndPhone",
+                      ).slice(8, 14)}`
+                      : isForgotPassword
+                        ? "Enter your registered email or mobile number. We will send a verification code or link to reset your password"
+                        : lang[langValue].login.subHeader}
               </Text>
             </Col>
 
@@ -318,7 +318,7 @@ const Login: any = () => {
                   {...register("confirmNewPassword", { required: true })}
                   label="Confirm Password"
                   type="password"
-                  placeholder={"Re-type your password"}
+                  placeholder="Re-type your password"
                   icon={<ICEyeCrossed />}
                   test-id="confirmNewPassword"
                 />
@@ -446,9 +446,9 @@ const Login: any = () => {
               <>
                 <Input
                   error={
-                    errors?.username?.message ||
-                    error?.errors?.find(
-                      (err) => err.label === "phone_number" || err.label === "email"
+                    errors?.username?.message
+                    || error?.errors?.find(
+                      (err) => err.label === "phone_number" || err.label === "email",
                     )?.message
                   }
                   {...register("username", {
@@ -461,8 +461,8 @@ const Login: any = () => {
                 <Spacer size={26} />
                 <Input
                   error={
-                    errors?.password?.message ||
-                    error?.errors?.find((err) => err.label === "password")?.message
+                    errors?.password?.message
+                    || error?.errors?.find((err) => err.label === "password")?.message
                   }
                   {...register("password", { required: true })}
                   label={lang[langValue].login.password}
@@ -499,7 +499,8 @@ const Login: any = () => {
 
                 <span style={{ textAlign: "center" }}>
                   <Text fluid variant="subtitle2" inline>
-                    {lang[langValue].login.newUser}{" "}
+                    {lang[langValue].login.newUser}
+                    {" "}
                   </Text>
                   <div
                     style={{ cursor: "pointer", display: "inline-block" }}
@@ -527,7 +528,7 @@ const Login: any = () => {
           visible={isShowModal}
           onCancel={() => setStateModal({ ...stateModal, isShowModal: false })}
           title={titleModal}
-          footer={
+          footer={(
             <Button
               full
               onClick={() => {
@@ -547,7 +548,7 @@ const Login: any = () => {
             >
               OK
             </Button>
-          }
+          )}
           content={
             titleModal === "Success" ? (
               <>

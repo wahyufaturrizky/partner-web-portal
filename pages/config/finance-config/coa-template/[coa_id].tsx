@@ -28,9 +28,9 @@ import { Controller, useForm } from "react-hook-form";
 import { colors } from "utils/color";
 import { permissionCoaTemplate } from "permission/coa-template";
 import { useUserPermissions } from "hooks/user-config/usePermission";
-import PlusAdd from "../../../assets/icons/plus-add.svg";
-import VectorPeople from "../../../assets/icons/vector-people.svg";
-import ArrowLeft from "../../../assets/icons/arrow-left.svg";
+import PlusAdd from "../../../../assets/icons/plus-add.svg";
+import VectorPeople from "../../../../assets/icons/vector-people.svg";
+import ArrowLeft from "../../../../assets/icons/arrow-left.svg";
 import { ModalDeleteConfirmation } from "../../../../components/elements/Modal/ModalConfirmationDelete";
 import DetailAccount from "../../../../components/pages/CoA/DetailCoA";
 import CreateAccount from "../../../../components/pages/CoA/CraeteCoA";
@@ -472,20 +472,20 @@ const DetailCoa: any = () => {
                   {listPermission?.filter(
                     (x: any) => x.viewTypes[0]?.viewType.name === "Delete",
                   ).length > 0 && (
-                        <Button
-                          size="big"
-                          variant="tertiary"
-                          onClick={() => setIsModalDelete({ open: true })}
-                        >
-                          {lang[t].coaTemplate.list.button.delete}
-                        </Button>
+                  <Button
+                    size="big"
+                    variant="tertiary"
+                    onClick={() => setIsModalDelete({ open: true })}
+                  >
+                    {lang[t].coaTemplate.list.button.delete}
+                  </Button>
                   )}
                   {listPermission?.filter(
                     (x: any) => x.viewTypes[0]?.viewType.name === "Update",
                   ).length > 0 && (
-                        <Button size="big" variant="primary" onClick={handleSubmit(onSubmitCoa)}>
-                          {lang[t].coaTemplate.list.button.save}
-                        </Button>
+                  <Button size="big" variant="primary" onClick={handleSubmit(onSubmitCoa)}>
+                    {lang[t].coaTemplate.list.button.save}
+                  </Button>
                   )}
                 </Row>
               </Row>
@@ -511,46 +511,46 @@ const DetailCoa: any = () => {
                     name="country_id"
                     defaultValue={countryId || ""}
                     rules={{
-                          required: {
-                            value: true,
-                            message: "Please enter country.",
-                          },
-                        }}
+                      required: {
+                        value: true,
+                        message: "Please enter country.",
+                      },
+                    }}
                     render={({ field: { onChange }, fieldState: { error } }) => (
-                          <>
-                            <Label>
-                              Country
-                              {' '}
-                              <span style={{ color: colors.red.regular }}>*</span>
-                            </Label>
-                            <Spacer size={3} />
-                            <FormSelect
-                              defaultValue={countryId || ""}
-                              error={error?.message}
-                              height="48px"
-                              style={{ width: "100%" }}
-                              size="large"
-                              placeholder="Select"
-                              borderColor="#AAAAAA"
-                              arrowColor="#000"
-                              withSearch
-                              isLoading={isFetchingCountry}
-                              isLoadingMore={isFetchingMoreCountry}
-                              fetchMore={() => {
-                                if (hasNextPageCountry) {
-                                  fetchNextPageCountry();
-                                }
-                              }}
-                              items={isFetchingCountry && !isFetchingMoreCountry ? [] : countryList}
-                              onChange={(value: any) => {
-                                onChange(value);
-                              }}
-                              onSearch={(value: any) => {
-                                setSearchCountry(value);
-                              }}
-                            />
-                          </>
-                        )}
+                      <>
+                        <Label>
+                          Country
+                          {' '}
+                          <span style={{ color: colors.red.regular }}>*</span>
+                        </Label>
+                        <Spacer size={3} />
+                        <FormSelect
+                          defaultValue={countryId || ""}
+                          error={error?.message}
+                          height="48px"
+                          style={{ width: "100%" }}
+                          size="large"
+                          placeholder="Select"
+                          borderColor="#AAAAAA"
+                          arrowColor="#000"
+                          withSearch
+                          isLoading={isFetchingCountry}
+                          isLoadingMore={isFetchingMoreCountry}
+                          fetchMore={() => {
+                            if (hasNextPageCountry) {
+                              fetchNextPageCountry();
+                            }
+                          }}
+                          items={isFetchingCountry && !isFetchingMoreCountry ? [] : countryList}
+                          onChange={(value: any) => {
+                            onChange(value);
+                          }}
+                          onSearch={(value: any) => {
+                            setSearchCountry(value);
+                          }}
+                        />
+                      </>
+                    )}
                   />
                 </Col>
               </Row>
@@ -561,49 +561,49 @@ const DetailCoa: any = () => {
                     name="industry_id"
                     defaultValue={industryId || ""}
                     rules={{
-                          required: {
-                            value: true,
-                            message: "Please enter country.",
-                          },
-                        }}
+                      required: {
+                        value: true,
+                        message: "Please enter country.",
+                      },
+                    }}
                     render={({ field: { onChange }, fieldState: { error } }) => (
-                          <>
-                            <Label>
-                              Industry
-                              {' '}
-                              <span style={{ color: colors.red.regular }}>*</span>
-                            </Label>
-                            <Spacer size={3} />
-                            <FormSelect
-                              defaultValue={industryId || ""}
-                              error={error?.message}
-                              height="48px"
-                              style={{ width: "100%" }}
-                              size="large"
-                              placeholder="Select"
-                              borderColor="#AAAAAA"
-                              arrowColor="#000"
-                              withSearch
-                              isLoading={isFetchingIndustry}
-                              isLoadingMore={isFetchingMoreIndustry}
-                              fetchMore={() => {
-                                if (hasNextIndustry) {
-                                  fetchNextIndustry();
-                                }
-                              }}
-                              items={
+                      <>
+                        <Label>
+                          Industry
+                          {' '}
+                          <span style={{ color: colors.red.regular }}>*</span>
+                        </Label>
+                        <Spacer size={3} />
+                        <FormSelect
+                          defaultValue={industryId || ""}
+                          error={error?.message}
+                          height="48px"
+                          style={{ width: "100%" }}
+                          size="large"
+                          placeholder="Select"
+                          borderColor="#AAAAAA"
+                          arrowColor="#000"
+                          withSearch
+                          isLoading={isFetchingIndustry}
+                          isLoadingMore={isFetchingMoreIndustry}
+                          fetchMore={() => {
+                            if (hasNextIndustry) {
+                              fetchNextIndustry();
+                            }
+                          }}
+                          items={
                                 isFetchingIndustry && !isFetchingMoreIndustry ? [] : industryList
                               }
-                              onChange={(value: any) => {
-                                onChange(value);
-                                setIndustryId(value);
-                              }}
-                              onSearch={(value: any) => {
-                                setSearchIndustry(value);
-                              }}
-                            />
-                          </>
-                        )}
+                          onChange={(value: any) => {
+                            onChange(value);
+                            setIndustryId(value);
+                          }}
+                          onSearch={(value: any) => {
+                            setSearchIndustry(value);
+                          }}
+                        />
+                      </>
+                    )}
                   />
                 </Col>
                 <Col width="100%">
@@ -612,46 +612,46 @@ const DetailCoa: any = () => {
                     name="segment_id"
                     defaultValue={segmentId || ""}
                     rules={{
-                          required: {
-                            value: true,
-                            message: "Please enter country.",
-                          },
-                        }}
+                      required: {
+                        value: true,
+                        message: "Please enter country.",
+                      },
+                    }}
                     render={({ field: { onChange }, fieldState: { error } }) => (
-                          <>
-                            <Label>
-                              Segment
-                              {' '}
-                              <span style={{ color: colors.red.regular }}>*</span>
-                            </Label>
-                            <Spacer size={3} />
-                            <FormSelect
-                              defaultValue={segmentId || ""}
-                              error={error?.message}
-                              height="48px"
-                              style={{ width: "100%" }}
-                              size="large"
-                              placeholder="Select"
-                              borderColor="#AAAAAA"
-                              arrowColor="#000"
-                              withSearch
-                              isLoading={isFetchingSegment}
-                              isLoadingMore={isFetchingMoreSegment}
-                              fetchMore={() => {
-                                if (hasNextPageSegment) {
-                                  fetchNextPageSegment();
-                                }
-                              }}
-                              items={isFetchingSegment && !isFetchingMoreSegment ? [] : segmentList}
-                              onChange={(value: any) => {
-                                onChange(value);
-                              }}
-                              onSearch={(value: any) => {
-                                setSearchSegment(value);
-                              }}
-                            />
-                          </>
-                        )}
+                      <>
+                        <Label>
+                          Segment
+                          {' '}
+                          <span style={{ color: colors.red.regular }}>*</span>
+                        </Label>
+                        <Spacer size={3} />
+                        <FormSelect
+                          defaultValue={segmentId || ""}
+                          error={error?.message}
+                          height="48px"
+                          style={{ width: "100%" }}
+                          size="large"
+                          placeholder="Select"
+                          borderColor="#AAAAAA"
+                          arrowColor="#000"
+                          withSearch
+                          isLoading={isFetchingSegment}
+                          isLoadingMore={isFetchingMoreSegment}
+                          fetchMore={() => {
+                            if (hasNextPageSegment) {
+                              fetchNextPageSegment();
+                            }
+                          }}
+                          items={isFetchingSegment && !isFetchingMoreSegment ? [] : segmentList}
+                          onChange={(value: any) => {
+                            onChange(value);
+                          }}
+                          onSearch={(value: any) => {
+                            setSearchSegment(value);
+                          }}
+                        />
+                      </>
+                    )}
                   />
                 </Col>
               </Row>
@@ -660,92 +660,92 @@ const DetailCoa: any = () => {
                 {allCoaItems.length !== 0 || isSearchAndFilter ? (
                   <>
                     <Row justifyContent="space-between" alignItems="center">
-                          <Row gap="16px" alignItems="center">
-                            <Search
-                              width="380px"
-                              placeholder={lang[t].coaTemplate.create.template.field.search}
-                              onChange={(e) => setSearchAccountGroup(e.target.value)}
-                            />
+                      <Row gap="16px" alignItems="center">
+                        <Search
+                          width="380px"
+                          placeholder={lang[t].coaTemplate.create.template.field.search}
+                          onChange={(e) => setSearchAccountGroup(e.target.value)}
+                        />
 
-                            <Row gap="8px" alignItems="center">
-                              <Text variant="subtitle1">Filter</Text>
-                              <DropdownMenuOptionGroupCustom
-                                handleChangeValue={(filter) => onChangeFilterAccount(filter)}
-                                listItems={listFilterAssociatedPermission}
-                                label=""
-                                width={194}
-                                roundedSelector
-                                defaultValue="All"
-                                placeholder="Select"
-                              />
-                            </Row>
-                          </Row>
-
-                          <Row gap="20px">
-                            <Button
-                              size="big"
-                              variant="tertiary"
-                              onClick={() => setModalDelete({ open: true })}
-                              disabled={rowSelection.selectedRowKeys?.length === 0}
-                            >
-                              Delete
-                            </Button>
-                            <Button
-                              size="big"
-                              variant="tertiary"
-                              onClick={() => setModalCopyCoa({ open: true })}
-                            >
-                              {lang[t].coaTemplate.create.template.button.copyCoa}
-                            </Button>
-                            <Button
-                              size="big"
-                              variant="tertiary"
-                              onClick={() => setMode({ field: null, mode: "ADD_ACCOUNT", source: "" })}
-                            >
-                              <div style={{ marginRight: "6px" }}>
-                                <PlusAdd />
-                              </div>
-                              {lang[t].coaTemplate.create.template.button.addAccount}
-                            </Button>
-                          </Row>
+                        <Row gap="8px" alignItems="center">
+                          <Text variant="subtitle1">Filter</Text>
+                          <DropdownMenuOptionGroupCustom
+                            handleChangeValue={(filter) => onChangeFilterAccount(filter)}
+                            listItems={listFilterAssociatedPermission}
+                            label=""
+                            width={194}
+                            roundedSelector
+                            defaultValue="All"
+                            placeholder="Select"
+                          />
                         </Row>
+                      </Row>
+
+                      <Row gap="20px">
+                        <Button
+                          size="big"
+                          variant="tertiary"
+                          onClick={() => setModalDelete({ open: true })}
+                          disabled={rowSelection.selectedRowKeys?.length === 0}
+                        >
+                          Delete
+                        </Button>
+                        <Button
+                          size="big"
+                          variant="tertiary"
+                          onClick={() => setModalCopyCoa({ open: true })}
+                        >
+                          {lang[t].coaTemplate.create.template.button.copyCoa}
+                        </Button>
+                        <Button
+                          size="big"
+                          variant="tertiary"
+                          onClick={() => setMode({ field: null, mode: "ADD_ACCOUNT", source: "" })}
+                        >
+                          <div style={{ marginRight: "6px" }}>
+                            <PlusAdd />
+                          </div>
+                          {lang[t].coaTemplate.create.template.button.addAccount}
+                        </Button>
+                      </Row>
+                    </Row>
                     <Table columns={columns} data={paginateField} rowSelection={rowSelection} />
                     {paginationCoaAccount.totalItems > 10 && (
-                          <Pagination pagination={paginationCoaAccount} />
-                        )}
+                    <Pagination pagination={paginationCoaAccount} />
+                    )}
                   </>
                 ) : (
                   <>
-                        <Row justifyContent="center">
-                          <VectorPeople />
-                        </Row>
-                        <Row justifyContent="center">
-                          <Text variant="headingLarge">
-                            {lang[t].coaTemplate.create.template.dictionary.noDataChart}
-                          </Text>
-                        </Row>
-                        <Row justifyContent="center">
-                          <Text variant="headingRegular">
-                            {lang[t].coaTemplate.create.template.dictionary.noAccount}
-                          </Text>
-                        </Row>
-                        <Row justifyContent="center" gap="15px">
-                          <Button
-                            size="big"
-                            variant="tertiary"
-                            onClick={() => setModalCopyCoa({ open: true })}
-                          >
-                            {lang[t].coaTemplate.create.template.button.copyCoa}
-                          </Button>
-                          <Button
-                            size="big"
-                            variant="primary"
-                            onClick={() => setMode({ field: null, mode: "ADD_ACCOUNT", source: "" })}
-                          >
-                            {lang[t].coaTemplate.create.template.button.addAccount}
-                          </Button>
-                        </Row>
-                      </>
+                    <Row justifyContent="center">
+                      <VectorPeople />
+                    </Row>
+                    <Row justifyContent="center">
+                      <Text variant="headingLarge">
+                        {lang[t].coaTemplate.create.template.dictionary.noDataChart}
+                      </Text>
+                    </Row>
+                    <Row justifyContent="center">
+                      <Text variant="headingRegular">
+                        {lang[t].coaTemplate.create.template.dictionary.noAccount}
+                      </Text>
+                    </Row>
+                    <Row justifyContent="center" gap="15px">
+                      <Button
+                        size="big"
+                        variant="tertiary"
+                        onClick={() => setModalCopyCoa({ open: true })}
+                      >
+                        {lang[t].coaTemplate.create.template.button.copyCoa}
+                      </Button>
+                      <Button
+                        size="big"
+                        variant="primary"
+                        onClick={() => setMode({ field: null, mode: "ADD_ACCOUNT", source: "" })}
+                      >
+                        {lang[t].coaTemplate.create.template.button.addAccount}
+                      </Button>
+                    </Row>
+                  </>
                 )}
               </Col>
             </Card>

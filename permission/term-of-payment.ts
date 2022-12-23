@@ -1,6 +1,6 @@
 export const permissionTermOfPayment = {
   role: {
-    ["Admin"]: {
+    Admin: {
       component: [
         "View Term Of Payment",
         "Create Term Of Payment",

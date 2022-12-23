@@ -22,9 +22,9 @@ import ModalCalendar from "components/elements/Modal/ModalCalendar";
 import { ModalDeleteConfirmation } from "components/elements/Modal/ModalConfirmationDelete";
 import moment from "moment";
 import { useUserPermissions } from "hooks/user-config/usePermission";
-import ArrowLeft from "../../assets/icons/arrow-left.svg";
-import ICWorld from "../../assets/icons/ic-world.svg";
-import ICCompany from "../../assets/icons/ic-company.svg";
+import ArrowLeft from "../../../assets/icons/arrow-left.svg";
+import ICWorld from "../../../assets/icons/ic-world.svg";
+import ICCompany from "../../../assets/icons/ic-company.svg";
 import { queryClient } from "../../_app";
 
 const WorldSvg = () => <ICWorld />;

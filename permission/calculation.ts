@@ -1,6 +1,6 @@
 export const permissionCalculation = {
   role: {
-    ["Admin"]: {
+    Admin: {
       component: [
         "View Calculation",
         "Create Calculation",

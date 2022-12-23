@@ -1,6 +1,6 @@
 export const permissionProductGroup = {
   role: {
-    ["Admin"]: {
+    Admin: {
       component: [
         "View Product Group",
         "Create Product Group",

@@ -42,7 +42,7 @@ import {
   RowLanguagesData,
   RowProfitCenter,
 } from "./cost_center_interface";
-import ArrowLeft from "../../assets/icons/arrow-left.svg";
+import ArrowLeft from "../../../assets/icons/arrow-left.svg";
 import useDebounce from "../../../lib/useDebounce";
 import { queryClient } from "../../_app";
 

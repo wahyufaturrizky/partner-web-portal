@@ -1,11 +1,13 @@
 import React, { useState } from "react";
 import styled from "styled-components";
 import usePagination from "@lucasmogari/react-pagination";
-import { Col, Pagination, Search, Spacer, Table, Text } from "pink-lava-ui";
+import {
+  Col, Pagination, Search, Spacer, Table, Text,
+} from "pink-lava-ui";
 
+import { lang } from "lang";
 import { colors } from "../../../../utils/color";
 import { useDateFormatLists } from "../../../../hooks/formating/useDate";
-import { lang } from "lang";
 
 export default function FormatingDate() {
   const t = localStorage.getItem("lan") || "en-US";
@@ -54,7 +56,7 @@ export default function FormatingDate() {
 
   return (
     <Col>
-      <Text variant={"h4"}>{lang[t].dateFormat.dateFormat}</Text>
+      <Text variant="h4">{lang[t].dateFormat.dateFormat}</Text>
       <Spacer size={20} />
       <Card>
         <Search
@@ -71,14 +73,13 @@ export default function FormatingDate() {
           <Table
             loading={isLoadingField}
             columns={columns.filter(
-              (filtering) =>
-                filtering.dataIndex !== "id" &&
-                filtering.dataIndex !== "created_at" &&
-                filtering.dataIndex !== "modified_by" &&
-                filtering.dataIndex !== "modified_at" &&
-                filtering.dataIndex !== "deleted_by" &&
-                filtering.dataIndex !== "deleted_at" &&
-                filtering.dataIndex !== "created_by"
+              (filtering) => filtering.dataIndex !== "id"
+                && filtering.dataIndex !== "created_at"
+                && filtering.dataIndex !== "modified_by"
+                && filtering.dataIndex !== "modified_at"
+                && filtering.dataIndex !== "deleted_by"
+                && filtering.dataIndex !== "deleted_at"
+                && filtering.dataIndex !== "created_by",
             )}
             data={data}
           />

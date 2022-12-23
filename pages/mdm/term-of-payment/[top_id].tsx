@@ -18,7 +18,7 @@ import {
   useDeleteTermOfPayment,
 } from "../../../hooks/mdm/term-of-payment/useTermOfPayment";
 import { queryClient } from "../../_app";
-import ArrowLeft from "../../assets/icons/arrow-left.svg";
+import ArrowLeft from "../../../assets/icons/arrow-left.svg";
 import { ModalDeleteConfirmation } from "../../../components/elements/Modal/ModalConfirmationDelete";
 import ModalAddTerm from "../../../components/elements/Modal/ModalAddTerm";
 import DraggableTable from "../../../components/pages/TermOfPayment/DraggableTable";

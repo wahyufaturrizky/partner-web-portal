@@ -29,8 +29,8 @@ import { useSegmentInfiniteLists } from "hooks/segment/useSegment";
 import { useInfiniteIndustry } from "hooks/industry/useIndustries";
 import DetailAccount from "../../../../components/pages/CoA/DetailCoA";
 import CreateAccount from "../../../../components/pages/CoA/CraeteCoA";
-import PlusAdd from "../../../assets/icons/plus-add.svg";
-import VectorPeople from "../../../assets/icons/vector-people.svg";
+import PlusAdd from "../../../../assets/icons/plus-add.svg";
+import VectorPeople from "../../../../assets/icons/vector-people.svg";
 import {
   useCreateCoa,
   useDetailCoa,

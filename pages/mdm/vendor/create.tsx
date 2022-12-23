@@ -1,5 +1,7 @@
 import React, { useState } from "react";
-import { Text, Col, Row, Spacer, Dropdown, Button, Accordion, Radio, Tabs } from "pink-lava-ui";
+import {
+  Text, Col, Row, Spacer, Dropdown, Button, Accordion, Radio, Tabs,
+} from "pink-lava-ui";
 import styled from "styled-components";
 import { useRouter } from "next/router";
 import { useForm, Controller, FormProvider } from "react-hook-form";
@@ -19,15 +21,16 @@ const listTabItems = [
   { title: "Invoicing" },
 ];
 
-const objectIsEmpty = (object: any) =>
-  Object.keys(object).length === 0 && object.constructor === Object;
+const objectIsEmpty = (object: any) => Object.keys(object).length === 0 && object.constructor === Object;
 
 export default function VendorCreate() {
   const router = useRouter();
   const companyCode = localStorage.getItem("companyCode");
 
   const methods = useForm({
-    defaultValues: { status: "Active", purchasing: {}, invoicing: {}, customer_id: "" },
+    defaultValues: {
+      status: "Active", purchasing: {}, invoicing: {}, customer_id: "",
+    },
   });
   const { control, handleSubmit } = methods;
 
@@ -39,9 +42,9 @@ export default function VendorCreate() {
   const renderTabItem = (activeTab: any) => {
     switch (activeTab) {
       case "Contacts":
-        return <Contacts formType={"add"} />;
+        return <Contacts formType="add" />;
       case "Addresses":
-        return <Addresses formType={"add"} />;
+        return <Addresses formType="add" />;
       case "Purchasing":
         return <Purchasing />;
       case "Invoicing":
@@ -61,52 +64,48 @@ export default function VendorCreate() {
   });
 
   const onSubmit = (data: any) => {
-    const companyPayload =
-      radioValue === "company"
-        ? { logo: companyLogo, website: data?.company?.website ?? "" }
-        : null;
+    const companyPayload = radioValue === "company"
+      ? { logo: companyLogo, website: data?.company?.website ?? "" }
+      : null;
 
-    const individuPayload =
-      radioValue === "individu"
-        ? {
-            title: data?.individu?.title ?? "",
-            company: data?.individu?.company ?? "",
-            job: data?.individu?.job ?? "",
-          }
-        : null;
+    const individuPayload = radioValue === "individu"
+      ? {
+        title: data?.individu?.title ?? "",
+        company: data?.individu?.company ?? "",
+        job: data?.individu?.job ?? "",
+      }
+      : null;
 
-    const contactsPayload =
-      data?.contacts?.map((contact: any) => {
-        delete contact?.filtered;
-        delete contact?.key;
-        return contact;
-      }) ?? [];
+    const contactsPayload = data?.contacts?.map((contact: any) => {
+      delete contact?.filtered;
+      delete contact?.key;
+      return contact;
+    }) ?? [];
 
-    const addressPayload =
-      data?.addresses?.map((address: any) => {
-        let mappCountrylevel = [];
+    const addressPayload = data?.addresses?.map((address: any) => {
+      const mappCountrylevel = [];
 
-        mappCountrylevel[0] = address.province === "" ? 0 : address.province;
-        mappCountrylevel[1] = address.city === "" ? 0 : address.city;
-        mappCountrylevel[2] = address.district === "" ? 0 : address.district;
-        mappCountrylevel[3] = address.zone === "" ? 0 : address.zone;
+      mappCountrylevel[0] = address.province === "" ? 0 : address.province;
+      mappCountrylevel[1] = address.city === "" ? 0 : address.city;
+      mappCountrylevel[2] = address.district === "" ? 0 : address.district;
+      mappCountrylevel[3] = address.zone === "" ? 0 : address.zone;
 
-        // cek apakah array isinya semuanya 0
-        const allEqual = mappCountrylevel.every((value) => value === 0);
+      // cek apakah array isinya semuanya 0
+      const allEqual = mappCountrylevel.every((value) => value === 0);
 
-        return {
-          is_primary: address.is_primary,
-          type: address.type,
-          street: address.street,
-          country: address.country,
-          country_levels: allEqual ? [] : mappCountrylevel,
-          postal_code: address.postal_code,
-          lon: address.lon,
-          lat: address.lat,
-          // Only get photo url
-          photo: address.photo?.map((photoObj: any) => photoObj?.response?.data),
-        };
-      }) ?? [];
+      return {
+        is_primary: address.is_primary,
+        type: address.type,
+        street: address.street,
+        country: address.country,
+        country_levels: allEqual ? [] : mappCountrylevel,
+        postal_code: address.postal_code,
+        lon: address.lon,
+        lat: address.lat,
+        // Only get photo url
+        photo: address.photo?.map((photoObj: any) => photoObj?.response?.data),
+      };
+    }) ?? [];
 
     const purchasingPayload = objectIsEmpty(data?.purchasing) ? null : data?.purchasing;
 
@@ -120,13 +119,12 @@ export default function VendorCreate() {
     delete data?.invoicing?.tax_type;
     delete data?.invoicing?.tax_code;
 
-    const mappingInvoicing =
-      invoicingPayload !== null
-        ? {
-            ...invoicingPayload,
-            banks: mappingBank,
-          }
-        : null;
+    const mappingInvoicing = invoicingPayload !== null
+      ? {
+        ...invoicingPayload,
+        banks: mappingBank,
+      }
+      : null;
 
     const formData = {
       customer_id: "",
@@ -145,11 +143,11 @@ export default function VendorCreate() {
 
   return (
     <Col>
-      <Row alignItems={"center"}>
-        <Text variant={"h4"}>Create Vendor</Text>
+      <Row alignItems="center">
+        <Text variant="h4">Create Vendor</Text>
         <Spacer size={10} />
         <Radio
-          value={"company"}
+          value="company"
           checked={radioValue === "company"}
           onChange={(e: any) => {
             setRadioValue(e.target.value);
@@ -159,7 +157,7 @@ export default function VendorCreate() {
         Company
         <Spacer size={10} />
         <Radio
-          value={"individu"}
+          value="individu"
           checked={radioValue === "individu"}
           onChange={(e: any) => {
             setRadioValue(e.target.value);
@@ -175,8 +173,8 @@ export default function VendorCreate() {
         <Row justifyContent="space-between" alignItems="center" nowrap>
           <Controller
             control={control}
-            name={"status"}
-            defaultValue={"Active"}
+            name="status"
+            defaultValue="Active"
             render={({ field: { onChange, value } }) => (
               <Dropdown
                 label=""
@@ -196,10 +194,10 @@ export default function VendorCreate() {
           />
 
           <Row gap="16px">
-            <Button size="big" variant={"tertiary"} onClick={() => router.back()}>
+            <Button size="big" variant="tertiary" onClick={() => router.back()}>
               Cancel
             </Button>
-            <Button size="big" variant={"primary"} onClick={handleSubmit(onSubmit)}>
+            <Button size="big" variant="primary" onClick={handleSubmit(onSubmit)}>
               {isLoadingCreateVendor ? "Loading..." : "Save"}
             </Button>
           </Row>
@@ -209,7 +207,9 @@ export default function VendorCreate() {
       <Spacer size={20} />
 
       <VendorContext.Provider
-        value={{ companyLogo, setCompanyLogo, selectFromForm, setSelectFromForm }}
+        value={{
+          companyLogo, setCompanyLogo, selectFromForm, setSelectFromForm,
+        }}
       >
         <FormProvider {...methods}>
           <Accordion>

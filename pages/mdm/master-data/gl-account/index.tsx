@@ -20,7 +20,7 @@ const columns = [
       <Text
         variant="small"
         hoverColor="pink.regular"
-        onClick={() => Router.push(`/mdm/${Router.pathname}/${row.id}`)}
+        onClick={() => Router.push(`${Router.pathname}/${row.id}`)}
         clickable
         underLineOnHover
       >
@@ -55,7 +55,7 @@ const columns = [
     render: (prop, row) => (
       <Button
         size="small"
-        onClick={() => Router.push(`/mdm/${Router.pathname}/${row.id}`)}
+        onClick={() => Router.push(`${Router.pathname}/${row.id}`)}
         variant="tertiary"
       >
         View Detail
@@ -172,7 +172,7 @@ const MasterGLAccount = () => {
             <Button
               size="big"
               variant="primary"
-              onClick={() => Router.push(`/mdm/${Router.pathname}/create`)}
+              onClick={() => Router.push(`${Router.pathname}/create`)}
             >
               Create
             </Button>

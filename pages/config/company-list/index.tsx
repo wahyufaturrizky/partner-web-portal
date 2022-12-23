@@ -6,6 +6,7 @@ import {
 import usePagination from "@lucasmogari/react-pagination";
 import { useRouter } from "next/router";
 import { lang } from "lang";
+import { useUserPermissions } from "hooks/user-config/usePermission";
 import { useCompanyList, useStatusCompany } from "../../../hooks/company-list/useCompany";
 
 const CompanyList: any = () => {

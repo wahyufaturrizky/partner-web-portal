@@ -20,8 +20,7 @@ import {
   Spin,
   Tag,
 } from "pink-lava-ui";
-import React, { useState } from "react";
-import { useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import { ModalDeleteConfirmation } from "../../../components/elements/Modal/ModalConfirmationDelete";
 import { ModalRegisterField } from "../../../components/elements/Modal/ModalRegisterField";
@@ -54,14 +53,18 @@ const DetailMenuList: any = () => {
     process_name: "",
     fee: "",
   });
-  const { name, screen, process_name, fee } = stateFieldInput;
+  const {
+    name, screen, process_name, fee,
+  } = stateFieldInput;
   const [stateModal, setStateModal] = useState({
     isShowModal: false,
     titleModal: "",
     dataModal: null,
     widthModal: null,
   });
-  const { isShowModal, titleModal, dataModal, widthModal } = stateModal;
+  const {
+    isShowModal, titleModal, dataModal, widthModal,
+  } = stateModal;
   const [selectedAllowedFieldRowKeys, setSelectedAllowedFieldRowKeys] = useState([]);
   const [dataTableAssociatePermission, setDataTableAssociatePermission] = useState([]);
   const [isZeus, setIsZeus] = useState(false);
@@ -71,7 +74,7 @@ const DetailMenuList: any = () => {
   const [selectedFilter, setSelectedFilter] = useState([]);
   const paginationTableField = usePagination({
     page: 1,
-    itemsPerPage: 10,
+    itemsPerPage: 20,
     maxPageItems: Infinity,
     numbers: true,
     arrows: true,
@@ -79,7 +82,7 @@ const DetailMenuList: any = () => {
   });
   const paginationAllowedField = usePagination({
     page: 1,
-    itemsPerPage: 10,
+    itemsPerPage: 20,
     maxPageItems: Infinity,
     numbers: true,
     arrows: true,
@@ -87,7 +90,7 @@ const DetailMenuList: any = () => {
   });
   const paginationTablePermission = usePagination({
     page: 1,
-    itemsPerPage: 10,
+    itemsPerPage: 20,
     maxPageItems: Infinity,
     numbers: true,
     arrows: true,
@@ -101,8 +104,8 @@ const DetailMenuList: any = () => {
   } = useMenuList({
     options: {
       onSuccess: (data) => {
-        let tempDataAllowedField = [];
-        let tempDataAssociatePermission = [];
+        const tempDataAllowedField = [];
+        const tempDataAssociatePermission = [];
 
         data.field.map((data) => {
           tempDataAllowedField.push({
@@ -123,8 +126,8 @@ const DetailMenuList: any = () => {
           setIsMenuProcess(true);
         }
 
-        setIsZeus(data.menu.isZeus === "Y" ? true : false);
-        setIsHermes(data.menu.isHermes === "Y" ? true : false);
+        setIsZeus(data.menu.isZeus === "Y");
+        setIsHermes(data.menu.isHermes === "Y");
 
         setStateFieldInput({
           ...stateFieldInput,
@@ -143,11 +146,11 @@ const DetailMenuList: any = () => {
         setDataAssociatedPermissionsField(tempDataAssociatePermission);
 
         if (
-          tempDataAllowedField.length > 0 &&
-          tempDataAssociatePermission.length > 0 &&
-          name &&
-          process_name &&
-          screen
+          tempDataAllowedField.length > 0
+          && tempDataAssociatePermission.length > 0
+          && name
+          && process_name
+          && screen
         ) {
           setIsLoading(false);
         }
@@ -421,7 +424,7 @@ const DetailMenuList: any = () => {
               allowed_field: data.field_name,
               allowed_field_id: data.key,
               key: data.key,
-            }))
+            })),
           );
           setStateModal({ ...stateModal, isShowModal: false });
         }
@@ -433,7 +436,7 @@ const DetailMenuList: any = () => {
     let tempDataAllowedField = [];
 
     tempDataAllowedField = dataAllowedField?.filter(
-      (field) => !rowSelectionAllowedField.selectedRowKeys.includes(field.key)
+      (field) => !rowSelectionAllowedField.selectedRowKeys.includes(field.key),
     );
     setDataAllowedField(tempDataAllowedField);
   };
@@ -476,10 +479,9 @@ const DetailMenuList: any = () => {
   const handleUpdateMenuList = () => {
     setIsLoading(true);
     const isEmptyField = Object.keys(stateFieldInput).find(
-      (thereIsEmptyField) =>
-        thereIsEmptyField !== "process_name" &&
-        stateFieldInput &&
-        stateFieldInput[thereIsEmptyField] === ""
+      (thereIsEmptyField) => thereIsEmptyField !== "process_name"
+        && stateFieldInput
+        && stateFieldInput[thereIsEmptyField] === "",
     );
 
     if (!isEmptyField) {
@@ -493,7 +495,7 @@ const DetailMenuList: any = () => {
           is_config: isZeus ? "Y" : "N",
           is_partner: isHermes ? "Y" : "N",
           permission: dataAssociatedPermissionsField.map((data) => data.key),
-		  company_id:companyCode
+          company_id: companyCode,
         };
         updateFieldMenuList(data);
       } else {
@@ -535,10 +537,10 @@ const DetailMenuList: any = () => {
 
   useEffect(() => {
     if (
-      !isLoading &&
-      !isLoadingPermissions &&
-      !isLoadingMenuList &&
-      !isLoadingFilterListPermissions
+      !isLoading
+      && !isLoadingPermissions
+      && !isLoadingMenuList
+      && !isLoadingFilterListPermissions
     ) {
       setTimeout(() => setIshowForDropDown(true), 3000);
     }
@@ -581,7 +583,7 @@ const DetailMenuList: any = () => {
           <div onClick={() => Router.back()} style={{ cursor: "pointer" }}>
             <Image src="/icons/arrow-left.svg" alt="arrow-left" width={32} height={32} />
           </div>
-          <Text variant={"h4"}>{Router.query.name}</Text>
+          <Text variant="h4">{Router.query.name}</Text>
         </Row>
         <Spacer size={8} />
         <Spacer size={12} />
@@ -592,7 +594,7 @@ const DetailMenuList: any = () => {
                 <Row alignItems="center">
                   <Checkbox disabled checked={isMenuProcess} onChange={onChangeIsMenuProcess} />
                   <div style={{ cursor: "pointer" }}>
-                    <Text variant={"subtitle1"}>{lang[t].menuList.checkBox.thisMenu}</Text>
+                    <Text variant="subtitle1">{lang[t].menuList.checkBox.thisMenu}</Text>
                   </div>
                 </Row>
               </Col>
@@ -613,7 +615,7 @@ const DetailMenuList: any = () => {
                   label={lang[t].menuList.menuListName}
                   value={name}
                   height="48px"
-                  placeholder={"e.g Shipment and Delivery"}
+                  placeholder="e.g Shipment and Delivery"
                   onChange={handleChangeInput}
                   disabled
                 />
@@ -624,7 +626,7 @@ const DetailMenuList: any = () => {
                   value={screen}
                   onChange={handleChangeInput}
                   height="48px"
-                  placeholder={"e.g Shipment and Delivery"}
+                  placeholder="e.g Shipment and Delivery"
                   disabled
                 />
               </Row>
@@ -637,7 +639,7 @@ const DetailMenuList: any = () => {
                   label={lang[t].menuList.menuListFee}
                   onChange={handleChangeInput}
                   height="48px"
-                  placeholder={"e.g 10.000"}
+                  placeholder="e.g 10.000"
                   disabled
                 />
                 <div style={{ visibility: isMenuProcess ? "visible" : "hidden", width: "100%" }}>
@@ -648,7 +650,7 @@ const DetailMenuList: any = () => {
                     label="Process Name"
                     onChange={handleChangeInput}
                     height="48px"
-                    placeholder={"e.g Shipment"}
+                    placeholder="e.g Shipment"
                     isOptional
                     disabled
                   />
@@ -662,14 +664,12 @@ const DetailMenuList: any = () => {
                   </Text>
                   <Spacer size={16} />
                   <Row>
-                    {dataAssociatedPermissionsField?.map((data: any) => {
-                      return (
-                        <>
-                          <Tag>{data.field_name}</Tag>
-                          <Spacer size={8} />
-                        </>
-                      );
-                    })}
+                    {dataAssociatedPermissionsField?.map((data: any) => (
+                      <>
+                        <Tag>{data.field_name}</Tag>
+                        <Spacer size={8} />
+                      </>
+                    ))}
                   </Row>
                 </Col>
               </Row>
@@ -711,7 +711,7 @@ const DetailMenuList: any = () => {
         visible={isShowModal}
         onCancel={() => setStateModal({ ...stateModal, isShowModal: false })}
         title={titleModal}
-        footer={
+        footer={(
           <div
             style={{
               display: "flex",
@@ -732,8 +732,8 @@ const DetailMenuList: any = () => {
               {titleModal === "Associated Module" ? "Apply" : "Add"}
             </Button>
           </div>
-        }
-        content={
+        )}
+        content={(
           <>
             <Spacer size={20} />
             <Row alignItems="flex-end" justifyContent="space-between">
@@ -744,11 +744,9 @@ const DetailMenuList: any = () => {
                     ? "Search Permission Name"
                     : "Search Field ID, Name, Key"
                 }
-                onChange={(e) =>
-                  titleModal === "Associated Module"
-                    ? setSearchTablePermission(e.target.value)
-                    : setSearchTableField(e.target.value)
-                }
+                onChange={(e) => (titleModal === "Associated Module"
+                  ? setSearchTablePermission(e.target.value)
+                  : setSearchTableField(e.target.value))}
               />
               <Row gap="16px">
                 {titleModal === "Associated Module" ? (
@@ -761,7 +759,7 @@ const DetailMenuList: any = () => {
                 ) : (
                   <Button
                     size="big"
-                    variant={"primary"}
+                    variant="primary"
                     onClick={() => setModalCreate({ open: true })}
                   >
                     Register
@@ -796,7 +794,7 @@ const DetailMenuList: any = () => {
             />
             <Spacer size={14} />
           </>
-        }
+        )}
       />
 
       {modalCreate.open && (

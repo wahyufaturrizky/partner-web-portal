@@ -4,7 +4,7 @@ import usePagination from "@lucasmogari/react-pagination";
 import useDebounce from "lib/useDebounce";
 import { useMenuLists } from "hooks/menu-config/useMenuConfig";
 
-const ModalAddMenu = ({ show, onCancel, selectedRowKeys, onAddMenu }: any) => {
+const ModalAddMenu = ({ show, onCancel, selectedRowKeys, onAddMenu, selectedRowsMenu }: any) => {
   const pagination = usePagination({
     page: 1,
     itemsPerPage: 20,
@@ -60,11 +60,20 @@ const ModalAddMenu = ({ show, onCancel, selectedRowKeys, onAddMenu }: any) => {
   ];
 
   const onSelectChange = (selectedRowKeys: any, selectedRows: any) => {
-    setSelectedMenu(selectedRows);
+    const mapSelectedRows = selectedRows.map((element: any, index: any) => {
+			if (element === undefined && selectedRowsMenu[index] !== undefined) {
+				return selectedRowsMenu[index];
+			} else {
+				return element;
+			}
+		});
+
+    setSelectedMenu(mapSelectedRows);
     setSelectedRowKeysMenu(selectedRowKeys);
   };
 
   const rowSelection = {
+    preserveSelectedRowKeys: true,
     selectedRowKeys: selectedRowKeysMenu,
     onChange: onSelectChange,
   };

@@ -28,6 +28,7 @@ import {
   useCalculations,
   useCreateCalculation,
   useDeleteCalculation,
+  useSubmitCalculation,
   useUpdateCalculation,
   useUploadFileCalculation,
 } from "hooks/calculation-config/useCalculation";
@@ -73,7 +74,10 @@ const Calculation = () => {
   const [isShowDelete, setShowDelete] = useState({ open: false, id: "", name: "" });
   const [isShowCreate, setShowCreate] = useState({ open: false, title: "" });
   const [isShowEdit, setShowEdit] = useState({
-    open: false, title: "", data: {}, id: 0,
+    open: false,
+    title: "",
+    data: {},
+    id: 0,
   });
   const [isShowUpload, setShowUpload] = useState(false);
 
@@ -94,9 +98,7 @@ const Calculation = () => {
     (filtering: any) => filtering.menu === "Term Of Payment",
   );
 
-  const checkUserPermission = (permissionGranted) => listPermission?.find(
-    (data: any) => data?.viewTypes?.[0]?.viewType?.name === permissionGranted,
-  );
+  const checkUserPermission = (permissionGranted) => listPermission?.find((data: any) => data?.viewTypes?.[0]?.viewType?.name === permissionGranted);
 
   const debounceSearch = useDebounce(search, 1000);
 
@@ -104,6 +106,7 @@ const Calculation = () => {
   const [totalRowsCompanyList, setTotalRowsCompanyList] = useState(0);
   const [searchCompany, setSearchCompany] = useState("");
   const debounceFetchCompany = useDebounce(searchCompany, 1000);
+  const [calculationId, setCalculationId] = useState([]);
 
   const {
     data: calculationData,
@@ -118,16 +121,19 @@ const Calculation = () => {
     },
     options: {
       onSuccess: (data: any) => {
+        setCalculationId(data.calculationIds);
         pagination?.setTotalItems(data.totalRow);
       },
       select: (data: any) => {
         let payment = 0;
+        const calculationIds = [];
         const mappedData = data?.rows?.map((element: any) => {
           const companyName = companyList
             .filter((el) => el.companyId === element.companyId)[0]
             ?.value?.split(" - ")[0];
           const newMenu = element.modules?.map((el: { name: string }) => el.name);
           payment += +element?.totalPayment;
+          calculationIds.push(element.id);
           return {
             key: element.id,
             id: element.id,
@@ -137,8 +143,9 @@ const Calculation = () => {
             company_name: companyName,
             branch: element.branch,
             fee: `IDR ${IDR_formatter.format(element?.fee?.split(".")[0])?.split("Rp")[1]}`,
-            total_fee:
-              `IDR ${IDR_formatter.format(element?.totalFee?.split(".")[0])?.split("Rp")[1]}`,
+            total_fee: `IDR ${
+              IDR_formatter.format(element?.totalFee?.split(".")[0])?.split("Rp")[1]
+            }`,
             action: (
               <div style={{ display: "flex", justifyContent: "left" }}>
                 {checkUserPermission("Update") && (
@@ -188,7 +195,12 @@ const Calculation = () => {
             : paymentButton?.twelveMonths
               ? (payment = payment * 12 - payment * 12 * 0.5)
               : payment;
-        return { data: mappedData, totalRow: data.totalRow, payment };
+        return {
+          data: mappedData,
+          totalRow: data.totalRow,
+          payment,
+          calculationIds,
+        };
       },
     },
   });
@@ -247,13 +259,26 @@ const Calculation = () => {
     },
   );
 
+  const { mutate: submitCalculation, isLoading: isLoadingSubmitCalculation } = useSubmitCalculation(
+    {
+      options: {
+        onSuccess: () => {
+          queryClient.invalidateQueries(["calculations"]);
+        },
+      },
+    },
+  );
+
   const { mutate: updateCalculation, isLoading: isLoadingUpdateCalculation } = useUpdateCalculation(
     {
       id: isShowEdit?.id,
       options: {
         onSuccess: () => {
           setShowEdit({
-            open: false, title: "", data: {}, id: 0,
+            open: false,
+            title: "",
+            data: {},
+            id: 0,
           });
           queryClient.invalidateQueries(["calculations"]);
         },
@@ -324,6 +349,15 @@ const Calculation = () => {
     updateCalculation(data);
   };
 
+  const onSubmit = () => {
+    console.log("masuk");
+    const payload = {
+      ids: calculationId,
+      company_id: companyCode,
+    };
+    console.log(payload);
+    submitCalculation(payload);
+  };
   return (
     <>
       <Col>
@@ -507,7 +541,7 @@ const Calculation = () => {
 
         <Row justifyContent="space-between">
           <div />
-          <Button size="big" variant="primary" onClick={() => router.push("/mdm/branch/create")}>
+          <Button size="big" variant="primary" onClick={onSubmit}>
             Submit
           </Button>
         </Row>
@@ -529,7 +563,10 @@ const Calculation = () => {
           defaultValue={isShowEdit.data}
           onOk={onEdit}
           onCancel={() => setShowEdit({
-            open: false, title: "", data: {}, id: 0,
+            open: false,
+            title: "",
+            data: {},
+            id: 0,
           })}
         />
       )}

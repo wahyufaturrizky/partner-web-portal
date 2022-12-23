@@ -158,7 +158,7 @@ const DetailProcessList: any = () => {
 
         <Spacer size={20} />
 
-        <Accordion>
+        <Accordion style={{ display: "relative" }} id="area">
           <Accordion.Item key={1}>
             <Accordion.Header variant="blue">{lang[t].process.accordion.general}</Accordion.Header>
             <Accordion.Body>
@@ -188,18 +188,19 @@ const DetailProcessList: any = () => {
                     <Spin tip="Loading data..." />
                   ) : (
                     <Dropdown
-                    width="100%"
-                    label={lang[t].process.processListModule}
-                    defaultValue={fieldProcessListById?.module?.name}
-                    loading={isLoadingConfigModule}
-                    items={
+                      containerId="area"
+                      width="100%"
+                      label={lang[t].process.processListModule}
+                      defaultValue={fieldProcessListById?.module?.name}
+                      loading={isLoadingConfigModule}
+                      items={
 												dataConfigsModule
 												&& dataConfigsModule?.rows.map((data) => ({ id: data.id, value: data.name }))
 											}
-                    placeholder="Select"
-                    handleChange={handleChangeDropdown}
-                    noSearch
-                  />
+                      placeholder="Select"
+                      handleChange={handleChangeDropdown}
+                      noSearch
+                    />
                   )}
 
                   {/* TODO: HIDE AFTER INCLUDING IN SPRINT */}

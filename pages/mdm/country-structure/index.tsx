@@ -19,8 +19,8 @@ import { useUserPermissions } from "hooks/user-config/usePermission";
 import { ModalDeleteConfirmation } from "../../../components/elements/Modal/ModalConfirmationDelete";
 
 import { useDataCountries, useDeleteDataCountries, useUploadFileCountries } from '../../../hooks/mdm/country-structure/useCountries';
-import DownloadSvg from "../../assets/icons/ic-download.svg";
-import UploadSvg from "../../assets/icons/ic-upload.svg";
+import DownloadSvg from "../../../assets/icons/ic-download.svg";
+import UploadSvg from "../../../assets/icons/ic-upload.svg";
 
 import { mdmDownloadService } from "../../../lib/client";
 

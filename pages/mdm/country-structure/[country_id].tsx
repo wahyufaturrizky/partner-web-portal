@@ -22,7 +22,7 @@ import styled from "styled-components";
 import { COUNTRY_CODE } from "utils/country_code_constant";
 import { PHONE_CODE } from "utils/phone_code_constant";
 import { useUserPermissions } from "hooks/user-config/usePermission";
-import ArrowLeft from "../../assets/icons/arrow-left.svg";
+import ArrowLeft from "../../../assets/icons/arrow-left.svg";
 import { ModalDeleteConfirmation } from "../../../components/elements/Modal/ModalConfirmationDelete";
 import { useCurrenciesMDM } from "../../../hooks/mdm/country-structure/useCurrencyMDM";
 import {

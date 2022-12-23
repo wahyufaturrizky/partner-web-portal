@@ -48,7 +48,7 @@ import {
   useUpdateCompany,
   useUploadLogoCompany,
 } from "../../../hooks/company-list/useCompany";
-import ArrowLeft from "../../assets/icons/arrow-left.svg";
+import ArrowLeft from "../../../assets/icons/arrow-left.svg";
 
 const CompanyTypeDataFake = [
   {
@@ -770,7 +770,7 @@ const DetailCompany: any = () => {
   return (
     <Col>
       <Row gap="4px" alignItems="center">
-        <ArrowLeft style={{ cursor: "pointer" }} onClick={() => Router.push("/config/company-list")} />
+        <ArrowLeft style={{ cursor: "pointer" }} onClick={() => router.push("/config/company-list")} />
         <Text variant="h4">{companyData.name}</Text>
       </Row>
       <Spacer size={12} />
@@ -791,7 +791,7 @@ const DetailCompany: any = () => {
               <Button
                 size="big"
                 variant="tertiary"
-                onClick={() => Router.push("/config/company-list")}
+                onClick={() => router.push("/config/company-list")}
               >
                 {lang[t].companyList.tertier.cancel}
               </Button>

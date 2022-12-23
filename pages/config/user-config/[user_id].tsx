@@ -10,6 +10,8 @@ import {
   Input,
   FormSelect,
   EmptyState,
+  Table,
+  Pagination,
 } from "pink-lava-ui";
 import { Controller, useForm } from "react-hook-form";
 
@@ -25,10 +27,11 @@ import { lang } from "lang";
 import { useAllLibraryLanguage } from "hooks/mdm/library-language/useLibraryLanguage";
 import { useUserPermissions } from "hooks/user-config/usePermission";
 import { permissionUserList } from "permission/user-list";
+import usePagination from "@lucasmogari/react-pagination";
 import { useLanguages } from "../../../hooks/languages/useLanguages";
 import { useRolePermissions } from "../../../hooks/role/useRole";
 import { useDeleteUser, useUpdateUser, useUser } from "../../../hooks/user-config/useUser";
-import ArrowLeft from "../../assets/icons/arrow-left.svg";
+import ArrowLeft from "../../../assets/icons/arrow-left.svg";
 
 const phoneRegex = /^(\+?\d{0,4})?\s?-?\s?(\(?\d{3}\)?)\s?-?\s?(\(?\d{3}\)?)\s?-?\s?(\(?\d{4}\)?)?$/;
 const schema = yup
@@ -74,7 +77,14 @@ const UpdateUserConfig: any = () => {
     resolver: yupResolver(schema),
     defaultValues,
   });
-
+  const pagination = usePagination({
+    page: 1,
+    itemsPerPage: 20,
+    maxPageItems: Infinity,
+    numbers: true,
+    arrows: true,
+    totalItems: 100,
+  });
   const [searchTimezone, setSearchTimezone] = useState("");
   const [searchEmployee, setSearchEmployee] = useState("");
 
@@ -106,6 +116,7 @@ const UpdateUserConfig: any = () => {
           timezone: data?.timezone,
           language: data?.language,
           status: data?.status,
+          companyAccess: data?.companyAccess,
         });
       },
     },
@@ -183,19 +194,39 @@ const UpdateUserConfig: any = () => {
       },
     },
   });
+  const columns = [
+    {
+      title: "Company",
+      dataIndex: "company",
+    },
+    {
+      title: "Branch/Plant/Outlet",
+      dataIndex: "branch",
+    },
+    {
+      title: "Roles",
+      dataIndex: "roles",
+      render: (roles: any) => {
+        if (roles.length === 1) {
+          return <>{roles[0]}</>;
+        }
+        return <>{roles?.join(", ")}</>;
+      },
+    },
+  ];
 
   const { mutate: updateUser } = useUpdateUser({
     user_id,
     options: {
       onSuccess: () => {
-        Router.push("/config/user-config");
+        router.push("/config/user-config");
       },
     },
   });
   const { mutate: deleteUser } = useDeleteUser({
     options: {
       onSuccess: () => {
-        Router.push("/config/user-config");
+        router.push("/config/user-config");
       },
     },
   });
@@ -245,10 +276,12 @@ const UpdateUserConfig: any = () => {
   if (isLoadingTimezone || isLoadingEmployee || isLoadingUser) {
     return <>loading data...</>;
   }
+
+  console.log(listEmployee, "<<<<cek ini");
   return (
     <Col>
       <Row gap="4px" alignItems="center">
-        <ArrowLeft style={{ cursor: "pointer" }} onClick={() => Router.push("/config/user-config")} />
+        <ArrowLeft style={{ cursor: "pointer" }} onClick={() => router.push("/config/user-config")} />
         <Text variant="h4">{defaultValues?.fullname}</Text>
       </Row>
 
@@ -270,19 +303,19 @@ const UpdateUserConfig: any = () => {
             <Row gap="16px">
               {listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Delete")
                 .length > 0 && (
-                  <Button
-                    size="big"
-                    variant="tertiary"
-                    onClick={() => deleteUser({ ids: [user_id] })}
-                  >
-                    {lang[t].userList.list.button.delete}
-                  </Button>
+                <Button
+                  size="big"
+                  variant="tertiary"
+                  onClick={() => deleteUser({ ids: [user_id] })}
+                >
+                  {lang[t].userList.list.button.delete}
+                </Button>
               )}
               {listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Update")
                 .length > 0 && (
-                  <Button size="big" variant="primary" onClick={handleSubmit(onSubmit)}>
-                    {lang[t].userList.list.button.save}
-                  </Button>
+                <Button size="big" variant="primary" onClick={handleSubmit(onSubmit)}>
+                  {lang[t].userList.list.button.save}
+                </Button>
               )}
             </Row>
           </Row>
@@ -344,10 +377,10 @@ const UpdateUserConfig: any = () => {
                         withSearch
                         error={errors?.employee_id?.message}
                         defaultValue={
-                            listEmployee?.filter(
-                              (employee) => employee?.value === defaultValues?.employee_id,
-                            )[0]
-                          }
+                          listEmployee?.filter(
+                            (employee) => employee?.value === defaultValues?.employee_id,
+                          )[0]
+                        }
                         isLoading={isFetchingEmployee}
                         isLoadingMore={isFetchingMoreEmployee}
                         fetchMore={() => {
@@ -359,8 +392,7 @@ const UpdateUserConfig: any = () => {
                         onChange={(value: any) => {
                           onChange(value);
                           setEmployeeLanguages(
-                            listEmployee.filter((employee) => employee.value === value)[0]
-                              ?.language,
+                            listEmployee.filter((employee) => employee.value === value)[0]?.language,
                           );
                         }}
                         onSearch={(value: any) => {
@@ -429,18 +461,16 @@ const UpdateUserConfig: any = () => {
                           isLoading={isFetchingTimezone}
                           isLoadingMore={isFetchingMoreTimezone}
                           defaultValue={
-                              listTimezone?.filter(
-                                (timezone) => timezone?.value === defaultValues?.timezone,
-                              )[0]?.label
-                            }
+                            listTimezone?.filter(
+                              (timezone) => timezone?.value === defaultValues?.timezone,
+                            )[0]?.label
+                          }
                           fetchMore={() => {
                             if (timezoneHasNextPage) {
                               timezoneFetchNextPage();
                             }
                           }}
-                          items={
-                              isFetchingTimezone && !isFetchingMoreTimezone ? [] : listTimezone
-                            }
+                          items={isFetchingTimezone && !isFetchingMoreTimezone ? [] : listTimezone}
                           onChange={(value: any) => {
                             onChange(value);
                           }}
@@ -465,13 +495,13 @@ const UpdateUserConfig: any = () => {
               <Row width="100%" gap="20px" noWrap>
                 {listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Delete")
                   .length > 0 && (
-                    <Button
-                      size="big"
-                      variant="tertiary"
-                      onClick={() => Router.push("https://accounts.edot.id/infopribadi")}
-                    >
-                      Reset Password
-                    </Button>
+                  <Button
+                    size="big"
+                    variant="tertiary"
+                    onClick={() => Router.push("https://accounts.edot.id/infopribadi")}
+                  >
+                    Reset Password
+                  </Button>
                 )}
               </Row>
             </Col>
@@ -486,13 +516,22 @@ const UpdateUserConfig: any = () => {
           <Accordion.Header variant="blue">Company Access</Accordion.Header>
           <Accordion.Body>
             <Spacer size={20} />
-
-            <EmptyState
-              image="/icons/empty-state.svg"
-              title="No Company Access Yet"
-              subtitle=""
-              height={100}
-            />
+            {isLoadingUser && (
+              <EmptyState
+                image="/icons/empty-state.svg"
+                title="No Company Access Yet"
+                subtitle=""
+                height={100}
+              />
+            )}
+            <Col gap="60px">
+              <Table
+                loading={isLoadingUser || isFetchingUser}
+                columns={columns}
+                data={defaultValues?.companyAccess}
+              />
+              <Pagination pagination={pagination} />
+            </Col>
           </Accordion.Body>
         </Accordion.Item>
       </Accordion>
