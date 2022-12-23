@@ -181,7 +181,7 @@ export default function CreateCustomers({
 
   const onSubmit = (data: any) => {
     const { customer, invoicing, purchasing, sales, bank, contact, address } = data || {};
-
+   
     const payloads = {
       bank: bank.map((data: any) => ({
         bank_name: data.bank_name,
@@ -444,7 +444,6 @@ export default function CreateCustomers({
             <ArrowLeft style={{ cursor: "pointer" }} onClick={() => router.back()} />
           )}
           <Label>{detailCustomer?.name || "Create Customer"}</Label>
-          {console.log("@dataWatchCustomer", dataWatchCustomer)}
           {detailCustomer?.registrationStatus ? (
             <Lozenge variant="blue">
               <Row alignItems="center">{detailCustomer?.registrationStatus}</Row>
@@ -484,7 +483,7 @@ export default function CreateCustomers({
         <Spacer size={20} />
         <FormProvider {...methods}>
           <Card>
-            <Accordion>
+            <Accordion style={{display : "relative"}} id={"area"}>
               <Accordion.Item key={1}>
                 <Accordion.Header variant="blue">General</Accordion.Header>
                 <Accordion.Body>
@@ -704,7 +703,6 @@ const GeneralForms = ({
             control={control}
             name="customer.company_logo"
             render={({ field: { value } }) => {
-              console.log("@value", value);
 
               return (
                 <FileUploaderAllFiles
@@ -900,7 +898,10 @@ const HeaderActionForm = ({
                 disabled={isLoadingCreateCustomer || isLoadingUpdateCustomer}
                 size="big"
                 variant="primary"
-                onClick={onSubmit}
+                onClick={()=> {
+                  onSubmit()
+                  console.log("tembak")
+                }}
               >
                 {isLoadingCreateCustomer || isLoadingUpdateCustomer ? "Loading..." : "Save"}
               </Button>

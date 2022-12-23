@@ -31,6 +31,7 @@ export default function Purchasing(props: any) {
         render={({ field: { onChange, value } }) => (
           <>
             <Dropdown
+              containerId={"area"}
               defaultValue={value}
               label="Term of Payment"
               width="70%"

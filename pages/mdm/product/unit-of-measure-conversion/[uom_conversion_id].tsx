@@ -205,7 +205,29 @@ const UOMConversionDetail = () => {
     options: {
       onSuccess: () => {
         queryClient.invalidateQueries(["uom-conversion"]);
-        // router.back()
+        router.back();
+      },
+    },
+  });
+
+  const { mutate: updateDeleteUomConv } = useUpdateUOMConversion({
+    companyId: companyCode,
+    id: uom_conversion_id,
+    options: {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["uom-conversion"]);
+        // router.back();
+      },
+    },
+  });
+
+  const { mutate: updateStatusUomConv } = useUpdateUOMConversion({
+    companyId: companyCode,
+    id: uom_conversion_id,
+    options: {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["uom-conversion"]);
+        // router.back();
       },
     },
   });
@@ -220,17 +242,20 @@ const UOMConversionDetail = () => {
   });
 
   const updateDeleteUom = (id: any) => {
-    const newData = {
-      name: UomData?.name,
-      base_uom_id: UomData?.baseUomId,
-      items: UomData?.dataForUpdate,
-      remove_items: [],
-    };
+    const removeItems = []
 
     id?.forEach((uomId:number) => {
-      newData.remove_items.push({ id: uomId });
+      removeItems.push({ id: uomId });
     });
-    updateUom(newData);
+
+    const newData = {
+      name: UomData?.parent?.name,
+      base_uom_id: UomData?.parent?.baseUomId,
+      items: UomData?.dataForUpdate,
+      remove_items: removeItems,
+    };
+
+    updateDeleteUomConv(newData);
     setSelectedRowKeys([]);
     setShowDelete({ open: false, type: "", data: {} });
   };
@@ -254,8 +279,8 @@ const UOMConversionDetail = () => {
 
   const updateStatusUom = (rowKey: any) => {
     const newData: any = {
-      name: UomData?.name,
-      base_uom_id: UomData?.baseUomId,
+      name: UomData?.parent?.name,
+      base_uom_id: UomData?.parent?.baseUomId,
       items: UomData?.dataForUpdate,
     };
     const updatedStatus: any[] = [];
@@ -273,7 +298,7 @@ const UOMConversionDetail = () => {
     });
 
     newData.items = updatedStatus;
-    updateUom(newData);
+    updateStatusUomConv(newData);
   };
 
   const onSave = (data: any) => {
@@ -359,7 +384,6 @@ const UOMConversionDetail = () => {
                   variant="primary"
                   onClick={(e) => {
                     handleSubmit(onSave)(e);
-                    router.back();
                   }}
                 >
                   {isLoadingUpdateUom ? "Loading..." : "Save"}
