@@ -58,7 +58,7 @@ const ConfigDetail: any = () => {
   });
 
   const listPermission = dataUserPermission?.permission?.filter(
-    (filtering: any) => filtering.menu === "Module Config",
+    (filtering: any) => filtering.menu === "Module Config"
   );
   const { data: configs, isLoading: isLoadingParent } = useConfigs({
     options: {},
@@ -101,7 +101,11 @@ const ConfigDetail: any = () => {
       key: field.id,
       modules: field.name,
       action: (
-        <Button size="small" onClick={() => router.push(`/config/module-config/${field.id}`)} variant="tertiary">
+        <Button
+          size="small"
+          onClick={() => router.push(`/config/module-config/${field.id}`)}
+          variant="tertiary"
+        >
           {lang[t].moduleConfig.tertier.viewDetail}
         </Button>
       ),
@@ -155,10 +159,11 @@ const ConfigDetail: any = () => {
 									>
 										Delete
 									</Button> */}
-                  {listPermission?.filter((x :any) => x.viewTypes[0]?.viewType.name === "Update").length > 0 && (
-                  <Button size="big" variant="primary" onClick={handleSubmit(onSubmit)}>
-                    {lang[t].moduleConfig.primary.save}
-                  </Button>
+                  {listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Update")
+                    .length > 0 && (
+                    <Button size="big" variant="primary" onClick={handleSubmit(onSubmit)}>
+                      {lang[t].moduleConfig.primary.save}
+                    </Button>
                   )}
                 </Row>
               </Row>
@@ -167,9 +172,11 @@ const ConfigDetail: any = () => {
 
           <Spacer size={20} />
 
-          <Accordion>
+          <Accordion style={{ display: "relative" }} id="area">
             <Accordion.Item key={1}>
-              <Accordion.Header variant="blue">{lang[t].moduleConfig.accordion.general}</Accordion.Header>
+              <Accordion.Header variant="blue">
+                {lang[t].moduleConfig.accordion.general}
+              </Accordion.Header>
               <Accordion.Body>
                 <Row width="100%" gap="20px" noWrap>
                   <Input
@@ -181,6 +188,7 @@ const ConfigDetail: any = () => {
                     {...register("name", { required: true })}
                   />
                   <Dropdown
+                    containerId="area"
                     label={lang[t].moduleConfig.filterBar.parentModule}
                     width="100%"
                     items={parents}
@@ -209,12 +217,12 @@ const ConfigDetail: any = () => {
             </Accordion.Item>
           </Accordion>
           {modalDelete.open && (
-          <ModalDeleteConfirmation
-            visible={modalDelete.open}
-            onCancel={() => setModalDelete({ open: false })}
-            onOk={() => deleteConfig({ id: [config_id] })}
-            itemTitle={config?.name}
-          />
+            <ModalDeleteConfirmation
+              visible={modalDelete.open}
+              onCancel={() => setModalDelete({ open: false })}
+              onOk={() => deleteConfig({ id: [config_id] })}
+              itemTitle={config?.name}
+            />
           )}
         </Col>
       )}
@@ -223,15 +231,15 @@ const ConfigDetail: any = () => {
 };
 
 const Center = styled.div`
-	display: flex;
-	justify-content: center;
-	align-items: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 `;
 
 const Card = styled.div`
-	background: #ffffff;
-	border-radius: 16px;
-	padding: ${(p) => (p.padding ? p.padding : "16px")};
+  background: #ffffff;
+  border-radius: 16px;
+  padding: ${(p) => (p.padding ? p.padding : "16px")};
 `;
 
 export default ConfigDetail;
