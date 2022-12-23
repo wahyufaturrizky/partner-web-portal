@@ -1342,6 +1342,18 @@ export const lang = {
         viewDetail: "View Detail",
         delete: "Delete",
         more: "More",
+        addressTypeLabel: "Address Type",
+        storePhotoLabel: "Office/Store Photos",
+        dimensionMinimumLabel: "The Photo format is .jpg, .jpeg, .png and minimum size of 300 x 300px",
+        fileSizeLabel: "(For Optimal photo use a minimum size of 700 x 700 px)",
+        streetLabel: "Street",
+        countryLabel: "Country",
+        provinceLabel: "Province",
+        cityLabel: "City",
+        districtLabel: "District",
+        zoneLabel: "Zone",
+        postalCodeLabel: "Postal Code",
+        longitudeLabel: "Longitude"
       },
       ghost: {
         downloadTemplate: "Download Template",
