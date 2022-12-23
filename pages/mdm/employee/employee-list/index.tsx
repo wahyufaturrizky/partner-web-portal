@@ -237,10 +237,7 @@ const EmployeeList = () => {
       },
     ];
   }
-  if (
-    listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Updload Template")
-      .length > 0
-  ) {
+  if (listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Upload").length > 0) {
     menuList = [
       ...menuList,
       {
@@ -254,7 +251,9 @@ const EmployeeList = () => {
       },
     ];
   }
-  if (listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Download").length > 0) {
+  if (
+    listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Download Data").length > 0
+  ) {
     menuList = [
       ...menuList,
       {
