@@ -57,13 +57,14 @@ const ChannelMDM = () => {
 
   const { register, handleSubmit } = useForm();
 
-  const downloadFile = (params: any) => mdmDownloadService("/sales-channel/download", { params }).then((res) => {
-    const dataUrl = window.URL.createObjectURL(new Blob([res.data]));
-    const tempLink = document.createElement("a");
-    tempLink.href = dataUrl;
-    tempLink.setAttribute("download", `sales-channel_${new Date().getTime()}.xlsx`);
-    tempLink.click();
-  });
+  const downloadFile = (params: any) =>
+    mdmDownloadService("/sales-channel/download", { params }).then((res) => {
+      const dataUrl = window.URL.createObjectURL(new Blob([res.data]));
+      const tempLink = document.createElement("a");
+      tempLink.href = dataUrl;
+      tempLink.setAttribute("download", `sales-channel_${new Date().getTime()}.xlsx`);
+      tempLink.click();
+    });
 
   const renderConfirmationText = (type: any, data: any) => {
     switch (type) {
@@ -71,11 +72,11 @@ const ChannelMDM = () => {
         return data.selectedRowKeys.length > 1
           ? `Are you sure to delete ${data.selectedRowKeys.length} items ?`
           : `${lang[t].salesChannel.byDeleting} ${
-            data?.channelData?.data.find((el: any) => el.key === data.selectedRowKeys[0])?.name
-          }-${
-            data?.channelData?.data.find((el: any) => el.key === data.selectedRowKeys[0])
-              ?.salesChannelId
-          }`;
+              data?.channelData?.data.find((el: any) => el.key === data.selectedRowKeys[0])?.name
+            }-${
+              data?.channelData?.data.find((el: any) => el.key === data.selectedRowKeys[0])
+                ?.salesChannelId
+            }`;
       case "detail":
         return `${lang[t].salesChannel.byDeleting} ${data.name}-${data.salesChannelId}`;
 
@@ -156,14 +157,15 @@ const ChannelMDM = () => {
     },
   });
 
-  const { mutate: uploadFileChannelMDM, isLoading: isLoadinguploadFileChannelMDM } = useUploadFileChannelMDM({
-    options: {
-      onSuccess: () => {
-        queryClient.invalidateQueries(["sales-channel"]);
-        setShowUpload(false);
+  const { mutate: uploadFileChannelMDM, isLoading: isLoadinguploadFileChannelMDM } =
+    useUploadFileChannelMDM({
+      options: {
+        onSuccess: () => {
+          queryClient.invalidateQueries(["sales-channel"]);
+          setShowUpload(false);
+        },
       },
-    },
-  });
+    });
 
   const { data: dataUserPermission } = useUserPermissions({
     options: {
@@ -172,9 +174,9 @@ const ChannelMDM = () => {
   });
 
   const listPermission = dataUserPermission?.permission?.filter(
-    (filtering: any) => filtering.menu === "Channel",
+    (filtering: any) => filtering.menu === "Channel"
   );
-  const allowPermissionToShow = listPermission?.filter((data: any) => permissionChannel.role[dataUserPermission?.role?.name]?.component.includes(data.name));
+  console.log(listPermission);
 
   const columns = [
     {
@@ -187,13 +189,13 @@ const ChannelMDM = () => {
     },
     ...(listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "View").length > 0
       ? [
-        {
-          title: lang[t].salesChannel.table.action,
-          dataIndex: "action",
-          width: "15%",
-          align: "left",
-        },
-      ]
+          {
+            title: lang[t].salesChannel.table.action,
+            dataIndex: "action",
+            width: "15%",
+            align: "left",
+          },
+        ]
       : []),
   ];
 
@@ -244,10 +246,7 @@ const ChannelMDM = () => {
       },
     ];
   }
-  if (
-    listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Updload Template")
-      .length > 0
-  ) {
+  if (listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Upload").length > 0) {
     menuList = [
       ...menuList,
       {
@@ -261,7 +260,9 @@ const ChannelMDM = () => {
       },
     ];
   }
-  if (listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Download").length > 0) {
+  if (
+    listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Download Data").length > 0
+  ) {
     menuList = [
       ...menuList,
       {
@@ -292,16 +293,18 @@ const ChannelMDM = () => {
             }}
           />
           <Row gap="16px">
-            {listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Delete").length
-              > 0 && (
+            {listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Delete").length >
+              0 && (
               <Button
                 size="big"
                 variant="tertiary"
-                onClick={() => setShowDelete({
-                  open: true,
-                  type: "selection",
-                  data: { channelData: channelsMDMData, selectedRowKeys },
-                })}
+                onClick={() =>
+                  setShowDelete({
+                    open: true,
+                    type: "selection",
+                    data: { channelData: channelsMDMData, selectedRowKeys },
+                  })
+                }
                 disabled={rowSelection.selectedRowKeys?.length === 0}
               >
                 {lang[t].salesChannel.tertier.delete}
@@ -335,8 +338,8 @@ const ChannelMDM = () => {
                 menuList={menuList}
               />
             )}
-            {listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Create").length
-              > 0 && (
+            {listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Create").length >
+              0 && (
               <Button
                 size="big"
                 variant="primary"
@@ -374,7 +377,7 @@ const ChannelMDM = () => {
               : lang[t].salesChannel.channel
           }
           footer={null}
-          content={(
+          content={
             <div
               style={{
                 display: "flex",
@@ -453,7 +456,7 @@ const ChannelMDM = () => {
                 )}
               </div>
             </div>
-          )}
+          }
         />
       )}
 
@@ -465,7 +468,7 @@ const ChannelMDM = () => {
           onCancel={() => setShowDelete({ open: false, type: "", data: {} })}
           title={lang[t].salesChannel.list.confirmDelete}
           footer={null}
-          content={(
+          content={
             <div
               style={{
                 display: "flex",
@@ -516,7 +519,7 @@ const ChannelMDM = () => {
                 </Button>
               </div>
             </div>
-          )}
+          }
         />
       )}
 
