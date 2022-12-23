@@ -589,7 +589,7 @@ const Container = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  height: 100vh;
+  // height: 100vh;
   flex-direction: column;
   padding: 2.5rem 0px 0.75rem 0px;
   position: relative;

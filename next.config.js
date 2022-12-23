@@ -20,6 +20,7 @@ const nextConfig = {
     // your project has ESLint errors.
     ignoreDuringBuilds: true,
   },
+  pageExtensions: ['tsx', 'jsx'],
 };
 
 module.exports = nextConfig;
