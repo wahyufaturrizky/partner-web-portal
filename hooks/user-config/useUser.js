@@ -85,8 +85,10 @@ const useUser = ({ user_id, options }) => {
 };
 
 const fetchUserPermissions = async ({ query = {} }) => {
+  const companyCode = localStorage.getItem("companyCode");
   return client(`/partner-user/permission`, {
     params: {
+      company_id: companyCode,
       ...query,
     },
   }).then((data) => data);
