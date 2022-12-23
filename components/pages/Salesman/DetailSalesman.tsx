@@ -9,6 +9,7 @@ import {
   Table,
   Text,
   TextArea,
+  Spin,
 } from "pink-lava-ui";
 import { useState } from "react";
 import styled from "styled-components";
@@ -65,7 +66,7 @@ export default function ComponentDetailSalesman({ listCustomers, isLoading }: an
     (filtering: any) => filtering.menu === "Sales Division"
   );
 
-  const { data } = useFetchDetailSalesman({
+  const { data, isLoading: isLoadingFetchDetailSalesman } = useFetchDetailSalesman({
     id: salesman_id,
     options: {
       onSuccess: (response: any) => {
@@ -190,7 +191,7 @@ export default function ComponentDetailSalesman({ listCustomers, isLoading }: an
 
   const _handleApproveSalesman = () => {
     const dataUpdated: any = {
-      code: salesman_id,
+      code: data?.code,
       approval_status: "APPROVED",
       remark: "APPROVED",
     };
@@ -233,12 +234,20 @@ export default function ComponentDetailSalesman({ listCustomers, isLoading }: an
 
   const onhandleRejected = () => {
     const dataUpdated: any = {
-      code: salesman_id,
+      code: data?.code,
       approval_status: "REJECTED",
       remark: remarks,
     };
     return handleApproveAndRejectSalesman(dataUpdated);
   };
+
+  if (isLoadingFetchDetailSalesman) {
+    return (
+      <Center>
+        <Spin tip="Loading Data..." />
+      </Center>
+    );
+  }
 
   return (
     <div>
@@ -432,5 +441,11 @@ const StatusCustomer = styled.p`
   text-align: center;
   display: flex;
   padding: 0 1rem;
+  align-items: center;
+`;
+
+const Center = styled.div`
+  display: flex;
+  justify-content: center;
   align-items: center;
 `;
