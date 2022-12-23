@@ -2,9 +2,10 @@ import { mdmService } from "lib/client";
 import { useMutation, useQuery } from "react-query";
 
 const fetchListSalesman = async ({ query, company_id }) => {
+  const companyCode = localStorage.getItem('companyCode');
   return mdmService(`/salesman`, {
     params: {
-      company: company_id,
+      company: companyCode,
       sortOrder: "ASC",
       limit: 10,
       page: 1,
