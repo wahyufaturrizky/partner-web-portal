@@ -76,10 +76,10 @@ const CreateMenuDesignList: any = () => {
                     const getMenuId = subModule?.menus?.map((menu: any) => parseInt(menu?.menuId));
                     const getSelectedMenu = subModule?.menus?.map((menu: any) => ({
                       id: menu.id,
-                      key: menu.id,
-                      field_id: menu.id,
+                      key: menu.menuId,
+                      field_id: menu.menuId,
                       field_name: menu.menuName,
-                      field_key: menu.id,
+                      field_key: menu.menuId,
                     }));
 
                     setShowMenuConfig({
@@ -143,8 +143,8 @@ const CreateMenuDesignList: any = () => {
       id: menu_design_id,
       options: {
         onSuccess: (data: any) => {
-          router.back();
           queryClient.invalidateQueries(["menu/design"]);
+          router.back();
         },
       },
     });
@@ -223,7 +223,6 @@ const CreateMenuDesignList: any = () => {
               <span
                 style={{ color: "#EB008B" }}
                 onClick={() => {
-                  console.log(subModuleIndex);
                   setShowMenuConfig({
                     show: true,
                     moduleIndex,
