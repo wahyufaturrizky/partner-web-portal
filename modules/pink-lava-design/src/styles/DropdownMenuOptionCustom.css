@@ -1,0 +1,12 @@
+.select-dropdown-item-custom.ant-select-item-option-selected:not(.ant-select-item-option-disabled) {
+  background-color: #aae5ea !important;
+}
+
+.select-dropdown-item-custom.ant-select-item-option-active {
+  background-color: #f5f5f5 !important;
+}
+
+.select-dropdown-item-custom .ant-select-item-option-state {
+  display: block !important;
+  color: white !important;
+}
