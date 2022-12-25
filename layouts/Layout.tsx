@@ -1,7 +1,7 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable eqeqeq */
 /* eslint-disable no-shadow */
-import Router from "next/router";
+import Router, { useRouter } from "next/router";
 import {
   Col,
   Header,
@@ -534,7 +534,7 @@ if (typeof window !== "undefined") {
   t = localStorage.getItem("lan") || "en-US";
 }
 
-const itemsMenu = [{ label: "Config" }, { label: "Master Data Management" }];
+const itemsMenu = [{ id: 'config', label: "Config" }, { id: 'mdm', label: "Master Data Management" }, { id: 'fico', label: "Finance", url: '/fico' }];
 
 const flexStyles = {
   display: "flex",
@@ -563,8 +563,10 @@ const AdminLayout = (props: any) => {
   const [totalUnread, setTotalUnread] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [companyCode, setCompanyCode] = useState("PTKSNI");
+  const router = useRouter();
 
   const handleCLickTabNav = (e: any) => {
+    if (itemsMenu[e.key].url) { window.location.href = itemsMenu[e.key].url || '/'; return; }
     setCurrent(e.key);
     Router.push("/dashboard");
   };
@@ -573,6 +575,13 @@ const AdminLayout = (props: any) => {
     localStorage.clear();
     window.location.href = "/login";
   };
+
+  useEffect(() => {
+    const { menu } = router.query;
+    const idxMenu = itemsMenu.findIndex((item) => item.id === menu);
+
+    setCurrent(`${idxMenu}`);
+  }, [router]);
 
   useEffect(() => {
     async function getCompanyList() {
