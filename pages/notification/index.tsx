@@ -14,11 +14,12 @@ import {
 import React, { useState } from "react";
 import styled from "styled-components";
 import moment from "moment";
+import useDebounce from 'lib/useDebounce';
 
 const getLinkViewDetail = (screenCode: any) => {
   const approvalEngineScreen = {
-    "mdm.salesman": "salesman",
-    "mdm.pricing.structure": "pricing-structure",
+    "mdm.salesman": "mdm/salesman",
+    "mdm.pricing.structure": "mdm/pricing/pricing-structure",
   };
 
   const url = `/${approvalEngineScreen[screenCode]}`;
@@ -39,6 +40,7 @@ const Notification: any = () => {
   const [search, setSearch] = useState("");
   const [tab, setTab] = useState("all");
 
+  const debounceSearch = useDebounce(search, 1000);
   const {
     data: notification,
   } = useNotification({
@@ -58,7 +60,7 @@ const Notification: any = () => {
       },
     },
     query: {
-      search,
+      search: debounceSearch,
       page: pagination.page,
       limit: pagination.itemsPerPage,
       status: tab,
@@ -102,6 +104,7 @@ const Notification: any = () => {
           options={options}
           defaultValue={tab}
           onChange={(value: string) => {
+            console.log("value", value)
             setTab(value);
           }}
         />
@@ -114,7 +117,7 @@ const Notification: any = () => {
         {notification?.data?.map((notif: any) => (
           <NotificationList active={!!notif.readDate}>
             <div>
-              <NotificationContent>{notif?.message}</NotificationContent>
+              <NotificationContent dangerouslySetInnerHTML={{__html: notif?.message}} />
               <NotificationDate>{moment(notif?.createdAt).format("MM DD, YYYY, HH.mm")}</NotificationDate>
             </div>
             <Button
@@ -164,7 +167,6 @@ const NotificationList = styled.div`
   justify-content: space-between;
   align-items: center;
   z-index: 10;
-  cursor: pointer;
 
 `;
 

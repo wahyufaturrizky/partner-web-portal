@@ -18,8 +18,14 @@ import {
   Modal,
   Lozenge,
 } from "pink-lava-ui";
-import { Controller, useForm, Control, useFieldArray, useWatch } from "react-hook-form";
+import {
+  Controller, useForm, Control, useFieldArray, useWatch,
+} from "react-hook-form";
 import { useRouter } from "next/router";
+import styled from "styled-components";
+import moment from "moment";
+import _ from "lodash";
+import { useProductCategoryInfiniteLists } from "hooks/mdm/product-category/useProductCategory";
 import {
   Branch,
   Registration,
@@ -29,7 +35,6 @@ import {
   Detail,
   Division,
 } from "./fragments";
-import styled from "styled-components";
 import {
   useCreateProductVariant,
   useDeleteProductVariant,
@@ -40,11 +45,8 @@ import {
 import { useProductBrandInfiniteLists } from "../../../hooks/mdm/product-brand/useProductBrandMDM";
 import useDebounce from "../../../lib/useDebounce";
 import { toSnakeCase } from "../../../lib/caseConverter";
-import moment from "moment";
-import _ from "lodash";
 import ArrowLeft from "../../../assets/icons/arrow-left.svg";
 import { queryClient } from "../../../pages/_app";
-import { useProductCategoryInfiniteLists } from "hooks/mdm/product-category/useProductCategory";
 
 export default function CreateProductVariant({
   isCreateProductVariant = true,
@@ -174,7 +176,7 @@ export default function CreateProductVariant({
 
   console.log("watch", watch());
 
-  //useFieldArray REGISTRATION
+  // useFieldArray REGISTRATION
   const {
     fields: fieldsRegistration,
     append: appendRegistration,
@@ -185,7 +187,7 @@ export default function CreateProductVariant({
   });
 
   const { data: productDetail, isLoading: isLoadingProduct } = useProductVariantDetail({
-    id: id,
+    id,
     options: {
       enabled: isUpdate,
       onSuccess: (data: any) => {
@@ -205,21 +207,21 @@ export default function CreateProductVariant({
                 uomConversionItemId: data.conversion_id,
                 name: data.name,
                 uomName: data?.uom_name,
-              }))
+              })),
             );
           } else if (key === "registrations") {
             setValue("registration", data[key]);
           } else if (key === "branch") {
-            let branchIds: any = [];
+            const branchIds: any = [];
             data[key].forEach((branch: any) => {
               branchIds.push(...branch.branchs.map((branch: any) => branch.id));
             });
-            let branch = {
+            const branch = {
               ids: branchIds,
             };
             setValue(key, branch);
           } else if (key === "sales_division") {
-            let branch = {
+            const branch = {
               ids: data[key]?.map((data: any) => data?.id) || [],
             };
             setValue(key, branch);
@@ -230,7 +232,7 @@ export default function CreateProductVariant({
             setValue("tax.tax_country_id", data?.tax?.tax_country?.id);
             setValue(
               "tax.tax_vendors",
-              data?.tax?.tax_vendors?.map((tax: any) => tax.id)
+              data?.tax?.tax_vendors?.map((tax: any) => tax.id),
             );
           } else {
             setValue(key, data[key]);
@@ -259,23 +261,18 @@ export default function CreateProductVariant({
     options: {
       onSuccess: (data: any) => {
         setTotalRowsProductBrand(data.pages[0].totalRow);
-        const mappedData = data?.pages?.map((group: any) => {
-          return group.rows?.map((element: any) => {
-            return {
-              label: element.brand,
-              value: element.id,
-            };
-          });
-        });
+        const mappedData = data?.pages?.map((group: any) => group.rows?.map((element: any) => ({
+          label: element.brand,
+          value: element.id,
+        })));
         const flattenArray = [].concat(...mappedData);
         setListProductBrand(flattenArray);
       },
       getNextPageParam: (_lastPage: any, pages: any) => {
         if (listProductBrand.length < totalRowsProductBrand) {
           return pages.length + 1;
-        } else {
-          return undefined;
         }
+        return undefined;
       },
     },
   });
@@ -294,23 +291,18 @@ export default function CreateProductVariant({
     options: {
       onSuccess: (data: any) => {
         setTotalRowsProductCategory(data?.pages[0].totalRow);
-        const mappedData = data?.pages?.map((group: any) => {
-          return group.rows?.map((element: any) => {
-            return {
-              label: element.name,
-              value: element.productCategoryId,
-            };
-          });
-        });
+        const mappedData = data?.pages?.map((group: any) => group.rows?.map((element: any) => ({
+          label: element.name,
+          value: element.productCategoryId,
+        })));
         const flattenArray = [].concat(...mappedData);
         setListProductCategory(flattenArray);
       },
       getNextPageParam: (_lastPage: any, pages: any) => {
         if (listProductCategory.length < totalRowsProductCategory) {
           return pages.length + 1;
-        } else {
-          return undefined;
         }
+        return undefined;
       },
     },
   });
@@ -318,7 +310,7 @@ export default function CreateProductVariant({
   const { mutate: uploadImage, isLoading: isLoadingUploadImage } = useUploadImageProductVariant({
     options: {
       onSuccess: () => {
-        router.push("/product-variant");
+        router.push("/mdm/product/product-variant");
       },
     },
   });
@@ -334,7 +326,7 @@ export default function CreateProductVariant({
 
           uploadImage(formData);
         } else {
-          router.push("/product-variant");
+          router.push("/mdm/product/product-variant");
         }
       },
     },
@@ -352,26 +344,25 @@ export default function CreateProductVariant({
 
           uploadImage(formData);
         } else {
-          router.push("/product-variant");
+          router.push("/mdm/product/product-variant");
         }
       },
     },
   });
 
-  const { mutate: deleteProductList, isLoading: isLoadingDeleteProductList } =
-    useDeleteProductVariant({
-      options: {
-        onSuccess: () => {
-          setShowDelete({ open: false });
-          queryClient.invalidateQueries(["product-variant"]);
-          router.push("/product-variant");
-        },
+  const { mutate: deleteProductList, isLoading: isLoadingDeleteProductList } = useDeleteProductVariant({
+    options: {
+      onSuccess: () => {
+        setShowDelete({ open: false });
+        queryClient.invalidateQueries(["product-variant"]);
+        router.push("/mdm/product/product-variant");
       },
-    });
+    },
+  });
 
   // VARIABLE
   const onSubmit = (data: any) => {
-    let payload: any = _.pick(data, [
+    const payload: any = _.pick(data, [
       "company_id",
       "company_code",
       "status",
@@ -441,17 +432,16 @@ export default function CreateProductVariant({
         transportation_type: data?.inventory?.storage_management?.transportation_type?.id,
       },
     };
-    payload.registration =
-      data.registration.map((data) => ({
-        number_type: data.number_type,
-        number: data.number,
-        valid_from: data.valid_from?.includes("/")
-          ? moment(data.valid_from, "DD/MM/YYYY").utc().toString()
-          : moment(data.valid_from).utc().toString(),
-        valid_to: data.valid_to?.includes("/")
-          ? moment(data.valid_to, "DD/MM/YYYY").utc().toString()
-          : moment(data.valid_to).utc().toString(),
-      })) || [];
+    payload.registration = data.registration.map((data) => ({
+      number_type: data.number_type,
+      number: data.number,
+      valid_from: data.valid_from?.includes("/")
+        ? moment(data.valid_from, "DD/MM/YYYY").utc().toString()
+        : moment(data.valid_from).utc().toString(),
+      valid_to: data.valid_to?.includes("/")
+        ? moment(data.valid_to, "DD/MM/YYYY").utc().toString()
+        : moment(data.valid_to).utc().toString(),
+    })) || [];
 
     payload.product_category_id = data?.category?.id;
     if (isUpdate) {
@@ -500,38 +490,36 @@ export default function CreateProductVariant({
     name: "branch",
   });
 
-  const switchTabItem = () => {
-    return (
-      <>
-        <div style={{ display: tabAktived === "Registration" ? "block" : "none" }}>
-          <Registration {...propsRegistrations} />
-        </div>
-        <div style={{ display: tabAktived === "Branch" ? "block" : "none" }}>
-          <Branch setValue={setValue} branch={branchForm} isUpdate={isUpdate} />
-        </div>
-        <div style={{ display: tabAktived === "Purchasing" ? "block" : "none" }}>
-          <Purchasing
-            control={control}
-            setValue={setValue}
-            register={register}
-            productData={productDetail}
-          />
-        </div>
-        <div style={{ display: tabAktived === "Accounting" ? "block" : "none" }}>
-          <Accounting {...propsAccounting} />
-        </div>
-        <div style={{ display: tabAktived === "Inventory" ? "block" : "none" }}>
-          <Inventory {...propsInventory} />
-        </div>
-        <div style={{ display: tabAktived === "Detail" ? "block" : "none" }}>
-          <Detail {...propsDetail} />
-        </div>
-        <div style={{ display: tabAktived === "Sales" ? "block" : "none" }}>
-          <Division {...propsDivision} />
-        </div>
-      </>
-    );
-  };
+  const switchTabItem = () => (
+    <>
+      <div style={{ display: tabAktived === "Registration" ? "block" : "none" }}>
+        <Registration {...propsRegistrations} />
+      </div>
+      <div style={{ display: tabAktived === "Branch" ? "block" : "none" }}>
+        <Branch setValue={setValue} branch={branchForm} isUpdate={isUpdate} />
+      </div>
+      <div style={{ display: tabAktived === "Purchasing" ? "block" : "none" }}>
+        <Purchasing
+          control={control}
+          setValue={setValue}
+          register={register}
+          productData={productDetail}
+        />
+      </div>
+      <div style={{ display: tabAktived === "Accounting" ? "block" : "none" }}>
+        <Accounting {...propsAccounting} />
+      </div>
+      <div style={{ display: tabAktived === "Inventory" ? "block" : "none" }}>
+        <Inventory {...propsInventory} />
+      </div>
+      <div style={{ display: tabAktived === "Detail" ? "block" : "none" }}>
+        <Detail {...propsDetail} />
+      </div>
+      <div style={{ display: tabAktived === "Sales" ? "block" : "none" }}>
+        <Division {...propsDivision} />
+      </div>
+    </>
+  );
 
   const productForm = useWatch({
     control,
@@ -566,7 +554,7 @@ export default function CreateProductVariant({
     list: string[][] = [[]],
     n = 0,
     result: any = [],
-    current: any = []
+    current: any = [],
   ) => {
     if (n === list.length) result.push(current);
     else list[n].forEach((item) => combinationVariant(list, n + 1, result, [...current, item]));
@@ -574,22 +562,20 @@ export default function CreateProductVariant({
     return result;
   };
   useEffect(() => {
-    let options = optionsForm?.filter((data) => {
+    const options = optionsForm?.filter((data) => {
       if (data?.option?.id && data?.option_items?.length > 0) return true;
       return false;
     });
 
     if (
-      options?.length > 0 &&
-      options.map((data) => data?.option_items.map((data) => data?.id))?.length > 0
+      options?.length > 0
+      && options.map((data) => data?.option_items.map((data) => data?.id))?.length > 0
     ) {
-      let allValues = options.map((data) =>
-        data.option_items.map((data) => data.name || data.label)
-      );
+      const allValues = options.map((data) => data.option_items.map((data) => data.name || data.label));
       allValues.unshift([productForm.name]);
       const variants = combinationVariant(allValues)?.map((data) => data.join(" "));
 
-      let finalVariants = variants.map((variant) => ({
+      const finalVariants = variants.map((variant) => ({
         name: variant,
         cost: productForm.cost_of_product,
         price: productForm.sales_price,
@@ -628,14 +614,14 @@ export default function CreateProductVariant({
         <>
           {!isUpdate ? (
             <Row gap="4px">
-              <Text variant={"h4"}>Create Product Variant</Text>
+              <Text variant="h4">Create Product Variant</Text>
             </Row>
           ) : (
             <Row gap="4px" alignItems="center">
               <ArrowLeft style={{ cursor: "pointer" }} onClick={() => router.back()} />
-              <Text variant={"h4"}>{productForm?.name}</Text>
+              <Text variant="h4">{productForm?.name}</Text>
               <Spacer size={8} />
-              {isNewProduct && <CustomLozenge variant={"blue"}>New Product Launch</CustomLozenge>}
+              {isNewProduct && <CustomLozenge variant="blue">New Product Launch</CustomLozenge>}
             </Row>
           )}
 
@@ -652,7 +638,7 @@ export default function CreateProductVariant({
                   style={{ cursor: "pointer" }}
                   onClick={() => setCanBePurchased(!canBePurchased)}
                 >
-                  <Text variant={"h6"}>Can Be Purchased</Text>
+                  <Text variant="h6">Can Be Purchased</Text>
                 </div>
               </Row>
             </Col>
@@ -664,7 +650,7 @@ export default function CreateProductVariant({
                   onChange={() => setCanBeSold(!canBeSold)}
                 />
                 <div style={{ cursor: "pointer" }} onClick={() => setCanBeSold(!canBeSold)}>
-                  <Text variant={"h6"}>Can Be Sold</Text>
+                  <Text variant="h6">Can Be Sold</Text>
                 </div>
               </Row>
             </Col>
@@ -679,7 +665,7 @@ export default function CreateProductVariant({
                   style={{ cursor: "pointer" }}
                   onClick={() => setCanManufacture(!canBeManufacture)}
                 >
-                  <Text variant={"h6"}>Can Be Manufacture</Text>
+                  <Text variant="h6">Can Be Manufacture</Text>
                 </div>
               </Row>
             </Col>
@@ -691,7 +677,7 @@ export default function CreateProductVariant({
                   onChange={() => setIsShareable(!isShareable)}
                 />
                 <div style={{ cursor: "pointer" }} onClick={() => setIsShareable(!isShareable)}>
-                  <Text variant={"h6"}>Is Shareable</Text>
+                  <Text variant="h6">Is Shareable</Text>
                 </div>
               </Row>
             </Col>
@@ -704,7 +690,7 @@ export default function CreateProductVariant({
               <Controller
                 control={control}
                 name="status"
-                defaultValue={"active"}
+                defaultValue="active"
                 render={({ field: { onChange } }) => (
                   <Dropdown
                     label=""
@@ -726,7 +712,7 @@ export default function CreateProductVariant({
                       .length > 0 && (
                       <Button
                         size="big"
-                        variant={"tertiary"}
+                        variant="tertiary"
                         disabled={productForm?.variants?.length > 0}
                         onClick={() => setShowDelete({ open: true })}
                       >
@@ -737,7 +723,7 @@ export default function CreateProductVariant({
                       .length > 0 && (
                       <Button
                         size="big"
-                        variant={"primary"}
+                        variant="primary"
                         onClick={(e: any) => {
                           if (!inventoryWatch?.weight?.net) {
                             setTabAktived("Inventory");
@@ -755,14 +741,14 @@ export default function CreateProductVariant({
                   </>
                 ) : (
                   <>
-                    <Button size="big" variant={"tertiary"} onClick={() => router.back()}>
+                    <Button size="big" variant="tertiary" onClick={() => router.back()}>
                       Cancel
                     </Button>
                     {listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Create")
                       .length > 0 && (
                       <Button
                         size="big"
-                        variant={"primary"}
+                        variant="primary"
                         onClick={(e: any) => {
                           if (!inventoryWatch?.weight?.net) {
                             setTabAktived("Inventory");
@@ -802,7 +788,10 @@ export default function CreateProductVariant({
                       </Text>
                       <Spacer size={8} />
                       <CustomForm>
-                        <Span>{productDetail?.product?.name} </Span>
+                        <Span>
+                          {productDetail?.product?.name}
+                          {' '}
+                        </Span>
                         <Link href={`/product-list/${productDetail?.product?.id}`} target="_blank">
                           View Detail
                         </Link>
@@ -812,12 +801,12 @@ export default function CreateProductVariant({
                 </Row>
                 <Spacer size={20} />
                 <Row width="100%" noWrap>
-                  <Col width={"100%"}>
+                  <Col width="100%">
                     <Input
                       width="100%"
                       label="Product Name"
                       height="48px"
-                      placeholder={"e.g Nabati Cheese"}
+                      placeholder="e.g Nabati Cheese"
                       {...register("name", {
                         required: "Product Name must be filled",
                       })}
@@ -836,7 +825,7 @@ export default function CreateProductVariant({
                           defaultValue={productForm?.product_type}
                           label="Product Type"
                           width="100%"
-                          labelBold={true}
+                          labelBold
                           noSearch
                           items={productType}
                           handleChange={(value: any) => {
@@ -859,18 +848,19 @@ export default function CreateProductVariant({
                       render={({ field: { onChange } }) => (
                         <Col width="100%">
                           <span>
-                            <Label style={{ display: "inline" }}>Product Category </Label>{" "}
-                            <span></span>
+                            <Label style={{ display: "inline" }}>Product Category </Label>
+                            {" "}
+                            <span />
                           </span>
 
                           <Spacer size={3} />
                           <CustomFormSelect
                             defaultValue={productForm?.category?.name}
                             style={{ width: "100%", height: "48px" }}
-                            size={"large"}
-                            placeholder={"Select"}
-                            borderColor={"#AAAAAA"}
-                            arrowColor={"#000"}
+                            size="large"
+                            placeholder="Select"
+                            borderColor="#AAAAAA"
+                            arrowColor="#000"
                             withSearch
                             isLoading={isFetchingProductCategory}
                             isLoadingMore={isFetchingMoreProductCategory}
@@ -906,18 +896,20 @@ export default function CreateProductVariant({
                       render={({ field: { onChange } }) => (
                         <>
                           <span>
-                            <Label style={{ display: "inline" }}>Product Brand</Label> <span></span>
+                            <Label style={{ display: "inline" }}>Product Brand</Label>
+                            {' '}
+                            <span />
                           </span>
 
                           <Spacer size={3} />
                           <CustomFormSelect
                             defaultValue={productForm?.brand?.name}
                             style={{ width: "100%", height: "48px" }}
-                            size={"large"}
-                            placeholder={"Select"}
-                            borderColor={"#AAAAAA"}
-                            arrowColor={"#000"}
-                            withSearch={true}
+                            size="large"
+                            placeholder="Select"
+                            borderColor="#AAAAAA"
+                            arrowColor="#000"
+                            withSearch
                             isLoading={isFetchingProductBrand}
                             isLoadingMore={isFetchingMoreProductBrand}
                             fetchMore={() => {
@@ -951,7 +943,7 @@ export default function CreateProductVariant({
                       width="100%"
                       label="SKU Number"
                       height="48px"
-                      placeholder={"e.g NXT-100021"}
+                      placeholder="e.g NXT-100021"
                       {...register("sku", {
                         required: "Sku Number is required",
                       })}
@@ -966,7 +958,7 @@ export default function CreateProductVariant({
                       width="100%"
                       label="Barcode"
                       height="48px"
-                      placeholder={"e.g 131311113411111"}
+                      placeholder="e.g 131311113411111"
                       {...register("barcode")}
                     />
                   </Col>
@@ -980,7 +972,7 @@ export default function CreateProductVariant({
                       width="100%"
                       label="External Code"
                       height="48px"
-                      placeholder={"e.g 413111"}
+                      placeholder="e.g 413111"
                       {...register("external_code")}
                     />
                   </Col>
@@ -990,14 +982,14 @@ export default function CreateProductVariant({
                   <Col width="100%">
                     <Controller
                       control={control}
-                      name={`expired_date`}
+                      name="expired_date"
                       render={({ field: { onChange } }) => (
                         <DatePickerInput
                           fullWidth
                           placeholder="Select"
                           onChange={(date: any, dateString: any) => onChange(dateString)}
                           label="Discontinue Date"
-                          format={"DD/MM/YYYY"}
+                          format="DD/MM/YYYY"
                           defaultValue={
                             productDetail?.expiredDate
                               ? moment(productDetail?.expiredDate)
@@ -1039,9 +1031,9 @@ export default function CreateProductVariant({
           centered
           visible={isShowDelete.open}
           onCancel={() => setShowDelete({ open: false })}
-          title={"Confirm Delete"}
+          title="Confirm Delete"
           footer={null}
-          content={
+          content={(
             <div
               style={{
                 display: "flex",
@@ -1050,7 +1042,9 @@ export default function CreateProductVariant({
               }}
             >
               <Spacer size={4} />
-              Are you sure to delete Product Name {productForm?.name}
+              Are you sure to delete Product Name
+              {' '}
+              {productForm?.name}
               <Spacer size={20} />
               <div
                 style={{
@@ -1080,7 +1074,7 @@ export default function CreateProductVariant({
                 </Button>
               </div>
             </div>
-          }
+          )}
         />
       )}
     </Col>
@@ -1095,31 +1089,29 @@ const UploadImage = ({
   control: Control<FormValues>;
   productForm: any;
   setIsImageChange: any;
-}) => {
-  return (
-    <Controller
-      control={control}
-      name="image"
-      render={({ field: { onChange } }) => (
-        <FileUploaderAllFiles
-          label="Product Photo"
-          onSubmit={(file: any) => {
-            setIsImageChange(true);
-            onChange(file);
-          }}
-          defaultFile={productForm?.image}
-          withCrop
-          sizeImagePhoto="125px"
-          removeable
-          textPhoto={[
-            "Packaging product photo, biscuit wrap, etc.",
-            "Photo size 1024x1024 recommended. Max File 5 MB",
-          ]}
-        />
-      )}
-    ></Controller>
-  );
-};
+}) => (
+  <Controller
+    control={control}
+    name="image"
+    render={({ field: { onChange } }) => (
+      <FileUploaderAllFiles
+        label="Product Photo"
+        onSubmit={(file: any) => {
+          setIsImageChange(true);
+          onChange(file);
+        }}
+        defaultFile={productForm?.image}
+        withCrop
+        sizeImagePhoto="125px"
+        removeable
+        textPhoto={[
+          "Packaging product photo, biscuit wrap, etc.",
+          "Photo size 1024x1024 recommended. Max File 5 MB",
+        ]}
+      />
+    )}
+  />
+);
 
 const CustomForm = styled.div`
   background: #d5fafd;
