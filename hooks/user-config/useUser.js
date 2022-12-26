@@ -1,8 +1,8 @@
 import { useQuery, useMutation, useInfiniteQuery } from "react-query";
 import { client, mdmService } from "../../lib/client";
 
-const fetchUsers = async ({ query = {} }) => {
-  return client(`/partner-user`, {
+const fetchUsers = async ({ query = {} }) =>
+  client(`/partner-user`, {
     params: {
       search: "",
       limit: 10,
@@ -12,10 +12,9 @@ const fetchUsers = async ({ query = {} }) => {
       ...query,
     },
   }).then((data) => data);
-};
 
-const fetchApprovalUsers = async ({ query = {} }) => {
-  return client(`/user/approval`, {
+const fetchApprovalUsers = async ({ query = {} }) =>
+  client(`/user/approval`, {
     params: {
       search: "",
       limit: 10,
@@ -25,14 +24,12 @@ const fetchApprovalUsers = async ({ query = {} }) => {
       ...query,
     },
   }).then((data) => data);
-};
 
-const useUsers = ({ query = {}, options } = {}) => {
-  return useQuery(["users", query], () => fetchUsers({ query }), {
+const useUsers = ({ query = {}, options } = {}) =>
+  useQuery(["users", query], () => fetchUsers({ query }), {
     keepPreviousData: true,
     ...options,
   });
-};
 
 const fetchInfiniteUsers = async ({ pageParam = 1, queryKey }) => {
   const searchQuery = queryKey[1].search;
@@ -47,19 +44,17 @@ const fetchInfiniteUsers = async ({ pageParam = 1, queryKey }) => {
   }).then((data) => data);
 };
 
-const useUserInfiniteList = ({ query = {}, options }) => {
-  return useInfiniteQuery(["user/infinite", query], fetchInfiniteUsers, {
+const useUserInfiniteList = ({ query = {}, options }) =>
+  useInfiniteQuery(["user/infinite", query], fetchInfiniteUsers, {
     keepPreviousData: true,
     ...options,
   });
-};
 
-const useApprovalUsers = ({ query = {}, options } = {}) => {
-  return useQuery(["approval-users", query], () => fetchApprovalUsers({ query }), {
+const useApprovalUsers = ({ query = {}, options } = {}) =>
+  useQuery(["approval-users", query], () => fetchApprovalUsers({ query }), {
     keepPreviousData: true,
     ...options,
   });
-};
 
 function useCreateUser({ options }) {
   return useMutation(
@@ -74,30 +69,25 @@ function useCreateUser({ options }) {
   );
 }
 
-const fetchUser = async ({ user_id }) => {
-  return client(`/partner-user/${user_id}`).then((data) => data);
-};
+const fetchUser = async ({ user_id }) => client(`/partner-user/${user_id}`).then((data) => data);
 
-const useUser = ({ user_id, options }) => {
-  return useQuery(["user", user_id], () => fetchUser({ user_id }), {
+const useUser = ({ user_id, options }) =>
+  useQuery(["user", user_id], () => fetchUser({ user_id }), {
     ...options,
   });
-};
 
-const fetchUserPermissions = async ({ query = {} }) => {
-  return client(`/partner-user/permission`, {
+const fetchUserPermissions = async ({ query = {} }) =>
+  client(`/partner-user/permission`, {
     params: {
       ...query,
     },
   }).then((data) => data);
-};
 
-const useUserPermissions = ({ query = {}, options } = {}) => {
-  return useQuery(["user-permissions", query], () => fetchUserPermissions({ query }), {
+const useUserPermissions = ({ query = {}, options } = {}) =>
+  useQuery(["user-permissions", query], () => fetchUserPermissions({ query }), {
     keepPreviousData: true,
     ...options,
   });
-};
 function useApproveUser({ options }) {
   return useMutation(
     (updates) =>
@@ -124,22 +114,20 @@ function useUpdateUser({ user_id, options }) {
   );
 }
 
-const useDeleteUser = ({ options }) => {
-  return useMutation(
-    (ids) => {
-      return client(`/partner-user`, {
+const useDeleteUser = ({ options }) =>
+  useMutation(
+    (ids) =>
+      client(`/partner-user`, {
         method: "DELETE",
         data: ids,
-      });
-    },
+      }),
     {
       ...options,
     }
   );
-};
 
-const useUploadFileUserConfig = ({ options }) => {
-  return useMutation(
+const useUploadFileUserConfig = ({ options }) =>
+  useMutation(
     (data) =>
       client(`/partner-user/upload`, {
         method: "POST",
@@ -149,7 +137,6 @@ const useUploadFileUserConfig = ({ options }) => {
       ...options,
     }
   );
-};
 
 export {
   useUsers,

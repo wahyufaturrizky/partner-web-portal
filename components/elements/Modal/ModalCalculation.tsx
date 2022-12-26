@@ -243,6 +243,13 @@ const ModalCalculation = ({ visible, onCancel, defaultValue, title, onOk }: any)
   const [selectedRows, setSelectedRows] = useState([]);
   const [inputWithTagsValue, setInputWithTagsValue] = useState(null);
 
+  useEffect(() => {
+    const userIds = users?.rows
+      ?.filter((user) => inputWithTagsValue?.includes(user.fullname))
+      ?.map((res) => res?.id);
+    setSelectedRowKeys(userIds);
+  }, [inputWithTagsValue]);
+  console.log(selectedRowKeys?.length < 4);
   const onSelectChange = (selectedRowKeys: any, selectedRows: any) => {
     setSelectedRows(selectedRows);
     setSelectedRowKeys(selectedRowKeys);
@@ -778,17 +785,7 @@ const ModalCalculation = ({ visible, onCancel, defaultValue, title, onOk }: any)
               error={errors?.user_name?.message}
               placeholder={`Type with separate comma or by pressing "Enter"`}
               onChange={(value: string | any[] | React.SetStateAction<null>) => {
-                const userChoosen = value[value.length - 1];
-                const userId = users?.rows?.filter(
-                  (user: { fullname: any }) => user.fullname === userChoosen
-                )[0]?.id;
-                if (selectedRowKeys?.length > 0) {
-                  setSelectedRowKeys((prev) => [...prev, userId]);
-                } else {
-                  setSelectedRowKeys([userId]);
-                }
                 setInputWithTagsValue(value);
-                // setValue("user_name", value)
               }}
             />
             {/*
@@ -804,7 +801,7 @@ const ModalCalculation = ({ visible, onCancel, defaultValue, title, onOk }: any)
           <Button
             style={{
               position: "relative",
-              top: "-40px",
+              top: selectedRowKeys?.length < 4 ? "0px" : "-40px",
             }}
             onClick={() => setOpenAdvanceView(true)}
             size="small"
