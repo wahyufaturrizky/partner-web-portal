@@ -114,8 +114,8 @@ const EmployeeList = () => {
       },
       select: (data: any) => {
         const mappedData = data?.rows?.map((element: any) => ({
-          key: element.code,
-          id: element.code,
+          key: element.id,
+          id: element.id,
           name: element.name,
           // jobPosition: jobPositionsData.rows.find((findingJobPosition: any) =>
           //   findingJobPosition.jobPositionId.includes(element.jobPosition)
