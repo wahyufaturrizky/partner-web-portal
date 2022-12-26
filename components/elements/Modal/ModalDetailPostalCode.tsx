@@ -3,12 +3,12 @@ import { Button, Spacer, Modal, Input, Dropdown, Spin, Row } from "pink-lava-ui"
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
+import { lang } from "lang";
 import {
   useCountries,
   useCountryStructures,
   useUpdatePostalCode,
 } from "../../../hooks/mdm/postal-code/usePostalCode";
-import { lang } from "lang";
 
 const schema = yup
   .object({
@@ -70,6 +70,7 @@ export const ModalDetailPostalCode: any = ({
     options: {
       onSuccess: (data: any) => {
         if (data) {
+          console.log(data, "<<<<data");
           setIsLoading(false);
           window.alert("Postal code updated successfully");
           refetchPostalCode();
@@ -81,7 +82,7 @@ export const ModalDetailPostalCode: any = ({
 
   const onSubmit = (data: any) => {
     setIsLoading(true);
-    let payload = {
+    const payload = {
       ...data,
       country: selectedCountry,
       structures: selectedCountryStructures,
@@ -122,10 +123,10 @@ export const ModalDetailPostalCode: any = ({
             <>
               <Dropdown
                 label={lang[t].postalCode.postalCountryName}
-                width={"100%"}
+                width="100%"
                 defaultValue={dataModal?.countryRecord?.name}
                 items={countries.rows.map((data: any) => ({ id: data.id, value: data.name }))}
-                placeholder={"Select"}
+                placeholder="Select"
                 handleChange={(value: any) => setSelectedCountry(value)}
                 onSearch={(search: any) => setSearch(search)}
               />
@@ -135,20 +136,28 @@ export const ModalDetailPostalCode: any = ({
 
               {dataCountryStructures ? (
                 dataCountryStructures?.rows.map((data: any, index: any) => {
-                  console.log("@data", data);
-
+                  console.log(
+                    "@data",
+                    data?.structures[0]?.values?.find(
+                      (element) => element?.id === +dataModal?.structures
+                    )?.name
+                  );
                   return (
                     <Dropdown
                       key={index}
                       label={data.name}
-                      defaultValue={data.structures[0]?.values[0]?.name}
+                      defaultValue={
+                        data.structures[0]?.values?.find(
+                          (dataStructures) => dataStructures?.id === +dataModal?.structures
+                        )?.name
+                      }
                       noSearch
-                      width={"100%"}
+                      width="100%"
                       items={data.structures[0]?.values.map((dataStructures: any) => ({
                         id: dataStructures.id,
                         value: dataStructures.name,
                       }))}
-                      placeholder={"Select"}
+                      placeholder="Select"
                       handleChange={(value: any) =>
                         setSelectedCountryStructures([...selectedCountryStructures, value])
                       }
@@ -165,7 +174,7 @@ export const ModalDetailPostalCode: any = ({
                 {...register("code", { required: true })}
                 label={lang[t].postalCode.postalCode}
                 defaultValue={dataModal?.code}
-                placeholder={"e.g 40551"}
+                placeholder="e.g 40551"
               />
               <Spacer size={20} />
             </>
