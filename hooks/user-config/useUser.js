@@ -84,12 +84,14 @@ const fetchUserPermissions = async ({ query = {} }) => {
       ...query,
     },
   }).then((data) => data);
+};
 
 const useUserPermissions = ({ query = {}, options } = {}) =>
   useQuery(["user-permissions", query], () => fetchUserPermissions({ query }), {
     keepPreviousData: true,
     ...options,
   });
+
 function useApproveUser({ options }) {
   return useMutation(
     (updates) =>
