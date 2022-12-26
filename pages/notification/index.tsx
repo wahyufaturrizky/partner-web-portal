@@ -1,20 +1,11 @@
 import usePagination from "@lucasmogari/react-pagination";
-import { useNotification } from 'hooks/notification/useNotification';
+import { useNotification } from "hooks/notification/useNotification";
 import { useRouter } from "next/router";
-import {
-  Button,
-  Col,
-  Pagination,
-  Row,
-  Search,
-  Spacer,
-  Text,
-  ContentSwitcher,
-} from "pink-lava-ui";
+import { Button, Col, Pagination, Row, Search, Spacer, Text, ContentSwitcher } from "pink-lava-ui";
 import React, { useState } from "react";
 import styled from "styled-components";
 import moment from "moment";
-import useDebounce from 'lib/useDebounce';
+import useDebounce from "lib/useDebounce";
 
 const getLinkViewDetail = (screenCode: any) => {
   const approvalEngineScreen = {
@@ -41,9 +32,7 @@ const Notification: any = () => {
   const [tab, setTab] = useState("all");
 
   const debounceSearch = useDebounce(search, 1000);
-  const {
-    data: notification,
-  } = useNotification({
+  const { data: notification } = useNotification({
     options: {
       onSuccess: (items: any) => {
         pagination.setTotalItems(items?.totalRow);
@@ -65,23 +54,20 @@ const Notification: any = () => {
       limit: pagination.itemsPerPage,
       status: tab,
       company_id: companyCode,
+      sortBy: "created_at",
+      sortOrder: "desc",
     },
   });
 
   const options = [
     {
-      label: (
-        <Flex>
-          All
-        </Flex>
-      ),
+      label: <Flex>All</Flex>,
       value: "all",
     },
     {
       label: (
         <Flex>
-          Waiting for Approval
-          {" "}
+          Waiting for Approval{" "}
           {notification?.totalWaiting > 0 && <Notif>{notification?.totalWaiting}</Notif>}
         </Flex>
       ),
@@ -104,30 +90,34 @@ const Notification: any = () => {
           options={options}
           defaultValue={tab}
           onChange={(value: string) => {
-            console.log("value", value)
+            console.log("value", value);
             setTab(value);
           }}
         />
       </Row>
       <Spacer size={20} />
-      <div style={{
-        display: 'flex', gap: '8px', flexDirection: "column", minHeight: 'calc(100vh - 260px)',
-      }}
+      <div
+        style={{
+          display: "flex",
+          gap: "8px",
+          flexDirection: "column",
+          minHeight: "calc(100vh - 260px)",
+        }}
       >
         {notification?.data?.map((notif: any) => (
           <NotificationList active={!!notif.readDate}>
             <div>
-              <NotificationContent dangerouslySetInnerHTML={{__html: notif?.message}} />
-              <NotificationDate>{moment(notif?.createdAt).format("MM DD, YYYY, HH.mm")}</NotificationDate>
+              <NotificationContent dangerouslySetInnerHTML={{ __html: notif?.message }} />
+              <NotificationDate>
+                {moment(notif?.createdAt).format("MM DD, YYYY, HH.mm")}
+              </NotificationDate>
             </div>
             <Button
               size="small"
               variant="tertiary"
-              onClick={
-                  () => {
-                    router.push(notif?.link);
-                  }
-                }
+              onClick={() => {
+                router.push(notif?.link);
+              }}
             >
               View Detail
             </Button>
@@ -160,14 +150,13 @@ const NotificationDate = styled.p`
   color: #666666;
 `;
 const NotificationList = styled.div`
-  background: ${({ active } : any) => (active ? "#F4FBFC" : "#FFFFFF")};
+  background: ${({ active }: any) => (active ? "#F4FBFC" : "#FFFFFF")};
   border-radius: 8px;
   padding: 16px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   z-index: 10;
-
 `;
 
 const Flex = styled.div`

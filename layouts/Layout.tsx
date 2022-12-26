@@ -836,11 +836,12 @@ const WrapeprProfile = styled.div`
 
 const WrapperMenuLogout = styled.div`
   width: 200px;
-  height: 272px;
+  // height: 272px;
   background: #ffffff;
   box-shadow: 0px 4px 16px rgba(170, 170, 170, 0.15);
   border-radius: 16px;
   padding: 20px;
+  margin-top: -60px;
 `;
 
 const MenuDropdown = styled.div`
