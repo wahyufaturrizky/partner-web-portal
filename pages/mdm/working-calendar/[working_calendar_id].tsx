@@ -1,11 +1,7 @@
 import React, { useState } from "react";
-import {
-  Text, Col, Row, Spacer, Button, Input, Table, DatePickerInput, Spin,
-} from "pink-lava-ui";
+import { Text, Col, Row, Spacer, Button, Input, Table, DatePickerInput, Spin } from "pink-lava-ui";
 import styled from "styled-components";
-import {
-  Controller, useForm, useFieldArray, useWatch,
-} from "react-hook-form";
+import { Controller, useForm, useFieldArray, useWatch } from "react-hook-form";
 import { useRouter } from "next/router";
 import Icon, { DeleteOutlined } from "@ant-design/icons";
 import {
@@ -58,9 +54,7 @@ const WorkingCalendarCreate = () => {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
-  const {
-    register, control, handleSubmit, setValue,
-  } = useForm({
+  const { register, control, handleSubmit, setValue } = useForm({
     defaultValues: {
       public_holidays: publicHolidaysDefaultValue,
     },
@@ -83,7 +77,7 @@ const WorkingCalendarCreate = () => {
   });
 
   const listPermission = dataUserPermission?.permission?.filter(
-    (filtering: any) => filtering.menu === "Postal Code",
+    (filtering: any) => filtering.menu === "Working Calendar"
   );
 
   const {
@@ -112,7 +106,7 @@ const WorkingCalendarCreate = () => {
 
         setValue(
           "public_holidays",
-          data?.publicHolidays?.length > 0 ? mappedPublicHolidays : publicHolidaysDefaultValue,
+          data?.publicHolidays?.length > 0 ? mappedPublicHolidays : publicHolidaysDefaultValue
         );
         setWorkingDaysPayload(data?.workingDays);
         setStartDate(data?.start);
@@ -121,25 +115,27 @@ const WorkingCalendarCreate = () => {
     },
   });
 
-  const { mutate: updateWorkingCalendar, isLoading: isLoadingUpdateWorkingCalendar } = useUpdateWorkingCalendar({
-    id: working_calendar_id,
-    options: {
-      onSuccess: () => {
-        router.back();
-        queryClient.invalidateQueries(["working-calendars"]);
+  const { mutate: updateWorkingCalendar, isLoading: isLoadingUpdateWorkingCalendar } =
+    useUpdateWorkingCalendar({
+      id: working_calendar_id,
+      options: {
+        onSuccess: () => {
+          router.back();
+          queryClient.invalidateQueries(["working-calendars"]);
+        },
       },
-    },
-  });
+    });
 
-  const { mutate: deleteWorkingCalendar, isLoading: isLoadingDeleteWorkingCalendar } = useDeleteWorkingCalendar({
-    options: {
-      onSuccess: () => {
-        queryClient.invalidateQueries(["working-calendars"]);
-        setShowDeleteModal(false);
-        router.back();
+  const { mutate: deleteWorkingCalendar, isLoading: isLoadingDeleteWorkingCalendar } =
+    useDeleteWorkingCalendar({
+      options: {
+        onSuccess: () => {
+          queryClient.invalidateQueries(["working-calendars"]);
+          setShowDeleteModal(false);
+          router.back();
+        },
       },
-    },
-  });
+    });
 
   const onSubmit = (data: any) => {
     delete data?.branch;
@@ -288,17 +284,19 @@ const WorkingCalendarCreate = () => {
               <WorkingDaysTable
                 control={control}
                 workingCalendarData={workingCalendarData}
-                onChangeValue={(value: any) => setWorkingDaysPayload(() => {
-                  const workingDaysObject = value[0];
-                  const workingDaysList = [];
+                onChangeValue={(value: any) =>
+                  setWorkingDaysPayload(() => {
+                    const workingDaysObject = value[0];
+                    const workingDaysList = [];
 
-                  // Loop object working days
-                  for (const property in workingDaysObject) {
-                    workingDaysList.push(workingDaysObject[property]);
-                  }
+                    // Loop object working days
+                    for (const property in workingDaysObject) {
+                      workingDaysList.push(workingDaysObject[property]);
+                    }
 
-                  return workingDaysList;
-                })}
+                    return workingDaysList;
+                  })
+                }
               />
 
               <Spacer size={20} />
