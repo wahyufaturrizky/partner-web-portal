@@ -547,8 +547,8 @@ const flexStyles = {
 
 const getLinkViewDetail = (screenCode: any) => {
   const approvalEngineScreen = {
-    "mdm.salesman": "salesman",
-    "mdm.pricing.structure": "pricing-structure",
+    "mdm.salesman": "mdm/salesman",
+    "mdm.pricing.structure": "mdm/pricing/pricing-structure",
   };
 
   const url = `/${approvalEngineScreen[screenCode]}`;
@@ -640,8 +640,8 @@ const AdminLayout = (props: any) => {
             key: items?.id,
             id: items?.id,
             isRead: !!items?.read_date,
-            content: items?.message ? <p dangerouslySetInnerHTML={{__html: items?.message}}></p>  : "-",
-            link: getLinkViewDetail(items?.screen_code),
+            content: items?.message ? <p dangerouslySetInnerHTML={{ __html: items?.message }} /> : "-",
+            link: () => router.push(getLinkViewDetail(items?.screen_code)),
           }));
 
           setNotifItems(notifItems);
