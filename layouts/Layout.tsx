@@ -545,13 +545,17 @@ const flexStyles = {
   cursor: "pointer",
 };
 
-const getLinkViewDetail = (screenCode: any) => {
+const getLinkViewDetail = (screenCode: any, referenceCode: any, referenceId: any) => {
   const approvalEngineScreen = {
-    "mdm.salesman": "salesman",
-    "mdm.pricing.structure": "pricing-structure",
+    "mdm.salesman": "mdm/salesman",
+    "mdm.pricing.structure": "mdm/pricing/pricing-structure",
   };
 
-  const url = `/${approvalEngineScreen[screenCode]}`;
+  let url = `/${approvalEngineScreen[screenCode]}`;
+
+  if (referenceId) {
+    url = `${url}/${referenceId}`;
+  }
   return url;
 };
 
@@ -640,8 +644,8 @@ const AdminLayout = (props: any) => {
             key: items?.id,
             id: items?.id,
             isRead: !!items?.read_date,
-            content: items?.message || "-",
-            link: getLinkViewDetail(items?.screen_code),
+            content: items?.message ? <p dangerouslySetInnerHTML={{ __html: items?.message }} /> : "-",
+            link: () => router.push(getLinkViewDetail(items?.screen_code, items?.reference_code, items?.reference_id)),
           }));
 
           setNotifItems(notifItems);
@@ -836,11 +840,12 @@ const WrapeprProfile = styled.div`
 
 const WrapperMenuLogout = styled.div`
   width: 200px;
-  height: 272px;
+  // height: 272px;
   background: #ffffff;
   box-shadow: 0px 4px 16px rgba(170, 170, 170, 0.15);
   border-radius: 16px;
   padding: 20px;
+  margin-top: -60px;
 `;
 
 const MenuDropdown = styled.div`
@@ -877,10 +882,11 @@ const LanguageOption = styled.div`
   position: absolute;
   background-color: white;
   width: 200px;
-  height: 160px;
+  // height: 160px;
   box-shadow: 0px 4px 16px rgba(170, 170, 170, 0.15);
   border-radius: 16px;
   padding: 20px;
+  padding-bottom: 10px;
 `;
 
 export default AdminLayout;

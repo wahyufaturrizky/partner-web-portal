@@ -643,12 +643,12 @@ const GeneralForms = ({
           <Spacer size={10} />
           <Controller
             control={control}
-            rules={{
-              required: {
-                value: true,
-                message: "Please enter language.",
-              },
-            }}
+            // rules={{
+            //   required: {
+            //     value: true,
+            //     message: "Please enter language.",
+            //   },
+            // }}
             name="customer.ppkp"
             render={({ field: { onChange, value }, fieldState: { error } }) => {
               return <Switch checked={value} defaultChecked={value} onChange={onChange} />;

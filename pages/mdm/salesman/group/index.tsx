@@ -310,7 +310,7 @@ const SalesmanGroup = () => {
           ),
         }
         : "",
-      checkUserPermission("Upload Template")
+      checkUserPermission("Upload")
         ? {
           key: 2,
           value: (

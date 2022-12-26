@@ -318,7 +318,11 @@ export default function ComponentDetailSalesman({ listCustomers, isLoading }: an
               <Spacer size={20} />
               <TextWarning> {lang[t].salesmanGroup.autoAddedFromCustomer}</TextWarning>
               <Spacer size={20} />
-              <Table loading={isLoading} columns={columns} data={listCustomers} />
+              <Table
+                loading={isLoadingFetchDetailSalesman}
+                columns={columns}
+                data={data.customers}
+              />
             </Accordion.Body>
           </Accordion.Item>
         </Accordion>
@@ -402,7 +406,7 @@ export default function ComponentDetailSalesman({ listCustomers, isLoading }: an
           onCancel={() => setModalCustomer({ visible: false, data: {} })}
           footer={
             <Row justifyContent="end">
-              <Button onClick={() => window.open(`/customers/${modalCustomer?.data?.id}`)}>
+              <Button onClick={() => window.open(`/customers/${modalCustomer?.data?.code}`)}>
                 {lang[t].salesmanGroup.openCustomerPage}
               </Button>
             </Row>

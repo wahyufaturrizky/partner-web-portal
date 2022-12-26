@@ -202,14 +202,13 @@ const UOMConversionCreate = () => {
         });
       });
     }
-    const saveData = {
+    const saveData:any = {
       company_id: companyCode,
       name: data.name,
       base_uom_id: data.baseUom,
       items: savedTable,
     };
-    console.log(saveData)
-    // createUom(saveData);
+    createUom(saveData);
   };
 
   const columns = [
