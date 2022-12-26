@@ -640,7 +640,7 @@ const AdminLayout = (props: any) => {
             key: items?.id,
             id: items?.id,
             isRead: !!items?.read_date,
-            content: items?.message || "-",
+            content: items?.message ? <p dangerouslySetInnerHTML={{__html: items?.message}}></p>  : "-",
             link: getLinkViewDetail(items?.screen_code),
           }));
 
