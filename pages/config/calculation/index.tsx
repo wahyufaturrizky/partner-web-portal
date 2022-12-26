@@ -46,13 +46,14 @@ import {
   useDeleteBranch,
 } from "../../../hooks/mdm/branch/useBranch";
 
-const downloadFile = (params: any) => mdmDownloadService("/branch/download", { params }).then((res) => {
-  const dataUrl = window.URL.createObjectURL(new Blob([res.data]));
-  const tempLink = document.createElement("a");
-  tempLink.href = dataUrl;
-  tempLink.setAttribute("download", `branch_${new Date().getTime()}.xlsx`);
-  tempLink.click();
-});
+const downloadFile = (params: any) =>
+  mdmDownloadService("/branch/download", { params }).then((res) => {
+    const dataUrl = window.URL.createObjectURL(new Blob([res.data]));
+    const tempLink = document.createElement("a");
+    tempLink.href = dataUrl;
+    tempLink.setAttribute("download", `branch_${new Date().getTime()}.xlsx`);
+    tempLink.click();
+  });
 
 const Calculation = () => {
   const router = useRouter();
@@ -66,9 +67,7 @@ const Calculation = () => {
     totalItems: 100,
   });
 
-  const {
-    register, control, handleSubmit, setValue,
-  } = useForm();
+  const { register, control, handleSubmit, setValue } = useForm();
 
   const [search, setSearch] = useState("");
   const [isShowDelete, setShowDelete] = useState({ open: false, id: "", name: "" });
@@ -89,16 +88,20 @@ const Calculation = () => {
   });
 
   const { data: dataUserPermission } = useUserPermissions({
+    query: {
+      company_id: companyCode,
+    },
     options: {
       onSuccess: () => {},
     },
   });
 
   const listPermission = dataUserPermission?.permission?.filter(
-    (filtering: any) => filtering.menu === "Term Of Payment",
+    (filtering: any) => filtering.menu === "Term Of Payment"
   );
 
-  const checkUserPermission = (permissionGranted) => listPermission?.find((data: any) => data?.viewTypes?.[0]?.viewType?.name === permissionGranted);
+  const checkUserPermission = (permissionGranted) =>
+    listPermission?.find((data: any) => data?.viewTypes?.[0]?.viewType?.name === permissionGranted);
 
   const debounceSearch = useDebounce(search, 1000);
 
@@ -148,42 +151,42 @@ const Calculation = () => {
             }`,
             action: (
               <div style={{ display: "flex", justifyContent: "left" }}>
-                {checkUserPermission("Update") && (
-                  <EditOutlined
-                    style={{
-                      cursor: "pointer",
-                      borderRadius: 3,
-                      backgroundColor: "#D5FAFD",
-                      color: "#2BBECB",
-                      padding: 4,
-                      fontSize: "18px",
-                    }}
-                    onClick={() => {
-                      setShowEdit({
-                        open: true,
-                        title: "Edit Roles, Menu, etc",
-                        data: { ...element, companyName },
-                        id: element?.id,
-                      });
-                    }}
-                  />
-                )}
+                {/* {checkUserPermission("Update") && ( */}
+                <EditOutlined
+                  style={{
+                    cursor: "pointer",
+                    borderRadius: 3,
+                    backgroundColor: "#D5FAFD",
+                    color: "#2BBECB",
+                    padding: 4,
+                    fontSize: "18px",
+                  }}
+                  onClick={() => {
+                    setShowEdit({
+                      open: true,
+                      title: "Edit Roles, Menu, etc",
+                      data: { ...element, companyName },
+                      id: element?.id,
+                    });
+                  }}
+                />
+                {/* )} */}
                 <Spacer size={5} />
-                {checkUserPermission("Delete") && (
-                  <DeleteOutlined
-                    style={{
-                      cursor: "pointer",
-                      borderRadius: 3,
-                      backgroundColor: "#D5FAFD",
-                      color: "#EB008B",
-                      padding: 4,
-                      fontSize: "18px",
-                    }}
-                    onClick={() => {
-                      setShowDelete({ open: true, id: element.id, name: element.roleName });
-                    }}
-                  />
-                )}
+                {/* {checkUserPermission("Delete") && ( */}
+                <DeleteOutlined
+                  style={{
+                    cursor: "pointer",
+                    borderRadius: 3,
+                    backgroundColor: "#D5FAFD",
+                    color: "#EB008B",
+                    padding: 4,
+                    fontSize: "18px",
+                  }}
+                  onClick={() => {
+                    setShowDelete({ open: true, id: element.id, name: element.roleName });
+                  }}
+                />
+                {/* )} */}
               </div>
             ),
           };
@@ -191,10 +194,10 @@ const Calculation = () => {
         paymentButton?.threeMonths
           ? (payment = payment * 3 - payment * 3 * 0.1)
           : paymentButton?.sixMonths
-            ? (payment = payment * 6 - payment * 6 * 0.25)
-            : paymentButton?.twelveMonths
-              ? (payment = payment * 12 - payment * 12 * 0.5)
-              : payment;
+          ? (payment = payment * 6 - payment * 6 * 0.25)
+          : paymentButton?.twelveMonths
+          ? (payment = payment * 12 - payment * 12 * 0.5)
+          : payment;
         return {
           data: mappedData,
           totalRow: data.totalRow,
@@ -220,11 +223,13 @@ const Calculation = () => {
     options: {
       onSuccess: (data: any) => {
         setTotalRowsCompanyList(data.pages[0].totalRow);
-        const mappedData = data?.pages?.map((group: any) => group.rows?.map((element: any) => ({
-          id: element.code,
-          value: `${element.name} - ${element.companyType}`,
-          companyId: element.id,
-        })));
+        const mappedData = data?.pages?.map((group: any) =>
+          group.rows?.map((element: any) => ({
+            id: element.code,
+            value: `${element.name} - ${element.companyType}`,
+            companyId: element.id,
+          }))
+        );
         const flattenArray = [].concat(...mappedData);
         setCompanyList(flattenArray);
       },
@@ -245,7 +250,7 @@ const Calculation = () => {
           queryClient.invalidateQueries(["calculations"]);
         },
       },
-    },
+    }
   );
 
   const { mutate: createCalculation, isLoading: isLoadingCreateCalculation } = useCreateCalculation(
@@ -256,7 +261,7 @@ const Calculation = () => {
           queryClient.invalidateQueries(["calculations"]);
         },
       },
-    },
+    }
   );
 
   const { mutate: submitCalculation, isLoading: isLoadingSubmitCalculation } = useSubmitCalculation(
@@ -266,7 +271,7 @@ const Calculation = () => {
           queryClient.invalidateQueries(["calculations"]);
         },
       },
-    },
+    }
   );
 
   const { mutate: updateCalculation, isLoading: isLoadingUpdateCalculation } = useUpdateCalculation(
@@ -283,17 +288,18 @@ const Calculation = () => {
           queryClient.invalidateQueries(["calculations"]);
         },
       },
-    },
+    }
   );
 
-  const { mutate: uploadFileCalculation, isLoading: isLoadingUploadFileCalculation } = useUploadFileCalculation({
-    options: {
-      onSuccess: () => {
-        queryClient.invalidateQueries(["calculations"]);
-        setShowUpload(false);
+  const { mutate: uploadFileCalculation, isLoading: isLoadingUploadFileCalculation } =
+    useUploadFileCalculation({
+      options: {
+        onSuccess: () => {
+          queryClient.invalidateQueries(["calculations"]);
+          setShowUpload(false);
+        },
       },
-    },
-  });
+    });
 
   const columns = [
     {
@@ -379,12 +385,14 @@ const Calculation = () => {
               width: "23.5%",
               borderRadius: "5px",
             }}
-            onClick={() => setPaymentButton({
-              oneMonth: true,
-              threeMonths: false,
-              sixMonths: false,
-              twelveMonths: false,
-            })}
+            onClick={() =>
+              setPaymentButton({
+                oneMonth: true,
+                threeMonths: false,
+                sixMonths: false,
+                twelveMonths: false,
+              })
+            }
           >
             1 Month
           </Button>
@@ -398,16 +406,16 @@ const Calculation = () => {
               width: "23.5%",
               borderRadius: "5px",
             }}
-            onClick={() => setPaymentButton({
-              oneMonth: false,
-              threeMonths: true,
-              sixMonths: false,
-              twelveMonths: false,
-            })}
+            onClick={() =>
+              setPaymentButton({
+                oneMonth: false,
+                threeMonths: true,
+                sixMonths: false,
+                twelveMonths: false,
+              })
+            }
           >
-            3 Months
-            {' '}
-            <PlanSaveText>Save 10%</PlanSaveText>
+            3 Months <PlanSaveText>Save 10%</PlanSaveText>
           </Button>
           <Spacer size={20} />
           <Button
@@ -419,16 +427,16 @@ const Calculation = () => {
               width: "23.5%",
               borderRadius: "5px",
             }}
-            onClick={() => setPaymentButton({
-              oneMonth: false,
-              threeMonths: false,
-              sixMonths: true,
-              twelveMonths: false,
-            })}
+            onClick={() =>
+              setPaymentButton({
+                oneMonth: false,
+                threeMonths: false,
+                sixMonths: true,
+                twelveMonths: false,
+              })
+            }
           >
-            6 Months
-            {' '}
-            <PlanSaveText>Save 25%</PlanSaveText>
+            6 Months <PlanSaveText>Save 25%</PlanSaveText>
           </Button>
           <Spacer size={20} />
 
@@ -441,16 +449,16 @@ const Calculation = () => {
               width: "23.5%",
               borderRadius: "5px",
             }}
-            onClick={() => setPaymentButton({
-              oneMonth: false,
-              threeMonths: false,
-              sixMonths: false,
-              twelveMonths: true,
-            })}
+            onClick={() =>
+              setPaymentButton({
+                oneMonth: false,
+                threeMonths: false,
+                sixMonths: false,
+                twelveMonths: true,
+              })
+            }
           >
-            12 Months
-            {' '}
-            <PlanSaveBestValueText>Best Value Save 50%</PlanSaveBestValueText>
+            12 Months <PlanSaveBestValueText>Best Value Save 50%</PlanSaveBestValueText>
           </Button>
         </Row>
 
@@ -464,18 +472,20 @@ const Calculation = () => {
         <Spacer size={20} />
 
         <Row gap="16px">
-          {checkUserPermission("Create") && (
-            <Button
-              size="big"
-              variant="primary"
-              onClick={() => setShowCreate({
+          {/* {checkUserPermission("Create") && ( */}
+          <Button
+            size="big"
+            variant="primary"
+            onClick={() =>
+              setShowCreate({
                 open: true,
                 title: "Add New Roles, Menu, etc",
-              })}
-            >
-              + Add New
-            </Button>
-          )}
+              })
+            }
+          >
+            + Add New
+          </Button>
+          {/* )} */}
           <Search
             width="340px"
             placeholder="Search Role Name, Total User, Menu Name, etc."
@@ -528,9 +538,7 @@ const Calculation = () => {
             <Text variant="subHeading">Total Payment</Text>
             <Spacer size={10} />
             <Text variant="headingLarge">
-              IDR
-              {' '}
-              {IDR_formatter.format(calculationData?.payment)?.split("Rp")[1]}
+              IDR {IDR_formatter.format(calculationData?.payment)?.split("Rp")[1]}
               /mo
             </Text>
           </div>
@@ -562,12 +570,14 @@ const Calculation = () => {
           title={isShowEdit.title}
           defaultValue={isShowEdit.data}
           onOk={onEdit}
-          onCancel={() => setShowEdit({
-            open: false,
-            title: "",
-            data: {},
-            id: 0,
-          })}
+          onCancel={() =>
+            setShowEdit({
+              open: false,
+              title: "",
+              data: {},
+              id: 0,
+            })
+          }
         />
       )}
 
@@ -579,7 +589,7 @@ const Calculation = () => {
           onCancel={() => setShowDelete({ open: false, id: "", name: "" })}
           title="Confirm Delete"
           footer={null}
-          content={(
+          content={
             <div
               style={{
                 display: "flex",
@@ -588,10 +598,7 @@ const Calculation = () => {
               }}
             >
               <Spacer size={4} />
-              <Text>
-                Are you sure you want to delete Role Name -
-                {isShowDelete.name}
-              </Text>
+              <Text>Are you sure you want to delete Role Name -{isShowDelete.name}</Text>
               <Spacer size={20} />
               <div
                 style={{
@@ -621,7 +628,7 @@ const Calculation = () => {
                 </Button>
               </div>
             </div>
-          )}
+          }
         />
       )}
 
