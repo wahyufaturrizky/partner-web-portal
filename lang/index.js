@@ -47,7 +47,7 @@ export const lang = {
         emptyState: {
           groupName: "Product Group Name",
           groupingBasedOn: "Grouping Based On",
-          condition: "Kondisi",
+          condition: "Condition",
           min: "Min",
           max: "Max",
           addMoreGrouping: "+ Add More Grouping",
@@ -1342,7 +1342,8 @@ export const lang = {
         more: "More",
         addressTypeLabel: "Address Type",
         storePhotoLabel: "Office/Store Photos",
-        dimensionMinimumLabel: "The Photo format is .jpg, .jpeg, .png and minimum size of 300 x 300px",
+        dimensionMinimumLabel:
+          "The Photo format is .jpg, .jpeg, .png and minimum size of 300 x 300px",
         fileSizeLabel: "(For Optimal photo use a minimum size of 700 x 700 px)",
         streetLabel: "Street",
         countryLabel: "Country",
@@ -1351,7 +1352,7 @@ export const lang = {
         districtLabel: "District",
         zoneLabel: "Zone",
         postalCodeLabel: "Postal Code",
-        longitudeLabel: "Longitude"
+        longitudeLabel: "Longitude",
       },
       ghost: {
         downloadTemplate: "Download Template",
