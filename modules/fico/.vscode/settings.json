@@ -1,0 +1,13 @@
+{
+  "editor.tabSize": 2,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true
+  },
+  "eslint.validate": ["javascript", "typescript", "typescriptreact"],
+  "eslint.trace.server": "off",
+  "typescript.updateImportsOnFileMove.enabled": "always",
+  "javascript.updateImportsOnFileMove.enabled": "always",
+  "workbench.colorCustomizations": {},
+  "eslint.workingDirectories": [{ "mode": "auto" }],
+  "svelte.enable-ts-plugin": true
+}

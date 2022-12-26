@@ -30,13 +30,14 @@ import { mdmDownloadService } from "../../../../lib/client";
 import useDebounce from "../../../../lib/useDebounce";
 import { queryClient } from "../../../_app";
 
-const downloadFile = (params: any) => mdmDownloadService("/employee/template/download", { params }).then((res) => {
-  const dataUrl = window.URL.createObjectURL(new Blob([res.data]));
-  const tempLink = document.createElement("a");
-  tempLink.href = dataUrl;
-  tempLink.setAttribute("download", `employee_list_${new Date().getTime()}.xlsx`);
-  tempLink.click();
-});
+const downloadFile = (params: any) =>
+  mdmDownloadService("/employee/template/download", { params }).then((res) => {
+    const dataUrl = window.URL.createObjectURL(new Blob([res.data]));
+    const tempLink = document.createElement("a");
+    tempLink.href = dataUrl;
+    tempLink.setAttribute("download", `employee_list_${new Date().getTime()}.xlsx`);
+    tempLink.click();
+  });
 
 const renderConfirmationText = (type: any, data: any) => {
   switch (type) {
@@ -44,8 +45,8 @@ const renderConfirmationText = (type: any, data: any) => {
       return data.selectedRowKeys.length > 1
         ? `Are you sure to delete ${data.selectedRowKeys.length} employee ID ?`
         : `Are you sure to delete employee name ${
-          data?.employeeListData?.data.find((el: any) => el.key === data.selectedRowKeys[0])?.name
-        } ?`;
+            data?.employeeListData?.data.find((el: any) => el.key === data.selectedRowKeys[0])?.name
+          } ?`;
     case "detail":
       return `Are you sure to delete employee name ${data.name} ?`;
 
@@ -120,7 +121,7 @@ const EmployeeList = () => {
           //   findingJobPosition.jobPositionId.includes(element.jobPosition)
           // ).name,
           jobPosition: jobPositionsData?.rows?.find(
-            (job) => job?.jobPositionId === element?.jobPosition,
+            (job) => job?.jobPositionId === element?.jobPosition
           )?.name,
           employeeType: element.type,
           action: (
@@ -143,26 +144,28 @@ const EmployeeList = () => {
     },
   });
 
-  const { mutate: deleteEmployeeList, isLoading: isLoadingDeleteEmployeeList } = useDeleteEmployeeListMDM({
-    options: {
-      onSuccess: () => {
-        setShowDelete({ open: false, data: {}, type: "" });
-        setSelectedRowKeys([]);
-        queryClient.invalidateQueries(["employee-list"]);
+  const { mutate: deleteEmployeeList, isLoading: isLoadingDeleteEmployeeList } =
+    useDeleteEmployeeListMDM({
+      options: {
+        onSuccess: () => {
+          setShowDelete({ open: false, data: {}, type: "" });
+          setSelectedRowKeys([]);
+          queryClient.invalidateQueries(["employee-list"]);
+        },
       },
-    },
-  });
+    });
 
-  const { mutate: uploadFileEmployee, isLoading: isLoadingUploadFileEmployeeListMDM } = useUploadFileEmployeeListMDM({
-    options: {
-      onSuccess: () => {
-        queryClient.invalidateQueries(["employee-list"]);
-        setShowUpload(false);
-        window.alert("success upload");
-        refetchEmployeeList();
+  const { mutate: uploadFileEmployee, isLoading: isLoadingUploadFileEmployeeListMDM } =
+    useUploadFileEmployeeListMDM({
+      options: {
+        onSuccess: () => {
+          queryClient.invalidateQueries(["employee-list"]);
+          setShowUpload(false);
+          window.alert("success upload");
+          refetchEmployeeList();
+        },
       },
-    },
-  });
+    });
 
   const { data: dataUserPermission } = useUserPermissions({
     options: {
@@ -170,9 +173,8 @@ const EmployeeList = () => {
     },
   });
   const listPermission = dataUserPermission?.permission?.filter(
-    (filtering: any) => filtering.menu === "Employee List",
+    (filtering: any) => filtering.menu === "Employee List"
   );
-  console.log(listPermission);
 
   const columns = [
     {
@@ -193,12 +195,12 @@ const EmployeeList = () => {
     },
     ...(listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "View").length > 0
       ? [
-        {
-          title: "Action",
-          dataIndex: "action",
-          width: 160,
-        },
-      ]
+          {
+            title: "Action",
+            dataIndex: "action",
+            width: 160,
+          },
+        ]
       : []),
   ];
 
@@ -235,10 +237,7 @@ const EmployeeList = () => {
       },
     ];
   }
-  if (
-    listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Updload Template")
-      .length > 0
-  ) {
+  if (listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Upload").length > 0) {
     menuList = [
       ...menuList,
       {
@@ -252,7 +251,9 @@ const EmployeeList = () => {
       },
     ];
   }
-  if (listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Download").length > 0) {
+  if (
+    listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Download Data").length > 0
+  ) {
     menuList = [
       ...menuList,
       {
@@ -336,16 +337,18 @@ const EmployeeList = () => {
           </Row>
 
           <Row gap="16px">
-            {listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Delete").length
-              > 0 && (
+            {listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Delete").length >
+              0 && (
               <Button
                 size="big"
                 variant="tertiary"
-                onClick={() => setShowDelete({
-                  open: true,
-                  type: "selection",
-                  data: { employeeListData, selectedRowKeys },
-                })}
+                onClick={() =>
+                  setShowDelete({
+                    open: true,
+                    type: "selection",
+                    data: { employeeListData, selectedRowKeys },
+                  })
+                }
                 disabled={rowSelection.selectedRowKeys?.length === 0}
               >
                 Delete
@@ -377,8 +380,8 @@ const EmployeeList = () => {
               }}
               menuList={menuList}
             />
-            {listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Create").length
-              > 0 && (
+            {listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Create").length >
+              0 && (
               <Button
                 size="big"
                 variant="primary"
@@ -395,10 +398,10 @@ const EmployeeList = () => {
         <Col gap="60px">
           <Table
             loading={
-              isLoadingEmployeeList
-              || isFetchinggEmployeeList
-              || isLoadingJobPositions
-              || isLoadingUploadFileEmployeeListMDM
+              isLoadingEmployeeList ||
+              isFetchinggEmployeeList ||
+              isLoadingJobPositions ||
+              isLoadingUploadFileEmployeeListMDM
             }
             columns={columns}
             data={employeeListData?.data}
@@ -416,7 +419,7 @@ const EmployeeList = () => {
           onCancel={() => setShowDelete({ open: false, type: "", data: {} })}
           title="Confirm Delete"
           footer={null}
-          content={(
+          content={
             <div
               style={{
                 display: "flex",
@@ -459,7 +462,7 @@ const EmployeeList = () => {
                 </Button>
               </div>
             </div>
-          )}
+          }
         />
       )}
 

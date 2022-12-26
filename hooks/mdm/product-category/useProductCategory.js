@@ -91,6 +91,7 @@ const useUpdateProductCategory = ({ id, options, company_id }) => {
 };
 
 const fetchCoaList = async ({ query = {}, status }) => {
+  const companyCode = localStorage.getItem("companyCode");
   return client(`/coa-list?account_type=${status}`, {
     params: {
       // search: "",
@@ -99,6 +100,7 @@ const fetchCoaList = async ({ query = {}, status }) => {
       // sortBy: "created_at",
       // sortOrder: "DESC",
       ...query,
+      company_code: companyCode
     },
   }).then((data) => data);
 };
@@ -116,9 +118,11 @@ const useCoaListReceive = ({ query = {}, options, status }) => {
 };
 
 const fetchAllCoaList = async ({ query = {} }) => {
+  const companyCode = localStorage.getItem('companyCode');
   return client(`/coa-list`, {
     params: {
       ...query,
+      company_code: companyCode
     },
   }).then((data) => data);
 };

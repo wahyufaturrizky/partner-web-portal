@@ -14,17 +14,12 @@ export const lang = {
         },
         tertier: { viewDetail: "View Detail", cancel: "Cancel" },
         primary: {
-          save: "Menyimpan",
+          save: "Save",
         },
         ghost: {
           downloadTemplate: "Download Template",
           uploadTemplate: "Upload Template",
           downloadData: "Download Data",
-        },
-        ghost: {
-          downloadTemplate: "Unduh Template",
-          uploadTemplate: "Unggah Template",
-          downloadData: "Unduh Data",
         },
       },
       create: {
@@ -33,7 +28,7 @@ export const lang = {
         emptyState: {
           groupName: "Product Group Name",
           groupingBasedOn: "Grouping Based On",
-          condition: "Kondisi",
+          condition: "Condition",
           min: "Min",
           max: "Max",
           addMoreGrouping: "+ Add More Grouping",
@@ -76,7 +71,10 @@ export const lang = {
       salesChannelName: "Sales Channel Name",
       placeHolder: { egModernTrade: "e.g Modern Trade" },
       tertier: {
-        more: "More", viewDetail: "View Detail", delete: "Delete", cancel: "Cancel",
+        more: "More",
+        viewDetail: "View Detail",
+        delete: "Delete",
+        cancel: "Cancel",
       },
       primary: { create: "Create", save: "Save", yes: "Yes" },
       table: {
@@ -1342,6 +1340,18 @@ export const lang = {
         viewDetail: "View Detail",
         delete: "Delete",
         more: "More",
+        addressTypeLabel: "Address Type",
+        storePhotoLabel: "Office/Store Photos",
+        dimensionMinimumLabel: "The Photo format is .jpg, .jpeg, .png and minimum size of 300 x 300px",
+        fileSizeLabel: "(For Optimal photo use a minimum size of 700 x 700 px)",
+        streetLabel: "Street",
+        countryLabel: "Country",
+        provinceLabel: "Province",
+        cityLabel: "City",
+        districtLabel: "District",
+        zoneLabel: "Zone",
+        postalCodeLabel: "Postal Code",
+        longitudeLabel: "Longitude"
       },
       ghost: {
         downloadTemplate: "Download Template",

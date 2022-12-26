@@ -363,3 +363,5 @@ export const FormMasterGLAccount = (props: Form<MasterGLAccountFields>) => {
     </div>
   );
 };
+
+export default FormMasterGLAccount;

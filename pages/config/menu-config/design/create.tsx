@@ -2,9 +2,7 @@ import React, { useState } from "react";
 import ModalAddMenu from "components/elements/Modal/ModalAddMenu";
 import ModalAddModule from "components/elements/Modal/ModalAddModule";
 import Router from "next/router";
-import {
-  Accordion, Button, Col, Dropdown, Input, Row, Spacer, Text,
-} from "pink-lava-ui";
+import { Accordion, Button, Col, Dropdown, Input, Row, Spacer, Text } from "pink-lava-ui";
 import styled from "styled-components";
 import { useCreateMenuDesignList } from "hooks/menu-config/useMenuDesign";
 import { useForm, Controller } from "react-hook-form";
@@ -30,13 +28,14 @@ const CreateMenuDesignList: any = () => {
 
   const [hierarchyData, setHierarchyData] = useState<any>([]);
 
-  const { mutate: createMenuDesign, isLoading: isLoadingCreateMenuDesign } = useCreateMenuDesignList({
-    options: {
-      onSuccess: (data: any) => {
-        Router.back();
+  const { mutate: createMenuDesign, isLoading: isLoadingCreateMenuDesign } =
+    useCreateMenuDesignList({
+      options: {
+        onSuccess: (data: any) => {
+          Router.back();
+        },
       },
-    },
-  });
+    });
 
   const handleOnDrop = (subModulesChange: any, Treeindex: any) => {
     const mappingHierarchy = hierarchyData.map((module: any, moduleIndex: any) => {
@@ -52,7 +51,9 @@ const CreateMenuDesignList: any = () => {
                 <span
                   style={{ color: "#EB008B" }}
                   onClick={() => {
-                    const getMenuId = subModule?.children?.map((menu: any) => parseInt(menu?.key?.split("-")[1]));
+                    const getMenuId = subModule?.children?.map((menu: any) =>
+                      parseInt(menu?.key?.split("-")[1])
+                    );
                     setShowMenuConfig({
                       show: true,
                       moduleIndex,
@@ -68,8 +69,9 @@ const CreateMenuDesignList: any = () => {
             ),
           })),
         };
+      } else {
+        return module;
       }
-      return module;
     });
     setHierarchyData(mappingHierarchy);
   };
@@ -77,7 +79,7 @@ const CreateMenuDesignList: any = () => {
   const handleAddModule = (modules: any) => {
     const mappingHierarchy = modules?.map((module: any, moduleIndex: any) => {
       const moduleObject = hierarchyData?.filter(
-        (filterModule: any) => filterModule?.moduleId === module?.module?.moduleId,
+        (filterModule: any) => filterModule?.moduleId === module?.module?.moduleId
       );
 
       if (moduleObject.length > 0) {
@@ -92,9 +94,7 @@ const CreateMenuDesignList: any = () => {
           key: `subModule-${subModule?.subModule?.moduleId}`,
           title: (
             <span>
-              {subModule?.subModule?.moduleName}
-              {' '}
-              <br />
+              {subModule?.subModule?.moduleName} <br />
               <span
                 style={{ color: "#EB008B" }}
                 onClick={() => {
@@ -142,9 +142,7 @@ const CreateMenuDesignList: any = () => {
                   ...subModule,
                   title: (
                     <span>
-                      {subModule?.title?.props?.children[0]}
-                      {' '}
-                      <br />
+                      {subModule?.title?.props?.children[0]} <br />
                       <span
                         style={{ color: "#EB008B" }}
                         onClick={() => {
@@ -203,7 +201,9 @@ const CreateMenuDesignList: any = () => {
   const handleRemoveMenu = () => {
     const filterHierarchyData = hierarchyData.map((module: any) => ({
       ...module,
-      subModules: module?.subModules?.filter((subModule: any) => !selectedRowKeyTree?.includes(subModule?.key)),
+      subModules: module?.subModules?.filter(
+        (subModule: any) => !selectedRowKeyTree?.includes(subModule?.key)
+      ),
     }));
     const mappingHierarchy = filterHierarchyData.map((module: any, moduleIndex: any) => ({
       ...module,
@@ -211,13 +211,13 @@ const CreateMenuDesignList: any = () => {
         ...subModule,
         title: (
           <span>
-            {subModule?.title?.props?.children[0]}
-            {' '}
-            <br />
+            {subModule?.title?.props?.children[0]} <br />
             <span
               style={{ color: "#EB008B" }}
               onClick={() => {
-                const getMenuId = subModule?.children?.map((menu: any) => parseInt(menu?.key?.split("-")[1]));
+                const getMenuId = subModule?.children?.map((menu: any) =>
+                  parseInt(menu?.key?.split("-")[1])
+                );
                 setShowMenuConfig({
                   show: true,
                   moduleIndex,

@@ -159,3 +159,5 @@ export const FormMasterBankAccount = (props: Form<MasterBankAccountFields>) => {
     </div>
   );
 };
+
+export default FormMasterBankAccount;

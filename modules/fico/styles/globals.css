@@ -1,0 +1,134 @@
+@import url("https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700&display=swap");
+
+@layer base {
+}
+/*
+  1. Use a more-intuitive box-sizing model.
+*/
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+/*
+    2. Remove default margin
+  */
+* {
+  margin: 0;
+}
+/*
+    3. Allow percentage-based heights in the application
+  */
+html,
+body {
+  height: 100%;
+}
+/*
+    Typographic tweaks!
+    4. Add accessible line-height
+    5. Improve text rendering
+  */
+body {
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  font-family: Nunito Sans;
+}
+/*
+    6. Improve media defaults
+  */
+img,
+picture,
+video,
+canvas,
+svg {
+  display: block;
+  max-width: 100%;
+}
+/*
+    7. Remove built-in form typography styles
+  */
+input,
+button,
+textarea,
+select {
+  font: inherit;
+}
+/*
+    8. Avoid text overflows
+  */
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  overflow-wrap: break-word;
+}
+/*
+    9. Create a root stacking context
+  */
+#root,
+#__next {
+  isolation: isolate;
+}
+
+@media (min-width: 1024px) {
+  .lg\:\!basis-10 {
+    flex-basis: 10% !important;
+  }
+  .lg\:\!basis-15 {
+    flex-basis: 15% !important;
+  }
+  .lg\:\!basis-20 {
+    flex-basis: 20% !important;
+  }
+  .lg\:\!basis-25 {
+    flex-basis: 25% !important;
+  }
+  .lg\:\!basis-30 {
+    flex-basis: 30% !important;
+  }
+  .lg\:\!basis-35 {
+    flex-basis: 35% !important;
+  }
+  .lg\:\!basis-40 {
+    flex-basis: 40% !important;
+  }
+  .lg\:\!basis-45 {
+    flex-basis: 45% !important;
+  }
+  .lg\:\!basis-50 {
+    flex-basis: 50% !important;
+  }
+  .lg\:\!basis-55 {
+    flex-basis: 55% !important;
+  }
+  .lg\:\!basis-60 {
+    flex-basis: 60% !important;
+  }
+  .lg\:\!basis-65 {
+    flex-basis: 65% !important;
+  }
+  .lg\:\!basis-70 {
+    flex-basis: 70% !important;
+  }
+  .lg\:\!basis-75 {
+    flex-basis: 75% !important;
+  }
+  .lg\:\!basis-80 {
+    flex-basis: 80% !important;
+  }
+  .lg\:\!basis-85 {
+    flex-basis: 85% !important;
+  }
+  .lg\:\!basis-90 {
+    flex-basis: 90% !important;
+  }
+  .lg\:\!basis-95 {
+    flex-basis: 95% !important;
+  }
+  .lg\:\!basis-100 {
+    flex-basis: 100% !important;
+  }
+}

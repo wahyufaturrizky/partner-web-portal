@@ -38,7 +38,8 @@ function useCreateConfig({ options }) {
 }
 
 const fetchConfig = async ({ config_id }) => {
-	return client(`/module/${config_id}`).then((data) => data);
+	const companyCode = localStorage.getItem("companyCode")
+	return client(`/module/${config_id}/${companyCode}`).then((data) => data);
 };
 
 const useConfig = ({ config_id, options = {} }) => {

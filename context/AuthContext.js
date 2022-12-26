@@ -1,7 +1,7 @@
 import React, { createContext, useState, useEffect } from "react";
 import Head from "next/head";
-import { useAuth } from "../hooks/auth/useAuth";
 import { Spin } from "pink-lava-ui";
+import { useAuth } from "../hooks/auth/useAuth";
 
 const AuthContext = createContext();
 
@@ -37,22 +37,27 @@ function AuthProvider({ children, protectedRoute }) {
   if (isLoading || !isReturnComponent) {
     return (
       <div
-        style={{ display: "flex", height: "100vh", justifyContent: "center", alignItems: "center" }}
+        style={{
+          display: "flex", height: "100vh", justifyContent: "center", alignItems: "center",
+        }}
       >
         <Spin tip="Loading data" />
       </div>
     );
-  } else {
-    return (
-      <AuthContext.Provider value={null}>
-        <Head>
-          <title>Hermes</title>
-        </Head>
-
-        {children}
-      </AuthContext.Provider>
-    );
   }
+  return (
+    <AuthContext.Provider value={null}>
+      <Head>
+        <link
+          href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700&display=swap"
+          rel="stylesheet"
+        />
+        <title>Hermes</title>
+      </Head>
+
+      {children}
+    </AuthContext.Provider>
+  );
 }
 
 export { AuthProvider };

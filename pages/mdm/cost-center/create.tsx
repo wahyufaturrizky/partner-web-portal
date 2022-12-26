@@ -140,7 +140,7 @@ const CostCenterCreate = () => {
   });
 
   const listPermission = dataUserPermission?.permission?.filter(
-    (filtering: any) => filtering.menu === "Cost Center",
+    (filtering: any) => filtering.menu === "Cost Center"
   );
 
   // const {
@@ -210,7 +210,7 @@ const CostCenterCreate = () => {
       search: debounceFetchProfitCenter,
       page: pagination.page,
       limit: pagination.itemsPerPage,
-      company_id: companyId,
+      company_id: companyCode,
     },
   });
 
@@ -677,9 +677,7 @@ const CostCenterCreate = () => {
               render={({ field: { onChange }, fieldState: { error } }) => (
                 <>
                   <Label>
-                    Profit Center
-                    {' '}
-                    <span style={{ color: colors.red.regular }}>*</span>
+                    Profit Center <span style={{ color: colors.red.regular }}>*</span>
                   </Label>
                   <Spacer size={3} />
                   <FormSelect

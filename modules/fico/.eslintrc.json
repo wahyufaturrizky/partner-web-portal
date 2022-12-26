@@ -1,0 +1,50 @@
+{
+    "env": {
+        "browser": true,
+        "es2021": true,
+        "node": true
+    },
+    "extends": [
+        "plugin:react/recommended",
+        "airbnb"
+    ],
+    "parser": "@typescript-eslint/parser",
+    "parserOptions": {
+        "ecmaFeatures": {
+            "jsx": true
+        },
+        "ecmaVersion": "latest",
+        "sourceType": "module"
+    },
+    "plugins": [
+        "react",
+        "@typescript-eslint"
+    ],
+    "globals": {
+        "JSX": true
+    },
+    "rules": {
+        "react/jsx-filename-extension": [1, { "extensions": [".ts", ".tsx"] }],
+        "import/no-unresolved": "off",
+        "import/extensions": "off",
+        "global-require": "off",
+        "jsx-a11y/label-has-associated-control": "off",
+        "jsx-a11y/control-has-associated-label": "off",
+        "jsx-a11y/no-noninteractive-element-interactions": "off",
+        "jsx-a11y/click-events-have-key-events": "off",
+        "react/jsx-props-no-spreading": "off",
+        "react/prop-types": "off",
+        "no-unused-expressions": ["error", { "allowShortCircuit": true, "allowTernary": true }],
+        "linebreak-style": "off",
+        "jsx-a11y/anchor-is-valid": "off",
+        "react/no-array-index-key": "off",
+        "react/react-in-jsx-scope": "off",
+        "max-len": ["error", { "ignoreComments": true, "code": 300 }],
+        "new-cap": "off",
+        "import/no-extraneous-dependencies": "off",
+        "react/require-default-props": "off",
+        "import/prefer-default-export": "off",
+        "react/function-component-definition": "off",
+        "no-use-before-define": "off"
+    }
+}

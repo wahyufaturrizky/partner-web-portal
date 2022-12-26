@@ -1,8 +1,6 @@
 import React, { useState } from "react";
 import styled from "styled-components";
-import {
-  Text, Button, Col, Row, Spacer, Search, Table, Pagination, Switch,
-} from "pink-lava-ui";
+import { Text, Button, Col, Row, Spacer, Search, Table, Pagination, Switch } from "pink-lava-ui";
 import usePagination from "@lucasmogari/react-pagination";
 import { useRouter } from "next/router";
 import { lang } from "lang";
@@ -35,7 +33,7 @@ const CompanyList: any = () => {
   });
 
   const listPermission = dataUserPermission?.permission?.filter(
-    (filtering: any) => filtering.menu === "Company",
+    (filtering: any) => filtering.menu === "Company List"
   );
 
   const columns = [

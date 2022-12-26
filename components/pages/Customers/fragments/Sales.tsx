@@ -9,6 +9,7 @@ import { useTermOfPayments } from "hooks/mdm/term-of-payment/useTermOfPayment";
 import { listSalesItems } from "../constants";
 
 export default function Sales(props: any) {
+  const companyCode = localStorage.getItem("companyCode");
   const { register, setValue, control } = props;
   const [search, setSearch] = useState({
     branch: null,
@@ -20,18 +21,19 @@ export default function Sales(props: any) {
   });
 
   const { data: listSalesman } = useFetchListSalesman({
+    company_id: companyCode,
     options: { onSuccess: () => {} },
     query: { status: 0, search: search.salesman },
   });
 
   const { data: listTermOfPayment } = useTermOfPayments({
     options: { onSuccess: () => {} },
-    query: { company_id: "KSNI", search: search.term_payment },
+    query: { search: search.term_payment },
   });
 
   const { data: listBranch } = useBranchList({
     options: { onSuccess: () => {} },
-    query: { company_id: "KSNI", search: search.branch },
+    query: { search: search.branch },
   });
 
   const _listSalesman = listSalesman?.rows?.map((items: any) => ({

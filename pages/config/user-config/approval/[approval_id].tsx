@@ -343,9 +343,7 @@ const DetailUserConfigApproval: any = () => {
       company_id: companyCode,
     };
 
-    console.log(formData);
-
-    // mutateCreatePartnerConfigApprovalList(formData);
+    mutateUpdatePartnerConfigApprovalList(formData);
   };
 
   if (isLoadingPartnerConfigApprovalList) {
