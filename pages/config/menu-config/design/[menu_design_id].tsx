@@ -2,9 +2,7 @@ import React, { useState } from "react";
 import ModalAddMenu from "components/elements/Modal/ModalAddMenu";
 import ModalAddModule from "components/elements/Modal/ModalAddModule";
 import { useRouter } from "next/router";
-import {
-  Accordion, Button, Col, Dropdown, Input, Row, Spacer, Text, Spin,
-} from "pink-lava-ui";
+import { Accordion, Button, Col, Dropdown, Input, Row, Spacer, Text, Spin } from "pink-lava-ui";
 import styled from "styled-components";
 import {
   useUpdateMenuDesignList,
@@ -26,9 +24,7 @@ const CreateMenuDesignList: any = () => {
   const companyCode = localStorage.getItem("companyCode");
   const { menu_design_id } = router.query;
 
-  const {
-    register, handleSubmit, control, setValue,
-  } = useForm();
+  const { register, handleSubmit, control, setValue } = useForm();
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showModuleConfig, setShowModuleConfig] = useState(false);
@@ -44,6 +40,7 @@ const CreateMenuDesignList: any = () => {
   const [selectedRowKeyTree, setSelectedRowKeyTree] = useState<any>([]);
 
   const [hierarchyData, setHierarchyData] = useState<any>([]);
+  const [tempHierarchyData, setTempHierarchyData] = useState<any>([]);
 
   const { data: dataUserPermission } = useUserPermissions({
     options: {
@@ -52,7 +49,7 @@ const CreateMenuDesignList: any = () => {
   });
 
   const listPermission = dataUserPermission?.permission?.filter(
-    (filtering: any) => filtering.menu === "Menu Design",
+    (filtering: any) => filtering.menu === "Menu Design"
   );
 
   const {
@@ -72,14 +69,13 @@ const CreateMenuDesignList: any = () => {
             key: `subModule-${subModule?.subModule?.moduleId}`,
             title: (
               <span>
-                {subModule?.subModule?.moduleName}
-                {' '}
-                <br />
+                {subModule?.subModule?.moduleName} <br />
                 <span
                   style={{ color: "#EB008B" }}
                   onClick={() => {
                     const getMenuId = subModule?.menus?.map((menu: any) => parseInt(menu?.menuId));
                     const getSelectedMenu = subModule?.menus?.map((menu: any) => ({
+                      id: menu.id,
                       key: menu.id,
                       field_id: menu.id,
                       field_name: menu.menuName,
@@ -130,34 +126,39 @@ const CreateMenuDesignList: any = () => {
           })),
         }));
 
-        const mappingSelectedModule = data?.hierarchies?.map((module: any) => module?.module?.moduleId);
+        const mappingSelectedModule = data?.hierarchies?.map(
+          (module: any) => module?.module?.moduleId
+        );
 
         setSelectedRowKeysModule(mappingSelectedModule ?? []);
 
         setHierarchyData(mappingHierarchyData);
+        setTempHierarchyData(mappingHierarchyData);
       },
     },
   });
 
-  const { mutate: updateMenuDesign, isLoading: isLoadingUpdateMenuDesign } = useUpdateMenuDesignList({
-    id: menu_design_id,
-    options: {
-      onSuccess: (data: any) => {
-        router.back();
-        queryClient.invalidateQueries(["menu/design"]);
+  const { mutate: updateMenuDesign, isLoading: isLoadingUpdateMenuDesign } =
+    useUpdateMenuDesignList({
+      id: menu_design_id,
+      options: {
+        onSuccess: (data: any) => {
+          router.back();
+          queryClient.invalidateQueries(["menu/design"]);
+        },
       },
-    },
-  });
+    });
 
-  const { mutate: deleteMenuDesign, isLoading: isLoadingDeleteMenuDesign }: any = useDeleteMenuDesignList({
-    options: {
-      onSuccess: () => {
-        queryClient.invalidateQueries(["working-calendars"]);
-        setShowDeleteModal(false);
-        router.back();
+  const { mutate: deleteMenuDesign, isLoading: isLoadingDeleteMenuDesign }: any =
+    useDeleteMenuDesignList({
+      options: {
+        onSuccess: () => {
+          queryClient.invalidateQueries(["menu/design"]);
+          setShowDeleteModal(false);
+          router.back();
+        },
       },
-    },
-  });
+    });
 
   const handleOnDrop = (subModulesChange: any, Treeindex: any) => {
     const mappingHierarchy = hierarchyData.map((module: any, moduleIndex: any) => {
@@ -173,11 +174,14 @@ const CreateMenuDesignList: any = () => {
                 <span
                   style={{ color: "#EB008B" }}
                   onClick={() => {
+                    const getMenuId = subModule?.children?.map((menu: any) =>
+                      parseInt(menu?.key?.split("-")[1])
+                    );
                     setShowMenuConfig({
                       show: true,
                       moduleIndex,
                       subModuleIndex,
-                      selectedRowKeyMenu: [],
+                      selectedRowKeyMenu: getMenuId ?? [],
                       selectedRowsMenu: subModule?.children ?? [],
                     });
                   }}
@@ -188,8 +192,9 @@ const CreateMenuDesignList: any = () => {
             ),
           })),
         };
+      } else {
+        return module;
       }
-      return module;
     });
     setHierarchyData(mappingHierarchy);
   };
@@ -197,7 +202,7 @@ const CreateMenuDesignList: any = () => {
   const handleAddModule = (modules: any) => {
     const mappingHierarchy = modules?.map((module: any, moduleIndex: any) => {
       const moduleObject = hierarchyData?.filter(
-        (filterModule: any) => filterModule?.moduleId === module?.module?.moduleId,
+        (filterModule: any) => filterModule?.moduleId === module?.module?.moduleId
       );
 
       if (moduleObject.length > 0) {
@@ -206,15 +211,15 @@ const CreateMenuDesignList: any = () => {
         };
       }
       return {
+        id: module?.module?.id,
         moduleId: module?.module?.moduleId,
         name: module?.module?.moduleName,
         subModules: module?.subModules?.map((subModule: any, subModuleIndex: any) => ({
+          id: subModule?.subModule?.id,
           key: `subModule-${subModule?.subModule?.moduleId}`,
           title: (
             <span>
-              {subModule?.subModule?.moduleName}
-              {' '}
-              <br />
+              {subModule?.subModule?.moduleName} <br />
               <span
                 style={{ color: "#EB008B" }}
                 onClick={() => {
@@ -262,9 +267,7 @@ const CreateMenuDesignList: any = () => {
                   ...subModule,
                   title: (
                     <span>
-                      {subModule?.title?.props?.children[0]}
-                      {' '}
-                      <br />
+                      {subModule?.title?.props?.children[0]} <br />
                       <span
                         style={{ color: "#EB008B" }}
                         onClick={() => {
@@ -283,6 +286,7 @@ const CreateMenuDesignList: any = () => {
                     </span>
                   ),
                   children: menus?.map((menu: any) => ({
+                    id: menu?.id,
                     key: `menu-${menu.key}-${subModuleIndex}`,
                     checkable: false,
                     title: menu.field_name,
@@ -300,12 +304,14 @@ const CreateMenuDesignList: any = () => {
                     ),
                   })),
                 };
+              } else {
+                return subModule;
               }
-              return subModule;
             }),
           };
+        } else {
+          return module;
         }
-        return module;
       });
 
       return mappingHierarcyMenu;
@@ -323,7 +329,9 @@ const CreateMenuDesignList: any = () => {
   const handleRemoveMenu = () => {
     const filterHierarchyData = hierarchyData.map((module: any) => ({
       ...module,
-      subModules: module?.subModules?.filter((subModule: any) => !selectedRowKeyTree?.includes(subModule?.key)),
+      subModules: module?.subModules?.filter(
+        (subModule: any) => !selectedRowKeyTree?.includes(subModule?.key)
+      ),
     }));
     const mappingHierarchy = filterHierarchyData.map((module: any, moduleIndex: any) => ({
       ...module,
@@ -331,13 +339,13 @@ const CreateMenuDesignList: any = () => {
         ...subModule,
         title: (
           <span>
-            {subModule?.title?.props?.children[0]}
-            {' '}
-            <br />
+            {subModule?.title?.props?.children[0]} <br />
             <span
               style={{ color: "#EB008B" }}
               onClick={() => {
-                const getMenuId = subModule?.children?.map((menu: any) => parseInt(menu?.key?.split("-")[1]));
+                const getMenuId = subModule?.children?.map((menu: any) =>
+                  parseInt(menu?.key?.split("-")[1])
+                );
                 setShowMenuConfig({
                   show: true,
                   moduleIndex,
@@ -357,30 +365,94 @@ const CreateMenuDesignList: any = () => {
   };
 
   const submit = (data: any) => {
-    const mappingHierarchiesPayload = hierarchyData?.map((module: any) => ({
-      module: {
-        id: module?.id,
-        module_id: module.moduleId,
-        flag_removal: false,
-      },
-      sub_modules: module.subModules.map((subModule: any) => ({
-        sub_module: {
-          id: subModule?.id,
-          module_id: parseInt(subModule?.key?.split("-")[1]),
+    const mappingHierarchiesPayload = hierarchyData?.map((module: any) => {
+      const getTempHierarchyData = tempHierarchyData?.filter(
+        (tempModule: any) => tempModule.moduleId === module.moduleId
+      );
+
+      return {
+        module: {
+          id: module?.id,
+          module_id: module.moduleId,
           flag_removal: false,
         },
-        menus: subModule?.children.map((menu: any) => ({
-          id: menu?.id,
-          menu_id: parseInt(menu.key?.split("-")[1]),
-          flag_removal: false,
-        })),
-      })),
-    }));
+        sub_modules: module.subModules.map((subModule: any) => {
+          const getTempSubModuleHierarchyData = getTempHierarchyData[0]?.subModules?.filter(
+            (tempSubModule: any) => {
+              return (
+                parseInt(tempSubModule?.key?.split("-")[1]) ===
+                parseInt(subModule?.key?.split("-")[1])
+              );
+            }
+          );
+          const mappingMenu: any = [];
+          const mappingTempMenu: any = [];
+
+          subModule?.children?.forEach((menu: any) => {
+            console.log(menu);
+            mappingMenu.push({
+              id: menu?.id,
+              menu_id: parseInt(menu.key?.split("-")[1]),
+              flag_removal: false,
+            });
+          });
+
+          getTempSubModuleHierarchyData.forEach((tempSubModule: any) => {
+            tempSubModule.children.forEach((tempMenu: any) => {
+              const filterMenuData = subModule?.children?.filter(
+                (menu: any) =>
+                  parseInt(menu.key?.split("-")[1]) === parseInt(tempMenu?.key?.split("-")[1])
+              );
+
+              if (filterMenuData.length === 0) {
+                mappingTempMenu.push({
+                  id: tempMenu?.id,
+                  menu_id: parseInt(tempMenu.key?.split("-")[1]),
+                  flag_removal: true,
+                });
+              }
+            });
+          });
+
+          const joinMenu = [...mappingMenu, ...mappingTempMenu];
+
+          return {
+            sub_module: {
+              id: subModule?.id,
+              module_id: parseInt(subModule?.key?.split("-")[1]),
+              flag_removal: false,
+            },
+            menus: joinMenu,
+          };
+        }),
+      };
+    });
+
+    const mappingTempHierarchiesPayload: any = [];
+
+    tempHierarchyData.forEach((tempModule: any) => {
+      const filterHierarchyData = hierarchyData?.filter(
+        (module: any) => module.moduleId === tempModule.moduleId
+      );
+
+      if (filterHierarchyData.length === 0) {
+        mappingTempHierarchiesPayload.push({
+          module: {
+            id: tempModule?.id,
+            module_id: tempModule?.moduleId,
+            flag_removal: true,
+          },
+          sub_modules: [],
+        });
+      }
+    });
+
+    const joinPayload = [...mappingHierarchiesPayload, ...mappingTempHierarchiesPayload];
 
     const formData = {
       ...data,
       status: data?.status === "Active" || data?.status === "Y" ? "Y" : "N",
-      hierarchies: mappingHierarchiesPayload,
+      hierarchies: joinPayload,
       company_id: companyCode,
     };
 
@@ -400,11 +472,7 @@ const CreateMenuDesignList: any = () => {
       <Col>
         <Row gap="4px" alignItems="center">
           <ArrowLeft style={{ cursor: "pointer" }} onClick={() => router.back()} />
-          <Text variant="h4">
-            Menu Design -
-            {' '}
-            {menuDesignData?.name}
-          </Text>
+          <Text variant="h4">Menu Design - {menuDesignData?.name}</Text>
         </Row>
         <Card padding="20px">
           <Row justifyContent="space-between" alignItems="center" nowrap>
@@ -538,6 +606,8 @@ const CreateMenuDesignList: any = () => {
             setSelectedRowKeysModule(value);
           }}
           onSuccess={handleAddModule}
+          type={"edit"}
+          selectedModule={hierarchyData}
         />
       )}
 
@@ -556,6 +626,7 @@ const CreateMenuDesignList: any = () => {
           selectedRowKeys={showMenuConfig.selectedRowKeyMenu}
           selectedRowsMenu={showMenuConfig.selectedRowsMenu}
           onAddMenu={handleAddMenu}
+          type={"edit"}
         />
       )}
 

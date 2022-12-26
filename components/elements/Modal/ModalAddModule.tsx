@@ -11,6 +11,8 @@ const ModalAddModule = ({
   onSuccess,
   selectedRowKeys,
   setSelectedRowKeys,
+  selectedModule,
+  type,
 }: any) => {
   const pagination = usePagination({
     page: 1,
@@ -51,7 +53,7 @@ const ModalAddModule = ({
                 <Button
                   size="small"
                   onClick={() => {
-                    window.open(`/module-config/${element.id}`, "_blank");
+                    window.open(`/config/module-config/${element.id}`, "_blank");
                   }}
                   variant="tertiary"
                 >
@@ -70,7 +72,29 @@ const ModalAddModule = ({
   const { mutate: filterModule, isLoading: isLoadingFilterModule }: any = filterModuleConfig({
     options: {
       onSuccess: (data: any) => {
-        onSuccess(data?.hierarchies ?? []);
+        if (type === "edit") {
+          const mappingModule = data?.hierarchies?.map((module: any) => {
+            const getSelectedModule = selectedModule?.filter(
+              (sModule: any) => sModule?.moduleId === module.moduleId
+            );
+
+            if (getSelectedModule.length > 0 && getSelectedModule[0]?.id !== 0) {
+              return {
+                ...module,
+                id: getSelectedModule[0].id,
+              };
+            } else {
+              return {
+                ...module,
+                id: 0,
+              };
+            }
+          });
+
+          onSuccess(mappingModule ?? []);
+        } else {
+          onSuccess(data?.hierarchies ?? []);
+        }
       },
     },
   });
@@ -93,12 +117,17 @@ const ModalAddModule = ({
   };
 
   const rowSelection = {
+    preserveSelectedRowKeys: true,
     selectedRowKeys,
     onChange: onSelectChange,
   };
 
   const handleFilterModule = () => {
-    filterModule({ ids: selectedRowKeys });
+    if (selectedRowKeys.length === 0) {
+      filterModule({ ids: [0] });
+    } else {
+      filterModule({ ids: selectedRowKeys });
+    }
   };
 
   return (
@@ -140,7 +169,7 @@ const ModalAddModule = ({
             <Button
               size="big"
               variant={"tertiary"}
-              onClick={() => window.open(`/module-config/create`, "_blank")}
+              onClick={() => window.open(`/config/module-config/create`, "_blank")}
             >
               Create Module
             </Button>
