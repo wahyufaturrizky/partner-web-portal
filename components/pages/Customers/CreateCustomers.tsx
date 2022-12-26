@@ -181,7 +181,7 @@ export default function CreateCustomers({
 
   const onSubmit = (data: any) => {
     const { customer, invoicing, purchasing, sales, bank, contact, address } = data || {};
-   
+
     const payloads = {
       bank: bank.map((data: any) => ({
         bank_name: data.bank_name,
@@ -483,7 +483,7 @@ export default function CreateCustomers({
         <Spacer size={20} />
         <FormProvider {...methods}>
           <Card>
-            <Accordion style={{display : "relative"}} id={"area"}>
+            <Accordion style={{ display: "relative" }} id={"area"}>
               <Accordion.Item key={1}>
                 <Accordion.Header variant="blue">General</Accordion.Header>
                 <Accordion.Body>
@@ -703,7 +703,6 @@ const GeneralForms = ({
             control={control}
             name="customer.company_logo"
             render={({ field: { value } }) => {
-
               return (
                 <FileUploaderAllFiles
                   label="Company Logo"
@@ -898,9 +897,9 @@ const HeaderActionForm = ({
                 disabled={isLoadingCreateCustomer || isLoadingUpdateCustomer}
                 size="big"
                 variant="primary"
-                onClick={()=> {
-                  onSubmit()
-                  console.log("tembak")
+                onClick={() => {
+                  onSubmit();
+                  console.log("tembak");
                 }}
               >
                 {isLoadingCreateCustomer || isLoadingUpdateCustomer ? "Loading..." : "Save"}
