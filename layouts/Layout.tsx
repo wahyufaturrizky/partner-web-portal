@@ -566,7 +566,7 @@ const AdminLayout = (props: any) => {
   const router = useRouter();
 
   const handleCLickTabNav = (e: any) => {
-    if (itemsMenu[e.key].url) { window.location.href = itemsMenu[e.key].url || '/'; return; }
+    if (itemsMenu[e.key].url) { setCurrent(e.key); window.location.href = itemsMenu[e.key].url || '/'; return; }
     setCurrent(e.key);
     Router.push("/dashboard");
   };
@@ -578,6 +578,8 @@ const AdminLayout = (props: any) => {
 
   useEffect(() => {
     const { menu } = router.query;
+    if (!menu) return;
+
     const idxMenu = itemsMenu.findIndex((item) => item.id === menu);
 
     setCurrent(`${idxMenu}`);

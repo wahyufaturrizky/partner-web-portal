@@ -1,3 +1,6 @@
+/* eslint-disable camelcase */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable no-unused-vars */
 import { useQuery, useMutation, useInfiniteQuery } from "react-query";
 import { client, mdmService } from "../../lib/client";
 
@@ -91,7 +94,6 @@ const useUserPermissions = ({ query = {}, options } = {}) =>
     keepPreviousData: true,
     ...options,
   });
-
 function useApproveUser({ options }) {
   return useMutation(
     (updates) =>
