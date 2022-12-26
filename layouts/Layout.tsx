@@ -878,10 +878,11 @@ const LanguageOption = styled.div`
   position: absolute;
   background-color: white;
   width: 200px;
-  height: 160px;
+  // height: 160px;
   box-shadow: 0px 4px 16px rgba(170, 170, 170, 0.15);
   border-radius: 16px;
   padding: 20px;
+  padding-bottom: 10px;
 `;
 
 export default AdminLayout;
