@@ -607,18 +607,20 @@ const AdminLayout = (props: any) => {
         },
       })
         .then((res) => {
-          const defaultCompany = res.data.data.rows[0];
-          localStorage.setItem('companyId', defaultCompany.id);
-          localStorage.setItem('companyCode', defaultCompany.code);
+          const currentCompanyCode = localStorage.getItem('companyCode');
+          const defaultCompany = currentCompanyCode
+            ? res.data.data.rows.find((data) => data.code === currentCompanyCode) : res.data.data.rows[0];
+          if (!currentCompanyCode) {
+            localStorage.setItem('companyId', defaultCompany.id);
+            localStorage.setItem('companyCode', defaultCompany.code);
+          }
+
           setCompanyCode(defaultCompany.code);
           setCompanies(res.data.data.rows);
           setIsLoading(false);
         })
         .catch(() => {
-          localStorage.setItem('companyId', "2");
-          localStorage.setItem('companyCode', "KSNI");
-          setCompanies([]);
-          setIsLoading(false);
+          window.location.reload();
         });
     }
 
@@ -677,7 +679,8 @@ const AdminLayout = (props: any) => {
         type: "dropdown",
         items: companies,
         onChange: (value) => handleChangeCompany(value),
-        default: companies[0],
+        default: companies.find((company) => company.code === companyCode),
+        icon: ICCompany,
       },
       ...menuConfig,
     ];
@@ -695,7 +698,8 @@ const AdminLayout = (props: any) => {
         type: "dropdown",
         items: companies,
         onChange: (value) => handleChangeCompany(value),
-        default: companies[0],
+        default: companies.find((company) => company.code === companyCode),
+        icon: ICCompany,
       },
       ...menuMdm,
     ];
