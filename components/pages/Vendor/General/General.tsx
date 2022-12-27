@@ -16,7 +16,10 @@ import { ExclamationCircleOutlined } from "@ant-design/icons";
 import { useFormContext, Controller, useWatch } from "react-hook-form";
 import { useVendorGroupInfiniteLists, useUploadLogo } from "hooks/mdm/vendor/useVendorGroup";
 import { useJobPositionInfiniteLists } from "hooks/mdm/job-position/useJobPositon";
-import { useLanguagesInfiniteLists } from "hooks/languages/useLanguages";
+import {
+  useLanguagesInfiniteLists,
+  useLanguageLibraryInfiniteLists,
+} from "hooks/languages/useLanguages";
 import { useCustomerInfiniteLists } from "hooks/mdm/customers/useCustomersMDM";
 import useDebounce from "lib/useDebounce";
 import { VendorContext } from "context/VendorContext";
@@ -143,7 +146,7 @@ const General = ({ type, formType }: any) => {
     isFetchingNextPage: isFetchingMoreLanguages,
     hasNextPage: hasNextLanguages,
     fetchNextPage: fetchNextPageLanguages,
-  } = useLanguagesInfiniteLists({
+  } = useLanguageLibraryInfiniteLists({
     query: {
       search: debounceSearchLanguage,
       limit: 10,
@@ -154,8 +157,8 @@ const General = ({ type, formType }: any) => {
         const mappedData = data?.pages?.map((group: any) => {
           return group.rows?.map((element: any) => {
             return {
-              label: element.name,
-              value: element.name,
+              label: `${element.id} - ${element.name}`,
+              value: element.id,
             };
           });
         });
