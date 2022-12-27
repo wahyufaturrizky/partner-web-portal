@@ -177,9 +177,7 @@ const CreateRetailPricing: any = () => {
 
   const onSubmit = (data:any) => {
     data.company_id = companyCode;
-    data.availability = data?.availability?.filter((data:any) => {
-      Object.keys(data).length === 0;
-    }).map((data) => {
+    data.availability = data?.availability?.filter((data:any) => Object.keys(data).length !== 0).map((data) => {
       const newData:any = {
         based_on: data?.based_on,
       };

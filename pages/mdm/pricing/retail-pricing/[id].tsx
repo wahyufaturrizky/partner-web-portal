@@ -217,9 +217,7 @@ const DetailRetailPricing: any = () => {
 
   const onSubmit = (data: any) => {
     data.availability = data?.availability
-      ?.filter((data: any) => {
-        Object.keys(data).length === 0;
-      })
+      ?.filter((data: any) => Object.keys(data).length !== 0)
       .map((data: any) => {
         const newData: any = {
           based_on: data.based_on,
