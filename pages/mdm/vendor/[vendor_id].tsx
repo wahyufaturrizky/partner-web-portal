@@ -13,9 +13,7 @@ import {
 } from "pink-lava-ui";
 import styled from "styled-components";
 import { useRouter } from "next/router";
-import {
-  useForm, Controller, FormProvider, useWatch,
-} from "react-hook-form";
+import { useForm, Controller, FormProvider, useWatch } from "react-hook-form";
 import General from "components/pages/Vendor/General/General";
 import Contacts from "components/pages/Vendor/Contacts/Contacts";
 import Addresses from "components/pages/Vendor/Addresess/Addresses";
@@ -40,7 +38,8 @@ const listTabItems = [
   { title: "Invoicing" },
 ];
 
-const objectIsEmpty = (object: any) => Object.keys(object).length === 0 && object.constructor === Object;
+const objectIsEmpty = (object: any) =>
+  Object.keys(object).length === 0 && object.constructor === Object;
 
 export default function VendorDetail() {
   const router = useRouter();
@@ -59,6 +58,7 @@ export default function VendorDetail() {
       language: "",
       tax: "",
       email: "",
+      valid_until: "",
       external_code: "",
       is_pkp: false,
       company: {
@@ -67,7 +67,7 @@ export default function VendorDetail() {
       },
       individu: {
         job: 0,
-        company: "",
+        // company: "",
         title: "",
       },
       contacts: [],
@@ -91,7 +91,7 @@ export default function VendorDetail() {
   });
 
   const listPermission = dataUserPermission?.permission?.filter(
-    (filtering: any) => filtering.menu === "Vendor",
+    (filtering: any) => filtering.menu === "Vendor"
   );
 
   const watchCustomerId = useWatch({
@@ -124,15 +124,16 @@ export default function VendorDetail() {
     },
   });
 
-  const { mutate: updateConvertCustomer, isLoading: isLoadingConvertCustomer } = useConvertToCustomer({
-    id: vendor_id,
-    options: {
-      onSuccess: (data: any) => {
-        setValue("customer_id", data);
-        setSelectFromForm(false);
+  const { mutate: updateConvertCustomer, isLoading: isLoadingConvertCustomer } =
+    useConvertToCustomer({
+      id: vendor_id,
+      options: {
+        onSuccess: (data: any) => {
+          setValue("customer_id", data);
+          setSelectFromForm(false);
+        },
       },
-    },
-  });
+    });
 
   const { mutate: deleteVendor, isLoading: isLoadingDeleteVendor }: any = useDeleteVendor({
     options: {
@@ -156,6 +157,7 @@ export default function VendorDetail() {
         setRadioValue(data?.type?.toLowerCase());
 
         // General Form
+        setValue("valid_until", data.validUntil);
         setValue("customer_id", data.customerId);
         setValue("status", data?.status);
         setValue("name", data?.name);
@@ -164,7 +166,7 @@ export default function VendorDetail() {
         setCompanyLogo(data?.companyLogo);
         setValue("individu.job", data?.personalJob);
         setValue("individu.title", data?.personalTitle);
-        setValue("individu.company", data?.personalCompany);
+        // setValue("individu.company", data?.personalCompany);
         setValue("mobile", data?.mobile);
         setValue("language", data?.language);
         setValue("phone", data?.phone);
@@ -197,9 +199,9 @@ export default function VendorDetail() {
           street: address.street,
           country: address.country,
           province:
-              address.countryLevelsArray[0] === 0 || address.countryLevelsArray[0] === undefined
-                ? ""
-                : address.countryLevelsArray[0],
+            address.countryLevelsArray[0] === 0 || address.countryLevelsArray[0] === undefined
+              ? ""
+              : address.countryLevelsArray[0],
           city: address.countryLevelsArray[1] ?? "",
           district: address.countryLevelsArray[2] ?? "",
           zone: address.countryLevelsArray[3] ?? "",
@@ -247,49 +249,53 @@ export default function VendorDetail() {
   });
 
   const onSubmit = (data: any) => {
-    const companyPayload = radioValue === "company"
-      ? { logo: companyLogo, website: data?.company?.website ?? "" }
-      : null;
+    const companyPayload =
+      radioValue === "company"
+        ? { logo: companyLogo, website: data?.company?.website ?? "" }
+        : null;
 
-    const individuPayload = radioValue === "individu"
-      ? {
-        title: data?.individu?.title ?? "",
-        company: data?.individu?.company ?? "",
-        job: data?.individu?.job ?? "",
-      }
-      : null;
+    const individuPayload =
+      radioValue === "individu"
+        ? {
+            title: data?.individu?.title ?? "",
+            // company: data?.individu?.company ?? "",
+            job: data?.individu?.job ?? "",
+          }
+        : null;
 
-    const contactsPayload = data?.contacts?.map((contact: any) => {
-      delete contact?.filtered;
-      delete contact?.key;
-      return contact;
-    }) ?? [];
+    const contactsPayload =
+      data?.contacts?.map((contact: any) => {
+        delete contact?.filtered;
+        delete contact?.key;
+        return contact;
+      }) ?? [];
 
-    const addressPayload = data?.addresses?.map((address: any) => {
-      const mappCountrylevel = [];
+    const addressPayload =
+      data?.addresses?.map((address: any) => {
+        const mappCountrylevel = [];
 
-      mappCountrylevel[0] = address.province === "" ? 0 : address.province;
-      mappCountrylevel[1] = address.city === "" ? 0 : address.city;
-      mappCountrylevel[2] = address.district === "" ? 0 : address.district;
-      mappCountrylevel[3] = address.zone === "" ? 0 : address.zone;
+        mappCountrylevel[0] = address.province === "" ? 0 : address.province;
+        mappCountrylevel[1] = address.city === "" ? 0 : address.city;
+        mappCountrylevel[2] = address.district === "" ? 0 : address.district;
+        mappCountrylevel[3] = address.zone === "" ? 0 : address.zone;
 
-      // cek apakah array isinya semuanya 0
-      const allEqual = mappCountrylevel.every((value) => value === 0);
+        // cek apakah array isinya semuanya 0
+        const allEqual = mappCountrylevel.every((value) => value === 0);
 
-      return {
-        id: address.id,
-        is_primary: address.is_primary,
-        type: address.type,
-        street: address.street,
-        country: address.country,
-        country_levels: allEqual ? [] : mappCountrylevel,
-        postal_code: address.postal_code,
-        lon: address.lon,
-        lat: address.lat,
-        photo: address.photo?.map((photoObj: any) => photoObj?.response?.data ?? photoObj?.url),
-        deleted: false,
-      };
-    }) ?? [];
+        return {
+          id: address.id,
+          is_primary: address.is_primary,
+          type: address.type,
+          street: address.street,
+          country: address.country,
+          country_levels: allEqual ? [] : mappCountrylevel,
+          postal_code: address.postal_code,
+          lon: address.lon,
+          lat: address.lat,
+          photo: address.photo?.map((photoObj: any) => photoObj?.response?.data ?? photoObj?.url),
+          deleted: false,
+        };
+      }) ?? [];
 
     const purchasingPayload = objectIsEmpty(data?.purchasing) ? null : data?.purchasing;
 
@@ -303,12 +309,13 @@ export default function VendorDetail() {
     delete data?.invoicing?.tax_type;
     delete data?.invoicing?.tax_code;
 
-    const mappingInvoicing = invoicingPayload !== null
-      ? {
-        ...invoicingPayload,
-        banks: mappingBank,
-      }
-      : null;
+    const mappingInvoicing =
+      invoicingPayload !== null
+        ? {
+            ...invoicingPayload,
+            banks: mappingBank,
+          }
+        : null;
 
     const formData = {
       customer_id: "",
@@ -338,7 +345,7 @@ export default function VendorDetail() {
         <Row alignItems="center">
           <ArrowLeft style={{ cursor: "pointer" }} onClick={() => router.back()} />
           <Text variant="h4">{vendorData?.name}</Text>
-          <Spacer size={10} />
+          {/* <Spacer size={10} />
           <Radio
             value="company"
             checked={radioValue === "company"}
@@ -357,7 +364,7 @@ export default function VendorDetail() {
               SetActiveTab("Addresses");
             }}
           />
-          Individu
+          Individu */}
         </Row>
 
         <Spacer size={10} />
@@ -424,7 +431,10 @@ export default function VendorDetail() {
 
         <VendorContext.Provider
           value={{
-            companyLogo, setCompanyLogo, selectFromForm, setSelectFromForm,
+            companyLogo,
+            setCompanyLogo,
+            selectFromForm,
+            setSelectFromForm,
           }}
         >
           <FormProvider {...methods}>

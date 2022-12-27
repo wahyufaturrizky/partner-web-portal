@@ -68,8 +68,17 @@ const ModalAddMenu = ({
 
   const onSelectChange = (selectedRowKeys: any, selectedRows: any) => {
     const mapSelectedRows = selectedRows.map((element: any, index: any) => {
-      if (element === undefined && selectedRowsMenu[index] !== undefined) {
-        return selectedRowsMenu[index];
+      if (element === undefined && selectedRowKeys[index] !== undefined) {
+        const filterSelectedRowsMenu =
+          selectedRowsMenu.filter((rowMenu: any) => rowMenu.field_id === selectedRowKeys[index]) ??
+          [];
+        return {
+          id: filterSelectedRowsMenu.length > 0 ? filterSelectedRowsMenu[0].id ?? 0 : 0,
+          field_id: filterSelectedRowsMenu[0]?.field_id,
+          field_name: filterSelectedRowsMenu[0]?.field_name,
+          key: filterSelectedRowsMenu[0]?.key,
+          field_key: filterSelectedRowsMenu[0]?.field_key,
+        };
       } else {
         if (type === "edit") {
           const filterSelectedRowsMenu =
@@ -83,7 +92,6 @@ const ModalAddMenu = ({
         }
       }
     });
-
     setSelectedMenu(mapSelectedRows);
     setSelectedRowKeysMenu(selectedRowKeys);
   };

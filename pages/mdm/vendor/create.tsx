@@ -71,7 +71,7 @@ export default function VendorCreate() {
     const individuPayload = radioValue === "individu"
       ? {
         title: data?.individu?.title ?? "",
-        company: data?.individu?.company ?? "",
+        // company: data?.individu?.company ?? "",
         job: data?.individu?.job ?? "",
       }
       : null;
