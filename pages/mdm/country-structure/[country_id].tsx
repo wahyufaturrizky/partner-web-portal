@@ -134,7 +134,16 @@ const CreateConfig = () => {
         structureElements: Object.values(updateAllStructure.delete).flat() || [],
       },
       update: {
-        structure: updateCountryStructure.update,
+        structure: updateCountryStructure.update.map((structure: any, index) => {
+          const isCityIndex = JSON.parse(JSON.stringify(updateCountryStructure.update)).reverse().findIndex((arr) => arr.isCity);
+          const indexReversed = updateCountryStructure.update.length - 1 - isCityIndex;
+          if (indexReversed !== index) {
+            structure.isCity = false;
+          } else {
+            structure.isCity = true;
+          }
+          return structure;
+        }),
       },
       addNew: {
         structure: updateCountryStructure.addNew.map((data: any) => ({
@@ -454,12 +463,12 @@ const CreateConfig = () => {
   Delete
 										</Button>
                   )}
-                  {listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Update")
-									  .length > 0 && (
-										<Button disabled={errors?.name || isCountryNameFocused} size="big" variant="primary" onClick={onSubmit}>
-  Save
-										</Button>
-                  )}
+                  {/* {listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Update")
+									  .length > 0 && ( */}
+                  <Button disabled={errors?.name || isCountryNameFocused} size="big" variant="primary" onClick={onSubmit}>
+                    Save
+                  </Button>
+                  {/* )} */}
                 </Row>
               </Row>
             </Row>
