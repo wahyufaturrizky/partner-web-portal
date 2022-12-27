@@ -35,7 +35,10 @@ const CreatePartnerConfigApproval: any = () => {
   const [numberOfApprovalStage, setnumberOfApprovalStage] = useState<any>(1);
   const [associateRoleUserData, setAssociateRoleUserData] = useState([
     {
-      stage: 1, roles: 0, users: 0, cc_email: false,
+      stage: 1,
+      roles: 0,
+      users: 0,
+      cc_email: false,
     },
   ]);
   const [roleList, setRoleList] = useState([]);
@@ -129,23 +132,25 @@ const CreatePartnerConfigApproval: any = () => {
     },
   });
 
-  const { data: fieldsPermissionList, isLoading: isLoadingFieldsPermissionList } = usePartnerConfigPermissionLists({
-    query: {
-      page: 1,
-      limit: 1000,
-    },
-    options: {
-      refetchOnWindowFocus: "always",
-      select: (data: any) => {
-        const mappedData = data?.rows?.map((element: any) => ({
-          id: element.id,
-          value: element.name,
-        }));
-
-        return { data: mappedData, totalRow: data.totalRow };
+  const { data: fieldsPermissionList, isLoading: isLoadingFieldsPermissionList } =
+    usePartnerConfigPermissionLists({
+      query: {
+        page: 1,
+        limit: 1000,
+        approvalPage: true,
       },
-    },
-  });
+      options: {
+        refetchOnWindowFocus: "always",
+        select: (data: any) => {
+          const mappedData = data?.rows?.map((element: any) => ({
+            id: element.id,
+            value: element.name,
+          }));
+
+          return { data: mappedData, totalRow: data.totalRow };
+        },
+      },
+    });
 
   const handleChangeInput = (e: any) => {
     // Set Approval Stage
@@ -171,7 +176,10 @@ const CreatePartnerConfigApproval: any = () => {
 
     for (let i = 0; i < lengthValue; i++) {
       associateRoleUser.push({
-        stage: i + 1, roles: [], users: [], cc_email: false,
+        stage: i + 1,
+        roles: [],
+        users: [],
+        cc_email: false,
       });
     }
 
@@ -218,13 +226,7 @@ const CreatePartnerConfigApproval: any = () => {
       dataIndex: "partner_user_id",
       width: "15%",
       render: (value: any, record: any, index: any) => (
-        <UserField
-          control={control}
-          index={index}
-          roleId={roleId}
-          indexRole={indexRole}
-          type=""
-        />
+        <UserField control={control} index={index} roleId={roleId} indexRole={indexRole} type="" />
       ),
     },
     {
@@ -434,9 +436,9 @@ const CreatePartnerConfigApproval: any = () => {
                       noSearch
                       required
                       error={
-                          errors?.partner_permission_id?.type === "required"
-                          && "This field is required"
-                        }
+                        errors?.partner_permission_id?.type === "required" &&
+                        "This field is required"
+                      }
                     />
                   )}
                 />

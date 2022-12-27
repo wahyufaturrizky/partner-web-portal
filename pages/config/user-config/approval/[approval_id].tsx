@@ -18,7 +18,10 @@ import {
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 
-import { usePartnerConfigPermissionLists, useUserPermissions } from "hooks/user-config/usePermission";
+import {
+  usePartnerConfigPermissionLists,
+  useUserPermissions,
+} from "hooks/user-config/usePermission";
 import { lang } from "lang";
 import ArrowLeft from "assets/icons/arrow-left.svg";
 import { useForm, Controller } from "react-hook-form";
@@ -47,7 +50,10 @@ const DetailUserConfigApproval: any = () => {
   const [numberOfApprovalStage, setnumberOfApprovalStage] = useState<any>(1);
   const [associateRoleUserData, setAssociateRoleUserData] = useState([
     {
-      stage: 1, roles: 0, users: 0, cc_email: false,
+      stage: 1,
+      roles: 0,
+      users: 0,
+      cc_email: false,
     },
   ]);
   const [roleList, setRoleList] = useState([]);
@@ -62,6 +68,7 @@ const DetailUserConfigApproval: any = () => {
     handleSubmit,
     formState: { errors },
     setValue,
+    getValues,
   } = useForm();
 
   const pagination = usePagination({
@@ -122,23 +129,27 @@ const DetailUserConfigApproval: any = () => {
     },
   });
 
-  const { data: fieldsPermissionList, isLoading: isLoadingFieldsPermissionList } = usePartnerConfigPermissionLists({
-    query: {
-      page: 1,
-      limit: 1000,
-    },
-    options: {
-      refetchOnWindowFocus: "always",
-      select: (data: any) => {
-        const mappedData = data?.rows?.map((element: any) => ({
-          id: element.id,
-          value: element.name,
-        }));
-
-        return { data: mappedData, totalRow: data.totalRow };
+  const { data: fieldsPermissionList, isLoading: isLoadingFieldsPermissionList } =
+    usePartnerConfigPermissionLists({
+      query: {
+        page: 1,
+        limit: 1000,
+        approvalPage: true,
+        isEdit: true,
+        permissionId: getValues("partner_permission_id"),
       },
-    },
-  });
+      options: {
+        refetchOnWindowFocus: "always",
+        select: (data: any) => {
+          const mappedData = data?.rows?.map((element: any) => ({
+            id: element.id,
+            value: element.name,
+          }));
+
+          return { data: mappedData, totalRow: data.totalRow };
+        },
+      },
+    });
 
   const { mutate: deleteApproval }: any = useDeletePartnerConfigApprovalList({
     options: {
@@ -164,7 +175,10 @@ const DetailUserConfigApproval: any = () => {
         setApprovalStages(mappingApprovalStages);
         setnumberOfApprovalStage(mappingApprovalStages?.length);
 
-        const sortAssociateRoleUserData = data?.partnerApprovalStages?.sort((a: any, b: any) => (a.stage > b.stage ? 1 : b.stage > a.stage ? -1 : 0)) ?? [];
+        const sortAssociateRoleUserData =
+          data?.partnerApprovalStages?.sort((a: any, b: any) =>
+            a.stage > b.stage ? 1 : b.stage > a.stage ? -1 : 0
+          ) ?? [];
 
         const mappingAssociateRoleUserData = sortAssociateRoleUserData.map(
           (el: any, index: any) => ({
@@ -172,7 +186,7 @@ const DetailUserConfigApproval: any = () => {
             roles: el?.partnerRoleId,
             users: el?.partnerUserId,
             cc_email: el?.isCcEmail,
-          }),
+          })
         );
 
         const mappingDefaultValue = sortAssociateRoleUserData.map((el: any, index: any) => ({
@@ -230,7 +244,10 @@ const DetailUserConfigApproval: any = () => {
 
     for (let i = 0; i < lengthValue; i++) {
       associateRoleUser.push({
-        stage: i + 1, roles: 0, users: 0, cc_email: false,
+        stage: i + 1,
+        roles: 0,
+        users: 0,
+        cc_email: false,
       });
     }
 
@@ -281,8 +298,8 @@ const DetailUserConfigApproval: any = () => {
           control={control}
           index={index}
           roleId={roleId || record.roles}
-            // roleId={firstFetch ? record.roles : roleId}
-            // indexRole={indexRole}
+          // roleId={firstFetch ? record.roles : roleId}
+          // indexRole={indexRole}
           indexRole={firstFetch ? index : indexRole}
           type="update"
         />
@@ -318,7 +335,7 @@ const DetailUserConfigApproval: any = () => {
   });
 
   const listPermission = dataUserPermission?.permission?.filter(
-    (filtering: any) => filtering.menu === "Approval List",
+    (filtering: any) => filtering.menu === "Approval List"
   );
   const onSubmit = (data: any) => {
     const length = numberOfApprovalStage === "" ? 1 : numberOfApprovalStage;
@@ -359,11 +376,7 @@ const DetailUserConfigApproval: any = () => {
       <Col>
         <Row gap="4px" alignItems="center">
           <ArrowLeft style={{ cursor: "pointer" }} onClick={() => Router.back()} />
-          <Text variant="h4">
-            Approval Partner Detail -
-            {' '}
-            {dataPartnerConfigApprovalList?.name}
-          </Text>
+          <Text variant="h4">Approval Partner Detail - {dataPartnerConfigApprovalList?.name}</Text>
         </Row>
         <Spacer size={20} />
         <Card>
@@ -519,8 +532,8 @@ const DetailUserConfigApproval: any = () => {
                         noSearch
                         required
                         error={
-                          errors?.partner_permission_id?.type === "required"
-                          && "This field is required"
+                          errors?.partner_permission_id?.type === "required" &&
+                          "This field is required"
                         }
                       />
                     )}
@@ -586,11 +599,7 @@ const DetailUserConfigApproval: any = () => {
                                 }}
                               />
                               <div>
-                                <Text variant="h6">
-                                  Stage
-                                  {' '}
-                                  {index + 1}
-                                </Text>
+                                <Text variant="h6">Stage {index + 1}</Text>
                               </div>
                             </>
                           )}
