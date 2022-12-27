@@ -619,7 +619,7 @@ const AdminLayout = (props: any) => {
           setCompanies(res.data.data.rows);
           setIsLoading(false);
         })
-        .catch(() => {
+        .catch((err) => {
           window.location.reload();
         });
     }
