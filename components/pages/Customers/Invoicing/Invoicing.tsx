@@ -25,6 +25,7 @@ import ModalAddBankAccountCustomer from "components/elements/Modal/ModalAddBankA
 
 const Invoicing = () => {
   const { register, control, setValue } = useFormContext();
+  const companyCode = localStorage.getItem("companyCode");
 
   const { fields, append, remove, update }: any = useFieldArray({
     control,
@@ -67,7 +68,7 @@ const Invoicing = () => {
     isFetching: isFetchingCoa,
   } = useCoaVendor({
     query: {
-      company_code: "KSNI",
+      company_code: companyCode,
       account_type: "payable",
     },
     options: {
@@ -193,12 +194,14 @@ const Invoicing = () => {
               width="100%"
               type="number"
               height="50px"
+              placeholder={"Rp 5.000.000"}
               {...register("invoicing.credit_limit")}
             />
             <Spacer size={10} />
             <Input
               label="Credit Used"
               width="100%"
+              placeholder={"Rp 5.000.000"}
               height="50px"
               disabled
               {...register("invoicing.credit_used")}
@@ -208,6 +211,7 @@ const Invoicing = () => {
             <Input
               label="Credit Balance"
               width="100%"
+              placeholder={"Rp 5.000.000"}
               height="50px"
               disabled
               {...register("invoicing.credit_balance")}

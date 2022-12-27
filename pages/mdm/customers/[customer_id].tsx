@@ -10,6 +10,7 @@ import {
   Radio,
   Tabs,
   Spin,
+  Lozenge,
 } from "pink-lava-ui";
 import styled from "styled-components";
 import { useRouter } from "next/router";
@@ -56,19 +57,24 @@ export default function CustomerDetail() {
 
   const methods = useForm({
     defaultValues: {
-      status: "Inactive",
       customer_id: "",
-      name: "",
-      group: 1,
-      mobile: "",
-      phone: "",
-      language: "",
-      tax: "",
-      email: "",
-      external_code: "",
-      is_pkp: false,
-      contacts: [],
-      addresses: [],
+      customer: {
+        name: "",
+        customer_group: 1,
+        mobile: "",
+        phone: "",
+        language: "",
+        tax_number: "",
+        email: "",
+        external_code: "",
+        ppkp: false,
+        active_status: "ACTIVE",
+        website: "",
+        is_company: true,
+      },
+      contact: [],
+      address: [],
+      bank: [],
       purchasing: {},
       invoicing: {},
       sales: {},
@@ -158,24 +164,22 @@ export default function CustomerDetail() {
 
         // General Form
         setValue("customer_id", data.customerId);
-        setValue("status", data?.status);
-        setValue("name", data?.name);
-        setValue("group", data?.group);
-        setValue("company.website", data?.companyWebsite);
+        setValue("customer.active_status", data?.status);
+        setValue("customer.name", data?.name);
+        setValue("customer.tax_number", data?.tax);
+        setValue("customer.website", data?.companyWebsite);
+        setValue("customer.phone", data?.phone);
+        setValue("customer.mobile", data?.mobile);
+        setValue("customer.email", data?.email);
+        setValue("customer.external_code", data?.externalCode);
+        setValue("customer.ppkp", data?.isPkp);
+        setValue("customer.language", data?.language);
+        setValue("customer.customer_group", data?.group);
+        setValue("customer.is_company", data?.isCompany);
         setCompanyLogo(data?.companyLogo);
-        setValue("individu.job", data?.personalJob);
-        setValue("individu.title", data?.personalTitle);
-        setValue("individu.company", data?.personalCompany);
-        setValue("mobile", data?.mobile);
-        setValue("language", data?.language);
-        setValue("phone", data?.phone);
-        setValue("tax", data?.tax);
-        setValue("email", data?.email);
-        setValue("is_pkp", data?.isPkp);
-        setValue("external_code", data?.externalCode);
 
         // Contact Form
-        const mappingContact = data?.contacts?.map((contact: any) => ({
+        const mappingContact = data?.contact?.map((contact: any) => ({
           id: contact.id,
           filtered: false,
           is_primary: contact.isPrimary,
@@ -188,10 +192,10 @@ export default function CustomerDetail() {
           deleted: false,
         }));
 
-        setValue("contacts", mappingContact);
+        setValue("contact", mappingContact);
 
         // Address Form
-        const mappingAddress = data?.addresses?.map((address: any) => ({
+        const mappingAddress = data?.address?.map((address: any) => ({
           id: address.id,
           is_primary: address.isPrimary,
           type: address.type,
@@ -216,7 +220,7 @@ export default function CustomerDetail() {
           deleted: false,
         }));
 
-        setValue("addresses", mappingAddress);
+        setValue("address", mappingAddress);
 
         // Purchasing Form
         const mappingPurchasing = {
@@ -243,6 +247,12 @@ export default function CustomerDetail() {
         };
 
         setValue("invoicing", mappingInvoicing);
+
+        const mappingBank = data?.bank?.map((el: any) => {
+          return el;
+        });
+
+        setValue("bank", mappingBank);
       },
     },
   });
@@ -345,7 +355,10 @@ export default function CustomerDetail() {
           <ArrowLeft style={{ cursor: "pointer" }} onClick={() => router.back()} />
           <Text variant="h4">{customerData?.name}</Text>
           <Spacer size={10} />
-          <Radio
+          <Lozenge variant="blue">
+            <Row alignItems="center">{customerData?.registrationStatus}</Row>
+          </Lozenge>
+          {/* <Radio
             value="company"
             checked={radioValue === "company"}
             onChange={(e: any) => {
@@ -363,7 +376,7 @@ export default function CustomerDetail() {
               SetActiveTab("Addresses");
             }}
           />
-          Individu
+          Individu */}
         </Row>
 
         <Spacer size={10} />
@@ -372,7 +385,7 @@ export default function CustomerDetail() {
           <Row justifyContent="space-between" alignItems="center" nowrap>
             <Controller
               control={control}
-              name="status"
+              name="customer.active_status"
               defaultValue="Active"
               render={({ field: { onChange, value } }) => (
                 <Dropdown

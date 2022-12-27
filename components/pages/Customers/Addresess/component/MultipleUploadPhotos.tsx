@@ -32,7 +32,7 @@ const MultipleUploadPhotos = ({ index, control }: any) => {
   return (
     <Controller
       control={control}
-      name={`addresses.${index}.photo`}
+      name={`address.${index}.photo`}
       defaultValue={[]}
       render={({ field: { onChange, value }, formState: { errors } }) => (
         <MultipleUpload

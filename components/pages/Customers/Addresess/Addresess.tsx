@@ -206,7 +206,7 @@ const Addresses = ({ formType }: any) => {
               <Controller
                 control={control}
                 defaultValue={""}
-                name={`addresses.${addressIndex}.type`}
+                name={`address.${addressIndex}.type`}
                 render={({ field: { onChange, value }, formState: { errors } }) => (
                   <Col width="50%">
                     <Text variant="headingRegular">Address Type</Text>
@@ -239,7 +239,7 @@ const Addresses = ({ formType }: any) => {
                   height="40px"
                   defaultValue={""}
                   placeholder={"e.g Front Groceries No. 5"}
-                  {...register(`addresses.${addressIndex}.street`)}
+                  {...register(`address.${addressIndex}.street`)}
                 />
               </Col>
             </Row>
@@ -250,7 +250,7 @@ const Addresses = ({ formType }: any) => {
               <Controller
                 control={control}
                 defaultValue={""}
-                name={`addresses.${addressIndex}.country`}
+                name={`address.${addressIndex}.country`}
                 render={({ field: { onChange }, formState: { errors } }) => (
                   <Col width="50%">
                     {isLoadingCountry ? (
@@ -293,7 +293,7 @@ const Addresses = ({ formType }: any) => {
               <Controller
                 control={control}
                 defaultValue={""}
-                name={`addresses.${addressIndex}.province`}
+                name={`address.${addressIndex}.province`}
                 render={({ field: { onChange, value }, formState: { errors } }) => (
                   <Col width="50%">
                     <Text variant="headingRegular">Province</Text>
@@ -322,7 +322,7 @@ const Addresses = ({ formType }: any) => {
               <Controller
                 control={control}
                 defaultValue={""}
-                name={`addresses.${addressIndex}.city`}
+                name={`address.${addressIndex}.city`}
                 render={({ field: { onChange, value }, formState: { errors } }) => (
                   <Col width="50%">
                     <Text variant="headingRegular">City</Text>
@@ -347,7 +347,7 @@ const Addresses = ({ formType }: any) => {
               <Controller
                 control={control}
                 defaultValue={""}
-                name={`addresses.${addressIndex}.district`}
+                name={`address.${addressIndex}.district`}
                 render={({ field: { onChange, value }, formState: { errors } }) => (
                   <Col width="50%">
                     <Text variant="headingRegular">District</Text>
@@ -376,7 +376,7 @@ const Addresses = ({ formType }: any) => {
               <Controller
                 control={control}
                 defaultValue={""}
-                name={`addresses.${addressIndex}.zone`}
+                name={`address.${addressIndex}.zone`}
                 render={({ field: { onChange, value }, formState: { errors } }) => (
                   <Col width="50%">
                     <Text variant="headingRegular">Zone</Text>
@@ -399,7 +399,7 @@ const Addresses = ({ formType }: any) => {
               <Controller
                 control={control}
                 defaultValue={""}
-                name={`addresses.${addressIndex}.postal_code`}
+                name={`address.${addressIndex}.postal_code`}
                 render={({ field: { onChange, value }, formState: { errors } }) => (
                   <Col width="50%">
                     <Text variant="headingRegular">Postal Code</Text>
@@ -432,7 +432,7 @@ const Addresses = ({ formType }: any) => {
                   height="40px"
                   defaultValue={""}
                   placeholder={"e.g 38.8951"}
-                  {...register(`addresses.${addressIndex}.lon`)}
+                  {...register(`address.${addressIndex}.lon`)}
                 />
               </Col>
 
@@ -443,7 +443,7 @@ const Addresses = ({ formType }: any) => {
                   height="40px"
                   defaultValue={""}
                   placeholder={"e.g -77.0364"}
-                  {...register(`addresses.${addressIndex}.lat`)}
+                  {...register(`address.${addressIndex}.lat`)}
                 />
               </Col>
             </Row>

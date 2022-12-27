@@ -13,7 +13,7 @@ import {
 import { ExclamationCircleOutlined } from "@ant-design/icons";
 import { useFormContext, Controller, useWatch } from "react-hook-form";
 import { useUploadLogo } from "hooks/mdm/vendor/useVendorGroup";
-import { useLanguages } from "hooks/languages/useLanguages";
+import { useLanguages, useLanguageLibrary } from "hooks/languages/useLanguages";
 import useDebounce from "lib/useDebounce";
 import styled from "styled-components";
 import { CustomerContext } from "context/CustomerContext";
@@ -37,12 +37,12 @@ const General = ({ type, formType }: any) => {
   const debounceFetchLanguages = useDebounce(searchLanguage, 1000);
   const debounceFetchCustomerGroup = useDebounce(searchCustomerGroup, 1000);
 
-  const { data: languagesData, isLoading: isLoadingLanguages } = useLanguages({
+  const { data: languagesData, isLoading: isLoadingLanguages } = useLanguageLibrary({
     options: {
       select: (data: any) => {
         const mappedData = data?.rows?.map((element: any) => {
           return {
-            value: element.name,
+            value: `${element.id} - ${element.name}`,
             id: element.id,
           };
         });
@@ -87,7 +87,7 @@ const General = ({ type, formType }: any) => {
     },
   });
 
-  const { mutate: uploadLogoVendor } = useUploadLogo({
+  const { mutate: uploadLogoCustomer } = useUploadLogo({
     options: {
       onSuccess: (data: any) => {
         setCompanyLogo(data);
@@ -191,7 +191,7 @@ const General = ({ type, formType }: any) => {
               onSubmit={(files: any) => {
                 const formData: any = new FormData();
                 formData.append("upload_file", files);
-                uploadLogoVendor(formData);
+                uploadLogoCustomer(formData);
               }}
               defaultFile={companyLogo}
               withCrop

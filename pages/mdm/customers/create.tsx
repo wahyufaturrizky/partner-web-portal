@@ -31,7 +31,7 @@ export default function CustomerCreate() {
   const methods = useForm({
     defaultValues: {
       customer: {
-        active_status: "Active",
+        active_status: "ACTIVE",
       },
       purchasing: {},
       invoicing: {},
@@ -86,7 +86,7 @@ export default function CustomerCreate() {
       }) ?? [];
 
     const addressPayload =
-      data?.addresses?.map((address: any) => {
+      data?.address?.map((address: any) => {
         const mappCountrylevel: any = [];
 
         mappCountrylevel[0] = address.province === "" ? 0 : address.province;
@@ -116,10 +116,11 @@ export default function CustomerCreate() {
 
     const salesPayload = objectIsEmpty(data?.sales) ? null : data?.sales;
 
-    const mappingBank = data?.bank?.map((bank: any) => {
-      delete bank.key;
-      return bank;
-    });
+    const mappingBank =
+      data?.bank?.map((bank: any) => {
+        delete bank.key;
+        return bank;
+      }) ?? [];
 
     // delete data?.invoicing?.tax_type;
     // delete data?.invoicing?.tax_code;
@@ -131,7 +132,6 @@ export default function CustomerCreate() {
     //         banks: mappingBank,
     //       }
     //     : null;
-
     const formData = {
       ...data,
       customer: customerPayload,
@@ -181,7 +181,7 @@ export default function CustomerCreate() {
           <Controller
             control={control}
             name="customer.active_status"
-            defaultValue="Active"
+            defaultValue="ACTIVE"
             render={({ field: { onChange, value } }) => (
               <Dropdown
                 label=""
@@ -189,8 +189,8 @@ export default function CustomerCreate() {
                 noSearch
                 isHtml
                 items={[
-                  { id: "Active", value: '<div key="1" style="color:green;">Active</div>' },
-                  { id: "Inactive", value: '<div key="2" style="color:red;">Inactive</div>' },
+                  { id: "ACTIVE", value: '<div key="1" style="color:green;">Active</div>' },
+                  { id: "INACTIVE", value: '<div key="2" style="color:red;">Inactive</div>' },
                 ]}
                 defaultValue={value}
                 handleChange={(value: any) => {
