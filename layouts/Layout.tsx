@@ -7,6 +7,7 @@ import {
   Header,
   Layout,
   MenuLogout,
+  Modal,
   Notification,
   Row,
   Sidebar,
@@ -15,10 +16,9 @@ import {
 } from "pink-lava-ui";
 import { useEffect, useState } from "react";
 
-import styled from "styled-components";
-import { lang } from "lang";
 import axios from "axios";
-import { useNotification } from 'hooks/notification/useNotification';
+import Image from "next/image";
+import styled from "styled-components";
 import {
   ICCalendar,
   ICDollar,
@@ -529,12 +529,11 @@ const menuMdm = [
   },
 ];
 
-let t;
-if (typeof window !== "undefined") {
-  t = localStorage.getItem("lan") || "en-US";
-}
-
-const itemsMenu = [{ id: 'config', label: "Config" }, { id: 'mdm', label: "Master Data Management" }, { id: 'fico', label: "Finance", url: '/fico' }];
+const itemsMenu = [
+  { id: "config", label: "Config" },
+  { id: "mdm", label: "Master Data Management" },
+  { id: "fico", label: "Finance", url: "/fico" },
+];
 
 const flexStyles = {
   display: "flex",
@@ -559,18 +558,27 @@ const getLinkViewDetail = (screenCode: any, referenceCode: any, referenceId: any
   return url;
 };
 
+const apiURLNextPublicApiBase = process.env.NEXT_PUBLIC_API_BASE;
+
 const AdminLayout = (props: any) => {
   const [current, setCurrent] = useState("0");
   const [isChangeLang, setIsChangeLang] = useState(false);
   const [companies, setCompanies] = useState([]);
   const [notifItems, setNotifItems] = useState([]);
+  const [isDontHavePermission, setIsDontHavePermission] = useState(false);
+
   const [totalUnread, setTotalUnread] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
-  const [companyCode, setCompanyCode] = useState("PTKSNI");
+  const [companyCode, setCompanyCode] = useState("KSNI");
+  const [dataUserPermission, setDataUserPermission] = useState("PTKSNI");
   const router = useRouter();
 
   const handleCLickTabNav = (e: any) => {
-    if (itemsMenu[e.key].url) { setCurrent(e.key); window.location.href = itemsMenu[e.key].url || '/'; return; }
+    if (itemsMenu[e.key].url) {
+      setCurrent(e.key);
+      window.location.href = itemsMenu[e.key].url || "/";
+      return;
+    }
     setCurrent(e.key);
     Router.push("/dashboard");
   };
@@ -592,27 +600,28 @@ const AdminLayout = (props: any) => {
   useEffect(() => {
     async function getCompanyList() {
       const token = localStorage.getItem("token");
-      const apiURL = process.env.NEXT_PUBLIC_API_BASE;
       setIsLoading(true);
-      await axios.get(`${apiURL}/hermes/company`, {
-        params: {
-          account_id: 0,
-          search: "",
-          limit: 1000,
-          sortBy: "id",
-          sortOrder: "ASC",
-        },
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
+      await axios
+        .get(`${apiURLNextPublicApiBase}/hermes/company`, {
+          params: {
+            account_id: 0,
+            search: "",
+            limit: 1000,
+            sortBy: "id",
+            sortOrder: "ASC",
+          },
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
         .then((res) => {
-          const currentCompanyCode = localStorage.getItem('companyCode');
+          const currentCompanyCode = localStorage.getItem("companyCode");
           const defaultCompany = currentCompanyCode
-            ? res.data.data.rows.find((data) => data.code === currentCompanyCode) : res.data.data.rows[0];
+            ? res.data.data.rows.find((data) => data.code === currentCompanyCode)
+            : res.data.data.rows[0];
           if (!currentCompanyCode) {
-            localStorage.setItem('companyId', defaultCompany.id);
-            localStorage.setItem('companyCode', defaultCompany.code);
+            localStorage.setItem("companyId", defaultCompany.id);
+            localStorage.setItem("companyCode", defaultCompany.code);
           }
 
           setCompanyCode(defaultCompany.code);
@@ -626,38 +635,66 @@ const AdminLayout = (props: any) => {
 
     async function getNotification() {
       const token = localStorage.getItem("token");
-      const apiURL = process.env.NEXT_PUBLIC_API_BASE;
       setIsLoading(true);
-      await axios.get(`${apiURL}/notification`, {
-        params: {
-          search: "",
-          page: 1,
-          limit: 4,
-          status: "all",
-          company_id: companyCode,
-        },
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
+      await axios
+        .get(`${apiURLNextPublicApiBase}/notification`, {
+          params: {
+            search: "",
+            page: 1,
+            limit: 4,
+            status: "all",
+            company_id: companyCode,
+          },
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
         .then((res) => {
           const totalUnread = res.data.data.total_unread;
           const notifItems = res.data.data.rows?.map((items: any) => ({
             key: items?.id,
             id: items?.id,
             isRead: !!items?.read_date,
-            content: items?.message ? <p dangerouslySetInnerHTML={{ __html: items?.message }} /> : "-",
-            link: () => router.push(getLinkViewDetail(items?.screen_code, items?.reference_code, items?.reference_id)),
+            content: items?.message ? (
+              <p dangerouslySetInnerHTML={{ __html: items?.message }} />
+            ) : (
+              "-"
+            ),
+            link: () =>
+              router.push(
+                getLinkViewDetail(items?.screen_code, items?.reference_code, items?.reference_id)
+              ),
           }));
 
           setNotifItems(notifItems);
           setTotalUnread(totalUnread);
         })
         .catch(() => {
-          localStorage.setItem('companyId', "2");
-          localStorage.setItem('companyCode', "KSNI");
+          localStorage.setItem("companyId", "2");
+          localStorage.setItem("companyCode", "KSNI");
           setCompanies([]);
           setIsLoading(false);
+        });
+    }
+
+    async function getUserPermission() {
+      const token = localStorage.getItem("token");
+
+      setIsLoading(true);
+      await axios
+        .get(`${apiURLNextPublicApiBase}/partner-user/permission`, {
+          params: {
+            company_id: companyCode,
+          },
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        .then((res: any) => {
+          setDataUserPermission(res.data.data);
+        })
+        .catch((e) => {
+          window.alert(e?.message);
         });
     }
 
@@ -665,13 +702,71 @@ const AdminLayout = (props: any) => {
     // localStorage.setItem('companyCode', "KSNI")
     getCompanyList();
     getNotification();
+    getUserPermission();
   }, []);
+
+  const menuByRoutingPath = {
+    "/config/user-config/permission": "Permission List",
+    "/mdm/customers": "Customer",
+    "/mdm/salesman/division": "Sales Division",
+    "/mdm/term-of-payment": "Term Of Payment",
+    "/config/business-process/process": "Process",
+    "/config/business-process": "Business Process",
+    "/config/company-list": "Company List",
+    "/config/finance-config/account-group": "Account Group",
+    "/config/finance-config/coa-template": "Coa Template",
+    "/mdm/company-structure/channel": "Channel",
+    "/config/menu-config/design": "Menu Design",
+    "/config/module-config": "Module Config",
+    "/config/user-config": "User List",
+    "/config/user-config/approval": "Approval List",
+    "/config/user-config/role": "Role List",
+    "/config/user-config/sequence-number": "Sequence Number",
+    "/mdm/company-structure/branch": "Branch",
+    "/mdm/company-structure/purchase-organization": "Purchase Organization",
+    "/mdm/company-structure/sales-organization": "Purchase Organization",
+    "/mdm/cost-center": "Cost Center",
+    "/mdm/country-structure": "Country",
+    "/mdm/country-structure/exchange-rate": "Exchange Rate",
+    "/mdm/country-structure/postal-code": "Postal Code",
+    "/mdm/customers/group": "Customer Group",
+    "/mdm/employee/department": "Department",
+    "/mdm/employee/employee-list": "Employee List",
+    "/mdm/employee/job-level": "Job Level",
+    "/mdm/employee/job-position": "Job Position",
+    "/mdm/pricing/pricing-structure": "Pricing Structure",
+    "/mdm/pricing/retail-pricing": "Retail Pricing",
+    "/mdm/product/product-brand": "Product Brand",
+    "/mdm/product/product-category": "Product Category",
+    "/mdm/product/product-option": "Product Option",
+    "/mdm/product/product-variant": "Product Variant",
+    "/mdm/product/unit-of-measure": "Unit of Measure",
+    "/mdm/profit-center": "Profit Center",
+    "/mdm/salesman": "Salesman",
+    "/mdm/salesman/group": "Salesman Group",
+    "/mdm/tax": "Tax",
+    "/mdm/transportation-group": "Transportation Group",
+    "/mdm/vendor": "Vendor",
+    "/mdm/working-calendar": "Working Calendar",
+  };
+
+  useEffect(() => {
+    if (dataUserPermission) {
+      const listPermission = dataUserPermission?.permission?.filter(
+        (filtering: any) => filtering.menu === menuByRoutingPath[router?.asPath]
+      );
+
+      if (listPermission?.length === 0) {
+        setIsDontHavePermission(true);
+      }
+    }
+  }, [dataUserPermission, router?.asPath]);
 
   const menuConfigFunc = (companies) => {
     const handleChangeCompany = (value) => {
       const selectedCompany = companies.filter((comp) => comp.name == value);
-      localStorage.setItem('companyId', selectedCompany[0].id);
-      localStorage.setItem('companyCode', selectedCompany[0].code);
+      localStorage.setItem("companyId", selectedCompany[0].id);
+      localStorage.setItem("companyCode", selectedCompany[0].code);
     };
 
     return [
@@ -689,8 +784,8 @@ const AdminLayout = (props: any) => {
   const menuMdmFunc = (companies) => {
     const handleChangeCompany = (value) => {
       const selectedCompany = companies.filter((comp) => comp.name == value);
-      localStorage.setItem('companyId', selectedCompany[0].id);
-      localStorage.setItem('companyCode', selectedCompany[0].code);
+      localStorage.setItem("companyId", selectedCompany[0].id);
+      localStorage.setItem("companyCode", selectedCompany[0].code);
     };
 
     return [
@@ -738,7 +833,7 @@ const AdminLayout = (props: any) => {
               totalUnread={totalUnread}
               items={notifItems}
               viewAll={() => {
-                Router.push('/notification');
+                Router.push("/notification");
               }}
             />
             <Spacer size={15} />
@@ -776,7 +871,7 @@ const AdminLayout = (props: any) => {
               </LanguageOption>
             ) : (
               <MenuLogout
-                menu={(
+                menu={
                   <WrapperMenuLogout>
                     <WrapeprProfile>
                       <ICAccount />
@@ -809,12 +904,15 @@ const AdminLayout = (props: any) => {
                       <p>Logout</p>
                     </div>
                   </WrapperMenuLogout>
-                )}
+                }
               >
                 <MenuDropdown>
                   <div
                     style={{
-                      gap: "5px", display: "flex", alignItems: "center", fontSize: "14px",
+                      gap: "5px",
+                      display: "flex",
+                      alignItems: "center",
+                      fontSize: "14px",
                     }}
                   >
                     <ICAccount size={64} />
@@ -828,6 +926,32 @@ const AdminLayout = (props: any) => {
         </Header>
         <div style={{ padding: "20px" }}>{props}</div>
       </Layout>
+
+      <Modal
+        visible={isDontHavePermission}
+        onCancel={() => {
+          setIsDontHavePermission(false);
+          router.back();
+        }}
+        footer={null}
+        content={
+          <Row padding="20px 20px" gap="12px" justifyContent="center">
+            <Image
+              src="/images/image-dont-have-permission.svg"
+              alt="logo-nabati"
+              width={258}
+              height={196}
+            />
+
+            <Text textAlign="center" variant="headingLarge" color="black.regular">
+              You don't have access this menu!
+            </Text>
+            <Text textAlign="center" variant="body1" color="black.dark">
+              Contact your super admin and ask for access permission.
+            </Text>
+          </Row>
+        }
+      />
     </Layout>
   );
 };
