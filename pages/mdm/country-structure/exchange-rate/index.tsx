@@ -29,13 +29,14 @@ import {
   useUploadFileExchangeRate,
 } from "../../../../hooks/mdm/exchange-rate/useExchangeRate";
 
-const downloadFile = (params: any) => mdmDownloadService("/exchange-rate/download", { params }).then((res) => {
-  const dataUrl = window.URL.createObjectURL(new Blob([res.data]));
-  const tempLink = document.createElement("a");
-  tempLink.href = dataUrl;
-  tempLink.setAttribute("download", `exchange-rate${new Date().getTime()}.xlsx`);
-  tempLink.click();
-});
+const downloadFile = (params: any) =>
+  mdmDownloadService("/exchange-rate/download", { params }).then((res) => {
+    const dataUrl = window.URL.createObjectURL(new Blob([res.data]));
+    const tempLink = document.createElement("a");
+    tempLink.href = dataUrl;
+    tempLink.setAttribute("download", `exchange-rate${new Date().getTime()}.xlsx`);
+    tempLink.click();
+  });
 
 const ExchangeRate = () => {
   const router = useRouter();
@@ -58,7 +59,7 @@ const ExchangeRate = () => {
   });
 
   const listPermission = dataUserPermission?.permission?.filter(
-    (filtering: any) => filtering.menu === "Exchange Rate",
+    (filtering: any) => filtering.menu === "Exchange Rate"
   );
 
   const {
@@ -119,14 +120,15 @@ const ExchangeRate = () => {
     },
   });
 
-  const { mutate: uploadFileExchange, isLoading: isLoadingUploadFileExchange } = useUploadFileExchangeRate({
-    options: {
-      onSuccess: () => {
-        queryClient.invalidateQueries(["exchange-rate-list"]);
-        setShowUpload(false);
+  const { mutate: uploadFileExchange, isLoading: isLoadingUploadFileExchange } =
+    useUploadFileExchangeRate({
+      options: {
+        onSuccess: () => {
+          queryClient.invalidateQueries(["exchange-rate-list"]);
+          setShowUpload(false);
+        },
       },
-    },
-  });
+    });
 
   const {
     isFetching: isFetchingCurrenciesInfinite,
@@ -142,11 +144,13 @@ const ExchangeRate = () => {
     options: {
       onSuccess: (data: any) => {
         setTotalRowsCurrenciesInfiniteList(data.pages[0].totalRow);
-        const mappedData = data?.pages?.map((group: any) => group.rows?.map((element: any) => ({
-          ...element,
-          value: element.currency,
-          label: `${element.currency} - ${element.currencyName}`,
-        })));
+        const mappedData = data?.pages?.map((group: any) =>
+          group.rows?.map((element: any) => ({
+            ...element,
+            value: element.currency,
+            label: `${element.currency} - ${element.currencyName}`,
+          }))
+        );
         const flattenArray = [].concat(...mappedData);
         setCurrenciesInfiniteList(flattenArray);
       },
@@ -218,8 +222,6 @@ const ExchangeRate = () => {
   };
 
   const onSubmit = (data) => {
-    console.log(data);
-
     if (dataAccess == "1") {
       setDataCurrency(data.currency);
       setDataFromDate(data.from_date_daily);

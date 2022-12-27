@@ -36,6 +36,7 @@ import { ICDelete, ICEdit } from "assets";
 import WithholdingForm from "components/pages/Tax/fragments/WithholdingForm";
 import TaxTypeForm from "components/pages/Tax/fragments/TaxTypeForm";
 import moment from "moment";
+import { useUserPermissions } from "hooks/user-config/usePermission";
 import ArrowLeft from "../../../assets/icons/arrow-left.svg";
 import { ModalDeleteConfirmation } from "../../../components/elements/Modal/ModalConfirmationDelete";
 import useDebounce from "../../../lib/useDebounce";
@@ -135,6 +136,16 @@ const TaxDetail = () => {
   const [allTaxData, setAllTaxData] = useState<{ data: string }[]>([]);
   const [taxItemId, setTaxItemId] = useState(null);
 
+  const { data: dataUserPermission } = useUserPermissions({
+    options: {
+      onSuccess: () => {},
+    },
+  });
+
+  const listPermission = dataUserPermission?.permission?.filter(
+    (filtering: any) => filtering.menu === "Tax"
+  );
+
   const {
     register,
     control,
@@ -152,15 +163,17 @@ const TaxDetail = () => {
       tax_type: "",
       tax_code: "",
       status: "",
-      item_details: [{
-        tax_item_id: "",
-        tax_item_detail_id: "",
-        period_from: moment(),
-        period_to: moment(),
-        percentage: "",
-        percentage_subject_to_tax: "",
-        withholding_tax_rate: "",
-      }],
+      item_details: [
+        {
+          tax_item_id: "",
+          tax_item_detail_id: "",
+          period_from: moment(),
+          period_to: moment(),
+          percentage: "",
+          percentage_subject_to_tax: "",
+          withholding_tax_rate: "",
+        },
+      ],
     },
   });
 
@@ -228,7 +241,9 @@ const TaxDetail = () => {
     options: {
       onSuccess: (data: any) => {
         pagination.setTotalItems(data?.totalRow);
-        setAllTaxData(data.data);
+        if (data) {
+          setAllTaxData(data?.data);
+        }
       },
       select: (data: any) => {
         const mappedData = data?.pages[0]?.rows?.map((taxDetail: TaxDetail, _index: any) => ({
@@ -247,6 +262,7 @@ const TaxDetail = () => {
             tax_type: item.taxType,
             tax_code: item.taxCode,
             deleted_by: item.deletedBy,
+            status: item.status,
             details: item.details.map((item_detail: any) => ({
               tax_item_id: item_detail.taxItemId,
               tax_item_detail_id: item_detail.taxItemDetailId,
@@ -273,7 +289,6 @@ const TaxDetail = () => {
       },
     },
   });
-
   const { mutate: updateTax, isLoading: isLoadingUpdateTax } = useUpdateTax({
     id: TaxData?.data[0]?.id,
     taxItem: taxItemId,
@@ -293,15 +308,16 @@ const TaxDetail = () => {
     },
   });
 
-  const { mutate: deleteTaxItemDetail, isLoading: isLoadingDeleteTaxItemDetail } = useDeleteTaxItemDetail({
-    options: {
-      onSuccess: () => {
-        queryClient.invalidateQueries(["tax/infinite"]);
-        setShowDelete({ open: false, type: "selection", data: {} });
-        // router.back();
+  const { mutate: deleteTaxItemDetail, isLoading: isLoadingDeleteTaxItemDetail } =
+    useDeleteTaxItemDetail({
+      options: {
+        onSuccess: () => {
+          queryClient.invalidateQueries(["tax/infinite"]);
+          setShowDelete({ open: false, type: "selection", data: {} });
+          // router.back();
+        },
       },
-    },
-  });
+    });
   useEffect(() => {
     if (updatedTaskData) {
       updateTax(updatedTaskData);
@@ -309,9 +325,7 @@ const TaxDetail = () => {
   }, [updatedTaskData]);
 
   // belum bisa dari backend
-  const deleteTax = (param: any, type :any) => {
-    // console.log(param.index);
-
+  const deleteTax = (param: any, type: any) => {
     const deleteParam: any = {
       tax_ids: [TaxData?.data[0]?.id],
       tax_item_ids: [param.tax_item_id],
@@ -319,18 +333,14 @@ const TaxDetail = () => {
     };
     if (type == "item-detail") {
       delete deleteParam.tax_ids;
-      // console.log("item-detail",deleteParam);
       deleteTaxItemDetail(deleteParam);
     } else {
       delete deleteParam.tax_item_detail_ids;
-      // console.log("item",deleteParam);
       deleteTaxItem(deleteParam);
     }
   };
 
   const handleNewTax = (data: any) => {
-    // console.log("DATA",data);
-
     const newTax: any = {
       tax_id: TaxData?.data[0]?.id,
       tax_name: data.tax_name,
@@ -344,8 +354,16 @@ const TaxDetail = () => {
         tax_item_detail_id: item?.tax_item_detail_id ? item?.tax_item_detail_id : "",
         percentage: item?.percentage ? item?.percentage : "",
         // period_from: item?.period ? moment(item?.period[0]).format("DD/MM/YYYY") : "",
-        period_from: item.period ? item.period[0].includes('/') ? item.period[0] : moment(item.period[0]).format("DD/MM/YYYY") : "",
-        period_to: item.period ? item.period[1].includes('/') ? item.period[1] : moment(item.period[1]).format("DD/MM/YYYY") : "",
+        period_from: item.period
+          ? item.period[0].includes("/")
+            ? item.period[0]
+            : moment(item.period[0]).format("DD/MM/YYYY")
+          : "",
+        period_to: item.period
+          ? item.period[1].includes("/")
+            ? item.period[1]
+            : moment(item.period[1]).format("DD/MM/YYYY")
+          : "",
         percentage_subject_to_tax: item?.percentage_subject_to_tax
           ? item?.percentage_subject_to_tax
           : "",
@@ -354,10 +372,8 @@ const TaxDetail = () => {
     };
     if (showCreateModal.type == "edit") {
       delete newTax.tax_id;
-      // console.log("Edit", newTax);
       updateTax(newTax);
     } else {
-      // console.log("create", newTax);
       createTax(newTax);
     }
 
@@ -366,15 +382,28 @@ const TaxDetail = () => {
 
   const updateTaxStatus = (rowKey: any) => {
     const data: any = {
-      name: rowKey.name,
-      percentage: rowKey.percentage,
-      active_status: rowKey?.active_status === "ACTIVE" ? "INACTIVE" : "ACTIVE",
+      tax_name: rowKey?.tax_item_name,
+      tax_item_type: rowKey?.tax_item_type,
+      gl_account: rowKey?.gl_account,
+      tax_type: rowKey?.tax_type,
+      tax_code: rowKey?.tax_code,
+      status: rowKey?.status === "ACTIVE" ? "INACTIVE" : "ACTIVE",
+      item_details: [
+        {
+          tax_item_id: rowKey?.tax_item_id,
+          percentage: rowKey?.percentage,
+          // period_from: "17/11/2022",
+          // period_to: "18/11/2022",
+          percentage_subject_to_tax: rowKey?.percentage_subject_to_tax,
+          withholding_tax_rate: rowKey?.withholding_tax_rate,
+        },
+      ],
     };
     setStatusId(rowKey.key);
     setUpdatedTaskData(data);
   };
 
-  const checkedStatus = (status: string) => (status === "ACTIVE");
+  const checkedStatus = (status: string) => status === "ACTIVE";
 
   const columns = [
     { title: "", dataIndex: "key" },
@@ -393,11 +422,17 @@ const TaxDetail = () => {
               </Col>
               <Col>
                 <ICDelete
-                  onClick={() => setShowDelete({
-                    open: true,
-                    type: "selection",
-                    data: { tax_item_id: record.tax_item_id, tax_item_name: record.tax_item_name, selectedRowKeys },
-                  })}
+                  onClick={() =>
+                    setShowDelete({
+                      open: true,
+                      type: "selection",
+                      data: {
+                        tax_item_id: record.tax_item_id,
+                        tax_item_name: record.tax_item_name,
+                        selectedRowKeys,
+                      },
+                    })
+                  }
                 />
               </Col>
             </Row>
@@ -447,11 +482,17 @@ const TaxDetail = () => {
     },
     {
       title: "Active",
-      dataIndex: "active_status",
+      dataIndex: "status",
       render: (status: string, rowKey: any) => {
         if (rowKey.tax_item_name) {
           return (
-            <Switch checked={checkedStatus(status)} onChange={() => updateTaxStatus(rowKey)} />
+            <Switch
+              checked={checkedStatus(rowKey?.status)}
+              onChange={() => {
+                setTaxItemId(rowKey?.tax_item_id);
+                updateTaxStatus(rowKey);
+              }}
+            />
           );
         }
       },
@@ -469,8 +510,9 @@ const TaxDetail = () => {
       percentage: item2.percentage,
       percentage_subject_to_tax: item2.percentage_subject_to_tax,
       withholding_tax_rate: item2.withholding_tax_rate,
+      status: item.status,
       period: `${moment(item2.period_from).format("D MMM YYYY")} to ${moment(
-        item2.period_to,
+        item2.period_to
       ).format("D MMM YYYY")}`,
       details: item.details,
       deleted_by: item.deleted_by,
@@ -495,7 +537,6 @@ const TaxDetail = () => {
   }
   const onHandleEdit = (render: any) => {
     setShowCreateModal({ open: true, type: "edit", data: render });
-    // console.log("render", render);
     setTaxItemId(render.tax_item_id);
   };
   const removeBankAccount = (param: any) => {
@@ -642,7 +683,7 @@ const TaxDetail = () => {
           visible={showCreateModal.open}
           onCancel={() => setShowCreateModal({ open: false, type: "", data: {} })}
           footer={null}
-          content={(
+          content={
             <TopButtonHolder>
               <CreateTitle>
                 Add New
@@ -661,16 +702,22 @@ const TaxDetail = () => {
                 >
                   Cancel
                 </Button>
-                <Button
-                  variant="primary"
-                  // size="small"
-                  onClick={handleSubmit(handleNewTax)}
-                >
-                  save
-                </Button>
+                {listPermission?.filter(
+                  (data: any) =>
+                    data.viewTypes[0]?.viewType.name === "Create" ||
+                    data.viewTypes[0]?.viewType.name === "Update"
+                ).length > 0 && (
+                  <Button
+                    variant="primary"
+                    // size="small"
+                    onClick={handleSubmit(handleNewTax)}
+                  >
+                    save
+                  </Button>
+                )}
               </DeleteCardButtonHolder>
             </TopButtonHolder>
-          )}
+          }
         />
       )}
 
@@ -682,7 +729,7 @@ const TaxDetail = () => {
           onCancel={() => setShowDelete({ open: false, type: "", data: {} })}
           title="Confirm Delete"
           footer={null}
-          content={(
+          content={
             <TopButtonHolder>
               <Spacer size={4} />
               {renderConfirmationText(isShowDelete.type, isShowDelete.data)}
@@ -708,7 +755,7 @@ const TaxDetail = () => {
                 </Button>
               </DeleteCardButtonHolder>
             </TopButtonHolder>
-          )}
+          }
         />
       )}
 
@@ -720,7 +767,7 @@ const TaxDetail = () => {
           visible={showTaxTypeModal}
           onCancel={() => setShowTaxTypeModal(false)}
           footer={null}
-          content={(
+          content={
             <TopButtonHolder>
               <CreateTitle>Add New Tax Type Modal</CreateTitle>
               <Spacer size={20} />
@@ -745,7 +792,7 @@ const TaxDetail = () => {
                 </Button>
               </DeleteCardButtonHolder>
             </TopButtonHolder>
-          )}
+          }
         />
       )}
     </>
