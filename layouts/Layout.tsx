@@ -545,13 +545,17 @@ const flexStyles = {
   cursor: "pointer",
 };
 
-const getLinkViewDetail = (screenCode: any) => {
+const getLinkViewDetail = (screenCode: any, referenceCode: any, referenceId: any) => {
   const approvalEngineScreen = {
     "mdm.salesman": "mdm/salesman",
     "mdm.pricing.structure": "mdm/pricing/pricing-structure",
   };
 
-  const url = `/${approvalEngineScreen[screenCode]}`;
+  let url = `/${approvalEngineScreen[screenCode]}`;
+
+  if (referenceId) {
+    url = `${url}/${referenceId}`;
+  }
   return url;
 };
 
@@ -641,7 +645,7 @@ const AdminLayout = (props: any) => {
             id: items?.id,
             isRead: !!items?.read_date,
             content: items?.message ? <p dangerouslySetInnerHTML={{ __html: items?.message }} /> : "-",
-            link: () => router.push(getLinkViewDetail(items?.screen_code)),
+            link: () => router.push(getLinkViewDetail(items?.screen_code, items?.reference_code, items?.reference_id)),
           }));
 
           setNotifItems(notifItems);
