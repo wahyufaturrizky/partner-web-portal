@@ -80,6 +80,7 @@ export default function Sales() {
             render={({ field: { onChange, value } }) => (
               <Dropdown
                 noSearch
+                containerId={"area2"}
                 defaultValue={value}
                 isShowActionLabel
                 width="100%"
@@ -118,6 +119,7 @@ export default function Sales() {
         <>
           <Controller
             control={control}
+            defaultValue={false}
             name={`sales.${value}`}
             render={({ field: { onChange, value } }) => {
               return (

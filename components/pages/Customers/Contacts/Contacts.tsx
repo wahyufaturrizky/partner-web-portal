@@ -4,10 +4,10 @@ import styled from "styled-components";
 import IconAdd from "assets/icons/ic-add-rounded.svg";
 import IconAvatar from "assets/icons/ic-avatar-xs.svg";
 import IconEdit from "assets/icons/ic-more.svg";
-import ModalAddNewContacts from "components/elements/Modal/ModalAddNewContacts";
 import { CheckOutlined } from "@ant-design/icons";
 import { useFormContext, useFieldArray } from "react-hook-form";
 import ModalAddNewContactCustomer from "components/elements/Modal/ModalAddNewContactsCustomer";
+import { ICEhash } from "assets";
 
 const menuList = [
   {
@@ -98,7 +98,7 @@ const Contacts = ({ formType }: any) => {
                 <ContactCard key={contact.key} filtered={contact.filtered}>
                   <IconAvatar />
                   <Spacer size={10} />
-                  <Col width="100%">
+                  <Col width="100%" gap={"2px"}>
                     <ContactName>{contact?.name}</ContactName>
                     <Row gap={"4px"}>
                       {contact?.is_primary && (
@@ -106,9 +106,16 @@ const Contacts = ({ formType }: any) => {
                           <CheckOutlined /> Primary
                         </ContactLabel>
                       )}
-                      <ContactLabel>{contact?.job}</ContactLabel>
+                      <ContactLabel>{contact?.role}</ContactLabel>
                     </Row>
                     <ContactEmail>{contact?.email}</ContactEmail>
+                    <Row alignItems="center">
+                      <ICEhash />
+
+                      <Text color="pink.regular" hoverColor="pink.regular" variant="subtitle">
+                        Chat with eDOTCHAT
+                      </Text>
+                    </Row>
                   </Col>
 
                   <DropdownOverlay

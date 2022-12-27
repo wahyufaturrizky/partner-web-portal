@@ -31,7 +31,7 @@ const Purchasing = () => {
         render={({ field: { onChange, value } }) => (
           <>
             <Dropdown
-              containerId={"area"}
+              containerId={"area2"}
               defaultValue={value}
               label="Term of Payment"
               width="70%"

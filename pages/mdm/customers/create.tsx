@@ -1,200 +1,265 @@
-import { useLanguages } from "hooks/languages/useLanguages";
-import { usePostalCodeInfiniteLists } from "hooks/mdm/postal-code/usePostalCode";
-import { lang } from "lang";
-import useDebounce from "lib/useDebounce";
+import React, { useState } from "react";
+import { Text, Col, Row, Spacer, Dropdown, Button, Accordion, Radio, Tabs } from "pink-lava-ui";
+import styled from "styled-components";
 import { useRouter } from "next/router";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import CreateCustomers from "../../../components/pages/Customers/CreateCustomers";
-import { useInfiniteCustomerGroupsLists } from "../../../hooks/mdm/customers/useCustomersGroupMDM";
+import { useForm, Controller, FormProvider } from "react-hook-form";
+import General from "components/pages/Customers/General/General";
+import Contacts from "components/pages/Customers/Contacts/Contacts";
+import Addresses from "components/pages/Customers/Addresess/Addresess";
+import Purchasing from "components/pages/Customers/Purchasing/Purchasing";
+import Invoicing from "components/pages/Customers/Invoicing/Invoicing";
+import Sales from "components/pages/Customers/Sales/Sales";
+import { queryClient } from "pages/_app";
+import { useCreateCustomers } from "hooks/mdm/customers/useCustomersMDM";
+import { CustomerContext } from "context/CustomerContext";
 
-export default function PageCreateCustomer() {
-  const t = localStorage.getItem("lan") || "en-US";
+const listTabItems = [
+  { title: "Contacts" },
+  { title: "Addresses" },
+  { title: "Sales" },
+  { title: "Purchasing" },
+  { title: "Invoicing" },
+];
+
+const objectIsEmpty = (object: any) =>
+  Object.keys(object).length === 0 && object.constructor === Object;
+
+export default function CustomerCreate() {
   const router = useRouter();
-  const [search, setSearch] = useState({
-    languages: "",
-    customerGroup: "",
-  });
-
-  const [postalCodeList, setPostalCodeList] = useState<any[]>([]);
-  const [totalRowsPostalCodeList, setTotalRowsPostalCodeList] = useState(0);
-  const [searchPostalCode, setSearchPostalCode] = useState("");
-
-  const [customerGroupsList, setListCustomerGroupsList] = useState<any[]>([]);
-  const [totalRowsCustomerGroupsList, setTotalRowsCustomerGroupsList] = useState(0);
-
-  const debounceFetchLanguages = useDebounce(search.languages, 1000);
-  const debounceFetchCustomerGroup = useDebounce(search.customerGroup, 1000);
-  const debounceFetchPostalCode = useDebounce(searchPostalCode, 1000);
+  const companyCode = localStorage.getItem("companyCode");
 
   const methods = useForm({
-    shouldUseNativeValidation: true,
     defaultValues: {
-      bank: [],
       customer: {
-        name: "",
-        is_company: "Company",
-        phone: "",
-        tax_number: "",
-        mobile: "",
-        active_status: "ACTIVE",
-        ppkp: false,
-        website: "",
-        email: "",
-        language: "",
-        customer_group: "",
-        external_code: "",
-        company_logo: "-",
+        active_status: "Active",
       },
-      contact: [],
-      address: [],
-      invoicing: {
-        credit_limit: 1,
-        credit_balance: 1,
-        credit_used: 1,
-        income_account: "-",
-        expense_account: "",
-        tax_name: "",
-        tax_city: "",
-        tax_address: "",
-        currency: "",
-      },
-      purchasing: {
-        term_of_payment: "",
-      },
-      sales: {
-        branch: 1,
-        salesman: 1,
-        term_payment: "1",
-        sales_order_blocking: false,
-        billing_blocking: false,
-        delivery_order_blocking: false,
-      },
+      purchasing: {},
+      invoicing: {},
+      sales: {},
     },
   });
+  const { control, handleSubmit } = methods;
 
-  const {
-    control,
-    handleSubmit,
-    register,
-    formState: { errors },
-    setValue,
-    getValues,
-  } = methods;
+  const [activeTab, SetActiveTab] = useState("Contacts");
+  const [radioValue, setRadioValue] = useState("company");
+  const [companyLogo, setCompanyLogo] = useState("");
+  const [selectFromForm, setSelectFromForm] = useState(false);
 
-  const { data: getDataLanguages, isLoading: isLoadingLanguages } = useLanguages({
-    options: { onSuccess: () => {} },
-    query: {
-      search: debounceFetchLanguages,
-    },
-  });
-
-  const {
-    isFetching: isFetchingPostalCode,
-    isFetchingNextPage: isFetchingMorePostalCode,
-    hasNextPage: hasNextPagePostalCode,
-    fetchNextPage: fetchNextPagePostalCode,
-    isLoading: isLoadingPostalCode,
-  } = usePostalCodeInfiniteLists({
-    query: {
-      search: debounceFetchPostalCode,
-      limit: 10,
-    },
-    options: {
-      onSuccess: (data: any) => {
-        setTotalRowsPostalCodeList(data.pages[0].totalRow);
-        const mappedData = data?.pages?.map((group: any) => group.rows?.map((element: any) => ({
-          value: element.codeText,
-          label: element.code,
-        })));
-        const flattenArray = [].concat(...mappedData);
-        setPostalCodeList(flattenArray);
-      },
-      getNextPageParam: (_lastPage: any, pages: any) => {
-        if (postalCodeList.length < totalRowsPostalCodeList) {
-          return pages.length + 1;
-        }
-        return undefined;
-      },
-    },
-  });
-
-  const {
-    isFetching: isFetchingCustomerGroupsLists,
-    isFetchingNextPage: isFetchingMoreCustomerGroupsLists,
-    hasNextPage: hasNextPageCustomerGroupsLists,
-    fetchNextPage: fetchNextPageCustomerGroupsLists,
-  } = useInfiniteCustomerGroupsLists({
-    query: {
-      search: debounceFetchCustomerGroup,
-      company: "KSNI",
-      limit: 10,
-    },
-    options: {
-      onSuccess: (data: any) => {
-        setTotalRowsCustomerGroupsList(data.pages[0].totalRow);
-        const mappedData = data?.pages?.map((group: any) => group.rows?.map((element: any) => ({
-          value: element.id,
-          label: element.name,
-        })));
-        const flattenArray = [].concat(...mappedData);
-        setListCustomerGroupsList(flattenArray);
-      },
-      getNextPageParam: (_lastPage: any, pages: any) => {
-        if (customerGroupsList.length < totalRowsCustomerGroupsList) {
-          return pages.length + 1;
-        }
-        return undefined;
-      },
-    },
-  });
-
-  const propsDropdownField = {
-    getDataLanguages,
-    isLoadingLanguages,
-    isFetchingCustomerGroupsLists,
-    isFetchingMoreCustomerGroupsLists,
-    hasNextPageCustomerGroupsLists,
-    fetchNextPageCustomerGroupsLists,
-    customerGroupsList,
-    setSearchLanguage: () => {},
-    setSearchLanguages: (value: string) => setSearch({ ...search, languages: value }),
-    setSearchCustomerGroup: (value: string) => setSearch({ ...search, customerGroup: value }),
-    isFetchingPostalCode,
-    isFetchingMorePostalCode,
-    hasNextPagePostalCode,
-    fetchNextPagePostalCode,
-    postalCodeList,
-    setSearchPostalCode,
-    isLoadingPostalCode,
-    methods,
-    control,
-    handleSubmit,
-    register,
-    errors,
-    setValue,
-    getValues,
-    router,
-    editBankAccount: lang[t].customer.editBankAccount,
-    addMoreAddress: lang[t].customer.addMoreAddress,
-    newAddress: lang[t].customer.newAddress,
-    primaryLabel: lang[t].customer.primaryLabel,
-    setPrimary: lang[t].customer.setPrimary,
-    deleteLabel: lang[t].customer.tertier.delete,
-    addressTypeLabel: lang[t].customer.tertier.addressTypeLabel,
-    storePhotoLabel: lang[t].customer.tertier.storePhotoLabel,
-    dimensionMinimumLabel: lang[t].customer.tertier.dimensionMinimumLabel,
-    fileSizeLabel: lang[t].customer.tertier.fileSizeLabel,
-    streetLabel: lang[t].customer.tertier.streetLabel,
-    countryLabel: lang[t].customer.tertier.countryLabel,
-    provinceLabel: lang[t].customer.tertier.provinceLabel,
-    cityLabel: lang[t].customer.tertier.cityLabel,
-    districtLabel: lang[t].customer.tertier.districtLabel,
-    zoneLabel: lang[t].customer.tertier.zoneLabel,
-    postalCodeLabel: lang[t].customer.tertier.postalCodeLabel,
-    longitudeLabel: lang[t].customer.tertier.longitudeLabel,
-    type: "create",
+  const renderTabItem = (activeTab: any) => {
+    switch (activeTab) {
+      case "Contacts":
+        return <Contacts formType="add" />;
+      case "Addresses":
+        return <Addresses formType="add" />;
+      case "Sales":
+        return <Sales />;
+      case "Purchasing":
+        return <Purchasing />;
+      case "Invoicing":
+        return <Invoicing />;
+      default:
+        return <Contacts />;
+    }
   };
 
-  return <CreateCustomers {...propsDropdownField} />;
+  const { mutate: createCustomer, isLoading: isLoadingCreateCustomer } = useCreateCustomers({
+    options: {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["customer-list"]);
+        router.back();
+      },
+    },
+  });
+
+  const onSubmit = (data: any) => {
+    const customerPayload = {
+      ...data.customer,
+      company_logo: companyLogo,
+      is_company: radioValue === "company",
+    };
+
+    const contactsPayload =
+      data?.contact?.map((contact: any) => {
+        delete contact?.filtered;
+        delete contact?.key;
+        return contact;
+      }) ?? [];
+
+    const addressPayload =
+      data?.addresses?.map((address: any) => {
+        const mappCountrylevel: any = [];
+
+        mappCountrylevel[0] = address.province === "" ? 0 : address.province;
+        mappCountrylevel[1] = address.city === "" ? 0 : address.city;
+        mappCountrylevel[2] = address.district === "" ? 0 : address.district;
+        mappCountrylevel[3] = address.zone === "" ? 0 : address.zone;
+
+        // cek apakah array isinya semuanya 0
+        // const allEqual = mappCountrylevel.every((value) => value === 0);
+
+        return {
+          is_primary: address.is_primary,
+          address_type: address.type,
+          street: address.street,
+          country: address.country,
+          postal_code: address.postal_code,
+          longtitude: address.lon,
+          latitude: address.lat,
+          // Only get photo url
+          // photo: address.photo?.map((photoObj: any) => photoObj?.response?.data),
+        };
+      }) ?? [];
+
+    const purchasingPayload = objectIsEmpty(data?.purchasing) ? null : data?.purchasing;
+
+    const invoicingPayload = objectIsEmpty(data?.invoicing) ? null : data?.invoicing;
+
+    const salesPayload = objectIsEmpty(data?.sales) ? null : data?.sales;
+
+    const mappingBank = data?.bank?.map((bank: any) => {
+      delete bank.key;
+      return bank;
+    });
+
+    // delete data?.invoicing?.tax_type;
+    // delete data?.invoicing?.tax_code;
+
+    // const mappingInvoicing =
+    //   invoicingPayload !== null
+    //     ? {
+    //         ...invoicingPayload,
+    //         banks: mappingBank,
+    //       }
+    //     : null;
+
+    const formData = {
+      ...data,
+      customer: customerPayload,
+      contact: contactsPayload,
+      address: addressPayload,
+      purchasing: purchasingPayload,
+      invoicing: invoicingPayload,
+      bank: mappingBank,
+      sales: salesPayload,
+    };
+
+    console.log(formData);
+
+    // createCustomer(formData);
+  };
+
+  return (
+    <Col>
+      <Row alignItems="center">
+        <Text variant="h4">Create Customer</Text>
+        <Spacer size={10} />
+        <Radio
+          value="company"
+          checked={radioValue === "company"}
+          onChange={(e: any) => {
+            setRadioValue(e.target.value);
+            SetActiveTab("Contacts");
+          }}
+        />
+        Company
+        <Spacer size={10} />
+        <Radio
+          value="individu"
+          checked={radioValue === "individu"}
+          onChange={(e: any) => {
+            setRadioValue(e.target.value);
+            SetActiveTab("Addresses");
+          }}
+        />
+        Individu
+      </Row>
+
+      <Spacer size={10} />
+
+      <Card>
+        <Row justifyContent="space-between" alignItems="center" nowrap>
+          <Controller
+            control={control}
+            name="customer.active_status"
+            defaultValue="Active"
+            render={({ field: { onChange, value } }) => (
+              <Dropdown
+                label=""
+                width="185px"
+                noSearch
+                isHtml
+                items={[
+                  { id: "Active", value: '<div key="1" style="color:green;">Active</div>' },
+                  { id: "Inactive", value: '<div key="2" style="color:red;">Inactive</div>' },
+                ]}
+                defaultValue={value}
+                handleChange={(value: any) => {
+                  onChange(value);
+                }}
+              />
+            )}
+          />
+
+          <Row gap="16px">
+            <Button size="big" variant="tertiary" onClick={() => router.back()}>
+              Cancel
+            </Button>
+            <Button size="big" variant="primary" onClick={handleSubmit(onSubmit)}>
+              {isLoadingCreateCustomer ? "Loading..." : "Save"}
+            </Button>
+          </Row>
+        </Row>
+      </Card>
+
+      <Spacer size={20} />
+
+      <CustomerContext.Provider
+        value={{
+          companyLogo,
+          setCompanyLogo,
+          selectFromForm,
+          setSelectFromForm,
+        }}
+      >
+        <FormProvider {...methods}>
+          <Accordion>
+            <Accordion.Item key={1}>
+              <Accordion.Header variant="blue">General</Accordion.Header>
+              <Accordion.Body>
+                <General type={radioValue} />
+              </Accordion.Body>
+            </Accordion.Item>
+          </Accordion>
+
+          <Spacer size={20} />
+
+          <Accordion style={{ display: "relative" }} id={"area2"}>
+            <Accordion.Item key={1}>
+              <Accordion.Header variant="blue">Detail Information</Accordion.Header>
+              <Accordion.Body>
+                <Tabs
+                  activeKey={activeTab}
+                  defaultActiveKey={activeTab}
+                  listTabPane={
+                    radioValue === "company"
+                      ? listTabItems
+                      : listTabItems.slice(1, listTabItems.length)
+                  }
+                  onChange={(e: any) => SetActiveTab(e)}
+                />
+                <Spacer size={20} />
+                {renderTabItem(activeTab)}
+              </Accordion.Body>
+            </Accordion.Item>
+          </Accordion>
+        </FormProvider>
+      </CustomerContext.Provider>
+    </Col>
+  );
 }
+
+const Card = styled.div`
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 16px;
+`;

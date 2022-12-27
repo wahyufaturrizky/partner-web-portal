@@ -14,11 +14,12 @@ import {
 import styled from "styled-components";
 import { useRouter } from "next/router";
 import { useForm, Controller, FormProvider, useWatch } from "react-hook-form";
-import General from "components/pages/Vendor/General/General";
-import Contacts from "components/pages/Vendor/Contacts/Contacts";
-import Addresses from "components/pages/Vendor/Addresess/Addresses";
-import Purchasing from "components/pages/Vendor/Purchasing/Purchasing";
-import Invoicing from "components/pages/Vendor/Invoicing/Invoicing";
+import General from "components/pages/Customers/General/General";
+import Contacts from "components/pages/Customers/Contacts/Contacts";
+import Addresses from "components/pages/Customers/Addresess/Addresess";
+import Purchasing from "components/pages/Customers/Purchasing/Purchasing";
+import Invoicing from "components/pages/Customers/Invoicing/Invoicing";
+import Sales from "components/pages/Customers/Sales/Sales";
 import {
   useUpdateVendor,
   useVendor,
@@ -30,10 +31,16 @@ import ArrowLeft from "assets/icons/arrow-left.svg";
 import { VendorContext } from "context/VendorContext";
 import { ModalDeleteConfirmation } from "components/elements/Modal/ModalConfirmationDelete";
 import { useUserPermissions } from "hooks/user-config/usePermission";
+import {
+  useDeleteCustomers,
+  useDetailCustomer,
+  useUpdateCustomer,
+} from "hooks/mdm/customers/useCustomersMDM";
 
 const listTabItems = [
   { title: "Contacts" },
   { title: "Addresses" },
+  { title: "Sales" },
   { title: "Purchasing" },
   { title: "Invoicing" },
 ];
@@ -45,7 +52,7 @@ export default function CustomerDetail() {
   const router = useRouter();
   const companyCode = localStorage.getItem("companyCode");
 
-  const { vendor_id } = router.query;
+  const { customer_id } = router.query;
 
   const methods = useForm({
     defaultValues: {
@@ -60,19 +67,11 @@ export default function CustomerDetail() {
       email: "",
       external_code: "",
       is_pkp: false,
-      company: {
-        website: "",
-        logo: "",
-      },
-      individu: {
-        job: 0,
-        company: "",
-        title: "",
-      },
       contacts: [],
       addresses: [],
       purchasing: {},
       invoicing: {},
+      sales: {},
     },
   });
   const { control, handleSubmit, setValue } = methods;
@@ -90,7 +89,7 @@ export default function CustomerDetail() {
   });
 
   const listPermission = dataUserPermission?.permission?.filter(
-    (filtering: any) => filtering.menu === "Vendor"
+    (filtering: any) => filtering.menu === "Customer"
   );
 
   const watchCustomerId = useWatch({
@@ -106,6 +105,8 @@ export default function CustomerDetail() {
         return <Addresses formType="edit" />;
       case "Purchasing":
         return <Purchasing />;
+      case "Sales":
+        return <Sales />;
       case "Invoicing":
         return <Invoicing />;
       default:
@@ -113,11 +114,11 @@ export default function CustomerDetail() {
     }
   };
 
-  const { mutate: updateVendor, isLoading: isLoadingUpdateVendor } = useUpdateVendor({
-    id: vendor_id,
+  const { mutate: updateCustomer, isLoading: isLoadingUpdateCustomer } = useUpdateCustomer({
+    id: customer_id,
     options: {
       onSuccess: () => {
-        queryClient.invalidateQueries(["vendors"]);
+        queryClient.invalidateQueries(["customer-list"]);
         router.back();
       },
     },
@@ -125,7 +126,7 @@ export default function CustomerDetail() {
 
   const { mutate: updateConvertCustomer, isLoading: isLoadingConvertCustomer } =
     useConvertToCustomer({
-      id: vendor_id,
+      id: customer_id,
       options: {
         onSuccess: (data: any) => {
           setValue("customer_id", data);
@@ -134,10 +135,10 @@ export default function CustomerDetail() {
       },
     });
 
-  const { mutate: deleteVendor, isLoading: isLoadingDeleteVendor }: any = useDeleteVendor({
+  const { mutate: deleteCustomer, isLoading: isLoadingDeleteCustomer }: any = useDeleteCustomers({
     options: {
       onSuccess: () => {
-        queryClient.invalidateQueries(["vendors"]);
+        queryClient.invalidateQueries(["customer-list"]);
         setShowDeleteModal(false);
         router.back();
       },
@@ -145,11 +146,11 @@ export default function CustomerDetail() {
   });
 
   const {
-    data: vendorData,
-    isLoading: isLoadingVendor,
-    isFetching: isFetchingVendor,
-  } = useVendor({
-    id: vendor_id,
+    data: customerData,
+    isLoading: isLoadingCustomer,
+    isFetching: isFetchingCustomer,
+  } = useDetailCustomer({
+    id: customer_id,
     options: {
       onSuccess: (data: any) => {
         setSelectFromForm(data?.customerId === "");
@@ -326,10 +327,10 @@ export default function CustomerDetail() {
       purchasing: purchasingPayload,
       invoicing: mappingInvoicing,
     };
-    updateVendor(formData);
+    updateCustomer(formData);
   };
 
-  if (isFetchingVendor || isLoadingVendor) {
+  if (isFetchingCustomer || isLoadingCustomer) {
     return (
       <Center>
         <Spin tip="Loading Data..." />
@@ -342,7 +343,7 @@ export default function CustomerDetail() {
       <Col>
         <Row alignItems="center">
           <ArrowLeft style={{ cursor: "pointer" }} onClick={() => router.back()} />
-          <Text variant="h4">{vendorData?.name}</Text>
+          <Text variant="h4">{customerData?.name}</Text>
           <Spacer size={10} />
           <Radio
             value="company"
@@ -418,7 +419,7 @@ export default function CustomerDetail() {
               {listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Update")
                 .length > 0 && (
                 <Button size="big" variant="primary" onClick={handleSubmit(onSubmit)}>
-                  {isLoadingUpdateVendor ? "Loading..." : "Save"}
+                  {isLoadingUpdateCustomer ? "Loading..." : "Save"}
                 </Button>
               )}
             </Row>
@@ -473,11 +474,11 @@ export default function CustomerDetail() {
       {showDeleteModal && (
         <ModalDeleteConfirmation
           totalSelected={1}
-          itemTitle={vendorData.name}
+          itemTitle={customerData.name}
           visible={showDeleteModal}
-          isLoading={isLoadingDeleteVendor}
+          isLoading={isLoadingDeleteCustomer}
           onCancel={() => setShowDeleteModal(false)}
-          onOk={() => deleteVendor({ ids: [vendor_id] })}
+          onOk={() => deleteCustomer({ ids: [customer_id] })}
         />
       )}
     </>

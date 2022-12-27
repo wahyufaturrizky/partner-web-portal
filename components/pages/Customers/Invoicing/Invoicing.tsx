@@ -21,13 +21,14 @@ import { useTaxInfiniteLists } from "hooks/mdm/Tax/useTax";
 import useDebounce from "lib/useDebounce";
 import styled from "styled-components";
 import { useCoaList } from "hooks/mdm/product-category/useProductCategory";
+import ModalAddBankAccountCustomer from "components/elements/Modal/ModalAddBankAccountsCustomer";
 
 const Invoicing = () => {
   const { register, control, setValue } = useFormContext();
 
   const { fields, append, remove, update }: any = useFieldArray({
     control,
-    name: "invoicing.banks",
+    name: "bank",
   });
 
   const [showFormBank, setShowFormBank] = useState<any>({
@@ -410,7 +411,7 @@ const Invoicing = () => {
       </Col>
 
       {showFormBank.open && (
-        <ModalAddBankAccounts
+        <ModalAddBankAccountCustomer
           visible={showFormBank.open}
           onCancel={() => {
             setShowFormBank({ type: "", open: false, data: {} });
