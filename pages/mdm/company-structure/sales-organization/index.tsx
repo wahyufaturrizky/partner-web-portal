@@ -55,40 +55,38 @@ const CreateConfig = () => {
     (filtering: any) => filtering.menu === "Sales Organization",
   );
 
-  const onUploadStructure = (data: ({ [s: string]: unknown } | ArrayLike<unknown>)[]) => {
+  const onUploadStructure = async (data: ({ [s: string]: unknown } | ArrayLike<unknown>)[]) => {
     const formData = new FormData();
     formData.append("upload_file", data);
 
-    console.log(formData, "<<<<form");
+    const idCountryStructure = countryStructure[0];
 
-    // let idCountryStructure = countryStructure[0];
+    const payload = {
+      add: [],
+      update: [],
+    };
 
-    // const payload = {
-    //     add: [],
-    //     update: []
-    // }
+    if (idCountryStructure) {
+      payload.delete = idCountryStructure.id;
+    }
+    await updateSalesOrganization(payload);
 
-    // if(idCountryStructure){
-    //     payload.delete = idCountryStructure.id;
-    // }
-    // updateSalesOrganization(payload)
+    const datas = Object.values(data[0]).filter((data) => !!data).map((data, index) => ({
+    	name: data,
+    	level: index + 1,
+      actionType: 'NEW',
+    }));
+    setCountryStructure(datas);
 
-    // const datas = Object.values(data[0]).filter(data => !!data).map((data, index) => ({
-    // 	name: data,
-    // 	level: index + 1,
-    //     actionType: 'NEW'
-    // }));
-    // setCountryStructure(datas)
+    const datasPayload = datas.map(({ actionType, ...rest }) => ({
+      ...rest,
+    }));
 
-    // const datasPayload = datas.map(({actionType, ...rest}) => ({
-    //     ...rest
-    // }));
-
-    // const payloadUpdate = {
-    //     add: datasPayload,
-    //     update: []
-    // }
-    // updateSalesOrganization(payloadUpdate)
+    const payloadUpdate = {
+      add: datasPayload,
+      update: [],
+    };
+    await updateSalesOrganization(payloadUpdate);
   };
 
   function stringifyNumber(n) {
@@ -140,7 +138,7 @@ const CreateConfig = () => {
     },
   });
 
-  const { mutate: updateSalesOrganization } = useUpdateSalesOrganization({
+  const { mutateAsync: updateSalesOrganization } = useUpdateSalesOrganization({
     company_code: COMPANY_CODE,
     options: {
       onSuccess: () => {
