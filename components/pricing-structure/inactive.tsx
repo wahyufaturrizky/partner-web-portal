@@ -17,9 +17,7 @@ import {
 } from "pink-lava-ui";
 import { useState } from "react";
 import styled from "styled-components";
-import {
-  ICDollarBlack, ICDownload, ICManageCustGroupBuyingPrice, ICUpload,
-} from "../../assets";
+import { ICDollarBlack, ICDownload, ICManageCustGroupBuyingPrice, ICUpload } from "../../assets";
 import {
   usePricingStructureLists,
   useUploadFilePricingStructureMDM,
@@ -28,13 +26,14 @@ import { mdmDownloadService } from "../../lib/client";
 import { queryClient } from "../../pages/_app";
 import { STATUS_APPROVAL_TEXT, STATUS_APPROVAL_VARIANT } from "../../utils/utils";
 
-const downloadFile = (params: any) => mdmDownloadService("/price-structure/download", { params }).then((res) => {
-  const dataUrl = window.URL.createObjectURL(new Blob([res.data]));
-  const tempLink = document.createElement("a");
-  tempLink.href = dataUrl;
-  tempLink.setAttribute("download", `pricing-structure_${new Date().getTime()}.xlsx`);
-  tempLink.click();
-});
+const downloadFile = (params: any) =>
+  mdmDownloadService("/price-structure/download", { params }).then((res) => {
+    const dataUrl = window.URL.createObjectURL(new Blob([res.data]));
+    const tempLink = document.createElement("a");
+    tempLink.href = dataUrl;
+    tempLink.setAttribute("download", `pricing-structure_${new Date().getTime()}.xlsx`);
+    tempLink.click();
+  });
 
 const InActivePricingStructure: any = (props: any) => {
   const router = useRouter();
@@ -52,20 +51,21 @@ const InActivePricingStructure: any = (props: any) => {
 
   const [isShowUpload, setShowUpload] = useState(false);
 
-  const { data: pricingStructureLists, isLoading: isLoadingPricingStructureList } = usePricingStructureLists({
-    options: {
-      onSuccess: (data: any) => {
-        pagination.setTotalItems(data.totalRow);
+  const { data: pricingStructureLists, isLoading: isLoadingPricingStructureList } =
+    usePricingStructureLists({
+      options: {
+        onSuccess: (data: any) => {
+          pagination.setTotalItems(data.totalRow);
+        },
       },
-    },
-    query: {
-      search,
-      page: pagination.page,
-      limit: pagination.itemsPerPage,
-      status: "INACTIVE",
-      company_id: companyCode,
-    },
-  });
+      query: {
+        search,
+        page: pagination.page,
+        limit: pagination.itemsPerPage,
+        status: "INACTIVE",
+        company_id: companyCode,
+      },
+    });
 
   const { mutate: uploadFileProductBrandMDM } = useUploadFilePricingStructureMDM({
     options: {
@@ -179,7 +179,9 @@ const InActivePricingStructure: any = (props: any) => {
               menuList={[
                 {
                   key: 1,
-                  value: (
+                  value: props?.listPermission?.filter(
+                    (x: any) => x.viewTypes[0]?.viewType.name === "Download Template"
+                  ).length > 0 && (
                     <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
                       <ICDownload />
                       <p style={{ margin: "0" }}>Download Template</p>
@@ -188,7 +190,9 @@ const InActivePricingStructure: any = (props: any) => {
                 },
                 {
                   key: 2,
-                  value: (
+                  value: props?.listPermission?.filter(
+                    (x: any) => x.viewTypes[0]?.viewType.name === "Upload"
+                  ).length > 0 && (
                     <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
                       <ICUpload />
                       <p style={{ margin: "0" }}>Upload Template</p>

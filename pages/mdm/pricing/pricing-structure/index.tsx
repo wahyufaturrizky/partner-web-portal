@@ -49,10 +49,10 @@ const renderConfirmationTextGroupBuying = (type: any, data: any) => {
       return data.selectedRowKeysGroupBuying.length > 1
         ? `Are you sure to delete ${data.selectedRowKeysGroupBuying.length} items ?`
         : `Are you sure to delete group buying name ${
-          data?.dataGroupBuying?.data.find(
-            (el: any) => el.key === data.selectedRowKeysGroupBuying[0],
-          )?.name
-        } ?`;
+            data?.dataGroupBuying?.data.find(
+              (el: any) => el.key === data.selectedRowKeysGroupBuying[0]
+            )?.name
+          } ?`;
     case "detail":
       return `Are you sure to delete group buying name ${data.name} ?`;
 
@@ -67,10 +67,10 @@ const renderConfirmationTextPricingConfig = (type: any, data: any) => {
       return data.selectedRowKeysPricingConfig.length > 1
         ? `Are you sure to delete ${data.selectedRowKeysPricingConfig.length} items ?`
         : `Are you sure to delete pricing config name ${
-          data?.dataPricingConfig?.data.find(
-            (el: any) => el.key === data.selectedRowKeysPricingConfig[0],
-          )?.name
-        } ?`;
+            data?.dataPricingConfig?.data.find(
+              (el: any) => el.key === data.selectedRowKeysPricingConfig[0]
+            )?.name
+          } ?`;
     case "detail":
       return `Are you sure to delete pricing config name ${data.name} ?`;
 
@@ -125,7 +125,7 @@ const PricingStructureList: any = () => {
 
   const debounceSearch = useDebounce(
     searchGroupBuying || searchGroupBuyingList || searchPricingConfig,
-    1000,
+    1000
   );
 
   const { data: dataUserPermission } = useUserPermissions({
@@ -134,11 +134,8 @@ const PricingStructureList: any = () => {
     },
   });
   const listPermission = dataUserPermission?.permission?.filter(
-    (filtering: any) => filtering.menu === "Pricing Structure",
+    (filtering: any) => filtering.menu === "Pricing Structure"
   );
-  console.log(listPermission);
-
-  const allowPermissionToShow = listPermission?.filter((data: any) => permissionPricingStructure.role.Admin.component.includes(data.name));
 
   const {
     data: pricingStructureLists,
@@ -154,15 +151,16 @@ const PricingStructureList: any = () => {
     },
   });
 
-  const { mutate: deleteGroupBuying, isLoading: isLoadingDeleteGroupBuying }: any = useDeleteGroupBuyingList({
-    options: {
-      onSuccess: () => {
-        setShowDeleteGroupBuying({ open: false, data: {}, type: "" });
-        setSelectedRowKeysGroupBuying([]);
-        queryClient.invalidateQueries(["group-buying"]);
+  const { mutate: deleteGroupBuying, isLoading: isLoadingDeleteGroupBuying }: any =
+    useDeleteGroupBuyingList({
+      options: {
+        onSuccess: () => {
+          setShowDeleteGroupBuying({ open: false, data: {}, type: "" });
+          setSelectedRowKeysGroupBuying([]);
+          queryClient.invalidateQueries(["group-buying"]);
+        },
       },
-    },
-  });
+    });
 
   const {
     data: customerGroupsMDMData,
@@ -178,15 +176,16 @@ const PricingStructureList: any = () => {
     },
   });
 
-  const { mutate: deletePricingConfig, isLoading: isLoadingDeletePricingConfig }: any = useDeletePricingConfigList({
-    options: {
-      onSuccess: () => {
-        setShowDeletePricingConfig({ open: false, data: {}, type: "" });
-        setSelectedRowKeysPricingConfig([]);
-        queryClient.invalidateQueries(["pricing-config"]);
+  const { mutate: deletePricingConfig, isLoading: isLoadingDeletePricingConfig }: any =
+    useDeletePricingConfigList({
+      options: {
+        onSuccess: () => {
+          setShowDeletePricingConfig({ open: false, data: {}, type: "" });
+          setSelectedRowKeysPricingConfig([]);
+          queryClient.invalidateQueries(["pricing-config"]);
+        },
       },
-    },
-  });
+    });
 
   const {
     data: dataGroupBuying,
@@ -212,11 +211,13 @@ const PricingStructureList: any = () => {
             <div style={{ display: "flex", justifyContent: "left" }}>
               <Button
                 size="small"
-                onClick={() => setModalPricingStructureForm({
-                  open: true,
-                  typeForm: "Customer Group Buying Price",
-                  data: element,
-                })}
+                onClick={() =>
+                  setModalPricingStructureForm({
+                    open: true,
+                    typeForm: "Customer Group Buying Price",
+                    data: element,
+                  })
+                }
                 variant="tertiary"
               >
                 View Detail
@@ -243,10 +244,12 @@ const PricingStructureList: any = () => {
     options: {
       onSuccess: (data: any) => {
         setTotalRowsGroupBuyingList(data.pages[0].totalRow);
-        const mappedData = data?.pages?.map((group: any) => group.rows?.map((element: any) => ({
-          value: element.id,
-          label: element.name,
-        })));
+        const mappedData = data?.pages?.map((group: any) =>
+          group.rows?.map((element: any) => ({
+            value: element.id,
+            label: element.name,
+          }))
+        );
         const flattenArray = [].concat(...mappedData);
         setGroupBuyingList(flattenArray);
       },
@@ -289,7 +292,7 @@ const PricingStructureList: any = () => {
                       index: data.id,
                       level: data.level,
                       buying_price: data.buyingPrice,
-                    })),
+                    }))
                   );
 
                   setModalPricingStructureForm({
@@ -357,8 +360,7 @@ const PricingStructureList: any = () => {
     {
       label: (
         <Flex>
-          Active
-          {" "}
+          Active{" "}
           {pricingStructureLists?.active > 0 && (
             <Notif hidden>{pricingStructureLists?.active}</Notif>
           )}
@@ -369,8 +371,7 @@ const PricingStructureList: any = () => {
     {
       label: (
         <Flex>
-          Inactive
-          {" "}
+          Inactive{" "}
           {pricingStructureLists?.inactive > 0 && (
             <Notif hidden>{pricingStructureLists?.inactive}</Notif>
           )}
@@ -381,8 +382,7 @@ const PricingStructureList: any = () => {
     {
       label: (
         <Flex>
-          Waiting for Approval
-          {" "}
+          Waiting for Approval{" "}
           {pricingStructureLists?.waiting > 0 && <Notif>{pricingStructureLists?.waiting}</Notif>}
         </Flex>
       ),
@@ -391,8 +391,7 @@ const PricingStructureList: any = () => {
     {
       label: (
         <Flex>
-          Rejected
-          {" "}
+          Rejected{" "}
           {pricingStructureLists?.rejected > 0 && (
             <Notif hidden>{pricingStructureLists?.rejected}</Notif>
           )}
@@ -403,8 +402,7 @@ const PricingStructureList: any = () => {
     {
       label: (
         <Flex>
-          Draft
-          {" "}
+          Draft{" "}
           {pricingStructureLists?.drafted > 0 && (
             <Notif hidden>{pricingStructureLists?.drafted}</Notif>
           )}
@@ -424,37 +422,40 @@ const PricingStructureList: any = () => {
           queryClient.invalidateQueries(["group-buying"]);
         },
       },
-    },
+    }
   );
 
-  const { mutate: updateGroupBuying, isLoading: isLoadingUpdateGroupBuying } = useUpdateGroupBuyingList({
-    groupBuyingListId: modalPricingStructureForm.data?.id,
-    options: {
-      onSuccess: () => {
-        setModalPricingStructureForm({ open: false, typeForm: "", data: {} });
-        queryClient.invalidateQueries(["group-buying"]);
+  const { mutate: updateGroupBuying, isLoading: isLoadingUpdateGroupBuying } =
+    useUpdateGroupBuyingList({
+      groupBuyingListId: modalPricingStructureForm.data?.id,
+      options: {
+        onSuccess: () => {
+          setModalPricingStructureForm({ open: false, typeForm: "", data: {} });
+          queryClient.invalidateQueries(["group-buying"]);
+        },
       },
-    },
-  });
+    });
 
-  const { mutate: createPricingConfig, isLoading: isLoadingCreatePricingConfig } = useCreatePricingConfig({
-    options: {
-      onSuccess: () => {
-        setModalPricingStructureForm({ open: false, typeForm: "", data: {} });
-        queryClient.invalidateQueries(["pricing-config"]);
+  const { mutate: createPricingConfig, isLoading: isLoadingCreatePricingConfig } =
+    useCreatePricingConfig({
+      options: {
+        onSuccess: () => {
+          setModalPricingStructureForm({ open: false, typeForm: "", data: {} });
+          queryClient.invalidateQueries(["pricing-config"]);
+        },
       },
-    },
-  });
+    });
 
-  const { mutate: updatePricingConfig, isLoading: isLoadingUpdatePricingConfig } = useUpdatePricingConfigList({
-    pricingConfigListId: modalPricingStructureForm.data?.id,
-    options: {
-      onSuccess: () => {
-        setModalPricingStructureForm({ open: false, typeForm: "", data: {} });
-        queryClient.invalidateQueries(["pricing-config"]);
+  const { mutate: updatePricingConfig, isLoading: isLoadingUpdatePricingConfig } =
+    useUpdatePricingConfigList({
+      pricingConfigListId: modalPricingStructureForm.data?.id,
+      options: {
+        onSuccess: () => {
+          setModalPricingStructureForm({ open: false, typeForm: "", data: {} });
+          queryClient.invalidateQueries(["pricing-config"]);
+        },
       },
-    },
-  });
+    });
 
   const onSubmitGroupBuying = (data: any) => {
     switch (modalPricingStructureForm.typeForm) {
@@ -493,9 +494,10 @@ const PricingStructureList: any = () => {
           add_level: data.leveling,
           remove_level: groupBuyingList
             ?.filter(
-              (filtering) => !data.leveling
-                .map((existLeveling) => existLeveling.buying_price)
-                .includes(filtering.value),
+              (filtering) =>
+                !data.leveling
+                  .map((existLeveling) => existLeveling.buying_price)
+                  .includes(filtering.value)
             )
             .map((data) => data.id),
         });
@@ -625,8 +627,8 @@ const PricingStructureList: any = () => {
         <Modal
           centered
           width={
-            modalPricingStructureForm.typeForm === "Manage Customer Group Buying Price"
-            || modalPricingStructureForm.typeForm === "Manage Price Structure Configuration"
+            modalPricingStructureForm.typeForm === "Manage Customer Group Buying Price" ||
+            modalPricingStructureForm.typeForm === "Manage Price Structure Configuration"
               ? "90%"
               : "50%"
           }
@@ -636,8 +638,8 @@ const PricingStructureList: any = () => {
           title={modalPricingStructureForm.typeForm}
           footer={null}
           content={
-            modalPricingStructureForm.typeForm === "Create Cust Group Buying Price"
-            || modalPricingStructureForm.typeForm === "Customer Group Buying Price" ? (
+            modalPricingStructureForm.typeForm === "Create Cust Group Buying Price" ||
+            modalPricingStructureForm.typeForm === "Customer Group Buying Price" ? (
               <div
                 style={{
                   display: "flex",
@@ -688,14 +690,17 @@ const PricingStructureList: any = () => {
                         error={error?.message}
                         handleChangeValue={(value: string[]) => onChange(value)}
                         valueSelectedItems={
-                            value
-                            || modalPricingStructureForm.data?.groupBuyingPriceToCustomerGroups?.map(
-                              (data) => data.customerGroupId,
-                            )
-                            || []
-                          }
+                          value ||
+                          modalPricingStructureForm.data?.groupBuyingPriceToCustomerGroups?.map(
+                            (data) => data.customerGroupId
+                          ) ||
+                          []
+                        }
                         listItems={customerGroupsMDMData?.rows?.map(
-                          ({ name, id }: { name: string; id: string }) => ({ value: id, label: name }),
+                          ({ name, id }: { name: string; id: string }) => ({
+                            value: id,
+                            label: name,
+                          })
                         )}
                       />
                     )}
@@ -717,7 +722,9 @@ const PricingStructureList: any = () => {
                     variant="tertiary"
                     key="submit"
                     type="primary"
-                    onClick={() => setModalPricingStructureForm({ open: false, data: {}, typeForm: "" })}
+                    onClick={() =>
+                      setModalPricingStructureForm({ open: false, data: {}, typeForm: "" })
+                    }
                   >
                     Cancel
                   </Button>
@@ -733,252 +740,261 @@ const PricingStructureList: any = () => {
                   </Button>
                 </div>
               </div>
-              ) : modalPricingStructureForm.typeForm === "Create Price Structure Config"
-              || modalPricingStructureForm.typeForm === "Price Structure Config" ? (
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "center",
-                  }}
-                >
-                  <Input
-                    defaultValue={modalPricingStructureForm.data?.name}
-                    width="100%"
-                    label="Name"
-                    erorr={errorsPricingConfig?.name}
-                    height="48px"
-                    required
-                    placeholder="Type here..."
-                    {...registerPricingConfig("name", {
-                      shouldUnregister: true,
-                      required: "Please enter name.",
-                      maxLength: {
-                        value: 100,
-                        message: "Max length exceeded",
-                      },
-                    })}
-                  />
-                  <Spacer size={14} />
+            ) : modalPricingStructureForm.typeForm === "Create Price Structure Config" ||
+              modalPricingStructureForm.typeForm === "Price Structure Config" ? (
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "center",
+                }}
+              >
+                <Input
+                  defaultValue={modalPricingStructureForm.data?.name}
+                  width="100%"
+                  label="Name"
+                  erorr={errorsPricingConfig?.name}
+                  height="48px"
+                  required
+                  placeholder="Type here..."
+                  {...registerPricingConfig("name", {
+                    shouldUnregister: true,
+                    required: "Please enter name.",
+                    maxLength: {
+                      value: 100,
+                      message: "Max length exceeded",
+                    },
+                  })}
+                />
+                <Spacer size={14} />
 
-                  {fieldsLeveling.map((item, index) => (
-                    <div key={index}>
-                      <Row width="100%" gap="16px" alignItems="center" noWrap>
-                        <Col justifyContent="space-between" width="10%">
-                          <Text color="blue.dark" variant="headingMedium">
-                            {`Level ${index + 1}`}
-                          </Text>
-                          <ICDelete onClick={() => removeLeveling(index)} />
-                        </Col>
+                {fieldsLeveling.map((item, index) => (
+                  <div key={index}>
+                    <Row width="100%" gap="16px" alignItems="center" noWrap>
+                      <Col justifyContent="space-between" width="10%">
+                        <Text color="blue.dark" variant="headingMedium">
+                          {`Level ${index + 1}`}
+                        </Text>
+                        <ICDelete onClick={() => removeLeveling(index)} />
+                      </Col>
 
-                        <Col width="90%">
-                          <Controller
-                            control={controlPricingConfig}
-                            name={`leveling.${index}.buying_price`}
-                            render={({ field: { onChange, value } }) => (
-                              <>
-                                <Label>Buying Price</Label>
-                                <Spacer size={3} />
-                                <FormSelect
-                                  height="48px"
-                                  defaultValue={
-                                      isFetchingInfiniteGroupBuying ? "loading..." : value
-                                    }
-                                  style={{ width: "100%" }}
-                                  size="large"
-                                  placeholder="Select"
-                                  borderColor="#AAAAAA"
-                                  arrowColor="#000"
-                                  withSearch
-                                  isLoading={isFetchingInfiniteGroupBuying}
-                                  isLoadingMore={isFetchingMoreInfiniteGroupBuying}
-                                  fetchMore={() => {
-                                    if (hasNextPageInfiniteGroupBuying) {
-                                      fetchNextPageInfiniteGroupBuying();
-                                    }
-                                  }}
-                                  items={
-                                      isFetchingGroupBuying && !isFetchingMoreInfiniteGroupBuying
-                                        ? []
-                                        : groupBuyingList
-                                    }
-                                  onChange={(value: any) => {
-                                    onChange(value);
-                                  }}
-                                  onSearch={(value: any) => {
-                                    setSearchGroupBuyingList(value);
-                                  }}
-                                />
-                              </>
-                            )}
-                          />
-                        </Col>
-                      </Row>
+                      <Col width="90%">
+                        <Controller
+                          control={controlPricingConfig}
+                          name={`leveling.${index}.buying_price`}
+                          render={({ field: { onChange, value } }) => (
+                            <>
+                              <Label>Buying Price</Label>
+                              <Spacer size={3} />
+                              <FormSelect
+                                height="48px"
+                                defaultValue={isFetchingInfiniteGroupBuying ? "loading..." : value}
+                                style={{ width: "100%" }}
+                                size="large"
+                                placeholder="Select"
+                                borderColor="#AAAAAA"
+                                arrowColor="#000"
+                                withSearch
+                                isLoading={isFetchingInfiniteGroupBuying}
+                                isLoadingMore={isFetchingMoreInfiniteGroupBuying}
+                                fetchMore={() => {
+                                  if (hasNextPageInfiniteGroupBuying) {
+                                    fetchNextPageInfiniteGroupBuying();
+                                  }
+                                }}
+                                items={
+                                  isFetchingGroupBuying && !isFetchingMoreInfiniteGroupBuying
+                                    ? []
+                                    : groupBuyingList
+                                }
+                                onChange={(value: any) => {
+                                  onChange(value);
+                                }}
+                                onSearch={(value: any) => {
+                                  setSearchGroupBuyingList(value);
+                                }}
+                              />
+                            </>
+                          )}
+                        />
+                      </Col>
+                    </Row>
 
-                      <Spacer size={14} />
-                    </div>
-                  ))}
+                    <Spacer size={14} />
+                  </div>
+                ))}
 
-                  <Spacer size={8} />
+                <Spacer size={8} />
 
-                  <Text
-                    onClick={() => appendLeveling({
+                <Text
+                  onClick={() =>
+                    appendLeveling({
                       index: fieldsLeveling.length + 1,
                       level: fieldsLeveling.length + 1,
                       buying_price: null,
-                    })}
-                    clickable
-                    variant="headingSmall"
-                    color="pink.regular"
-                  >
-                    + Add Level
-                  </Text>
+                    })
+                  }
+                  clickable
+                  variant="headingSmall"
+                  color="pink.regular"
+                >
+                  + Add Level
+                </Text>
 
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "center",
-                      gap: "10px",
-                      marginBottom: "20px",
-                    }}
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    gap: "10px",
+                    marginBottom: "20px",
+                  }}
+                >
+                  <Button
+                    size="big"
+                    variant="tertiary"
+                    key="submit"
+                    type="primary"
+                    onClick={() =>
+                      setModalPricingStructureForm({ open: false, data: {}, typeForm: "" })
+                    }
                   >
-                    <Button
-                      size="big"
-                      variant="tertiary"
-                      key="submit"
-                      type="primary"
-                      onClick={() => setModalPricingStructureForm({ open: false, data: {}, typeForm: "" })}
-                    >
-                      Cancel
-                    </Button>
+                    Cancel
+                  </Button>
 
-                    <Button
-                      onClick={handleSubmitPricingConfig(onSubmitPricingConfig)}
-                      variant="primary"
-                      size="big"
-                    >
-                      {isLoadingCreatePricingConfig || isLoadingUpdatePricingConfig
-                        ? "Loading..."
-                        : "Save"}
-                    </Button>
-                  </div>
+                  <Button
+                    onClick={handleSubmitPricingConfig(onSubmitPricingConfig)}
+                    variant="primary"
+                    size="big"
+                  >
+                    {isLoadingCreatePricingConfig || isLoadingUpdatePricingConfig
+                      ? "Loading..."
+                      : "Save"}
+                  </Button>
                 </div>
-                ) : modalPricingStructureForm.typeForm === "Manage Customer Group Buying Price" ? (
-                  <>
-                    <Card>
-                      <Row justifyContent="space-between">
-                        <Search
-                          width="340px"
-                          placeholder="Search Name"
-                          onChange={(e: any) => {
-                            setSearchGroupBuying(e.target.value);
-                          }}
-                        />
-                        <Row gap="16px">
-                          <Button
-                            size="big"
-                            variant="tertiary"
-                            onClick={() => setShowDeleteGroupBuying({
-                              open: true,
-                              type: "selection",
-                              data: { dataGroupBuying, selectedRowKeysGroupBuying },
-                            })}
-                            disabled={rowSelectionGroupBuying.selectedRowKeys?.length === 0}
-                          >
-                            Delete
-                          </Button>
-                          <Button
-                            size="big"
-                            variant="primary"
-                            onClick={() => setModalPricingStructureForm({
-                              ...modalPricingStructureForm,
-                              open: true,
-                              typeForm: "Create Cust Group Buying Price",
-                            })}
-                          >
-                            Create
-                          </Button>
-                        </Row>
-                      </Row>
-                    </Card>
-                    <Spacer size={10} />
-                    <Card style={{ padding: "16px 20px" }}>
-                      <Col gap="60px">
-                        <Table
-                          loading={isLoadingGroupBuying || isFetchingGroupBuying}
-                          columns={columnsGroupBuying.filter(
-                            (filtering) => filtering.dataIndex !== "id",
-                          )}
-                          data={dataGroupBuying?.data}
-                          rowSelection={rowSelectionGroupBuying}
-                        />
+              </div>
+            ) : modalPricingStructureForm.typeForm === "Manage Customer Group Buying Price" ? (
+              <>
+                <Card>
+                  <Row justifyContent="space-between">
+                    <Search
+                      width="340px"
+                      placeholder="Search Name"
+                      onChange={(e: any) => {
+                        setSearchGroupBuying(e.target.value);
+                      }}
+                    />
+                    <Row gap="16px">
+                      <Button
+                        size="big"
+                        variant="tertiary"
+                        onClick={() =>
+                          setShowDeleteGroupBuying({
+                            open: true,
+                            type: "selection",
+                            data: { dataGroupBuying, selectedRowKeysGroupBuying },
+                          })
+                        }
+                        disabled={rowSelectionGroupBuying.selectedRowKeys?.length === 0}
+                      >
+                        Delete
+                      </Button>
+                      <Button
+                        size="big"
+                        variant="primary"
+                        onClick={() =>
+                          setModalPricingStructureForm({
+                            ...modalPricingStructureForm,
+                            open: true,
+                            typeForm: "Create Cust Group Buying Price",
+                          })
+                        }
+                      >
+                        Create
+                      </Button>
+                    </Row>
+                  </Row>
+                </Card>
+                <Spacer size={10} />
+                <Card style={{ padding: "16px 20px" }}>
+                  <Col gap="60px">
+                    <Table
+                      loading={isLoadingGroupBuying || isFetchingGroupBuying}
+                      columns={columnsGroupBuying.filter(
+                        (filtering) => filtering.dataIndex !== "id"
+                      )}
+                      data={dataGroupBuying?.data}
+                      rowSelection={rowSelectionGroupBuying}
+                    />
 
-                        <Pagination pagination={paginationGroupBuying} />
-                      </Col>
-                    </Card>
-                  </>
-                ) : modalPricingStructureForm.typeForm === "Manage Price Structure Configuration" ? (
-                  <>
-                    <Card>
-                      <Row justifyContent="space-between">
-                        <Search
-                          width="340px"
-                          placeholder="Search Name"
-                          onChange={(e: any) => {
-                            setSearchPricingConfig(e.target.value);
-                          }}
-                        />
-                        <Row gap="16px">
-                          <Button
-                            size="big"
-                            variant="tertiary"
-                            onClick={() => setShowDeletePricingConfig({
-                              open: true,
-                              type: "selection",
-                              data: {
-                                dataPricingConfig,
-                                selectedRowKeysPricingConfig,
-                              },
-                            })}
-                            disabled={rowSelectionPricingConfig.selectedRowKeys?.length === 0}
-                          >
-                            Delete
-                          </Button>
-                          <Button
-                            size="big"
-                            variant="primary"
-                            onClick={() => {
-                              replaceLeveling(levelingBodyField);
-                              setModalPricingStructureForm({
-                                ...modalPricingStructureForm,
-                                open: true,
-                                typeForm: "Create Price Structure Config",
-                              });
-                            }}
-                          >
-                            Create
-                          </Button>
-                        </Row>
-                      </Row>
-                    </Card>
-                    <Spacer size={10} />
-                    <Card style={{ padding: "16px 20px" }}>
-                      <Col gap="60px">
-                        <Table
-                          loading={isLoadingPricingConfig || isFetchingPricingConfig}
-                          columns={columnsPricingConfig.filter(
-                            (filtering) => filtering.dataIndex !== "id"
-                          && filtering.dataIndex !== "priceStructureLevelings",
-                          )}
-                          data={dataPricingConfig?.data}
-                          rowSelection={rowSelectionPricingConfig}
-                        />
+                    <Pagination pagination={paginationGroupBuying} />
+                  </Col>
+                </Card>
+              </>
+            ) : modalPricingStructureForm.typeForm === "Manage Price Structure Configuration" ? (
+              <>
+                <Card>
+                  <Row justifyContent="space-between">
+                    <Search
+                      width="340px"
+                      placeholder="Search Name"
+                      onChange={(e: any) => {
+                        setSearchPricingConfig(e.target.value);
+                      }}
+                    />
+                    <Row gap="16px">
+                      <Button
+                        size="big"
+                        variant="tertiary"
+                        onClick={() =>
+                          setShowDeletePricingConfig({
+                            open: true,
+                            type: "selection",
+                            data: {
+                              dataPricingConfig,
+                              selectedRowKeysPricingConfig,
+                            },
+                          })
+                        }
+                        disabled={rowSelectionPricingConfig.selectedRowKeys?.length === 0}
+                      >
+                        Delete
+                      </Button>
+                      <Button
+                        size="big"
+                        variant="primary"
+                        onClick={() => {
+                          replaceLeveling(levelingBodyField);
+                          setModalPricingStructureForm({
+                            ...modalPricingStructureForm,
+                            open: true,
+                            typeForm: "Create Price Structure Config",
+                          });
+                        }}
+                      >
+                        Create
+                      </Button>
+                    </Row>
+                  </Row>
+                </Card>
+                <Spacer size={10} />
+                <Card style={{ padding: "16px 20px" }}>
+                  <Col gap="60px">
+                    <Table
+                      loading={isLoadingPricingConfig || isFetchingPricingConfig}
+                      columns={columnsPricingConfig.filter(
+                        (filtering) =>
+                          filtering.dataIndex !== "id" &&
+                          filtering.dataIndex !== "priceStructureLevelings"
+                      )}
+                      data={dataPricingConfig?.data}
+                      rowSelection={rowSelectionPricingConfig}
+                    />
 
-                        <Pagination pagination={paginationPricingConfig} />
-                      </Col>
-                    </Card>
-                  </>
-                ) : null
+                    <Pagination pagination={paginationPricingConfig} />
+                  </Col>
+                </Card>
+              </>
+            ) : null
           }
         />
       )}
@@ -991,7 +1007,7 @@ const PricingStructureList: any = () => {
           onCancel={() => setShowDeleteGroupBuying({ open: false, type: "", data: {} })}
           title="Confirm Delete"
           footer={null}
-          content={(
+          content={
             <div
               style={{
                 display: "flex",
@@ -1002,7 +1018,7 @@ const PricingStructureList: any = () => {
               <Spacer size={4} />
               {renderConfirmationTextGroupBuying(
                 isShowDeleteGroupBuying.type,
-                isShowDeleteGroupBuying.data,
+                isShowDeleteGroupBuying.data
               )}
               <Spacer size={20} />
               <div
@@ -1037,7 +1053,7 @@ const PricingStructureList: any = () => {
                 </Button>
               </div>
             </div>
-          )}
+          }
         />
       )}
 
@@ -1049,7 +1065,7 @@ const PricingStructureList: any = () => {
           onCancel={() => setShowDeletePricingConfig({ open: false, type: "", data: {} })}
           title="Confirm Delete"
           footer={null}
-          content={(
+          content={
             <div
               style={{
                 display: "flex",
@@ -1060,7 +1076,7 @@ const PricingStructureList: any = () => {
               <Spacer size={4} />
               {renderConfirmationTextPricingConfig(
                 isShowDeletePricingConfig.type,
-                isShowDeletePricingConfig.data,
+                isShowDeletePricingConfig.data
               )}
               <Spacer size={20} />
               <div
@@ -1095,7 +1111,7 @@ const PricingStructureList: any = () => {
                 </Button>
               </div>
             </div>
-          )}
+          }
         />
       )}
     </>

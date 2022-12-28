@@ -34,8 +34,8 @@ import { STATUS_APPROVAL_TEXT, STATUS_APPROVAL_VARIANT } from "../../utils/utils
 
 const downloadFile = (params: any) =>
   mdmDownloadService("/price-structure/template/download", { params }).then((res) => {
-    let dataUrl = window.URL.createObjectURL(new Blob([res.data]));
-    let tempLink = document.createElement("a");
+    const dataUrl = window.URL.createObjectURL(new Blob([res.data]));
+    const tempLink = document.createElement("a");
     tempLink.href = dataUrl;
     tempLink.setAttribute("download", `pricing-structure_${new Date().getTime()}.xlsx`);
     tempLink.click();
@@ -173,11 +173,11 @@ const WaitingApprovalPricingStructure: any = (props: any) => {
           />
           <Row gap="16px" justifyContent="flex-end">
             <DropdownMenu
-              title={"More"}
-              buttonVariant={"secondary"}
-              buttonSize={"big"}
-              textVariant={"button"}
-              textColor={"pink.regular"}
+              title="More"
+              buttonVariant="secondary"
+              buttonSize="big"
+              textVariant="button"
+              textColor="pink.regular"
               iconStyle={{ fontSize: "12px" }}
               onClick={(e: any) => {
                 switch (parseInt(e.key)) {
@@ -208,7 +208,9 @@ const WaitingApprovalPricingStructure: any = (props: any) => {
               menuList={[
                 {
                   key: 1,
-                  value: (
+                  value: props?.listPermission?.filter(
+                    (x: any) => x.viewTypes[0]?.viewType.name === "Download Template"
+                  ).length > 0 && (
                     <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
                       <ICDownload />
                       <p style={{ margin: "0" }}>Download Template</p>
@@ -217,7 +219,9 @@ const WaitingApprovalPricingStructure: any = (props: any) => {
                 },
                 {
                   key: 2,
-                  value: (
+                  value: props?.listPermission?.filter(
+                    (x: any) => x.viewTypes[0]?.viewType.name === "Upload"
+                  ).length > 0 && (
                     <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
                       <ICUpload />
                       <p style={{ margin: "0" }}>Upload Template</p>
@@ -248,7 +252,7 @@ const WaitingApprovalPricingStructure: any = (props: any) => {
               .length > 0 && (
               <Button
                 size="big"
-                variant={"primary"}
+                variant="primary"
                 onClick={() => {
                   router.push("/mdm/pricing/pricing-structure/create");
                 }}
@@ -270,8 +274,8 @@ const WaitingApprovalPricingStructure: any = (props: any) => {
             <Spacer size={20} />
             {isEmpty ? (
               <EmptyState
-                image={"/icons/empty-state.svg"}
-                title={"The Data You Are Looking for Cannot be Found"}
+                image="/icons/empty-state.svg"
+                title="The Data You Are Looking for Cannot be Found"
                 subtitle={`Don't worry you can Create a new pricing structure`}
                 height={400}
               />

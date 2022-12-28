@@ -182,7 +182,9 @@ const RejectedPricingStructure: any = (props: any) => {
               menuList={[
                 {
                   key: 1,
-                  value: (
+                  value: props?.listPermission?.filter(
+                    (x: any) => x.viewTypes[0]?.viewType.name === "Download Template"
+                  ).length > 0 && (
                     <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
                       <ICDownload />
                       <p style={{ margin: "0" }}>Download Template</p>
@@ -191,7 +193,9 @@ const RejectedPricingStructure: any = (props: any) => {
                 },
                 {
                   key: 2,
-                  value: (
+                  value: props?.listPermission?.filter(
+                    (x: any) => x.viewTypes[0]?.viewType.name === "Upload"
+                  ).length > 0 && (
                     <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
                       <ICUpload />
                       <p style={{ margin: "0" }}>Upload Template</p>
