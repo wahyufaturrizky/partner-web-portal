@@ -40,7 +40,7 @@ const downloadFile = (params: any) => mdmDownloadService("/vendor/template/downl
 
 export default function Vendor() {
   const router = useRouter();
-  const companyCode = localStorage.getItem("companyCode");
+  const companyCode:any = localStorage.getItem("companyCode");
 
   const pagination = usePagination({
     page: 1,
@@ -178,6 +178,7 @@ export default function Vendor() {
   const onSubmitFile = (file: any) => {
     const formData = new FormData();
     formData.append("upload_file", file);
+    formData.append("company_id", companyCode);
 
     uploadVendor(formData);
   };
@@ -220,13 +221,13 @@ export default function Vendor() {
               onClick={(e: any) => {
                 switch (parseInt(e.key)) {
                   case 1:
-                    downloadFile({ with_data: "N" });
+                    downloadFile({ with_data: "N", company_id: companyCode });
                     break;
                   case 2:
                     setShowUpload(true);
                     break;
                   case 3:
-                    downloadFile({ with_data: "Y" });
+                    downloadFile({ with_data: "Y", company_id: companyCode });
                     break;
                   case 4:
                     setShowVendorGroup(true);

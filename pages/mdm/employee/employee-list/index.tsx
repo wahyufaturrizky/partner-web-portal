@@ -151,6 +151,7 @@ const EmployeeList = () => {
           setShowDelete({ open: false, data: {}, type: "" });
           setSelectedRowKeys([]);
           queryClient.invalidateQueries(["employee-list"]);
+          refetchEmployeeList();
         },
       },
     });

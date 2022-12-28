@@ -470,6 +470,7 @@ const CreateCompany: any = () => {
     control,
     formState: { errors },
     setError,
+    getValues,
   } = useForm({
     resolver: yupResolver(schema),
     defaultValues: defaultValue,
@@ -693,7 +694,10 @@ const CreateCompany: any = () => {
     options: {
       onSuccess: (data) => {
         alert("Create Success!");
-        router.push("/config/company-list");
+        const code = getValues('code').toUpperCase();
+        localStorage.setItem('companyId', data.id);
+        localStorage.setItem('companyCode', code);
+        window.location.href = "/config/company-list";
       },
       onError: (error: any) => {
         if (error?.data?.message?.includes("already exits")) {

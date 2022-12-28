@@ -25,13 +25,9 @@ import {
   Spin,
 } from "pink-lava-ui";
 import { useState } from "react";
-import {
-  Controller, useFieldArray, useForm, useWatch,
-} from "react-hook-form";
+import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form";
 import styled from "styled-components";
-import {
-  ICCheckPrimary, ICDelete, ICEdit, ICPlusWhite, ICView,
-} from "../../../../assets";
+import { ICCheckPrimary, ICDelete, ICEdit, ICPlusWhite, ICView } from "../../../../assets";
 import ArrowLeft from "../../../../assets/icons/arrow-left.svg";
 import { useCityInfiniteLists } from "../../../../hooks/city/useCity";
 import { useLanguages } from "../../../../hooks/languages/useLanguages";
@@ -99,6 +95,10 @@ const EmployeeDetail = () => {
   const [totalRowsReportToList, setTotalRowsReportToList] = useState(0);
   const [searchReportTo, setSearchReportTo] = useState("");
 
+  const [searchLanguage, setSearchLanguage] = useState("");
+  const [totalRowsLanguage, setTotalRowsLanguage] = useState(0);
+  const [listLanguage, setListLanguage] = useState([]);
+
   const [countryId, setCountryId] = useState();
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -112,18 +112,20 @@ const EmployeeDetail = () => {
   const [defaultActiveKey, setDefaultActiveKey] = useState("Personal");
 
   const debounceFetch = useDebounce(
-    searchDepartment
-      || searchJobPosition
-      || searchReportTo
-      || searchJobLevel
-      || searchEmployee
-      || searchBranch
-      || searchCity
-      || searchPostalCode
-      || searchTrainingType
-      || searchCountry,
-    1000,
+    searchDepartment ||
+      searchJobPosition ||
+      searchReportTo ||
+      searchJobLevel ||
+      searchEmployee ||
+      searchBranch ||
+      searchCity ||
+      searchPostalCode ||
+      searchTrainingType ||
+      searchCountry,
+    1000
   );
+
+  const debounceSearchLanguage = useDebounce(searchLanguage, 1000);
 
   const {
     register,
@@ -181,7 +183,7 @@ const EmployeeDetail = () => {
     },
   });
   const listPermission = dataUserPermission?.permission?.filter(
-    (filtering: any) => filtering.menu === "Employee List",
+    (filtering: any) => filtering.menu === "Employee List"
   );
 
   const { data: dataEmployee, isLoading: isLoadingEmployee } = useEmployeeListMDM({
@@ -231,7 +233,7 @@ const EmployeeDetail = () => {
             lon: data.lon,
             lat: data.lat,
             key: data.id,
-          })),
+          }))
         );
         setValue("bank", data.bank);
         setValue("education", data.education);
@@ -248,7 +250,7 @@ const EmployeeDetail = () => {
             end: data.end,
             description: data.description,
             attachments: data.attachments,
-          })),
+          }))
         );
 
         replaceCertification(
@@ -259,7 +261,7 @@ const EmployeeDetail = () => {
             number: data.number,
             date: data.date,
             attachments: data.attachments,
-          })),
+          }))
         );
       },
     },
@@ -327,32 +329,35 @@ const EmployeeDetail = () => {
     shouldUseNativeValidation: true,
   });
 
-  const { mutate: uploadFilePhotoEmployee, isLoading: isLoadingFilePhotoFilePhotoEmployee } = useUploadFilePhotoEmployeeMDM({
-    options: {
-      onSuccess: (data: any) => {
-        setValue("photo", data);
-        alert("Upload Success");
+  const { mutate: uploadFilePhotoEmployee, isLoading: isLoadingFilePhotoFilePhotoEmployee } =
+    useUploadFilePhotoEmployeeMDM({
+      options: {
+        onSuccess: (data: any) => {
+          setValue("photo", data);
+          alert("Upload Success");
+        },
       },
-    },
-  });
+    });
 
-  const { mutate: uploadFilePhotoCertificate, isLoading: isLoadingFilePhotoFilePhotoCertificate } = useUploadFilePhotoEmployeeMDM({
-    options: {
-      onSuccess: (data: any) => {
-        setValueCertification("attachments", data);
-        alert("Upload Success");
+  const { mutate: uploadFilePhotoCertificate, isLoading: isLoadingFilePhotoFilePhotoCertificate } =
+    useUploadFilePhotoEmployeeMDM({
+      options: {
+        onSuccess: (data: any) => {
+          setValueCertification("attachments", data);
+          alert("Upload Success");
+        },
       },
-    },
-  });
+    });
 
-  const { mutate: uploadFilePhotoTraining, isLoading: isLoadingFilePhotoFilePhotoTraining } = useUploadFilePhotoEmployeeMDM({
-    options: {
-      onSuccess: (data: any) => {
-        setValueTraining("attachments", data);
-        alert("Upload Success");
+  const { mutate: uploadFilePhotoTraining, isLoading: isLoadingFilePhotoFilePhotoTraining } =
+    useUploadFilePhotoEmployeeMDM({
+      options: {
+        onSuccess: (data: any) => {
+          setValueTraining("attachments", data);
+          alert("Upload Success");
+        },
       },
-    },
-  });
+    });
 
   const handleUploadPhotoEmployeeFile = (file: any) => {
     const formData = new FormData();
@@ -386,10 +391,12 @@ const EmployeeDetail = () => {
     options: {
       onSuccess: (data: any) => {
         setTotalRowsDepartmentList(data.pages[0].totalRow);
-        const mappedData = data?.pages?.map((group: any) => group.rows?.map((element: any) => ({
-          value: element.departmentId,
-          label: element.name,
-        })));
+        const mappedData = data?.pages?.map((group: any) =>
+          group.rows?.map((element: any) => ({
+            value: element.departmentId,
+            label: element.name,
+          }))
+        );
         const flattenArray = [].concat(...mappedData);
         setListDepartmentList(flattenArray);
       },
@@ -416,10 +423,12 @@ const EmployeeDetail = () => {
     options: {
       onSuccess: (data: any) => {
         setTotalRowsReportToList(data.pages[0].totalRow);
-        const mappedData = data?.pages?.map((group: any) => group.rows?.map((element: any) => ({
-          value: element.ReportToId,
-          label: element.name,
-        })));
+        const mappedData = data?.pages?.map((group: any) =>
+          group.rows?.map((element: any) => ({
+            value: element.ReportToId,
+            label: element.name,
+          }))
+        );
         const flattenArray = [].concat(...mappedData);
         setReportToList(flattenArray);
       },
@@ -446,10 +455,12 @@ const EmployeeDetail = () => {
     options: {
       onSuccess: (data: any) => {
         setTotalRowsCityList(data.pages[0].totalRow);
-        const mappedData = data?.pages?.map((group: any) => group.rows?.map((element: any) => ({
-          value: element.cityId,
-          label: element.name,
-        })));
+        const mappedData = data?.pages?.map((group: any) =>
+          group.rows?.map((element: any) => ({
+            value: element.cityId,
+            label: element.name,
+          }))
+        );
         const flattenArray = [].concat(...mappedData);
         setCityList(flattenArray);
       },
@@ -475,10 +486,12 @@ const EmployeeDetail = () => {
     options: {
       onSuccess: (data: any) => {
         setTotalRowsPostalCodeList(data.pages[0].totalRow);
-        const mappedData = data?.pages?.map((group: any) => group.rows?.map((element: any) => ({
-          value: element.codeText,
-          label: element.code,
-        })));
+        const mappedData = data?.pages?.map((group: any) =>
+          group.rows?.map((element: any) => ({
+            value: element.codeText,
+            label: element.code,
+          }))
+        );
         const flattenArray = [].concat(...mappedData);
         setPostalCodeList(flattenArray);
       },
@@ -522,10 +535,12 @@ const EmployeeDetail = () => {
     options: {
       onSuccess: (data: any) => {
         setTotalRowsCountryList(data.pages[0].totalRow);
-        const mappedData = data?.pages?.map((group: any) => group.rows?.map((element: any) => ({
-          value: element.id,
-          label: element.name,
-        })));
+        const mappedData = data?.pages?.map((group: any) =>
+          group.rows?.map((element: any) => ({
+            value: element.id,
+            label: element.name,
+          }))
+        );
         const flattenArray = [].concat(...mappedData);
         setCountryList(flattenArray);
       },
@@ -551,10 +566,12 @@ const EmployeeDetail = () => {
     options: {
       onSuccess: (data: any) => {
         setTotalRowsTrainingTypeList(data.pages[0].totalRow);
-        const mappedData = data?.pages?.map((group: any) => group.rows?.map((element: any) => ({
-          value: element.trainingTypeId,
-          label: element.name,
-        })));
+        const mappedData = data?.pages?.map((group: any) =>
+          group.rows?.map((element: any) => ({
+            value: element.trainingTypeId,
+            label: element.name,
+          }))
+        );
         const flattenArray = [].concat(...mappedData);
         setTrainingTypeList(flattenArray);
       },
@@ -581,10 +598,12 @@ const EmployeeDetail = () => {
     options: {
       onSuccess: (data: any) => {
         setTotalRowsBranchList(data.pages[0].totalRow);
-        const mappedData = data?.pages?.map((group: any) => group.rows?.map((element: any) => ({
-          value: element.BranchId,
-          label: element.name,
-        })));
+        const mappedData = data?.pages?.map((group: any) =>
+          group.rows?.map((element: any) => ({
+            value: element.BranchId,
+            label: element.name,
+          }))
+        );
         const flattenArray = [].concat(...mappedData);
         setBranchList(flattenArray);
       },
@@ -612,10 +631,12 @@ const EmployeeDetail = () => {
     options: {
       onSuccess: (data: any) => {
         setTotalRowsJobPositionList(data.pages[0].totalRow);
-        const mappedData = data?.pages?.map((group: any) => group.rows?.map((element: any) => ({
-          value: element.jobPositionId,
-          label: element.name,
-        })));
+        const mappedData = data?.pages?.map((group: any) =>
+          group.rows?.map((element: any) => ({
+            value: element.jobPositionId,
+            label: element.name,
+          }))
+        );
         const flattenArray = [].concat(...mappedData);
         setJobPositionList(flattenArray);
       },
@@ -642,10 +663,12 @@ const EmployeeDetail = () => {
     options: {
       onSuccess: (data: any) => {
         setTotalRowsEmployeeList(data.pages[0].totalRow);
-        const mappedData = data?.pages?.map((group: any) => group.rows?.map((element: any) => ({
-          value: element.employeeId,
-          label: element.name,
-        })));
+        const mappedData = data?.pages?.map((group: any) =>
+          group.rows?.map((element: any) => ({
+            value: element.employeeId,
+            label: element.name,
+          }))
+        );
         const flattenArray = [].concat(...mappedData);
         setEmployeeList(flattenArray);
       },
@@ -672,10 +695,12 @@ const EmployeeDetail = () => {
     options: {
       onSuccess: (data: any) => {
         setTotalRowsJobLevelList(data.pages[0].totalRow);
-        const mappedData = data?.pages?.map((group: any) => group.rows?.map((element: any) => ({
-          value: element.jobLevelId,
-          label: element.name,
-        })));
+        const mappedData = data?.pages?.map((group: any) =>
+          group.rows?.map((element: any) => ({
+            value: element.jobLevelId,
+            label: element.name,
+          }))
+        );
         const flattenArray = [].concat(...mappedData);
         setJobLevelList(flattenArray);
       },
@@ -688,14 +713,15 @@ const EmployeeDetail = () => {
     },
   });
 
-  const { mutate: updateEmployeeList, isLoading: isLoadingUpdateEmployeeList } = useUpdateEmployeeListMDM({
-    options: {
-      onSuccess: () => {
-        router.back();
+  const { mutate: updateEmployeeList, isLoading: isLoadingUpdateEmployeeList } =
+    useUpdateEmployeeListMDM({
+      options: {
+        onSuccess: () => {
+          router.back();
+        },
       },
-    },
-    id: idEmployee,
-  });
+      id: idEmployee,
+    });
 
   const onSubmit = (data: any) => {
     if (data.hasOwnProperty("id")) {
@@ -746,12 +772,12 @@ const EmployeeDetail = () => {
 
     data.address.map((dataAddress: any) => {
       if (
-        dataAddress.hasOwnProperty("province")
-        || dataAddress.hasOwnProperty("city")
-        || dataAddress.hasOwnProperty("district")
-        || dataAddress.hasOwnProperty("zone")
-        || dataAddress.hasOwnProperty("id")
-        || dataAddress.hasOwnProperty("key")
+        dataAddress.hasOwnProperty("province") ||
+        dataAddress.hasOwnProperty("city") ||
+        dataAddress.hasOwnProperty("district") ||
+        dataAddress.hasOwnProperty("zone") ||
+        dataAddress.hasOwnProperty("id") ||
+        dataAddress.hasOwnProperty("key")
       ) {
         delete dataAddress.id;
         delete dataAddress.key;
@@ -783,9 +809,37 @@ const EmployeeDetail = () => {
     });
   };
 
-  const { data: languageData } = useLanguages();
-
-  const language = languageData?.rows?.map((row: any) => ({ id: row.id, value: row.name })) ?? [];
+  const {
+    isLoading: isLoiadingLanguages,
+    isFetching: isFetchingLanguages,
+    isFetchingNextPage: isFetchingMoreLanguages,
+    hasNextPage: hasNextLanguages,
+    fetchNextPage: fetchNextPageLanguages,
+  } = useLanguagesInfiniteLists({
+    query: {
+      search: debounceSearchLanguage,
+      limit: 10,
+    },
+    options: {
+      onSuccess: (data: any) => {
+        setTotalRowsLanguage(data?.pages[0].totalRow);
+        const mappedData = data?.pages?.map((group: any) =>
+          group.rows?.map((element: any) => ({
+            label: element.name,
+            value: element.name,
+          }))
+        );
+        const flattenArray = [].concat(...mappedData);
+        setListLanguage(flattenArray);
+      },
+      getNextPageParam: (_lastPage: any, pages: any) => {
+        if (listLanguage.length < totalRowsLanguage) {
+          return pages.length + 1;
+        }
+        return undefined;
+      },
+    },
+  });
 
   const listTab = [
     { title: "Personal" },
@@ -1005,11 +1059,13 @@ const EmployeeDetail = () => {
         <Row gap="16px" alignItems="center" nowrap>
           <Col>
             <ICEdit
-              onClick={() => setModalChannelForm({
-                open: true,
-                typeForm: "Edit Education",
-                data: record,
-              })}
+              onClick={() =>
+                setModalChannelForm({
+                  open: true,
+                  typeForm: "Edit Education",
+                  data: record,
+                })
+              }
             />
           </Col>
           <Col>
@@ -1062,11 +1118,13 @@ const EmployeeDetail = () => {
         <Row gap="16px" alignItems="center" nowrap>
           <Col>
             <ICEdit
-              onClick={() => setModalChannelForm({
-                open: true,
-                typeForm: "Edit Family",
-                data: record,
-              })}
+              onClick={() =>
+                setModalChannelForm({
+                  open: true,
+                  typeForm: "Edit Family",
+                  data: record,
+                })
+              }
             />
           </Col>
           <Col>
@@ -1115,20 +1173,24 @@ const EmployeeDetail = () => {
         <Row gap="16px" alignItems="center" nowrap>
           <Col>
             <ICView
-              onClick={() => setModalChannelForm({
-                open: true,
-                typeForm: "View Training",
-                data: record,
-              })}
+              onClick={() =>
+                setModalChannelForm({
+                  open: true,
+                  typeForm: "View Training",
+                  data: record,
+                })
+              }
             />
           </Col>
           <Col>
             <ICEdit
-              onClick={() => setModalChannelForm({
-                open: true,
-                typeForm: "Edit Training",
-                data: record,
-              })}
+              onClick={() =>
+                setModalChannelForm({
+                  open: true,
+                  typeForm: "Edit Training",
+                  data: record,
+                })
+              }
             />
           </Col>
           <Col>
@@ -1185,20 +1247,24 @@ const EmployeeDetail = () => {
         <Row gap="16px" alignItems="center" nowrap>
           <Col>
             <ICView
-              onClick={() => setModalChannelForm({
-                open: true,
-                typeForm: "View Certification",
-                data: record,
-              })}
+              onClick={() =>
+                setModalChannelForm({
+                  open: true,
+                  typeForm: "View Certification",
+                  data: record,
+                })
+              }
             />
           </Col>
           <Col>
             <ICEdit
-              onClick={() => setModalChannelForm({
-                open: true,
-                typeForm: "Edit Certification",
-                data: record,
-              })}
+              onClick={() =>
+                setModalChannelForm({
+                  open: true,
+                  typeForm: "Edit Certification",
+                  data: record,
+                })
+              }
             />
           </Col>
           <Col>
@@ -1247,11 +1313,13 @@ const EmployeeDetail = () => {
         <Row gap="16px" alignItems="center" nowrap>
           <Col>
             <ICEdit
-              onClick={() => setModalChannelForm({
-                open: true,
-                typeForm: "Edit Bank Account",
-                data: record,
-              })}
+              onClick={() =>
+                setModalChannelForm({
+                  open: true,
+                  typeForm: "Edit Bank Account",
+                  data: record,
+                })
+              }
             />
           </Col>
           <Col>
@@ -1314,14 +1382,15 @@ const EmployeeDetail = () => {
     },
   ];
 
-  const { mutate: deleteEmployeeList, isLoading: isLoadingDeleteEmployeeList } = useDeleteEmployeeListMDM({
-    options: {
-      onSuccess: () => {
-        setShowDeleteModal(false);
-        router.back();
+  const { mutate: deleteEmployeeList, isLoading: isLoadingDeleteEmployeeList } =
+    useDeleteEmployeeListMDM({
+      options: {
+        onSuccess: () => {
+          setShowDeleteModal(false);
+          router.back();
+        },
       },
-    },
-  });
+    });
 
   if (isLoadingEmployee) {
     return (
@@ -1372,14 +1441,14 @@ const EmployeeDetail = () => {
           </Row>
 
           <Row gap="16px">
-            {listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Delete").length
-              > 0 && (
+            {listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Delete").length >
+              0 && (
               <Button size="big" variant="tertiary" onClick={() => setShowDeleteModal(true)}>
                 Delete
               </Button>
             )}
-            {listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Update").length
-              > 0 && (
+            {listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Update").length >
+              0 && (
               <Button size="big" variant="primary" onClick={handleSubmit(onSubmit)}>
                 {isLoadingUpdateEmployeeList ? "Loading..." : "Save"}
               </Button>
@@ -1429,9 +1498,7 @@ const EmployeeDetail = () => {
                   render={({ field: { onChange }, fieldState: { error } }) => (
                     <>
                       <Label>
-                        Title
-                        {' '}
-                        <span style={{ color: colors.red.regular }}>*</span>
+                        Title <span style={{ color: colors.red.regular }}>*</span>
                       </Label>
                       <Spacer size={3} />
                       <Dropdown
@@ -1686,9 +1753,7 @@ const EmployeeDetail = () => {
                   render={({ field: { onChange }, fieldState: { error } }) => (
                     <>
                       <Label>
-                        Branch
-                        {' '}
-                        <span style={{ color: colors.red.regular }}>*</span>
+                        Branch <span style={{ color: colors.red.regular }}>*</span>
                       </Label>
                       <Spacer size={3} />
                       <FormSelect
@@ -1777,19 +1842,19 @@ const EmployeeDetail = () => {
                         borderColor="#AAAAAA"
                         arrowColor="#000"
                         withSearch
-                        isLoading={isFetchingCountry}
-                        isLoadingMore={isFetchingMoreCountry}
+                        isLoading={isFetchingLanguages}
+                        isLoadingMore={isFetchingMoreLanguages}
                         fetchMore={() => {
-                          if (hasNextPageCountry) {
-                            fetchNextPageCountry();
+                          if (hasNextLanguages) {
+                            fetchNextPageLanguages();
                           }
                         }}
-                        items={isFetchingCountry && !isFetchingMoreCountry ? [] : countryList}
+                        items={isFetchingLanguages && !isFetchingMoreLanguages ? [] : listLanguage}
                         onChange={(value: any) => {
                           onChange(value);
                         }}
                         onSearch={(value: any) => {
-                          setSearchCountry(value);
+                          setSearchLanguage(value);
                         }}
                       />
                     </>
@@ -2129,11 +2194,11 @@ const EmployeeDetail = () => {
               <>
                 <Button
                   size="big"
-                  onClick={() => appendAddresess({ ...addressBodyField, key: fieldsAddresess.length })}
+                  onClick={() =>
+                    appendAddresess({ ...addressBodyField, key: fieldsAddresess.length })
+                  }
                 >
-                  <ICPlusWhite />
-                  {' '}
-                  Add More Address
+                  <ICPlusWhite /> Add More Address
                 </Button>
 
                 {fieldsAddresess.map((item, index) => (
@@ -2222,8 +2287,8 @@ const EmployeeDetail = () => {
                                 arrowColor="#000"
                                 withSearch
                                 defaultValue={
-                                    dataEmployee?.address?.[index]?.countryLevelsOptions?.name
-                                  }
+                                  dataEmployee?.address?.[index]?.countryLevelsOptions?.name
+                                }
                                 isLoading={isFetchingCountry}
                                 isLoadingMore={isFetchingMoreCountry}
                                 fetchMore={() => {
@@ -2232,8 +2297,8 @@ const EmployeeDetail = () => {
                                   }
                                 }}
                                 items={
-                                    isFetchingCountry && !isFetchingMoreCountry ? [] : countryList
-                                  }
+                                  isFetchingCountry && !isFetchingMoreCountry ? [] : countryList
+                                }
                                 onChange={(value: any) => {
                                   setCountryId(value);
                                   onChange(value);
@@ -2257,7 +2322,7 @@ const EmployeeDetail = () => {
                               label="Province"
                               width="100%"
                               items={countryStructureListData?.structures?.[0]?.values.map(
-                                (data) => ({ id: data.id, value: data.name }),
+                                (data) => ({ id: data.id, value: data.name })
                               )}
                               handleChange={onChange}
                             />
@@ -2276,7 +2341,7 @@ const EmployeeDetail = () => {
                               label="City"
                               width="100%"
                               items={countryStructureListData?.structures?.[1]?.values.map(
-                                (data) => ({ id: data.id, value: data.name }),
+                                (data) => ({ id: data.id, value: data.name })
                               )}
                               handleChange={onChange}
                             />
@@ -2294,7 +2359,7 @@ const EmployeeDetail = () => {
                               label="District"
                               width="100%"
                               items={countryStructureListData?.structures?.[2]?.values.map(
-                                (data) => ({ id: data.id, value: data.name }),
+                                (data) => ({ id: data.id, value: data.name })
                               )}
                               handleChange={onChange}
                             />
@@ -2313,7 +2378,7 @@ const EmployeeDetail = () => {
                               label="Zone"
                               width="100%"
                               items={countryStructureListData?.structures?.[3]?.values.map(
-                                (data) => ({ id: data.id, value: data.name }),
+                                (data) => ({ id: data.id, value: data.name })
                               )}
                               handleChange={onChange}
                             />
@@ -2346,10 +2411,10 @@ const EmployeeDetail = () => {
                                   }
                                 }}
                                 items={
-                                    isFetchingPostalCode && !isFetchingMorePostalCode
-                                      ? []
-                                      : postalCodeList
-                                  }
+                                  isFetchingPostalCode && !isFetchingMorePostalCode
+                                    ? []
+                                    : postalCodeList
+                                }
                                 onChange={(value: any) => {
                                   onChange(value);
                                 }}
@@ -2404,7 +2469,9 @@ const EmployeeDetail = () => {
               <>
                 <Button
                   size="big"
-                  onClick={() => setModalChannelForm({ open: true, typeForm: "Add Bank Account", data: {} })}
+                  onClick={() =>
+                    setModalChannelForm({ open: true, typeForm: "Add Bank Account", data: {} })
+                  }
                 >
                   <ICPlusWhite />
                   Add Bank Account
@@ -2414,7 +2481,7 @@ const EmployeeDetail = () => {
 
                 <Table
                   columns={columnsBankAccount.filter(
-                    (filtering) => filtering.dataIndex !== "id" && filtering.dataIndex !== "key",
+                    (filtering) => filtering.dataIndex !== "id" && filtering.dataIndex !== "key"
                   )}
                   data={fieldsBankAccount}
                 />
@@ -2423,7 +2490,9 @@ const EmployeeDetail = () => {
               <>
                 <Button
                   size="big"
-                  onClick={() => setModalChannelForm({ open: true, typeForm: "Add Education", data: {} })}
+                  onClick={() =>
+                    setModalChannelForm({ open: true, typeForm: "Add Education", data: {} })
+                  }
                 >
                   <ICPlusWhite />
                   Add Education
@@ -2433,7 +2502,7 @@ const EmployeeDetail = () => {
 
                 <Table
                   columns={columnsEducation.filter(
-                    (filtering) => filtering.dataIndex !== "id" && filtering.dataIndex !== "key",
+                    (filtering) => filtering.dataIndex !== "id" && filtering.dataIndex !== "key"
                   )}
                   data={fieldsEducation}
                 />
@@ -2442,7 +2511,9 @@ const EmployeeDetail = () => {
               <>
                 <Button
                   size="big"
-                  onClick={() => setModalChannelForm({ open: true, typeForm: "Add Family", data: {} })}
+                  onClick={() =>
+                    setModalChannelForm({ open: true, typeForm: "Add Family", data: {} })
+                  }
                 >
                   <ICPlusWhite />
                   Add Family
@@ -2452,7 +2523,7 @@ const EmployeeDetail = () => {
 
                 <Table
                   columns={columnsFamily.filter(
-                    (filtering) => filtering.dataIndex !== "id" && filtering.dataIndex !== "key",
+                    (filtering) => filtering.dataIndex !== "id" && filtering.dataIndex !== "key"
                   )}
                   data={fieldsFamily}
                 />
@@ -2461,7 +2532,9 @@ const EmployeeDetail = () => {
               <>
                 <Button
                   size="big"
-                  onClick={() => setModalChannelForm({ open: true, typeForm: "Add Training", data: {} })}
+                  onClick={() =>
+                    setModalChannelForm({ open: true, typeForm: "Add Training", data: {} })
+                  }
                 >
                   <ICPlusWhite />
                   Add Training
@@ -2471,9 +2544,10 @@ const EmployeeDetail = () => {
 
                 <Table
                   columns={columnsTraining.filter(
-                    (filtering) => filtering.dataIndex !== "id"
-                      && filtering.dataIndex !== "key"
-                      && filtering.dataIndex !== "attachments",
+                    (filtering) =>
+                      filtering.dataIndex !== "id" &&
+                      filtering.dataIndex !== "key" &&
+                      filtering.dataIndex !== "attachments"
                   )}
                   data={fieldsTraining}
                 />
@@ -2482,7 +2556,9 @@ const EmployeeDetail = () => {
 
                 <Button
                   size="big"
-                  onClick={() => setModalChannelForm({ open: true, typeForm: "Add Certification", data: {} })}
+                  onClick={() =>
+                    setModalChannelForm({ open: true, typeForm: "Add Certification", data: {} })
+                  }
                 >
                   <ICPlusWhite />
                   Add Certification
@@ -2492,9 +2568,10 @@ const EmployeeDetail = () => {
 
                 <Table
                   columns={columnsCertification.filter(
-                    (filtering) => filtering.dataIndex !== "id"
-                      && filtering.dataIndex !== "key"
-                      && filtering.dataIndex !== "attachments",
+                    (filtering) =>
+                      filtering.dataIndex !== "id" &&
+                      filtering.dataIndex !== "key" &&
+                      filtering.dataIndex !== "attachments"
                   )}
                   data={fieldsCertification}
                 />
@@ -2508,8 +2585,8 @@ const EmployeeDetail = () => {
         <Modal
           centered
           width={
-            modalChannelForm.typeForm === "View Training"
-            || modalChannelForm.typeForm === "View Certification"
+            modalChannelForm.typeForm === "View Training" ||
+            modalChannelForm.typeForm === "View Certification"
               ? "80%"
               : undefined
           }
@@ -2518,7 +2595,7 @@ const EmployeeDetail = () => {
           onCancel={() => setModalChannelForm({ open: false, data: {}, typeForm: "" })}
           title={modalChannelForm.typeForm}
           footer={null}
-          content={(
+          content={
             <div
               style={{
                 display: "flex",
@@ -2528,8 +2605,8 @@ const EmployeeDetail = () => {
             >
               <Spacer size={20} />
 
-              {modalChannelForm.typeForm === "Add Bank Account"
-              || modalChannelForm.typeForm === "Edit Bank Account" ? (
+              {modalChannelForm.typeForm === "Add Bank Account" ||
+              modalChannelForm.typeForm === "Edit Bank Account" ? (
                 <>
                   <Input
                     defaultValue={modalChannelForm.data?.bank}
@@ -2589,565 +2666,561 @@ const EmployeeDetail = () => {
                     })}
                   />
                 </>
-                ) : modalChannelForm.typeForm === "Add Education"
-                || modalChannelForm.typeForm === "Edit Education" ? (
-                  <>
-                    <Input
-                      defaultValue={modalChannelForm.data?.school}
-                      width="100%"
-                      label="School Name"
-                      height="48px"
-                      placeholder="e.g Lala University"
-                      {...registerEducation("school", {
-                        shouldUnregister: true,
-                        maxLength: {
-                          value: 100,
-                          message: "Max length exceeded",
-                        },
-                      })}
-                    />
+              ) : modalChannelForm.typeForm === "Add Education" ||
+                modalChannelForm.typeForm === "Edit Education" ? (
+                <>
+                  <Input
+                    defaultValue={modalChannelForm.data?.school}
+                    width="100%"
+                    label="School Name"
+                    height="48px"
+                    placeholder="e.g Lala University"
+                    {...registerEducation("school", {
+                      shouldUnregister: true,
+                      maxLength: {
+                        value: 100,
+                        message: "Max length exceeded",
+                      },
+                    })}
+                  />
 
-                    <Spacer size={20} />
+                  <Spacer size={20} />
 
-                    <Controller
-                      control={controlEducation}
-                      name="degree"
-                      rules={{
-                        shouldUnregister: true,
-                      }}
-                      render={({ field: { onChange } }) => (
-                        <>
-                          <Label>Degree</Label>
-                          <Spacer size={3} />
-                          <Dropdown
-                            defaultValue={modalChannelForm.data?.degree}
-                            noSearch
-                            defaul
-                            width="100%"
-                            items={[
-                              { id: "Master Degree", value: "Master Degree" },
-                              { id: "Magister Degree", value: "Magister Degree" },
-                              { id: "Magister Degree", value: "Magister Degree" },
-                              { id: "Doctor", value: "Doctor" },
-                              { id: "Bachelor Degree", value: "Bachelor Degree" },
-                              { id: "Associate", value: "Associate" },
-                              { id: "Diploma 4", value: "Diploma 4" },
-                              { id: "Diploma 3", value: "Diploma 3" },
-                              { id: "Diploma 2", value: "Diploma 2" },
-                              { id: "Diploma 1", value: "Diploma 1" },
-                              { id: "Senior High School", value: "Senior High School" },
-                            ]}
-                            handleChange={(value: any) => {
-                              onChange(value);
-                            }}
-                          />
-                        </>
-                      )}
-                    />
+                  <Controller
+                    control={controlEducation}
+                    name="degree"
+                    rules={{
+                      shouldUnregister: true,
+                    }}
+                    render={({ field: { onChange } }) => (
+                      <>
+                        <Label>Degree</Label>
+                        <Spacer size={3} />
+                        <Dropdown
+                          defaultValue={modalChannelForm.data?.degree}
+                          noSearch
+                          defaul
+                          width="100%"
+                          items={[
+                            { id: "Master Degree", value: "Master Degree" },
+                            { id: "Magister Degree", value: "Magister Degree" },
+                            { id: "Magister Degree", value: "Magister Degree" },
+                            { id: "Doctor", value: "Doctor" },
+                            { id: "Bachelor Degree", value: "Bachelor Degree" },
+                            { id: "Associate", value: "Associate" },
+                            { id: "Diploma 4", value: "Diploma 4" },
+                            { id: "Diploma 3", value: "Diploma 3" },
+                            { id: "Diploma 2", value: "Diploma 2" },
+                            { id: "Diploma 1", value: "Diploma 1" },
+                            { id: "Senior High School", value: "Senior High School" },
+                          ]}
+                          handleChange={(value: any) => {
+                            onChange(value);
+                          }}
+                        />
+                      </>
+                    )}
+                  />
 
-                    <Spacer size={20} />
+                  <Spacer size={20} />
 
-                    <Input
-                      defaultValue={modalChannelForm.data?.study}
-                      width="100%"
-                      label="Field of Study"
-                      height="48px"
-                      placeholder="e.g Business"
-                      {...registerEducation("study", {
-                        shouldUnregister: true,
-                        maxLength: {
-                          value: 150,
-                          message: "Max length exceeded",
-                        },
-                      })}
-                    />
+                  <Input
+                    defaultValue={modalChannelForm.data?.study}
+                    width="100%"
+                    label="Field of Study"
+                    height="48px"
+                    placeholder="e.g Business"
+                    {...registerEducation("study", {
+                      shouldUnregister: true,
+                      maxLength: {
+                        value: 150,
+                        message: "Max length exceeded",
+                      },
+                    })}
+                  />
 
-                    <Spacer size={20} />
+                  <Spacer size={20} />
 
-                    <Controller
-                      control={controlEducation}
-                      name="start"
-                      rules={{
-                        shouldUnregister: true,
-                      }}
-                      render={({ field: { onChange } }) => (
-                        <DatePickerInput
-                          fullWidth
-                          defaultValue={
+                  <Controller
+                    control={controlEducation}
+                    name="start"
+                    rules={{
+                      shouldUnregister: true,
+                    }}
+                    render={({ field: { onChange } }) => (
+                      <DatePickerInput
+                        fullWidth
+                        defaultValue={
                           modalChannelForm.data?.start
                             ? moment(modalChannelForm.data?.start, "YYYY-MM-DD")
                             : ""
                         }
-                          picker="year"
-                          onChange={(date: any, dateString: any) => onChange(dateString)}
-                          label="Start Year"
-                        />
-                      )}
-                    />
+                        picker="year"
+                        onChange={(date: any, dateString: any) => onChange(dateString)}
+                        label="Start Year"
+                      />
+                    )}
+                  />
 
-                    <Spacer size={20} />
+                  <Spacer size={20} />
 
-                    <Controller
-                      control={controlEducation}
-                      name="end"
-                      rules={{
-                        shouldUnregister: true,
-                      }}
-                      render={({ field: { onChange } }) => (
-                        <DatePickerInput
-                          fullWidth
-                          defaultValue={
+                  <Controller
+                    control={controlEducation}
+                    name="end"
+                    rules={{
+                      shouldUnregister: true,
+                    }}
+                    render={({ field: { onChange } }) => (
+                      <DatePickerInput
+                        fullWidth
+                        defaultValue={
                           modalChannelForm.data?.end
                             ? moment(modalChannelForm.data?.end, "YYYY-MM-DD")
                             : ""
                         }
-                          picker="year"
-                          onChange={(date: any, dateString: any) => onChange(dateString)}
-                          label="End Year"
+                        picker="year"
+                        onChange={(date: any, dateString: any) => onChange(dateString)}
+                        label="End Year"
+                      />
+                    )}
+                  />
+
+                  <Spacer size={20} />
+
+                  <Input
+                    defaultValue={modalChannelForm.data?.gpa}
+                    width="100%"
+                    label="GPA"
+                    type="number"
+                    height="48px"
+                    placeholder="e.g 4.0"
+                    {...registerEducation("gpa", {
+                      shouldUnregister: true,
+                      maxLength: {
+                        value: 5,
+                        message: "Max length exceeded",
+                      },
+                    })}
+                  />
+                </>
+              ) : modalChannelForm.typeForm === "Add Family" ||
+                modalChannelForm.typeForm === "Edit Family" ? (
+                <>
+                  <Controller
+                    control={controlFamily}
+                    name="relation"
+                    render={({ field: { onChange } }) => (
+                      <>
+                        <Label>Family Relation</Label>
+                        <Spacer size={3} />
+                        <Dropdown
+                          defaultValue={modalChannelForm.data?.relation}
+                          noSearch
+                          defaul
+                          width="100%"
+                          items={[
+                            { id: "Husband", value: "Husband" },
+                            { id: "Father", value: "Father" },
+                            { id: "Mother", value: "Mother" },
+                            { id: "Wife", value: "Wife" },
+                            { id: "Child", value: "Child" },
+                          ]}
+                          handleChange={(value: any) => {
+                            onChange(value);
+                          }}
                         />
-                      )}
-                    />
+                      </>
+                    )}
+                  />
 
-                    <Spacer size={20} />
+                  <Spacer size={20} />
 
-                    <Input
-                      defaultValue={modalChannelForm.data?.gpa}
-                      width="100%"
-                      label="GPA"
-                      type="number"
-                      height="48px"
-                      placeholder="e.g 4.0"
-                      {...registerEducation("gpa", {
-                        shouldUnregister: true,
-                        maxLength: {
-                          value: 5,
-                          message: "Max length exceeded",
-                        },
-                      })}
-                    />
-                  </>
-                  ) : modalChannelForm.typeForm === "Add Family"
-                || modalChannelForm.typeForm === "Edit Family" ? (
-                  <>
-                    <Controller
-                      control={controlFamily}
-                      name="relation"
-                      render={({ field: { onChange } }) => (
-                        <>
-                          <Label>Family Relation</Label>
-                          <Spacer size={3} />
-                          <Dropdown
-                            defaultValue={modalChannelForm.data?.relation}
-                            noSearch
-                            defaul
-                            width="100%"
-                            items={[
-                              { id: "Husband", value: "Husband" },
-                              { id: "Father", value: "Father" },
-                              { id: "Mother", value: "Mother" },
-                              { id: "Wife", value: "Wife" },
-                              { id: "Child", value: "Child" },
-                            ]}
-                            handleChange={(value: any) => {
-                              onChange(value);
-                            }}
-                          />
-                        </>
-                      )}
-                    />
+                  <Input
+                    defaultValue={modalChannelForm.data?.name}
+                    width="100%"
+                    label="Name"
+                    height="48px"
+                    error={errorsFamily.name?.message}
+                    placeholder="e.g Jane Doe"
+                    {...registerFamily("name", {
+                      maxLength: {
+                        value: 100,
+                        message: "Max length exceeded",
+                      },
+                      shouldUnregister: true,
+                    })}
+                  />
 
-                    <Spacer size={20} />
+                  <Spacer size={20} />
 
-                    <Input
-                      defaultValue={modalChannelForm.data?.name}
-                      width="100%"
-                      label="Name"
-                      height="48px"
-                      error={errorsFamily.name?.message}
-                      placeholder="e.g Jane Doe"
-                      {...registerFamily("name", {
-                        maxLength: {
-                          value: 100,
-                          message: "Max length exceeded",
-                        },
-                        shouldUnregister: true,
-                      })}
-                    />
+                  <Controller
+                    control={controlFamily}
+                    name="gender"
+                    render={({ field: { onChange } }) => (
+                      <>
+                        <Label>Gender</Label>
+                        <Spacer size={3} />
+                        <Dropdown
+                          defaultValue={modalChannelForm.data?.gender}
+                          noSearch
+                          defaul
+                          width="100%"
+                          items={[
+                            { id: "Male", value: "Male" },
+                            { id: "Female", value: "Female" },
+                          ]}
+                          handleChange={(value: any) => {
+                            onChange(value);
+                          }}
+                        />
+                      </>
+                    )}
+                  />
 
-                    <Spacer size={20} />
+                  <Spacer size={20} />
 
-                    <Controller
-                      control={controlFamily}
-                      name="gender"
-                      render={({ field: { onChange } }) => (
-                        <>
-                          <Label>Gender</Label>
-                          <Spacer size={3} />
-                          <Dropdown
-                            defaultValue={modalChannelForm.data?.gender}
-                            noSearch
-                            defaul
-                            width="100%"
-                            items={[
-                              { id: "Male", value: "Male" },
-                              { id: "Female", value: "Female" },
-                            ]}
-                            handleChange={(value: any) => {
-                              onChange(value);
-                            }}
-                          />
-                        </>
-                      )}
-                    />
-
-                    <Spacer size={20} />
-
-                    <Controller
-                      control={controlFamily}
-                      name="dob"
-                      render={({ field: { onChange } }) => (
-                        <DatePickerInput
-                          fullWidth
-                          defaultValue={
+                  <Controller
+                    control={controlFamily}
+                    name="dob"
+                    render={({ field: { onChange } }) => (
+                      <DatePickerInput
+                        fullWidth
+                        defaultValue={
                           modalChannelForm.data?.dob
                             ? moment(modalChannelForm.data?.dob, "YYYY-DD-MM")
                             : ""
                         }
-                          onChange={(date: any, dateString: any) => onChange(dateString)}
-                          label="Birth of Date"
-                        />
-                      )}
-                    />
+                        onChange={(date: any, dateString: any) => onChange(dateString)}
+                        label="Birth of Date"
+                      />
+                    )}
+                  />
 
-                    <Spacer size={20} />
+                  <Spacer size={20} />
 
-                    <Input
-                      defaultValue={modalChannelForm.data?.mobile}
-                      width="100%"
-                      label="Mobile"
-                      error={errorsFamily.mobile?.message}
-                      type="number"
-                      height="48px"
-                      placeholder="e.g 08123456789"
-                      {...registerFamily("mobile", {
-                        maxLength: {
-                          value: 15,
-                          message: "Max length exceeded",
-                        },
-                        shouldUnregister: true,
-                      })}
-                    />
-                  </>
-                    ) : modalChannelForm.typeForm === "Add Training"
-                || modalChannelForm.typeForm === "Edit Training" ? (
-                  <>
-                    <Input
-                      defaultValue={modalChannelForm.data?.name}
-                      error={errorTraining.name?.message}
-                      width="100%"
-                      label="Training Name"
-                      height="48px"
-                      placeholder="e.g Training Business"
-                      {...registerTraining("name", {
-                        maxLength: {
-                          value: 100,
-                          message: "Max length exceeded",
-                        },
-                        shouldUnregister: true,
-                      })}
-                    />
+                  <Input
+                    defaultValue={modalChannelForm.data?.mobile}
+                    width="100%"
+                    label="Mobile"
+                    error={errorsFamily.mobile?.message}
+                    type="number"
+                    height="48px"
+                    placeholder="e.g 08123456789"
+                    {...registerFamily("mobile", {
+                      maxLength: {
+                        value: 15,
+                        message: "Max length exceeded",
+                      },
+                      shouldUnregister: true,
+                    })}
+                  />
+                </>
+              ) : modalChannelForm.typeForm === "Add Training" ||
+                modalChannelForm.typeForm === "Edit Training" ? (
+                <>
+                  <Input
+                    defaultValue={modalChannelForm.data?.name}
+                    error={errorTraining.name?.message}
+                    width="100%"
+                    label="Training Name"
+                    height="48px"
+                    placeholder="e.g Training Business"
+                    {...registerTraining("name", {
+                      maxLength: {
+                        value: 100,
+                        message: "Max length exceeded",
+                      },
+                      shouldUnregister: true,
+                    })}
+                  />
 
-                    <Spacer size={20} />
+                  <Spacer size={20} />
 
-                    <Controller
-                      control={controlTraining}
-                      name="type"
-                      render={({ field: { onChange }, fieldState: { error } }) => (
-                        <>
-                          <Label>Training Type</Label>
-                          <Spacer size={3} />
-                          <FormSelect
-                            error={error?.message}
-                            height="48px"
-                            style={{ width: "100%" }}
-                            size="large"
-                            placeholder="Select"
-                            borderColor={error?.message ? "#ED1C24" : "#AAAAAA"}
-                            arrowColor="#000"
-                            withSearch
-                            isLoading={isFetchingTrainingType}
-                            isLoadingMore={isFetchingMoreTrainingType}
-                            fetchMore={() => {
-                              if (hasNextPageTrainingType) {
-                                fetchNextPageTrainingType();
-                              }
-                            }}
-                            items={
+                  <Controller
+                    control={controlTraining}
+                    name="type"
+                    render={({ field: { onChange }, fieldState: { error } }) => (
+                      <>
+                        <Label>Training Type</Label>
+                        <Spacer size={3} />
+                        <FormSelect
+                          error={error?.message}
+                          height="48px"
+                          style={{ width: "100%" }}
+                          size="large"
+                          placeholder="Select"
+                          borderColor={error?.message ? "#ED1C24" : "#AAAAAA"}
+                          arrowColor="#000"
+                          withSearch
+                          isLoading={isFetchingTrainingType}
+                          isLoadingMore={isFetchingMoreTrainingType}
+                          fetchMore={() => {
+                            if (hasNextPageTrainingType) {
+                              fetchNextPageTrainingType();
+                            }
+                          }}
+                          items={
                             isFetchingTrainingType && !isFetchingMoreTrainingType
                               ? []
                               : trainingTypeList
                           }
-                            onChange={(value: any) => {
-                              onChange(value);
-                            }}
-                            onSearch={(value: any) => {
-                              setSearchTrainingType(value);
-                            }}
-                          />
-                        </>
-                      )}
-                    />
+                          onChange={(value: any) => {
+                            onChange(value);
+                          }}
+                          onSearch={(value: any) => {
+                            setSearchTrainingType(value);
+                          }}
+                        />
+                      </>
+                    )}
+                  />
 
-                    <Spacer size={20} />
+                  <Spacer size={20} />
 
-                    <Controller
-                      control={controlTraining}
-                      name="status"
-                      render={({ field: { onChange } }) => (
-                        <>
-                          <Label>Training Status</Label>
-                          <Spacer size={3} />
-                          <Dropdown
-                            defaultValue={modalChannelForm.data?.status}
-                            noSearch
-                            defaul
-                            width="100%"
-                            items={[
-                              { id: "Completed", value: "Completed" },
-                              { id: "In Progress", value: "In Progress" },
-                              { id: "Plan", value: "Plan" },
-                            ]}
-                            handleChange={(value: any) => {
-                              onChange(value);
-                            }}
-                          />
-                        </>
-                      )}
-                    />
+                  <Controller
+                    control={controlTraining}
+                    name="status"
+                    render={({ field: { onChange } }) => (
+                      <>
+                        <Label>Training Status</Label>
+                        <Spacer size={3} />
+                        <Dropdown
+                          defaultValue={modalChannelForm.data?.status}
+                          noSearch
+                          defaul
+                          width="100%"
+                          items={[
+                            { id: "Completed", value: "Completed" },
+                            { id: "In Progress", value: "In Progress" },
+                            { id: "Plan", value: "Plan" },
+                          ]}
+                          handleChange={(value: any) => {
+                            onChange(value);
+                          }}
+                        />
+                      </>
+                    )}
+                  />
 
-                    <Spacer size={20} />
+                  <Spacer size={20} />
 
-                    <Controller
-                      control={controlTraining}
-                      name="start"
-                      render={({ field: { onChange } }) => (
-                        <DatePickerInput
-                          fullWidth
-                          defaultValue={
+                  <Controller
+                    control={controlTraining}
+                    name="start"
+                    render={({ field: { onChange } }) => (
+                      <DatePickerInput
+                        fullWidth
+                        defaultValue={
                           modalChannelForm.data?.start
                             ? moment(modalChannelForm.data?.start, "YYYY-DD-MM")
                             : ""
                         }
-                          onChange={(date: any, dateString: any) => onChange(dateString)}
-                          label="Start Date"
-                        />
-                      )}
-                    />
+                        onChange={(date: any, dateString: any) => onChange(dateString)}
+                        label="Start Date"
+                      />
+                    )}
+                  />
 
-                    <Spacer size={20} />
+                  <Spacer size={20} />
 
-                    <Controller
-                      control={controlTraining}
-                      name="end"
-                      render={({ field: { onChange } }) => (
-                        <DatePickerInput
-                          fullWidth
-                          defaultValue={
+                  <Controller
+                    control={controlTraining}
+                    name="end"
+                    render={({ field: { onChange } }) => (
+                      <DatePickerInput
+                        fullWidth
+                        defaultValue={
                           modalChannelForm.data?.end
                             ? moment(modalChannelForm.data?.end, "YYYY-DD-MM")
                             : ""
                         }
-                          onChange={(date: any, dateString: any) => onChange(dateString)}
-                          label="End Date"
-                        />
-                      )}
-                    />
+                        onChange={(date: any, dateString: any) => onChange(dateString)}
+                        label="End Date"
+                      />
+                    )}
+                  />
 
-                    <Spacer size={20} />
+                  <Spacer size={20} />
 
-                    <Controller
-                      control={controlTraining}
-                      rules={{
-                        maxLength: {
-                          value: 225,
-                          message: "Max length exceeded",
-                        },
-                      }}
-                      name="description"
-                      render={({ field: { onChange } }) => (
-                        <TextArea
-                          width="100%"
-                          rows={2}
-                          onChange={onChange}
-                          defaultValue={modalChannelForm.data?.description}
-                          error={errorTraining.description?.message}
-                          placeholder="e.g Training very helpfull"
-                          label="Description"
-                        />
-                      )}
-                    />
+                  <Controller
+                    control={controlTraining}
+                    rules={{
+                      maxLength: {
+                        value: 225,
+                        message: "Max length exceeded",
+                      },
+                    }}
+                    name="description"
+                    render={({ field: { onChange } }) => (
+                      <TextArea
+                        width="100%"
+                        rows={2}
+                        onChange={onChange}
+                        defaultValue={modalChannelForm.data?.description}
+                        error={errorTraining.description?.message}
+                        placeholder="e.g Training very helpfull"
+                        label="Description"
+                      />
+                    )}
+                  />
 
-                    <Spacer size={20} />
+                  <Spacer size={20} />
 
-                    <Text variant="headingRegular">
-                      Upload Certification
-                      {' '}
-                      <Text variant="body1">(Max. 5MB, Format .jpeg, .pdf)</Text>
-                    </Text>
+                  <Text variant="headingRegular">
+                    Upload Certification <Text variant="body1">(Max. 5MB, Format .jpeg, .pdf)</Text>
+                  </Text>
 
-                    <Spacer size={16} />
+                  <Spacer size={16} />
 
-                    <FileUploaderAllFilesDragger
-                      disabled={isLoadingFilePhotoFilePhotoTraining}
-                      onSubmit={(file: any) => handleUploadPhotoTrainingFile(file)}
-                      defaultFileList={
+                  <FileUploaderAllFilesDragger
+                    disabled={isLoadingFilePhotoFilePhotoTraining}
+                    onSubmit={(file: any) => handleUploadPhotoTrainingFile(file)}
+                    defaultFileList={
                       modalChannelForm.data?.attachments ? [modalChannelForm.data?.attachments] : []
                     }
-                      defaultFile={
+                    defaultFile={
                       modalChannelForm.data?.attachments
                         ? modalChannelForm.data?.attachments
                         : "/placeholder-employee-photo.svg"
                     }
-                      withCrop
-                      removeable
-                    />
-                  </>
-                      ) : modalChannelForm.typeForm === "View Training" ? (
-                        <>
-                          <Spacer size={20} />
+                    withCrop
+                    removeable
+                  />
+                </>
+              ) : modalChannelForm.typeForm === "View Training" ? (
+                <>
+                  <Spacer size={20} />
 
-                          <Image
-                            src={
+                  <Image
+                    src={
                       modalChannelForm.data?.attachments
                         ? modalChannelForm.data?.attachments
                         : "/sample-cert.svg"
                     }
-                            layout="responsive"
-                            width={100}
-                            height={100}
-                            placeholder="blur"
-                            blurDataURL={
+                    layout="responsive"
+                    width={100}
+                    height={100}
+                    placeholder="blur"
+                    blurDataURL={
                       modalChannelForm.data?.attachments
                         ? modalChannelForm.data?.attachments
                         : "/placeholder-employee-photo.svg"
                     }
-                            alt="iew-training"
-                          />
-                          <Spacer size={20} />
-                        </>
-                      ) : modalChannelForm.typeForm === "View Certification" ? (
-                        <>
-                          <Spacer size={20} />
+                    alt="iew-training"
+                  />
+                  <Spacer size={20} />
+                </>
+              ) : modalChannelForm.typeForm === "View Certification" ? (
+                <>
+                  <Spacer size={20} />
 
-                          <Image
-                            src={
+                  <Image
+                    src={
                       modalChannelForm.data?.attachments
                         ? modalChannelForm.data?.attachments
                         : "/sample-cert.svg"
                     }
-                            layout="responsive"
-                            width={100}
-                            height={100}
-                            placeholder="blur"
-                            blurDataURL={
+                    layout="responsive"
+                    width={100}
+                    height={100}
+                    placeholder="blur"
+                    blurDataURL={
                       modalChannelForm.data?.attachments
                         ? modalChannelForm.data?.attachments
                         : "/placeholder-employee-photo.svg"
                     }
-                            alt="iew-training"
-                          />
-                          <Spacer size={20} />
-                        </>
-                      ) : (
-                        <>
-                          <Input
-                            defaultValue={modalChannelForm.data?.name}
-                            width="100%"
-                            error={errorsCertification.name?.message}
-                            label="Certification Name"
-                            height="48px"
-                            placeholder="e.g Business Cetification"
-                            {...registerCertification("name", {
-                              maxLength: {
-                                value: 50,
-                                message: "Max length exceeded",
-                              },
-                            })}
-                          />
+                    alt="iew-training"
+                  />
+                  <Spacer size={20} />
+                </>
+              ) : (
+                <>
+                  <Input
+                    defaultValue={modalChannelForm.data?.name}
+                    width="100%"
+                    error={errorsCertification.name?.message}
+                    label="Certification Name"
+                    height="48px"
+                    placeholder="e.g Business Cetification"
+                    {...registerCertification("name", {
+                      maxLength: {
+                        value: 50,
+                        message: "Max length exceeded",
+                      },
+                    })}
+                  />
 
-                          <Spacer size={20} />
+                  <Spacer size={20} />
 
-                          <Input
-                            defaultValue={modalChannelForm.data?.institution}
-                            error={errorsCertification.institution?.message}
-                            width="100%"
-                            label="Institution"
-                            height="48px"
-                            placeholder="e.g Business Center"
-                            {...registerCertification("institution", {
-                              maxLength: {
-                                value: 50,
-                                message: "Max length exceeded",
-                              },
-                            })}
-                          />
+                  <Input
+                    defaultValue={modalChannelForm.data?.institution}
+                    error={errorsCertification.institution?.message}
+                    width="100%"
+                    label="Institution"
+                    height="48px"
+                    placeholder="e.g Business Center"
+                    {...registerCertification("institution", {
+                      maxLength: {
+                        value: 50,
+                        message: "Max length exceeded",
+                      },
+                    })}
+                  />
 
-                          <Spacer size={20} />
+                  <Spacer size={20} />
 
-                          <Input
-                            defaultValue={modalChannelForm.data?.number}
-                            width="100%"
-                            label="Certification Number"
-                            height="48px"
-                            placeholder="e.g Business Center"
-                            {...registerCertification("number")}
-                          />
+                  <Input
+                    defaultValue={modalChannelForm.data?.number}
+                    width="100%"
+                    label="Certification Number"
+                    height="48px"
+                    placeholder="e.g Business Center"
+                    {...registerCertification("number")}
+                  />
 
-                          <Spacer size={20} />
+                  <Spacer size={20} />
 
-                          <Controller
-                            control={controlCertification}
-                            name="date"
-                            render={({ field: { onChange } }) => (
-                              <DatePickerInput
-                                fullWidth
-                                defaultValue={
+                  <Controller
+                    control={controlCertification}
+                    name="date"
+                    render={({ field: { onChange } }) => (
+                      <DatePickerInput
+                        fullWidth
+                        defaultValue={
                           modalChannelForm.data?.date
                             ? moment(modalChannelForm.data?.date, "YYYY-DD-MM")
                             : ""
                         }
-                                onChange={(date: any, dateString: any) => onChange(dateString)}
-                                label="Certification Date"
-                              />
-                            )}
-                          />
+                        onChange={(date: any, dateString: any) => onChange(dateString)}
+                        label="Certification Date"
+                      />
+                    )}
+                  />
 
-                          <Spacer size={20} />
+                  <Spacer size={20} />
 
-                          <Text variant="headingRegular">
-                            Upload Certification
-                            {' '}
-                            <Text variant="body1">(Max. 5MB, Format .jpeg, .pdf)</Text>
-                          </Text>
+                  <Text variant="headingRegular">
+                    Upload Certification <Text variant="body1">(Max. 5MB, Format .jpeg, .pdf)</Text>
+                  </Text>
 
-                          <Spacer size={16} />
+                  <Spacer size={16} />
 
-                          <FileUploaderAllFilesDragger
-                            disabled={isLoadingFilePhotoFilePhotoCertificate}
-                            onSubmit={(file: any) => handleUploadPhotoCertificateFile(file)}
-                            defaultFileList={
+                  <FileUploaderAllFilesDragger
+                    disabled={isLoadingFilePhotoFilePhotoCertificate}
+                    onSubmit={(file: any) => handleUploadPhotoCertificateFile(file)}
+                    defaultFileList={
                       modalChannelForm.data?.attachments ? [modalChannelForm.data?.attachments] : []
                     }
-                            defaultFile={
+                    defaultFile={
                       modalChannelForm.data?.attachments
                         ? modalChannelForm.data?.attachments
                         : "/placeholder-employee-photo.svg"
                     }
-                            withCrop
-                            removeable
-                          />
-                        </>
-                      )}
+                    withCrop
+                    removeable
+                  />
+                </>
+              )}
 
               <Spacer size={20} />
               <div
@@ -3158,8 +3231,8 @@ const EmployeeDetail = () => {
                   marginBottom: "20px",
                 }}
               >
-                {modalChannelForm.typeForm === "View Certification"
-                  || (modalChannelForm.typeForm === "View Training" ? null : (
+                {modalChannelForm.typeForm === "View Certification" ||
+                  (modalChannelForm.typeForm === "View Training" ? null : (
                     <Button
                       size="big"
                       variant="tertiary"
@@ -3171,8 +3244,8 @@ const EmployeeDetail = () => {
                     </Button>
                   ))}
 
-                {modalChannelForm.typeForm === "Add Bank Account"
-                || modalChannelForm.typeForm === "Edit Bank Account" ? (
+                {modalChannelForm.typeForm === "Add Bank Account" ||
+                modalChannelForm.typeForm === "Edit Bank Account" ? (
                   <Button
                     onClick={handleSubmitBankAccount(handleAddItemBankAccount)}
                     variant="primary"
@@ -3180,46 +3253,46 @@ const EmployeeDetail = () => {
                   >
                     Save
                   </Button>
-                  ) : modalChannelForm.typeForm === "Add Education"
-                  || modalChannelForm.typeForm === "Edit Education" ? (
-                    <Button
-                      onClick={handleSubmitEducation(handleAddItemEducation)}
-                      variant="primary"
-                      size="big"
-                    >
-                      Save
-                    </Button>
-                    ) : modalChannelForm.typeForm === "Add Family"
-                  || modalChannelForm.typeForm === "Edit Family" ? (
-                    <Button
-                      onClick={handleSubmitFamily(handleAddItemFamily)}
-                      variant="primary"
-                      size="big"
-                    >
-                      Save
-                    </Button>
-                      ) : modalChannelForm.typeForm === "Add Training"
-                  || modalChannelForm.typeForm === "Edit Training" ? (
-                    <Button
-                      onClick={handleSubmitTraining(handleAddItemTraining)}
-                      variant="primary"
-                      size="big"
-                    >
-                      Save
-                    </Button>
-                        ) : modalChannelForm.typeForm === "Add Certification"
-                  || modalChannelForm.typeForm === "Edit Certification" ? (
-                    <Button
-                      onClick={handleSubmitCertification(handleAddItemCertification)}
-                      variant="primary"
-                      size="big"
-                    >
-                      Save
-                    </Button>
-                          ) : null}
+                ) : modalChannelForm.typeForm === "Add Education" ||
+                  modalChannelForm.typeForm === "Edit Education" ? (
+                  <Button
+                    onClick={handleSubmitEducation(handleAddItemEducation)}
+                    variant="primary"
+                    size="big"
+                  >
+                    Save
+                  </Button>
+                ) : modalChannelForm.typeForm === "Add Family" ||
+                  modalChannelForm.typeForm === "Edit Family" ? (
+                  <Button
+                    onClick={handleSubmitFamily(handleAddItemFamily)}
+                    variant="primary"
+                    size="big"
+                  >
+                    Save
+                  </Button>
+                ) : modalChannelForm.typeForm === "Add Training" ||
+                  modalChannelForm.typeForm === "Edit Training" ? (
+                  <Button
+                    onClick={handleSubmitTraining(handleAddItemTraining)}
+                    variant="primary"
+                    size="big"
+                  >
+                    Save
+                  </Button>
+                ) : modalChannelForm.typeForm === "Add Certification" ||
+                  modalChannelForm.typeForm === "Edit Certification" ? (
+                  <Button
+                    onClick={handleSubmitCertification(handleAddItemCertification)}
+                    variant="primary"
+                    size="big"
+                  >
+                    Save
+                  </Button>
+                ) : null}
               </div>
             </div>
-          )}
+          }
         />
       )}
 
@@ -3231,7 +3304,7 @@ const EmployeeDetail = () => {
           onCancel={() => setShowDeleteModal(false)}
           title="Confirm Delete"
           footer={null}
-          content={(
+          content={
             <div
               style={{
                 display: "flex",
@@ -3240,9 +3313,7 @@ const EmployeeDetail = () => {
               }}
             >
               <Spacer size={4} />
-              Are you sure to delete Product Name
-              {' '}
-              {dataEmployee?.name}
+              Are you sure to delete Product Name {dataEmployee?.name}
               <Spacer size={20} />
               <div
                 style={{
@@ -3272,7 +3343,7 @@ const EmployeeDetail = () => {
                 </Button>
               </div>
             </div>
-          )}
+          }
         />
       )}
     </Col>
@@ -3310,9 +3381,7 @@ const InputAddressType = ({ control, index }: { control: any; index: any }) => {
       render={({ field: { onChange }, fieldState: { error } }) => (
         <>
           <Label>
-            Address Type
-            {' '}
-            <span style={{ color: colors.red.regular }}>*</span>
+            Address Type <span style={{ color: colors.red.regular }}>*</span>
           </Label>
           <Spacer size={3} />
           <Dropdown

@@ -213,7 +213,7 @@ const Purchasing = () => {
       <Spacer size={20} />
 
       <Text variant="headingMedium" color={"blue.dark"}>
-        Purchase Organization
+        Purchase Order Information
       </Text>
 
       <Spacer size={20} />
