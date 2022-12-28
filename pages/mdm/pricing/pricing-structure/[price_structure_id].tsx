@@ -434,6 +434,7 @@ const DetailPricingStructure: any = () => {
     isFetchingNextPage: isFetchingMorePricingConfigInfinite,
     hasNextPage: hasNextPagePricingConfigInfinite,
     fetchNextPage: fetchNextPagePricingConfigInfinite,
+    isLoading: isLoadingPricingConfigInfinite
   } = usePricingConfigInfiniteLists({
     query: {
       search: debounceFetchPricingConfigInfinite,
@@ -1914,7 +1915,7 @@ const DetailPricingStructure: any = () => {
     return (
       <>
       {
-        isLoadingPricingStructureListById ? (
+        isLoadingPricingStructureListById || isLoadingPricingConfigInfinite ? (
           <Row alignItems='center' justifyContent='center'>
             <Spin tip='loading...' />
           </Row>
