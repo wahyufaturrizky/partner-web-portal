@@ -1,9 +1,7 @@
 import React, { useState } from "react";
 import Router from "next/router";
 import usePagination from "@lucasmogari/react-pagination";
-import {
-  Button, Col, Pagination, Row, Search, Spacer, Table, Tabs, Text,
-} from "pink-lava-ui";
+import { Button, Col, Pagination, Row, Search, Spacer, Table, Tabs, Text } from "pink-lava-ui";
 
 import styled from "styled-components";
 import { lang } from "lang";
@@ -41,18 +39,18 @@ const MenuConfigList: any = () => {
     query:
       defaultActiveKey === "All" || defaultActiveKey === "Semua"
         ? {
-          company_id: companyCode,
-          search,
-          page: pagination.page,
-          limit: pagination.itemsPerPage,
-        }
+            company_id: companyCode,
+            search,
+            page: pagination.page,
+            limit: pagination.itemsPerPage,
+          }
         : {
-          company_id: companyCode,
-          search,
-          page: pagination.page,
-          limit: pagination.itemsPerPage,
-          type: defaultActiveKey === "Menu" ? "menu" : "process",
-        },
+            company_id: companyCode,
+            search,
+            page: pagination.page,
+            limit: pagination.itemsPerPage,
+            type: defaultActiveKey === "Menu" ? "menu" : "process",
+          },
   });
 
   const { mutate: deleteFields }: any = useDeleteMenuList({
@@ -71,7 +69,7 @@ const MenuConfigList: any = () => {
   });
 
   const listPermission = dataUserPermission?.permission?.filter(
-    (filtering: any) => filtering.menu === "Channel",
+    (filtering: any) => filtering.menu === "Menu List"
   );
 
   const columns = [
@@ -87,12 +85,12 @@ const MenuConfigList: any = () => {
     },
     ...(listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "View").length > 0
       ? [
-        {
-          title: lang[t].menuList.menuList.action,
-          dataIndex: "action",
-          width: "15%",
-        },
-      ]
+          {
+            title: lang[t].menuList.menuList.action,
+            dataIndex: "action",
+            width: "15%",
+          },
+        ]
       : []),
   ];
 
@@ -105,10 +103,12 @@ const MenuConfigList: any = () => {
       action: (
         <Button
           size="small"
-          onClick={() => Router.push({
-            pathname: "/config/menu-config/detail",
-            query: field,
-          })}
+          onClick={() =>
+            Router.push({
+              pathname: "/config/menu-config/detail",
+              query: field,
+            })
+          }
           variant="tertiary"
         >
           {lang[t].menuList.tertier.viewDetail}
@@ -183,15 +183,16 @@ const MenuConfigList: any = () => {
             <Table
               loading={isLoadingField}
               columns={columns.filter(
-                (filtering) => filtering.dataIndex !== "id"
-                  && filtering.dataIndex !== "screen"
-                  && filtering.dataIndex !== "created_at"
-                  && filtering.dataIndex !== "modified_by"
-                  && filtering.dataIndex !== "modified_at"
-                  && filtering.dataIndex !== "deleted_by"
-                  && filtering.dataIndex !== "deleted_at"
-                  && filtering.dataIndex !== "process_name"
-                  && filtering.dataIndex !== "created_by",
+                (filtering) =>
+                  filtering.dataIndex !== "id" &&
+                  filtering.dataIndex !== "screen" &&
+                  filtering.dataIndex !== "created_at" &&
+                  filtering.dataIndex !== "modified_by" &&
+                  filtering.dataIndex !== "modified_at" &&
+                  filtering.dataIndex !== "deleted_by" &&
+                  filtering.dataIndex !== "deleted_at" &&
+                  filtering.dataIndex !== "process_name" &&
+                  filtering.dataIndex !== "created_by"
               )}
               data={paginateField}
               // rowSelection={rowSelection}

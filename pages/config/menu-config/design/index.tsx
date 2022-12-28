@@ -1,9 +1,7 @@
 import React, { useState } from "react";
 import Router from "next/router";
 import usePagination from "@lucasmogari/react-pagination";
-import {
-  Button, Col, Pagination, Row, Search, Spacer, Table, Text,
-} from "pink-lava-ui";
+import { Button, Col, Pagination, Row, Search, Spacer, Table, Text } from "pink-lava-ui";
 
 import { colors } from "utils/color";
 import { useDeleteMenuDesignList, useMenuDesignLists } from "hooks/menu-config/useMenuDesign";
@@ -34,7 +32,7 @@ const MenuConfigDesign: any = () => {
   });
 
   const listPermission = dataUserPermission?.permission?.filter(
-    (filtering: any) => filtering.menu === "Menu Design",
+    (filtering: any) => filtering.menu === "Menu Design"
   );
 
   const {
@@ -62,9 +60,11 @@ const MenuConfigDesign: any = () => {
             <div style={{ display: "flex", justifyContent: "left" }}>
               <Button
                 size="small"
-                onClick={() => Router.push({
-                  pathname: `/config/menu-config/design/${element.id}`,
-                })}
+                onClick={() =>
+                  Router.push({
+                    pathname: `/config/menu-config/design/${element.id}`,
+                  })
+                }
                 variant="tertiary"
               >
                 {lang[t].menuDesign.tertier.viewDetail}
@@ -94,15 +94,15 @@ const MenuConfigDesign: any = () => {
       dataIndex: "field_name",
       width: "80%",
     },
-    ...(listPermission?.some((el: any) => el.viewTypes[0]?.viewType.name === "View")
+    ...(listPermission?.filter((el: any) => el.viewTypes[0]?.viewType.name === "View").length > 0
       ? [
-        {
-          title: lang[t].menuDesign.menuDesignAction,
-          dataIndex: "action",
-          width: "15%",
-          align: "left",
-        },
-      ]
+          {
+            title: lang[t].menuDesign.menuDesignAction,
+            dataIndex: "action",
+            width: "15%",
+            align: "left",
+          },
+        ]
       : []),
   ];
 
