@@ -18,6 +18,7 @@ import useDebounce from "lib/useDebounce";
 import styled from "styled-components";
 import { CustomerContext } from "context/CustomerContext";
 import { useInfiniteCustomerGroupsLists } from "hooks/mdm/customers/useCustomersGroupMDM";
+import { useUploadLogoCompany } from "hooks/mdm/customers/useCustomersMDM";
 
 const General = ({ type, formType }: any) => {
   const {
@@ -87,7 +88,7 @@ const General = ({ type, formType }: any) => {
     },
   });
 
-  const { mutate: uploadLogoCustomer } = useUploadLogo({
+  const { mutate: uploadLogoCustomer } = useUploadLogoCompany({
     options: {
       onSuccess: (data: any) => {
         setCompanyLogo(data);
@@ -190,7 +191,7 @@ const General = ({ type, formType }: any) => {
               label="Company Logo"
               onSubmit={(files: any) => {
                 const formData: any = new FormData();
-                formData.append("upload_file", files);
+                formData.append("image", files);
                 uploadLogoCustomer(formData);
               }}
               defaultFile={companyLogo}
@@ -248,8 +249,9 @@ const General = ({ type, formType }: any) => {
 
           <Controller
             control={control}
+            defaultValue={null}
             name="customer.customer_group"
-            render={({ field: { onChange } }) => (
+            render={({ field: { onChange, value } }) => (
               <>
                 <LabelDropdown>Customer Group</LabelDropdown>
                 <Spacer size={3} />
@@ -258,6 +260,7 @@ const General = ({ type, formType }: any) => {
                   style={{ width: "100%" }}
                   size={"large"}
                   placeholder={"Select"}
+                  defaultValue={value}
                   borderColor={"#AAAAAA"}
                   arrowColor={"#000"}
                   withSearch

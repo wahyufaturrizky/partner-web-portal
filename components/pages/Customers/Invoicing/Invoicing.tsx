@@ -23,7 +23,7 @@ import styled from "styled-components";
 import { useCoaList } from "hooks/mdm/product-category/useProductCategory";
 import ModalAddBankAccountCustomer from "components/elements/Modal/ModalAddBankAccountsCustomer";
 
-const Invoicing = () => {
+const Invoicing = ({ formType }) => {
   const { register, control, setValue } = useFormContext();
   const companyCode = localStorage.getItem("companyCode");
 

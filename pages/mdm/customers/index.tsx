@@ -26,16 +26,24 @@ import {
   useUploadFileCustomerMDM,
 } from "../../../hooks/mdm/customers/useCustomersMDM";
 
-const downloadFile = (params: any) => mdmDownloadService("/customer/download", { params }).then((res) => {
-  const dataUrl = window.URL.createObjectURL(new Blob([res.data]));
-  const tempLink = document.createElement("a");
-  tempLink.href = dataUrl;
-  tempLink.setAttribute("download", `customer_${new Date().getTime()}.xlsx`);
-  tempLink.click();
-});
+const downloadFile = async (params: any) => {
+  const companyCode = localStorage.getItem("companyCode");
+  const url =
+    (await params.with_data) === "Y" ? "/customer/download" : "/customer/download/template";
+  const param = params.with_data === "Y" ? { company_id: companyCode } : {};
+
+  return mdmDownloadService(url, { params: param }).then((res) => {
+    const dataUrl = window.URL.createObjectURL(new Blob([res.data]));
+    const tempLink = document.createElement("a");
+    tempLink.href = dataUrl;
+    tempLink.setAttribute("download", `customer_${new Date().getTime()}.xlsx`);
+    tempLink.click();
+  });
+};
 
 export default function Customer() {
   const t = localStorage.getItem("lan") || "en-US";
+  const companyCode = localStorage.getItem("companyCode");
   const pagination = usePagination({
     page: 1,
     itemsPerPage: 20,
@@ -57,7 +65,7 @@ export default function Customer() {
   });
 
   const listPermission = dataUserPermission?.permission?.filter(
-    (filtering: any) => filtering.menu === "Customer",
+    (filtering: any) => filtering.menu === "Customer"
   );
 
   const columns = [
@@ -79,24 +87,24 @@ export default function Customer() {
     },
     ...(listPermission?.some((el: any) => el.viewTypes[0]?.viewType.name === "View")
       ? [
-        {
-          title: lang[t].customer.action,
-          dataIndex: "id",
-          width: "15%",
-          align: "left",
-          render: (id: any) => (
-            <div style={{ display: "flex", justifyContent: "left" }}>
-              <Button
-                size="small"
-                onClick={() => router.push(`/mdm/customers/${id}`)}
-                variant="tertiary"
-              >
-                {lang[t].customer.tertier.viewDetail}
-              </Button>
-            </div>
-          ),
-        },
-      ]
+          {
+            title: lang[t].customer.action,
+            dataIndex: "id",
+            width: "15%",
+            align: "left",
+            render: (id: any) => (
+              <div style={{ display: "flex", justifyContent: "left" }}>
+                <Button
+                  size="small"
+                  onClick={() => router.push(`/mdm/customers/${id}`)}
+                  variant="tertiary"
+                >
+                  {lang[t].customer.tertier.viewDetail}
+                </Button>
+              </div>
+            ),
+          },
+        ]
       : []),
   ];
 
@@ -121,6 +129,7 @@ export default function Customer() {
       },
     },
     query: {
+      company_id: companyCode,
       search,
       page: pagination.page,
       limit: pagination.itemsPerPage,
@@ -140,7 +149,7 @@ export default function Customer() {
   const actDrowpdown = [
     {
       ...(listPermission?.filter(
-        (data: any) => data.viewTypes[0]?.viewType.name === "Download Template",
+        (data: any) => data.viewTypes[0]?.viewType.name === "Download Template"
       ).length > 0 && {
         key: 1,
         value: (
@@ -152,9 +161,8 @@ export default function Customer() {
       }),
     },
     {
-      ...(listPermission?.filter(
-        (data: any) => data.viewTypes[0]?.viewType.name === "Upload",
-      ).length > 0 && {
+      ...(listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Upload")
+        .length > 0 && {
         key: 2,
         value: (
           <ButtonAction disabled>
@@ -166,7 +174,7 @@ export default function Customer() {
     },
     {
       ...(listPermission?.filter(
-        (data: any) => data.viewTypes[0]?.viewType.name === "Download Data",
+        (data: any) => data.viewTypes[0]?.viewType.name === "Download Data"
       ).length > 0 && {
         key: 3,
         value: (
@@ -216,55 +224,58 @@ export default function Customer() {
             onChange={({ target }: any) => setSearch(target.value)}
           />
           <Row gap="16px">
-            {listPermission?.filter(
-              (data: any) => data.viewTypes[0]?.viewType.name === "Delete",
-            ).length > 0 && (
-            <Button
-              size="big"
-              variant="tertiary"
-              onClick={() => setVisible(true)}
-              disabled={itemsSelected?.length < 1}
-            >
-              {lang[t].customer.tertier.delete}
-            </Button>
+            {listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Delete")
+              .length > 0 && (
+              <Button
+                size="big"
+                variant="tertiary"
+                onClick={() => setVisible(true)}
+                disabled={itemsSelected?.length < 1}
+              >
+                {lang[t].customer.tertier.delete}
+              </Button>
             )}
 
             {(listPermission?.filter(
-              (data: any) => data.viewTypes[0]?.viewType.name === "Download Template",
-            ).length > 0
-							|| listPermission?.filter(
-							  (data: any) => data.viewTypes[0]?.viewType.name === "Download Data",
-							).length > 0
-							|| listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Upload")
-							  .length > 0) && (
-<DropdownMenu
-  title={lang[t].customer.tertier.more}
-  buttonVariant="secondary"
-  buttonSize="big"
-  textVariant="button"
-  textColor="pink.regular"
-  iconStyle={{ fontSize: "12px" }}
-  onClick={(e: any) => {
-    switch (parseInt(e.key)) {
-      case 1:
-        downloadFile({ with_data: "N" });
-        break;
-      case 2:
-        setShowUpload(true);
-        break;
-      case 3:
-        downloadFile({ with_data: "Y" });
-        break;
-      default:
-        break;
-    }
-  }}
-  menuList={actDrowpdown}
-/>
+              (data: any) => data.viewTypes[0]?.viewType.name === "Download Template"
+            ).length > 0 ||
+              listPermission?.filter(
+                (data: any) => data.viewTypes[0]?.viewType.name === "Download Data"
+              ).length > 0 ||
+              listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Upload")
+                .length > 0) && (
+              <DropdownMenu
+                title={lang[t].customer.tertier.more}
+                buttonVariant="secondary"
+                buttonSize="big"
+                textVariant="button"
+                textColor="pink.regular"
+                iconStyle={{ fontSize: "12px" }}
+                onClick={(e: any) => {
+                  switch (parseInt(e.key)) {
+                    case 1:
+                      downloadFile({ with_data: "N" });
+                      break;
+                    case 2:
+                      setShowUpload(true);
+                      break;
+                    case 3:
+                      downloadFile({ with_data: "Y" });
+                      break;
+                    default:
+                      break;
+                  }
+                }}
+                menuList={actDrowpdown}
+              />
             )}
             {listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Create")
               .length > 0 && (
-              <Button size="big" variant="primary" onClick={() => router.push("/mdm/customers/create")}>
+              <Button
+                size="big"
+                variant="primary"
+                onClick={() => router.push("/mdm/customers/create")}
+              >
                 {lang[t].customer.primary.create}
               </Button>
             )}

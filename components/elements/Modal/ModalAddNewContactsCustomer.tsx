@@ -35,8 +35,8 @@ export default function ModalAddNewContactCustomer({
           <Controller
             control={control}
             shouldUnregister={true}
-            defaultValue={contactData?.title ?? ""}
-            name="title"
+            defaultValue={contactData?.tittle ?? ""}
+            name="tittle"
             render={({ field: { onChange }, formState: { errors } }) => (
               <>
                 <Text variant="headingRegular">Title</Text>
@@ -76,7 +76,7 @@ export default function ModalAddNewContactCustomer({
             height="40px"
             placeholder="e.g Business"
             label="Job Position"
-            defaultValue={contactData?.job ?? ""}
+            defaultValue={contactData?.role ?? ""}
             {...register("role", { shouldUnregister: true })}
           />
           <Spacer size={10} />

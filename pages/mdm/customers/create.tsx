@@ -56,7 +56,7 @@ export default function CustomerCreate() {
       case "Purchasing":
         return <Purchasing />;
       case "Invoicing":
-        return <Invoicing />;
+        return <Invoicing formType={"add"} />;
       default:
         return <Contacts />;
     }
@@ -73,6 +73,7 @@ export default function CustomerCreate() {
 
   const onSubmit = (data: any) => {
     const customerPayload = {
+      company_id: companyCode,
       ...data.customer,
       company_logo: companyLogo,
       is_company: radioValue === "company",
@@ -87,15 +88,10 @@ export default function CustomerCreate() {
 
     const addressPayload =
       data?.address?.map((address: any) => {
-        const mappCountrylevel: any = [];
-
-        mappCountrylevel[0] = address.province === "" ? 0 : address.province;
-        mappCountrylevel[1] = address.city === "" ? 0 : address.city;
-        mappCountrylevel[2] = address.district === "" ? 0 : address.district;
-        mappCountrylevel[3] = address.zone === "" ? 0 : address.zone;
-
-        // cek apakah array isinya semuanya 0
-        // const allEqual = mappCountrylevel.every((value) => value === 0);
+        let level_1 = address.province === "" ? 0 : address.province;
+        let level_2 = address.city === "" ? 0 : address.city;
+        let level_3 = address.district === "" ? 0 : address.district;
+        let level_4 = address.zone === "" ? 0 : address.zone;
 
         return {
           is_primary: address.is_primary,
@@ -105,14 +101,30 @@ export default function CustomerCreate() {
           postal_code: address.postal_code,
           longtitude: address.lon,
           latitude: address.lat,
+          lvl_1: level_1,
+          lvl_2: level_2,
+          lvl_3: level_3,
+          lvl_4: level_4,
           // Only get photo url
-          // photo: address.photo?.map((photoObj: any) => photoObj?.response?.data),
+          image: address.photo?.map((photoObj: any) => photoObj?.response?.data)[0] ?? "",
         };
       }) ?? [];
 
     const purchasingPayload = objectIsEmpty(data?.purchasing) ? null : data?.purchasing;
 
-    const invoicingPayload = objectIsEmpty(data?.invoicing) ? null : data?.invoicing;
+    const invoicingPayload = objectIsEmpty(data?.invoicing)
+      ? null
+      : {
+          credit_limit: parseInt(data?.invoicing?.credit_limit ?? 0),
+          credit_balance: parseInt(data?.invoicing?.credit_balance ?? 0),
+          credit_used: parseInt(data?.invoicing?.credit_used ?? 0),
+          income_account: data?.invoicing?.income_account ?? "",
+          expense_account: data?.invoicing?.expense_account ?? "",
+          tax_name: data?.invoicing?.tax_name ?? "",
+          tax_city: data?.invoicing?.tax_city ?? "",
+          tax_address: data?.invoicing?.tax_address ?? "",
+          currency: data?.invoicing?.currency ?? "",
+        };
 
     const salesPayload = objectIsEmpty(data?.sales) ? null : data?.sales;
 
@@ -122,16 +134,6 @@ export default function CustomerCreate() {
         return bank;
       }) ?? [];
 
-    // delete data?.invoicing?.tax_type;
-    // delete data?.invoicing?.tax_code;
-
-    // const mappingInvoicing =
-    //   invoicingPayload !== null
-    //     ? {
-    //         ...invoicingPayload,
-    //         banks: mappingBank,
-    //       }
-    //     : null;
     const formData = {
       ...data,
       customer: customerPayload,
@@ -143,9 +145,7 @@ export default function CustomerCreate() {
       sales: salesPayload,
     };
 
-    console.log(formData);
-
-    // createCustomer(formData);
+    createCustomer(formData);
   };
 
   return (

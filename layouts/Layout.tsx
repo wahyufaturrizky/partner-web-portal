@@ -808,21 +808,21 @@ const AdminLayout = (props: any) => {
     "/mdm/working-calendar/create": "Working Calendar",
   };
 
-  useEffect(() => {
-    if (dataUserPermission) {
-      console.log("@router", router);
+  // useEffect(() => {
+  //   if (dataUserPermission) {
+  //     console.log("@router", router);
 
-      const listPermission = dataUserPermission?.permission?.filter(
-        (filtering: any) => filtering.menu === menuByRoutingPath[router?.pathname]
-      );
+  //     const listPermission = dataUserPermission?.permission?.filter(
+  //       (filtering: any) => filtering.menu === menuByRoutingPath[router?.pathname]
+  //     );
 
-      console.log("@listPermission", listPermission);
+  //     console.log("@listPermission", listPermission);
 
-      if (listPermission?.length === 0) {
-        setIsDontHavePermission(true);
-      }
-    }
-  }, [dataUserPermission, router?.asPath]);
+  //     if (listPermission?.length === 0) {
+  //       setIsDontHavePermission(true);
+  //     }
+  //   }
+  // }, [dataUserPermission, router?.asPath]);
 
   const menuConfigFunc = (companies) => {
     const handleChangeCompany = (value) => {

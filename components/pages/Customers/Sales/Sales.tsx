@@ -97,12 +97,13 @@ export default function Sales() {
           <Controller
             control={control}
             name="sales.salesman"
-            render={({ field: { onChange } }) => (
+            render={({ field: { onChange, value } }) => (
               <Dropdown
                 actionLabel="Add New Salesman"
                 label="Salesman"
                 width="100%"
                 isShowActionLabel
+                defaultValue={value}
                 handleChange={onChange}
                 handleClickActionLabel={() => window.open("/salesman/create")}
                 onSearch={(value: string) => setSearch({ ...search, salesman: value })}

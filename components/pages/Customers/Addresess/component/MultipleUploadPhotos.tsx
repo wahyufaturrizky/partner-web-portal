@@ -11,7 +11,7 @@ const getBase64 = (file: any) =>
   });
 
 let apiURL = process.env.NEXT_PUBLIC_API_BASE3;
-const uploadUrl = `${apiURL}/vendor/file/upload`;
+const uploadUrl = `${apiURL}/customer/upload`;
 
 const MultipleUploadPhotos = ({ index, control }: any) => {
   const token = localStorage.getItem("token");
@@ -32,13 +32,13 @@ const MultipleUploadPhotos = ({ index, control }: any) => {
   return (
     <Controller
       control={control}
-      name={`address.${index}.photo`}
+      name={`address.${index}.image`}
       defaultValue={[]}
       render={({ field: { onChange, value }, formState: { errors } }) => (
         <MultipleUpload
           accept=".png,.jpg,.jpeg"
           listType="picture-card"
-          name={"upload_file"}
+          name={"image"}
           action={uploadUrl}
           headers={{
             Authorization: `Bearer ${token}`,
