@@ -7,13 +7,18 @@ import styled from "styled-components";
 import moment from "moment";
 import useDebounce from "lib/useDebounce";
 
-const getLinkViewDetail = (screenCode: any) => {
+const getLinkViewDetail = (screenCode: any, referenceCode: any, referenceId: any) => {
   const approvalEngineScreen = {
     "mdm.salesman": "mdm/salesman",
     "mdm.pricing.structure": "mdm/pricing/pricing-structure",
   };
 
-  const url = `/${approvalEngineScreen[screenCode]}`;
+  let url = `/${approvalEngineScreen[screenCode]}`;
+
+  if (referenceId) {
+    url = `${url}/${referenceId}`;
+  }
+
   return url;
 };
 
@@ -41,7 +46,7 @@ const Notification: any = () => {
         const data = rows?.map((items: any) => ({
           key: items?.id,
           id: items?.id,
-          link: getLinkViewDetail(items?.screenCode),
+          link: getLinkViewDetail(items?.screenCode, items?.referenceCode, items?.referenceId),
           message: items?.message || "-",
           createdAt: items?.createdAt,
         }));
