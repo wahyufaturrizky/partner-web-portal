@@ -34,7 +34,10 @@ export default function ComponentDetailSalesman({ listCustomers, isLoading }: an
   const companyId = localStorage.getItem("companyId");
   const companyCode = localStorage.getItem("companyCode");
   const router = useRouter();
-  const { status, salesman_id, name, idCard, division: queryDivision }: any = router.query || {};
+  const { salesman_id, division: queryDivision }: any = router.query || {};
+  const [status, setStatus] = useState("");
+  const [name, setName] = useState("");
+  const [idCard, setIdCard] = useState("");
   const [search, setSearch] = useState<string>("");
   const [division, setDivision] = useState("");
   const [remarks, setRemarks] = useState("");
@@ -71,6 +74,9 @@ export default function ComponentDetailSalesman({ listCustomers, isLoading }: an
     options: {
       onSuccess: (response: any) => {
         setDivision(response?.division);
+        setStatus(response?.statusText);
+        setIdCard(response?.idCard);
+        setName(response?.name);
       },
     },
   });
