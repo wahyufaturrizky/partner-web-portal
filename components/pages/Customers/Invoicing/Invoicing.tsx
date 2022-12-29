@@ -422,17 +422,32 @@ const Invoicing = ({ formType }) => {
           }}
           bankData={showFormBank.data}
           onSaveBank={(bankObject: any) => {
-            switch (showFormBank.type) {
-              case "add":
-                append({ ...bankObject, key: fields.length });
-                setShowFormBank({ type: "", open: false, data: {}, index: 0 });
-                break;
-              case "edit":
-                update(showFormBank.index, bankObject);
-                setShowFormBank({ type: "", open: false, data: {}, index: 0 });
-                break;
-              default:
-                break;
+            if (formType === "edit") {
+              switch (showFormBank.type) {
+                case "add":
+                  append({ ...bankObject, key: fields.length, id: 0 });
+                  setShowFormBank({ type: "", open: false, data: {}, index: 0 });
+                  break;
+                case "edit":
+                  update(showFormBank.index, { ...showFormBank.data, ...bankObject });
+                  setShowFormBank({ type: "", open: false, data: {}, index: 0 });
+                  break;
+                default:
+                  break;
+              }
+            } else {
+              switch (showFormBank.type) {
+                case "add":
+                  append({ ...bankObject, key: fields.length });
+                  setShowFormBank({ type: "", open: false, data: {}, index: 0 });
+                  break;
+                case "edit":
+                  update(showFormBank.index, bankObject);
+                  setShowFormBank({ type: "", open: false, data: {}, index: 0 });
+                  break;
+                default:
+                  break;
+              }
             }
           }}
         />
