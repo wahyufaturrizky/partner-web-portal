@@ -1,8 +1,8 @@
 import { useQuery, useMutation, useInfiniteQuery } from "react-query";
 import { mdmService } from "../../lib/client";
 
-const fetchPricingStructureLists = async ({ query = {} }) => {
-  return mdmService(`/price-structure`, {
+const fetchPricingStructureLists = async ({ query = {} }) =>
+  mdmService(`/price-structure`, {
     params: {
       search: "",
       limit: 10,
@@ -12,14 +12,12 @@ const fetchPricingStructureLists = async ({ query = {} }) => {
       ...query,
     },
   }).then((data) => data);
-};
 
-const usePricingStructureLists = ({ query = {}, options } = {}) => {
-  return useQuery(["price-structure", query], () => fetchPricingStructureLists({ query }), {
+const usePricingStructureLists = ({ query = {}, options } = {}) =>
+  useQuery(["price-structure", query], () => fetchPricingStructureLists({ query }), {
     keepPreviousData: true,
     ...options,
   });
-};
 
 const fetchInfinitePricingStructureLists = async ({ pageParam = 1, queryKey }) => {
   const searchQuery = queryKey[1].search;
@@ -35,15 +33,14 @@ const fetchInfinitePricingStructureLists = async ({ pageParam = 1, queryKey }) =
   }).then((data) => data);
 };
 
-const usePricingStructureInfiniteLists = ({ query = {}, options }) => {
-  return useInfiniteQuery(["price-structure/infinite", query], fetchInfinitePricingStructureLists, {
+const usePricingStructureInfiniteLists = ({ query = {}, options }) =>
+  useInfiniteQuery(["price-structure/infinite", query], fetchInfinitePricingStructureLists, {
     keepPreviousData: true,
     ...options,
   });
-};
 
-const fetchGroupBuyingLists = async ({ query = {} }) => {
-  return mdmService(`/group-buying`, {
+const fetchGroupBuyingLists = async ({ query = {} }) =>
+  mdmService(`/group-buying`, {
     params: {
       search: "",
       limit: 10,
@@ -53,14 +50,12 @@ const fetchGroupBuyingLists = async ({ query = {} }) => {
       ...query,
     },
   }).then((data) => data);
-};
 
-const useGroupBuyingLists = ({ query = {}, options } = {}) => {
-  return useQuery(["group-buying", query], () => fetchGroupBuyingLists({ query }), {
+const useGroupBuyingLists = ({ query = {}, options } = {}) =>
+  useQuery(["group-buying", query], () => fetchGroupBuyingLists({ query }), {
     keepPreviousData: true,
     ...options,
   });
-};
 
 const fetchInfiniteGroupBuyingLists = async ({ pageParam = 1, queryKey }) => {
   const searchQuery = queryKey[1].search;
@@ -76,15 +71,14 @@ const fetchInfiniteGroupBuyingLists = async ({ pageParam = 1, queryKey }) => {
   }).then((data) => data);
 };
 
-const useGroupBuyingInfiniteLists = ({ query = {}, options }) => {
-  return useInfiniteQuery(["group-buying/infinite", query], fetchInfiniteGroupBuyingLists, {
+const useGroupBuyingInfiniteLists = ({ query = {}, options }) =>
+  useInfiniteQuery(["group-buying/infinite", query], fetchInfiniteGroupBuyingLists, {
     keepPreviousData: true,
     ...options,
   });
-};
 
-const fetchPricingConfigLists = async ({ query = {} }) => {
-  return mdmService(`/pricing-config`, {
+const fetchPricingConfigLists = async ({ query = {} }) =>
+  mdmService(`/pricing-config`, {
     params: {
       search: "",
       limit: 10,
@@ -94,14 +88,12 @@ const fetchPricingConfigLists = async ({ query = {} }) => {
       ...query,
     },
   }).then((data) => data);
-};
 
-const usePricingConfigLists = ({ query = {}, options } = {}) => {
-  return useQuery(["pricing-config", query], () => fetchPricingConfigLists({ query }), {
+const usePricingConfigLists = ({ query = {}, options } = {}) =>
+  useQuery(["pricing-config", query], () => fetchPricingConfigLists({ query }), {
     keepPreviousData: true,
     ...options,
   });
-};
 
 const fetchInfinitePricingConfigLists = async ({ pageParam = 1, queryKey }) => {
   const searchQuery = queryKey[1].search;
@@ -117,12 +109,11 @@ const fetchInfinitePricingConfigLists = async ({ pageParam = 1, queryKey }) => {
   }).then((data) => data);
 };
 
-const usePricingConfigInfiniteLists = ({ query = {}, options }) => {
-  return useInfiniteQuery(["pricing-config/infinite", query], fetchInfinitePricingConfigLists, {
+const usePricingConfigInfiniteLists = ({ query = {}, options }) =>
+  useInfiniteQuery(["pricing-config/infinite", query], fetchInfinitePricingConfigLists, {
     keepPreviousData: true,
     ...options,
   });
-};
 
 function useCreateGroupBuying({ options }) {
   return useMutation(
@@ -176,47 +167,37 @@ function useCreatePricingStructureDraftList({ options }) {
   );
 }
 
-const fetchPricingStructureList = async ({ price_structure_id }) => {
-  return mdmService(`/price-structure/${price_structure_id}`).then((data) => data);
-};
+const fetchPricingStructureList = async ({ price_structure_id }) =>
+  mdmService(`/price-structure/${price_structure_id}`).then((data) => data);
 
-const usePricingStructureList = ({ price_structure_id, options }) => {
-  return useQuery(
+const usePricingStructureList = ({ price_structure_id, options }) =>
+  useQuery(
     ["price-structure", price_structure_id],
     () => fetchPricingStructureList({ price_structure_id }),
     {
       ...options,
     }
   );
-};
 
-const fetchGroupBuyingList = async ({ group_buying_id }) => {
-  return mdmService(`/group-buying/${group_buying_id}`).then((data) => data);
-};
+const fetchGroupBuyingList = async ({ group_buying_id }) =>
+  mdmService(`/group-buying/${group_buying_id}`).then((data) => data);
 
-const useGroupBuyingList = ({ group_buying_id, options }) => {
-  return useQuery(
-    ["group-buying", group_buying_id],
-    () => fetchGroupBuyingList({ group_buying_id }),
-    {
-      ...options,
-    }
-  );
-};
+const useGroupBuyingList = ({ group_buying_id, options }) =>
+  useQuery(["group-buying", group_buying_id], () => fetchGroupBuyingList({ group_buying_id }), {
+    ...options,
+  });
 
-const fetchPricingConfigList = async ({ group_buying_id }) => {
-  return mdmService(`/pricing-config/${group_buying_id}`).then((data) => data);
-};
+const fetchPricingConfigList = async ({ group_buying_id }) =>
+  mdmService(`/pricing-config/${group_buying_id}`).then((data) => data);
 
-const usePricingConfigList = ({ pricing_config_id, options }) => {
-  return useQuery(
+const usePricingConfigList = ({ pricing_config_id, options }) =>
+  useQuery(
     ["pricing-config", pricing_config_id],
     () => fetchPricingConfigList({ pricing_config_id }),
     {
       ...options,
     }
   );
-};
 
 function useUpdatePricingStructureList({ pricingStructureListId, options }) {
   return useMutation(
@@ -257,8 +238,8 @@ function useUpdatePricingConfigList({ pricingConfigListId, options }) {
   );
 }
 
-const useDeletePricingStructureList = ({ options }) => {
-  return useMutation(
+const useDeletePricingStructureList = ({ options }) =>
+  useMutation(
     (ids) =>
       mdmService("/price-structure", {
         method: "DELETE",
@@ -268,10 +249,9 @@ const useDeletePricingStructureList = ({ options }) => {
       ...options,
     }
   );
-};
 
-const useDeleteGroupBuyingList = ({ options }) => {
-  return useMutation(
+const useDeleteGroupBuyingList = ({ options }) =>
+  useMutation(
     (ids) =>
       mdmService("/group-buying", {
         method: "DELETE",
@@ -281,10 +261,9 @@ const useDeleteGroupBuyingList = ({ options }) => {
       ...options,
     }
   );
-};
 
-const useDeletePricingConfigList = ({ options }) => {
-  return useMutation(
+const useDeletePricingConfigList = ({ options }) =>
+  useMutation(
     (ids) =>
       mdmService("/pricing-config", {
         method: "DELETE",
@@ -294,7 +273,6 @@ const useDeletePricingConfigList = ({ options }) => {
       ...options,
     }
   );
-};
 
 function useValidatePricingStructureInput({ options }) {
   return useMutation(
@@ -309,11 +287,11 @@ function useValidatePricingStructureInput({ options }) {
   );
 }
 
-function useApprovePricingStructureList({ options, partner_id }) {
+function useApproveRejectPricingStructureList({ options }) {
   return useMutation(
     (updates) =>
-      mdmService(`/price-structure/approval/${partner_id}`, {
-        method: "PUT",
+      mdmService("/price-structure/approval", {
+        method: "POST",
         data: updates,
       }),
     {
@@ -322,8 +300,8 @@ function useApprovePricingStructureList({ options, partner_id }) {
   );
 }
 
-const useUploadFilePricingStructureMDM = ({ options }) => {
-  return useMutation(
+const useUploadFilePricingStructureMDM = ({ options }) =>
+  useMutation(
     (data) =>
       mdmService(`/price-structure/upload`, {
         method: "POST",
@@ -333,7 +311,6 @@ const useUploadFilePricingStructureMDM = ({ options }) => {
       ...options,
     }
   );
-};
 
 export {
   usePricingStructureLists,
@@ -343,7 +320,7 @@ export {
   useUpdatePricingStructureList,
   useDeletePricingStructureList,
   useValidatePricingStructureInput,
-  useApprovePricingStructureList,
+  useApproveRejectPricingStructureList,
   useUploadFilePricingStructureMDM,
   useGroupBuyingLists,
   useCreateGroupBuying,

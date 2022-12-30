@@ -5,6 +5,7 @@ import { ModalRejectPriceStructure } from "components/elements/Modal/ModalReject
 import { useCurrenciesInfiniteLists } from "hooks/mdm/country-structure/useCurrencyMDM";
 import { useProductList } from "hooks/mdm/product-list/useProductList";
 import {
+  useApproveRejectPricingStructureList,
   useCreatePricingStructureDraftList, useDeletePricingStructureList,
   useGroupBuyingLists,
   usePricingConfigInfiniteLists, usePricingStructureInfiniteLists, usePricingStructureList,
@@ -304,14 +305,13 @@ const DetailPricingStructure: any = () => {
     pricingStructureListId: price_structure_id,
   });
 
-  const { mutate: rejectPartner, isLoading: isLoadingRejectPriceStructure } = useUpdatePricingStructureList({
+  const { mutate: rejectPartner, isLoading: isLoadingRejectPriceStructure } = useApproveRejectPricingStructureList({
     options: {
       onSuccess: () => {
         setModalReject({ open: false });
         router.back();
       },
     },
-    pricingStructureListId: price_structure_id,
   });
 
   const { mutate: updatePriceStructure, isLoading: isLoadingUpdatePriceStructure } = useUpdatePricingStructureList({
