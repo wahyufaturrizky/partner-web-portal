@@ -782,7 +782,7 @@ const DetailPricingStructure: any = () => {
 
   };
 
-  const onSubmitDraft = (dataDraft: any) => {
+  const onSubmitDraft = (dataSubmit: any) => {
     pricingStructureDraft({
       status: "DRAFTED",
       add_distributions: dataSubmit.distribution_channel,
