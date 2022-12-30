@@ -88,6 +88,9 @@ export default function CustomerDetail() {
     visible: false,
     data: {},
   });
+  const [contactsTemp, setContactTemp] = useState([]);
+  const [addressesTemp, setAddressTemp] = useState([]);
+  const [banksTemp, setBankTemp] = useState([]);
 
   const { data: dataUserPermission } = useUserPermissions({
     options: {
@@ -193,6 +196,7 @@ export default function CustomerDetail() {
           deleted: false,
         }));
 
+        setContactTemp(mappingContact);
         setValue("contact", mappingContact);
 
         // Address Form
@@ -228,6 +232,7 @@ export default function CustomerDetail() {
           deleted: false,
         }));
 
+        setAddressTemp(mappingAddress);
         setValue("address", mappingAddress);
 
         // Sales Form
@@ -273,6 +278,7 @@ export default function CustomerDetail() {
           };
         });
 
+        setBankTemp(mappingBank);
         setValue("bank", mappingBank);
       },
     },
@@ -316,6 +322,20 @@ export default function CustomerDetail() {
           email: contact.email,
           nik: contact.nik,
           isPrimary: contact.isPrimary,
+        });
+      }
+    });
+
+    let mappingDelContacts: any = [];
+
+    contactsTemp.forEach((contactTemp: any) => {
+      const isContactIdExist = data?.contact?.filter(
+        (contact: any) => contact.id === contactTemp.id
+      );
+
+      if (isContactIdExist?.length === 0) {
+        mappingDelContacts.push({
+          id: contactTemp.id,
         });
       }
     });
@@ -384,6 +404,20 @@ export default function CustomerDetail() {
       }
     });
 
+    let mappingDelAdress: any = [];
+
+    addressesTemp.forEach((addressTemp: any) => {
+      const isAddressIdExist = data?.address?.filter(
+        (address: any) => address.id === addressTemp.id
+      );
+
+      if (isAddressIdExist?.length === 0) {
+        mappingDelAdress.push({
+          id: addressTemp.id,
+        });
+      }
+    });
+
     // Purchasing Payload
     const purchasingPayload = objectIsEmpty(data?.purchasing) ? null : data?.purchasing;
 
@@ -432,6 +466,18 @@ export default function CustomerDetail() {
       }
     });
 
+    let mappingDelBank: any = [];
+
+    banksTemp.forEach((bankTemp: any) => {
+      const isBankIdExist = data?.bank?.filter((bank: any) => bank.id === bankTemp.id);
+
+      if (isBankIdExist?.length === 0) {
+        mappingDelBank.push({
+          id: bankTemp.id,
+        });
+      }
+    });
+
     const formData = {
       ...data,
       customer: customerPayload,
@@ -444,9 +490,9 @@ export default function CustomerDetail() {
       add_bank: mappingAddBank,
       add_contact: mappingAddContacts,
       add_address: mappingAddAddress,
-      del_contacts: [],
-      del_bank: [],
-      del_address: [],
+      del_contacts: mappingDelContacts,
+      del_bank: mappingDelBank,
+      del_address: mappingDelAdress,
     };
 
     updateCustomer(formData);
