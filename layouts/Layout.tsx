@@ -990,7 +990,7 @@ const AdminLayout = (props: any) => {
       </Layout>
 
       <Modal
-        visible={isDontHavePermission}
+        visible={false}
         onCancel={() => {
           setIsDontHavePermission(false);
           router.back();

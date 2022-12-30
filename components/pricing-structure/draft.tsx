@@ -224,7 +224,7 @@ const DraftPricingStructure: any = ({
               menuList={[
                 {
                   key: 1,
-                  value: props?.listPermission?.filter(
+                  value: listPermission?.filter(
                     (x: any) => x.viewTypes[0]?.viewType.name === "Download Template"
                   ).length > 0 && (
                     <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
@@ -235,7 +235,7 @@ const DraftPricingStructure: any = ({
                 },
                 {
                   key: 2,
-                  value: props?.listPermission?.filter(
+                  value: listPermission?.filter(
                     (x: any) => x.viewTypes[0]?.viewType.name === "Upload"
                   ).length > 0 && (
                     <div style={{ display: "flex", alignItems: "center", gap: 5 }}>

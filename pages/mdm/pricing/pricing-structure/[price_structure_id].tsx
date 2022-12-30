@@ -387,7 +387,7 @@ const DetailPricingStructure: any = () => {
 
   const debounceFetchRegion = useDebounce(searchRegion, 1000);
 
-  const { data: dataGroupBuying } = useGroupBuyingLists({
+  const { data: dataGroupBuying, isLoading: isLoadingGroupBuying} = useGroupBuyingLists({
     query: {
       limit: 1000000,
     },
@@ -599,7 +599,7 @@ const DetailPricingStructure: any = () => {
     },
   });
 
-  const { data: pricingStructureLists } =
+  const { data: pricingStructureLists, isLoading: isLoadingPricingStructureLists } =
     usePricingStructureLists({
       options: {
         onSuccess: (data: any) => {
@@ -624,6 +624,7 @@ const DetailPricingStructure: any = () => {
     isFetchingNextPage: isFetchingMoreSalesOrganizationInfinite,
     hasNextPage: hasNextPageSalesOrganizationInfinite,
     fetchNextPage: fetchNextPageSalesOrganizationInfinite,
+    isLoading: isLoadingSalesOrganization
   } = useSalesOrganizationInfiniteLists({
     query: {
       search: debounceFetchSalesOrganizationInfinite,
@@ -660,6 +661,7 @@ const DetailPricingStructure: any = () => {
     isFetchingNextPage: isFetchingMorePricingStructureInfinite,
     hasNextPage: hasNextPagePricingStructureInfinite,
     fetchNextPage: fetchNextPagePricingStructureInfinite,
+    isLoading: isLoadingPricingStructureInfinite
   } = usePricingStructureInfiniteLists({
     query: {
       search: debounceFetchPricingStructureInfinite,
@@ -696,6 +698,7 @@ const DetailPricingStructure: any = () => {
     isFetchingNextPage: isFetchingMoreCurrenciesInfinite,
     hasNextPage: hasNextPageCurrenciesInfinite,
     fetchNextPage: fetchNextPageCurrenciesInfinite,
+    isLoading: isLoadingCurrencies
   } = useCurrenciesInfiniteLists({
     query: {
       search: debounceFetchCurrenciesInfinite,
@@ -731,7 +734,7 @@ const DetailPricingStructure: any = () => {
     updatePriceStructure({
       status: pricingStructureListById?.changesHistory?.from === "ACTIVE" && pricingStructureListById?.changesHistory?.to === "WAITING" ? "ACTIVE" : pricingStructureListById?.changesHistory?.from === "REJECTED" && pricingStructureListById?.changesHistory?.to === "WAITING" ? "REJECTED" : pricingStructureListById?.changesHistory?.from === "INACTIVE" && pricingStructureListById?.changesHistory?.to === "WAITING" ? "INACTIVE" : (dataSubmit.status === "DRAFTED" || dataSubmit.status === "REJECTED" || dataSubmit.status === "INACTIVE") ? "WAITING" : "ACTIVE",
       add_distributions: dataSubmit.distribution_channel,
-      add_products: dataSubmit.product_selected.map((data: any) => data.id),
+      add_products: dataSubmit.product_selected.map((data: any) => [...new Set(data.id) ]),
       add_total_cost: dataSubmit.product_selected?.[0]?.distribution_channel?.[0]?.cost ? dataSubmit.product_selected.map((data: any, index: any) => ({
         price_structure_cost_by_distribution_id: data.distribution_channel[index]?.id,
         group_buying_price_id: data.distribution_channel[index]?.level?.[index].buyingPrice,
@@ -783,7 +786,7 @@ const DetailPricingStructure: any = () => {
     pricingStructureDraft({
       status: "DRAFTED",
       add_distributions: dataSubmit.distribution_channel,
-      add_products: dataSubmit.product_selected.map((data: any) => data.id),
+      add_products: dataSubmit.product_selected.map((data: any) => [...new Set(data.id) ]),
       add_total_cost: dataSubmit.product_selected?.[0]?.distribution_channel?.[0]?.cost ? dataSubmit.product_selected.map((data: any, index: any) => ({
         price_structure_cost_by_distribution_id: data.distribution_channel[index]?.id,
         group_buying_price_id: data.distribution_channel[index]?.level?.[index].buyingPrice,
@@ -1915,7 +1918,7 @@ const DetailPricingStructure: any = () => {
     return (
       <>
       {
-        isLoadingPricingStructureListById || isLoadingPricingConfigInfinite ? (
+        isLoadingSalesOrganizationHirarcy || isLoadingPricingStructureInfinite || isLoadingPricingStructureListById || isLoadingPricingConfigInfinite || isLoadingSalesOrganization || isLoadingGroupBuying || isLoadingPricingStructureLists || isLoadingProductList || isLoadingCurrencies ? (
           <Row alignItems='center' justifyContent='center'>
             <Spin tip='loading...' />
           </Row>
