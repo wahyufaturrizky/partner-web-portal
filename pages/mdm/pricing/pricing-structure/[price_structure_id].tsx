@@ -296,13 +296,12 @@ const DetailPricingStructure: any = () => {
     name: "manage_by",
   });
 
-  const { mutate: approvePartner, isLoading: isLoadingApprovePriceStructure } = useUpdatePricingStructureList({
+  const { mutate: approvePartner, isLoading: isLoadingApprovePriceStructure } = useApproveRejectPricingStructureList({
     options: {
       onSuccess: () => {
         router.back();
       },
     },
-    pricingStructureListId: price_structure_id,
   });
 
   const { mutate: rejectPartner, isLoading: isLoadingRejectPriceStructure } = useApproveRejectPricingStructureList({
@@ -326,14 +325,16 @@ const DetailPricingStructure: any = () => {
   const approve = () => {
     if (pricingStructureListById?.changesHistory?.from === "ACTIVE" && pricingStructureListById?.changesHistory?.to === "WAITING") {
       const payload = {
-        status: "INACTIVE",
+        approval_status: "APPROVED",
         inactive_reason: pricingStructureListById?.inactiveReason || "empty reason",
+        id: price_structure_id,
         ...emptyPayloadPriceStructure
       };
       approvePartner(payload);
     } else {
       const payload = {
-        status: "ACTIVE",
+        approval_status: "APPROVED",
+        id: price_structure_id,
         ...emptyPayloadPriceStructure
       };
       approvePartner(payload);

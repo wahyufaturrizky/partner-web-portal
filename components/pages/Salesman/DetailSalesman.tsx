@@ -184,7 +184,8 @@ export default function ComponentDetailSalesman({ listCustomers, isLoading }: an
 
   const _handleUpdateSalesman = () => {
     const stt = status === "Draft" ? 2 : 0;
-    const setTobe = status === "Waiting for Approval" ? -1 : status === "Draft" ? 2 : 0;
+    const setTobe =
+      status === "Waiting for Approval" ? -1 : status === "Draft" ? 2 : status === "Active" ? 1 : 0;
     const dataUpdated: any = {
       ...payloads,
       division: setDvs,
