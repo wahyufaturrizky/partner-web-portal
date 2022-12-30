@@ -1,5 +1,16 @@
 import React, { useState } from "react";
-import { Col, Row, Spacer, Text, Button, FormSelect, Table, Input, Spin, FormSelectCustom } from "pink-lava-ui";
+import {
+  Col,
+  Row,
+  Spacer,
+  Text,
+  Button,
+  FormSelect,
+  Table,
+  Input,
+  Spin,
+  FormSelectCustom,
+} from "pink-lava-ui";
 import { ICPlusWhite, ICDelete, ICEdit } from "assets";
 import { useFormContext, useFieldArray, Controller } from "react-hook-form";
 import ModalAddBankAccounts from "components/elements/Modal/ModalAddBankAccounts";
@@ -9,7 +20,7 @@ import { useTaxInfiniteLists } from "hooks/mdm/Tax/useTax";
 import useDebounce from "lib/useDebounce";
 import styled from "styled-components";
 
-const Invoicing = () => {
+const Invoicing = ({ formType }) => {
   const { register, control, setValue } = useFormContext();
 
   const { fields, append, remove, update }: any = useFieldArray({
@@ -521,17 +532,32 @@ const Invoicing = () => {
           }}
           bankData={showFormBank.data}
           onSaveBank={(bankObject: any) => {
-            switch (showFormBank.type) {
-              case "add":
-                append({ ...bankObject, key: fields.length });
-                setShowFormBank({ type: "", open: false, data: {}, index: 0 });
-                break;
-              case "edit":
-                update(showFormBank.index, bankObject);
-                setShowFormBank({ type: "", open: false, data: {}, index: 0 });
-                break;
-              default:
-                break;
+            if (formType === "edit") {
+              switch (showFormBank.type) {
+                case "add":
+                  append({ ...bankObject, key: fields.length, id: 0, deleted: false });
+                  setShowFormBank({ type: "", open: false, data: {}, index: 0 });
+                  break;
+                case "edit":
+                  update(showFormBank.index, { ...showFormBank.data, ...bankObject });
+                  setShowFormBank({ type: "", open: false, data: {}, index: 0 });
+                  break;
+                default:
+                  break;
+              }
+            } else {
+              switch (showFormBank.type) {
+                case "add":
+                  append({ ...bankObject, key: fields.length });
+                  setShowFormBank({ type: "", open: false, data: {}, index: 0 });
+                  break;
+                case "edit":
+                  update(showFormBank.index, bankObject);
+                  setShowFormBank({ type: "", open: false, data: {}, index: 0 });
+                  break;
+                default:
+                  break;
+              }
             }
           }}
         />

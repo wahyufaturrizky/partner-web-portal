@@ -334,9 +334,7 @@ export default function CustomerDetail() {
       );
 
       if (isContactIdExist?.length === 0) {
-        mappingDelContacts.push({
-          id: contactTemp.id,
-        });
+        mappingDelContacts.push(contactTemp.id);
       }
     });
 
@@ -412,9 +410,7 @@ export default function CustomerDetail() {
       );
 
       if (isAddressIdExist?.length === 0) {
-        mappingDelAdress.push({
-          id: addressTemp.id,
-        });
+        mappingDelAdress.push(addressTemp.id);
       }
     });
 
@@ -472,14 +468,11 @@ export default function CustomerDetail() {
       const isBankIdExist = data?.bank?.filter((bank: any) => bank.id === bankTemp.id);
 
       if (isBankIdExist?.length === 0) {
-        mappingDelBank.push({
-          id: bankTemp.id,
-        });
+        mappingDelBank.push(bankTemp.id);
       }
     });
 
-    const formData = {
-      ...data,
+    const formData: any = {
       customer: customerPayload,
       contact: mappingContacts,
       address: mappingAddress,
