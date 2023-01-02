@@ -16,12 +16,26 @@ import { Controller, useForm } from "react-hook-form";
 import { useRouter } from "next/router";
 import { lang } from "lang";
 import { useUserPermissions } from "hooks/user-config/usePermission";
-import { useUOMDetail, useUpdateUOM, useDeletUOM } from "../../../../hooks/mdm/unit-of-measure/useUOM";
+import * as yup from "yup";
+import { yupResolver } from "@hookform/resolvers/yup";
+import {
+  useUOMDetail,
+  useUpdateUOM,
+  useDeletUOM,
+} from "../../../../hooks/mdm/unit-of-measure/useUOM";
 import { queryClient } from "../../../_app";
 import useDebounce from "../../../../lib/useDebounce";
 import { useUOMCategoryInfiniteLists } from "../../../../hooks/mdm/unit-of-measure-category/useUOMCategory";
 import { ModalDeleteConfirmation } from "../../../../components/elements/Modal/ModalConfirmationDelete";
 import ArrowLeft from "../../../../assets/icons/arrow-left.svg";
+
+const schema = yup
+  .object({
+    name: yup.string().required("Name is Required"),
+    // format: yup.string().required("format is Required"),
+    // uom_category_id: yup.string().required("Category is Required"),
+  })
+  .required();
 
 const UOMDetail = () => {
   const t = localStorage.getItem("lan") || "en-US";
@@ -36,7 +50,12 @@ const UOMDetail = () => {
   const [search, setSearch] = useState("");
   const debounceFetch = useDebounce(search, 1000);
 
-  const { register, control, handleSubmit } = useForm();
+  const {
+    register,
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({ resolver: yupResolver(schema) });
 
   const { data: dataUserPermission } = useUserPermissions({
     options: {
@@ -45,7 +64,7 @@ const UOMDetail = () => {
   });
 
   const listPermission = dataUserPermission?.permission?.filter(
-    (filtering: any) => filtering.menu === "Unit of Measure",
+    (filtering: any) => filtering.menu === "Unit of Measure"
   );
 
   const {
@@ -62,10 +81,12 @@ const UOMDetail = () => {
     options: {
       onSuccess: (data: any) => {
         setTotalRows(data.pages[0].totalRow);
-        const mappedData = data?.pages?.map((group: any) => group.rows?.map((element: any) => ({
-          value: element.uomCategoryId,
-          label: element.name,
-        })));
+        const mappedData = data?.pages?.map((group: any) =>
+          group.rows?.map((element: any) => ({
+            value: element.uomCategoryId,
+            label: element.name,
+          }))
+        );
         const flattenArray = [].concat(...mappedData);
         setListUomCategory(flattenArray);
       },
@@ -189,6 +210,8 @@ const UOMDetail = () => {
                     label="Uom Name"
                     height="40px"
                     placeholder="e.g gram"
+                    required
+                    error={errors?.name?.message}
                     defaultValue={UomData.name}
                     {...register("name")}
                   />
