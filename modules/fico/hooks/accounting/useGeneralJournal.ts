@@ -11,6 +11,8 @@ export function useGeneralJournal() {
       search: '',
       limit: 10,
       page: 1,
+      sort_by: '["posting_date desc"]',
+      company_code: localStorage.getItem('companyCode'),
       ...query,
     },
   }).then((res) => ({

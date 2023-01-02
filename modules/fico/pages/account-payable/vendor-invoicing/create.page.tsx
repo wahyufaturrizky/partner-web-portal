@@ -24,7 +24,7 @@ function CreateVendorInvoicing() {
   const getDocumentNumber = service.getDocumentNumber({
     onSuccess: (res) => {
       if (res.status !== 'success') throw new Error(res.message);
-      form.setValue('doc_number', res.data.number);
+      form.setValue('doc_number', res.data);
     },
     onError: (err) => {
       message.error(err?.message);

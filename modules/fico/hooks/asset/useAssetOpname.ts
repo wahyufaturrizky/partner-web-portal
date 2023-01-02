@@ -6,7 +6,14 @@ import React from 'react';
 const apiPath = 'v1/asset-opname';
 
 export function useAssetOpname() {
-  const doFetchList = async ({ query = {} }) => client(`/${apiPath}/lists`, { method: 'POST', data: query }).then((res) => res);
+  const doFetchList = async ({ query = {} }) => client(`/${apiPath}/lists`, {
+    method: 'POST',
+    data: {
+      sort_by: '["created_at desc"]',
+      company_code: localStorage.getItem('companyCode'),
+      ...query,
+    },
+  }).then((res) => res);
 
   const getList = ({
     query = {}, onSuccess, onError, enabled = true,

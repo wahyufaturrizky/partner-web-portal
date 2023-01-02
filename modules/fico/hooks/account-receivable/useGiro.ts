@@ -11,6 +11,8 @@ export function useGiro() {
       search: '',
       limit: 10,
       page: 0,
+      sort_by: '["created_at desc"]',
+      company_code: localStorage.getItem('companyCode'),
       ...query,
     },
   }).then((data) => data);

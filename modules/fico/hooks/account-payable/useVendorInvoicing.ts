@@ -12,6 +12,7 @@ export function useVendorInvoicing() {
       limit: 10,
       page: 1,
       sort_by: '["created_at desc"]',
+      company_code: localStorage.getItem('companyCode'),
       ...query,
     },
   }).then((res) => res);
@@ -36,12 +37,7 @@ export function useVendorInvoicing() {
 
   const getDocumentNumber = ({
     query = {}, onSuccess, onError,
-  }) => useQuery(['/v1/ap-vdr-ivc/update-doc-range', query], () => client('/v1/ap-vdr-ivc/update-doc-range', { params: { ...query } }).then((res) => ({
-    ...res,
-    data: {
-      number: res.data.items,
-    },
-  })), {
+  }) => useQuery(['/v1/ap-vdr-ivc/update-doc-range', query], () => client('/v1/ap-vdr-ivc/update-doc-range', { params: { ...query } }).then((res) => (res)), {
     keepPreviousData: false,
     cacheTime: 0,
     onSuccess,

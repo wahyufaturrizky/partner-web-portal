@@ -18,6 +18,8 @@ import {
   ICFlagEnglish,
 } from 'assets/icon';
 import { useQueryHermesCompany } from 'hooks/master-data/hermes/useMasterCompany';
+// import { useQueryMasterCompany } from 'hooks/master-data/useMasterCompany';
+import { useProfile } from 'context/AuthContext';
 import TabIcon from '../assets/tab.svg';
 import CalculatorIcon from '../assets/calculator.svg';
 import AccountReceivableIcon from '../assets/fi-br-chart-histogram.svg';
@@ -323,6 +325,7 @@ const flexStyles = {
 
 function AdminLayout({ children }) {
   const [isChangeLang, setIsChangeLang] = useState(false);
+  const { setProfile } = useProfile();
 
   const notification = useNotification();
   const getListNotification = notification.getList({});
@@ -344,6 +347,11 @@ function AdminLayout({ children }) {
       if (!defaultCompany || localStorage.getItem('companyId') === 'undefined') {
         localStorage.setItem('companyId', res.rows?.[0].id);
         localStorage.setItem('companyCode', res.rows?.[0].code);
+
+        setProfile({
+          companyId: res.rows?.[0].id,
+          companyCode: res.rows?.[0].code,
+        });
       }
 
       menu.unshift({
@@ -355,10 +363,35 @@ function AdminLayout({ children }) {
     },
   });
 
+  // eslint-disable-next-line no-unused-vars
+  // const queryCompanies = useQueryMasterCompany({
+  //   onSuccess: (res) => {
+  //     const companies = res.map((company) => ({ name: company.text, value: company.id }));
+  //     const defaultCompany = localStorage.getItem('companyId') !== 'undefined' ? localStorage.getItem('companyId') : res[0].id;
+
+  //     if (!defaultCompany || localStorage.getItem('companyId') === 'undefined') {
+  //       localStorage.setItem('companyId', companies?.[0].id);
+  //       localStorage.setItem('companyCode', companies?.[0].id);
+  //     }
+
+  //     menu.unshift({
+  //       type: 'dropdown',
+  //       items: companies,
+  //       onChange: (value) => handleChangeCompany(companies, value),
+  //       default: companies.find((company) => company.value === defaultCompany),
+  //     });
+  //   },
+  // });
+
   const handleChangeCompany = (companies, value) => {
     const selectedCompany = companies.find((comp) => comp.name === value);
     localStorage.setItem('companyId', selectedCompany.id);
     localStorage.setItem('companyCode', selectedCompany.code);
+
+    setProfile({
+      companyId: selectedCompany.id,
+      companyCode: selectedCompany.code,
+    });
   };
 
   return (
