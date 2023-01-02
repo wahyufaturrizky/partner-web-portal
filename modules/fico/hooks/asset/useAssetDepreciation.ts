@@ -11,7 +11,8 @@ export function useAssetDepreciation() {
       search: '',
       size: 10,
       page: 1,
-      sort: '-created_at',
+      sort_by: '["created_at desc"]',
+      company_code: localStorage.getItem('companyCode'),
       ...query,
     },
   }).then((data) => data);

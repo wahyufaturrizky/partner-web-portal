@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /* eslint-disable camelcase */
 import { useQuery } from 'react-query';
 import { client } from 'lib/client';
@@ -19,7 +20,7 @@ const doFetchList = async ({ query = {} }) => {
 
 export const useQueryMasterCompany = ({
   query = {},
-  onSuccess = () => {},
+  onSuccess = (res) => {},
   onError = () => {},
 }) => useQuery([`${apiPath}`, query], () => doFetchList({ query }), {
   onSuccess,

@@ -3,14 +3,13 @@ import { NextComponentType } from 'next';
 import { AppContext, AppInitialProps, AppProps } from 'next/app';
 
 import '../styles/index.css';
-import 'pink-lava-ui/index.css';
 
 import { QueryClient, QueryClientProvider, QueryCache } from 'react-query';
 import toast from 'react-hot-toast';
 import styled from 'styled-components';
 import moment from 'moment';
 import { message } from 'antd';
-import { AuthProvider } from '../context/AuthContext';
+import { AuthProvider } from 'context/AuthContext';
 import DashboardLayout from '../components/DashboardLayout';
 
 moment.locale('id');

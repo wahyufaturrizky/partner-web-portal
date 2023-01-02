@@ -1,14 +1,43 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable react/jsx-filename-extension */
-import React, { createContext, useState, useEffect } from 'react';
+import React, {
+  createContext, useState, useEffect, useMemo, useContext, Dispatch, SetStateAction,
+} from 'react';
 import Head from 'next/head';
 import { Spin } from 'pink-lava-ui';
+import useLocalStorage from 'use-local-storage';
+import { Setter } from 'types/useLocalStorage';
 import { useAuth } from '../hooks/auth/useAuth';
 
-const AuthContext = createContext();
+type Profile = {
+  companyId: string | null;
+  companyCode: string | null;
+}
+type ContextValue = {
+  profile: Profile;
+  setProfile: Setter<Profile>;
+};
+
+const AuthContext = createContext<ContextValue>({
+  profile: {
+    companyCode: 'undefined',
+    companyId: 'undefined',
+  },
+  setProfile: (value) => {},
+});
+export const useProfile = () => useContext(AuthContext);
 
 function AuthProvider({ children, protectedRoute }) {
   const [isReturnComponent, setReturnComponent] = useState(false);
+  const [profile, setProfile] = useLocalStorage<Profile>('profile', {
+    companyId: '',
+    companyCode: '',
+  });
+
+  const value = useMemo(
+    () => ({ profile: profile || [], setProfile }),
+    [profile],
+  );
 
   const { mutate, isLoading } = useAuth({
     options: {
@@ -34,6 +63,10 @@ function AuthProvider({ children, protectedRoute }) {
 
   useEffect(() => {
     mutate();
+    setProfile({
+      companyCode: localStorage.getItem('companyCode') || 'undefined',
+      companyId: localStorage.getItem('companyId') || 'undefined',
+    });
     // if (localStorage.getItem('token')) {
     //   if (window.location.pathname === '/') {
     //     setReturnComponent(true);
@@ -65,7 +98,7 @@ function AuthProvider({ children, protectedRoute }) {
     );
   }
   return (
-    <AuthContext.Provider value={null}>
+    <AuthContext.Provider value={value}>
       <Head>
         <link
           href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700&display=swap"

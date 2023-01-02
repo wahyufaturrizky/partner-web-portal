@@ -12,6 +12,7 @@ export function useInvoiceBilling() {
       size: 10,
       page: 1,
       sort: '-created_at',
+      company_code: localStorage.getItem('companyCode'),
       ...query,
     },
   }).then((data) => data);

@@ -21,6 +21,17 @@ function CreateAssetDisposal() {
   const [modals, setModals] = useState<IModals>();
 
   const service = useAssetDisposal();
+  const getDocumentNumber = service.getDocumentNumber({
+    onSuccess: (res) => {
+      if (res.status !== 'success') throw new Error(res.message);
+
+      // form.setValue('doc_number', res.data);
+    },
+    onError: (err) => {
+      message.error(err?.message);
+    },
+  });
+
   const createAssetDisposal = service.create({
     onSuccess: (res) => {
       const alert = { title: 'Save Success', message: 'Order number has been successfully saved' };
@@ -34,6 +45,7 @@ function CreateAssetDisposal() {
     },
     onError: (err) => {
       message.error(err.message);
+      getDocumentNumber.refetch();
     },
   });
 

@@ -18,6 +18,7 @@ import { Table } from './Table';
 import { ModalDeleteConfirmation } from './modals/ModalDeleteConfirmation';
 import { Filter } from './Filter';
 import { FilterMultiDropdown } from './FilterMultiDropdown';
+import { FilterForm } from './FilterForm';
 
 function DataTable(props: IDataTable) {
   const {
@@ -137,6 +138,9 @@ function DataTable(props: IDataTable) {
             onSearch={(e) => console.log(e)}
           />
         </div> */}
+        <div className="w-full">
+          <FilterForm columns={filterDatasources} />
+        </div>
         <div style={{ width: '100%' }}>
           <Table
             columns={columns}

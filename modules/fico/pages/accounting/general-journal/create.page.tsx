@@ -24,7 +24,6 @@ function GeneralJournal() {
   const [modals, setModals] = useState<IModals>();
 
   useEffect(() => {
-    setValue('company_code', 'PP01');
     setValue('document_type', 'SA');
     setValue('exchange_rate', moment().format('YYYY-MM-DD'));
   }, []);

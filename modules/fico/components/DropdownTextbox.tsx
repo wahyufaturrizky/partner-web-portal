@@ -39,15 +39,15 @@ export const DropdownTextbox = React.forwardRef(({
       />
     </Container>
     <Container width="70%">
-      <Label style={{ color: 'transparent', marginBottom: '1px' }}>{id}</Label>
+      <Label style={{ color: 'transparent' }}>{id}</Label>
       <BaseInput
-        height="48px"
+        height="50px"
         value={datasources.find((v) => v.id === value)?.description || ''}
         className={css`
           border-color: #d9d9d9;
           border-left: none;
           border-radius: 0px 8px 8px 0px;
-          margin-left: -1px;
+          margin-left: -5px;
           z-index: 10;
 
           :hover {

@@ -10,6 +10,7 @@ import React, { useEffect } from 'react';
 import moment from 'moment';
 import { uniqueId } from 'lodash';
 import { errorMaxLength, errorMaxValue } from 'constants/errorMsg';
+import { useProfile } from 'context/AuthContext';
 import { Input } from './Input';
 import { InputNumber } from './InputNumber';
 import { DatePicker } from './DatePicker';
@@ -54,6 +55,7 @@ const mobilephoneParser = (value) => value!.replace(/\$\s?|(\s*)/g, '');
 console.error = () => {};
 
 export function FormBuilder<T>(props: IFormBuilder<T>) {
+  const { profile } = useProfile();
   const { fields, column = 1, useForm } = props;
   const {
     watch, register, setValue, getValues, formState: { errors },
@@ -64,15 +66,19 @@ export function FormBuilder<T>(props: IFormBuilder<T>) {
     return subscription.unsubscribe();
   }, [watch]);
 
-  // console.log(getValues());
+  useEffect(() => {
+    setValue('company_code', profile.companyCode);
+  }, [profile]);
 
   return (
     <For of={fields}>
       {(field) => {
         const {
-          id, validation = {}, type, width = '100%', height = '48px', label = ' ', placeholder = '', isLoading = false, disabled = false,
+          id, validation = {}, type, width = '100%', height = '48px', label = ' ', placeholder = '', isLoading = false,
           datasources = [], onChange, render, flexWidth, onSearch,
         } = field;
+
+        let { disabled } = field;
 
         let defaultValue = getValues(id);
 
@@ -106,6 +112,8 @@ export function FormBuilder<T>(props: IFormBuilder<T>) {
           else if (moment(defaultValue, 'DD/MM/YYYY').isValid()) defaultValue = moment(defaultValue, 'DD/MM/YYYY');
           else if (moment(defaultValue).isValid()) defaultValue = moment(defaultValue);
         }
+
+        if (id === 'company_code') disabled = true;
 
         const flexRatio = `1 0 ${(flexWidth ?? 100 / column) - 2}%`;
         const containerId = id !== '' ? `container-field-${id}` : uniqueId('container-field-');

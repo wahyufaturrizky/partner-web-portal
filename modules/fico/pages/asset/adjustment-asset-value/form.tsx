@@ -38,7 +38,7 @@ export type AdjustmentAssetValueFields = {
 
 export const getPayload = (data: AdjustmentAssetValueFields) => ({
   ...data,
-  doc_number: data.doc_number || '190000005',
+  doc_number: `${data.doc_number || 190000005}`,
   id_currency: Number(data.id_currency),
   val_currency: `${data.val_currency}`,
   period: Number(data.period),

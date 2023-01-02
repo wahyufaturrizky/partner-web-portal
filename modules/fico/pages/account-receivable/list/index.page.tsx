@@ -27,6 +27,11 @@ import { useConfigPagination } from 'hooks/pagination/useConfigPagination';
 import moment from 'moment';
 import { StatusPill } from 'components/StatusPill';
 import { STATUS_VARIANT } from 'utils/utils';
+import { useSearchDropdown } from 'hooks/helper/useSearchDropdown';
+import { useQueryMasterCompany } from 'hooks/master-data/useMasterCompany';
+import { message } from 'antd';
+import { Divider } from 'components/Divider';
+import { AccountReceivableFields } from './form-index';
 
 type Props = {
   company_code: string;
@@ -206,7 +211,6 @@ function AccountReceivable() {
   const [isFetch, setIsFetch] = useState(false);
 
   const [isLoading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
   const { configPagination } = useConfigPagination();
   const pagination = usePagination(configPagination);
 
@@ -232,14 +236,19 @@ function AccountReceivable() {
     onChange: (selected) => setSelectedRowKeys(selected),
   };
 
+  const { setSearchDropdown, getSearchValue } = useSearchDropdown<AccountReceivableFields>();
+  const queryMasterCompany = useQueryMasterCompany({
+    query: { search: getSearchValue('company_code') },
+  });
+
   const fields: IField<Props>[] = [
     {
       id: 'company_code',
       type: 'dropdown',
       label: 'Company Code',
       placeholder: 'Select',
-      datasources: DS_COMPANY.map((v) => ({ id: v.id, value: v.name })),
-      validation: { required: '* required' },
+      onSearch: (search, field) => setSearchDropdown({ field, search }),
+      datasources: queryMasterCompany.data?.map((v) => ({ id: v.id, value: `${v.id} - ${v.text}`, ...v })),
     },
     {
       id: '', type: '',
@@ -334,12 +343,10 @@ function AccountReceivable() {
       setLoading(false);
     },
     onError: (err) => {
-      // message.error(err.message);
-      console.log(err);
+      message.error(err.message);
     },
     enabled: showData,
     query: {
-      search,
       page: pagination.page - 1,
       size: pagination.itemsPerPage,
       company_code: form.getValues('company_code'),
@@ -400,13 +407,14 @@ function AccountReceivable() {
           && (
           <Card padding="16px 20px" style={{ width: '100%' }}>
             <Row justifyContent="space-between" padding="20px 0" alignItems="center">
-              <Search
+              <div />
+              {/* <Search
                 width="380px"
                 nameIcon="SearchOutlined"
                 placeholder="Search Document Number, Company Code or Name"
                 colorIcon={COLORS.grey.regular}
                 onChange={_.debounce((e) => setSearch(e.target.value), 500)}
-              />
+              /> */}
               <Button
                 size="big"
                 variant="primary"
@@ -416,6 +424,7 @@ function AccountReceivable() {
                 Input
               </Button>
             </Row>
+            <Divider dashed />
             <DataTable
               rowKey="ar_id"
               data={data || []}

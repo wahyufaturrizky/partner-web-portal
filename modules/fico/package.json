@@ -13,8 +13,8 @@
     "fix": "eslint --fix --ext .js,.ts,.tsx .",
     "test": "jest",
     "update:pink-lava-ui": "rm -rf ./node_modules/pink-lava-ui && cp -r ../pink-lava-design/dist ./node_modules/pink-lava-ui",
-
     "epc-install": "yarn",
+    "epc-update": "rm -rf .git && git init && git remote add origin https://gitito.nabatisnack.co.id/edot/accounting-web.git && git pull && git clean -f -d && git checkout development && rm -rf .git",
     "epc-start": "next start -p 9001",
     "epc-dev": "next dev -p 9001",
     "epc-build": "next build"
@@ -51,6 +51,7 @@
     "react-query": "^3.34.16",
     "styled-components": "^5.3.3",
     "swr": "^1.2.2",
+    "use-local-storage": "^2.3.6",
     "yarn": "^1.22.18",
     "yup": "^0.32.11"
   },

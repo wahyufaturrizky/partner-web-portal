@@ -11,7 +11,8 @@ export function useAssetDisposal() {
       search: '',
       size: 10,
       page: 1,
-      sort: '-created_at',
+      sort_by: '["created_at desc"]',
+      company_code: localStorage.getItem('companyCode'),
       ...query,
     },
   }).then((data) => data);
@@ -74,6 +75,15 @@ export function useAssetDisposal() {
     },
   );
 
+  const getDocumentNumber = ({
+    query = {}, onSuccess, onError,
+  }) => useQuery([`/${apiPath}/update-doc-range`, query], () => client(`/${apiPath}/update-doc-range`).then((data) => data), {
+    keepPreviousData: false,
+    cacheTime: 0,
+    onSuccess,
+    onError,
+  });
+
   return {
     getList,
     getByID,
@@ -83,5 +93,6 @@ export function useAssetDisposal() {
     create,
     update,
     updateStatus,
+    getDocumentNumber,
   };
 }
