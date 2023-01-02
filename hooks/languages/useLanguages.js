@@ -63,4 +63,30 @@ const useLanguageLibraryInfiniteLists = ({ query = {}, options }) => {
   });
 };
 
-export { useLanguages, useLanguagesInfiniteLists, useLanguageLibraryInfiniteLists };
+const fetchLanguageLibrary = async ({ pageParam = 1, queryKey }) => {
+  const searchQuery = queryKey[1].search;
+  return mdmService(`/language`, {
+    params: {
+      search: searchQuery,
+      limit: 10,
+      page: pageParam,
+      sortBy: "created_at",
+      sortOrder: "DESC",
+      ...queryKey[1],
+    },
+  }).then((data) => data);
+};
+
+const useLanguageLibrary = ({ query = {}, options }) => {
+  return useQuery(["languages-library", query], fetchInfinityLanguageLibrary, {
+    keepPreviousData: true,
+    ...options,
+  });
+};
+
+export {
+  useLanguages,
+  useLanguagesInfiniteLists,
+  useLanguageLibraryInfiniteLists,
+  useLanguageLibrary,
+};

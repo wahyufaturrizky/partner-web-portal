@@ -32,16 +32,19 @@ import { queryClient } from "../../_app";
 import { ICDownload, ICUpload } from "../../../assets/icons";
 import { mdmDownloadService } from "../../../lib/client";
 
-const downloadFile = (params: any) => mdmDownloadService(
-  `/transportation-group/download${params.with_data === "Y" ? "" : "/template"}`,
-  {},
-).then((res) => {
-  const dataUrl = window.URL.createObjectURL(new Blob([res.data]));
-  const tempLink = document.createElement("a");
-  tempLink.href = dataUrl;
-  tempLink.setAttribute("download", `transportation_group_${new Date().getTime()}.xlsx`);
-  tempLink.click();
-});
+const downloadFile = (params: any) =>
+  mdmDownloadService(
+    `/transportation-group/download${
+      params?.company_id ? `?company_id=${params.company_id}` : "/template"
+    }`,
+    {}
+  ).then((res) => {
+    const dataUrl = window.URL.createObjectURL(new Blob([res.data]));
+    const tempLink = document.createElement("a");
+    tempLink.href = dataUrl;
+    tempLink.setAttribute("download", `transportation_group_${new Date().getTime()}.xlsx`);
+    tempLink.click();
+  });
 
 const renderConfirmationText = (type: any, data: any) => {
   switch (type) {
@@ -49,9 +52,9 @@ const renderConfirmationText = (type: any, data: any) => {
       return data.selectedRowKeys.length > 1
         ? `Are you sure to delete ${data.selectedRowKeys.length} items ?`
         : `Are you sure to delete Transportation Name - ${
-          data?.transportationsData?.data.find((el: any) => el.key === data.selectedRowKeys[0])
-            ?.transportationGroup
-        } ?`;
+            data?.transportationsData?.data.find((el: any) => el.key === data.selectedRowKeys[0])
+              ?.transportationGroup
+          } ?`;
     case "detail":
       return `Are you sure to delete Transportation Name - ${data.transportationGroup} ?`;
 
@@ -91,7 +94,7 @@ const TransportationGroup = () => {
   });
 
   const listPermission = dataUserPermission?.permission?.filter(
-    (filtering: any) => filtering.menu === "Transportation Group",
+    (filtering: any) => filtering.menu === "Transportation Group"
   );
 
   const {
@@ -140,45 +143,49 @@ const TransportationGroup = () => {
     },
   });
 
-  const { mutate: createTransportation, isLoading: isLoadingCreateTransportation } = useCreateTransportation({
-    options: {
-      onSuccess: () => {
-        setModalForm({ open: false, typeForm: "", data: {} });
-        queryClient.invalidateQueries(["transportations"]);
+  const { mutate: createTransportation, isLoading: isLoadingCreateTransportation } =
+    useCreateTransportation({
+      options: {
+        onSuccess: () => {
+          setModalForm({ open: false, typeForm: "", data: {} });
+          queryClient.invalidateQueries(["transportations"]);
+        },
       },
-    },
-  });
+    });
 
-  const { mutate: updateTransportation, isLoading: isLoadingUpdateTransportation } = useUpdateTransportation({
-    id: modalForm?.data?.id,
-    companyId: companyCode,
-    options: {
-      onSuccess: () => {
-        setModalForm({ open: false, typeForm: "", data: {} });
-        queryClient.invalidateQueries(["transportations"]);
+  const { mutate: updateTransportation, isLoading: isLoadingUpdateTransportation } =
+    useUpdateTransportation({
+      id: modalForm?.data?.id,
+      companyId: companyCode,
+      options: {
+        onSuccess: () => {
+          setModalForm({ open: false, typeForm: "", data: {} });
+          queryClient.invalidateQueries(["transportations"]);
+        },
       },
-    },
-  });
+    });
 
-  const { mutate: deleteTransportation, isLoading: isLoadingDeleteUomCategory } = useDeleteTransportation({
-    options: {
-      onSuccess: () => {
-        setShowDelete({ open: false, data: {}, type: "" });
-        setModalForm({ open: false, data: {}, typeForm: "" });
-        setSelectedRowKeys([]);
-        queryClient.invalidateQueries(["transportations"]);
+  const { mutate: deleteTransportation, isLoading: isLoadingDeleteUomCategory } =
+    useDeleteTransportation({
+      options: {
+        onSuccess: () => {
+          setShowDelete({ open: false, data: {}, type: "" });
+          setModalForm({ open: false, data: {}, typeForm: "" });
+          setSelectedRowKeys([]);
+          queryClient.invalidateQueries(["transportations"]);
+        },
       },
-    },
-  });
+    });
 
-  const { mutate: uploadFileTransportation, isLoading: isLoadingUploadFileTransportation } = useUploadFileTransportation({
-    options: {
-      onSuccess: () => {
-        queryClient.invalidateQueries(["transportations"]);
-        setShowUpload(false);
+  const { mutate: uploadFileTransportation, isLoading: isLoadingUploadFileTransportation } =
+    useUploadFileTransportation({
+      options: {
+        onSuccess: () => {
+          queryClient.invalidateQueries(["transportations"]);
+          setShowUpload(false);
+        },
       },
-    },
-  });
+    });
 
   const columns = [
     {
@@ -203,13 +210,13 @@ const TransportationGroup = () => {
     },
     ...(listPermission?.some((el: any) => el.viewTypes[0]?.viewType.name === "View")
       ? [
-        {
-          title: "Action",
-          dataIndex: "action",
-          width: "15%",
-          align: "left",
-        },
-      ]
+          {
+            title: "Action",
+            dataIndex: "action",
+            width: "15%",
+            align: "left",
+          },
+        ]
       : []),
   ];
 
@@ -271,11 +278,13 @@ const TransportationGroup = () => {
               <Button
                 size="big"
                 variant="tertiary"
-                onClick={() => setShowDelete({
-                  open: true,
-                  type: "selection",
-                  data: { transportationsData, selectedRowKeys },
-                })}
+                onClick={() =>
+                  setShowDelete({
+                    open: true,
+                    type: "selection",
+                    data: { transportationsData, selectedRowKeys },
+                  })
+                }
                 disabled={rowSelection.selectedRowKeys?.length === 0}
               >
                 Delete
@@ -283,79 +292,79 @@ const TransportationGroup = () => {
             )}
 
             {(listPermission?.filter(
-              (data: any) => data.viewTypes[0]?.viewType.name === "Download Template",
-            ).length > 0
-              || listPermission?.filter(
-                (data: any) => data.viewTypes[0]?.viewType.name === "Download Data",
-              ).length > 0
-              || listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Upload")
+              (data: any) => data.viewTypes[0]?.viewType.name === "Download Template"
+            ).length > 0 ||
+              listPermission?.filter(
+                (data: any) => data.viewTypes[0]?.viewType.name === "Download Data"
+              ).length > 0 ||
+              listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Upload")
                 .length > 0) && (
-                <DropdownMenu
-                  title="More"
-                  buttonVariant="secondary"
-                  buttonSize="big"
-                  textVariant="button"
-                  textColor="pink.regular"
-                  iconStyle={{ fontSize: "12px" }}
-                  onClick={(e: any) => {
-                    switch (parseInt(e.key)) {
-                      case 1:
-                        downloadFile({ with_data: "N", company_id: "KSNI" });
-                        break;
-                      case 2:
-                        setShowUpload(true);
-                        break;
-                      case 3:
-                        downloadFile({ with_data: "Y", company_id: "KSNI" });
-                        break;
-                      case 4:
-                        break;
-                      default:
-                        break;
-                    }
-                  }}
-                  menuList={[
-                    {
-                      ...(listPermission?.filter(
-                        (data: any) => data.viewTypes[0]?.viewType.name === "Download Template",
-                      ).length > 0 && {
-                        key: 1,
-                        value: (
-                          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                            <ICDownload />
-                            <p style={{ margin: "0" }}>Download Template</p>
-                          </div>
-                        ),
-                      }),
-                    },
-                    {
-                      ...(listPermission?.filter(
-                        (data: any) => data.viewTypes[0]?.viewType.name === "Upload",
-                      ).length > 0 && {
-                        key: 2,
-                        value: (
-                          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                            <ICUpload />
-                            <p style={{ margin: "0" }}>Upload Template</p>
-                          </div>
-                        ),
-                      }),
-                    },
-                    {
-                      ...(listPermission?.filter(
-                        (data: any) => data.viewTypes[0]?.viewType.name === "Download Data",
-                      ).length > 0 && {
-                        key: 3,
-                        value: (
-                          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                            <ICDownload />
-                            <p style={{ margin: "0" }}>Download Data</p>
-                          </div>
-                        ),
-                      }),
-                    },
-                  ]}
-                />
+              <DropdownMenu
+                title="More"
+                buttonVariant="secondary"
+                buttonSize="big"
+                textVariant="button"
+                textColor="pink.regular"
+                iconStyle={{ fontSize: "12px" }}
+                onClick={(e: any) => {
+                  switch (parseInt(e.key)) {
+                    case 1:
+                      downloadFile();
+                      break;
+                    case 2:
+                      setShowUpload(true);
+                      break;
+                    case 3:
+                      downloadFile({ company_id: companyCode });
+                      break;
+                    case 4:
+                      break;
+                    default:
+                      break;
+                  }
+                }}
+                menuList={[
+                  {
+                    ...(listPermission?.filter(
+                      (data: any) => data.viewTypes[0]?.viewType.name === "Download Template"
+                    ).length > 0 && {
+                      key: 1,
+                      value: (
+                        <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                          <ICDownload />
+                          <p style={{ margin: "0" }}>Download Template</p>
+                        </div>
+                      ),
+                    }),
+                  },
+                  {
+                    ...(listPermission?.filter(
+                      (data: any) => data.viewTypes[0]?.viewType.name === "Upload"
+                    ).length > 0 && {
+                      key: 2,
+                      value: (
+                        <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                          <ICUpload />
+                          <p style={{ margin: "0" }}>Upload Template</p>
+                        </div>
+                      ),
+                    }),
+                  },
+                  {
+                    ...(listPermission?.filter(
+                      (data: any) => data.viewTypes[0]?.viewType.name === "Download Data"
+                    ).length > 0 && {
+                      key: 3,
+                      value: (
+                        <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                          <ICDownload />
+                          <p style={{ margin: "0" }}>Download Data</p>
+                        </div>
+                      ),
+                    }),
+                  },
+                ]}
+              />
             )}
 
             {listPermission?.filter((data: any) => data.viewTypes[0]?.viewType.name === "Create")
@@ -396,7 +405,7 @@ const TransportationGroup = () => {
               : "Transportation Group"
           }
           footer={null}
-          content={(
+          content={
             <div
               style={{
                 display: "flex",
@@ -678,7 +687,7 @@ const TransportationGroup = () => {
                 </Button>
               </div>
             </div>
-          )}
+          }
         />
       )}
 
@@ -690,7 +699,7 @@ const TransportationGroup = () => {
           onCancel={() => setShowDelete({ open: false, type: "", data: {} })}
           title="Confirm Delete"
           footer={null}
-          content={(
+          content={
             <div
               style={{
                 display: "flex",
@@ -735,7 +744,7 @@ const TransportationGroup = () => {
                 </Button>
               </div>
             </div>
-          )}
+          }
         />
       )}
 

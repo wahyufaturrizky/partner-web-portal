@@ -1,19 +1,19 @@
 import React from "react";
-import styled from "styled-components";
 import { Spacer, Dropdown } from "pink-lava-ui";
+import { useTermOfPayments } from "hooks/mdm/term-of-payment/useTermOfPayment";
+import { useFormContext, Controller } from "react-hook-form";
+import styled from "styled-components";
 
-import { useTermOfPayments } from "../../../../hooks/mdm/term-of-payment/useTermOfPayment";
-import { Controller } from "react-hook-form";
-
-export default function Purchasing(props: any) {
-  const { control } = props;
+const Purchasing = () => {
+  const companyCode = localStorage.getItem("companyCode");
+  const { control } = useFormContext();
 
   const { data: getDataTermOfPayment } = useTermOfPayments({
     options: {
       onSuccess: () => {},
     },
     query: {
-      company_id: "KSNI",
+      company_id: companyCode,
     },
   });
 
@@ -31,13 +31,13 @@ export default function Purchasing(props: any) {
         render={({ field: { onChange, value } }) => (
           <>
             <Dropdown
-              containerId={"area"}
+              containerId={"area2"}
               defaultValue={value}
               label="Term of Payment"
               width="70%"
               actionLabel="Add New Term of Payment"
               isShowActionLabel
-              handleClickActionLabel={() => window.open("/term-of-payment/create")}
+              handleClickActionLabel={() => window.open("/mdm/term-of-payment/create")}
               items={listItemsOfPayment}
               handleChange={onChange}
               noSearch
@@ -47,7 +47,7 @@ export default function Purchasing(props: any) {
       />
     </div>
   );
-}
+};
 
 const Label = styled.p`
   font-weight: 600;
@@ -55,3 +55,5 @@ const Label = styled.p`
   line-height: 27px;
   color: #1e858e;
 `;
+
+export default Purchasing;

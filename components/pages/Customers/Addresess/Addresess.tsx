@@ -1,16 +1,5 @@
 import React, { useState } from "react";
-import {
-  Col,
-  Row,
-  Spacer,
-  Text,
-  Button,
-  FormSelect,
-  Input,
-  Spin,
-  FileUploaderAllFiles,
-  TextArea,
-} from "pink-lava-ui";
+import { Col, Row, Spacer, Text, Button, FormSelect, Input, Spin } from "pink-lava-ui";
 import { useFormContext, useFieldArray, Controller } from "react-hook-form";
 import { ICPlusWhite } from "assets";
 import { CheckOutlined } from "@ant-design/icons";
@@ -18,43 +7,15 @@ import { useCountryStructureVendor, useCountryPostalVendor } from "hooks/mdm/ven
 import { useCountryInfiniteLists } from "hooks/mdm/country-structure/useCountries";
 import useDebounce from "lib/useDebounce";
 import styled from "styled-components";
-import { useUploadStorePhotoAddress } from "hooks/mdm/customers/useCustomersMDM";
+import MultipleUploadPhotos from "./component/MultipleUploadPhotos";
 
-const Addresses = ({
-  formType,
-  getValues,
-  isFetchingPostalCode,
-  isFetchingMorePostalCode,
-  hasNextPagePostalCode,
-  fetchNextPagePostalCode,
-  postalCodeList,
-  setSearchPostalCode,
-  addMoreAddress,
-  newAddress,
-  primaryLabel,
-  setPrimary,
-  deleteLabel,
-  addressTypeLabel,
-  storePhotoLabel,
-  dimensionMinimumLabel,
-  fileSizeLabel,
-  streetLabel,
-  countryLabel,
-  provinceLabel,
-  cityLabel,
-  districtLabel,
-  zoneLabel,
-  postalCodeLabel,
-  longitudeLabel,
-}: any) => {
-  const { register, control, setValue } = useFormContext();
+const Addresses = ({ formType }: any) => {
+  const { register, control } = useFormContext();
 
   const { fields, append, remove, update }: any = useFieldArray({
     control,
     name: "address",
   });
-
-  const [indexStorePhoto, setindexStorePhoto] = useState(0);
 
   // Country State
   const [totalRowsCountry, setTotalRowsCountry] = useState(0);
@@ -73,22 +34,6 @@ const Addresses = ({
   const [listPostal, setListPostal] = useState([]);
   const [searchPostal, setSearchPostal] = useState("");
   const debounceSearchPostal = useDebounce(searchPostal, 1000);
-
-  const { mutate: uploadStorePhotoAddress, isLoading: isLoadingStorePhotoAddress } =
-    useUploadStorePhotoAddress({
-      options: {
-        onSuccess: ({ imageUrl }: { imageUrl: string }) => {
-          setValue(`address.${indexStorePhoto}.image`, imageUrl);
-        },
-      },
-    });
-
-  const handleUploadStorePhotoAddress = async (files: any) => {
-    const formData: any = new FormData();
-    await formData.append("image", files);
-
-    return uploadStorePhotoAddress(formData);
-  };
 
   // Country API
   const {
@@ -164,7 +109,7 @@ const Addresses = ({
             if (formType === "edit") {
               append({
                 id: 0,
-                address_type: "",
+                type: "",
                 street: "",
                 country: "",
                 province: "",
@@ -172,15 +117,15 @@ const Addresses = ({
                 district: "",
                 zone: "",
                 postal_code: "",
-                longtitude: "",
-                latitude: "",
+                lon: "",
+                lat: "",
                 is_primary: fields.length === 0,
-                photo: "",
+                photo: [],
                 deleted: false,
               });
             } else {
               append({
-                address_type: "",
+                type: "",
                 street: "",
                 country: "",
                 province: "",
@@ -188,49 +133,25 @@ const Addresses = ({
                 district: "",
                 zone: "",
                 postal_code: "",
-                longtitude: "",
-                latitude: "",
+                lon: "",
+                lat: "",
                 is_primary: fields.length === 0,
-                photo: "",
+                photo: [],
               });
             }
           }}
         >
-          <ICPlusWhite /> {addMoreAddress}
+          <ICPlusWhite /> Add More Address
         </Button>
       </Row>
 
       <Spacer size={20} />
 
-      {fields.map((address: any, addressIndex: any) => {
+      {fields?.map((address: any, addressIndex: any) => {
         return (
           <Col key={address.id}>
-            <Controller
-              control={control}
-              name={`address.${addressIndex}.imageUrl`}
-              render={({ field: { value } }) => {
-                return (
-                  <FileUploaderAllFiles
-                    label={storePhotoLabel}
-                    onSubmit={(file: any) => {
-                      setindexStorePhoto(addressIndex);
-                      handleUploadStorePhotoAddress(file);
-                    }}
-                    disabled={isLoadingStorePhotoAddress}
-                    defaultFile={value || "/placeholder-employee-photo.svg"}
-                    withCrop
-                    sizeImagePhoto="125px"
-                    removeable
-                    textPhoto={[dimensionMinimumLabel, fileSizeLabel]}
-                  />
-                );
-              }}
-            />
-
-            <Spacer size={10} />
-
             <Text variant="headingRegular" color="blue.dark">
-              {newAddress}
+              New Address
             </Text>
 
             <Spacer size={10} />
@@ -239,7 +160,7 @@ const Addresses = ({
               {address.is_primary ? (
                 <>
                   <AddressLabel>
-                    <CheckOutlined /> {primaryLabel}
+                    <CheckOutlined /> Primary
                   </AddressLabel>{" "}
                   |
                 </>
@@ -256,11 +177,11 @@ const Addresses = ({
                       // Ganti status primary true menjadi false di elemen lain
                       update(findIndex, { ...fields[findIndex], is_primary: false });
 
-                      // Ganti status primary false menjadi true di elemen yang di tuju
+                      // Gantu status primary false menjadi true di elemen yang di tuju
                       update(addressIndex, { ...address, is_primary: true });
                     }}
                   >
-                    {setPrimary}
+                    Set Primary
                   </Text>{" "}
                   |
                 </>
@@ -275,7 +196,7 @@ const Addresses = ({
                   remove(addressIndex);
                 }}
               >
-                {deleteLabel}
+                Delete
               </Text>
             </Row>
 
@@ -284,11 +205,11 @@ const Addresses = ({
             <Row width="100%" gap={"10px"} noWrap>
               <Controller
                 control={control}
-                defaultValue={getValues(`address.${addressIndex}.address_type`)}
-                name={`address.${addressIndex}.address_type`}
+                defaultValue={""}
+                name={`address.${addressIndex}.type`}
                 render={({ field: { onChange, value }, formState: { errors } }) => (
                   <Col width="50%">
-                    <Text variant="headingRegular">{addressTypeLabel}</Text>
+                    <Text variant="headingRegular">Address Type</Text>
                     <Spacer size={5} />
                     <FormSelect
                       defaultValue={value}
@@ -296,14 +217,11 @@ const Addresses = ({
                       size={"large"}
                       placeholder={"Select"}
                       borderColor={"#AAAAAA"}
-                      error={errors?.["address"]?.[addressIndex]?.["address_type"]?.["message"]}
                       arrowColor={"#000"}
                       withSearch={false}
                       items={[
-                        { id: "Home", value: "Home" },
                         { id: "Office", value: "Office" },
-                        { id: "Apartment", value: "Apartment" },
-                        { id: "School", value: "School" },
+                        { id: "Store/Outlet", value: "Store/Outlet" },
                       ]}
                       onChange={(value: any) => {
                         onChange(value);
@@ -314,32 +232,14 @@ const Addresses = ({
               />
 
               <Col width="50%">
-                <Controller
-                  control={control}
-                  defaultValue={getValues(`address.${addressIndex}.street`)}
-                  rules={{
-                    maxLength: {
-                      value: 225,
-                      message: "Max length exceeded",
-                    },
-                    // required: {
-                    //   value: true,
-                    //   message: "Please enter account street.",
-                    // },
-                  }}
-                  name={`address.${addressIndex}.street`}
-                  render={({ field: { onChange, value }, formState: { errors } }) => (
-                    <TextArea
-                      width="100%"
-                      rows={2}
-                      defaultValue={value}
-                      onChange={onChange}
-                      // required
-                      error={errors?.["address"]?.[addressIndex]?.["street"]?.["message"]}
-                      placeholder="e.g Front Groceries No. 5"
-                      label={streetLabel}
-                    />
-                  )}
+                <Input
+                  required
+                  width="100%"
+                  label="Street"
+                  height="40px"
+                  defaultValue={""}
+                  placeholder={"e.g Front Groceries No. 5"}
+                  {...register(`address.${addressIndex}.street`)}
                 />
               </Col>
             </Row>
@@ -359,7 +259,7 @@ const Addresses = ({
                       </Center>
                     ) : (
                       <>
-                        <Text variant="headingRegular">{countryLabel}</Text>
+                        <Text variant="headingRegular">Country</Text>
                         <Spacer size={5} />
                         <FormSelect
                           defaultValue={""}
@@ -396,7 +296,7 @@ const Addresses = ({
                 name={`address.${addressIndex}.province`}
                 render={({ field: { onChange, value }, formState: { errors } }) => (
                   <Col width="50%">
-                    <Text variant="headingRegular">{provinceLabel}</Text>
+                    <Text variant="headingRegular">Province</Text>
                     <Spacer size={5} />
                     <FormSelect
                       defaultValue={value}
@@ -425,7 +325,7 @@ const Addresses = ({
                 name={`address.${addressIndex}.city`}
                 render={({ field: { onChange, value }, formState: { errors } }) => (
                   <Col width="50%">
-                    <Text variant="headingRegular">{cityLabel}</Text>
+                    <Text variant="headingRegular">City</Text>
                     <Spacer size={5} />
                     <FormSelect
                       defaultValue={value}
@@ -450,7 +350,7 @@ const Addresses = ({
                 name={`address.${addressIndex}.district`}
                 render={({ field: { onChange, value }, formState: { errors } }) => (
                   <Col width="50%">
-                    <Text variant="headingRegular">{districtLabel}</Text>
+                    <Text variant="headingRegular">District</Text>
                     <Spacer size={5} />
                     <FormSelect
                       defaultValue={value}
@@ -479,7 +379,7 @@ const Addresses = ({
                 name={`address.${addressIndex}.zone`}
                 render={({ field: { onChange, value }, formState: { errors } }) => (
                   <Col width="50%">
-                    <Text variant="headingRegular">{zoneLabel}</Text>
+                    <Text variant="headingRegular">Zone</Text>
                     <Spacer size={5} />
                     <FormSelect
                       defaultValue={value}
@@ -490,7 +390,7 @@ const Addresses = ({
                       arrowColor={"#000"}
                       withSearch={false}
                       items={[]}
-                      onChange={onChange}
+                      onChange={(value: any) => {}}
                     />
                   </Col>
                 )}
@@ -498,10 +398,11 @@ const Addresses = ({
 
               <Controller
                 control={control}
+                defaultValue={""}
                 name={`address.${addressIndex}.postal_code`}
-                render={({ field: { onChange, value } }) => (
+                render={({ field: { onChange, value }, formState: { errors } }) => (
                   <Col width="50%">
-                    <Text variant="headingRegular">{postalCodeLabel}</Text>
+                    <Text variant="headingRegular">Postal Code</Text>
                     <Spacer size={5} />
                     <FormSelect
                       defaultValue={value}
@@ -510,22 +411,10 @@ const Addresses = ({
                       placeholder={"Select"}
                       borderColor={"#AAAAAA"}
                       arrowColor={"#000"}
-                      withSearch
-                      isLoading={isFetchingPostalCode}
-                      isLoadingMore={isFetchingMorePostalCode}
-                      fetchMore={() => {
-                        if (hasNextPagePostalCode) {
-                          fetchNextPagePostalCode();
-                        }
-                      }}
-                      items={
-                        isFetchingPostalCode && !isFetchingMorePostalCode ? [] : postalCodeList
-                      }
+                      withSearch={false}
+                      items={[]}
                       onChange={(value: any) => {
                         onChange(value);
-                      }}
-                      onSearch={(value: any) => {
-                        setSearchPostalCode(value);
                       }}
                     />
                   </Col>
@@ -539,11 +428,11 @@ const Addresses = ({
               <Col width="50%">
                 <Input
                   width="100%"
-                  label={longitudeLabel}
+                  label="Longitude"
                   height="40px"
                   defaultValue={""}
                   placeholder={"e.g 38.8951"}
-                  {...register(`address.${addressIndex}.longtitude`)}
+                  {...register(`address.${addressIndex}.lon`)}
                 />
               </Col>
 
@@ -554,10 +443,14 @@ const Addresses = ({
                   height="40px"
                   defaultValue={""}
                   placeholder={"e.g -77.0364"}
-                  {...register(`address.${addressIndex}.latitude`)}
+                  {...register(`address.${addressIndex}.lat`)}
                 />
               </Col>
             </Row>
+
+            <Spacer size={10} />
+
+            <MultipleUploadPhotos index={addressIndex} control={control} />
 
             <Spacer size={25} />
           </Col>

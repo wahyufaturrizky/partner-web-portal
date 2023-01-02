@@ -231,6 +231,15 @@ export default function VendorDetail() {
         setValue("purchasing", mappingPurchasing);
 
         // Invoicing Form
+        const mappingBank = data?.invoicing?.banks?.map((bank: any) => {
+          return {
+            bank: bank.bank,
+            account_name: bank.account_name,
+            account_number: bank.account_number,
+            deleted: false,
+          };
+        });
+
         const mappingInvoicing = {
           reconciliation_account: data?.invoicing?.reconciliationAccount,
           tax_country: data?.invoicing?.taxCountry,
@@ -240,7 +249,7 @@ export default function VendorDetail() {
           tax_code: data?.invoicing?.taxCode,
           currency: data?.invoicing?.currency,
           payment_method: data?.invoicing?.paymentMethods ?? [],
-          banks: data?.invoicing?.banks ?? [],
+          banks: mappingBank,
         };
 
         setValue("invoicing", mappingInvoicing);

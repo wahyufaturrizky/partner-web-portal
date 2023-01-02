@@ -4,9 +4,9 @@ import styled from "styled-components";
 import IconAdd from "assets/icons/ic-add-rounded.svg";
 import IconAvatar from "assets/icons/ic-avatar-xs.svg";
 import IconEdit from "assets/icons/ic-more.svg";
-import ModalAddNewContacts from "components/elements/Modal/ModalAddNewContacts";
 import { CheckOutlined } from "@ant-design/icons";
 import { useFormContext, useFieldArray } from "react-hook-form";
+import ModalAddNewContactCustomer from "components/elements/Modal/ModalAddNewContactsCustomer";
 import { ICEhash } from "assets";
 
 const menuList = [
@@ -42,6 +42,7 @@ const Contacts = ({ formType }: any) => {
   const { fields, append, remove, update }: any = useFieldArray<any>({
     control,
     name: "contact",
+    keyName: "key",
   });
 
   const [showFormContact, setShowFormContact] = useState<any>({
@@ -72,7 +73,7 @@ const Contacts = ({ formType }: any) => {
                   };
                 }
               });
-              setValue("contact", mapContact);
+              setValue("contacts", mapContact);
             }}
           />
 
@@ -94,12 +95,11 @@ const Contacts = ({ formType }: any) => {
 
             {fields.map((contact: any, contactIndex: any) => {
               return (
-                <ContactCard key={contact.id} filtered={contact.filtered}>
+                <ContactCard key={contact.key} filtered={contact.filtered}>
                   <IconAvatar />
                   <Spacer size={10} />
-                  <Col width="100%">
+                  <Col width="100%" gap={"2px"}>
                     <ContactName>{contact?.name}</ContactName>
-                    <Spacer size={10} />
                     <Row gap={"4px"}>
                       {contact?.is_primary && (
                         <ContactLabel>
@@ -108,13 +108,11 @@ const Contacts = ({ formType }: any) => {
                       )}
                       <ContactLabel>{contact?.role}</ContactLabel>
                     </Row>
-                    <Spacer size={10} />
                     <ContactEmail>{contact?.email}</ContactEmail>
-                    <Spacer size={10} />
                     <Row alignItems="center">
                       <ICEhash />
 
-                      <Text color="pink.regular" hoverColor="pink.regular" variant="headingRegular">
+                      <Text color="pink.regular" hoverColor="pink.regular" variant="subtitle">
                         Chat with eDOTCHAT
                       </Text>
                     </Row>
@@ -161,7 +159,7 @@ const Contacts = ({ formType }: any) => {
       </Row>
 
       {showFormContact.open && (
-        <ModalAddNewContacts
+        <ModalAddNewContactCustomer
           visible={showFormContact.open}
           onCancel={() => {
             setShowFormContact({ type: "", open: false, data: {} });
@@ -181,7 +179,7 @@ const Contacts = ({ formType }: any) => {
                   setShowFormContact({ type: "", open: false, data: {}, index: 0 });
                   break;
                 case "edit":
-                  update(showFormContact.index, { ...contactObject });
+                  update(showFormContact.index, { ...showFormContact.data, ...contactObject });
                   setShowFormContact({ type: "", open: false, data: {}, index: 0 });
                   break;
                 default:
@@ -194,7 +192,7 @@ const Contacts = ({ formType }: any) => {
                   setShowFormContact({ type: "", open: false, data: {}, index: 0 });
                   break;
                 case "edit":
-                  update(showFormContact.index, { ...contactObject });
+                  update(showFormContact.index, { ...showFormContact.data, ...contactObject });
                   setShowFormContact({ type: "", open: false, data: {}, index: 0 });
                   break;
                 default:
@@ -244,7 +242,7 @@ const ContactCard: any = styled.div`
   ${({ justifyContent }: any) => (justifyContent ? `justify-content: ${justifyContent};` : "")}
   position: relative;
   width: 353px;
-  height: 140px;
+  height: 96px;
   cursor: ${({ clickAble }: any) => (clickAble ? "pointer" : "auto")};
   display: ${({ filtered }: any) => (filtered ? "none" : "flex")};
   align-items: center;

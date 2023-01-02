@@ -1,6 +1,6 @@
 import { Checkbox, Col, Dropdown, Row, Spacer, Text } from "pink-lava-ui";
 import { useState } from "react";
-import { Controller } from "react-hook-form";
+import { Controller, useFormContext } from "react-hook-form";
 import styled from "styled-components";
 
 import { useBranchList } from "hooks/mdm/branch/useBranch";
@@ -8,9 +8,10 @@ import { useFetchListSalesman } from "hooks/mdm/salesman/useSalesman";
 import { useTermOfPayments } from "hooks/mdm/term-of-payment/useTermOfPayment";
 import { listSalesItems } from "../constants";
 
-export default function Sales(props: any) {
+export default function Sales() {
   const companyCode = localStorage.getItem("companyCode");
-  const { register, setValue, control } = props;
+  const { control } = useFormContext();
+
   const [search, setSearch] = useState({
     branch: null,
     term_payment: "",
@@ -79,6 +80,7 @@ export default function Sales(props: any) {
             render={({ field: { onChange, value } }) => (
               <Dropdown
                 noSearch
+                containerId={"area2"}
                 defaultValue={value}
                 isShowActionLabel
                 width="100%"
@@ -95,12 +97,13 @@ export default function Sales(props: any) {
           <Controller
             control={control}
             name="sales.salesman"
-            render={({ field: { onChange } }) => (
+            render={({ field: { onChange, value } }) => (
               <Dropdown
                 actionLabel="Add New Salesman"
                 label="Salesman"
                 width="100%"
                 isShowActionLabel
+                defaultValue={value}
                 handleChange={onChange}
                 handleClickActionLabel={() => window.open("/salesman/create")}
                 onSearch={(value: string) => setSearch({ ...search, salesman: value })}
@@ -117,6 +120,7 @@ export default function Sales(props: any) {
         <>
           <Controller
             control={control}
+            defaultValue={false}
             name={`sales.${value}`}
             render={({ field: { onChange, value } }) => {
               return (
