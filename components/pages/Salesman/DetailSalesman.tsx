@@ -152,6 +152,24 @@ export default function ComponentDetailSalesman({ listCustomers, isLoading }: an
             onCancel={() => router.back()}
           />
         );
+      case "Inactive":
+        return (
+          <ActionButton
+            status={status}
+            onSubmit={_handleUpdateSalesman}
+            isDisabled={payloads?.code?.length > 1}
+            onCancel={() => router.back()}
+          />
+        );
+      case "Rejected":
+        return (
+          <ActionButton
+            status={status}
+            onSubmit={_handleUpdateSalesman}
+            isDisabled={payloads?.code?.length > 1}
+            onCancel={() => router.back()}
+          />
+        );
       case "Waiting for Approval":
         return (
           <ActionButton
