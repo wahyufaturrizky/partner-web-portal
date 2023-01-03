@@ -7,6 +7,7 @@ import { lang } from "lang";
 import {
   useCountries,
   useCountryStructures,
+  useDeletePostalCode,
   useUpdatePostalCode,
 } from "../../../hooks/mdm/postal-code/usePostalCode";
 
@@ -80,6 +81,15 @@ export const ModalDetailPostalCode: any = ({
     },
   });
 
+  const { mutate: detailDeletePostalCode } = useDeletePostalCode({
+    options: {
+      onSuccess: () => {
+        refetchPostalCode();
+        onCancel();
+      },
+    },
+  });
+
   const onSubmit = (data: any) => {
     setIsLoading(true);
     const payload = {
@@ -106,6 +116,14 @@ export const ModalDetailPostalCode: any = ({
               gap: "12px",
             }}
           >
+            <Button
+              disabled={isLoading}
+              onClick={() => detailDeletePostalCode({ ids: [dataModal?.id] })}
+              variant="tertiary"
+              size="big"
+            >
+              {isLoading ? "Loading" : "Delete"}
+            </Button>
             <Button onClick={handleSubmit(onSubmit)} variant="primary" size="big">
               {isLoading ? "Loading" : lang[t].postalCode.primary.save}
             </Button>

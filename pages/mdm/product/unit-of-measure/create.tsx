@@ -25,8 +25,8 @@ import { useUOMCategoryInfiniteLists } from "../../../../hooks/mdm/unit-of-measu
 const schema = yup
   .object({
     name: yup.string().required("Name is Required"),
-    format: yup.string().required("format is Required"),
-    uom_category_id: yup.string().required("Category is Required"),
+    // format: yup.string().required("format is Required"),
+    // uom_category_id: yup.string().required("Category is Required"),
   })
   .required();
 
@@ -47,7 +47,7 @@ const UOMCreate = () => {
   });
 
   const listPermission = dataUserPermission?.permission?.filter(
-    (filtering: any) => filtering.menu === "Unit of Measure",
+    (filtering: any) => filtering.menu === "Unit of Measure"
   );
 
   const {
@@ -71,10 +71,12 @@ const UOMCreate = () => {
     options: {
       onSuccess: (data: any) => {
         setTotalRows(data.pages[0].totalRow);
-        const mappedData = data?.pages?.map((group: any) => group.rows?.map((element: any) => ({
-          value: element.uomCategoryId,
-          label: element.name,
-        })));
+        const mappedData = data?.pages?.map((group: any) =>
+          group.rows?.map((element: any) => ({
+            value: element.uomCategoryId,
+            label: element.name,
+          }))
+        );
         const flattenArray = [].concat(...mappedData);
         setListUomCategory(flattenArray);
       },
@@ -184,7 +186,7 @@ const UOMCreate = () => {
                         }}
                       >
                         <Label>UoM Category</Label>
-                        <Span>&#42;</Span>
+                        {/* <Span>&#42;</Span> */}
                       </div>
                       <Spacer size={3} />
                       <CustomFormSelect
@@ -195,8 +197,8 @@ const UOMCreate = () => {
                         borderColor="#AAAAAA"
                         arrowColor="#000"
                         withSearch
-                        required
-                        error={errors?.uom_category_id?.message}
+                        // required
+                        // error={errors?.uom_category_id?.message}
                         isLoading={isFetchingUomCategory}
                         isLoadingMore={isFetchingMoreUomCategory}
                         fetchMore={() => {
@@ -234,8 +236,8 @@ const UOMCreate = () => {
                 width="100%"
                 label="Uom Format"
                 height="40px"
-                required
-                error={errors?.format?.message}
+                // required
+                // error={errors?.format?.message}
                 placeholder="e.g gr"
                 {...register("format")}
               />

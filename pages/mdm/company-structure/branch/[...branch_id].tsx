@@ -1,20 +1,38 @@
 import React, { useState } from "react";
 import {
-  Text, Col, Row, Spacer, Spin, Button, Accordion, FormSelect, FormInput, Input,
+  Text,
+  Col,
+  Row,
+  Spacer,
+  Spin,
+  Button,
+  Accordion,
+  FormSelect,
+  FormInput,
+  Input,
 } from "pink-lava-ui";
 import styled from "styled-components";
 import { Controller, useForm } from "react-hook-form";
 import { useRouter } from "next/router";
 import useDebounce from "lib/useDebounce";
 import usePagination from "@lucasmogari/react-pagination";
-import { useSalesOrganizationHirarcy, useSalesOrganizationInfiniteLists } from "hooks/sales-organization/useSalesOrganization";
+import {
+  useSalesOrganizationHirarcy,
+  useSalesOrganizationInfiniteLists,
+} from "hooks/sales-organization/useSalesOrganization";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { useCountryInfiniteLists } from "hooks/mdm/country-structure/useCountries";
 import { useUserPermissions } from "hooks/user-config/usePermission";
 import { queryClient } from "../../../_app";
 import {
-  useBranchDetail, useBranchParent, useCalendarDetail, useCalendarInfiniteLists, useCreateBranch, useTimezoneInfiniteLists, useUpdateBranch,
+  useBranchDetail,
+  useBranchParent,
+  useCalendarDetail,
+  useCalendarInfiniteLists,
+  useCreateBranch,
+  useTimezoneInfiniteLists,
+  useUpdateBranch,
 } from "../../../../hooks/mdm/branch/useBranch";
 
 const schema = yup
@@ -26,6 +44,8 @@ const schema = yup
 
 const BranchDetail = () => {
   const router = useRouter();
+  const companyCode = localStorage.getItem("companyCode");
+  const companyId = localStorage.getItem("companyId");
   const pagination = usePagination({
     page: 1,
     itemsPerPage: 20,
@@ -59,29 +79,29 @@ const BranchDetail = () => {
   const [listCountry, setListCountry] = useState<any[]>([]);
 
   const [listProvince, setListProvince] = useState([
-    { value: 1, label: 'DKI Jakarta' },
-    { value: 2, label: 'Jawa Barat' },
-    { value: 3, label: 'Jawa Tengah' },
+    { value: 1, label: "DKI Jakarta" },
+    { value: 2, label: "Jawa Barat" },
+    { value: 3, label: "Jawa Tengah" },
   ]);
   const [listCity, setListCity] = useState([
-    { value: 1, label: 'Jakarta' },
-    { value: 2, label: 'Bandung' },
-    { value: 3, label: 'Yogyakarta' },
+    { value: 1, label: "Jakarta" },
+    { value: 2, label: "Bandung" },
+    { value: 3, label: "Yogyakarta" },
   ]);
   const [listDistrict, setListDistrict] = useState([
-    { value: 1, label: 'Baleendah' },
-    { value: 2, label: 'Bojongsoang' },
-    { value: 3, label: 'Rancaekek' },
+    { value: 1, label: "Baleendah" },
+    { value: 2, label: "Bojongsoang" },
+    { value: 3, label: "Rancaekek" },
   ]);
   const [listZone, setListZone] = useState([
-    { value: 1, label: 'Andir' },
-    { value: 2, label: 'Arcamanik' },
-    { value: 3, label: 'Baleendah' },
+    { value: 1, label: "Andir" },
+    { value: 2, label: "Arcamanik" },
+    { value: 3, label: "Baleendah" },
   ]);
   const [listPostalCode, setListPostalCode] = useState([
-    { value: 1, label: '40123' },
-    { value: 2, label: '40124' },
-    { value: 3, label: '40125' },
+    { value: 1, label: "40123" },
+    { value: 2, label: "40124" },
+    { value: 3, label: "40125" },
   ]);
 
   const { data: dataUserPermission } = useUserPermissions({
@@ -91,7 +111,7 @@ const BranchDetail = () => {
   });
 
   const listPermission = dataUserPermission?.permission?.filter(
-    (filtering: any) => filtering.menu === "Branch",
+    (filtering: any) => filtering.menu === "Branch"
   );
 
   // const { register, control, handleSubmit } = useForm();
@@ -112,10 +132,10 @@ const BranchDetail = () => {
     isFetching: isFetchingBranchDetailData,
   } = useBranchDetail({
     id: branch_id && branch_id[1],
-    companyId: branch_id && branch_id[0],
+    // companyId: branch_id && branch_id[0],
+    companyId: companyCode,
     options: {
-      onSuccess: (data: any) => {
-      },
+      onSuccess: (data: any) => {},
       select: (data: any) => data,
     },
   });
@@ -126,17 +146,18 @@ const BranchDetail = () => {
     isFetching: isFetchingBranchParentData,
   } = useBranchParent({
     query: {
-      company_id: branch_id && branch_id[0],
+      // company_id: branch_id && branch_id[0],
+      company_id: companyCode,
       is_group: true,
       search: debounceFetchBranchParent,
     },
     options: {
-      onSuccess: (data: any) => {
-      },
-      select: (data: any) => data?.rows?.map((parent: { parentName: string; parentId: string; }) => ({
-        label: parent.parentName,
-        value: parent.parentId,
-      })),
+      onSuccess: (data: any) => {},
+      select: (data: any) =>
+        data?.rows?.map((parent: { parentName: string; parentId: string }) => ({
+          label: parent.parentName,
+          value: parent.parentId,
+        })),
     },
   });
 
@@ -150,12 +171,12 @@ const BranchDetail = () => {
       search: debounceFetchSalesOrganization,
     },
     options: {
-      onSuccess: (data: any) => {
-      },
-      select: (data: any) => data?.map((salesOrganization: { name: string; id: number; }) => ({
-        label: salesOrganization.name,
-        value: salesOrganization.id,
-      })),
+      onSuccess: (data: any) => {},
+      select: (data: any) =>
+        data?.map((salesOrganization: { name: string; id: number }) => ({
+          label: salesOrganization.name,
+          value: salesOrganization.id,
+        })),
     },
   });
 
@@ -173,9 +194,12 @@ const BranchDetail = () => {
     options: {
       onSuccess: (data: any) => {
         setTimezoneRows(data?.pages[0]?.totalRow);
-        setListTimezone(data?.pages[0]?.rows?.map((timezone: { utc: any; id: any; }) => ({
-          label: timezone.utc, value: timezone.id,
-        })));
+        setListTimezone(
+          data?.pages[0]?.rows?.map((timezone: { utc: any; id: any }) => ({
+            label: timezone.utc,
+            value: timezone.id,
+          }))
+        );
       },
       getNextPageParam: (_lastPage: any, pages: any) => {
         if (timezoneRows && listTimezone.length < timezoneRows) {
@@ -200,8 +224,17 @@ const BranchDetail = () => {
     options: {
       onSuccess: (data: any) => {
         setCalendarRows(data?.pages[0]?.totalRow);
-        setListCalendar(data?.pages[0]?.rows?.map((calendar: { calendarName: any; id: any; }) => ({ label: calendar.calendarName, value: calendar.id })));
-        setCalendarDetailId(listCalendar?.filter((calendar: any) => calendar?.value === +branchDetailData?.calendarId)[0]?.value);
+        setListCalendar(
+          data?.pages[0]?.rows?.map((calendar: { calendarName: any; id: any }) => ({
+            label: calendar.calendarName,
+            value: calendar.id,
+          }))
+        );
+        setCalendarDetailId(
+          listCalendar?.filter(
+            (calendar: any) => calendar?.value === +branchDetailData?.calendarId
+          )[0]?.value
+        );
       },
       getNextPageParam: (_lastPage: any, pages: any) => {
         if (calendarRows && listCalendar.length < calendarRows) {
@@ -224,16 +257,26 @@ const BranchDetail = () => {
       onSuccess: (data: any) => {},
       select: (data: any) => {
         const start = data?.workingDays.findIndex((e: boolean) => e === true);
-        const end = data?.workingDays.findIndex((e: boolean) => e === false) === 0 ? 6 : data?.workingDays.findIndex((e: boolean) => e === false) - 1;
+        const end =
+          data?.workingDays.findIndex((e: boolean) => e === false) === 0
+            ? 6
+            : data?.workingDays.findIndex((e: boolean) => e === false) - 1;
         const findDays = (data: number) => {
           switch (data) {
-            case 0: return 'Senin';
-            case 1: return 'Selasa';
-            case 2: return 'Rabu';
-            case 3: return 'Kamis';
-            case 4: return 'Jumat';
-            case 5: return 'Sabtu';
-            case 6: return 'Minggu';
+            case 0:
+              return "Senin";
+            case 1:
+              return "Selasa";
+            case 2:
+              return "Rabu";
+            case 3:
+              return "Kamis";
+            case 4:
+              return "Jumat";
+            case 5:
+              return "Sabtu";
+            case 6:
+              return "Minggu";
               break;
           }
         };
@@ -259,11 +302,13 @@ const BranchDetail = () => {
     options: {
       onSuccess: (data: any) => {
         setCountryRows(data.pages[0].totalRow);
-        const mappedData = data?.pages?.map((group: any) => group.rows?.map((element: any) => ({
-          value: element.id,
-          label: element.name,
-          key: element.id,
-        })));
+        const mappedData = data?.pages?.map((group: any) =>
+          group.rows?.map((element: any) => ({
+            value: element.id,
+            label: element.name,
+            key: element.id,
+          }))
+        );
         const flattenArray = [].concat(...mappedData);
         setListCountry(flattenArray);
       },
@@ -307,7 +352,7 @@ const BranchDetail = () => {
 
   const { mutate: updateBranch, isLoading: isLoadingUpdateBranch } = useUpdateBranch({
     id: branch_id && branch_id[1],
-    companyId: branch_id && branch_id[0],
+    companyId: companyCode,
     options: {
       onSuccess: () => {
         router.back();
@@ -320,8 +365,12 @@ const BranchDetail = () => {
     const formData = {
       company_id: companyCode,
       ...data,
-      start_working_day: calendarDetailData?.start ? calendarDetailData?.start : branchDetailData?.startWorkingDay,
-      end_working_day: calendarDetailData?.end ? calendarDetailData?.end : branchDetailData?.endWorkingDay,
+      start_working_day: calendarDetailData?.start
+        ? calendarDetailData?.start
+        : branchDetailData?.startWorkingDay,
+      end_working_day: calendarDetailData?.end
+        ? calendarDetailData?.end
+        : branchDetailData?.endWorkingDay,
     };
     updateBranch(formData);
   };
@@ -393,7 +442,12 @@ const BranchDetail = () => {
                         borderColor="#AAAAAA"
                         arrowColor="#000"
                         withSearch
-                        defaultValue={branchParentData?.filter((parent: { value: string }) => parent.value === branchDetailData?.parentId)[0]?.label}
+                        defaultValue={
+                          branchParentData?.filter(
+                            (parent: { value: string }) =>
+                              parent.value === branchDetailData?.parentId
+                          )[0]?.label
+                        }
                         isLoading={isLoadingBranchParentData}
                         items={
                           isLoadingBranchParentData && !isFetchingBranchParentData
@@ -430,12 +484,21 @@ const BranchDetail = () => {
                         borderColor="#AAAAAA"
                         arrowColor="#000"
                         withSearch
-                        defaultValue={salesOrganizationData?.filter((sales: { value: any; }) => sales.value === +branchDetailData?.companyInternalStructureId)[0]?.label}
+                        defaultValue={
+                          salesOrganizationData?.filter(
+                            (sales: { value: any }) =>
+                              sales.value === +branchDetailData?.companyInternalStructureId
+                          )[0]?.label
+                        }
                         isLoading={isLoadingSalesOrganizationData}
                         isLoadingMore={isFetchingSalesOrganizationData}
                         fetchMore={() => {}}
                         // items={salesOrganizationData}
-                        items={isLoadingSalesOrganizationData && isFetchingSalesOrganizationData ? [] : salesOrganizationData}
+                        items={
+                          isLoadingSalesOrganizationData && isFetchingSalesOrganizationData
+                            ? []
+                            : salesOrganizationData
+                        }
                         onChange={(value: any) => {
                           onChange(value);
                         }}
@@ -462,13 +525,15 @@ const BranchDetail = () => {
                         borderColor="#AAAAAA"
                         arrowColor="#000"
                         withSearch
-                        defaultValue={salesOrganizationList?.filter((sales) => sales.value === branchDetailData?.salesOrganizationId)}
+                        defaultValue={salesOrganizationList?.filter(
+                          (sales) => sales.value === branchDetailData?.salesOrganizationId
+                        )}
                         items={salesOrganizationList}
                         onChange={(value: any) => {
                           onChange(value);
                         }}
                         onSearch={(value: any) => {
-                          if (value === '') {
+                          if (value === "") {
                             setSalesOrganizationList([
                               {
                                 label: "Domestic",
@@ -484,8 +549,12 @@ const BranchDetail = () => {
                               },
                             ]);
                           } else {
-                            const search = new RegExp(value, 'i');
-                            setSalesOrganizationList(salesOrganizationList.filter((sales) => search.test(sales.label.toLowerCase())));
+                            const search = new RegExp(value, "i");
+                            setSalesOrganizationList(
+                              salesOrganizationList.filter((sales) =>
+                                search.test(sales.label.toLowerCase())
+                              )
+                            );
                           }
                         }}
                       />
@@ -493,7 +562,6 @@ const BranchDetail = () => {
                   )}
                 />
               </Col>
-
             </Row>
 
             <Spacer size={15} />
@@ -514,7 +582,11 @@ const BranchDetail = () => {
                         borderColor="#AAAAAA"
                         arrowColor="#000"
                         withSearch
-                        defaultValue={listCalendar?.filter((calendar: any) => calendar?.value === +branchDetailData?.calendarId)[0]?.label}
+                        defaultValue={
+                          listCalendar?.filter(
+                            (calendar: any) => calendar?.value === +branchDetailData?.calendarId
+                          )[0]?.label
+                        }
                         isLoading={isFetchingCalendar}
                         isLoadingMore={isFetchingMoreCalendar}
                         fetchMore={() => {
@@ -522,11 +594,7 @@ const BranchDetail = () => {
                             calendarFetchNextPage();
                           }
                         }}
-                        items={
-                          isFetchingCalendar && !isFetchingMoreCalendar
-                            ? []
-                            : listCalendar
-                        }
+                        items={isFetchingCalendar && !isFetchingMoreCalendar ? [] : listCalendar}
                         onChange={(value: any) => {
                           onChange(value);
                           setCalendarDetailId(value);
@@ -554,7 +622,12 @@ const BranchDetail = () => {
                         borderColor="#AAAAAA"
                         arrowColor="#000"
                         withSearch
-                        defaultValue={listTimezone?.filter((timezone: {value: any, label: any}) => timezone?.value === +branchDetailData?.timezone)[0]?.label}
+                        defaultValue={
+                          listTimezone?.filter(
+                            (timezone: { value: any; label: any }) =>
+                              timezone?.value === +branchDetailData?.timezone
+                          )[0]?.label
+                        }
                         isLoading={isFetchingTimezone}
                         isLoadingMore={isFetchingMoreTimezone}
                         fetchMore={() => {
@@ -562,11 +635,7 @@ const BranchDetail = () => {
                             timezoneFetchNextPage();
                           }
                         }}
-                        items={
-                          isFetchingTimezone && !isFetchingMoreTimezone
-                            ? []
-                            : listTimezone
-                        }
+                        items={isFetchingTimezone && !isFetchingMoreTimezone ? [] : listTimezone}
                         onChange={(value: any) => {
                           onChange(value);
                         }}
@@ -578,7 +647,6 @@ const BranchDetail = () => {
                   )}
                 />
               </Col>
-
             </Row>
 
             <Spacer size={15} />
@@ -598,7 +666,11 @@ const BranchDetail = () => {
                         borderColor="#AAAAAA"
                         arrowColor="#000"
                         withSearch
-                        value={calendarDetailData?.start ? calendarDetailData?.start : branchDetailData?.startWorkingDay}
+                        value={
+                          calendarDetailData?.start
+                            ? calendarDetailData?.start
+                            : branchDetailData?.startWorkingDay
+                        }
                         disabled
                         isLoading={false}
                         isLoadingMore={false}
@@ -632,7 +704,11 @@ const BranchDetail = () => {
                         arrowColor="#000"
                         withSearch
                         disabled
-                        value={calendarDetailData?.end ? calendarDetailData?.end : branchDetailData?.endWorkingDay}
+                        value={
+                          calendarDetailData?.end
+                            ? calendarDetailData?.end
+                            : branchDetailData?.endWorkingDay
+                        }
                         isLoading={isLoadingCalendarDetailData}
                         isLoadingMore={isFetchingCalendarDetailData}
                         fetchMore={() => {}}
@@ -699,7 +775,12 @@ const BranchDetail = () => {
                         borderColor="#AAAAAA"
                         arrowColor="#000"
                         withSearch
-                        defaultValue={listCountry?.filter((country: {value: number, label: string}) => country.value === branchDetailData?.countryId)[0]?.label}
+                        defaultValue={
+                          listCountry?.filter(
+                            (country: { value: number; label: string }) =>
+                              country.value === branchDetailData?.countryId
+                          )[0]?.label
+                        }
                         isLoading={isFetchingCountry}
                         isLoadingMore={isFetchingMoreCountry}
                         fetchMore={() => {
@@ -707,11 +788,7 @@ const BranchDetail = () => {
                             countryFetchNextPage();
                           }
                         }}
-                        items={
-                          isFetchingCountry && !isFetchingMoreCountry
-                            ? []
-                            : listCountry
-                        }
+                        items={isFetchingCountry && !isFetchingMoreCountry ? [] : listCountry}
                         onChange={(value: any) => {
                           onChange(value);
                         }}
@@ -742,7 +819,9 @@ const BranchDetail = () => {
                         borderColor="#AAAAAA"
                         arrowColor="#000"
                         withSearch
-                        defaultValue={listProvince?.filter((province) => province.value === 1)[0]?.label}
+                        defaultValue={
+                          listProvince?.filter((province) => province.value === 1)[0]?.label
+                        }
                         isLoading={false}
                         isLoadingMore={false}
                         fetchMore={() => {}}
@@ -751,15 +830,19 @@ const BranchDetail = () => {
                           onChange(value);
                         }}
                         onSearch={(value: any) => {
-                          if (value === '') {
+                          if (value === "") {
                             setListProvince([
-                              { value: 1, label: 'DKI Jakarta' },
-                              { value: 2, label: 'Jawa Barat' },
-                              { value: 3, label: 'Jawa Tengah' },
+                              { value: 1, label: "DKI Jakarta" },
+                              { value: 2, label: "Jawa Barat" },
+                              { value: 3, label: "Jawa Tengah" },
                             ]);
                           } else {
-                            const search = new RegExp(value, 'i');
-                            setListProvince(listProvince.filter((province) => search.test(province.label.toLowerCase())));
+                            const search = new RegExp(value, "i");
+                            setListProvince(
+                              listProvince.filter((province) =>
+                                search.test(province.label.toLowerCase())
+                              )
+                            );
                           }
                         }}
                       />
@@ -793,15 +876,17 @@ const BranchDetail = () => {
                           onChange(value);
                         }}
                         onSearch={(value: any) => {
-                          if (value === '') {
+                          if (value === "") {
                             setListCity([
-                              { value: 1, label: 'Jakarta' },
-                              { value: 2, label: 'Bandung' },
-                              { value: 3, label: 'Yogyakarta' },
+                              { value: 1, label: "Jakarta" },
+                              { value: 2, label: "Bandung" },
+                              { value: 3, label: "Yogyakarta" },
                             ]);
                           } else {
-                            const search = new RegExp(value, 'i');
-                            setListCity(listCity.filter((city) => search.test(city.label.toLowerCase())));
+                            const search = new RegExp(value, "i");
+                            setListCity(
+                              listCity.filter((city) => search.test(city.label.toLowerCase()))
+                            );
                           }
                         }}
                       />
@@ -828,7 +913,9 @@ const BranchDetail = () => {
                         borderColor="#AAAAAA"
                         arrowColor="#000"
                         withSearch
-                        defaultValue={listDistrict?.filter((district) => district.value === 1)[0]?.label}
+                        defaultValue={
+                          listDistrict?.filter((district) => district.value === 1)[0]?.label
+                        }
                         isLoading={false}
                         isLoadingMore={false}
                         fetchMore={() => {}}
@@ -837,15 +924,19 @@ const BranchDetail = () => {
                           onChange(value);
                         }}
                         onSearch={(value: any) => {
-                          if (value === '') {
+                          if (value === "") {
                             setListDistrict([
-                              { value: 1, label: 'Baleendah' },
-                              { value: 2, label: 'Bojongsoang' },
-                              { value: 3, label: 'Rancaekek' },
+                              { value: 1, label: "Baleendah" },
+                              { value: 2, label: "Bojongsoang" },
+                              { value: 3, label: "Rancaekek" },
                             ]);
                           } else {
-                            const search = new RegExp(value, 'i');
-                            setListDistrict(listDistrict.filter((district) => search.test(district.label.toLowerCase())));
+                            const search = new RegExp(value, "i");
+                            setListDistrict(
+                              listDistrict.filter((district) =>
+                                search.test(district.label.toLowerCase())
+                              )
+                            );
                           }
                         }}
                       />
@@ -879,15 +970,17 @@ const BranchDetail = () => {
                           onChange(value);
                         }}
                         onSearch={(value: any) => {
-                          if (value === '') {
+                          if (value === "") {
                             setListZone([
-                              { value: 1, label: 'Andir' },
-                              { value: 2, label: 'Arcamanik' },
-                              { value: 3, label: 'Baleendah' },
+                              { value: 1, label: "Andir" },
+                              { value: 2, label: "Arcamanik" },
+                              { value: 3, label: "Baleendah" },
                             ]);
                           } else {
-                            const search = new RegExp(value, 'i');
-                            setListZone(listZone.filter((zone) => search.test(zone.label.toLowerCase())));
+                            const search = new RegExp(value, "i");
+                            setListZone(
+                              listZone.filter((zone) => search.test(zone.label.toLowerCase()))
+                            );
                           }
                         }}
                       />
@@ -915,7 +1008,9 @@ const BranchDetail = () => {
                         borderColor="#AAAAAA"
                         arrowColor="#000"
                         withSearch
-                        defaultValue={listPostalCode.filter((postalCode) => postalCode.value === 1)[0]?.label}
+                        defaultValue={
+                          listPostalCode.filter((postalCode) => postalCode.value === 1)[0]?.label
+                        }
                         isLoading={false}
                         isLoadingMore={false}
                         fetchMore={() => {}}
@@ -924,15 +1019,19 @@ const BranchDetail = () => {
                           onChange(value);
                         }}
                         onSearch={(value: any) => {
-                          if (value === '') {
+                          if (value === "") {
                             setListPostalCode([
-                              { value: 1, label: '40123' },
-                              { value: 2, label: '40124' },
-                              { value: 3, label: '40125' },
+                              { value: 1, label: "40123" },
+                              { value: 2, label: "40124" },
+                              { value: 3, label: "40125" },
                             ]);
                           } else {
-                            const search = new RegExp(value, 'i');
-                            setListPostalCode(listPostalCode.filter((postalCode) => search.test(postalCode.label.toLowerCase())));
+                            const search = new RegExp(value, "i");
+                            setListPostalCode(
+                              listPostalCode.filter((postalCode) =>
+                                search.test(postalCode.label.toLowerCase())
+                              )
+                            );
                           }
                         }}
                       />
