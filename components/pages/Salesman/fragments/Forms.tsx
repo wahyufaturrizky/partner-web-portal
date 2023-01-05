@@ -25,7 +25,7 @@ const Forms = ({
         placeholder={salesmanName}
         required
         value={forms?.name}
-        disabled
+        disabled={status !== "Rejected"}
       />
       <Spacer size={10} />
       <Input
@@ -35,7 +35,7 @@ const Forms = ({
         placeholder={branch}
         required
         value={forms?.branch}
-        disabled
+        disabled={status !== "Rejected"}
       />
       <Spacer size={10} />
       <Input
@@ -45,7 +45,7 @@ const Forms = ({
         placeholder={idCard}
         required
         value={forms?.idCard}
-        disabled
+        disabled={status !== "Rejected"}
       />
       <Spacer size={10} />
       <Input
@@ -54,7 +54,7 @@ const Forms = ({
         height="50px"
         placeholder={externalCode}
         value={forms?.externalCode}
-        disabled
+        disabled={status !== "Rejected"}
       />
     </Col>
     <Col width="48%">
@@ -72,7 +72,7 @@ const Forms = ({
         handleChange={(value: any) => setDivision(value)}
         defaultValue={queryDivision}
         onSearch={(value: any) => setSearch(value)}
-        disabled={status === "Rejected" || status === "Waiting for Approval"}
+        disabled={status === "Waiting for Approval"}
       />
       <Spacer size={10} />
       <Input
@@ -82,7 +82,7 @@ const Forms = ({
         value={forms?.mobileNumber}
         placeholder="082274586011"
         required
-        disabled
+        disabled={status !== "Rejected"}
       />
       <Spacer size={10} />
       <Input
@@ -91,7 +91,7 @@ const Forms = ({
         height="50px"
         placeholder={email}
         value={forms?.email}
-        disabled
+        disabled={status !== "Rejected"}
       />
     </Col>
   </Row>
