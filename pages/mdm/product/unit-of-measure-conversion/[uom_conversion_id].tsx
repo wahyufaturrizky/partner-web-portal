@@ -279,6 +279,7 @@ const UOMConversionDetail = () => {
       onSuccess: () => {
         queryClient.invalidateQueries(["uom-list"]);
         setShowDeleteModal(false);
+        router.back();
       },
     },
   });
@@ -653,7 +654,7 @@ const UOMConversionDetail = () => {
       {showDeleteModal && (
         <ModalDeleteConfirmation
           totalSelected={1}
-          itemTitle={UomData?.name}
+          itemTitle={UomData?.parent?.name}
           visible={showDeleteModal}
           isLoading={isLoadingDeleteUOM}
           onCancel={() => setShowDeleteModal(false)}
