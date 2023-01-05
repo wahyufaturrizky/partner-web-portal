@@ -776,7 +776,6 @@ const CreateCompany: any = () => {
       status: data.activeStatus,
       parent: companyParent,
     };
-    console.log(payload);
 
     createCompany(payload);
   };
@@ -1145,8 +1144,9 @@ const CreateCompany: any = () => {
                   items={NumberOfEmployeeDataFake}
                   placeholder="Select"
                   handleChange={(value: any) => setValue("numberOfEmployee", value)}
+                  // onChange={(value) => setValue("numberOfEmployee", value)}
                   required
-                  {...register("numberOfEmployee", { required: true })}
+                  // {...register("numberOfEmployee")}
                   error={errors?.numberOfEmployee?.message}
                   noSearch
                 />
@@ -1227,7 +1227,7 @@ const CreateCompany: any = () => {
                   error={errors?.currency?.message}
                   defaultValue={templateGeneralData?.currencyFormat?.format}
                   key={templateGeneralData?.currencyFormat?.format}
-                  {...register("currency", { required: true })}
+                  // {...register("currency", { required: true })}
                 />
                 {/* )} */}
               </Col>
@@ -1327,7 +1327,7 @@ const CreateCompany: any = () => {
                   error={errors?.language?.message}
                   defaultValue={listLanguage?.rows?.find((data) => data?.id == language)?.name}
                   key={language}
-                  {...register("language", { required: true })}
+                  // {...register("language", { required: true })}
                 />
               </Col>
 
