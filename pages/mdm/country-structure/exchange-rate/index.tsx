@@ -45,8 +45,8 @@ const ExchangeRate = () => {
 
   const [dataAccess, setDataAccess] = useState("1");
   const [dataCurrency, setDataCurrency] = useState("");
-  const [dataFromDate, setDataFromDate] = useState("");
-  const [dataToDate, setDataToDate] = useState("");
+  const [dataFromDate, setDataFromDate] = useState(moment().format("DD/MM/YYYY"));
+  const [dataToDate, setDataToDate] = useState(moment().format("DD/MM/YYYY"));
   const [totalRowsCurrenciesInfiniteList, setTotalRowsCurrenciesInfiniteList] = useState(0);
   const [currenciesInfiniteList, setCurrenciesInfiniteList] = useState<any[]>([]);
   const [searchCurrenciesInfinite, setSearchCurrenciesInfinite] = useState("");
@@ -84,6 +84,21 @@ const ExchangeRate = () => {
   const [search, setSearch] = useState("");
   const [isShowUpload, setShowUpload] = useState(false);
   const debounceSearch = useDebounce(search, 1000);
+  const dailyAccess = [
+    {
+      id: "1",
+      value: "Daily",
+    },
+    {
+      id: "2",
+      value: "Time Series",
+    },
+  ];
+
+  let dailyDataAccess = dailyAccess
+    ?.find((access) => access.id === dataAccess)
+    ?.value.toLowerCase();
+  if (dailyDataAccess !== "daily") dailyDataAccess = "time_series";
 
   const {
     data: ExchangeData,
@@ -98,6 +113,7 @@ const ExchangeRate = () => {
       currency: dataCurrency,
       start_date: dataFromDate,
       end_date: dataToDate,
+      data_access: dailyDataAccess,
     },
     options: {
       onSuccess: (data: any) => {
@@ -189,16 +205,6 @@ const ExchangeRate = () => {
     },
   ];
 
-  const dailyAccess = [
-    {
-      id: "1",
-      value: "Daily",
-    },
-    {
-      id: "2",
-      value: "Time Series",
-    },
-  ];
   const bank = [
     {
       id: "1",
