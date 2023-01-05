@@ -57,13 +57,14 @@ const TrainingType = () => {
 
   const { register, handleSubmit } = useForm();
 
-  const downloadFile = (params: any) => mdmDownloadService("/training-type/download", { params }).then((res) => {
-    const dataUrl = window.URL.createObjectURL(new Blob([res.data]));
-    const tempLink = document.createElement("a");
-    tempLink.href = dataUrl;
-    tempLink.setAttribute("download", `training_type_${new Date().getTime()}.xlsx`);
-    tempLink.click();
-  });
+  const downloadFile = (params: any) =>
+    mdmDownloadService("/training-type/download", { params }).then((res) => {
+      const dataUrl = window.URL.createObjectURL(new Blob([res.data]));
+      const tempLink = document.createElement("a");
+      tempLink.href = dataUrl;
+      tempLink.setAttribute("download", `training_type_${new Date().getTime()}.xlsx`);
+      tempLink.click();
+    });
 
   const renderConfirmationText = (type: any, data: any) => {
     switch (type) {
@@ -71,9 +72,9 @@ const TrainingType = () => {
         return data.selectedRowKeys.length > 1
           ? `${lang[t].trainingType.areYouSureToDelete} ${data.selectedRowKeys.length} items ?`
           : `${lang[t].trainingType.areYouSureToDelete} ${
-            data?.trainingTypeData?.data.find((el: any) => el.key === data.selectedRowKeys[0])
-              ?.name
-          } ?`;
+              data?.trainingTypeData?.data.find((el: any) => el.key === data.selectedRowKeys[0])
+                ?.name
+            } ?`;
       case "detail":
         return `${lang[t].trainingType.areYouSureToDelete} ${data.name} ?`;
 
@@ -122,45 +123,49 @@ const TrainingType = () => {
     },
   });
 
-  const { mutate: createTrainingType, isLoading: isLoadingCreateTrainingType } = useCreateTrainingType({
-    options: {
-      onSuccess: () => {
-        setModalForm({ open: false, typeForm: "", data: {} });
-        queryClient.invalidateQueries(["training-types"]);
+  const { mutate: createTrainingType, isLoading: isLoadingCreateTrainingType } =
+    useCreateTrainingType({
+      options: {
+        onSuccess: () => {
+          setModalForm({ open: false, typeForm: "", data: {} });
+          queryClient.invalidateQueries(["training-types"]);
+        },
       },
-    },
-  });
+    });
 
-  const { mutate: updateTrainingType, isLoading: isLoadingUpdateTrainingType } = useUpdateTrainingType({
-    id: modalForm?.data?.trainingTypeId,
-    companyId: companyCode,
-    options: {
-      onSuccess: () => {
-        setModalForm({ open: false, typeForm: "", data: {} });
-        queryClient.invalidateQueries(["training-types"]);
+  const { mutate: updateTrainingType, isLoading: isLoadingUpdateTrainingType } =
+    useUpdateTrainingType({
+      id: modalForm?.data?.trainingTypeId,
+      companyId: companyCode,
+      options: {
+        onSuccess: () => {
+          setModalForm({ open: false, typeForm: "", data: {} });
+          queryClient.invalidateQueries(["training-types"]);
+        },
       },
-    },
-  });
+    });
 
-  const { mutate: deleteTrainingType, isLoading: isLoadingDeleteTrainingType } = useDeleteTrainingType({
-    options: {
-      onSuccess: () => {
-        setShowDelete({ open: false, data: {}, type: "" });
-        setModalForm({ open: false, data: {}, typeForm: "" });
-        setSelectedRowKeys([]);
-        queryClient.invalidateQueries(["training-types"]);
+  const { mutate: deleteTrainingType, isLoading: isLoadingDeleteTrainingType } =
+    useDeleteTrainingType({
+      options: {
+        onSuccess: () => {
+          setShowDelete({ open: false, data: {}, type: "" });
+          setModalForm({ open: false, data: {}, typeForm: "" });
+          setSelectedRowKeys([]);
+          queryClient.invalidateQueries(["training-types"]);
+        },
       },
-    },
-  });
+    });
 
-  const { mutate: uploadFileTrainingType, isLoading: isLoadingUploadFileTrainingType } = useUploadFileTrainingType({
-    options: {
-      onSuccess: () => {
-        queryClient.invalidateQueries(["training-types"]);
-        setShowUpload(false);
+  const { mutate: uploadFileTrainingType, isLoading: isLoadingUploadFileTrainingType } =
+    useUploadFileTrainingType({
+      options: {
+        onSuccess: () => {
+          queryClient.invalidateQueries(["training-types"]);
+          setShowUpload(false);
+        },
       },
-    },
-  });
+    });
 
   const { data: dataUserPermission } = useUserPermissions({
     options: {
@@ -168,9 +173,8 @@ const TrainingType = () => {
     },
   });
   const listPermission = dataUserPermission?.permission?.filter(
-    (filtering: any) => filtering.menu === "Term Of Payment",
+    (filtering: any) => filtering.menu === "Term Of Payment"
   );
-  const allowPermissionToShow = listPermission?.filter((data: any) => permissionTrainingType.role[dataUserPermission?.role?.name]?.component.includes(data.name));
   let menuList: any = [];
   const columns = [
     {
@@ -212,10 +216,7 @@ const TrainingType = () => {
       },
     ];
   }
-  if (
-    listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Upload Template").length
-    > 0
-  ) {
+  if (listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Upload").length > 0) {
     menuList = [
       ...menuList,
       {
@@ -229,7 +230,9 @@ const TrainingType = () => {
       },
     ];
   }
-  if (listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Download").length > 0) {
+  if (
+    listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Download Data").length > 0
+  ) {
     menuList = [
       ...menuList,
       {
@@ -288,11 +291,13 @@ const TrainingType = () => {
             <Button
               size="big"
               variant="tertiary"
-              onClick={() => setShowDelete({
-                open: true,
-                type: "selection",
-                data: { trainingTypeData: trainingTypesData, selectedRowKeys },
-              })}
+              onClick={() =>
+                setShowDelete({
+                  open: true,
+                  type: "selection",
+                  data: { trainingTypeData: trainingTypesData, selectedRowKeys },
+                })
+              }
               disabled={rowSelection.selectedRowKeys?.length === 0}
             >
               {lang[t].trainingType.tertier.delete}
@@ -325,8 +330,8 @@ const TrainingType = () => {
                 menuList={menuList}
               />
             )}
-            {listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Create").length
-              > 0 && (
+            {listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Create").length >
+              0 && (
               <Button
                 size="big"
                 variant="primary"
@@ -363,7 +368,7 @@ const TrainingType = () => {
               : modalForm.data?.name
           }
           footer={null}
-          content={(
+          content={
             <div
               style={{
                 display: "flex",
@@ -441,7 +446,7 @@ const TrainingType = () => {
                 )}
               </div>
             </div>
-          )}
+          }
         />
       )}
 
@@ -452,7 +457,7 @@ const TrainingType = () => {
           onCancel={() => setShowDelete({ open: false, type: "", data: {} })}
           title={lang[t].trainingType.confirmDelete}
           footer={null}
-          content={(
+          content={
             <div
               style={{
                 display: "flex",
@@ -498,7 +503,7 @@ const TrainingType = () => {
                 </Button>
               </div>
             </div>
-          )}
+          }
         />
       )}
 

@@ -58,13 +58,14 @@ const JobPosition = () => {
 
   const { register, handleSubmit } = useForm();
 
-  const downloadFile = (params: any) => mdmDownloadService("/department/download", { params }).then((res) => {
-    const dataUrl = window.URL.createObjectURL(new Blob([res.data]));
-    const tempLink = document.createElement("a");
-    tempLink.href = dataUrl;
-    tempLink.setAttribute("download", `department_${new Date().getTime()}.xlsx`);
-    tempLink.click();
-  });
+  const downloadFile = (params: any) =>
+    mdmDownloadService("/department/download", { params }).then((res) => {
+      const dataUrl = window.URL.createObjectURL(new Blob([res.data]));
+      const tempLink = document.createElement("a");
+      tempLink.href = dataUrl;
+      tempLink.setAttribute("download", `department_${new Date().getTime()}.xlsx`);
+      tempLink.click();
+    });
 
   const renderConfirmationText = (type: any, data: any) => {
     switch (type) {
@@ -72,8 +73,8 @@ const JobPosition = () => {
         return data.selectedRowKeys.length > 1
           ? `${lang[t].department.areYouSureToDelete} ${data.selectedRowKeys.length} items ?`
           : `${lang[t].department.areYouSureToDelete} ${
-            data?.departmentData?.data.find((el: any) => el.key === data.selectedRowKeys[0])?.name
-          } ?`;
+              data?.departmentData?.data.find((el: any) => el.key === data.selectedRowKeys[0])?.name
+            } ?`;
       case "detail":
         return `${lang[t].department.areYouSureToDelete} ${data.name} ?`;
 
@@ -153,14 +154,15 @@ const JobPosition = () => {
     },
   });
 
-  const { mutate: uploadFileDepartment, isLoading: isLoadingUploadFileDepartment } = useUploadFileDepartment({
-    options: {
-      onSuccess: () => {
-        queryClient.invalidateQueries(["departments"]);
-        setShowUpload(false);
+  const { mutate: uploadFileDepartment, isLoading: isLoadingUploadFileDepartment } =
+    useUploadFileDepartment({
+      options: {
+        onSuccess: () => {
+          queryClient.invalidateQueries(["departments"]);
+          setShowUpload(false);
+        },
       },
-    },
-  });
+    });
 
   const { data: dataUserPermission } = useUserPermissions({
     options: {
@@ -168,9 +170,8 @@ const JobPosition = () => {
     },
   });
   const listPermission = dataUserPermission?.permission?.filter(
-    (filtering: any) => filtering.menu === "Department",
+    (filtering: any) => filtering.menu === "Department"
   );
-  const allowPermissionToShow = listPermission?.filter((data: any) => permissionDepartment.role.Admin.component.includes(data.name));
   const columns = [
     {
       title: lang[t].department.departmentID,
@@ -180,15 +181,15 @@ const JobPosition = () => {
       title: lang[t].department.departmentName,
       dataIndex: "name",
     },
-    ...(listPermission?.filter((x :any) => x.viewTypes[0]?.viewType.name === "View").length > 0
+    ...(listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "View").length > 0
       ? [
-        {
-          title: lang[t].department.action,
-          dataIndex: "action",
-          width: "15%",
-          align: "left",
-        },
-      ]
+          {
+            title: lang[t].department.action,
+            dataIndex: "action",
+            width: "15%",
+            align: "left",
+          },
+        ]
       : []),
   ];
 
@@ -243,10 +244,7 @@ const JobPosition = () => {
       },
     ];
   }
-  if (
-    listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Updload Template")
-      .length > 0
-  ) {
+  if (listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Upload").length > 0) {
     menuList = [
       ...menuList,
       {
@@ -260,7 +258,9 @@ const JobPosition = () => {
       },
     ];
   }
-  if (listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Download").length > 0) {
+  if (
+    listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Download Data").length > 0
+  ) {
     menuList = [
       ...menuList,
       {
@@ -290,19 +290,22 @@ const JobPosition = () => {
             }}
           />
           <Row gap="16px">
-            {listPermission?.filter((x :any) => x.viewTypes[0]?.viewType.name === "Delete").length > 0 && (
-            <Button
-              size="big"
-              variant="tertiary"
-              onClick={() => setShowDelete({
-                open: true,
-                type: "selection",
-                data: { departmentData: departmentsData, selectedRowKeys },
-              })}
-              disabled={rowSelection.selectedRowKeys?.length === 0}
-            >
-              {lang[t].department.tertier.delete}
-            </Button>
+            {listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Delete").length >
+              0 && (
+              <Button
+                size="big"
+                variant="tertiary"
+                onClick={() =>
+                  setShowDelete({
+                    open: true,
+                    type: "selection",
+                    data: { departmentData: departmentsData, selectedRowKeys },
+                  })
+                }
+                disabled={rowSelection.selectedRowKeys?.length === 0}
+              >
+                {lang[t].department.tertier.delete}
+              </Button>
             )}
             <DropdownMenu
               title="More"
@@ -330,14 +333,15 @@ const JobPosition = () => {
               }}
               menuList={menuList}
             />
-            {listPermission?.filter((x :any) => x.viewTypes[0]?.viewType.name === "Create").length > 0 && (
-            <Button
-              size="big"
-              variant="primary"
-              onClick={() => setModalForm({ open: true, typeForm: "create", data: {} })}
-            >
-              {lang[t].department.primary.create}
-            </Button>
+            {listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Create").length >
+              0 && (
+              <Button
+                size="big"
+                variant="primary"
+                onClick={() => setModalForm({ open: true, typeForm: "create", data: {} })}
+              >
+                {lang[t].department.primary.create}
+              </Button>
             )}
           </Row>
         </Row>
@@ -363,7 +367,7 @@ const JobPosition = () => {
           onCancel={() => setModalForm({ open: false, data: {}, typeForm: "" })}
           title={modalForm.typeForm === "create" ? "Create Department" : modalForm?.data?.name}
           footer={null}
-          content={(
+          content={
             <div
               style={{
                 display: "flex",
@@ -411,33 +415,34 @@ const JobPosition = () => {
                   </>
                 ) : (
                   <>
-                    {listPermission?.filter((x :any) => x.viewTypes[0]?.viewType.name === "Delete").length > 0 && (
-                    <Button
-                      full
-                      size="big"
-                      variant="tertiary"
-                      key="submit"
-                      type="primary"
-                      onClick={() => {
-                        setShowDelete({ open: true, type: "detail", data: modalForm.data });
-                      }}
-                    >
-                      {lang[t].department.tertier.delete}
-                    </Button>
+                    {listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Delete")
+                      .length > 0 && (
+                      <Button
+                        full
+                        size="big"
+                        variant="tertiary"
+                        key="submit"
+                        type="primary"
+                        onClick={() => {
+                          setShowDelete({ open: true, type: "detail", data: modalForm.data });
+                        }}
+                      >
+                        {lang[t].department.tertier.delete}
+                      </Button>
                     )}
-                    {listPermission?.filter((x :any) => x.viewTypes[0]?.viewType.name === "Update").length > 0 && (
-                    <Button full onClick={handleSubmit(onSubmit)} variant="primary" size="big">
-                      {isLoadingCreateDepartment || isLoadingUpdateDepartment
-                        ? "Loading..."
-                        : lang[t].department.primary.save}
-                    </Button>
+                    {listPermission?.filter((x: any) => x.viewTypes[0]?.viewType.name === "Update")
+                      .length > 0 && (
+                      <Button full onClick={handleSubmit(onSubmit)} variant="primary" size="big">
+                        {isLoadingCreateDepartment || isLoadingUpdateDepartment
+                          ? "Loading..."
+                          : lang[t].department.primary.save}
+                      </Button>
                     )}
                   </>
                 )}
-
               </div>
             </div>
-          )}
+          }
         />
       )}
 
@@ -449,7 +454,7 @@ const JobPosition = () => {
           onCancel={() => setShowDelete({ open: false, type: "", data: {} })}
           title={lang[t].department.confirmDelete}
           footer={null}
-          content={(
+          content={
             <div
               style={{
                 display: "flex",
@@ -484,7 +489,10 @@ const JobPosition = () => {
                     if (isShowDelete.type === "selection") {
                       deleteDepartment({ ids: selectedRowKeys, company_id: companyCode });
                     } else {
-                      deleteDepartment({ ids: [modalForm.data.departmentId], company_id: companyCode });
+                      deleteDepartment({
+                        ids: [modalForm.data.departmentId],
+                        company_id: companyCode,
+                      });
                     }
                   }}
                 >
@@ -492,7 +500,7 @@ const JobPosition = () => {
                 </Button>
               </div>
             </div>
-          )}
+          }
         />
       )}
 
