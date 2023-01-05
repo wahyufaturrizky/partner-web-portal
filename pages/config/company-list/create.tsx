@@ -346,7 +346,10 @@ const NumberOfEmployeeDataFake = [
 const schema = yup
   .object({
     name: yup.string().required("Name is Required"),
-    code: yup.string().required("Company code is Required").test('len', 'Maximum 4 Characters', (val) => val.toString().length <= 4),
+    code: yup
+      .string()
+      .required("Company code is Required")
+      .test("len", "Maximum 4 Characters", (val) => val.toString().length <= 4),
     email: yup.string().email("Email not validated").required("Email is required"),
     phone_number: yup.string().required("Phone Number is Required"),
     address: yup.string().required("Addres is required").default(""),
@@ -438,11 +441,8 @@ const CreateCompany: any = () => {
 
   const [dataCurrency, setDataCurrency] = useState("");
   const debounceFetch = useDebounce(
-    searchCountry
-      || searchSegment
-      || searchOtherCompany
-      || searchIndustry,
-    1000,
+    searchCountry || searchSegment || searchOtherCompany || searchIndustry,
+    1000
   );
   const [queryParam, setQueryParam] = useState<any>({
     search: debounceFetch,
@@ -459,7 +459,10 @@ const CreateCompany: any = () => {
     }
     if (segmentId) {
       setQueryParam({
-        ...queryParam, country_id: countryId, industry_id: industryId, sector_id: segmentId,
+        ...queryParam,
+        country_id: countryId,
+        industry_id: industryId,
+        sector_id: segmentId,
       });
     }
   }, [countryId, industryId, segmentId]);
@@ -477,8 +480,14 @@ const CreateCompany: any = () => {
   });
 
   const activeStatus = [
-    { id: "Active", value: `<div key="1" style="color:green;">${lang[t].companyList.tertier.active}</div>` },
-    { id: "Inactive", value: `<div key="2" style="color:red;">${lang[t].companyList.tertier.nonActive}</div>` },
+    {
+      id: "Active",
+      value: `<div key="1" style="color:green;">${lang[t].companyList.tertier.active}</div>`,
+    },
+    {
+      id: "Inactive",
+      value: `<div key="2" style="color:red;">${lang[t].companyList.tertier.nonActive}</div>`,
+    },
   ];
 
   const { data: dateFormatData, isLoading: isLoadingDateFormatList } = useDateFormatLists({
@@ -523,10 +532,12 @@ const CreateCompany: any = () => {
     options: {
       onSuccess: (data: any) => {
         setTotalRowsCountryList(data.pages[0].totalRow);
-        const mappedData = data?.pages?.map((group: any) => group.rows?.map((element: any) => ({
-          value: element.id,
-          label: element.name,
-        })));
+        const mappedData = data?.pages?.map((group: any) =>
+          group.rows?.map((element: any) => ({
+            value: element.id,
+            label: element.name,
+          }))
+        );
         const flattenArray = [].concat(...mappedData);
         setCountryList(flattenArray);
       },
@@ -549,9 +560,10 @@ const CreateCompany: any = () => {
       page: pagination.page,
       limit: pagination.itemsPerPage,
       company_id: companyCode,
+      data_access: "time_series",
+      start_date: "01/01/2021",
+      end_date: moment().format("DD/MM/YYYY"),
       // currency: dataCurrency,
-      // start_date: dataFromDate,
-      // end_date: dataToDate,
     },
     options: {
       onSuccess: (data: any) => {
@@ -589,10 +601,12 @@ const CreateCompany: any = () => {
     options: {
       onSuccess: (data: any) => {
         setTotalRowsSegmentList(data.pages[0].totalRow);
-        const mappedData = data?.pages?.map((group: any) => group.rows?.map((element: any) => ({
-          value: element.id,
-          label: element.name,
-        })));
+        const mappedData = data?.pages?.map((group: any) =>
+          group.rows?.map((element: any) => ({
+            value: element.id,
+            label: element.name,
+          }))
+        );
         const flattenArray = [].concat(...mappedData);
         setSegmentList(industryId ? flattenArray : []);
       },
@@ -619,10 +633,12 @@ const CreateCompany: any = () => {
     options: {
       onSuccess: (data: any) => {
         setTotalRowsIndustryList(data.pages[0].totalRow);
-        const mappedData = data?.pages?.map((group: any) => group.rows?.map((element: any) => ({
-          label: element.name,
-          value: element.id,
-        })));
+        const mappedData = data?.pages?.map((group: any) =>
+          group.rows?.map((element: any) => ({
+            label: element.name,
+            value: element.id,
+          }))
+        );
         const flattenArray = [].concat(...mappedData);
         setIndustryList(flattenArray);
       },
@@ -645,12 +661,14 @@ const CreateCompany: any = () => {
     options: {
       onSuccess: (data: any) => {
         setTotalRowsCompanyList(data.pages[0].totalRow);
-        const mappedData = data?.pages?.map((group: any) => group.rows?.map((element: any) => ({
-          id: element.id,
-          parent: element.parent,
-          label: element.name,
-          value: element.name,
-        })));
+        const mappedData = data?.pages?.map((group: any) =>
+          group.rows?.map((element: any) => ({
+            id: element.id,
+            parent: element.parent,
+            label: element.name,
+            value: element.name,
+          }))
+        );
         const flattenArray = [].concat(...mappedData);
         setCompanyList(flattenArray);
       },
@@ -694,14 +712,14 @@ const CreateCompany: any = () => {
     options: {
       onSuccess: (data) => {
         alert("Create Success!");
-        const code = getValues('code').toUpperCase();
-        localStorage.setItem('companyId', data.id);
-        localStorage.setItem('companyCode', code);
+        const code = getValues("code").toUpperCase();
+        localStorage.setItem("companyId", data.id);
+        localStorage.setItem("companyCode", code);
         window.location.href = "/config/company-list";
       },
       onError: (error: any) => {
         if (error?.data?.message?.includes("already exits")) {
-          setError('code', { message: error?.data?.message, type: "focus" }, { shouldFocus: true });
+          setError("code", { message: error?.data?.message, type: "focus" }, { shouldFocus: true });
         }
       },
     },
@@ -763,7 +781,7 @@ const CreateCompany: any = () => {
     createCompany(payload);
   };
 
-  const { mutate: getTemplateGeneral, data: templateGeneralData } : any = useUpdateTemplateGeneral({
+  const { mutate: getTemplateGeneral, data: templateGeneralData }: any = useUpdateTemplateGeneral({
     options: {
       onSuccess: (data: any) => {
         if (data.countryId) setValue("country", data.country.refCountryId);
@@ -781,13 +799,11 @@ const CreateCompany: any = () => {
 
   const fillUpTemplateGeneral = () => {
     if (countryId && industryId && fromTemplate === "eDot") {
-      getTemplateGeneral(
-        {
-          country_id: countryId,
-          industry_id: industryId,
-          sector_id: segmentId || 0,
-        },
-      );
+      getTemplateGeneral({
+        country_id: countryId,
+        industry_id: industryId,
+        sector_id: segmentId || 0,
+      });
     }
   };
 
@@ -798,7 +814,10 @@ const CreateCompany: any = () => {
   return (
     <Col>
       <Row gap="4px" alignItems="center">
-        <ArrowLeft style={{ cursor: "pointer" }} onClick={() => router.push("/config/company-list")} />
+        <ArrowLeft
+          style={{ cursor: "pointer" }}
+          onClick={() => router.push("/config/company-list")}
+        />
         <Text variant="h4">{lang[t].companyList.addNewCompany}</Text>
       </Row>
       <Spacer size={12} />
@@ -840,7 +859,7 @@ const CreateCompany: any = () => {
             <Row width="100%" gap="20px" noWrap>
               <FileUploaderAllFiles
                 label={lang[t].companyList.companyLogo}
-                  // onSubmit={(file) => setFoto(file)}
+                // onSubmit={(file) => setFoto(file)}
                 onSubmit={(file) => handleUploadLogo(file)}
                 defaultFile="/placeholder-employee-photo.svg"
                 withCrop
@@ -890,9 +909,7 @@ const CreateCompany: any = () => {
                       name="other_company"
                       render={({ field: { onChange }, fieldState: { error } }) => (
                         <>
-                          <Label>
-                            Other Company Name
-                          </Label>
+                          <Label>Other Company Name</Label>
                           <Spacer size={3} />
                           <FormSelect
                             height="48px"
@@ -913,8 +930,13 @@ const CreateCompany: any = () => {
                             onChange={(value: any) => {
                               onChange(value);
                               setValue("other_company", value);
-                              setOtherCompanyId(companyList.filter((e: { value: any; }) => e.value === value)[0]?.id);
-                              setCompanyParent(companyList.filter((e: { value: any; }) => e.value === value)[0]?.parent);
+                              setOtherCompanyId(
+                                companyList.filter((e: { value: any }) => e.value === value)[0]?.id
+                              );
+                              setCompanyParent(
+                                companyList.filter((e: { value: any }) => e.value === value)[0]
+                                  ?.parent
+                              );
                             }}
                             onSearch={(value: any) => {
                               setSearchOtherCompany(value);
@@ -992,9 +1014,7 @@ const CreateCompany: any = () => {
                   render={({ field: { onChange }, fieldState: { error } }) => (
                     <>
                       <Label>
-                        Country
-                        {' '}
-                        <span style={{ color: colors.red.regular }}>*</span>
+                        Country <span style={{ color: colors.red.regular }}>*</span>
                       </Label>
                       <Spacer size={3} />
                       <FormSelect
@@ -1047,9 +1067,7 @@ const CreateCompany: any = () => {
                   name="industry_id"
                   render={({ field: { onChange }, fieldState: { error } }) => (
                     <>
-                      <Label>
-                        Industry
-                      </Label>
+                      <Label>Industry</Label>
                       <Spacer size={3} />
                       <FormSelect
                         height="48px"
@@ -1086,9 +1104,7 @@ const CreateCompany: any = () => {
                   name="sector_id"
                   render={({ field: { onChange }, fieldState: { error } }) => (
                     <>
-                      <Label>
-                        Segment
-                      </Label>
+                      <Label>Segment</Label>
                       <Spacer size={3} />
                       <FormSelect
                         error={error?.message}
@@ -1134,7 +1150,6 @@ const CreateCompany: any = () => {
                   error={errors?.numberOfEmployee?.message}
                   noSearch
                 />
-
               </Col>
               <Col width="50%">
                 <Input
@@ -1194,10 +1209,14 @@ const CreateCompany: any = () => {
                 <Dropdown
                   label={lang[t].companyList.currency}
                   width="100%"
-                  items={!isLoadingCurrencyList ? currencyData?.rows?.map((data) => ({
-                    value: `${data.currency} - ${data.currencyName}`,
-                    id: `${data.currency} - ${data.currencyName}`,
-                  })) : []}
+                  items={
+                    !isLoadingCurrencyList
+                      ? currencyData?.rows?.map((data) => ({
+                          value: `${data.currency} - ${data.currencyName}`,
+                          id: `${data.currency} - ${data.currencyName}`,
+                        }))
+                      : []
+                  }
                   placeholder="Select"
                   handleChange={(value) => {
                     setDataCurrency(value?.split("-")[0]);
@@ -1288,10 +1307,8 @@ const CreateCompany: any = () => {
                     handleChange={(value) => setValue("timezone", value)}
                     onSearch={(search) => setSearchTimezone(search)}
                     error={errors?.timezone?.message}
-                    defaultValue={
-                        `${templateGeneralData?.timezone?.utc}
-                        ${templateGeneralData?.timezone?.name}`
-}
+                    defaultValue={`${templateGeneralData?.timezone?.utc}
+                        ${templateGeneralData?.timezone?.name}`}
                     key={templateGeneralData?.timezone?.name}
                     {...register("timezone")}
                   />
@@ -1342,9 +1359,9 @@ const CreateCompany: any = () => {
                 <Text
                   variant="body1"
                   style={{
-                    display: 'flex',
-                    gap: '.25rem',
-                    paddingRight: '.25rem',
+                    display: "flex",
+                    gap: ".25rem",
+                    paddingRight: ".25rem",
                   }}
                 >
                   {lang[t].companyList.companyUseAdvanceApproval}
@@ -1366,9 +1383,9 @@ const CreateCompany: any = () => {
                 <Text
                   variant="body1"
                   style={{
-                    display: 'flex',
-                    gap: '.25rem',
-                    paddingRight: '.25rem',
+                    display: "flex",
+                    gap: ".25rem",
+                    paddingRight: ".25rem",
                   }}
                 >
                   {lang[t].companyList.companyUseRetailPricing}
@@ -1390,9 +1407,9 @@ const CreateCompany: any = () => {
                 <Text
                   variant="body1"
                   style={{
-                    display: 'flex',
-                    gap: '.25rem',
-                    paddingRight: '.25rem',
+                    display: "flex",
+                    gap: ".25rem",
+                    paddingRight: ".25rem",
                   }}
                 >
                   {lang[t].companyList.companyUsePricingStructure}
@@ -1444,7 +1461,9 @@ const CreateCompany: any = () => {
                 <DatePickerInput
                   fullWidth
                   placeholder="YYYY"
-                  onChange={(date: any, dateString: any) => setValue("fiscal_year", Number(dateString))}
+                  onChange={(date: any, dateString: any) =>
+                    setValue("fiscal_year", Number(dateString))
+                  }
                   label={lang[t].companyList.fiscalYear}
                   picker="year"
                 />
