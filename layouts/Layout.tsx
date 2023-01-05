@@ -577,15 +577,15 @@ const AdminLayout = (props: any) => {
   const handleCLickTabNav = (e: any) => {
     if (itemsMenu[e.key].label === "EDS") {
       window.open(itemsMenu[e.key].url, "_blank");
-    }
-
-    if (itemsMenu[e.key].url !== "https://dist-system.nabatisnack.co.id/") {
+    } else {
+      if (itemsMenu[e.key].url) {
+        setCurrent(e.key);
+        window.location.href = itemsMenu[e.key].url || "/";
+        return;
+      }
       setCurrent(e.key);
-      window.location.href = itemsMenu[e.key].url || "/";
-      return;
+      Router.push("/dashboard");
     }
-    setCurrent(e.key);
-    Router.push("/dashboard");
   };
 
   const handleLogout = () => {

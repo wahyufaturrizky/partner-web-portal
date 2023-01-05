@@ -32,8 +32,8 @@ const renderConfirmationText = (type: any, data: any) => {
       return data.selectedRowKeys.length > 1
         ? `Are you sure to delete ${data.selectedRowKeys.length} items ?`
         : `Are you sure to delete Uom Conversion with ID's ${
-          data?.uomData?.find((el: any) => el.id === data.selectedRowKeys[0]).id
-        } ?`;
+            data?.uomData?.find((el: any) => el.id === data.selectedRowKeys[0]).id
+          } ?`;
     case "detail":
       return `Are you sure to delete Uom Name ${data.uomName} ?`;
 
@@ -45,6 +45,8 @@ const renderConfirmationText = (type: any, data: any) => {
 const UOMConversionCreate = () => {
   const router = useRouter();
   const companyId = localStorage.getItem("companyId");
+  const [valueBaseUom, setValueBaseUom] = useState<string>("");
+
   const companyCode = localStorage.getItem("companyCode");
   const pagination = usePagination({
     page: 1,
@@ -91,10 +93,12 @@ const UOMConversionCreate = () => {
     options: {
       onSuccess: (data: any) => {
         setTotalRows(data.pages[0].totalRow);
-        const mappedData = data?.pages?.map((group: any) => group.rows?.map((element: any) => ({
-          value: element.uomId,
-          label: element.name,
-        })));
+        const mappedData = data?.pages?.map((group: any) =>
+          group.rows?.map((element: any) => ({
+            value: element.uomId,
+            label: element.name,
+          }))
+        );
         const flattenArray = [].concat(...mappedData);
         setListUomCategory(flattenArray);
       },
@@ -122,10 +126,12 @@ const UOMConversionCreate = () => {
     options: {
       onSuccess: (data: any) => {
         setTotalRows(data.pages[0].totalRow);
-        const mappedData = data?.pages?.map((group: any) => group.rows?.map((element: any) => ({
-          value: element.uomId,
-          label: element.name,
-        })));
+        const mappedData = data?.pages?.map((group: any) =>
+          group.rows?.map((element: any) => ({
+            value: element.uomId,
+            label: element.name,
+          }))
+        );
         const flattenArray = [].concat(...mappedData);
         setListUomCategoryModal(flattenArray);
       },
@@ -164,26 +170,41 @@ const UOMConversionCreate = () => {
 
   const updateCreateUom = (data: any) => {
     if (!newUomTable) {
-      setNewUomTable([{
-        id: 1,
-        qty: 1,
-        uom: listUomCategory?.find((e) => e.value === data.uom)?.label ? listUomCategory?.find((e) => e.value === data.uom)?.label : listUomCategoryModal?.find((e) => e.value === data.uom)?.label,
-        conversionNumber: data.conversionNumber,
-        baseUom: listUomCategory?.find((e) => e.value === data.baseUom)?.label ? listUomCategory?.find((e) => e.value === data.baseUom)?.label : listUomCategoryModal?.find((e) => e.value === data.baseUom)?.label,
-      }]);
+      setNewUomTable([
+        {
+          id: 1,
+          qty: 1,
+          uom: listUomCategory?.find((e) => e.value === data.uom)?.label
+            ? listUomCategory?.find((e) => e.value === data.uom)?.label
+            : listUomCategoryModal?.find((e) => e.value === data.uom)?.label,
+          conversionNumber: data.conversionNumber,
+          baseUom: listUomCategory?.find((e) => e.value === data.baseUom)?.label
+            ? listUomCategory?.find((e) => e.value === data.baseUom)?.label
+            : listUomCategoryModal?.find((e) => e.value === data.baseUom)?.label,
+        },
+      ]);
     } else {
-      setNewUomTable((prev) => [...prev, {
-        id: newUomTable.length + 1,
-        qty: 1,
-        uom: listUomCategory?.find((e) => e.value === data.uom)?.label ? listUomCategory?.find((e) => e.value === data.uom)?.label : listUomCategoryModal?.find((e) => e.value === data.uom)?.label,
-        conversionNumber: data.conversionNumber,
-        baseUom: listUomCategory?.find((e) => e.value === data.baseUom)?.label ? listUomCategory?.find((e) => e.value === data.baseUom)?.label : listUomCategoryModal?.find((e) => e.value === data.baseUom)?.label,
-      }]);
+      setNewUomTable((prev) => [
+        ...prev,
+        {
+          id: newUomTable.length + 1,
+          qty: 1,
+          uom: listUomCategory?.find((e) => e.value === data.uom)?.label
+            ? listUomCategory?.find((e) => e.value === data.uom)?.label
+            : listUomCategoryModal?.find((e) => e.value === data.uom)?.label,
+          conversionNumber: data.conversionNumber,
+          baseUom: listUomCategory?.find((e) => e.value === data.baseUom)?.label
+            ? listUomCategory?.find((e) => e.value === data.baseUom)?.label
+            : listUomCategoryModal?.find((e) => e.value === data.baseUom)?.label,
+        },
+      ]);
     }
     setNewUom({
       company_id: companyCode,
       name: data.name,
-      base_uom_id: listUomCategory?.find((e) => e.value === data.uom)?.label ? listUomCategory?.find((e) => e.value === data.uom)?.label : listUomCategoryModal?.find((e) => e.value === data.uom)?.label,
+      base_uom_id: listUomCategory?.find((e) => e.value === data.uom)?.label
+        ? listUomCategory?.find((e) => e.value === data.uom)?.label
+        : listUomCategoryModal?.find((e) => e.value === data.uom)?.label,
     });
     setShowCreateModal(false);
   };
@@ -191,18 +212,20 @@ const UOMConversionCreate = () => {
   const updateStatusUom = (rowKey: any) => {};
 
   const onSave = (data: any) => {
-    const savedTable: { qty: any; uom_id: any; conversion_number: any; }[] = [];
+    const savedTable: { qty: any; uom_id: any; conversion_number: any }[] = [];
     if (newUomTable) {
       const tempTable = [...newUomTable];
       tempTable.forEach((uom) => {
         savedTable?.push({
           qty: uom.qty,
-          uom_id: listUomCategory.find((e) => e.label === uom.uom).value ? listUomCategory.find((e) => e.label === uom.uom).value : listUomCategoryModal.find((e) => e.label === uom.uom).value,
+          uom_id: listUomCategory.find((e) => e.label === uom.uom).value
+            ? listUomCategory.find((e) => e.label === uom.uom).value
+            : listUomCategoryModal.find((e) => e.label === uom.uom).value,
           conversion_number: uom.conversionNumber,
         });
       });
     }
-    const saveData:any = {
+    const saveData: any = {
       company_id: companyCode,
       name: data.name,
       base_uom_id: data.baseUom,
@@ -215,26 +238,26 @@ const UOMConversionCreate = () => {
     {
       title: "Qty",
       dataIndex: "qty",
-      key: 'qty',
+      key: "qty",
     },
     {
       title: "UoM",
       dataIndex: "uom",
-      key: 'uom',
+      key: "uom",
     },
     {
       title: "Conversion Number",
       dataIndex: "conversionNumber",
-      key: 'conversionNumber',
+      key: "conversionNumber",
     },
     {
       title: "Base UoM",
       dataIndex: "baseUom",
-      key: 'baseUom',
+      key: "baseUom",
     },
     {
       title: "Active",
-      dataIndex: 'status',
+      dataIndex: "status",
       render: (status: string, rowKey: any) => (
         <Switch checked={status} onChange={() => updateStatusUom(rowKey)} />
       ),
@@ -305,15 +328,16 @@ const UOMConversionCreate = () => {
                 name="baseUom"
                 render={({ field: { onChange } }) => (
                   <>
-                    <div style={{
-                      display: 'flex',
-                    }}
+                    <div
+                      style={{
+                        display: "flex",
+                      }}
                     >
                       <Label>Base UoM</Label>
                       <Span>&#42;</Span>
                     </div>
                     <Spacer size={3} />
-                    <CustomFormSelect
+                    <FormSelect
                       style={{ width: "100%" }}
                       // defaultValue={newUom.base_uom_id}
                       size="large"
@@ -330,13 +354,14 @@ const UOMConversionCreate = () => {
                         }
                       }}
                       items={
-                        isFetchingUomCategory && !isFetchingMoreUomCategory
-                          ? []
-                          : listUomCategory
+                        isFetchingUomCategory && !isFetchingMoreUomCategory ? [] : listUomCategory
                       }
                       onChange={(value: any) => {
                         onChange(value);
                         setSearch("");
+                        setValueBaseUom(
+                          listUomCategory.find((finding: any) => finding.value === value).label
+                        );
                       }}
                       onSearch={(value: any) => {
                         setSearch(value);
@@ -360,12 +385,14 @@ const UOMConversionCreate = () => {
               <Button
                 size="big"
                 variant="tertiary"
-                onClick={() => setShowDelete({
-                  open: true,
-                  type: "selection",
-                  // data: { uomData: UomData?.data, selectedRowKeys },
-                  data: { uomData: newUomTable, selectedRowKeys },
-                })}
+                onClick={() =>
+                  setShowDelete({
+                    open: true,
+                    type: "selection",
+                    // data: { uomData: UomData?.data, selectedRowKeys },
+                    data: { uomData: newUomTable, selectedRowKeys },
+                  })
+                }
                 disabled={rowSelection.selectedRowKeys?.length === 0}
               >
                 Delete
@@ -374,7 +401,7 @@ const UOMConversionCreate = () => {
             <Spacer size={20} />
             <Col gap="60px">
               <Table
-                    // loading={isLoadingUOM || isFetchingUom}
+                // loading={isLoadingUOM || isFetchingUom}
                 columns={columns}
                 data={newUomTable}
                 rowSelection={rowSelection}
@@ -389,15 +416,13 @@ const UOMConversionCreate = () => {
       {showCreateModal && (
         <Modal
           centered
-          width="400px"
+          width="600px"
           visible={showCreateModal}
           onCancel={() => setShowCreateModal(false)}
           footer={null}
-          content={(
+          content={
             <TopButtonHolder>
-              <CreateTitle>
-                Add New Conversion
-              </CreateTitle>
+              <CreateTitle>Add New Conversion</CreateTitle>
               <Spacer size={20} />
               <Col width="100%">
                 <Controller
@@ -405,45 +430,46 @@ const UOMConversionCreate = () => {
                   name="uom"
                   render={({ field: { onChange } }) => (
                     <>
-                      <div style={{
-                        display: 'flex',
-                      }}
+                      <div
+                        style={{
+                          display: "flex",
+                        }}
                       >
                         <Label>UoM</Label>
                         <Span>&#42;</Span>
                       </div>
                       <Spacer size={3} />
-                      <CreateSelectDiv>
-                        <InputAddonAfter>Per</InputAddonAfter>
-                        <CustomFormSelect
-                          style={{ width: "82%", marginLeft: '18%', paddingLeft: '2px' }}
-                          size="large"
-                          placeholder="PCS"
-                          required
-                          borderColor="#AAAAAA"
-                          arrowColor="#000"
-                          withSearch
-                          isLoading={isFetchingUomCategoryModal}
-                          isLoadingMore={isFetchingMoreUomCategoryModal}
-                          fetchMore={() => {
-                            if (hasNextPageModal) {
-                              fetchNextPageModal();
-                            }
-                          }}
-                          items={
+                      <InputAddonAfter>Per</InputAddonAfter>
+                      <FormSelect
+                        style={{ width: "82%", marginLeft: "18%", paddingLeft: "2px" }}
+                        size="large"
+                        placeholder="PCS"
+                        required
+                        borderColor="#AAAAAA"
+                        arrowColor="#000"
+                        withSearch
+                        isLoading={isFetchingUomCategoryModal}
+                        isLoadingMore={isFetchingMoreUomCategoryModal}
+                        fetchMore={() => {
+                          if (hasNextPageModal) {
+                            fetchNextPageModal();
+                          }
+                        }}
+                        items={
                           isFetchingUomCategoryModal && !isFetchingMoreUomCategoryModal
                             ? []
-                            : listUomCategoryModal
+                            : listUomCategoryModal.filter(
+                                (data: any) => data.label !== valueBaseUom
+                              )
                         }
-                          onChange={(value: any) => {
-                            onChange(value);
-                            setSearchModal("");
-                          }}
-                          onSearch={(value: any) => {
-                            setSearchModal(value);
-                          }}
-                        />
-                      </CreateSelectDiv>
+                        onChange={(value: any) => {
+                          onChange(value);
+                          setSearchModal("");
+                        }}
+                        onSearch={(value: any) => {
+                          setSearchModal(value);
+                        }}
+                      />
                     </>
                   )}
                 />
@@ -459,9 +485,11 @@ const UOMConversionCreate = () => {
                     required
                     placeholder="e.g 12"
                     addonAfter="PCS"
-                    {...register("conversionNumber", { required: "Please enter Conversion Number." })}
+                    {...register("conversionNumber", {
+                      required: "Please enter Conversion Number.",
+                    })}
                   />
-                  <InputAddonBefore>PCS</InputAddonBefore>
+                  <InputAddonBefore>{valueBaseUom}</InputAddonBefore>
                 </CreateInputDiv>
               </Col>
 
@@ -475,15 +503,12 @@ const UOMConversionCreate = () => {
                 >
                   Cancel
                 </Button>
-                <Button
-                  variant="primary"
-                  onClick={handleSubmit(updateCreateUom)}
-                >
+                <Button variant="primary" onClick={handleSubmit(updateCreateUom)}>
                   save
                 </Button>
               </DeleteCardButtonHolder>
             </TopButtonHolder>
-        )}
+          }
         />
       )}
 
@@ -506,7 +531,7 @@ const UOMConversionCreate = () => {
           onCancel={() => setShowDelete({ open: false, type: "", data: {} })}
           title="Confirm Delete"
           footer={null}
-          content={(
+          content={
             <TopButtonHolder>
               <Spacer size={4} />
               {renderConfirmationText(isShowDelete.type, isShowDelete.data)}
@@ -532,43 +557,17 @@ const UOMConversionCreate = () => {
                 </Button>
               </DeleteCardButtonHolder>
             </TopButtonHolder>
-          )}
+          }
         />
       )}
     </>
   );
 };
 
-const CustomFormSelect = styled(FormSelect)`
-  
-  .ant-select-selection-placeholder {
-    line-height: 40px !important;
-  }
-
-  .ant-select-selection-search-input {
-    height: 40px !important;
-  }
-
-  .ant-select-selector {
-    height: 40px !important;
-  }
-
-  .ant-select-selection-item {
-    display: flex;
-    align-items: center;
-  }
-`;
-
 const Card = styled.div`
   background: #ffffff;
   border-radius: 16px;
   padding: ${(p: any) => (p.padding ? p.padding : "16px")};
-`;
-
-const Center = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
 `;
 
 const Label = styled.div`
@@ -582,7 +581,7 @@ const HeaderLabel = styled.p`
   font-weight: 600;
   font-size: 20px;
   line-height: 27px;
-  color: #1E858E;
+  color: #1e858e;
 `;
 const Span = styled.span`
   color: #ed1c24;
@@ -591,10 +590,10 @@ const Span = styled.span`
 `;
 
 const DeleteCardButtonHolder = styled.div`
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    margin-bottom: 20px;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 20px;
 `;
 
 const TopButtonHolder = styled.div`
@@ -608,12 +607,6 @@ const CreateInputDiv = styled.div`
   position: relative;
 `;
 
-const CreateSelectDiv = styled.div`
-  display: flex;
-  position: relative;
-  justify-content: space-between;
-`;
-
 const CreateTitle = styled.div`
   margin-top: 1rem;
   font-weight: 600;
@@ -623,13 +616,16 @@ const InputAddonAfter = styled.div`
   z-index: 10;
   background: #f4f4f4;
   position: absolute;
-  height: 40px;
-  width: 20%;
+  height: 58px;
+  width: 18%;
   border-radius: 5px 0 0 5px;
   margin: 0 auto;
+  top: 101px;
   text-align: center;
-  padding-top: .5rem;
   border: 1px solid #aaaaaa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 `;
 
 const InputAddonBefore = styled.div`
@@ -639,12 +635,12 @@ const InputAddonBefore = styled.div`
   background: #f4f4f4;
   position: absolute;
   height: 40px;
-  width: 20%;
+  width: 30%;
   border-radius: 0 5px 5px 0;
   margin: 0 auto;
   margin-top: 1.75rem;
   text-align: center;
-  padding-top: .5rem;
+  padding-top: 0.5rem;
   border: 1px solid #aaaaaa;
 `;
 

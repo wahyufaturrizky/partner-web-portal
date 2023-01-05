@@ -47,6 +47,8 @@ const renderConfirmationText = (type: any, data: any) => {
 
 const UOMConversionDetail = () => {
   const router = useRouter();
+  const [valueBaseUom, setValueBaseUom] = useState<string>("");
+
   const companyId = localStorage.getItem("companyId");
   const companyCode = localStorage.getItem("companyCode");
   const pagination = usePagination({
@@ -72,7 +74,13 @@ const UOMConversionDetail = () => {
   const debounceFetchModal = useDebounce(searchModal, 1000);
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
 
-  const { register, control, handleSubmit, setValue } = useForm();
+  const {
+    register,
+    control,
+    handleSubmit,
+    setValue,
+    formState: { errors },
+  } = useForm();
 
   const { data: dataUserPermission } = useUserPermissions({
     options: {
@@ -239,10 +247,7 @@ const UOMConversionDetail = () => {
       companyId: companyCode,
       id: uom_conversion_id,
       options: {
-        onSuccess: () => {
-          queryClient.invalidateQueries(["uom-conversion"]);
-          // router.back();
-        },
+        onSuccess: () => {},
       },
     }
   );
@@ -444,6 +449,7 @@ const UOMConversionDetail = () => {
                 required
                 defaultValue={UomData?.parent?.name}
                 placeholder="e.g gram"
+                error={errors?.name?.message}
                 {...register("name", { required: "Please enter name." })}
               />
             </Col>
@@ -466,7 +472,7 @@ const UOMConversionDetail = () => {
                       <Span>&#42;</Span>
                     </div>
                     <Spacer size={3} />
-                    <CustomFormSelect
+                    <FormSelect
                       defaultValue={UomData?.parent?.baseUom}
                       style={{ width: "100%" }}
                       size="large"
@@ -487,6 +493,9 @@ const UOMConversionDetail = () => {
                       }
                       onChange={(value: any) => {
                         onChange(value);
+                        setValueBaseUom(
+                          listUomCategory.find((finding: any) => finding.value === value).label
+                        );
                       }}
                       onSearch={(value: any) => {
                         setSearch(value);
@@ -540,7 +549,7 @@ const UOMConversionDetail = () => {
       {showCreateModal && (
         <Modal
           centered
-          width="400px"
+          width="600px"
           visible={showCreateModal}
           onCancel={() => setShowCreateModal(false)}
           footer={null}
@@ -554,38 +563,47 @@ const UOMConversionDetail = () => {
                   name="uom"
                   render={({ field: { onChange } }) => (
                     <>
-                      <Label>UoM</Label>
+                      <div
+                        style={{
+                          display: "flex",
+                        }}
+                      >
+                        <Label>UoM</Label>
+                        <Span>&#42;</Span>
+                      </div>
+
                       <Spacer size={3} />
-                      <CreateSelectDiv>
-                        <InputAddonAfter>Per</InputAddonAfter>
-                        <CustomFormSelect
-                          style={{ width: "82%", marginLeft: "18%", paddingLeft: "2px" }}
-                          size="large"
-                          placeholder="PCS"
-                          required
-                          borderColor="#AAAAAA"
-                          arrowColor="#000"
-                          withSearch
-                          isLoading={isFetchingUomCategoryModal}
-                          isLoadingMore={isFetchingMoreUomCategoryModal}
-                          fetchMore={() => {
-                            if (hasNextPageModal) {
-                              fetchNextPageModal();
-                            }
-                          }}
-                          items={
-                            isFetchingUomCategoryModal && !isFetchingMoreUomCategoryModal
-                              ? []
-                              : listUomCategoryModal
+
+                      <InputAddonAfter>Per</InputAddonAfter>
+                      <FormSelect
+                        style={{ width: "82%", marginLeft: "18%", paddingLeft: "2px" }}
+                        size="large"
+                        placeholder="PCS"
+                        required
+                        borderColor="#AAAAAA"
+                        arrowColor="#000"
+                        withSearch
+                        isLoading={isFetchingUomCategoryModal}
+                        isLoadingMore={isFetchingMoreUomCategoryModal}
+                        fetchMore={() => {
+                          if (hasNextPageModal) {
+                            fetchNextPageModal();
                           }
-                          onChange={(value: any) => {
-                            onChange(value);
-                          }}
-                          onSearch={(value: any) => {
-                            setSearchModal(value);
-                          }}
-                        />
-                      </CreateSelectDiv>
+                        }}
+                        items={
+                          isFetchingUomCategoryModal && !isFetchingMoreUomCategoryModal
+                            ? []
+                            : listUomCategoryModal.filter(
+                                (data: any) => data.label !== valueBaseUom
+                              )
+                        }
+                        onChange={(value: any) => {
+                          onChange(value);
+                        }}
+                        onSearch={(value: any) => {
+                          setSearchModal(value);
+                        }}
+                      />
                     </>
                   )}
                 />
@@ -605,11 +623,7 @@ const UOMConversionDetail = () => {
                       required: "Please enter Conversion Number.",
                     })}
                   />
-                  <InputAddonBefore>
-                    {UomData?.baseUomName?.length > 4
-                      ? UomData?.baseUomName?.slice(0, 4)
-                      : UomData?.baseUomName}
-                  </InputAddonBefore>
+                  <InputAddonBefore>{valueBaseUom || UomData?.baseUomName}</InputAddonBefore>
                 </CreateInputDiv>
               </Col>
 
@@ -623,8 +637,12 @@ const UOMConversionDetail = () => {
                 >
                   Cancel
                 </Button>
-                <Button variant="primary" onClick={handleSubmit(updateCreateUom, false)}>
-                  save
+                <Button
+                  variant="primary"
+                  disabled={isLoadingUpdateCreatedUom}
+                  onClick={handleSubmit(updateCreateUom)}
+                >
+                  {isLoadingUpdateCreatedUom ? "Loading" : "save"}
                 </Button>
               </DeleteCardButtonHolder>
             </TopButtonHolder>
@@ -684,25 +702,6 @@ const UOMConversionDetail = () => {
   );
 };
 
-const CustomFormSelect = styled(FormSelect)`
-  .ant-select-selection-placeholder {
-    line-height: 48px !important;
-  }
-
-  .ant-select-selection-search-input {
-    height: 48px !important;
-  }
-
-  .ant-select-selector {
-    height: 48px !important;
-  }
-
-  .ant-select-selection-item {
-    display: flex;
-    align-items: center;
-  }
-`;
-
 const Card = styled.div`
   background: #ffffff;
   border-radius: 16px;
@@ -752,12 +751,6 @@ const CreateInputDiv = styled.div`
   position: relative;
 `;
 
-const CreateSelectDiv = styled.div`
-  display: flex;
-  position: relative;
-  justify-content: space-between;
-`;
-
 const CreateTitle = styled.div`
   margin-top: 1rem;
   font-weight: 600;
@@ -767,13 +760,16 @@ const InputAddonAfter = styled.div`
   z-index: 10;
   background: #f4f4f4;
   position: absolute;
-  height: 40px;
-  width: 20%;
+  height: 58px;
+  width: 18%;
   border-radius: 5px 0 0 5px;
   margin: 0 auto;
+  top: 101px;
   text-align: center;
-  padding-top: 0.5rem;
   border: 1px solid #aaaaaa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 `;
 
 const InputAddonBefore = styled.div`
@@ -783,7 +779,7 @@ const InputAddonBefore = styled.div`
   background: #f4f4f4;
   position: absolute;
   height: 40px;
-  width: 20%;
+  width: 30%;
   border-radius: 0 5px 5px 0;
   margin: 0 auto;
   margin-top: 1.75rem;
