@@ -205,7 +205,7 @@ const CustomerGroupMDM = () => {
       title: "Company",
       dataIndex: "company",
     },
-    ...(listPermission?.some((el: any) => el.viewTypes[0]?.viewType.name === "View").length > 0
+    ...(listPermission?.filter((el: any) => el.viewTypes[0]?.viewType.name === "View").length > 0
       ? [
           {
             title: lang[t].customerGroup.customergroupAction,
