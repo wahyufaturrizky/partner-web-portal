@@ -1,23 +1,23 @@
-import React, { useState } from "react";
-import {
-  Col,
-  Row,
-  Spacer,
-  Text,
-  Button,
-  FormSelect,
-  Table,
-  Input,
-  Spin,
-  FormSelectCustom,
-} from "pink-lava-ui";
-import { ICPlusWhite, ICDelete, ICEdit } from "assets";
-import { useFormContext, useFieldArray, Controller } from "react-hook-form";
+import { ICDelete, ICEdit, ICPlusWhite } from "assets";
 import ModalAddBankAccounts from "components/elements/Modal/ModalAddBankAccounts";
-import { useCoaVendor } from "hooks/mdm/vendor/useVendor";
 import { useCurrenciesInfiniteLists } from "hooks/mdm/country-structure/useCurrencyMDM";
 import { useTaxInfiniteLists } from "hooks/mdm/Tax/useTax";
+import { useCoaVendor } from "hooks/mdm/vendor/useVendor";
 import useDebounce from "lib/useDebounce";
+import {
+  Button,
+  Col,
+  FormSelect,
+  FormSelectCustom,
+  Input,
+  Row,
+  Spacer,
+  Spin,
+  Table,
+  Text,
+} from "pink-lava-ui";
+import { useState } from "react";
+import { Controller, useFieldArray, useFormContext } from "react-hook-form";
 import styled from "styled-components";
 
 const Invoicing = ({ formType }) => {
@@ -69,12 +69,10 @@ const Invoicing = ({ formType }) => {
         // pagination.setTotalItems(data.totalRow);
       },
       select: (data: any) => {
-        const mappedData = data?.rows?.map((element: any) => {
-          return {
-            label: element.accountName,
-            value: element.accountCode,
-          };
-        });
+        const mappedData = data?.rows?.map((element: any) => ({
+          label: element.accountName,
+          value: element.accountCode,
+        }));
 
         return mappedData ?? [];
       },
@@ -96,23 +94,20 @@ const Invoicing = ({ formType }) => {
     options: {
       onSuccess: (data: any) => {
         setTotalRowsCurrency(data?.pages[0].totalRow);
-        const mappedData = data?.pages?.map((group: any) => {
-          return group.rows?.map((element: any) => {
-            return {
-              label: `${element.currency} - ${element.currencyName}`,
-              value: element.id,
-            };
-          });
-        });
+        const mappedData = data?.pages?.map((group: any) =>
+          group.rows?.map((element: any) => ({
+            label: `${element.currency} - ${element.currencyName}`,
+            value: element.id,
+          }))
+        );
         const flattenArray = [].concat(...mappedData);
         setListCurrency(flattenArray);
       },
       getNextPageParam: (_lastPage: any, pages: any) => {
         if (listCurrency.length < totalRowsCurrency) {
           return pages.length + 1;
-        } else {
-          return undefined;
         }
+        return undefined;
       },
     },
   });
@@ -134,14 +129,12 @@ const Invoicing = ({ formType }) => {
     options: {
       onSuccess: (data: any) => {
         setTotalRowsTax(data?.pages[0].totalRow);
-        const mappedData = data?.pages?.map((group: any) => {
-          return group.rows?.map((element: any) => {
-            return {
-              label: element?.country?.name,
-              value: element?.countryId,
-            };
-          });
-        });
+        const mappedData = data?.pages?.map((group: any) =>
+          group.rows?.map((element: any) => ({
+            label: element?.country?.name,
+            value: element?.countryId,
+          }))
+        );
         const flattenArray = [].concat(...mappedData);
         setListTax(flattenArray);
         setListTaxTemp(data?.pages[0]?.rows ?? []);
@@ -149,9 +142,8 @@ const Invoicing = ({ formType }) => {
       getNextPageParam: (_lastPage: any, pages: any) => {
         if (listTax.length < totalRowsTax) {
           return pages.length + 1;
-        } else {
-          return undefined;
         }
+        return undefined;
       },
     },
   });
@@ -162,33 +154,31 @@ const Invoicing = ({ formType }) => {
       dataIndex: "action",
       width: "15%",
       align: "left",
-      render: (_: any, record: any, index: any) => {
-        return (
-          <Row gap="16px" alignItems="center" nowrap>
-            <Col>
-              <ICEdit
-                style={{ cursor: "pointer" }}
-                onClick={() => {
-                  setShowFormBank({
-                    type: "edit",
-                    open: true,
-                    data: record,
-                    index,
-                  });
-                }}
-              />
-            </Col>
-            <Col>
-              <ICDelete
-                style={{ cursor: "pointer" }}
-                onClick={() => {
-                  remove(index);
-                }}
-              />
-            </Col>
-          </Row>
-        );
-      },
+      render: (_: any, record: any, index: any) => (
+        <Row gap="16px" alignItems="center" nowrap>
+          <Col>
+            <ICEdit
+              style={{ cursor: "pointer" }}
+              onClick={() => {
+                setShowFormBank({
+                  type: "edit",
+                  open: true,
+                  data: record,
+                  index,
+                });
+              }}
+            />
+          </Col>
+          <Col>
+            <ICDelete
+              style={{ cursor: "pointer" }}
+              onClick={() => {
+                remove(index);
+              }}
+            />
+          </Col>
+        </Row>
+      ),
     },
     {
       title: "Bank Name",
@@ -207,7 +197,7 @@ const Invoicing = ({ formType }) => {
   return (
     <>
       <Col>
-        <Text variant="headingMedium" color={"blue.dark"}>
+        <Text variant="headingMedium" color="blue.dark">
           Account Payable
         </Text>
 
@@ -215,7 +205,7 @@ const Invoicing = ({ formType }) => {
 
         <Controller
           control={control}
-          defaultValue={""}
+          defaultValue=""
           name="invoicing.reconciliation_account"
           render={({ field: { onChange, value }, formState: { errors } }) => (
             <>
@@ -230,10 +220,10 @@ const Invoicing = ({ formType }) => {
                   <FormSelect
                     defaultValue={value}
                     style={{ width: "50%" }}
-                    size={"large"}
-                    placeholder={"Select"}
-                    borderColor={"#AAAAAA"}
-                    arrowColor={"#000"}
+                    size="large"
+                    placeholder="Select"
+                    borderColor="#AAAAAA"
+                    arrowColor="#000"
                     withSearch
                     isLoading={isFetchingCoa}
                     isLoadingMore={false}
@@ -257,13 +247,13 @@ const Invoicing = ({ formType }) => {
 
         <Spacer size={20} />
 
-        <Text variant="headingMedium" color={"blue.dark"}>
+        <Text variant="headingMedium" color="blue.dark">
           Bank Account
         </Text>
 
         <Spacer size={10} />
 
-        <Row width={"220px"}>
+        <Row width="220px">
           <Button
             size="big"
             onClick={() => {
@@ -281,7 +271,7 @@ const Invoicing = ({ formType }) => {
 
         <Spacer size={20} />
 
-        <Text variant="headingMedium" color={"blue.dark"}>
+        <Text variant="headingMedium" color="blue.dark">
           Payment Method
         </Text>
 
@@ -289,7 +279,7 @@ const Invoicing = ({ formType }) => {
 
         <Controller
           control={control}
-          defaultValue={""}
+          defaultValue=""
           name="invoicing.payment_method"
           render={({ field: { onChange, value }, formState: { errors } }) => (
             <>
@@ -301,10 +291,10 @@ const Invoicing = ({ formType }) => {
                 mode="multiple"
                 value={Array.isArray(value) ? value : []}
                 style={{ width: "50%" }}
-                size={"large"}
-                placeholder={"Select"}
-                borderColor={"#AAAAAA"}
-                arrowColor={"#000"}
+                size="large"
+                placeholder="Select"
+                borderColor="#AAAAAA"
+                arrowColor="#000"
                 withSearch={false}
                 isLoading={false}
                 isLoadingMore={false}
@@ -325,19 +315,19 @@ const Invoicing = ({ formType }) => {
 
         <Spacer size={20} />
 
-        <Text variant="headingMedium" color={"blue.dark"}>
+        <Text variant="headingMedium" color="blue.dark">
           Tax
         </Text>
 
         <Spacer size={20} />
 
-        <Row width={"100%"} gap={"10px"} noWrap>
+        <Row width="100%" gap="10px" noWrap>
           <Controller
             control={control}
-            defaultValue={""}
+            defaultValue=""
             name="invoicing.tax_country"
             render={({ field: { onChange, value }, formState: { errors } }) => (
-              <Col width={"50%"}>
+              <Col width="50%">
                 {isLoadingTax ? (
                   <Center>
                     <Spin tip="" />
@@ -349,10 +339,10 @@ const Invoicing = ({ formType }) => {
                     <FormSelect
                       defaultValue={value}
                       style={{ width: "100%" }}
-                      size={"large"}
-                      placeholder={"Select"}
-                      borderColor={"#AAAAAA"}
-                      arrowColor={"#000"}
+                      size="large"
+                      placeholder="Select"
+                      borderColor="#AAAAAA"
+                      arrowColor="#000"
                       withSearch
                       isLoading={isFetchingTax}
                       isLoadingMore={isFetchingMoreTax}
@@ -369,12 +359,10 @@ const Invoicing = ({ formType }) => {
                           (el: any) => el.countryId === value
                         );
 
-                        const mappedTaxName = filterTaxName[0]?.taxItems?.map((el: any) => {
-                          return {
-                            label: el.taxName,
-                            value: el.taxItemId,
-                          };
-                        });
+                        const mappedTaxName = filterTaxName[0]?.taxItems?.map((el: any) => ({
+                          label: el.taxName,
+                          value: el.taxItemId,
+                        }));
 
                         setListTaxNameTemp(filterTaxName[0]?.taxItems ?? []);
                         setListTaxName(mappedTaxName ?? []);
@@ -391,19 +379,19 @@ const Invoicing = ({ formType }) => {
 
           <Controller
             control={control}
-            defaultValue={""}
+            defaultValue=""
             name="invoicing.tax_name"
             render={({ field: { onChange, value }, formState: { errors } }) => (
-              <Col width={"50%"}>
+              <Col width="50%">
                 <Text variant="headingRegular">Tax Name</Text>
                 <Spacer size={5} />
                 <FormSelect
                   defaultValue={value}
                   style={{ width: "100%" }}
-                  size={"large"}
-                  placeholder={"Select"}
-                  borderColor={"#AAAAAA"}
-                  arrowColor={"#000"}
+                  size="large"
+                  placeholder="Select"
+                  borderColor="#AAAAAA"
+                  arrowColor="#000"
                   withSearch
                   isLoading={false}
                   isLoadingMore={false}
@@ -434,26 +422,26 @@ const Invoicing = ({ formType }) => {
 
         <Spacer size={20} />
 
-        <Row width={"100%"} gap={"10px"} noWrap>
-          <Col width={"50%"}>
+        <Row width="100%" gap="10px" noWrap>
+          <Col width="50%">
             <Input
               width="50%"
               label="Tax Type"
               height="40px"
-              defaultValue={""}
-              placeholder={""}
-              disabled={true}
+              defaultValue=""
+              placeholder=""
+              disabled
               {...register("invoicing.tax_type")}
             />
           </Col>
-          <Col width={"50%"}>
+          <Col width="50%">
             <Input
               width="50%"
               label="Tax Code"
               height="40px"
-              defaultValue={""}
-              placeholder={""}
-              disabled={true}
+              defaultValue=""
+              placeholder=""
+              disabled
               {...register("invoicing.tax_code")}
             />
           </Col>
@@ -461,20 +449,20 @@ const Invoicing = ({ formType }) => {
 
         <Spacer size={20} />
 
-        <Row width={"50%"}>
+        <Row width="50%">
           <Input
             width="50%"
             label="Tax Address"
             height="40px"
-            defaultValue={""}
-            placeholder={"e.g Jalan Soekarno Hatta No. 1"}
+            defaultValue=""
+            placeholder="e.g Jalan Soekarno Hatta No. 1"
             {...register("invoicing.tax_address")}
           />
         </Row>
 
         <Spacer size={20} />
 
-        <Text variant="headingMedium" color={"blue.dark"}>
+        <Text variant="headingMedium" color="blue.dark">
           Currency
         </Text>
 
@@ -482,7 +470,7 @@ const Invoicing = ({ formType }) => {
 
         <Controller
           control={control}
-          defaultValue={""}
+          defaultValue=""
           name="invoicing.currency"
           render={({ field: { onChange, value }, formState: { errors } }) => (
             <>
@@ -497,10 +485,10 @@ const Invoicing = ({ formType }) => {
                   <FormSelect
                     defaultValue={value}
                     style={{ width: "50%" }}
-                    size={"large"}
-                    placeholder={"Select"}
-                    borderColor={"#AAAAAA"}
-                    arrowColor={"#000"}
+                    size="large"
+                    placeholder="Select"
+                    borderColor="#AAAAAA"
+                    arrowColor="#000"
                     withSearch
                     isLoading={isFetchingCurrency}
                     isLoadingMore={isFetchingMoreCurrency}
@@ -531,16 +519,32 @@ const Invoicing = ({ formType }) => {
             setShowFormBank({ type: "", open: false, data: {} });
           }}
           bankData={showFormBank.data}
+          bankType={showFormBank.type}
           onSaveBank={(bankObject: any) => {
             if (formType === "edit") {
               switch (showFormBank.type) {
                 case "add":
-                  append({ ...bankObject, key: fields.length, id: 0, deleted: false });
-                  setShowFormBank({ type: "", open: false, data: {}, index: 0 });
+                  append({
+                    ...bankObject,
+                    key: fields.length,
+                    id: 0,
+                    deleted: false,
+                  });
+                  setShowFormBank({
+                    type: "",
+                    open: false,
+                    data: {},
+                    index: 0,
+                  });
                   break;
                 case "edit":
                   update(showFormBank.index, { ...showFormBank.data, ...bankObject });
-                  setShowFormBank({ type: "", open: false, data: {}, index: 0 });
+                  setShowFormBank({
+                    type: "",
+                    open: false,
+                    data: {},
+                    index: 0,
+                  });
                   break;
                 default:
                   break;
@@ -549,11 +553,21 @@ const Invoicing = ({ formType }) => {
               switch (showFormBank.type) {
                 case "add":
                   append({ ...bankObject, key: fields.length });
-                  setShowFormBank({ type: "", open: false, data: {}, index: 0 });
+                  setShowFormBank({
+                    type: "",
+                    open: false,
+                    data: {},
+                    index: 0,
+                  });
                   break;
                 case "edit":
                   update(showFormBank.index, bankObject);
-                  setShowFormBank({ type: "", open: false, data: {}, index: 0 });
+                  setShowFormBank({
+                    type: "",
+                    open: false,
+                    data: {},
+                    index: 0,
+                  });
                   break;
                 default:
                   break;

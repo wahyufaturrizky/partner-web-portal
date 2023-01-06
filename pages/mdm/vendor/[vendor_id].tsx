@@ -1,35 +1,24 @@
-import React, { useState } from "react";
-import {
-  Text,
-  Col,
-  Row,
-  Spacer,
-  Dropdown,
-  Button,
-  Accordion,
-  Radio,
-  Tabs,
-  Spin,
-} from "pink-lava-ui";
-import styled from "styled-components";
-import { useRouter } from "next/router";
-import { useForm, Controller, FormProvider, useWatch } from "react-hook-form";
-import General from "components/pages/Vendor/General/General";
-import Contacts from "components/pages/Vendor/Contacts/Contacts";
+import ArrowLeft from "assets/icons/arrow-left.svg";
+import { ModalDeleteConfirmation } from "components/elements/Modal/ModalConfirmationDelete";
 import Addresses from "components/pages/Vendor/Addresess/Addresses";
-import Purchasing from "components/pages/Vendor/Purchasing/Purchasing";
+import Contacts from "components/pages/Vendor/Contacts/Contacts";
+import General from "components/pages/Vendor/General/General";
 import Invoicing from "components/pages/Vendor/Invoicing/Invoicing";
+import Purchasing from "components/pages/Vendor/Purchasing/Purchasing";
+import { VendorContext } from "context/VendorContext";
 import {
-  useUpdateVendor,
-  useVendor,
   useConvertToCustomer,
   useDeleteVendor,
+  useUpdateVendor,
+  useVendor,
 } from "hooks/mdm/vendor/useVendor";
-import { queryClient } from "pages/_app";
-import ArrowLeft from "assets/icons/arrow-left.svg";
-import { VendorContext } from "context/VendorContext";
-import { ModalDeleteConfirmation } from "components/elements/Modal/ModalConfirmationDelete";
 import { useUserPermissions } from "hooks/user-config/usePermission";
+import { useRouter } from "next/router";
+import { queryClient } from "pages/_app";
+import { Accordion, Button, Col, Dropdown, Row, Spacer, Spin, Tabs, Text } from "pink-lava-ui";
+import { useState } from "react";
+import { Controller, FormProvider, useForm, useWatch } from "react-hook-form";
+import styled from "styled-components";
 
 const listTabItems = [
   { title: "Contacts" },
@@ -84,7 +73,7 @@ export default function VendorDetail() {
   const [selectFromForm, setSelectFromForm] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
-  const { data: dataUserPermission } = useUserPermissions({
+  const { data: dataUserPermission, isLoading: isLoadingUserPermissions } = useUserPermissions({
     options: {
       onSuccess: () => {},
     },
@@ -145,11 +134,7 @@ export default function VendorDetail() {
     },
   });
 
-  const {
-    data: vendorData,
-    isLoading: isLoadingVendor,
-    isFetching: isFetchingVendor,
-  } = useVendor({
+  const { data: vendorData, isLoading: isLoadingVendor } = useVendor({
     id: vendor_id,
     options: {
       onSuccess: (data: any) => {
@@ -231,14 +216,12 @@ export default function VendorDetail() {
         setValue("purchasing", mappingPurchasing);
 
         // Invoicing Form
-        const mappingBank = data?.invoicing?.banks?.map((bank: any) => {
-          return {
-            bank: bank.bank,
-            account_name: bank.account_name,
-            account_number: bank.account_number,
-            deleted: false,
-          };
-        });
+        const mappingBank = data?.invoicing?.banks?.map((bank: any) => ({
+          bank: bank.bank,
+          account_name: bank.account_name,
+          account_number: bank.account_number,
+          deleted: false,
+        }));
 
         const mappingInvoicing = {
           reconciliation_account: data?.invoicing?.reconciliationAccount,
@@ -340,7 +323,7 @@ export default function VendorDetail() {
     updateVendor(formData);
   };
 
-  if (isFetchingVendor || isLoadingVendor) {
+  if (isLoadingVendor || isLoadingConvertCustomer || isLoadingUserPermissions) {
     return (
       <Center>
         <Spin tip="Loading Data..." />

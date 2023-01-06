@@ -1,18 +1,16 @@
-import React, { useState } from "react";
-import {
-  Text, Col, Row, Spacer, Dropdown, Button, Accordion, Radio, Tabs,
-} from "pink-lava-ui";
-import styled from "styled-components";
-import { useRouter } from "next/router";
-import { useForm, Controller, FormProvider } from "react-hook-form";
-import General from "components/pages/Vendor/General/General";
-import Contacts from "components/pages/Vendor/Contacts/Contacts";
 import Addresses from "components/pages/Vendor/Addresess/Addresses";
-import Purchasing from "components/pages/Vendor/Purchasing/Purchasing";
+import Contacts from "components/pages/Vendor/Contacts/Contacts";
+import General from "components/pages/Vendor/General/General";
 import Invoicing from "components/pages/Vendor/Invoicing/Invoicing";
-import { useCreateVendor } from "hooks/mdm/vendor/useVendor";
-import { queryClient } from "pages/_app";
+import Purchasing from "components/pages/Vendor/Purchasing/Purchasing";
 import { VendorContext } from "context/VendorContext";
+import { useCreateVendor } from "hooks/mdm/vendor/useVendor";
+import { useRouter } from "next/router";
+import { queryClient } from "pages/_app";
+import { Accordion, Button, Col, Dropdown, Radio, Row, Spacer, Tabs, Text } from "pink-lava-ui";
+import { useState } from "react";
+import { Controller, FormProvider, useForm } from "react-hook-form";
+import styled from "styled-components";
 
 const listTabItems = [
   { title: "Contacts" },
@@ -21,7 +19,8 @@ const listTabItems = [
   { title: "Invoicing" },
 ];
 
-const objectIsEmpty = (object: any) => Object.keys(object).length === 0 && object.constructor === Object;
+const objectIsEmpty = (object: any) =>
+  Object.keys(object).length === 0 && object.constructor === Object;
 
 export default function VendorCreate() {
   const router = useRouter();
@@ -29,7 +28,10 @@ export default function VendorCreate() {
 
   const methods = useForm({
     defaultValues: {
-      status: "Active", purchasing: {}, invoicing: {}, customer_id: "",
+      status: "Active",
+      purchasing: {},
+      invoicing: {},
+      customer_id: "",
     },
   });
   const { control, handleSubmit } = methods;
@@ -64,48 +66,52 @@ export default function VendorCreate() {
   });
 
   const onSubmit = (data: any) => {
-    const companyPayload = radioValue === "company"
-      ? { logo: companyLogo, website: data?.company?.website ?? "" }
-      : null;
+    const companyPayload =
+      radioValue === "company"
+        ? { logo: companyLogo, website: data?.company?.website ?? "" }
+        : null;
 
-    const individuPayload = radioValue === "individu"
-      ? {
-        title: data?.individu?.title ?? "",
-        // company: data?.individu?.company ?? "",
-        job: data?.individu?.job ?? "",
-      }
-      : null;
+    const individuPayload =
+      radioValue === "individu"
+        ? {
+            title: data?.individu?.title ?? "",
+            // company: data?.individu?.company ?? "",
+            job: data?.individu?.job ?? "",
+          }
+        : null;
 
-    const contactsPayload = data?.contacts?.map((contact: any) => {
-      delete contact?.filtered;
-      delete contact?.key;
-      return contact;
-    }) ?? [];
+    const contactsPayload =
+      data?.contacts?.map((contact: any) => {
+        delete contact?.filtered;
+        delete contact?.key;
+        return contact;
+      }) ?? [];
 
-    const addressPayload = data?.addresses?.map((address: any) => {
-      const mappCountrylevel = [];
+    const addressPayload =
+      data?.addresses?.map((address: any) => {
+        const mappCountrylevel = [];
 
-      mappCountrylevel[0] = address.province === "" ? 0 : address.province;
-      mappCountrylevel[1] = address.city === "" ? 0 : address.city;
-      mappCountrylevel[2] = address.district === "" ? 0 : address.district;
-      mappCountrylevel[3] = address.zone === "" ? 0 : address.zone;
+        mappCountrylevel[0] = address.province === "" ? 0 : address.province;
+        mappCountrylevel[1] = address.city === "" ? 0 : address.city;
+        mappCountrylevel[2] = address.district === "" ? 0 : address.district;
+        mappCountrylevel[3] = address.zone === "" ? 0 : address.zone;
 
-      // cek apakah array isinya semuanya 0
-      const allEqual = mappCountrylevel.every((value) => value === 0);
+        // cek apakah array isinya semuanya 0
+        const allEqual = mappCountrylevel.every((value) => value === 0);
 
-      return {
-        is_primary: address.is_primary,
-        type: address.type,
-        street: address.street,
-        country: address.country,
-        country_levels: allEqual ? [] : mappCountrylevel,
-        postal_code: address.postal_code,
-        lon: address.lon,
-        lat: address.lat,
-        // Only get photo url
-        photo: address.photo?.map((photoObj: any) => photoObj?.response?.data),
-      };
-    }) ?? [];
+        return {
+          is_primary: address.is_primary,
+          type: address.type,
+          street: address.street,
+          country: address.country,
+          country_levels: allEqual ? [] : mappCountrylevel,
+          postal_code: address.postal_code,
+          lon: address.lon,
+          lat: address.lat,
+          // Only get photo url
+          photo: address.photo?.map((photoObj: any) => photoObj?.response?.data),
+        };
+      }) ?? [];
 
     const purchasingPayload = objectIsEmpty(data?.purchasing) ? null : data?.purchasing;
 
@@ -119,12 +125,13 @@ export default function VendorCreate() {
     delete data?.invoicing?.tax_type;
     delete data?.invoicing?.tax_code;
 
-    const mappingInvoicing = invoicingPayload !== null
-      ? {
-        ...invoicingPayload,
-        banks: mappingBank,
-      }
-      : null;
+    const mappingInvoicing =
+      invoicingPayload !== null
+        ? {
+            ...invoicingPayload,
+            banks: mappingBank,
+          }
+        : null;
 
     const formData = {
       customer_id: "",
@@ -208,7 +215,10 @@ export default function VendorCreate() {
 
       <VendorContext.Provider
         value={{
-          companyLogo, setCompanyLogo, selectFromForm, setSelectFromForm,
+          companyLogo,
+          setCompanyLogo,
+          selectFromForm,
+          setSelectFromForm,
         }}
       >
         <FormProvider {...methods}>
