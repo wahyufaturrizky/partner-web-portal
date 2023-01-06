@@ -81,23 +81,20 @@ const General = ({ type, formType }: any) => {
     options: {
       onSuccess: (data: any) => {
         setTotalRowsVendorGroup(data?.pages[0].totalRow);
-        const mappedData = data?.pages?.map((group: any) => {
-          return group.rows?.map((element: any) => {
-            return {
-              label: element.name,
-              value: element.id,
-            };
-          });
-        });
+        const mappedData = data?.pages?.map((group: any) =>
+          group.rows?.map((element: any) => ({
+            label: element.name,
+            value: element.id,
+          }))
+        );
         const flattenArray = [].concat(...mappedData);
         setListVendorGroup(flattenArray);
       },
       getNextPageParam: (_lastPage: any, pages: any) => {
         if (listVendorGroup.length < totalRowsVendorGroup) {
           return pages.length + 1;
-        } else {
-          return undefined;
         }
+        return undefined;
       },
     },
   });
@@ -118,23 +115,20 @@ const General = ({ type, formType }: any) => {
     options: {
       onSuccess: (data: any) => {
         setTotalRowsJobPosition(data?.pages[0].totalRow);
-        const mappedData = data?.pages?.map((group: any) => {
-          return group.rows?.map((element: any) => {
-            return {
-              label: element.name,
-              value: element.name,
-            };
-          });
-        });
+        const mappedData = data?.pages?.map((group: any) =>
+          group.rows?.map((element: any) => ({
+            label: element.name,
+            value: element.name,
+          }))
+        );
         const flattenArray = [].concat(...mappedData);
         setListJobPosition(flattenArray);
       },
       getNextPageParam: (_lastPage: any, pages: any) => {
         if (listJobPosition.length < totalRowsJobPosition) {
           return pages.length + 1;
-        } else {
-          return undefined;
         }
+        return undefined;
       },
     },
   });
@@ -154,23 +148,20 @@ const General = ({ type, formType }: any) => {
     options: {
       onSuccess: (data: any) => {
         setTotalRowsLanguage(data?.pages[0].totalRow);
-        const mappedData = data?.pages?.map((group: any) => {
-          return group.rows?.map((element: any) => {
-            return {
-              label: `${element.id} - ${element.name}`,
-              value: element.id,
-            };
-          });
-        });
+        const mappedData = data?.pages?.map((group: any) =>
+          group.rows?.map((element: any) => ({
+            label: `${element.id} - ${element.name}`,
+            value: element.id,
+          }))
+        );
         const flattenArray = [].concat(...mappedData);
         setListLanguage(flattenArray);
       },
       getNextPageParam: (_lastPage: any, pages: any) => {
         if (listLanguage.length < totalRowsLanguage) {
           return pages.length + 1;
-        } else {
-          return undefined;
         }
+        return undefined;
       },
     },
   });
@@ -191,23 +182,20 @@ const General = ({ type, formType }: any) => {
       enabled: formType === "edit",
       onSuccess: (data: any) => {
         setTotalRowsCustomerList(data.pages[0].totalRow);
-        const mappedData = data?.pages?.map((group: any) => {
-          return group.rows?.map((element: any) => {
-            return {
-              value: element.id,
-              label: `${element.id} - ${element.name}`,
-            };
-          });
-        });
+        const mappedData = data?.pages?.map((group: any) =>
+          group.rows?.map((element: any) => ({
+            value: element.id,
+            label: `${element.id} - ${element.name}`,
+          }))
+        );
         const flattenArray = [].concat(...mappedData);
         setCustomerList(flattenArray);
       },
       getNextPageParam: (_lastPage: any, pages: any) => {
         if (customerList.length < totalRowsCustomerList) {
           return pages.length + 1;
-        } else {
-          return undefined;
         }
+        return undefined;
       },
     },
   });
@@ -245,11 +233,11 @@ const General = ({ type, formType }: any) => {
             </div>
 
             {formType === "edit" && (
-              <Col width="50%" justifyContent={"center"}>
+              <Col width="50%" justifyContent="center">
                 {watchCustomerId === "" || selectFromForm ? (
                   <Controller
                     control={control}
-                    defaultValue={""}
+                    defaultValue={watchCustomerId}
                     name="customer_id"
                     render={({ field: { onChange }, formState: { errors } }) => (
                       <>
@@ -262,11 +250,13 @@ const General = ({ type, formType }: any) => {
                             <Text variant="headingRegular">Customer ID</Text>
                             <Spacer size={6} />
                             <FormSelect
+                              defaultValue={watchCustomerId}
+                              value={watchCustomerId}
                               style={{ width: "100%" }}
-                              size={"large"}
-                              placeholder={"Select"}
-                              borderColor={"#AAAAAA"}
-                              arrowColor={"#000"}
+                              size="large"
+                              placeholder="Select"
+                              borderColor="#AAAAAA"
+                              arrowColor="#000"
                               withSearch
                               isLoading={isFetchingCustomer}
                               isLoadingMore={isFetchingMoreCustomer}
@@ -292,7 +282,7 @@ const General = ({ type, formType }: any) => {
                   />
                 ) : (
                   <CustomerContainer>
-                    <Text variant="headingSmall" color={"blue.dark"} hoverColor={"blue.dark"}>
+                    <Text variant="headingSmall" color="blue.dark" hoverColor="blue.dark">
                       {watchCustomerId}{" "}
                       <span
                         style={{ color: "#EB008B", cursor: "pointer" }}
@@ -312,18 +302,19 @@ const General = ({ type, formType }: any) => {
 
         {type === "individu" && (
           <>
-            <Row width={"50%"} noWrap>
+            <Row width="50%" noWrap>
               <Controller
                 control={control}
                 name="individu.title"
-                defaultValue={"Mr."}
+                defaultValue="Mr."
                 rules={{
                   required: true,
                 }}
                 render={({ field: { onChange, value }, fieldState: { error } }) => (
-                  <Col width={"10%"}>
+                  <Col width="10%">
                     <Label>
-                      Title<span style={{ color: "#EB008B" }}>*</span>
+                      Title
+                      <span style={{ color: "#EB008B" }}>*</span>
                     </Label>
                     <Spacer size={6} />
                     <FormSelect
@@ -350,9 +341,9 @@ const General = ({ type, formType }: any) => {
                   label="Name"
                   height="40px"
                   required
-                  defaultValue={""}
+                  defaultValue=""
                   error={errors?.name?.type === "required" && "This field is required"}
-                  placeholder={"e.g Jane Doe"}
+                  placeholder="e.g Jane Doe"
                   {...register("name", {
                     required: true,
                   })}
@@ -363,11 +354,11 @@ const General = ({ type, formType }: any) => {
             <Spacer size={10} />
 
             {formType === "edit" && (
-              <Row width="50%" justifyContent={"center"} alignItems={"center"} noWrap>
+              <Row width="50%" justifyContent="center" alignItems="center" noWrap>
                 {watchCustomerId === "" || selectFromForm ? (
                   <Controller
                     control={control}
-                    defaultValue={""}
+                    defaultValue=""
                     name="customer_id"
                     render={({ field: { onChange }, formState: { errors } }) =>
                       isLoadingCustomer ? (
@@ -375,15 +366,15 @@ const General = ({ type, formType }: any) => {
                           <Spin tip="" />
                         </Center>
                       ) : (
-                        <Col width="100%" justifyContent={"center"}>
+                        <Col width="100%" justifyContent="center">
                           <Text variant="headingRegular">Customer ID</Text>
                           <Spacer size={6} />
                           <FormSelect
                             style={{ width: "100%" }}
-                            size={"large"}
-                            placeholder={"Select"}
-                            borderColor={"#AAAAAA"}
-                            arrowColor={"#000"}
+                            size="large"
+                            placeholder="Select"
+                            borderColor="#AAAAAA"
+                            arrowColor="#000"
                             withSearch
                             isLoading={isFetchingCustomer}
                             isLoadingMore={isFetchingMoreCustomer}
@@ -407,10 +398,10 @@ const General = ({ type, formType }: any) => {
                     }
                   />
                 ) : (
-                  <Col width={"100%"}>
+                  <Col width="100%">
                     <Spacer size={15} />
                     <CustomerContainer>
-                      <Text variant="headingSmall" color={"blue.dark"} hoverColor={"blue.dark"}>
+                      <Text variant="headingSmall" color="blue.dark" hoverColor="blue.dark">
                         {watchCustomerId}{" "}
                         <span
                           style={{ color: "#EB008B", cursor: "pointer" }}
@@ -436,17 +427,17 @@ const General = ({ type, formType }: any) => {
 
       <Spacer size={20} />
 
-      <Row width="100%" noWrap gap={"10px"} alignItems={"center"}>
+      <Row width="100%" noWrap gap="10px" alignItems="center">
         {type === "company" && (
-          <Col width={"100%"}>
+          <Col width="100%">
             <Input
               width="100%"
-              label={"Name"}
+              label="Name"
               height="40px"
               required
-              defaultValue={""}
+              defaultValue=""
               error={errors?.name?.type === "required" && "This field is required"}
-              placeholder={"e.g PT Indo Log"}
+              placeholder="e.g PT Indo Log"
               {...register("name", {
                 required: true,
               })}
@@ -454,7 +445,7 @@ const General = ({ type, formType }: any) => {
           </Col>
         )}
         {type === "individu" && (
-          <Col width={"100%"}>
+          <Col width="100%">
             <Controller
               control={control}
               defaultValue={null}
@@ -471,10 +462,10 @@ const General = ({ type, formType }: any) => {
                     <FormSelect
                       defaultValue={value}
                       style={{ width: "100%" }}
-                      size={"large"}
-                      placeholder={"Select"}
-                      borderColor={"#AAAAAA"}
-                      arrowColor={"#000"}
+                      size="large"
+                      placeholder="Select"
+                      borderColor="#AAAAAA"
+                      arrowColor="#000"
                       withSearch
                       isLoading={isFetchingJobPosition}
                       isLoadingMore={isFetchingMoreJobPosition}
@@ -500,7 +491,7 @@ const General = ({ type, formType }: any) => {
           </Col>
         )}
 
-        <Col width={"100%"}>
+        <Col width="100%">
           <Controller
             control={control}
             defaultValue={null}
@@ -517,10 +508,10 @@ const General = ({ type, formType }: any) => {
                   <FormSelect
                     defaultValue={value}
                     style={{ width: "100%" }}
-                    size={"large"}
-                    placeholder={"Select"}
-                    borderColor={"#AAAAAA"}
-                    arrowColor={"#000"}
+                    size="large"
+                    placeholder="Select"
+                    borderColor="#AAAAAA"
+                    arrowColor="#000"
                     withSearch
                     isLoading={isFetchingVendorGroup}
                     isLoadingMore={isFetchingMoreVendorGroup}
@@ -548,26 +539,26 @@ const General = ({ type, formType }: any) => {
 
       <Spacer size={20} />
 
-      <Row width="100%" noWrap gap={"10px"}>
+      <Row width="100%" noWrap gap="10px">
         {type === "company" && (
           <>
-            <Col width={"100%"}>
+            <Col width="100%">
               <Input
                 width="100%"
-                label={"Website"}
+                label="Website"
                 height="40px"
-                defaultValue={""}
-                placeholder={"e.g yourcompany.com"}
+                defaultValue=""
+                placeholder="e.g yourcompany.com"
                 {...register("company.website")}
               />
             </Col>
-            <Col width={"100%"}>
+            <Col width="100%">
               <Input
                 width="100%"
-                label={"Email"}
+                label="Email"
                 height="40px"
-                defaultValue={""}
-                placeholder={"e.g admin@Indolog.com"}
+                defaultValue=""
+                placeholder="e.g admin@Indolog.com"
                 {...register("email")}
               />
             </Col>
@@ -575,23 +566,23 @@ const General = ({ type, formType }: any) => {
         )}
         {type === "individu" && (
           <>
-            <Col width={"100%"}>
+            <Col width="100%">
               <Input
                 width="100%"
-                label={"Email"}
+                label="Email"
                 height="40px"
-                defaultValue={""}
-                placeholder={"e.g admin@Indolog.com"}
+                defaultValue=""
+                placeholder="e.g admin@Indolog.com"
                 {...register("email")}
               />
             </Col>
-            <Col width={"100%"}>
+            <Col width="100%">
               <Input
                 width="100%"
-                label={"Mobile"}
+                label="Mobile"
                 height="40px"
-                defaultValue={""}
-                placeholder={"e.g 0812345678910"}
+                defaultValue=""
+                placeholder="e.g 0812345678910"
                 {...register("mobile")}
               />
             </Col>
@@ -601,27 +592,27 @@ const General = ({ type, formType }: any) => {
 
       <Spacer size={20} />
 
-      <Row width="100%" noWrap gap={"10px"} alignItems={"center"}>
+      <Row width="100%" noWrap gap="10px" alignItems="center">
         {type === "company" && (
           <>
-            <Col width={"100%"}>
+            <Col width="100%">
               <Input
                 width="100%"
-                label={"Phone"}
+                label="Phone"
                 height="40px"
-                defaultValue={""}
-                placeholder={"e.g 021 123456"}
+                defaultValue=""
+                placeholder="e.g 021 123456"
                 {...register("phone")}
               />
             </Col>
 
-            <Col width={"100%"}>
+            <Col width="100%">
               <Input
                 width="100%"
-                label={"Mobile"}
+                label="Mobile"
                 height="40px"
-                defaultValue={""}
-                placeholder={"e.g 0812345678910"}
+                defaultValue=""
+                placeholder="e.g 0812345678910"
                 {...register("mobile")}
               />
             </Col>
@@ -629,33 +620,33 @@ const General = ({ type, formType }: any) => {
         )}
         {type === "individu" && (
           <>
-            <Col width={"100%"}>
+            <Col width="100%">
               <Input
                 width="100%"
-                label={"Phone"}
+                label="Phone"
                 height="40px"
-                defaultValue={""}
-                placeholder={"e.g 021 123456"}
+                defaultValue=""
+                placeholder="e.g 021 123456"
                 {...register("phone")}
               />
             </Col>
             <Controller
               control={control}
-              defaultValue={""}
-              name={`valid_until`}
+              defaultValue=""
+              name="valid_until"
               render={({ field: { onChange, value } }) => (
-                <Col width={"100%"}>
+                <Col width="100%">
                   <Label>Valid Until</Label>
                   <Spacer size={6} />
                   <DatePickerInput
                     label=""
                     fullWidth
-                    placeholder={"DD/MM/YYYY"}
+                    placeholder="DD/MM/YYYY"
                     defaultValue={value ? moment(value, "DD/MM/YYYY") : ""}
                     onChange={(date: any, dateString: any) => {
                       onChange(dateString);
                     }}
-                    format={"DD/MM/YYYY"}
+                    format="DD/MM/YYYY"
                   />
                 </Col>
               )}
@@ -666,8 +657,8 @@ const General = ({ type, formType }: any) => {
 
       <Spacer size={20} />
 
-      <Row width={"100%"} noWrap gap={"10px"} alignItems={"center"}>
-        <Col width={"100%"}>
+      <Row width="100%" noWrap gap="10px" alignItems="center">
+        <Col width="100%">
           <Controller
             control={control}
             defaultValue={null}
@@ -684,10 +675,10 @@ const General = ({ type, formType }: any) => {
                   <FormSelect
                     defaultValue={value}
                     style={{ width: "100%" }}
-                    size={"large"}
-                    placeholder={"Select"}
-                    borderColor={"#AAAAAA"}
-                    arrowColor={"#000"}
+                    size="large"
+                    placeholder="Select"
+                    borderColor="#AAAAAA"
+                    arrowColor="#000"
                     withSearch
                     isLoading={isFetchingLanguages}
                     isLoadingMore={isFetchingMoreLanguages}
@@ -713,21 +704,21 @@ const General = ({ type, formType }: any) => {
         {type === "company" && (
           <Controller
             control={control}
-            defaultValue={""}
-            name={`valid_until`}
+            defaultValue=""
+            name="valid_until"
             render={({ field: { onChange, value } }) => (
-              <Col width={"100%"}>
+              <Col width="100%">
                 <Label>Valid Until</Label>
                 <Spacer size={6} />
                 <DatePickerInput
                   label=""
                   fullWidth
-                  placeholder={"DD/MM/YYYY"}
+                  placeholder="DD/MM/YYYY"
                   defaultValue={value ? moment(value, "DD/MM/YYYY") : ""}
                   onChange={(date: any, dateString: any) => {
                     onChange(dateString);
                   }}
-                  format={"DD/MM/YYYY"}
+                  format="DD/MM/YYYY"
                 />
               </Col>
             )}
@@ -735,13 +726,13 @@ const General = ({ type, formType }: any) => {
         )}
 
         {type === "individu" && (
-          <Col width={"100%"}>
+          <Col width="100%">
             <Input
               width="100%"
-              label={"External Code"}
+              label="External Code"
               height="40px"
-              defaultValue={""}
-              placeholder={"e.g 123456789"}
+              defaultValue=""
+              placeholder="e.g 123456789"
               {...register("external_code")}
             />
           </Col>
@@ -750,17 +741,17 @@ const General = ({ type, formType }: any) => {
 
       <Spacer size={20} />
 
-      <Row width="100%" noWrap gap={"10px"}>
+      <Row width="100%" noWrap gap="10px">
         <Col width={type === "company" ? "100%" : "50%"}>
           <Input
             width="100%"
-            label={"Tax Number"}
+            label="Tax Number"
             height="40px"
-            defaultValue={""}
-            placeholder={"e.g 123456789"}
+            defaultValue=""
+            placeholder="e.g 123456789"
             {...register("tax")}
           />
-          <Row alignItems={"center"} gap={"5px"}>
+          <Row alignItems="center" gap="5px">
             <Controller
               control={control}
               defaultValue={isPKP}
@@ -771,7 +762,7 @@ const General = ({ type, formType }: any) => {
                   <Tooltip
                     overlayInnerStyle={{ width: "fit-content" }}
                     title={`If you are "ON" PKP then input Purchase Tax`}
-                    color={"#F4FBFC"}
+                    color="#F4FBFC"
                   >
                     <ExclamationCircleOutlined />
                   </Tooltip>
@@ -790,13 +781,13 @@ const General = ({ type, formType }: any) => {
         </Col>
 
         {type === "company" && (
-          <Col width={"100%"}>
+          <Col width="100%">
             <Input
               width="100%"
-              label={"External Code"}
+              label="External Code"
               height="40px"
-              defaultValue={""}
-              placeholder={"e.g 123456789"}
+              defaultValue=""
+              placeholder="e.g 123456789"
               {...register("external_code")}
             />
           </Col>
